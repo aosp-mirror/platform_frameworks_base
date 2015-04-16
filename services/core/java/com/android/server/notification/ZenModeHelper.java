@@ -21,6 +21,7 @@ import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
 import android.app.AppOpsManager;
+import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -57,6 +58,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * NotificationManagerService helper for functionality related to zen mode.
@@ -230,6 +232,21 @@ public class ZenModeHelper {
         mConfig.writeXml(out);
     }
 
+    public Policy getNotificationPolicy() {
+        return getNotificationPolicy(mConfig);
+    }
+
+    private static Policy getNotificationPolicy(ZenModeConfig config) {
+        return config == null ? null : config.toNotificationPolicy();
+    }
+
+    public void setNotificationPolicy(Policy policy) {
+        if (policy == null || mConfig == null) return;
+        final ZenModeConfig newConfig = mConfig.copy();
+        newConfig.applyNotificationPolicy(policy);
+        setConfig(newConfig, "setNotificationPolicy");
+    }
+
     public ZenModeConfig getConfig() {
         return mConfig;
     }
@@ -247,8 +264,13 @@ public class ZenModeHelper {
         if (config.equals(mConfig)) return true;
         if (DEBUG) Log.d(TAG, "setConfig reason=" + reason);
         ZenLog.traceConfig(mConfig, config);
+        final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
+                getNotificationPolicy(config));
         mConfig = config;
         dispatchOnConfigChanged();
+        if (policyChanged){
+            dispatchOnPolicyChanged();
+        }
         final String val = Integer.toString(mConfig.hashCode());
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
         if (!evaluateZenMode(reason, setRingerMode)) {
@@ -352,6 +374,12 @@ public class ZenModeHelper {
     private void dispatchOnConfigChanged() {
         for (Callback callback : mCallbacks) {
             callback.onConfigChanged();
+        }
+    }
+
+    private void dispatchOnPolicyChanged() {
+        for (Callback callback : mCallbacks) {
+            callback.onPolicyChanged();
         }
     }
 
@@ -617,6 +645,7 @@ public class ZenModeHelper {
     public static class Callback {
         void onConfigChanged() {}
         void onZenModeChanged() {}
+        void onPolicyChanged() {}
     }
 
 }

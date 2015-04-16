@@ -29,9 +29,11 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
+import android.app.INotificationManagerCallback;
 import android.app.ITransientNotification;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -227,6 +229,8 @@ public class NotificationManagerService extends SystemService {
             new ArrayMap<String, NotificationRecord>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
+    private final ArrayMap<String, Policy.Token> mPolicyTokens = new ArrayMap<>();
+
 
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
@@ -893,6 +897,13 @@ public class NotificationManagerService extends SystemService {
                     updateInterruptionFilterLocked();
                 }
             }
+
+            @Override
+            void onPolicyChanged() {
+                getContext().sendBroadcast(
+                        new Intent(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED)
+                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+            }
         });
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
@@ -1551,6 +1562,18 @@ public class NotificationManagerService extends SystemService {
                     message);
         }
 
+        private void enforcePolicyToken(Policy.Token token, String method) {
+            if (!checkPolicyToken(token)) {
+                Slog.w(TAG, "Invalid notification policy token calling " + method);
+                throw new SecurityException("Invalid notification policy token");
+            }
+        }
+
+        private boolean checkPolicyToken(Policy.Token token) {
+            return mPolicyTokens.containsValue(token)
+                    || mListeners.mPolicyTokens.containsValue(token);
+        }
+
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
@@ -1586,24 +1609,73 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUIOrVolume("INotificationManager.isSystemConditionProviderEnabled");
             return mConditionProviders.isSystemProviderEnabled(path);
         }
-    };
 
-    private String[] getActiveNotificationKeys(INotificationListener token) {
-        final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-        final ArrayList<String> keys = new ArrayList<String>();
-        if (info.isEnabledForCurrentProfiles()) {
-            synchronized (mNotificationList) {
-                final int N = mNotificationList.size();
-                for (int i = 0; i < N; i++) {
-                    final StatusBarNotification sbn = mNotificationList.get(i).sbn;
-                    if (info.enabledAndUserMatches(sbn.getUserId())) {
-                        keys.add(sbn.getKey());
-                    }
-                }
+        @Override
+        public Policy.Token getPolicyTokenFromListener(INotificationListener listener) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mListeners.getPolicyToken(listener);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
-        return keys.toArray(new String[keys.size()]);
-    }
+
+        @Override
+        public void requestNotificationPolicyToken(String pkg,
+                INotificationManagerCallback callback) throws RemoteException {
+            if (callback == null) {
+                Slog.w(TAG, "requestNotificationPolicyToken: no callback specified");
+                return;
+            }
+            if (pkg == null) {
+                Slog.w(TAG, "requestNotificationPolicyToken denied: no package specified");
+                callback.onPolicyToken(null);
+                return;
+            }
+            Policy.Token token = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationList) {
+                    token = mPolicyTokens.get(pkg);
+                    if (token == null) {
+                        token = new Policy.Token(new Binder());
+                        mPolicyTokens.put(pkg, token);
+                    }
+                    if (DBG) Slog.w(TAG, "requestNotificationPolicyToken granted for " + pkg);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            callback.onPolicyToken(token);
+        }
+
+        @Override
+        public boolean isNotificationPolicyTokenValid(String pkg, Policy.Token token) {
+            return checkPolicyToken(token);
+        }
+
+        @Override
+        public Policy getNotificationPolicy(Policy.Token token) {
+            enforcePolicyToken(token, "getNotificationPolicy");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mZenModeHelper.getNotificationPolicy();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setNotificationPolicy(Policy.Token token, Policy policy) {
+            enforcePolicyToken(token, "setNotificationPolicy");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mZenModeHelper.setNotificationPolicy(policy);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    };
 
     private String disableNotificationEffects(NotificationRecord record) {
         if (mDisableNotificationEffects) {
@@ -1718,6 +1790,10 @@ public class NotificationManagerService extends SystemService {
                     pw.print(listener.component);
                 }
                 pw.println(')');
+                pw.print("    mPolicyTokens.keys: ");
+                pw.println(TextUtils.join(",", mPolicyTokens.keySet()));
+                pw.print("    mListeners.mPolicyTokens.keys: ");
+                pw.println(TextUtils.join(",", mListeners.mPolicyTokens.keySet()));
             }
 
             pw.println("\n  Condition providers:");
@@ -2970,10 +3046,16 @@ public class NotificationManagerService extends SystemService {
     public class NotificationListeners extends ManagedServices {
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
+        private final ArrayMap<ComponentName, Policy.Token> mPolicyTokens = new ArrayMap<>();
         private boolean mNotificationGroupsDesired;
 
         public NotificationListeners() {
             super(getContext(), mHandler, mNotificationList, mUserProfiles);
+        }
+
+        public Policy.Token getPolicyToken(INotificationListener listener) {
+            final ManagedServiceInfo info = checkServiceTokenLocked(listener);
+            return info == null ? null : mPolicyTokens.get(info.component);
         }
 
         @Override
@@ -3000,6 +3082,7 @@ public class NotificationManagerService extends SystemService {
             synchronized (mNotificationList) {
                 updateNotificationGroupsDesiredLocked();
                 update = makeRankingUpdateLocked(info);
+                mPolicyTokens.put(info.component, new Policy.Token(new Binder()));
             }
             try {
                 listener.onListenerConnected(update);
@@ -3016,6 +3099,7 @@ public class NotificationManagerService extends SystemService {
             }
             mLightTrimListeners.remove(removed);
             updateNotificationGroupsDesiredLocked();
+            mPolicyTokens.remove(removed.component);
         }
 
         public void setOnNotificationPostedTrimLocked(ManagedServiceInfo info, int trim) {

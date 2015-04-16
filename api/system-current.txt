@@ -5199,8 +5199,44 @@ package android.app {
     method public void cancel(int);
     method public void cancel(java.lang.String, int);
     method public void cancelAll();
+    method public android.app.NotificationManager.Policy getNotificationPolicy(android.app.NotificationManager.Policy.Token);
+    method public boolean isNotificationPolicyTokenValid(android.app.NotificationManager.Policy.Token);
     method public void notify(int, android.app.Notification);
     method public void notify(java.lang.String, int, android.app.Notification);
+    method public void requestNotificationPolicyToken(android.app.NotificationManager.Policy.Token.RequestCallback, android.os.Handler);
+    method public void setNotificationPolicy(android.app.NotificationManager.Policy.Token, android.app.NotificationManager.Policy);
+    field public static final java.lang.String ACTION_NOTIFICATION_POLICY_CHANGED = "android.app.action.NOTIFICATION_POLICY_CHANGED";
+  }
+
+  public static class NotificationManager.Policy implements android.os.Parcelable {
+    ctor public NotificationManager.Policy(int, int);
+    method public int describeContents();
+    method public static java.lang.String priorityCategoriesToString(int);
+    method public static java.lang.String prioritySendersToString(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.NotificationManager.Policy> CREATOR;
+    field public static final int PRIORITY_CATEGORY_CALLS = 8; // 0x8
+    field public static final int PRIORITY_CATEGORY_EVENTS = 2; // 0x2
+    field public static final int PRIORITY_CATEGORY_MESSAGES = 4; // 0x4
+    field public static final int PRIORITY_CATEGORY_REMINDERS = 1; // 0x1
+    field public static final int PRIORITY_CATEGORY_REPEAT_CALLERS = 16; // 0x10
+    field public static final int PRIORITY_SENDERS_ANY = 0; // 0x0
+    field public static final int PRIORITY_SENDERS_CONTACTS = 1; // 0x1
+    field public static final int PRIORITY_SENDERS_STARRED = 2; // 0x2
+    field public final int priorityCategories;
+    field public final int prioritySenders;
+  }
+
+  public static class NotificationManager.Policy.Token implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.NotificationManager.Policy.Token> CREATOR;
+  }
+
+  public static abstract class NotificationManager.Policy.Token.RequestCallback {
+    ctor public NotificationManager.Policy.Token.RequestCallback();
+    method public abstract void onTokenDenied();
+    method public abstract void onTokenGranted(android.app.NotificationManager.Policy.Token);
   }
 
   public final class PendingIntent implements android.os.Parcelable {
@@ -30646,6 +30682,7 @@ package android.service.notification {
     method public final int getCurrentInterruptionFilter();
     method public final int getCurrentListenerHints();
     method public android.service.notification.NotificationListenerService.RankingMap getCurrentRanking();
+    method public final android.app.NotificationManager.Policy.Token getNotificationPolicyToken();
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onInterruptionFilterChanged(int);
     method public void onListenerConnected();
