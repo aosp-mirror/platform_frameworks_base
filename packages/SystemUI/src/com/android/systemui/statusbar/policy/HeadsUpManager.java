@@ -464,13 +464,19 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
         public void updateEntry() {
             long currentTime = mClock.currentTimeMillis();
-            postTime = Math.max(postTime, currentTime);
-            long finishTime = postTime + mHeadsUpNotificationDecay;
-            long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
             earliestRemovaltime = currentTime + mMinimumDisplayTime;
+            postTime = Math.max(postTime, currentTime);
             removeAutoCancelCallbacks();
-            mHandler.postDelayed(mRemoveHeadsUpRunnable, removeDelay);
+            if (canEntryDecay()) {
+                long finishTime = postTime + mHeadsUpNotificationDecay;
+                long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
+                mHandler.postDelayed(mRemoveHeadsUpRunnable, removeDelay);
+            }
             updateSortOrder(HeadsUpEntry.this);
+        }
+
+        private boolean canEntryDecay() {
+            return entry.notification.getNotification().fullScreenIntent == null;
         }
 
         @Override
