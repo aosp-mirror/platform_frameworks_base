@@ -93,15 +93,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
     }
     static boolean sSystemReady = false;
 
+    static public void broadcastStickyIntent(Intent intent, String permission, int userId) {
+        broadcastStickyIntent(intent, permission, AppOpsManager.OP_NONE, userId);
+    }
+
     /**
      * Convenience for sending a sticky broadcast.  For internal use only.
      * If you don't care about permission, use null.
      */
-    static public void broadcastStickyIntent(Intent intent, String permission, int userId) {
+    static public void broadcastStickyIntent(Intent intent, String permission, int appOp,
+            int userId) {
         try {
             getDefault().broadcastIntent(
                 null, intent, null, null, Activity.RESULT_OK, null, null,
-                null /*permission*/, AppOpsManager.OP_NONE, false, true, userId);
+                null /*permission*/, appOp, false, true, userId);
         } catch (RemoteException ex) {
         }
     }

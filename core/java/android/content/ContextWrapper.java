@@ -444,6 +444,13 @@ public class ContextWrapper extends Context {
         mBase.sendBroadcastAsUser(intent, user, receiverPermission);
     }
 
+    /** @hide */
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, int appOp) {
+        mBase.sendBroadcastAsUser(intent, user, receiverPermission, appOp);
+    }
+
     @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,

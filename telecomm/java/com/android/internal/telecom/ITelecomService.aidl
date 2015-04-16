@@ -33,12 +33,12 @@ interface ITelecomService {
      *
      * @param showDialpad if true, make the dialpad visible initially.
      */
-    void showInCallScreen(boolean showDialpad);
+    void showInCallScreen(boolean showDialpad, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getDefaultOutgoingPhoneAccount
      */
-    PhoneAccountHandle getDefaultOutgoingPhoneAccount(in String uriScheme);
+    PhoneAccountHandle getDefaultOutgoingPhoneAccount(in String uriScheme, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getUserSelectedOutgoingPhoneAccount
@@ -53,12 +53,13 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getCallCapablePhoneAccounts
      */
-    List<PhoneAccountHandle> getCallCapablePhoneAccounts();
+    List<PhoneAccountHandle> getCallCapablePhoneAccounts(String callingPackage);
 
     /**
      * @see TelecomManager#getPhoneAccountsSupportingScheme
      */
-    List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme);
+    List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme,
+            String callingPackage);
 
     /**
      * @see TelecomManager#getPhoneAccountsForPackage
@@ -98,7 +99,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getSimCallManagers
      */
-    List<PhoneAccountHandle> getSimCallManagers();
+    List<PhoneAccountHandle> getSimCallManagers(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#registerPhoneAccount
@@ -118,17 +119,18 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#isVoiceMailNumber
      */
-    boolean isVoiceMailNumber(in PhoneAccountHandle accountHandle, String number);
+    boolean isVoiceMailNumber(in PhoneAccountHandle accountHandle, String number,
+            String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getVoiceMailNumber
      */
-    String getVoiceMailNumber(in PhoneAccountHandle accountHandle);
+    String getVoiceMailNumber(in PhoneAccountHandle accountHandle, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getLine1Number
      */
-    String getLine1Number(in PhoneAccountHandle accountHandle);
+    String getLine1Number(in PhoneAccountHandle accountHandle, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getDefaultPhoneApp
@@ -147,12 +149,12 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#isInCall
      */
-    boolean isInCall();
+    boolean isInCall(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#isRinging
      */
-    boolean isRinging();
+    boolean isRinging(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getCallState
@@ -192,12 +194,12 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#isTtySupported
      */
-    boolean isTtySupported();
+    boolean isTtySupported(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getCurrentTtyMode
      */
-    int getCurrentTtyMode();
+    int getCurrentTtyMode(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#addNewIncomingCall

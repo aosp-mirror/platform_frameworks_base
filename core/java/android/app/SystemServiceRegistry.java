@@ -332,10 +332,10 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.NETWORK_POLICY_SERVICE, NetworkPolicyManager.class,
-                new StaticServiceFetcher<NetworkPolicyManager>() {
+                new CachedServiceFetcher<NetworkPolicyManager>() {
             @Override
-            public NetworkPolicyManager createService() {
-                return new NetworkPolicyManager(INetworkPolicyManager.Stub.asInterface(
+            public NetworkPolicyManager createService(ContextImpl ctx) {
+                return new NetworkPolicyManager(ctx, INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE)));
             }});
 

@@ -45,6 +45,7 @@ interface ITelephony {
 
     /**
      * Place a call to the specified number.
+     * @param callingPackage The package making the call.
      * @param number the number to be called.
      */
     void call(String callingPackage, String number);
@@ -169,8 +170,9 @@ interface ITelephony {
     /**
      * Check if the SIM pin lock is enabled.
      * @return true if the SIM pin lock is enabled.
+     * @param callingPackage The package making the call.
      */
-    boolean isSimPinEnabled();
+    boolean isSimPinEnabled(String callingPackage);
 
     /**
      * Supply a pin to unlock the SIM.  Blocks until a result is determined.
@@ -644,10 +646,11 @@ interface ITelephony {
     /*
      * Get the calculated preferred network type.
      * Used for device configuration by some CDMA operators.
+     * @param callingPackage The package making the call.
      *
      * @return the calculated preferred network type, defined in RILConstants.java.
      */
-    int getCalculatedPreferredNetworkType();
+    int getCalculatedPreferredNetworkType(String callingPackage);
 
     /*
      * Get the preferred network type.
@@ -701,8 +704,9 @@ interface ITelephony {
     /**
      * Get P-CSCF address from PCO after data connection is established or modified.
      * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
+     * @param callingPackage The package making the call.
      */
-    String[] getPcscfAddress(String apnType);
+    String[] getPcscfAddress(String apnType, String callingPackage);
 
     /**
      * Set IMS registration state
@@ -768,19 +772,21 @@ interface ITelephony {
      * {@link #setLine1NumberForDisplay}. Otherwise returns null.
      *
      * @param subId whose dialing number for line 1 is returned.
+     * @param callingPackage The package making the call.
      * @return the displayed dialing number if set, or null if not set.
      */
-    String getLine1NumberForDisplay(int subId);
+    String getLine1NumberForDisplay(int subId, String callingPackage);
 
     /**
      * Returns the displayed alphatag of the dialing number if it was set
      * previously via {@link #setLine1NumberForDisplay}. Otherwise returns null.
      *
      * @param subId whose alphatag associated with line 1 is returned.
+     * @param callingPackage The package making the call.
      * @return the displayed alphatag of the dialing number if set, or null if
      *         not set.
      */
-    String getLine1AlphaTagForDisplay(int subId);
+    String getLine1AlphaTagForDisplay(int subId, String callingPackage);
 
     String[] getMergedSubscriberIds();
 
@@ -872,9 +878,10 @@ interface ITelephony {
     /**
      * Whether video calling has been enabled by the user.
      *
+     * @param callingPackage The package making the call.
      * @return {@code true} if the user has enabled video calling, {@code false} otherwise.
      */
-    boolean isVideoCallingEnabled();
+    boolean isVideoCallingEnabled(String callingPackage);
 
     /**
      * Whether the DTMF tone length can be changed.
@@ -925,10 +932,11 @@ interface ITelephony {
       * Returns the unique device ID of phone, for example, the IMEI for
       * GSM and the MEID for CDMA phones. Return null if device ID is not available.
       *
+      * @param callingPackage The package making the call.
       * <p>Requires Permission:
       *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
       */
-    String getDeviceId();
+    String getDeviceId(String callingPackage);
 
     /**
      * Returns the subscription ID associated with the specified PhoneAccount.
