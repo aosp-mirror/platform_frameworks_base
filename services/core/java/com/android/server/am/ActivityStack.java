@@ -4061,6 +4061,7 @@ final class ActivityStack {
             }
             ActivityRecord r = null;
             ActivityRecord top = null;
+            ActivityRecord tmp;
             int numActivities = 0;
             int numRunning = 0;
             final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -4068,7 +4069,11 @@ final class ActivityStack {
                 continue;
             }
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                r = activities.get(activityNdx);
+                tmp = activities.get(activityNdx);
+                if (tmp.finishing) {
+                    continue;
+                }
+                r = tmp;
 
                 // Initialize state for next task if needed.
                 if (top == null || (top.state == ActivityState.INITIALIZING)) {

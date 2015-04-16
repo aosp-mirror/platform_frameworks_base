@@ -3636,12 +3636,15 @@ package android.app {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.ActivityManager.RecentTaskInfo> CREATOR;
     field public int affiliatedTaskId;
+    field public android.content.ComponentName baseActivity;
     field public android.content.Intent baseIntent;
     field public java.lang.CharSequence description;
     field public int id;
+    field public int numActivities;
     field public android.content.ComponentName origActivity;
     field public int persistentId;
     field public android.app.ActivityManager.TaskDescription taskDescription;
+    field public android.content.ComponentName topActivity;
   }
 
   public static class ActivityManager.RunningAppProcessInfo implements android.os.Parcelable {
