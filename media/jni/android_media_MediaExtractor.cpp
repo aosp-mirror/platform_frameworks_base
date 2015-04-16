@@ -25,6 +25,7 @@
 #include "android_runtime/Log.h"
 #include "jni.h"
 #include "JNIHelp.h"
+#include "android_media_MediaDataSource.h"
 
 #include <media/IMediaHTTPService.h>
 #include <media/hardware/CryptoAPI.h>
@@ -49,74 +50,6 @@ struct fields_t {
 };
 
 static fields_t gFields;
-
-class JavaDataSourceBridge : public DataSource {
-    jmethodID mReadMethod;
-    jmethodID mGetSizeMethod;
-    jmethodID mCloseMethod;
-    jobject   mDataSource;
- public:
-    JavaDataSourceBridge(JNIEnv *env, jobject source) {
-        mDataSource = env->NewGlobalRef(source);
-
-        jclass datasourceclass = env->GetObjectClass(mDataSource);
-        CHECK(datasourceclass != NULL);
-
-        mReadMethod = env->GetMethodID(datasourceclass, "readAt", "(J[BI)I");
-        CHECK(mReadMethod != NULL);
-
-        mGetSizeMethod = env->GetMethodID(datasourceclass, "getSize", "()J");
-        CHECK(mGetSizeMethod != NULL);
-
-        mCloseMethod = env->GetMethodID(datasourceclass, "close", "()V");
-        CHECK(mCloseMethod != NULL);
-    }
-
-    ~JavaDataSourceBridge() {
-        JNIEnv *env = AndroidRuntime::getJNIEnv();
-        env->CallVoidMethod(mDataSource, mCloseMethod);
-        env->DeleteGlobalRef(mDataSource);
-    }
-
-    virtual status_t initCheck() const {
-        return OK;
-    }
-
-    virtual ssize_t readAt(off64_t offset, void* buffer, size_t size) {
-        JNIEnv *env = AndroidRuntime::getJNIEnv();
-
-        // XXX could optimize this by reusing the same array
-        jbyteArray byteArrayObj = env->NewByteArray(size);
-        env->DeleteLocalRef(env->GetObjectClass(mDataSource));
-        env->DeleteLocalRef(env->GetObjectClass(byteArrayObj));
-        ssize_t numread = env->CallIntMethod(mDataSource, mReadMethod, offset, byteArrayObj, (jint)size);
-        env->GetByteArrayRegion(byteArrayObj, 0, size, (jbyte*) buffer);
-        env->DeleteLocalRef(byteArrayObj);
-        if (env->ExceptionCheck()) {
-            ALOGW("Exception occurred while reading %zu at %lld", size, (long long)offset);
-            LOGW_EX(env);
-            env->ExceptionClear();
-            return -1;
-        }
-        return numread;
-    }
-
-    virtual status_t getSize(off64_t *size) {
-        JNIEnv *env = AndroidRuntime::getJNIEnv();
-
-        CHECK(size != NULL);
-
-        int64_t len = env->CallLongMethod(mDataSource, mGetSizeMethod);
-        if (len < 0) {
-            *size = ERROR_UNSUPPORTED;
-        } else {
-            *size = len;
-        }
-        return OK;
-    }
-};
-
-////////////////////////////////////////////////////////////////////////////////
 
 JMediaExtractor::JMediaExtractor(JNIEnv *env, jobject thiz)
     : mClass(NULL),
@@ -777,7 +710,8 @@ static void android_media_MediaExtractor_setDataSourceCallback(
         return;
     }
 
-    sp<JavaDataSourceBridge> bridge = new JavaDataSourceBridge(env, callbackObj);
+    sp<DataSource> bridge =
+        DataSource::CreateFromIDataSource(new JMediaDataSource(env, callbackObj));
     status_t err = extractor->setDataSource(bridge);
 
     if (err != OK) {
@@ -881,7 +815,7 @@ static JNINativeMethod gMethods[] = {
     { "setDataSource", "(Ljava/io/FileDescriptor;JJ)V",
       (void *)android_media_MediaExtractor_setDataSourceFd },
 
-    { "setDataSource", "(Landroid/media/DataSource;)V",
+    { "setDataSource", "(Landroid/media/MediaDataSource;)V",
       (void *)android_media_MediaExtractor_setDataSourceCallback },
 
     { "getCachedDuration", "()J",

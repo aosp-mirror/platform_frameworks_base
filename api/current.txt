@@ -15564,6 +15564,11 @@ package android.media {
     ctor public MediaCryptoException(java.lang.String);
   }
 
+  public abstract interface MediaDataSource implements java.io.Closeable {
+    method public abstract long getSize();
+    method public abstract int readAt(long, byte[], int);
+  }
+
   public class MediaDescription implements android.os.Parcelable {
     method public int describeContents();
     method public java.lang.CharSequence getDescription();
@@ -15699,6 +15704,7 @@ package android.media {
     method public final void release();
     method public void seekTo(long, int);
     method public void selectTrack(int);
+    method public final void setDataSource(android.media.MediaDataSource) throws java.io.IOException, java.lang.IllegalArgumentException;
     method public final void setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
     method public final void setDataSource(java.lang.String, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
     method public final void setDataSource(java.lang.String) throws java.io.IOException;
@@ -15878,6 +15884,7 @@ package android.media {
     method public void setDataSource(java.io.FileDescriptor, long, long) throws java.lang.IllegalArgumentException;
     method public void setDataSource(java.io.FileDescriptor) throws java.lang.IllegalArgumentException;
     method public void setDataSource(android.content.Context, android.net.Uri) throws java.lang.IllegalArgumentException, java.lang.SecurityException;
+    method public void setDataSource(android.media.MediaDataSource) throws java.lang.IllegalArgumentException;
     field public static final int METADATA_KEY_ALBUM = 1; // 0x1
     field public static final int METADATA_KEY_ALBUMARTIST = 13; // 0xd
     field public static final int METADATA_KEY_ARTIST = 2; // 0x2
@@ -15962,6 +15969,7 @@ package android.media {
     method public void setDataSource(java.lang.String) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException, java.lang.SecurityException;
     method public void setDataSource(java.io.FileDescriptor) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setDataSource(java.io.FileDescriptor, long, long) throws java.io.IOException, java.lang.IllegalArgumentException, java.lang.IllegalStateException;
+    method public void setDataSource(android.media.MediaDataSource) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setDisplay(android.view.SurfaceHolder);
     method public void setLooping(boolean);
     method public void setNextMediaPlayer(android.media.MediaPlayer);

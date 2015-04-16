@@ -181,7 +181,8 @@ import java.lang.ref.WeakReference;
  *         {@link #setDataSource(FileDescriptor)}, or
  *         {@link #setDataSource(String)}, or
  *         {@link #setDataSource(Context, Uri)}, or
- *         {@link #setDataSource(FileDescriptor, long, long)} transfers a
+ *         {@link #setDataSource(FileDescriptor, long, long)}, or
+ *         {@link #setDataSource(MediaDataSource)} transfers a
  *         MediaPlayer object in the <em>Idle</em> state to the
  *         <em>Initialized</em> state.
  *         <ul>
@@ -1125,6 +1126,20 @@ public class MediaPlayer implements SubtitleController.Listener
 
     private native void _setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException;
+
+    /**
+     * Sets the data source (MediaDataSource) to use.
+     *
+     * @param dataSource the MediaDataSource for the media you want to play
+     * @throws IllegalStateException if it is called in an invalid state
+     */
+    public void setDataSource(MediaDataSource dataSource)
+            throws IllegalArgumentException, IllegalStateException {
+        _setDataSource(dataSource);
+    }
+
+    private native void _setDataSource(MediaDataSource dataSource)
+          throws IllegalArgumentException, IllegalStateException;
 
     /**
      * Prepares the player for playback, synchronously.

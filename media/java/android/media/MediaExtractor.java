@@ -66,10 +66,11 @@ final public class MediaExtractor {
     }
 
     /**
-     * Sets the DataSource object to be used as the data source for this extractor
-     * {@hide}
+     * Sets the data source (MediaDataSource) to use.
+     *
+     * @param dataSource the MediaDataSource for the media you want to extract from
      */
-    public native final void setDataSource(DataSource source) throws IOException;
+    public native final void setDataSource(MediaDataSource dataSource) throws IllegalArgumentException, IOException;
 
     /**
      * Sets the data source as a content Uri.
