@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.util.ArrayMap;
 
 import java.util.Collections;
@@ -26,7 +27,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A unified virtual device providing a means of voice (and other) communication on a device.
+ *
+ * @hide
+ * @deprecated Use {@link InCallService} directly instead of using this class.
  */
+@SystemApi
+@Deprecated
 public final class Phone {
 
     public abstract static class Listener {
@@ -100,12 +106,10 @@ public final class Phone {
 
     private boolean mCanAddCall = true;
 
-    /** {@hide} */
     Phone(InCallAdapter adapter) {
         mInCallAdapter = adapter;
     }
 
-    /** {@hide} */
     final void internalAddCall(ParcelableCall parcelableCall) {
         Call call = new Call(this, parcelableCall.getId(), mInCallAdapter);
         mCallByTelecomCallId.put(parcelableCall.getId(), call);
@@ -115,14 +119,12 @@ public final class Phone {
         fireCallAdded(call);
      }
 
-    /** {@hide} */
     final void internalRemoveCall(Call call) {
         mCallByTelecomCallId.remove(call.internalGetCallId());
         mCalls.remove(call);
         fireCallRemoved(call);
     }
 
-    /** {@hide} */
     final void internalUpdateCall(ParcelableCall parcelableCall) {
          Call call = mCallByTelecomCallId.get(parcelableCall.getId());
          if (call != null) {
@@ -131,7 +133,6 @@ public final class Phone {
          }
      }
 
-    /** {@hide} */
     final void internalSetPostDialWait(String telecomId, String remaining) {
         Call call = mCallByTelecomCallId.get(telecomId);
         if (call != null) {
@@ -139,7 +140,6 @@ public final class Phone {
         }
     }
 
-    /** {@hide} */
     final void internalAudioStateChanged(AudioState audioState) {
         if (!Objects.equals(mAudioState, audioState)) {
             mAudioState = audioState;
@@ -147,17 +147,14 @@ public final class Phone {
         }
     }
 
-    /** {@hide} */
     final Call internalGetCallByTelecomId(String telecomId) {
         return mCallByTelecomCallId.get(telecomId);
     }
 
-    /** {@hide} */
     final void internalBringToForeground(boolean showDialpad) {
         fireBringToForeground(showDialpad);
     }
 
-    /** {@hide} */
     final void internalSetCanAddCall(boolean canAddCall) {
         if (mCanAddCall != canAddCall) {
             mCanAddCall = canAddCall;
@@ -167,7 +164,6 @@ public final class Phone {
 
     /**
      * Called to destroy the phone and cleanup any lingering calls.
-     * @hide
      */
     final void destroy() {
         for (Call call : mCalls) {

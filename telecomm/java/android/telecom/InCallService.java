@@ -216,9 +216,11 @@ public abstract class InCallService extends Service {
      *         if the {@code InCallService} is not in a state where it has an associated
      *         {@code Phone}.
      * @hide
+     * @deprecated Use direct methods on InCallService instead of {@link Phone}.
      */
     @SystemApi
-    public final Phone getPhone() {
+    @Deprecated
+    public Phone getPhone() {
         return mPhone;
     }
 
@@ -282,8 +284,10 @@ public abstract class InCallService extends Service {
      *
      * @param phone The {@code Phone} object associated with this {@code InCallService}.
      * @hide
+     * @deprecated Use direct methods on InCallService instead of {@link Phone}.
      */
     @SystemApi
+    @Deprecated
     public void onPhoneCreated(Phone phone) {
     }
 
@@ -295,8 +299,10 @@ public abstract class InCallService extends Service {
      *
      * @param phone The {@code Phone} object associated with this {@code InCallService}.
      * @hide
+     * @deprecated Use direct methods on InCallService instead of {@link Phone}.
      */
     @SystemApi
+    @Deprecated
     public void onPhoneDestroyed(Phone phone) {
     }
 
