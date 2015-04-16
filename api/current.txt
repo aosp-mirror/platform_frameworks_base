@@ -30950,6 +30950,7 @@ package android.telephony {
     method public boolean isVoiceCapable();
     method public boolean isWorldPhone();
     method public void listen(android.telephony.PhoneStateListener, int);
+    method public void notifyCarrierNetworkChange(boolean);
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
     method public boolean setLine1NumberForDisplay(java.lang.String, java.lang.String);
     method public boolean setOperatorBrandOverride(java.lang.String);

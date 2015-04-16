@@ -33097,6 +33097,7 @@ package android.telephony {
     method public boolean isWorldPhone();
     method public void listen(android.telephony.PhoneStateListener, int);
     method public boolean needsOtaServiceProvisioning();
+    method public void notifyCarrierNetworkChange(boolean);
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
     method public void setDataEnabled(boolean);
     method public void setDataEnabled(int, boolean);
