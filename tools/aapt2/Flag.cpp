@@ -39,7 +39,7 @@ void optionalSwitch(const StringPiece& name, const StringPiece& description, boo
             Flag{ name.toString(), description.toString(), {}, false, result, false });
 }
 
-static void usageAndDie(const StringPiece& command) {
+void usageAndDie(const StringPiece& command) {
     std::cerr << command << " [options]";
     for (const Flag& flag : sFlags) {
         if (flag.required) {

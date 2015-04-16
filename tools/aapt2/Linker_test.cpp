@@ -30,6 +30,7 @@ struct LinkerTest : public ::testing::Test {
     virtual void SetUp() override {
         mTable = std::make_shared<ResourceTable>();
         mTable->setPackage(u"android");
+        mTable->setPackageId(0x01);
         mLinker = std::make_shared<Linker>(mTable, std::make_shared<Resolver>(
                 mTable, std::make_shared<android::AssetManager>()));
 
@@ -75,7 +76,7 @@ TEST_F(LinkerTest, DoNotInterpretEscapedStringAsReference) {
 }
 
 TEST_F(LinkerTest, EscapeAndConvertRawString) {
-    std::unique_ptr<Style> style = util::make_unique<Style>();
+    std::unique_ptr<Style> style = util::make_unique<Style>(false);
     style->entries.push_back(Style::Entry{
             ResourceNameRef{ u"android", ResourceType::kAttr, u"integer" },
             util::make_unique<RawString>(mTable->getValueStringPool().makeRef(u"  123"))
@@ -91,7 +92,7 @@ TEST_F(LinkerTest, EscapeAndConvertRawString) {
 }
 
 TEST_F(LinkerTest, FailToConvertRawString) {
-    std::unique_ptr<Style> style = util::make_unique<Style>();
+    std::unique_ptr<Style> style = util::make_unique<Style>(false);
     style->entries.push_back(Style::Entry{
             ResourceNameRef{ u"android", ResourceType::kAttr, u"integer" },
             util::make_unique<RawString>(mTable->getValueStringPool().makeRef(u"yo what is up?"))
@@ -103,7 +104,7 @@ TEST_F(LinkerTest, FailToConvertRawString) {
 }
 
 TEST_F(LinkerTest, ConvertRawStringToString) {
-    std::unique_ptr<Style> style = util::make_unique<Style>();
+    std::unique_ptr<Style> style = util::make_unique<Style>(false);
     style->entries.push_back(Style::Entry{
             ResourceNameRef{ u"android", ResourceType::kAttr, u"string" },
             util::make_unique<RawString>(
@@ -122,7 +123,7 @@ TEST_F(LinkerTest, ConvertRawStringToString) {
 }
 
 TEST_F(LinkerTest, ConvertRawStringToFlags) {
-    std::unique_ptr<Style> style = util::make_unique<Style>();
+    std::unique_ptr<Style> style = util::make_unique<Style>(false);
     style->entries.push_back(Style::Entry{
             ResourceNameRef{ u"android", ResourceType::kAttr, u"flags" },
             util::make_unique<RawString>(mTable->getValueStringPool().makeRef(u"banana | apple"))
@@ -138,6 +139,14 @@ TEST_F(LinkerTest, ConvertRawStringToFlags) {
             result->entries.front().value.get());
     ASSERT_NE(nullptr, bin);
     EXPECT_EQ(bin->value.data, 1u | 2u);
+}
+
+TEST_F(LinkerTest, AllowReferenceWithOnlyResourceIdPointingToDifferentPackage) {
+    ASSERT_TRUE(addResource(ResourceName{ u"android", ResourceType::kInteger, u"foo" },
+                util::make_unique<Reference>(ResourceId{ 0x02, 0x01, 0x01 })));
+
+    ASSERT_TRUE(mLinker->linkAndValidate());
+    EXPECT_TRUE(mLinker->getUnresolvedReferences().empty());
 }
 
 } // namespace aapt

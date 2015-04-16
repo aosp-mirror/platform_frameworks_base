@@ -175,6 +175,25 @@ StringPool::StyleRef StringPool::makeRef(const StyleString& str, const Context& 
     return StyleRef(styleEntry);
 }
 
+StringPool::StyleRef StringPool::makeRef(const StyleRef& ref) {
+    Entry* entry = new Entry();
+    entry->value = *ref.mEntry->str;
+    entry->context = ref.mEntry->str.mEntry->context;
+    entry->index = mStrings.size();
+    entry->ref = 0;
+    mStrings.emplace_back(entry);
+    mIndexedStrings.insert(std::make_pair(StringPiece16(entry->value), entry));
+
+    StyleEntry* styleEntry = new StyleEntry();
+    styleEntry->str = Ref(entry);
+    for (const Span& span : ref.mEntry->spans) {
+        styleEntry->spans.emplace_back(Span{ makeRef(*span.name), span.firstChar, span.lastChar });
+    }
+    styleEntry->ref = 0;
+    mStyles.emplace_back(styleEntry);
+    return StyleRef(styleEntry);
+}
+
 void StringPool::merge(StringPool&& pool) {
     mIndexedStrings.insert(pool.mIndexedStrings.begin(), pool.mIndexedStrings.end());
     pool.mIndexedStrings.clear();
@@ -266,7 +285,7 @@ bool StringPool::flattenUtf8(BigBuffer* out, const StringPool& pool) {
     header->stringCount = pool.size();
     header->flags |= android::ResStringPool_header::UTF8_FLAG;
 
-    uint32_t* indices = out->nextBlock<uint32_t>(pool.size());
+    uint32_t* indices = pool.size() != 0 ? out->nextBlock<uint32_t>(pool.size()) : nullptr;
 
     uint32_t* styleIndices = nullptr;
     if (!pool.mStyles.empty()) {

@@ -148,6 +148,12 @@ public:
 
     bool markPublic(const ResourceNameRef& name, const ResourceId resId, const SourceLine& source);
 
+    /*
+     * Merges the resources from `other` into this table, mangling the names of the resources
+     * if `other` has a different package name.
+     */
+    bool merge(ResourceTable&& other);
+
     /**
      * Returns the string pool used by this ResourceTable.
      * Values that reference strings should use this pool to create

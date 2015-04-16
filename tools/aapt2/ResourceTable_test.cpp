@@ -31,7 +31,7 @@ struct TestValue : public Value {
     TestValue(StringPiece16 str) : value(str.toString()) {
     }
 
-    TestValue* clone() const override {
+    TestValue* clone(StringPool* /*newPool*/) const override {
         return new TestValue(value);
     }
 
@@ -48,7 +48,7 @@ struct TestWeakValue : public Value {
         return true;
     }
 
-    TestWeakValue* clone() const override {
+    TestWeakValue* clone(StringPool* /*newPool*/) const override {
         return new TestWeakValue();
     }
 

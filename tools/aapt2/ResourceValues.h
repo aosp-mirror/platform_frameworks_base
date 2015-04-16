@@ -63,7 +63,7 @@ struct Value {
     /**
      * Clone the value.
      */
-    virtual Value* clone() const = 0;
+    virtual Value* clone(StringPool* newPool) const = 0;
 
     /**
      * Human readable printout of this value.
@@ -92,7 +92,7 @@ struct Item : public Value {
     /**
      * Clone the Item.
      */
-    virtual Item* clone() const override = 0;
+    virtual Item* clone(StringPool* newPool) const override = 0;
 
     /**
      * Fills in an android::Res_value structure with this Item's binary representation.
@@ -132,7 +132,7 @@ struct Reference : public BaseItem<Reference> {
     Reference(const ResourceId& i, Type type = Type::kResource);
 
     bool flatten(android::Res_value& outValue) const override;
-    Reference* clone() const override;
+    Reference* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
@@ -142,7 +142,7 @@ struct Reference : public BaseItem<Reference> {
 struct Id : public BaseItem<Id> {
     bool isWeak() const override;
     bool flatten(android::Res_value& out) const override;
-    Id* clone() const override;
+    Id* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
@@ -157,7 +157,7 @@ struct RawString : public BaseItem<RawString> {
     RawString(const StringPool::Ref& ref);
 
     bool flatten(android::Res_value& outValue) const override;
-    RawString* clone() const override;
+    RawString* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
@@ -167,7 +167,7 @@ struct String : public BaseItem<String> {
     String(const StringPool::Ref& ref);
 
     bool flatten(android::Res_value& outValue) const override;
-    String* clone() const override;
+    String* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
@@ -177,7 +177,7 @@ struct StyledString : public BaseItem<StyledString> {
     StyledString(const StringPool::StyleRef& ref);
 
     bool flatten(android::Res_value& outValue) const override;
-    StyledString* clone() const override;
+    StyledString* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
@@ -188,7 +188,7 @@ struct FileReference : public BaseItem<FileReference> {
     FileReference(const StringPool::Ref& path);
 
     bool flatten(android::Res_value& outValue) const override;
-    FileReference* clone() const override;
+    FileReference* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
@@ -202,8 +202,8 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
     BinaryPrimitive(const android::Res_value& val);
 
     bool flatten(android::Res_value& outValue) const override;
-    BinaryPrimitive* clone() const override;
-    void print(::std::ostream& out) const override;
+    BinaryPrimitive* clone(StringPool* newPool) const override;
+    void print(std::ostream& out) const override;
 };
 
 /**
@@ -214,8 +214,8 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
 struct Sentinel : public BaseItem<Sentinel> {
     bool isWeak() const override;
     bool flatten(android::Res_value& outValue) const override;
-    Sentinel* clone() const override;
-    void print(::std::ostream& out) const override;
+    Sentinel* clone(StringPool* newPool) const override;
+    void print(std::ostream& out) const override;
 };
 
 struct Attribute : public BaseValue<Attribute> {
@@ -233,7 +233,7 @@ struct Attribute : public BaseValue<Attribute> {
     Attribute(bool w, uint32_t t = 0u);
 
     bool isWeak() const override;
-    virtual Attribute* clone() const override;
+    virtual Attribute* clone(StringPool* newPool) const override;
     virtual void print(std::ostream& out) const override;
 };
 
@@ -243,17 +243,20 @@ struct Style : public BaseValue<Style> {
         std::unique_ptr<Item> value;
     };
 
+    bool weak;
     Reference parent;
     std::vector<Entry> entries;
 
-    Style* clone() const override;
+    Style(bool weak);
+    bool isWeak() const override;
+    Style* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
 struct Array : public BaseValue<Array> {
     std::vector<std::unique_ptr<Item>> items;
 
-    Array* clone() const override;
+    Array* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
@@ -270,14 +273,14 @@ struct Plural : public BaseValue<Plural> {
 
     std::array<std::unique_ptr<Item>, Count> values;
 
-    Plural* clone() const override;
+    Plural* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 
 struct Styleable : public BaseValue<Styleable> {
     std::vector<Reference> entries;
 
-    Styleable* clone() const override;
+    Styleable* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
 

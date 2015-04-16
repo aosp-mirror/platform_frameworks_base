@@ -45,7 +45,8 @@ public:
      * Creates a flattener with a Resolver to resolve references
      * and attributes.
      */
-    XmlFlattener(const std::shared_ptr<Resolver>& resolver);
+    XmlFlattener(const std::shared_ptr<ResourceTable>& table,
+                 const std::shared_ptr<Resolver>& resolver);
 
     XmlFlattener(const XmlFlattener&) = delete; // Not copyable.
 
@@ -60,6 +61,7 @@ public:
                           BigBuffer* outBuffer, Options options);
 
 private:
+    std::shared_ptr<ResourceTable> mTable;
     std::shared_ptr<Resolver> mResolver;
 };
 

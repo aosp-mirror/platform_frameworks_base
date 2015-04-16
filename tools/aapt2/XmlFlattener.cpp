@@ -35,6 +35,10 @@
 
 namespace aapt {
 
+constexpr const char16_t* kSchemaAndroid = u"http://schemas.android.com/apk/res/android";
+constexpr const char16_t* kSchemaAuto = u"http://schemas.android.com/apk/res-auto";
+constexpr const char16_t* kSchemaPrefix = u"http://schemas.android.com/apk/res/";
+
 struct AttributeValueFlattener : ValueVisitor {
     struct Args : ValueVisitorArgs {
         Args(std::shared_ptr<Resolver> r, SourceLogger& s, android::Res_value& oV,
@@ -95,7 +99,9 @@ static bool lessAttributeId(const XmlAttribute& a, uint32_t id) {
     return a.resourceId < id;
 }
 
-XmlFlattener::XmlFlattener(const std::shared_ptr<Resolver>& resolver) : mResolver(resolver) {
+XmlFlattener::XmlFlattener(const std::shared_ptr<ResourceTable>& table,
+                           const std::shared_ptr<Resolver>& resolver) :
+        mTable(table), mResolver(resolver) {
 }
 
 /**
@@ -190,28 +196,50 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                 uint32_t nextAttributeId = 0;
                 const auto endAttrIter = parser->endAttributes();
                 for (auto attrIter = parser->beginAttributes();
-                     attrIter != endAttrIter;
-                     ++attrIter) {
+                        attrIter != endAttrIter;
+                        ++attrIter) {
                     uint32_t id;
                     StringPool::Ref nameRef;
                     const Attribute* attr = nullptr;
-                    if (attrIter->namespaceUri.empty()) {
+
+                    if (options.maxSdkAttribute && attrIter->namespaceUri == kSchemaAndroid) {
+                        size_t sdkVersion = findAttributeSdkLevel(attrIter->name);
+                        if (sdkVersion > options.maxSdkAttribute.value()) {
+                            // We will silently omit this attribute
+                            smallestStrippedAttributeSdk =
+                                    std::min(smallestStrippedAttributeSdk, sdkVersion);
+                            continue;
+                        }
+                    }
+
+                    ResourceNameRef genIdName;
+                    bool create = false;
+                    bool privateRef = false;
+                    if (mTable && ResourceParser::tryParseReference(attrIter->value, &genIdName,
+                            &create, &privateRef) && create) {
+                        mTable->addResource(genIdName, {}, source.line(parser->getLineNumber()),
+                                            util::make_unique<Id>());
+                    }
+
+
+                    StringPiece16 package;
+                    if (util::stringStartsWith<char16_t>(attrIter->namespaceUri, kSchemaPrefix)) {
+                        StringPiece16 schemaPrefix = kSchemaPrefix;
+                        package = attrIter->namespaceUri;
+                        package = package.substr(schemaPrefix.size(),
+                                                 package.size() - schemaPrefix.size());
+                    } else if (attrIter->namespaceUri == kSchemaAuto && mResolver) {
+                        package = mResolver->getDefaultPackage();
+                    }
+
+                    if (package.empty() || !mResolver) {
                         // Attributes that have no resource ID (because they don't belong to a
                         // package) should appear after those that do have resource IDs. Assign
                         // them some/ integer value that will appear after.
                         id = 0x80000000u | nextAttributeId++;
                         nameRef = pool.makeRef(attrIter->name, StringPool::Context{ id });
-                    } else {
-                        StringPiece16 package;
-                        if (attrIter->namespaceUri == u"http://schemas.android.com/apk/res-auto") {
-                            package = mResolver->getDefaultPackage();
-                        } else {
-                            // TODO(adamlesinski): Extract package from namespace.
-                            // The package name appears like so:
-                            // http://schemas.android.com/apk/res/<package name>
-                            package = u"android";
-                        }
 
+                    } else {
                         // Find the Attribute object via our Resolver.
                         ResourceName attrName = {
                                 package.toString(), ResourceType::kAttr, attrIter->name };
@@ -234,16 +262,6 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                                     << std::endl;
                             error = true;
                             continue;
-                        }
-
-                        if (options.maxSdkAttribute && package == u"android") {
-                            size_t sdkVersion = findAttributeSdkLevel(attrIter->name);
-                            if (sdkVersion > options.maxSdkAttribute.value()) {
-                                // We will silently omit this attribute
-                                smallestStrippedAttributeSdk =
-                                        std::min(smallestStrippedAttributeSdk, sdkVersion);
-                                continue;
-                            }
                         }
 
                         id = result.value().id.id;

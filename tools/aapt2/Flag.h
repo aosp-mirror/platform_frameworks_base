@@ -18,6 +18,8 @@ void optionalFlag(const StringPiece& name, const StringPiece& description,
 
 void optionalSwitch(const StringPiece& name, const StringPiece& description, bool* result);
 
+void usageAndDie(const StringPiece& command);
+
 void parse(int argc, char** argv, const StringPiece& command);
 
 const std::vector<std::string>& getArgs();

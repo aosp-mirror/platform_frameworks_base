@@ -41,12 +41,16 @@ public:
         bool useFinal = true;
     };
 
-    JavaClassGenerator(std::shared_ptr<const ResourceTable> table, Options options);
+    JavaClassGenerator(const std::shared_ptr<const ResourceTable>& table, Options options);
 
     /*
-     * Writes the R.java file to `out`. Returns true on success.
+     * Writes the R.java file to `out`. Only symbols belonging to `package` are written.
+     * All symbols technically belong to a single package, but linked libraries will
+     * have their names mangled, denoting that they came from a different package.
+     * We need to generate these symbols in a separate file.
+     * Returns true on success.
      */
-    bool generate(std::ostream& out);
+    bool generate(const std::u16string& package, std::ostream& out);
 
     /*
      * ConstValueVisitor implementation.
@@ -56,7 +60,8 @@ public:
     const std::string& getError() const;
 
 private:
-    bool generateType(std::ostream& out, const ResourceTableType& type, size_t packageId);
+    bool generateType(const std::u16string& package, size_t packageId,
+                      const ResourceTableType& type, std::ostream& out);
 
     std::shared_ptr<const ResourceTable> mTable;
     Options mOptions;

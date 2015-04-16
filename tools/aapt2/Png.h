@@ -17,6 +17,7 @@
 #ifndef AAPT_PNG_H
 #define AAPT_PNG_H
 
+#include "BigBuffer.h"
 #include "Source.h"
 
 #include <iostream>
@@ -29,7 +30,7 @@ struct Png {
         int grayScaleTolerance = 0;
     };
 
-    bool process(const Source& source, std::istream& input, std::ostream& output,
+    bool process(const Source& source, std::istream& input, BigBuffer* outBuffer,
                  const Options& options, std::string* outError);
 };
 

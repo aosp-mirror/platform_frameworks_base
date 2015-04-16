@@ -17,6 +17,7 @@
 #include "AppInfo.h"
 #include "BigBuffer.h"
 #include "BinaryResourceParser.h"
+#include "BinaryXmlPullParser.h"
 #include "BindingXmlPullParser.h"
 #include "Files.h"
 #include "Flag.h"
@@ -34,6 +35,7 @@
 #include "TableFlattener.h"
 #include "Util.h"
 #include "XmlFlattener.h"
+#include "ZipFile.h"
 
 #include <algorithm>
 #include <androidfw/AssetManager.h>
@@ -44,6 +46,7 @@
 #include <iostream>
 #include <sstream>
 #include <sys/stat.h>
+#include <unordered_set>
 #include <utils/Errors.h>
 
 using namespace aapt;
@@ -96,17 +99,6 @@ void printStringPool(const StringPool& pool) {
     }
 }
 
-std::unique_ptr<FileReference> makeFileReference(StringPool& pool, const StringPiece& filename,
-        ResourceType type, const ConfigDescription& config) {
-    std::stringstream path;
-    path << "res/" << type;
-    if (config != ConfigDescription{}) {
-        path << "-" << config;
-    }
-    path << "/" << filename;
-    return util::make_unique<FileReference>(pool.makeRef(util::utf8ToUtf16(path.str())));
-}
-
 /**
  * Collect files from 'root', filtering out any files that do not
  * match the FileFilter 'filter'.
@@ -148,30 +140,6 @@ bool walkTree(const Source& root, const FileFilter& filter,
     return !error;
 }
 
-bool loadBinaryResourceTable(std::shared_ptr<ResourceTable> table, const Source& source) {
-    std::ifstream ifs(source.path, std::ifstream::in | std::ifstream::binary);
-    if (!ifs) {
-        Logger::error(source) << strerror(errno) << std::endl;
-        return false;
-    }
-
-    std::streampos fsize = ifs.tellg();
-    ifs.seekg(0, std::ios::end);
-    fsize = ifs.tellg() - fsize;
-    ifs.seekg(0, std::ios::beg);
-
-    assert(fsize >= 0);
-    size_t dataSize = static_cast<size_t>(fsize);
-    char* buf = new char[dataSize];
-    ifs.read(buf, dataSize);
-
-    BinaryResourceParser parser(table, source, buf, dataSize);
-    bool result = parser.parse();
-
-    delete [] buf;
-    return result;
-}
-
 bool loadResTable(android::ResTable* table, const Source& source) {
     std::ifstream ifs(source.path, std::ifstream::in | std::ifstream::binary);
     if (!ifs) {
@@ -195,7 +163,7 @@ bool loadResTable(android::ResTable* table, const Source& source) {
     return result;
 }
 
-void versionStylesForCompat(std::shared_ptr<ResourceTable> table) {
+void versionStylesForCompat(const std::shared_ptr<ResourceTable>& table) {
     for (auto& type : *table) {
         if (type->type != ResourceType::kStyle) {
             continue;
@@ -251,10 +219,12 @@ void versionStylesForCompat(std::shared_ptr<ResourceTable> table) {
                                 {},
 
                                 // Create a copy of the original style.
-                                std::unique_ptr<Value>(configValue.value->clone())
+                                std::unique_ptr<Value>(configValue.value->clone(
+                                            &table->getValueStringPool()))
                         };
 
                         Style& newStyle = static_cast<Style&>(*value.value);
+                        newStyle.weak = true;
 
                         // Move the recorded stripped attributes into this new style.
                         std::move(stripped.begin(), stripped.end(),
@@ -285,59 +255,6 @@ void versionStylesForCompat(std::shared_ptr<ResourceTable> table) {
     }
 }
 
-bool collectXml(std::shared_ptr<ResourceTable> table, const Source& source,
-                const ResourceName& name, const ConfigDescription& config) {
-    std::ifstream in(source.path, std::ifstream::binary);
-    if (!in) {
-        Logger::error(source) << strerror(errno) << std::endl;
-        return false;
-    }
-
-    std::set<size_t> sdkLevels;
-
-    SourceXmlPullParser parser(in);
-    while (XmlPullParser::isGoodEvent(parser.next())) {
-        if (parser.getEvent() != XmlPullParser::Event::kStartElement) {
-            continue;
-        }
-
-        const auto endIter = parser.endAttributes();
-        for (auto iter = parser.beginAttributes(); iter != endIter; ++iter) {
-            if (iter->namespaceUri == u"http://schemas.android.com/apk/res/android") {
-                size_t sdkLevel = findAttributeSdkLevel(iter->name);
-                if (sdkLevel > 1) {
-                    sdkLevels.insert(sdkLevel);
-                }
-            }
-
-            ResourceNameRef refName;
-            bool create = false;
-            bool privateRef = false;
-            if (ResourceParser::tryParseReference(iter->value, &refName, &create, &privateRef) &&
-                    create) {
-                table->addResource(refName, {}, source.line(parser.getLineNumber()),
-                                   util::make_unique<Id>());
-            }
-        }
-    }
-
-    for (size_t level : sdkLevels) {
-        Logger::note(source)
-                << "creating v" << level << " versioned file."
-                << std::endl;
-        ConfigDescription newConfig = config;
-        newConfig.sdkVersion = level;
-
-        std::unique_ptr<FileReference> fileResource = makeFileReference(
-                table->getValueStringPool(),
-                util::utf16ToUtf8(name.entry) + ".xml",
-                name.type,
-                newConfig);
-        table->addResource(name, newConfig, source.line(0), std::move(fileResource));
-    }
-    return true;
-}
-
 struct CompileItem {
     Source source;
     ResourceName name;
@@ -345,28 +262,91 @@ struct CompileItem {
     std::string extension;
 };
 
-bool compileXml(std::shared_ptr<Resolver> resolver, const CompileItem& item,
-                const Source& outputSource, std::queue<CompileItem>* queue) {
+struct LinkItem {
+    Source source;
+    std::string apkPath;
+};
+
+std::string buildFileReference(const CompileItem& item) {
+    std::stringstream path;
+    path << "res/" << item.name.type;
+    if (item.config != ConfigDescription{}) {
+        path << "-" << item.config;
+    }
+    path << "/" << util::utf16ToUtf8(item.name.entry) + "." + item.extension;
+    return path.str();
+}
+
+bool addFileReference(const std::shared_ptr<ResourceTable>& table, const CompileItem& item) {
+    StringPool& pool = table->getValueStringPool();
+    StringPool::Ref ref = pool.makeRef(util::utf8ToUtf16(buildFileReference(item)));
+    return table->addResource(item.name, item.config, item.source.line(0),
+                              util::make_unique<FileReference>(ref));
+}
+
+struct AaptOptions {
+    enum class Phase {
+        Link,
+        Compile,
+    };
+
+    // The phase to process.
+    Phase phase;
+
+    // Details about the app.
+    AppInfo appInfo;
+
+    // The location of the manifest file.
+    Source manifest;
+
+    // The APK files to link.
+    std::vector<Source> input;
+
+    // The libraries these files may reference.
+    std::vector<Source> libraries;
+
+    // Output path. This can be a directory or file
+    // depending on the phase.
+    Source output;
+
+    // Directory in which to write binding xml files.
+    Source bindingOutput;
+
+    // Directory to in which to generate R.java.
+    Maybe<Source> generateJavaClass;
+
+    // Whether to output verbose details about
+    // compilation.
+    bool verbose = false;
+};
+
+bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
+                const CompileItem& item, std::queue<CompileItem>* outQueue, ZipFile* outApk) {
     std::ifstream in(item.source.path, std::ifstream::binary);
     if (!in) {
         Logger::error(item.source) << strerror(errno) << std::endl;
         return false;
     }
 
-    std::shared_ptr<BindingXmlPullParser> binding;
-    std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<SourceXmlPullParser>(in);
-    if (item.name.type == ResourceType::kLayout) {
-        binding = std::make_shared<BindingXmlPullParser>(xmlParser);
-        xmlParser = binding;
-    }
-
     BigBuffer outBuffer(1024);
-    XmlFlattener flattener(resolver);
+
+    // No resolver, since we are not compiling attributes here.
+    XmlFlattener flattener(table, {});
 
     // We strip attributes that do not belong in this version of the resource.
     // Non-version qualified resources have an implicit version 1 requirement.
-    XmlFlattener::Options options = { item.config.sdkVersion ? item.config.sdkVersion : 1 };
-    Maybe<size_t> minStrippedSdk = flattener.flatten(item.source, xmlParser, &outBuffer, options);
+    XmlFlattener::Options xmlOptions;
+    xmlOptions.maxSdkAttribute = item.config.sdkVersion ? item.config.sdkVersion : 1;
+
+    std::shared_ptr<BindingXmlPullParser> binding;
+    std::shared_ptr<XmlPullParser> parser = std::make_shared<SourceXmlPullParser>(in);
+    if (item.name.type == ResourceType::kLayout) {
+        // Layouts may have defined bindings, so we need to make sure they get processed.
+        binding = std::make_shared<BindingXmlPullParser>(parser);
+        parser = binding;
+    }
+
+    Maybe<size_t> minStrippedSdk = flattener.flatten(item.source, parser, &outBuffer, xmlOptions);
     if (!minStrippedSdk) {
         return false;
     }
@@ -376,24 +356,29 @@ bool compileXml(std::shared_ptr<Resolver> resolver, const CompileItem& item,
         // with the version of the smallest SDK version stripped.
         CompileItem newWork = item;
         newWork.config.sdkVersion = minStrippedSdk.value();
-        queue->push(newWork);
+        outQueue->push(newWork);
     }
 
-    std::ofstream out(outputSource.path, std::ofstream::binary);
-    if (!out) {
-        Logger::error(outputSource) << strerror(errno) << std::endl;
+    // Write the resulting compiled XML file to the output APK.
+    if (outApk->add(outBuffer, buildFileReference(item).data(), ZipEntry::kCompressStored,
+                nullptr) != android::NO_ERROR) {
+        Logger::error(options.output) << "failed to write compiled '" << item.source << "' to apk."
+                                      << std::endl;
         return false;
     }
 
-    if (!util::writeAll(out, outBuffer)) {
-        Logger::error(outputSource) << strerror(errno) << std::endl;
-        return false;
-    }
+    if (binding && !options.bindingOutput.path.empty()) {
+        // We generated a binding xml file, write it out.
+        Source bindingOutput = options.bindingOutput;
+        appendPath(&bindingOutput.path, buildFileReference(item));
 
-    if (binding) {
-        // We generated a binding xml file, write it out beside the output file.
-        Source bindingOutput = outputSource;
-        bindingOutput.path += ".bind.xml";
+        if (!mkdirs(bindingOutput.path)) {
+            Logger::error(bindingOutput) << strerror(errno) << std::endl;
+            return false;
+        }
+
+        appendPath(&bindingOutput.path, "bind.xml");
+
         std::ofstream bout(bindingOutput.path);
         if (!bout) {
             Logger::error(bindingOutput) << strerror(errno) << std::endl;
@@ -408,100 +393,68 @@ bool compileXml(std::shared_ptr<Resolver> resolver, const CompileItem& item,
     return true;
 }
 
-bool compilePng(const Source& source, const Source& output) {
-    std::ifstream in(source.path, std::ifstream::binary);
-    if (!in) {
-        Logger::error(source) << strerror(errno) << std::endl;
+bool linkXml(const AaptOptions& options, const std::shared_ptr<Resolver>& resolver,
+             const LinkItem& item, const void* data, size_t dataLen, ZipFile* outApk) {
+    std::shared_ptr<android::ResXMLTree> tree = std::make_shared<android::ResXMLTree>();
+    if (tree->setTo(data, dataLen, false) != android::NO_ERROR) {
         return false;
     }
 
-    std::ofstream out(output.path, std::ofstream::binary);
-    if (!out) {
-        Logger::error(output) << strerror(errno) << std::endl;
+    std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<BinaryXmlPullParser>(tree);
+
+    BigBuffer outBuffer(1024);
+    XmlFlattener flattener({}, resolver);
+    if (!flattener.flatten(item.source, xmlParser, &outBuffer, {})) {
         return false;
     }
 
-    std::string err;
-    Png png;
-    if (!png.process(source, in, out, {}, &err)) {
-        Logger::error(source) << err << std::endl;
+    if (outApk->add(outBuffer, item.apkPath.data(), ZipEntry::kCompressDeflated, nullptr) !=
+            android::NO_ERROR) {
+        Logger::error(options.output) << "failed to write linked file '" << item.source
+                                      << "' to apk." << std::endl;
         return false;
     }
     return true;
 }
 
-bool copyFile(const Source& source, const Source& output) {
-    std::ifstream in(source.path, std::ifstream::binary);
+bool compilePng(const AaptOptions& options, const CompileItem& item, ZipFile* outApk) {
+    std::ifstream in(item.source.path, std::ifstream::binary);
     if (!in) {
-        Logger::error(source) << strerror(errno) << std::endl;
+        Logger::error(item.source) << strerror(errno) << std::endl;
         return false;
     }
 
-    std::ofstream out(output.path, std::ofstream::binary);
-    if (!out) {
-        Logger::error(output) << strerror(errno) << std::endl;
+    BigBuffer outBuffer(4096);
+    std::string err;
+    Png png;
+    if (!png.process(item.source, in, &outBuffer, {}, &err)) {
+        Logger::error(item.source) << err << std::endl;
         return false;
     }
 
-    if (out << in.rdbuf()) {
-        Logger::error(output) << strerror(errno) << std::endl;
-        return true;
+    if (outApk->add(outBuffer, buildFileReference(item).data(), ZipEntry::kCompressStored,
+                nullptr) != android::NO_ERROR) {
+        Logger::error(options.output) << "failed to write compiled '" << item.source
+                                      << "' to apk." << std::endl;
+        return false;
     }
-    return false;
+    return true;
 }
 
-struct AaptOptions {
-    enum class Phase {
-        Full,
-        Collect,
-        Link,
-        Compile,
-        Manifest
-    };
+bool copyFile(const AaptOptions& options, const CompileItem& item, ZipFile* outApk) {
+    if (outApk->add(item.source.path.data(), buildFileReference(item).data(),
+                ZipEntry::kCompressStored, nullptr) != android::NO_ERROR) {
+        Logger::error(options.output) << "failed to copy file '" << item.source << "' to apk."
+                                      << std::endl;
+        return false;
+    }
+    return true;
+}
 
-    // The phase to process.
-    Phase phase;
-
-    // Details about the app.
-    AppInfo appInfo;
-
-    // The location of the manifest file.
-    Source manifest;
-
-    // The source directories to walk and find resource files.
-    std::vector<Source> sourceDirs;
-
-    // The resource files to process and collect.
-    std::vector<Source> collectFiles;
-
-    // The binary table files to link.
-    std::vector<Source> linkFiles;
-
-    // The resource files to compile.
-    std::vector<Source> compileFiles;
-
-    // The libraries these files may reference.
-    std::vector<Source> libraries;
-
-    // Output path. This can be a directory or file
-    // depending on the phase.
-    Source output;
-
-    // Directory to in which to generate R.java.
-    Maybe<Source> generateJavaClass;
-
-    // Whether to output verbose details about
-    // compilation.
-    bool verbose = false;
-};
-
-bool compileAndroidManifest(const std::shared_ptr<Resolver>& resolver,
-                            const AaptOptions& options) {
-    Source outSource = options.output;
-    appendPath(&outSource.path, "AndroidManifest.xml");
-
+bool compileManifest(const AaptOptions& options, const std::shared_ptr<Resolver>& resolver,
+                     ZipFile* outApk) {
     if (options.verbose) {
-        Logger::note(outSource) << "compiling AndroidManifest.xml." << std::endl;
+        Logger::note(options.manifest) << "compiling AndroidManifest.xml." << std::endl;
     }
 
     std::ifstream in(options.manifest.path, std::ifstream::binary);
@@ -512,23 +465,16 @@ bool compileAndroidManifest(const std::shared_ptr<Resolver>& resolver,
 
     BigBuffer outBuffer(1024);
     std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<SourceXmlPullParser>(in);
-    XmlFlattener flattener(resolver);
+    XmlFlattener flattener({}, resolver);
 
-    Maybe<size_t> result = flattener.flatten(options.manifest, xmlParser, &outBuffer,
-                                             XmlFlattener::Options{});
-    if (!result) {
+    if (!flattener.flatten(options.manifest, xmlParser, &outBuffer, {})) {
         return false;
     }
 
-    std::unique_ptr<uint8_t[]> data = std::unique_ptr<uint8_t[]>(new uint8_t[outBuffer.size()]);
-    uint8_t* p = data.get();
-    for (const auto& b : outBuffer) {
-        memcpy(p, b.buffer.get(), b.size);
-        p += b.size;
-    }
+    std::unique_ptr<uint8_t[]> data = util::copy(outBuffer);
 
     android::ResXMLTree tree;
-    if (tree.setTo(data.get(), outBuffer.size()) != android::NO_ERROR) {
+    if (tree.setTo(data.get(), outBuffer.size(), false) != android::NO_ERROR) {
         return false;
     }
 
@@ -537,14 +483,10 @@ bool compileAndroidManifest(const std::shared_ptr<Resolver>& resolver,
         return false;
     }
 
-    std::ofstream out(outSource.path, std::ofstream::binary);
-    if (!out) {
-        Logger::error(outSource) << strerror(errno) << std::endl;
-        return false;
-    }
-
-    if (!util::writeAll(out, outBuffer)) {
-        Logger::error(outSource) << strerror(errno) << std::endl;
+    if (outApk->add(data.get(), outBuffer.size(), "AndroidManifest.xml",
+                ZipEntry::kCompressStored, nullptr) != android::NO_ERROR) {
+        Logger::error(options.output) << "failed to write 'AndroidManifest.xml' to apk."
+                                      << std::endl;
         return false;
     }
     return true;
@@ -562,10 +504,20 @@ bool loadAppInfo(const Source& source, AppInfo* outInfo) {
     return parser.parse(source, pullParser, outInfo);
 }
 
+static void printCommandsAndDie() {
+    std::cerr << "The following commands are supported:" << std::endl << std::endl;
+    std::cerr << "compile       compiles a subset of resources" << std::endl;
+    std::cerr << "link          links together compiled resources and libraries" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "run aapt2 with one of the commands and the -h flag for extra details."
+              << std::endl;
+    exit(1);
+}
+
 static AaptOptions prepareArgs(int argc, char** argv) {
     if (argc < 2) {
-        std::cerr << "no command specified." << std::endl;
-        exit(1);
+        std::cerr << "no command specified." << std::endl << std::endl;
+        printCommandsAndDie();
     }
 
     const StringPiece command(argv[1]);
@@ -574,32 +526,27 @@ static AaptOptions prepareArgs(int argc, char** argv) {
 
     AaptOptions options;
 
-    StringPiece outputDescription = "place output in file";
-    if (command == "package") {
-        options.phase = AaptOptions::Phase::Full;
-        outputDescription = "place output in directory";
-    } else if (command == "collect") {
-        options.phase = AaptOptions::Phase::Collect;
-    } else if (command == "link") {
+    if (command == "link") {
         options.phase = AaptOptions::Phase::Link;
     } else if (command == "compile") {
         options.phase = AaptOptions::Phase::Compile;
-        outputDescription = "place output in directory";
-    } else if (command == "manifest") {
-        options.phase = AaptOptions::Phase::Manifest;
-        outputDescription = "place AndroidManifest.xml in directory";
     } else {
-        std::cerr << "invalid command '" << command << "'." << std::endl;
-        exit(1);
+        std::cerr << "invalid command '" << command << "'." << std::endl << std::endl;
+        printCommandsAndDie();
     }
 
-    if (options.phase == AaptOptions::Phase::Full) {
-        flag::requiredFlag("-S", "add a directory in which to find resources",
+    if (options.phase == AaptOptions::Phase::Compile) {
+        flag::requiredFlag("--package", "Android package name",
                 [&options](const StringPiece& arg) {
-                    options.sourceDirs.push_back(Source{ arg.toString() });
+                    options.appInfo.package = util::utf8ToUtf16(arg);
+                });
+        flag::optionalFlag("--binding", "Output directory for binding XML files",
+                [&options](const StringPiece& arg) {
+                    options.bindingOutput = Source{ arg.toString() };
                 });
 
-        flag::requiredFlag("-M", "path to AndroidManifest.xml",
+    } else if (options.phase == AaptOptions::Phase::Link) {
+        flag::requiredFlag("--manifest", "AndroidManifest.xml of your app",
                 [&options](const StringPiece& arg) {
                     options.manifest = Source{ arg.toString() };
                 });
@@ -613,35 +560,16 @@ static AaptOptions prepareArgs(int argc, char** argv) {
                 [&options](const StringPiece& arg) {
                     options.generateJavaClass = Source{ arg.toString() };
                 });
-
-    } else {
-        if (options.phase != AaptOptions::Phase::Manifest) {
-            flag::requiredFlag("--package", "Android package name",
-                    [&options](const StringPiece& arg) {
-                        options.appInfo.package = util::utf8ToUtf16(arg);
-                    });
-        }
-
-        if (options.phase != AaptOptions::Phase::Collect) {
-            flag::optionalFlag("-I", "add an Android APK to link against",
-                    [&options](const StringPiece& arg) {
-                        options.libraries.push_back(Source{ arg.toString() });
-                    });
-        }
-
-        if (options.phase == AaptOptions::Phase::Link) {
-            flag::optionalFlag("--java", "directory in which to generate R.java",
-                    [&options](const StringPiece& arg) {
-                        options.generateJavaClass = Source{ arg.toString() };
-                    });
-        }
     }
 
     // Common flags for all steps.
-    flag::requiredFlag("-o", outputDescription, [&options](const StringPiece& arg) {
+    flag::requiredFlag("-o", "Output path", [&options](const StringPiece& arg) {
         options.output = Source{ arg.toString() };
     });
+
+    bool help = false;
     flag::optionalSwitch("-v", "enables verbose logging", &options.verbose);
+    flag::optionalSwitch("-h", "displays this help menu", &help);
 
     // Build the command string for output (eg. "aapt2 compile").
     std::string fullCommand = "aapt2";
@@ -651,28 +579,18 @@ static AaptOptions prepareArgs(int argc, char** argv) {
     // Actually read the command line flags.
     flag::parse(argc, argv, fullCommand);
 
+    if (help) {
+        flag::usageAndDie(fullCommand);
+    }
+
     // Copy all the remaining arguments.
-    if (options.phase == AaptOptions::Phase::Collect) {
-        for (const std::string& arg : flag::getArgs()) {
-            options.collectFiles.push_back(Source{ arg });
-        }
-    } else if (options.phase == AaptOptions::Phase::Compile) {
-        for (const std::string& arg : flag::getArgs()) {
-            options.compileFiles.push_back(Source{ arg });
-        }
-    } else if (options.phase == AaptOptions::Phase::Link) {
-        for (const std::string& arg : flag::getArgs()) {
-            options.linkFiles.push_back(Source{ arg });
-        }
-    } else if (options.phase == AaptOptions::Phase::Manifest) {
-        if (!flag::getArgs().empty()) {
-            options.manifest = Source{ flag::getArgs()[0] };
-        }
+    for (const std::string& arg : flag::getArgs()) {
+        options.input.push_back(Source{ arg });
     }
     return options;
 }
 
-static bool collectValues(const std::shared_ptr<ResourceTable>& table, const Source& source,
+static bool compileValues(const std::shared_ptr<ResourceTable>& table, const Source& source,
                           const ConfigDescription& config) {
     std::ifstream in(source.path, std::ifstream::binary);
     if (!in) {
@@ -738,115 +656,91 @@ static Maybe<ResourcePathData> extractResourcePathData(const Source& source) {
     };
 }
 
-bool doAll(AaptOptions* options, const std::shared_ptr<ResourceTable>& table,
-           const std::shared_ptr<Resolver>& resolver) {
-    const bool versionStyles = (options->phase == AaptOptions::Phase::Full ||
-            options->phase == AaptOptions::Phase::Link);
-    const bool verifyNoMissingSymbols = (options->phase == AaptOptions::Phase::Full ||
-            options->phase == AaptOptions::Phase::Link);
-    const bool compileFiles = (options->phase == AaptOptions::Phase::Full ||
-            options->phase == AaptOptions::Phase::Compile);
-    const bool flattenTable = (options->phase == AaptOptions::Phase::Full ||
-            options->phase == AaptOptions::Phase::Collect ||
-            options->phase == AaptOptions::Phase::Link);
-    const bool useExtendedChunks = options->phase == AaptOptions::Phase::Collect;
-
-    // Build the output table path.
-    Source outputTable = options->output;
-    if (options->phase == AaptOptions::Phase::Full) {
-        appendPath(&outputTable.path, "resources.arsc");
-    }
-
-    bool error = false;
-    std::queue<CompileItem> compileQueue;
-
-    // If source directories were specified, walk them looking for resource files.
-    if (!options->sourceDirs.empty()) {
-        const char* customIgnore = getenv("ANDROID_AAPT_IGNORE");
-        FileFilter fileFilter;
-        if (customIgnore && customIgnore[0]) {
-            fileFilter.setPattern(customIgnore);
-        } else {
-            fileFilter.setPattern(
-                    "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~");
-        }
-
-        for (const Source& source : options->sourceDirs) {
-            if (!walkTree(source, fileFilter, &options->collectFiles)) {
-                return false;
-            }
-        }
-    }
-
-    // Load all binary resource tables.
-    for (const Source& source : options->linkFiles) {
-        error |= !loadBinaryResourceTable(table, source);
-    }
-
-    if (error) {
-        return false;
-    }
-
-    // Collect all the resource files.
-    // Need to parse the resource type/config/filename.
-    for (const Source& source : options->collectFiles) {
-        Maybe<ResourcePathData> maybePathData = extractResourcePathData(source);
-        if (!maybePathData) {
+bool writeResourceTable(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
+                        const TableFlattener::Options& flattenerOptions, ZipFile* outApk) {
+    if (table->begin() != table->end()) {
+        BigBuffer buffer(1024);
+        TableFlattener flattener(flattenerOptions);
+        if (!flattener.flatten(&buffer, *table)) {
+            Logger::error() << "failed to flatten resource table." << std::endl;
             return false;
         }
 
-        const ResourcePathData& pathData = maybePathData.value();
-        if (pathData.resourceDir == u"values") {
-            if (options->verbose) {
-                Logger::note(source) << "collecting values..." << std::endl;
-            }
-
-            error |= !collectValues(table, source, pathData.config);
-            continue;
+        if (options.verbose) {
+            Logger::note() << "Final resource table size=" << util::formatSize(buffer.size())
+                           << std::endl;
         }
 
-        const ResourceType* type = parseResourceType(pathData.resourceDir);
-        if (!type) {
-            Logger::error(source) << "invalid resource type '" << pathData.resourceDir << "'."
-                                  << std::endl;
+        if (outApk->add(buffer, "resources.arsc", ZipEntry::kCompressStored, nullptr) !=
+                android::NO_ERROR) {
+            Logger::note(options.output) << "failed to store resource table." << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+static constexpr int kOpenFlags = ZipFile::kOpenCreate | ZipFile::kOpenTruncate |
+        ZipFile::kOpenReadWrite;
+
+bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outTable,
+          const std::shared_ptr<Resolver>& resolver) {
+    std::map<std::shared_ptr<ResourceTable>, std::unique_ptr<ZipFile>> apkFiles;
+    std::unordered_set<std::u16string> linkedPackages;
+
+    // Populate the linkedPackages with our own.
+    linkedPackages.insert(options.appInfo.package);
+
+    // Load all APK files.
+    for (const Source& source : options.input) {
+        std::unique_ptr<ZipFile> zipFile = util::make_unique<ZipFile>();
+        if (zipFile->open(source.path.data(), ZipFile::kOpenReadOnly) != android::NO_ERROR) {
+            Logger::error(source) << "failed to open: " << strerror(errno) << std::endl;
             return false;
         }
 
-        ResourceName resourceName = { table->getPackage(), *type, pathData.name };
+        std::shared_ptr<ResourceTable> table = std::make_shared<ResourceTable>();
 
-        // Add the file name to the resource table.
-        std::unique_ptr<FileReference> fileReference = makeFileReference(
-                table->getValueStringPool(),
-                util::utf16ToUtf8(pathData.name) + "." + pathData.extension,
-                *type, pathData.config);
-        error |= !table->addResource(resourceName, pathData.config, source.line(0),
-                                     std::move(fileReference));
-
-        if (pathData.extension == "xml") {
-            error |= !collectXml(table, source, resourceName, pathData.config);
+        ZipEntry* entry = zipFile->getEntryByName("resources.arsc");
+        if (!entry) {
+            Logger::error(source) << "missing 'resources.arsc'." << std::endl;
+            return false;
         }
 
-        compileQueue.push(
-                CompileItem{ source, resourceName, pathData.config, pathData.extension });
+        void* uncompressedData = zipFile->uncompress(entry);
+        assert(uncompressedData);
+
+        BinaryResourceParser parser(table, resolver, source, uncompressedData,
+                                    entry->getUncompressedLen());
+        if (!parser.parse()) {
+            free(uncompressedData);
+            return false;
+        }
+        free(uncompressedData);
+
+        // Keep track of where this table came from.
+        apkFiles[table] = std::move(zipFile);
+
+        // Add the package to the set of linked packages.
+        linkedPackages.insert(table->getPackage());
     }
 
-    if (error) {
-        return false;
+    for (auto& p : apkFiles) {
+        const std::shared_ptr<ResourceTable>& inTable = p.first;
+
+        if (!outTable->merge(std::move(*inTable))) {
+            return false;
+        }
     }
 
-    // Version all styles referencing attributes outside of their specified SDK version.
-    if (versionStyles) {
-        versionStylesForCompat(table);
-    }
+    {
+        // Now that everything is merged, let's link it.
+        Linker linker(outTable, resolver);
+        if (!linker.linkAndValidate()) {
+            return false;
+        }
 
-    // Verify that all references are valid.
-    Linker linker(table, resolver);
-    if (!linker.linkAndValidate()) {
-        return false;
-    }
-
-    // Verify that all symbols exist.
-    if (verifyNoMissingSymbols) {
+        // Verify that all symbols exist.
         const auto& unresolvedRefs = linker.getUnresolvedReferences();
         if (!unresolvedRefs.empty()) {
             for (const auto& entry : unresolvedRefs) {
@@ -859,143 +753,190 @@ bool doAll(AaptOptions* options, const std::shared_ptr<ResourceTable>& table,
         }
     }
 
-    // Compile files.
-    if (compileFiles) {
-        // First process any input compile files.
-        for (const Source& source : options->compileFiles) {
-            Maybe<ResourcePathData> maybePathData = extractResourcePathData(source);
-            if (!maybePathData) {
-                return false;
-            }
-
-            const ResourcePathData& pathData = maybePathData.value();
-            const ResourceType* type = parseResourceType(pathData.resourceDir);
-            if (!type) {
-                Logger::error(source) << "invalid resource type '" << pathData.resourceDir
-                                      << "'." << std::endl;
-                return false;
-            }
-
-            ResourceName resourceName = { table->getPackage(), *type, pathData.name };
-            compileQueue.push(
-                    CompileItem{ source, resourceName, pathData.config, pathData.extension });
-        }
-
-        // Now process the actual compile queue.
-        for (; !compileQueue.empty(); compileQueue.pop()) {
-            const CompileItem& item = compileQueue.front();
-
-            // Create the output directory path from the resource type and config.
-            std::stringstream outputPath;
-            outputPath << item.name.type;
-            if (item.config != ConfigDescription{}) {
-                outputPath << "-" << item.config.toString();
-            }
-
-            Source outSource = options->output;
-            appendPath(&outSource.path, "res");
-            appendPath(&outSource.path, outputPath.str());
-
-            // Make the directory.
-            if (!mkdirs(outSource.path)) {
-                Logger::error(outSource) << strerror(errno) << std::endl;
-                return false;
-            }
-
-            // Add the file name to the directory path.
-            appendPath(&outSource.path, util::utf16ToUtf8(item.name.entry) + "." + item.extension);
-
-            if (item.extension == "xml") {
-                if (options->verbose) {
-                    Logger::note(outSource) << "compiling XML file." << std::endl;
-                }
-
-                error |= !compileXml(resolver, item, outSource, &compileQueue);
-            } else if (item.extension == "png" || item.extension == "9.png") {
-                if (options->verbose) {
-                    Logger::note(outSource) << "compiling png file." << std::endl;
-                }
-
-                error |= !compilePng(item.source, outSource);
-            } else {
-                error |= !copyFile(item.source, outSource);
-            }
-        }
-
-        if (error) {
-            return false;
-        }
+    // Open the output APK file for writing.
+    ZipFile outApk;
+    if (outApk.open(options.output.path.data(), kOpenFlags) != android::NO_ERROR) {
+        Logger::error(options.output) << "failed to open: " << strerror(errno) << std::endl;
+        return false;
     }
 
-    // Compile and validate the AndroidManifest.xml.
-    if (!options->manifest.path.empty()) {
-        if (!compileAndroidManifest(resolver, *options)) {
-            return false;
+    if (!compileManifest(options, resolver, &outApk)) {
+        return false;
+    }
+
+    for (auto& p : apkFiles) {
+        std::unique_ptr<ZipFile>& zipFile = p.second;
+
+        // TODO(adamlesinski): Get list of files to read when processing config filter.
+
+        const int numEntries = zipFile->getNumEntries();
+        for (int i = 0; i < numEntries; i++) {
+            ZipEntry* entry = zipFile->getEntryByIndex(i);
+            assert(entry);
+
+            StringPiece filename = entry->getFileName();
+            if (!util::stringStartsWith<char>(filename, "res/")) {
+                continue;
+            }
+
+            if (util::stringEndsWith<char>(filename, ".xml")) {
+                void* uncompressedData = zipFile->uncompress(entry);
+                assert(uncompressedData);
+
+                LinkItem item = { Source{ filename.toString() }, filename.toString() };
+
+                if (!linkXml(options, resolver, item, uncompressedData,
+                            entry->getUncompressedLen(), &outApk)) {
+                    Logger::error(options.output) << "failed to link '" << filename << "'."
+                                                  << std::endl;
+                    return false;
+                }
+            } else {
+                if (outApk.add(zipFile.get(), entry, 0, nullptr) != android::NO_ERROR) {
+                    Logger::error(options.output) << "failed to copy '" << filename << "'."
+                                                  << std::endl;
+                    return false;
+                }
+            }
         }
     }
 
     // Generate the Java class file.
-    if (options->generateJavaClass) {
-        Source outPath = options->generateJavaClass.value();
-        if (options->verbose) {
-            Logger::note() << "writing symbols to " << outPath << "." << std::endl;
-        }
+    if (options.generateJavaClass) {
+        JavaClassGenerator generator(outTable, {});
 
-        // Build the output directory from the package name.
-        // Eg. com.android.app -> com/android/app
-        const std::string packageUtf8 = util::utf16ToUtf8(table->getPackage());
-        for (StringPiece part : util::tokenize<char>(packageUtf8, '.')) {
-            appendPath(&outPath.path, part);
-        }
+        for (const std::u16string& package : linkedPackages) {
+            Source outPath = options.generateJavaClass.value();
 
-        if (!mkdirs(outPath.path)) {
-            Logger::error(outPath) << strerror(errno) << std::endl;
-            return false;
-        }
+            // Build the output directory from the package name.
+            // Eg. com.android.app -> com/android/app
+            const std::string packageUtf8 = util::utf16ToUtf8(package);
+            for (StringPiece part : util::tokenize<char>(packageUtf8, '.')) {
+                appendPath(&outPath.path, part);
+            }
 
-        appendPath(&outPath.path, "R.java");
+            if (!mkdirs(outPath.path)) {
+                Logger::error(outPath) << strerror(errno) << std::endl;
+                return false;
+            }
 
-        std::ofstream fout(outPath.path);
-        if (!fout) {
-            Logger::error(outPath) << strerror(errno) << std::endl;
-            return false;
-        }
+            appendPath(&outPath.path, "R.java");
 
-        JavaClassGenerator generator(table, {});
-        if (!generator.generate(fout)) {
-            Logger::error(outPath) << generator.getError() << "." << std::endl;
-            return false;
+            if (options.verbose) {
+                Logger::note(outPath) << "writing Java symbols." << std::endl;
+            }
+
+            std::ofstream fout(outPath.path);
+            if (!fout) {
+                Logger::error(outPath) << strerror(errno) << std::endl;
+                return false;
+            }
+
+            if (!generator.generate(package, fout)) {
+                Logger::error(outPath) << generator.getError() << "." << std::endl;
+                return false;
+            }
         }
     }
 
     // Flatten the resource table.
-    if (flattenTable && table->begin() != table->end()) {
-        BigBuffer buffer(1024);
-        TableFlattener::Options tableOptions;
-        tableOptions.useExtendedChunks = useExtendedChunks;
-        TableFlattener flattener(tableOptions);
-        if (!flattener.flatten(&buffer, *table)) {
-            Logger::error() << "failed to flatten resource table." << std::endl;
-            return false;
-        }
-
-        if (options->verbose) {
-            Logger::note() << "Final resource table size=" << util::formatSize(buffer.size())
-                           << std::endl;
-        }
-
-        std::ofstream fout(outputTable.path, std::ofstream::binary);
-        if (!fout) {
-            Logger::error(outputTable) << strerror(errno) << "." << std::endl;
-            return false;
-        }
-
-        if (!util::writeAll(fout, buffer)) {
-            Logger::error(outputTable) << strerror(errno) << "." << std::endl;
-            return false;
-        }
-        fout.flush();
+    TableFlattener::Options flattenerOptions;
+    flattenerOptions.useExtendedChunks = false;
+    if (!writeResourceTable(options, outTable, flattenerOptions, &outApk)) {
+        return false;
     }
+
+    outApk.flush();
+    return true;
+}
+
+bool compile(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
+             const std::shared_ptr<Resolver>& resolver) {
+    std::queue<CompileItem> compileQueue;
+    bool error = false;
+
+    // Compile all the resource files passed in on the command line.
+    for (const Source& source : options.input) {
+        // Need to parse the resource type/config/filename.
+        Maybe<ResourcePathData> maybePathData = extractResourcePathData(source);
+        if (!maybePathData) {
+            return false;
+        }
+
+        const ResourcePathData& pathData = maybePathData.value();
+        if (pathData.resourceDir == u"values") {
+            // The file is in the values directory, which means its contents will
+            // go into the resource table.
+            if (options.verbose) {
+                Logger::note(source) << "compiling values." << std::endl;
+            }
+
+            error |= !compileValues(table, source, pathData.config);
+        } else {
+            // The file is in a directory like 'layout' or 'drawable'. Find out
+            // the type.
+            const ResourceType* type = parseResourceType(pathData.resourceDir);
+            if (!type) {
+                Logger::error(source) << "invalid resource type '" << pathData.resourceDir << "'."
+                                      << std::endl;
+                return false;
+            }
+
+            compileQueue.push(CompileItem{
+                    source,
+                    ResourceName{ table->getPackage(), *type, pathData.name },
+                    pathData.config,
+                    pathData.extension
+            });
+        }
+    }
+
+    if (error) {
+        return false;
+    }
+
+    // Version all styles referencing attributes outside of their specified SDK version.
+    versionStylesForCompat(table);
+
+    // Open the output APK file for writing.
+    ZipFile outApk;
+    if (outApk.open(options.output.path.data(), kOpenFlags) != android::NO_ERROR) {
+        Logger::error(options.output) << "failed to open: " << strerror(errno) << std::endl;
+        return false;
+    }
+
+    // Compile each file.
+    for (; !compileQueue.empty(); compileQueue.pop()) {
+        const CompileItem& item = compileQueue.front();
+
+        // Add the file name to the resource table.
+        error |= !addFileReference(table, item);
+
+        if (item.extension == "xml") {
+            error |= !compileXml(options, table, item, &compileQueue, &outApk);
+        } else if (item.extension == "png" || item.extension == "9.png") {
+            error |= !compilePng(options, item, &outApk);
+        } else {
+            error |= !copyFile(options, item, &outApk);
+        }
+    }
+
+    if (error) {
+        return false;
+    }
+
+    // Link and assign resource IDs.
+    Linker linker(table, resolver);
+    if (!linker.linkAndValidate()) {
+        return false;
+    }
+
+    // Flatten the resource table.
+    if (!writeResourceTable(options, table, {}, &outApk)) {
+        return false;
+    }
+
+    outApk.flush();
     return true;
 }
 
@@ -1057,10 +998,16 @@ int main(int argc, char** argv) {
     // Make the resolver that will cache IDs for us.
     std::shared_ptr<Resolver> resolver = std::make_shared<Resolver>(table, libraries);
 
-    // Do the work.
-    if (!doAll(&options, table, resolver)) {
-        Logger::error() << "aapt exiting with failures." << std::endl;
-        return 1;
+    if (options.phase == AaptOptions::Phase::Compile) {
+        if (!compile(options, table, resolver)) {
+            Logger::error() << "aapt exiting with failures." << std::endl;
+            return 1;
+        }
+    } else if (options.phase == AaptOptions::Phase::Link) {
+        if (!link(options, table, resolver)) {
+            Logger::error() << "aapt exiting with failures." << std::endl;
+            return 1;
+        }
     }
     return 0;
 }

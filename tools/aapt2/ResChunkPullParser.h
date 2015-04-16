@@ -74,6 +74,22 @@ private:
     std::string mLastError;
 };
 
+template <typename T>
+inline static const T* convertTo(const android::ResChunk_header* chunk) {
+    if (chunk->headerSize < sizeof(T)) {
+        return nullptr;
+    }
+    return reinterpret_cast<const T*>(chunk);
+}
+
+inline static const uint8_t* getChunkData(const android::ResChunk_header& chunk) {
+    return reinterpret_cast<const uint8_t*>(&chunk) + chunk.headerSize;
+}
+
+inline static size_t getChunkDataLen(const android::ResChunk_header& chunk) {
+    return chunk.size - chunk.headerSize;
+}
+
 //
 // Implementation
 //

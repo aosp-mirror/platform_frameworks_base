@@ -15,6 +15,8 @@
  */
 
 #include "JavaClassGenerator.h"
+#include "Linker.h"
+#include "Resolver.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "Util.h"
@@ -47,7 +49,7 @@ TEST_F(JavaClassGeneratorTest, FailWhenEntryIsJavaKeyword) {
     JavaClassGenerator generator(mTable, {});
 
     std::stringstream out;
-    EXPECT_FALSE(generator.generate(out));
+    EXPECT_FALSE(generator.generate(mTable->getPackage(), out));
 }
 
 TEST_F(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
@@ -69,7 +71,7 @@ TEST_F(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
     JavaClassGenerator generator(mTable, {});
 
     std::stringstream out;
-    EXPECT_TRUE(generator.generate(out));
+    EXPECT_TRUE(generator.generate(mTable->getPackage(), out));
     std::string output = out.str();
 
     EXPECT_NE(std::string::npos,
@@ -80,6 +82,35 @@ TEST_F(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
 
     EXPECT_NE(std::string::npos,
               output.find("public static final int hey_dude_cool_attr = 0;"));
+}
+
+TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
+    ASSERT_TRUE(addResource(ResourceName{ {}, ResourceType::kId, u"foo" },
+                            ResourceId{ 0x01, 0x02, 0x0000 }));
+    ResourceTable table;
+    table.setPackage(u"com.lib");
+    ASSERT_TRUE(table.addResource(ResourceName{ {}, ResourceType::kId, u"test" }, {},
+                                  SourceLine{ "lib.xml", 33 }, util::make_unique<Id>()));
+    ASSERT_TRUE(mTable->merge(std::move(table)));
+
+    std::shared_ptr<Resolver> resolver = std::make_shared<Resolver>(mTable,
+            std::make_shared<const android::AssetManager>());
+    Linker linker(mTable, resolver);
+    ASSERT_TRUE(linker.linkAndValidate());
+
+    JavaClassGenerator generator(mTable, {});
+
+    std::stringstream out;
+    EXPECT_TRUE(generator.generate(mTable->getPackage(), out));
+    std::string output = out.str();
+    EXPECT_NE(std::string::npos, output.find("int foo ="));
+    EXPECT_EQ(std::string::npos, output.find("int test ="));
+
+    out.str("");
+    EXPECT_TRUE(generator.generate(u"com.lib", out));
+    output = out.str();
+    EXPECT_NE(std::string::npos, output.find("int test ="));
+    EXPECT_EQ(std::string::npos, output.find("int foo ="));
 }
 
 } // namespace aapt

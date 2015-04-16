@@ -15,6 +15,7 @@
  */
 
 #include "Maybe.h"
+#include "NameMangler.h"
 #include "Resolver.h"
 #include "Resource.h"
 #include "ResourceTable.h"
@@ -31,6 +32,12 @@ namespace aapt {
 Resolver::Resolver(std::shared_ptr<const ResourceTable> table,
                    std::shared_ptr<const android::AssetManager> sources) :
         mTable(table), mSources(sources) {
+    const android::ResTable& resTable = mSources->getResources(false);
+    const size_t packageCount = resTable.getBasePackageCount();
+    for (size_t i = 0; i < packageCount; i++) {
+        std::u16string packageName = resTable.getBasePackageName(i).string();
+        mIncludedPackages.insert(std::move(packageName));
+    }
 }
 
 Maybe<ResourceId> Resolver::findId(const ResourceName& name) {
@@ -47,9 +54,31 @@ Maybe<Resolver::Entry> Resolver::findAttribute(const ResourceName& name) {
         return Entry{ cacheIter->second.id, cacheIter->second.attr.get() };
     }
 
+    ResourceName mangledName;
+    const ResourceName* nameToSearch = &name;
+    if (name.package != mTable->getPackage()) {
+        // This may be a reference to an included resource or
+        // to a mangled resource.
+        if (mIncludedPackages.find(name.package) == mIncludedPackages.end()) {
+            // This is not in our included set, so mangle the name and
+            // check for that.
+            mangledName.entry = name.entry;
+            NameMangler::mangle(name.package, &mangledName.entry);
+            mangledName.package = mTable->getPackage();
+            mangledName.type = name.type;
+            nameToSearch = &mangledName;
+        } else {
+            const CacheEntry* cacheEntry = buildCacheEntry(name);
+            if (cacheEntry) {
+                return Entry{ cacheEntry->id, cacheEntry->attr.get() };
+            }
+            return {};
+        }
+    }
+
     const ResourceTableType* type;
     const ResourceEntry* entry;
-    std::tie(type, entry) = mTable->findResource(name);
+    std::tie(type, entry) = mTable->findResource(*nameToSearch);
     if (type && entry) {
         Entry result = {};
         if (mTable->getPackageId() != ResourceTable::kUnsetPackageId &&
@@ -64,11 +93,6 @@ Maybe<Resolver::Entry> Resolver::findAttribute(const ResourceName& name) {
             });
         }
         return result;
-    }
-
-    const CacheEntry* cacheEntry = buildCacheEntry(name);
-    if (cacheEntry) {
-        return Entry{ cacheEntry->id, cacheEntry->attr.get() };
     }
     return {};
 }
