@@ -30229,25 +30229,6 @@ package android.telecom {
     method public abstract void onVideoQualityChanged(int);
   }
 
-  public final class Phone {
-    method public final void addListener(android.telecom.Phone.Listener);
-    method public final boolean canAddCall();
-    method public final android.telecom.AudioState getAudioState();
-    method public final java.util.List<android.telecom.Call> getCalls();
-    method public final void removeListener(android.telecom.Phone.Listener);
-    method public final void setAudioRoute(int);
-    method public final void setMuted(boolean);
-  }
-
-  public static abstract class Phone.Listener {
-    ctor public Phone.Listener();
-    method public void onAudioStateChanged(android.telecom.Phone, android.telecom.AudioState);
-    method public void onBringToForeground(android.telecom.Phone, boolean);
-    method public void onCallAdded(android.telecom.Phone, android.telecom.Call);
-    method public void onCallRemoved(android.telecom.Phone, android.telecom.Call);
-    method public void onCanAddCallChanged(android.telecom.Phone, boolean);
-  }
-
   public class PhoneAccount implements android.os.Parcelable {
     method public static android.telecom.PhoneAccount.Builder builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
     method public android.graphics.drawable.Drawable createIconDrawable(android.content.Context);
