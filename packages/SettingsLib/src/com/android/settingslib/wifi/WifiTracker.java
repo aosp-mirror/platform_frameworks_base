@@ -61,6 +61,7 @@ public class WifiTracker {
     private final WifiListener mListener;
     private final boolean mIncludeSaved;
     private final boolean mIncludeScans;
+    private final boolean mIncludePasspoints;
 
     private boolean mSavedNetworksExist;
     private boolean mRegistered;
@@ -74,14 +75,18 @@ public class WifiTracker {
     Scanner mScanner;
 
     public WifiTracker(Context context, WifiListener wifiListener, boolean includeSaved,
-            boolean includeScans) {
-        this(context, wifiListener, includeSaved, includeScans,
+                       boolean includeScans) {
+        this(context, wifiListener, includeSaved, includeScans, false);
+    }
+    public WifiTracker(Context context, WifiListener wifiListener, boolean includeSaved,
+            boolean includeScans, boolean includePasspoints) {
+        this(context, wifiListener, includeSaved, includeScans, includePasspoints,
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE));
     }
 
     @VisibleForTesting
     WifiTracker(Context context, WifiListener wifiListener, boolean includeSaved,
-            boolean includeScans, WifiManager wifiManager) {
+            boolean includeScans, boolean includePasspoints, WifiManager wifiManager) {
         if (!includeSaved && !includeScans) {
             throw new IllegalArgumentException("Must include either saved or scans");
         }
@@ -89,6 +94,7 @@ public class WifiTracker {
         mWifiManager = wifiManager;
         mIncludeSaved = includeSaved;
         mIncludeScans = includeScans;
+        mIncludePasspoints = includePasspoints;
         mListener = wifiListener;
 
         // check if verbose logging has been turned on or off
@@ -232,16 +238,19 @@ public class WifiTracker {
                 if (config.selfAdded && config.numAssociation == 0) {
                     continue;
                 }
-                if (config.isPasspoint()) {
-                    continue;
-                }
                 AccessPoint accessPoint = getCachedOrCreate(config);
                 if (mLastInfo != null && mLastNetworkInfo != null) {
-                    accessPoint.update(mLastInfo, mLastNetworkInfo);
+                    if (config.isPasspoint() == false) {
+                        accessPoint.update(mLastInfo, mLastNetworkInfo);
+                    }
                 }
                 if (mIncludeSaved) {
-                    mAccessPoints.add(accessPoint);
-                    apMap.put(accessPoint.getSsid(), accessPoint);
+                    if (!config.isPasspoint() || mIncludePasspoints)
+                        mAccessPoints.add(accessPoint);
+
+                    if (config.isPasspoint() == false) {
+                        apMap.put(accessPoint.getSsid(), accessPoint);
+                    }
                 } else {
                     // If we aren't using saved networks, drop them into the cache so that
                     // we have access to their saved info.
@@ -270,6 +279,13 @@ public class WifiTracker {
                     AccessPoint accessPoint = getCachedOrCreate(result);
                     if (mLastInfo != null && mLastNetworkInfo != null) {
                         accessPoint.update(mLastInfo, mLastNetworkInfo);
+                    }
+
+                    if (result.passpointNetwork) {
+                        WifiConfiguration config = mWifiManager.getMatchingWifiConfig(result);
+                        if (config != null) {
+                            accessPoint.update(config);
+                        }
                     }
 
                     if (mLastInfo != null && mLastInfo.getBSSID() != null
@@ -370,8 +386,9 @@ public class WifiTracker {
     }
 
     public static List<AccessPoint> getCurrentAccessPoints(Context context, boolean includeSaved,
-            boolean includeScans) {
-        WifiTracker tracker = new WifiTracker(context, null, includeSaved, includeScans);
+            boolean includeScans, boolean includePasspoints) {
+        WifiTracker tracker = new WifiTracker(context,
+                null, includeSaved, includeScans, includePasspoints);
         tracker.forceUpdate();
         return tracker.getAccessPoints();
     }

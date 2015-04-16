@@ -69,6 +69,8 @@
     <string name="connected_via_wfa">Connected via Wi\u2011Fi assistant</string>
     <!-- Status message of Wi-Fi when it is connected by Passpoint configuration. [CHAR LIMIT=NONE] -->
     <string name="connected_via_passpoint">Connected via %1$s</string>
+    <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
+    <string name="available_via_passpoint">Available via %1$s</string>
 
     <!-- Bluetooth settings.  Message when a device is disconnected -->
     <string name="bluetooth_disconnected">Disconnected</string>

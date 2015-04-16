@@ -200,7 +200,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public boolean matches(WifiConfiguration config) {
-        return ssid.equals(removeDoubleQuotes(config.SSID)) && security == getSecurity(config);
+        if (config.isPasspoint() && mConfig != null && mConfig.isPasspoint())
+            return config.FQDN.equals(mConfig.providerFriendlyName);
+        else
+            return ssid.equals(removeDoubleQuotes(config.SSID)) && security == getSecurity(config);
     }
 
     public WifiConfiguration getConfig() {
@@ -266,21 +269,47 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return ssid;
     }
 
+    public String getConfigName() {
+        if (mConfig != null && mConfig.isPasspoint()) {
+            return mConfig.providerFriendlyName;
+        } else {
+            return ssid;
+        }
+    }
+
     public DetailedState getDetailedState() {
         return mNetworkInfo != null ? mNetworkInfo.getDetailedState() : null;
     }
 
+    public String getSavedNetworkSummary() {
+        // Update to new summary
+        if (mConfig != null && mConfig.isPasspoint()) {
+            return "";
+        } else {
+            return getSettingsSummary();
+        }
+    }
+
     public String getSummary() {
+        return getSettingsSummary();
+    }
+
+    public String getSettingsSummary() {
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
-        if (isActive()) { // This is the active connection
-            String passpointProvider = (mConfig != null && mConfig.isPasspoint()) ?
-                    mConfig.providerFriendlyName : null;
+        if (isActive() && mConfig != null && mConfig.isPasspoint()) {
+            // This is the active connection on passpoint
             summary.append(getSummary(mContext, getDetailedState(),
-                    networkId == WifiConfiguration.INVALID_NETWORK_ID, passpointProvider));
-        } else if (mConfig != null
-                && mConfig.hasNoInternetAccess()) {
+                    false, mConfig.providerFriendlyName));
+        } else if (isActive()) {
+            // This is the active connection on non-passpoint network
+            summary.append(getSummary(mContext, getDetailedState(),
+                    networkId == WifiConfiguration.INVALID_NETWORK_ID));
+        } else if (mConfig != null && mConfig.isPasspoint()) {
+            String format = mContext.getString(R.string.available_via_passpoint);
+            summary.append(String.format(format, mConfig.providerFriendlyName));
+        } else if (mConfig != null && mConfig.hasNoInternetAccess()) {
             summary.append(mContext.getString(R.string.wifi_no_internet));
         } else if (mConfig != null && ((mConfig.status == WifiConfiguration.Status.DISABLED &&
                 mConfig.disableReason != WifiConfiguration.DISABLED_UNKNOWN_REASON)
@@ -652,16 +681,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     void update(WifiConfiguration config) {
         mConfig = config;
+        networkId = config.networkId;
+        if (mAccessPointListener != null) {
+            mAccessPointListener.onAccessPointChanged(this);
+        }
     }
     
     public static String getSummary(Context context, String ssid, DetailedState state,
             boolean isEphemeral, String passpointProvider) {
-        if (state == DetailedState.CONNECTED && isEphemeral && ssid == null) {
+        if (state == DetailedState.CONNECTED && ssid == null) {
             if (TextUtils.isEmpty(passpointProvider) == false) {
-                // Special case for connected + ephemeral networks.
+                // Special case for connected + passpoint networks.
                 String format = context.getString(R.string.connected_via_passpoint);
                 return String.format(format, passpointProvider);
-            } else if (isEphemeral && ssid == null) {
+            } else if (isEphemeral) {
                 // Special case for connected + ephemeral networks.
                 return context.getString(R.string.connected_via_wfa);
             }
