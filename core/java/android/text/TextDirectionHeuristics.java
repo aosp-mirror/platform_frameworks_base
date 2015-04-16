@@ -81,29 +81,47 @@ public class TextDirectionHeuristics {
     private static final int STATE_FALSE = 1;
     private static final int STATE_UNKNOWN = 2;
 
-    private static int isRtlText(int directionality) {
-        switch (directionality) {
+    /* Returns STATE_TRUE for strong RTL characters, STATE_FALSE for strong LTR characters, and
+     * STATE_UNKNOWN for everything else.
+     */
+    private static int isRtlCodePoint(int codePoint) {
+        switch (Character.getDirectionality(codePoint)) {
             case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
                 return STATE_FALSE;
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
                 return STATE_TRUE;
-            default:
-                return STATE_UNKNOWN;
-        }
-    }
+            case Character.DIRECTIONALITY_UNDEFINED:
+                // Unassigned characters still have bidi direction, defined at:
+                // http://www.unicode.org/Public/UCD/latest/ucd/extracted/DerivedBidiClass.txt
 
-    private static int isRtlTextOrFormat(int directionality) {
-        switch (directionality) {
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT_EMBEDDING:
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE:
-                return STATE_FALSE;
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE:
-                return STATE_TRUE;
+                if ((0x0590 <= codePoint && codePoint <= 0x08FF) ||
+                        (0xFB1D <= codePoint && codePoint <= 0xFDCF) ||
+                        (0xFDF0 <= codePoint && codePoint <= 0xFDFF) ||
+                        (0xFE70 <= codePoint && codePoint <= 0xFEFF) ||
+                        (0x10800 <= codePoint && codePoint <= 0x10FFF) ||
+                        (0x1E800 <= codePoint && codePoint <= 0x1EFFF)) {
+                    // Unassigned RTL character
+                    return STATE_TRUE;
+                } else if (
+                        // Potentially-unassigned Default_Ignorable. Ranges are from unassigned
+                        // characters that have Unicode property Other_Default_Ignorable_Code_Point
+                        // plus some enlargening to cover bidi isolates and simplify checks.
+                        (0x2065 <= codePoint && codePoint <= 0x2069) ||
+                        (0xFFF0 <= codePoint && codePoint <= 0xFFF8) ||
+                        (0xE0000 <= codePoint && codePoint <= 0xE0FFF) ||
+                        // Non-character
+                        (0xFDD0 <= codePoint && codePoint <= 0xFDEF) ||
+                        ((codePoint & 0xFFFE) == 0xFFFE) ||
+                        // Currency symbol
+                        (0x20A0 <= codePoint && codePoint <= 0x20CF) ||
+                        // Unpaired surrogate
+                        (0xD800 <= codePoint && codePoint <= 0xDFFF)) {
+                    return STATE_UNKNOWN;
+                } else {
+                    // Unassigned LTR character
+                    return STATE_FALSE;
+                }
             default:
                 return STATE_UNKNOWN;
         }
@@ -181,14 +199,26 @@ public class TextDirectionHeuristics {
 
     /**
      * Algorithm that uses the first strong directional character to determine the paragraph
-     * direction. This is the standard Unicode Bidirectional algorithm.
+     * direction. This is the standard Unicode Bidirectional Algorithm (steps P2 and P3), with the
+     * exception that if no strong character is found, UNKNOWN is returned.
      */
     private static class FirstStrong implements TextDirectionAlgorithm {
         @Override
         public int checkRtl(CharSequence cs, int start, int count) {
             int result = STATE_UNKNOWN;
-            for (int i = start, e = start + count; i < e && result == STATE_UNKNOWN; ++i) {
-                result = isRtlTextOrFormat(Character.getDirectionality(cs.charAt(i)));
+            int openIsolateCount = 0;
+            for (int cp, i = start, end = start + count;
+                    i < end && result == STATE_UNKNOWN;
+                    i += Character.charCount(cp)) {
+                cp = Character.codePointAt(cs, i);
+                if (0x2066 <= cp && cp <= 0x2068) { // Opening isolates
+                    openIsolateCount += 1;
+                } else if (cp == 0x2069) { // POP DIRECTIONAL ISOLATE (PDI)
+                    if (openIsolateCount > 0) openIsolateCount -= 1;
+                } else if (openIsolateCount == 0) {
+                    // Only consider the characters outside isolate pairs
+                    result = isRtlCodePoint(cp);
+                }
             }
             return result;
         }
@@ -200,9 +230,10 @@ public class TextDirectionHeuristics {
     }
 
     /**
-     * Algorithm that uses the presence of any strong directional non-format
-     * character (e.g. excludes LRE, LRO, RLE, RLO) to determine the
-     * direction of text.
+     * Algorithm that uses the presence of any strong directional character of the type indicated
+     * in the constructor parameter to determine the direction of text.
+     *
+     * Characters inside isolate pairs are skipped.
      */
     private static class AnyStrong implements TextDirectionAlgorithm {
         private final boolean mLookForRtl;
@@ -210,22 +241,31 @@ public class TextDirectionHeuristics {
         @Override
         public int checkRtl(CharSequence cs, int start, int count) {
             boolean haveUnlookedFor = false;
-            for (int i = start, e = start + count; i < e; ++i) {
-                switch (isRtlText(Character.getDirectionality(cs.charAt(i)))) {
-                    case STATE_TRUE:
-                        if (mLookForRtl) {
-                            return STATE_TRUE;
-                        }
-                        haveUnlookedFor = true;
-                        break;
-                    case STATE_FALSE:
-                        if (!mLookForRtl) {
-                            return STATE_FALSE;
-                        }
-                        haveUnlookedFor = true;
-                        break;
-                    default:
-                        break;
+            int openIsolateCount = 0;
+            for (int cp, i = start, end = start + count; i < end; i += Character.charCount(cp)) {
+                cp = Character.codePointAt(cs, i);
+                if (0x2066 <= cp && cp <= 0x2068) { // Opening isolates
+                    openIsolateCount += 1;
+                } else if (cp == 0x2069) { // POP DIRECTIONAL ISOLATE (PDI)
+                    if (openIsolateCount > 0) openIsolateCount -= 1;
+                } else if (openIsolateCount == 0) {
+                    // Only consider the characters outside isolate pairs
+                    switch (isRtlCodePoint(cp)) {
+                        case STATE_TRUE:
+                            if (mLookForRtl) {
+                                return STATE_TRUE;
+                            }
+                            haveUnlookedFor = true;
+                            break;
+                        case STATE_FALSE:
+                            if (!mLookForRtl) {
+                                return STATE_FALSE;
+                            }
+                            haveUnlookedFor = true;
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
             if (haveUnlookedFor) {
