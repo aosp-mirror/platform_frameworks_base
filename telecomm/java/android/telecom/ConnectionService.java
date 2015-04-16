@@ -427,6 +427,12 @@ public abstract class ConnectionService extends Service {
                     videoProvider);
             mAdapter.setVideoProvider(id, videoProvider);
         }
+
+        @Override
+        public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {
+            String id = mIdByConference.get(conference);
+            mAdapter.setStatusHints(id, statusHints);
+        }
     };
 
     private final Connection.Listener mConnectionListener = new Connection.Listener() {
@@ -912,7 +918,8 @@ public abstract class ConnectionService extends Service {
                             null : conference.getVideoProvider().getInterface(),
                     conference.getVideoState(),
                     conference.getConnectTimeMillis()
-                    );
+                    conference.getStatusHints());
+
             mAdapter.addConferenceCall(id, parcelableConference);
             mAdapter.setVideoProvider(id, conference.getVideoProvider());
             mAdapter.setVideoState(id, conference.getVideoState());
