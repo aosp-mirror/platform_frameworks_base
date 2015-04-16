@@ -43,9 +43,9 @@ import java.util.List;
  * // MediaCodec videoDecoder = ...;
  * videoDecoder.configure(format, inputSurface, ...);
  * ...
- * sync.configureAudioTrack(audioTrack, nativeSampleRateInHz);
+ * sync.configureAudioTrack(audioTrack);
  * sync.setCallback(new MediaSync.Callback() {
- *     \@Override
+ *     {@literal @Override}
  *     public void onReturnAudioBuffer(MediaSync sync, ByteBuffer audioBuffer, int bufferIndex) {
  *         ...
  *     }
@@ -151,8 +151,6 @@ final public class MediaSync {
     private Handler mCallbackHandler = null;
     private MediaSync.Callback mCallback = null;
 
-    private int mNativeSampleRateInHz = 0;
-
     private Thread mAudioThread = null;
     // Created on mAudioThread when mAudioThread is started. When used on user thread, they should
     // be guarded by checking mAudioThread.
@@ -247,20 +245,17 @@ final public class MediaSync {
      * Configures the audio track for MediaSync.
      *
      * @param audioTrack Specify an AudioTrack through which to render the audio data.
-     * @throws IllegalArgumentException if the audioTrack has been released, or is invalid,
-     *     or nativeSampleRateInHz is invalid.
+     * @throws IllegalArgumentException if the audioTrack has been released, or is invalid.
      * @throws IllegalStateException if not in the Initialized state, or another audio track
      *     has already been configured.
      */
-    public void configureAudioTrack(AudioTrack audioTrack, int nativeSampleRateInHz) {
-        if (audioTrack != null && nativeSampleRateInHz <= 0) {
-            final String msg = "Native sample rate " + nativeSampleRateInHz + " is invalid";
-            throw new IllegalArgumentException(msg);
-        }
+    public void configureAudioTrack(AudioTrack audioTrack) {
+        // AudioTrack has sanity check for configured sample rate.
+        int nativeSampleRateInHz = (audioTrack == null ? 0 : audioTrack.getSampleRate());
+
         native_configureAudioTrack(audioTrack, nativeSampleRateInHz);
         mAudioTrack = audioTrack;
-        mNativeSampleRateInHz = nativeSampleRateInHz;
-        if (mAudioThread == null) {
+        if (audioTrack != null && mAudioThread == null) {
             createAudioThread();
         }
     }
@@ -349,8 +344,9 @@ final public class MediaSync {
 
         int status = AudioTrack.SUCCESS;
         if (mAudioTrack != null) {
-            int playbackSampleRate = (int)(rate * mNativeSampleRateInHz + 0.5);
-            rate = playbackSampleRate / (float)mNativeSampleRateInHz;
+            int nativeSampleRateInHz = mAudioTrack.getSampleRate();
+            int playbackSampleRate = (int)(rate * nativeSampleRateInHz + 0.5);
+            rate = playbackSampleRate / (float)nativeSampleRateInHz;
 
             try {
                 if (rate == 0.0) {
