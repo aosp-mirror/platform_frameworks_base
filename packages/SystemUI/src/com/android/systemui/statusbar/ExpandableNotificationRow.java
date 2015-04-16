@@ -62,7 +62,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mShowingPublic;
     private boolean mSensitive;
     private boolean mShowingPublicInitialized;
-    private boolean mShowingPublicForIntrinsicHeight;
+    private boolean mHideSensitiveForIntrinsicHeight;
 
     /**
      * Is this notification expanded by the system. The expansion state can be overridden by the
@@ -570,13 +570,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
         boolean inExpansionState = isExpanded();
         int maxContentHeight;
-        if (mIsHeadsUp) {
+        if (mSensitive && mHideSensitiveForIntrinsicHeight) {
+            return mRowMinHeight;
+        } else if (mIsHeadsUp) {
             if (inExpansionState) {
                 maxContentHeight = Math.max(mMaxExpandHeight, mHeadsUpHeight);
             } else {
                 maxContentHeight = Math.max(mRowMinHeight, mHeadsUpHeight);
             }
-        } else if ((!inExpansionState && !mChildrenExpanded) || mShowingPublicForIntrinsicHeight) {
+        } else if ((!inExpansionState && !mChildrenExpanded)) {
             maxContentHeight = mRowMinHeight;
         } else if (mChildrenExpanded) {
             maxContentHeight = mChildrenContainer.getIntrinsicHeight();
@@ -661,7 +663,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void setHideSensitiveForIntrinsicHeight(boolean hideSensitive) {
-        mShowingPublicForIntrinsicHeight = mSensitive && hideSensitive;
+        mHideSensitiveForIntrinsicHeight = hideSensitive;
     }
 
     public void setHideSensitive(boolean hideSensitive, boolean animated, long delay,
