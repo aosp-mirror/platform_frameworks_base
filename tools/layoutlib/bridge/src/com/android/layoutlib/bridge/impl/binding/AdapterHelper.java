@@ -17,7 +17,7 @@
 package com.android.layoutlib.bridge.impl.binding;
 
 import com.android.ide.common.rendering.api.DataBindingItem;
-import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.IProjectCallback.ViewAttribute;
@@ -40,7 +40,7 @@ import android.widget.TextView;
 public class AdapterHelper {
 
     static Pair<View, Boolean> getView(AdapterItem item, AdapterItem parentItem, ViewGroup parent,
-            IProjectCallback callback, ResourceReference adapterRef, boolean skipCallbackParser) {
+            LayoutlibCallback callback, ResourceReference adapterRef, boolean skipCallbackParser) {
         // we don't care about recycling here because we never scroll.
         DataBindingItem dataBindingItem = item.getDataBindingItem();
 
@@ -65,7 +65,7 @@ public class AdapterHelper {
     }
 
     private static void fillView(BridgeContext context, View view, AdapterItem item,
-            AdapterItem parentItem, IProjectCallback callback, ResourceReference adapterRef) {
+            AdapterItem parentItem, LayoutlibCallback callback, ResourceReference adapterRef) {
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();

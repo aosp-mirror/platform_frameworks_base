@@ -18,7 +18,7 @@ package com.android.layoutlib.bridge.impl.binding;
 
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.DataBindingItem;
-import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.util.Pair;
 
@@ -37,18 +37,17 @@ import java.util.List;
  * and {@link SpinnerAdapter}.
  *
  */
-@SuppressWarnings("deprecation")
 public class FakeAdapter extends BaseAdapter {
 
     // don't use a set because the order is important.
     private final List<ResourceReference> mTypes = new ArrayList<ResourceReference>();
-    private final IProjectCallback mCallback;
+    private final LayoutlibCallback mCallback;
     private final ResourceReference mAdapterRef;
     private final List<AdapterItem> mItems = new ArrayList<AdapterItem>();
     private boolean mSkipCallbackParser = false;
 
     public FakeAdapter(ResourceReference adapterRef, AdapterBinding binding,
-            IProjectCallback callback) {
+            LayoutlibCallback callback) {
         mAdapterRef = adapterRef;
         mCallback = callback;
 
@@ -111,11 +110,11 @@ public class FakeAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         // we don't care about recycling here because we never scroll.
         AdapterItem item = mItems.get(position);
-        Pair<View, Boolean> pair = AdapterHelper.getView(item, null /*parentGroup*/, parent,
-                mCallback, mAdapterRef, mSkipCallbackParser);
+        @SuppressWarnings("deprecation")
+        Pair<View, Boolean> pair = AdapterHelper.getView(item, null, parent, mCallback,
+                mAdapterRef, mSkipCallbackParser);
         mSkipCallbackParser = pair.getSecond();
         return pair.getFirst();
-
     }
 
     @Override

@@ -18,7 +18,7 @@ package com.android.layoutlib.bridge.impl.binding;
 
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.DataBindingItem;
-import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.util.Pair;
 
@@ -34,7 +34,7 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 public class FakeExpandableAdapter implements ExpandableListAdapter, HeterogeneousExpandableList {
 
-    private final IProjectCallback mCallback;
+    private final LayoutlibCallback mCallback;
     private final ResourceReference mAdapterRef;
     private boolean mSkipCallbackParser = false;
 
@@ -45,7 +45,7 @@ public class FakeExpandableAdapter implements ExpandableListAdapter, Heterogeneo
     private final List<ResourceReference> mChildrenTypes = new ArrayList<ResourceReference>();
 
     public FakeExpandableAdapter(ResourceReference adapterRef, AdapterBinding binding,
-            IProjectCallback callback) {
+            LayoutlibCallback callback) {
         mAdapterRef = adapterRef;
         mCallback = callback;
 
