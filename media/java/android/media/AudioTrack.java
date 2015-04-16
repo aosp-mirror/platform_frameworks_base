@@ -19,7 +19,9 @@ package android.media;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.lang.Math;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.NioUtils;
 
 import android.annotation.IntDef;
@@ -271,6 +273,14 @@ public class AudioTrack
      * Reference to the app-ops service.
      */
     private final IAppOpsService mAppOps;
+    /**
+     * HW_AV_SYNC track AV Sync Header
+     */
+    private ByteBuffer mAvSyncHeader = null;
+    /**
+     * HW_AV_SYNC track audio data bytes remaining to write after current AV sync header
+     */
+    private int mAvSyncBytesRemaining = 0;
 
     //--------------------------------
     // Used exclusively by native code
@@ -1390,6 +1400,8 @@ public class AudioTrack
         synchronized(mPlayStateLock) {
             native_stop();
             mPlayState = PLAYSTATE_STOPPED;
+            mAvSyncHeader = null;
+            mAvSyncBytesRemaining = 0;
         }
     }
 
@@ -1434,6 +1446,8 @@ public class AudioTrack
         if (mState == STATE_INITIALIZED) {
             // flush the data in native layer
             native_flush();
+            mAvSyncHeader = null;
+            mAvSyncBytesRemaining = 0;
         }
 
     }
@@ -1671,6 +1685,86 @@ public class AudioTrack
 
         return ret;
     }
+
+    /**
+     * Writes the audio data to the audio sink for playback (streaming mode) on a HW_AV_SYNC track.
+     * In streaming mode, the blocking behavior will depend on the write mode.
+     * @param audioData the buffer that holds the data to play, starting at the position reported
+     *     by <code>audioData.position()</code>.
+     *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
+     *     have been advanced to reflect the amount of data that was successfully written to
+     *     the AudioTrack.
+     * @param sizeInBytes number of bytes to write.
+     *     <BR>Note this may differ from <code>audioData.remaining()</code>, but cannot exceed it.
+     * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}.
+     *     <BR>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
+     *         to the audio sink.
+     *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
+     *     queuing as much audio data for playback as possible without blocking.
+     * @param timestamp The timestamp of the first decodable audio frame in the provided audioData.
+     * @return 0 or a positive number of bytes that were written, or
+     *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}, or
+     *     {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *     needs to be recreated.
+     */
+    public int write(ByteBuffer audioData, int sizeInBytes,
+            @WriteMode int writeMode, long timestamp) {
+
+        if ((mAttributes.getFlags() & AudioAttributes.FLAG_HW_AV_SYNC) == 0) {
+            Log.d(TAG, "AudioTrack.write() called on a regular AudioTrack. Ignoring pts...");
+            return write(audioData, sizeInBytes, writeMode);
+        }
+
+        if ((audioData == null) || (sizeInBytes < 0) || (sizeInBytes > audioData.remaining())) {
+            Log.e(TAG, "AudioTrack.write() called with invalid size (" + sizeInBytes + ") value");
+            return ERROR_BAD_VALUE;
+        }
+
+        // create timestamp header if none exists
+        if (mAvSyncHeader == null) {
+            mAvSyncHeader = ByteBuffer.allocate(16);
+            mAvSyncHeader.order(ByteOrder.BIG_ENDIAN);
+            mAvSyncHeader.putInt(0x55550001);
+            mAvSyncHeader.putInt(sizeInBytes);
+            mAvSyncHeader.putLong(timestamp);
+            mAvSyncHeader.position(0);
+            mAvSyncBytesRemaining = sizeInBytes;
+        }
+
+        // write timestamp header if not completely written already
+        int ret = 0;
+        if (mAvSyncHeader.remaining() != 0) {
+            ret = write(mAvSyncHeader, mAvSyncHeader.remaining(), writeMode);
+            if (ret < 0) {
+                Log.e(TAG, "AudioTrack.write() could not write timestamp header!");
+                mAvSyncHeader = null;
+                mAvSyncBytesRemaining = 0;
+                return ret;
+            }
+            if (mAvSyncHeader.remaining() > 0) {
+                Log.v(TAG, "AudioTrack.write() partial timestamp header written.");
+                return 0;
+            }
+        }
+
+        // write audio data
+        int sizeToWrite = Math.min(mAvSyncBytesRemaining, sizeInBytes);
+        ret = write(audioData, sizeToWrite, writeMode);
+        if (ret < 0) {
+            Log.e(TAG, "AudioTrack.write() could not write audio data!");
+            mAvSyncHeader = null;
+            mAvSyncBytesRemaining = 0;
+            return ret;
+        }
+
+        mAvSyncBytesRemaining -= ret;
+        if (mAvSyncBytesRemaining == 0) {
+            mAvSyncHeader = null;
+        }
+
+        return ret;
+    }
+
 
     /**
      * Sets the playback head position within the static buffer to zero,
