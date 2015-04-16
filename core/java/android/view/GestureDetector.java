@@ -149,12 +149,30 @@ public class GestureDetector {
     }
 
     /**
+     * The listener that is used to notify when a stylus button press occurs.
+     */
+    public interface OnStylusButtonPressListener {
+        /**
+         * Notified when a stylus button press occurs. This is when the stylus
+         * is touching the screen and the {@value MotionEvent#BUTTON_SECONDARY}
+         * is pressed.
+         *
+         * @param e The motion event that occurred during the stylus button
+         *            press.
+         * @return true if the event is consumed, else false
+         */
+        boolean onStylusButtonPress(MotionEvent e);
+    }
+
+    /**
      * A convenience class to extend when you only want to listen for a subset
      * of all the gestures. This implements all methods in the
-     * {@link OnGestureListener} and {@link OnDoubleTapListener} but does
-     * nothing and return {@code false} for all applicable methods.
+     * {@link OnGestureListener}, {@link OnDoubleTapListener}, and {@link OnStylusButtonPressListener}
+     * but does nothing and return {@code false} for all applicable methods.
      */
-    public static class SimpleOnGestureListener implements OnGestureListener, OnDoubleTapListener {
+    public static class SimpleOnGestureListener implements OnGestureListener, OnDoubleTapListener,
+            OnStylusButtonPressListener {
+
         public boolean onSingleTapUp(MotionEvent e) {
             return false;
         }
@@ -190,6 +208,10 @@ public class GestureDetector {
         public boolean onSingleTapConfirmed(MotionEvent e) {
             return false;
         }
+
+        public boolean onStylusButtonPress(MotionEvent e) {
+            return false;
+        }
     }
 
     private int mTouchSlopSquare;
@@ -211,10 +233,12 @@ public class GestureDetector {
     private final Handler mHandler;
     private final OnGestureListener mListener;
     private OnDoubleTapListener mDoubleTapListener;
+    private OnStylusButtonPressListener mStylusButtonListener;
 
     private boolean mStillDown;
     private boolean mDeferConfirmSingleTap;
     private boolean mInLongPress;
+    private boolean mInStylusButtonPress;
     private boolean mAlwaysInTapRegion;
     private boolean mAlwaysInBiggerTapRegion;
 
@@ -358,6 +382,9 @@ public class GestureDetector {
         if (listener instanceof OnDoubleTapListener) {
             setOnDoubleTapListener((OnDoubleTapListener) listener);
         }
+        if (listener instanceof OnStylusButtonPressListener) {
+            setOnStylusButtonPressListener((OnStylusButtonPressListener) listener);
+        }
         init(context);
     }
     
@@ -417,6 +444,19 @@ public class GestureDetector {
      */
     public void setOnDoubleTapListener(OnDoubleTapListener onDoubleTapListener) {
         mDoubleTapListener = onDoubleTapListener;
+    }
+
+    /**
+     * Sets the listener which will be called for stylus button related
+     * gestures.
+     *
+     * @param onStylusButtonPressListener the listener invoked for all the
+     *            callbacks, or null to stop listening for stylus button
+     *            gestures.
+     */
+    public void setOnStylusButtonPressListener(
+            OnStylusButtonPressListener onStylusButtonPressListener) {
+        mStylusButtonListener = onStylusButtonPressListener;
     }
 
     /**
@@ -512,7 +552,18 @@ public class GestureDetector {
             break;
 
         case MotionEvent.ACTION_DOWN:
-            if (mDoubleTapListener != null) {
+            if (mStylusButtonListener != null
+                    && ev.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
+                    && (ev.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0) {
+                if (mStylusButtonListener.onStylusButtonPress(ev)) {
+                    mInStylusButtonPress = true;
+                    handled = true;
+                    mHandler.removeMessages(LONG_PRESS);
+                    mHandler.removeMessages(TAP);
+                }
+            }
+
+            if (mDoubleTapListener != null && !mInStylusButtonPress) {
                 boolean hadTapMessage = mHandler.hasMessages(TAP);
                 if (hadTapMessage) mHandler.removeMessages(TAP);
                 if ((mCurrentDownEvent != null) && (mPreviousUpEvent != null) && hadTapMessage &&
@@ -540,8 +591,8 @@ public class GestureDetector {
             mStillDown = true;
             mInLongPress = false;
             mDeferConfirmSingleTap = false;
-            
-            if (mIsLongpressEnabled) {
+
+            if (mIsLongpressEnabled && !mInStylusButtonPress) {
                 mHandler.removeMessages(LONG_PRESS);
                 mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()
                         + TAP_TIMEOUT + LONGPRESS_TIMEOUT);
@@ -551,7 +602,17 @@ public class GestureDetector {
             break;
 
         case MotionEvent.ACTION_MOVE:
-            if (mInLongPress) {
+            if (mStylusButtonListener != null && !mInStylusButtonPress && !mInLongPress
+                    && ev.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
+                    && (ev.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0) {
+                if (mStylusButtonListener.onStylusButtonPress(ev)) {
+                    mInStylusButtonPress = true;
+                    handled = true;
+                    mHandler.removeMessages(LONG_PRESS);
+                    mHandler.removeMessages(TAP);
+                }
+            }
+            if (mInLongPress || mInStylusButtonPress) {
                 break;
             }
             final float scrollX = mLastFocusX - focusX;
@@ -591,6 +652,9 @@ public class GestureDetector {
             } else if (mInLongPress) {
                 mHandler.removeMessages(TAP);
                 mInLongPress = false;
+            } else if (mInStylusButtonPress) {
+                mHandler.removeMessages(TAP);
+                mInStylusButtonPress = false;
             } else if (mAlwaysInTapRegion) {
                 handled = mListener.onSingleTapUp(ev);
                 if (mDeferConfirmSingleTap && mDoubleTapListener != null) {
@@ -649,9 +713,8 @@ public class GestureDetector {
         mAlwaysInTapRegion = false;
         mAlwaysInBiggerTapRegion = false;
         mDeferConfirmSingleTap = false;
-        if (mInLongPress) {
-            mInLongPress = false;
-        }
+        mInLongPress = false;
+        mInStylusButtonPress = false;
     }
 
     private void cancelTaps() {
@@ -662,9 +725,8 @@ public class GestureDetector {
         mAlwaysInTapRegion = false;
         mAlwaysInBiggerTapRegion = false;
         mDeferConfirmSingleTap = false;
-        if (mInLongPress) {
-            mInLongPress = false;
-        }
+        mInLongPress = false;
+        mInStylusButtonPress = false;
     }
 
     private boolean isConsideredDoubleTap(MotionEvent firstDown, MotionEvent firstUp,
