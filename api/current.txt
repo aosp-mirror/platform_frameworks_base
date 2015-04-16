@@ -30399,9 +30399,9 @@ package android.telecom {
     method public java.lang.String getLine1Number(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccountHandle getSimCallManager();
+    method public java.lang.String getVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method public boolean handleMmi(java.lang.String);
     method public boolean handleMmi(java.lang.String, android.telecom.PhoneAccountHandle);
-    method public boolean hasVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method public boolean isInCall();
     method public boolean isVoiceMailNumber(android.telecom.PhoneAccountHandle, java.lang.String);
     method public void registerPhoneAccount(android.telecom.PhoneAccount);
