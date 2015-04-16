@@ -54,7 +54,7 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
     boolean start() {
         // Seq #37.
         if (mEnabled) {
-            // Enable ARC status immediately after sending <Report Arc Initiated>.
+            // Enable ARC status immediately before sending <Report Arc Initiated>.
             // If AVR responds with <Feature Abort>, disable ARC status again.
             // This is different from spec that says that turns ARC status to
             // "Enabled" if <Report ARC Initiated> is acknowledged and no
@@ -80,12 +80,21 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error != Constants.SEND_RESULT_SUCCESS) {
-                    // If fails to send <Report ARC Initiated>, disable ARC and
-                    // send <Report ARC Terminated> directly.
-                    setArcStatus(false);
-                    HdmiLogger.debug("Failed to send <Report Arc Initiated>.");
-                    finish();
+                switch (error) {
+                    case Constants.SEND_RESULT_SUCCESS:
+                    case Constants.SEND_RESULT_BUSY:
+                    case Constants.SEND_RESULT_FAILURE:
+                        // The result of the command transmission, unless it is an obvious
+                        // failure indicated by the target device (or lack thereof), should
+                        // not affect the ARC status. Ignores it silently.
+                        break;
+                    case Constants.SEND_RESULT_NAK:
+                        // If <Report ARC Initiated> is negatively ack'ed, disable ARC and
+                        // send <Report ARC Terminated> directly.
+                        setArcStatus(false);
+                        HdmiLogger.debug("Failed to send <Report Arc Initiated>.");
+                        finish();
+                        break;
                 }
             }
         });
