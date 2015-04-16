@@ -130,7 +130,7 @@ public final class ParcelableConference implements Parcelable {
             int videoState = source.readInt();
 
             return new ParcelableConference(phoneAccount, state, capabilities, connectionIds,
-                    videoCallProvider, videoState);
+                    videoCallProvider, videoState, connectTimeMillis);
         }
 
         @Override
