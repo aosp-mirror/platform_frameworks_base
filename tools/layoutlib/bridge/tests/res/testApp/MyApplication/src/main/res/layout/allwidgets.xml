@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="HardcodedText,LabelFor,TextFields,ContentDescription,RtlHardcoded">
+
+    <FrameLayout
+        android:id="@id/frameLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="311dp">
+
+        <TextView
+            android:id="@id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|top"
+            android:text="New Text" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/frameLayout"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@id/textView2"
+        android:text="Medium Text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/textView2"
+        android:layout_toEndOf="@id/textView2"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <Button
+        android:id="@id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView3"
+        android:layout_toEndOf="@id/textView4"
+        android:text="New Button" />
+
+    <Button
+        android:id="@id/button2"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@id/button"
+        android:text="New Button" />
+
+    <CheckBox
+        android:id="@id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@id/button"
+        android:layout_below="@id/button"
+        android:text="New CheckBox" />
+
+    <Switch
+        android:id="@id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/textView2"
+        android:text="New Switch" />
+
+    <ImageButton
+        android:id="@id/imageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button"
+        android:layout_toEndOf="@id/switch1" />
+
+    <ImageView
+        android:id="@id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_launcher"
+        android:layout_below="@id/button"
+        android:layout_toEndOf="@id/imageButton" />
+
+    <GridLayout
+        android:id="@id/gridLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/imageButton"
+        android:columnCount="2"
+        android:rowCount="2">
+
+        <ProgressBar
+            android:id="@id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_row="0" />
+
+        <ProgressBar
+            android:id="@id/progressBar2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_row="0" />
+
+        <ProgressBar
+            android:id="@id/progressBar3"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_row="1" />
+
+        <ProgressBar
+            android:id="@id/progressBar4"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_row="1" />
+    </GridLayout>
+
+    <SeekBar
+        android:id="@id/seekBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/gridLayout"
+        android:layout_toEndOf="@id/gridLayout" />
+
+    <RatingBar
+        android:id="@id/ratingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/switch2"
+        android:layout_toEndOf="@id/gridLayout" />
+
+    <Switch
+        android:id="@id/switch2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seekBar"
+        android:layout_toEndOf="@id/switch1"
+        android:checked="true" />
+
+    <EditText
+        android:id="@id/editText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/ratingBar"
+        android:layout_alignParentStart="true"
+        android:text="plain text" />
+
+    <EditText
+        android:id="@id/editText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/ratingBar"
+        android:ems="3"
+        android:inputType="textPersonName"
+        android:text="Name" />
+
+    <EditText
+        android:id="@id/editText3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/editText2"
+        android:ems="2"
+        android:inputType="textPassword"
+        android:text="password" />
+
+    <EditText
+        android:id="@id/editText4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/editText3"
+        android:layout_toEndOf="@id/editText3"
+        android:ems="3"
+        android:inputType="numberPassword"
+        android:text="numeric password" />
+
+    <EditText
+        android:id="@id/editText5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editText3"
+        android:layout_toStartOf="@id/editText6"
+        android:ems="7"
+        android:inputType="textEmailAddress"
+        android:text="email@domain.com" />
+
+    <EditText
+        android:id="@id/editText6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/editText4"
+        android:ems="7"
+        android:inputType="phone"
+        android:text="+11235554344" />
+
+    <EditText
+        android:id="@id/editText7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editText"
+        android:layout_toEndOf="@id/editText4"
+        android:ems="10"
+        android:inputType="textPostalAddress"
+        android:text="1600 Amphitheatre" />
+
+    <EditText
+        android:id="@id/editText9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editText5"
+        android:layout_alignParentStart="true"
+        android:ems="3"
+        android:inputType="time"
+        android:text="12:12" />
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editText5"
+        android:layout_toEndOf="@id/editText9"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@id/radioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New RadioButton" />
+
+        <RadioButton
+            android:id="@id/radioButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New RadioButton" />
+
+    </RadioGroup>
+
+    <CheckedTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CheckedTextView"
+        android:id="@id/checkedTextView"
+        android:layout_below="@id/button2"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@id/button2" />
+
+    <DialerFilter
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/checkBox"
+        android:layout_toStartOf="@id/quickContactBadge"
+        android:id="@id/dialerFilter"
+        android:layout_above="@id/ratingBar"
+        android:layout_toEndOf="@id/seekBar">
+
+        <EditText
+            android:id="@android:id/hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hint" />
+
+        <EditText
+            android:id="@android:id/primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@android:id/hint"
+            android:text="Primary" />
+    </DialerFilter>
+
+    <QuickContactBadge
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@id/quickContactBadge"
+        android:layout_below="@id/checkedTextView"
+        android:layout_alignParentEnd="true" />
+
+    <android.inputmethodservice.ExtractEditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ExtractEditText"
+        android:id="@id/extractEditText"
+        android:layout_below="@id/editText9"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@id/checkedTextView" />
+
+    <ZoomControls
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@id/zoomControls"
+        android:layout_below="@id/editText9"
+        android:layout_alignParentStart="true" />
+
+    <TextureView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@id/textureView"
+        android:layout_below="@id/zoomControls"
+        android:layout_alignParentStart="true"
+        android:layout_alignBottom="@id/extractEditText"
+        android:layout_toStartOf="@id/editText3" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@id/listView"
+        android:layout_below="@id/textureView"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@id/textureView" />
+
+    <GridView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@id/gridView"
+        android:layout_below="@id/extractEditText"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@id/extractEditText" />
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@id/scrollView"
+        android:layout_below="@id/zoomControls"
+        android:layout_toRightOf="@id/listView"
+        android:layout_toLeftOf="@id/extractEditText">
+
+    <TabHost
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@id/tabHost">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@id/linearLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"/>
+
+                <LinearLayout
+                    android:id="@id/linearLayout2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"/>
+
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+</ScrollView>
+
+    <SearchView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@id/searchView"
+        android:layout_alignBottom="@id/zoomControls"
+        android:layout_toEndOf="@id/seekBar" />
+
+</RelativeLayout>
