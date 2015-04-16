@@ -192,6 +192,8 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_SECURE_HW_BUSY = -48;
     public static final int KM_ERROR_SECURE_HW_COMMUNICATION_FAILED = -49;
     public static final int KM_ERROR_UNSUPPORTED_EC_FIELD = -50;
+    public static final int KM_ERROR_MISSING_NONCE = -51;
+    public static final int KM_ERROR_INVALID_NONCE = -52;
     public static final int KM_ERROR_UNIMPLEMENTED = -100;
     public static final int KM_ERROR_VERSION_MISMATCH = -101;
     public static final int KM_ERROR_UNKNOWN_ERROR = -1000;
@@ -231,6 +233,8 @@ public final class KeymasterDefs {
         sErrorCodeToString.put(KM_ERROR_INVALID_TAG, "Invalid tag");
         sErrorCodeToString.put(KM_ERROR_MEMORY_ALLOCATION_FAILED, "Memory allocation failed");
         sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_EC_FIELD, "Unsupported EC field");
+        sErrorCodeToString.put(KM_ERROR_MISSING_NONCE, "Required IV missing");
+        sErrorCodeToString.put(KM_ERROR_INVALID_NONCE, "Invalid IV");
         sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
         sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");
     }
