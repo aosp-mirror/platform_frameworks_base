@@ -226,14 +226,24 @@ public abstract class KeyStoreKeyProperties {
         public static final int IMPORTED = 1 << 1;
 
         /**
+         * Origin of the key is unknown. This can occur only for keys backed by an old TEE
+         * implementation which does not record origin information.
+         *
+         * @hide
+         */
+        public static final int UNKNOWN = 1 << 2;
+
+        /**
          * @hide
          */
         public static @OriginEnum int fromKeymaster(int origin) {
             switch (origin) {
-                case KeymasterDefs.KM_ORIGIN_HARDWARE:
+                case KeymasterDefs.KM_ORIGIN_GENERATED:
                     return GENERATED;
                 case KeymasterDefs.KM_ORIGIN_IMPORTED:
                     return IMPORTED;
+                case KeymasterDefs.KM_ORIGIN_UNKNOWN:
+                    return UNKNOWN;
                 default:
                     throw new IllegalArgumentException("Unknown origin: " + origin);
             }
