@@ -2669,4 +2669,6 @@
 
   <public type="attr" name="leftIndents" />
   <public type="attr" name="rightIndents" />
+
+  <public type="attr" name="showForAllUsers" />
 </resources>

@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
@@ -478,6 +479,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mAppToken != null) {
             final DisplayContent appDisplay = getDisplayContent();
             mNotOnAppsDisplay = displayContent != appDisplay;
+
+            if (mAppToken.showForAllUsers) {
+                // Windows for apps that can show for all users should also show when the
+                // device is locked.
+                mAttrs.flags |= FLAG_SHOW_WHEN_LOCKED;
+            }
         }
 
         mWinAnimator = new WindowStateAnimator(this);
@@ -1353,7 +1360,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             win = win.mAttachedWindow;
         }
         if (win.mAttrs.type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
-                && win.mAppToken != null && win.mAppToken.showWhenLocked) {
+                && win.mAppToken != null && win.mAppToken.showForAllUsers) {
             // Save some cycles by not calling getDisplayInfo unless it is an application
             // window intended for all users.
             final DisplayContent displayContent = win.getDisplayContent();

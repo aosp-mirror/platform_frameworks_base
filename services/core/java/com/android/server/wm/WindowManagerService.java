@@ -3620,13 +3620,13 @@ public class WindowManagerService extends IWindowManager.Stub
         EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
         Task task = new Task(taskId, stack, userId, this);
         mTaskIdToTask.put(taskId, task);
-        stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showWhenLocked);
+        stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showForAllUsers);
         return task;
     }
 
     @Override
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
-            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
+            int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
@@ -3656,7 +3656,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken = new AppWindowToken(this, token, voiceInteraction);
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
             atoken.appFullscreen = fullscreen;
-            atoken.showWhenLocked = showWhenLocked;
+            atoken.showForAllUsers = showForAllUsers;
             atoken.requestedOrientation = requestedOrientation;
             atoken.layoutConfigChanges = (configChanges &
                     (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) != 0;
