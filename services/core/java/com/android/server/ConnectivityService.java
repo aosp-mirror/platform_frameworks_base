@@ -3455,6 +3455,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    @Override
+    public boolean requestBwUpdate(Network network) {
+        enforceAccessPermission();
+        NetworkAgentInfo nai = null;
+        if (network == null) {
+            return false;
+        }
+        synchronized (mNetworkForNetId) {
+            nai = mNetworkForNetId.get(network.netId);
+        }
+        if (nai != null) {
+            nai.asyncChannel.sendMessage(android.net.NetworkAgent.CMD_REQUEST_BANDWIDTH_UPDATE);
+            return true;
+        }
+        return false;
+    }
+
+
     private void enforceMeteredApnPolicy(NetworkCapabilities networkCapabilities) {
         // if UID is restricted, don't allow them to bring up metered APNs
         if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)

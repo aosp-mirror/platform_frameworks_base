@@ -134,6 +134,8 @@ interface IConnectivityManager
 
     void registerNetworkFactory(in Messenger messenger, in String name);
 
+    boolean requestBwUpdate(in Network network);
+
     void unregisterNetworkFactory(in Messenger messenger);
 
     int registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
