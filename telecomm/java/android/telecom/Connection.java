@@ -201,48 +201,6 @@ public abstract class Connection implements IConferenceable {
     // Next CAPABILITY value: 0x00200000
     //**********************************************************************************************
 
-    /**
-     * Call substate bitmask values
-     */
-
-    /* Default case */
-    /**
-     * @hide
-     */
-    public static final int SUBSTATE_NONE = 0;
-
-    /* Indicates that the call is connected but audio attribute is suspended */
-    /**
-     * @hide
-     */
-    public static final int SUBSTATE_AUDIO_CONNECTED_SUSPENDED = 0x1;
-
-    /* Indicates that the call is connected but video attribute is suspended */
-    /**
-     * @hide
-     */
-    public static final int SUBSTATE_VIDEO_CONNECTED_SUSPENDED = 0x2;
-
-    /* Indicates that the call is established but media retry is needed */
-    /**
-     * @hide
-     */
-    public static final int SUBSTATE_AVP_RETRY = 0x4;
-
-    /* Indicates that the call is multitasking */
-    /**
-     * @hide
-     */
-    public static final int SUBSTATE_MEDIA_PAUSED = 0x8;
-
-    /* Mask containing all the call substate bits set */
-    /**
-     * @hide
-     */
-    public static final int SUBSTATE_ALL = SUBSTATE_AUDIO_CONNECTED_SUSPENDED |
-        SUBSTATE_VIDEO_CONNECTED_SUSPENDED | SUBSTATE_AVP_RETRY |
-        SUBSTATE_MEDIA_PAUSED;
-
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
@@ -381,7 +339,6 @@ public abstract class Connection implements IConferenceable {
         public void onConferenceParticipantsChanged(Connection c,
                 List<ConferenceParticipant> participants) {}
         public void onConferenceStarted() {}
-        public void onCallSubstateChanged(Connection c, int substate) {}
     }
 
     public static abstract class VideoProvider {
@@ -852,7 +809,6 @@ public abstract class Connection implements IConferenceable {
     private DisconnectCause mDisconnectCause;
     private Conference mConference;
     private ConnectionService mConnectionService;
-    private int mCallSubstate;
 
     /**
      * Create a new Connection.
@@ -908,21 +864,6 @@ public abstract class Connection implements IConferenceable {
      */
     public final int getVideoState() {
         return mVideoState;
-    }
-
-    /**
-     * Returns the call substate of the call.
-     * Valid values: {@link Connection#SUBSTATE_NONE},
-     * {@link Connection#SUBSTATE_AUDIO_CONNECTED_SUSPENDED},
-     * {@link Connection#SUBSTATE_VIDEO_CONNECTED_SUSPENDED},
-     * {@link Connection#SUBSTATE_AVP_RETRY},
-     * {@link Connection#SUBSTATE_MEDIA_PAUSED}.
-     *
-     * @param callSubstate The new call substate.
-     * @hide
-     */
-    public final int getCallSubstate() {
-        return mCallSubstate;
     }
 
     /**
@@ -1095,25 +1036,6 @@ public abstract class Connection implements IConferenceable {
         mVideoState = videoState;
         for (Listener l : mListeners) {
             l.onVideoStateChanged(this, mVideoState);
-        }
-    }
-
-    /**
-     * Set the call substate for the connection.
-     * Valid values: {@link Connection#SUBSTATE_NONE},
-     * {@link Connection#SUBSTATE_AUDIO_CONNECTED_SUSPENDED},
-     * {@link Connection#SUBSTATE_VIDEO_CONNECTED_SUSPENDED},
-     * {@link Connection#SUBSTATE_AVP_RETRY},
-     * {@link Connection#SUBSTATE_MEDIA_PAUSED}.
-     *
-     * @param callSubstate The new call substate.
-     * @hide
-     */
-    public final void setCallSubstate(int callSubstate) {
-        Log.d(this, "setCallSubstate %d", callSubstate);
-        mCallSubstate = callSubstate;
-        for (Listener l : mListeners) {
-            l.onCallSubstateChanged(this, mCallSubstate);
         }
     }
 
