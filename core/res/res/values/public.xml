@@ -2653,7 +2653,6 @@
   <public type="attr" name="colorBackgroundFloating" />
   <public type="attr" name="extractNativeLibs" />
   <public type="attr" name="usesCleartextTraffic" />
-  <public type="attr" name="lockTaskMode" />
 
   <!--IntentFilter auto verification -->
   <public type="attr" name="autoVerify" />
@@ -2664,4 +2663,6 @@
 
   <!-- Animation -->
   <public type="attr" name="durationScaleHint" />
+
+  <public type="attr" name="lockTaskMode" />
 </resources>
