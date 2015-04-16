@@ -66,6 +66,7 @@ class DisplayContent {
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
     int mBaseDisplayDensity = 0;
+    boolean mDisplayScalingDisabled;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Display mDisplay;
 
@@ -359,6 +360,9 @@ class DisplayContent {
                 pw.print(" base=");
                 pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
                 pw.print(" "); pw.print(mBaseDisplayDensity); pw.print("dpi");
+            }
+            if (mDisplayScalingDisabled) {
+                pw.println(" noscale");
             }
             pw.print(" cur=");
             pw.print(mDisplayInfo.logicalWidth);

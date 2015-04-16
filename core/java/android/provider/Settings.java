@@ -6036,6 +6036,13 @@ public final class Settings {
        public static final String DISPLAY_SIZE_FORCED = "display_size_forced";
 
        /**
+        * The saved value for WindowManagerService.setForcedDisplayScalingMode().
+        * 0 or unset if scaling is automatic, 1 if scaling is disabled.
+        * @hide
+        */
+       public static final String DISPLAY_SCALING_FORCE = "display_scaling_force";
+
+       /**
         * The maximum size, in bytes, of a download that the download manager will transfer over
         * a non-wifi connection.
         * @hide

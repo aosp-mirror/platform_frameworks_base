@@ -170,6 +170,15 @@ public final class Display {
     public static final int FLAG_PRESENTATION = 1 << 3;
 
     /**
+     * Display flag: Indicates that the contents of the display should not be scaled
+     * to fit the physical screen dimensions.  Used for development only to emulate
+     * devices with smaller physicals screens while preserving density.
+     *
+     * @hide
+     */
+    public static final int FLAG_SCALING_DISABLED = 1 << 30;
+
+    /**
      * Display type: Unknown display type.
      * @hide
      */

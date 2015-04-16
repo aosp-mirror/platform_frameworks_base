@@ -376,6 +376,10 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void setForcedDisplayScalingMode(int displayId, int mode) {
+    }
+
+    @Override
     public void setInTouchMode(boolean arg0) throws RemoteException {
         // TODO Auto-generated method stub
     }

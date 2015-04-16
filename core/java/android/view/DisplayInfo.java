@@ -538,6 +538,9 @@ public final class DisplayInfo implements Parcelable {
         if ((flags & Display.FLAG_PRESENTATION) != 0) {
             result.append(", FLAG_PRESENTATION");
         }
+        if ((flags & Display.FLAG_SCALING_DISABLED) != 0) {
+            result.append(", FLAG_SCALING_DISABLED");
+        }
         return result.toString();
     }
 }
