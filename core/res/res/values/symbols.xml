@@ -1165,6 +1165,8 @@
   <java-symbol type="drawable" name="ic_audio_alarm_mute" />
   <java-symbol type="drawable" name="ic_audio_bt" />
   <java-symbol type="drawable" name="ic_audio_bt_mute" />
+  <java-symbol type="drawable" name="ic_audio_media" />
+  <java-symbol type="drawable" name="ic_audio_media_mute" />
   <java-symbol type="drawable" name="ic_audio_notification" />
   <java-symbol type="drawable" name="ic_audio_notification_mute" />
   <java-symbol type="drawable" name="ic_audio_phone" />
