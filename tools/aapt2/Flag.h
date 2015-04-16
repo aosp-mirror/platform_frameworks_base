@@ -16,7 +16,8 @@ void requiredFlag(const StringPiece& name, const StringPiece& description,
 void optionalFlag(const StringPiece& name, const StringPiece& description,
                   std::function<void(const StringPiece&)> action);
 
-void optionalSwitch(const StringPiece& name, const StringPiece& description, bool* result);
+void optionalSwitch(const StringPiece& name, const StringPiece& description, bool resultWhenSet,
+                    bool* result);
 
 void usageAndDie(const StringPiece& command);
 
