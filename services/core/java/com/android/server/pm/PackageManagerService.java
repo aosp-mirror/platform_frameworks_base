@@ -6280,7 +6280,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
                     final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
                     for (int userId : userIds) {
-                        if (mInstaller.linkNativeLibraryDirectory(pkg.packageName, nativeLibPath, userId) < 0) {
+                        if (mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
+                                nativeLibPath, userId) < 0) {
                             throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                                     "Failed linking native library dir (user=" + userId + ")");
                         }

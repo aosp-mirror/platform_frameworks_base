@@ -38,6 +38,8 @@ import com.android.internal.util.Preconditions;
 
 import java.io.CharArrayWriter;
 import java.io.File;
+import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Information about a storage volume that may be mounted. A volume may be a
@@ -76,6 +78,22 @@ public class VolumeInfo implements Parcelable {
 
     private static SparseArray<String> sStateToEnvironment = new SparseArray<>();
     private static ArrayMap<String, String> sEnvironmentToBroadcast = new ArrayMap<>();
+
+    private static final Comparator<VolumeInfo>
+            sDescriptionComparator = new Comparator<VolumeInfo>() {
+        @Override
+        public int compare(VolumeInfo lhs, VolumeInfo rhs) {
+            if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(lhs.getId())) {
+                return -1;
+            } else if (lhs.getDescription() == null) {
+                return 1;
+            } else if (rhs.getDescription() == null) {
+                return -1;
+            } else {
+                return lhs.getDescription().compareTo(rhs.getDescription());
+            }
+        }
+    };
 
     static {
         sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTED, Environment.MEDIA_UNMOUNTED);
@@ -148,6 +166,10 @@ public class VolumeInfo implements Parcelable {
 
     public static @Nullable String getBroadcastForState(int state) {
         return getBroadcastForEnvironment(getEnvironmentForState(state));
+    }
+
+    public static @NonNull Comparator<VolumeInfo> getDescriptionComparator() {
+        return sDescriptionComparator;
     }
 
     public @NonNull String getId() {
@@ -342,6 +364,20 @@ public class VolumeInfo implements Parcelable {
         } finally {
             temp.recycle();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof VolumeInfo) {
+            return Objects.equals(id, ((VolumeInfo) o).id);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 
     public static final Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {

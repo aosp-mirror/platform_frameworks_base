@@ -26,6 +26,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.io.CharArrayWriter;
+import java.util.Objects;
 
 /**
  * Information about a physical disk which may contain one or more
@@ -116,6 +117,20 @@ public class DiskInfo implements Parcelable {
         } finally {
             temp.recycle();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof DiskInfo) {
+            return Objects.equals(id, ((DiskInfo) o).id);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 
     public static final Creator<DiskInfo> CREATOR = new Creator<DiskInfo>() {

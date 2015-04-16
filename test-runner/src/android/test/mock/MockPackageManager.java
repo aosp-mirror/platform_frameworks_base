@@ -16,6 +16,7 @@
 
 package android.test.mock;
 
+import android.annotation.NonNull;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -51,6 +52,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.UserHandle;
+import android.os.storage.VolumeInfo;
 
 import java.util.List;
 
@@ -495,6 +497,18 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void movePackageAndData(String packageName, String volumeUuid,
             IPackageMoveObserver observer) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public @NonNull VolumeInfo getApplicationCurrentVolume(ApplicationInfo app) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public @NonNull List<VolumeInfo> getApplicationCandidateVolumes(ApplicationInfo app) {
         throw new UnsupportedOperationException();
     }
 
