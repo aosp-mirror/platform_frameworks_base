@@ -1797,6 +1797,10 @@ public class Instrumentation {
             case ActivityManager.START_NOT_VOICE_COMPATIBLE:
                 throw new SecurityException(
                         "Starting under voice control not allowed for: " + intent);
+            case ActivityManager.START_NOT_CURRENT_USER_ACTIVITY:
+                throw new SecurityException(
+                        "Not allowed to start background user activity that shouldn't be"
+                        + " displayed for all users.");
             default:
                 throw new AndroidRuntimeException("Unknown error code "
                         + res + " when starting " + intent);

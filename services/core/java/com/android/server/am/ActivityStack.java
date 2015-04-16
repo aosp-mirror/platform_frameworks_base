@@ -363,19 +363,9 @@ final class ActivityStack {
         mOverrideConfig = Configuration.EMPTY;
     }
 
-    /**
-     * Checks whether the userid is a profile of the current user.
-     */
-    private boolean isCurrentProfileLocked(int userId) {
-        if (userId == mCurrentUser) return true;
-        for (int i = 0; i < mService.mCurrentProfileIds.length; i++) {
-            if (mService.mCurrentProfileIds[i] == userId) return true;
-        }
-        return false;
-    }
-
     boolean okToShowLocked(ActivityRecord r) {
-        return isCurrentProfileLocked(r.userId) || (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0;
+        return mStackSupervisor.isCurrentProfileLocked(r.userId)
+                || (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0;
     }
 
     final ActivityRecord topRunningActivityLocked(ActivityRecord notTop) {
@@ -619,7 +609,8 @@ final class ActivityStack {
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            final boolean notCurrentUserTask = !isCurrentProfileLocked(task.userId);
+            final boolean notCurrentUserTask =
+                    !mStackSupervisor.isCurrentProfileLocked(task.userId);
             final ArrayList<ActivityRecord> activities = task.mActivities;
 
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
@@ -655,7 +646,7 @@ final class ActivityStack {
 
             // NOTE: If {@link TaskRecord#topRunningActivityLocked} return is not null then it is
             // okay to show the activity when locked.
-            if (isCurrentProfileLocked(task.userId)
+            if (mStackSupervisor.isCurrentProfileLocked(task.userId)
                     || task.topRunningActivityLocked(null) != null) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "switchUserLocked: stack=" + getStackId() +
                         " moving " + task + " to top");
@@ -2026,11 +2017,11 @@ final class ActivityStack {
         final boolean notShownWhenLocked =
                 (newActivity != null && (newActivity.info.flags & FLAG_SHOW_FOR_ALL_USERS) == 0)
                 || (newActivity == null && task.topRunningActivityLocked(null) == null);
-        if (!isCurrentProfileLocked(task.userId) && notShownWhenLocked) {
+        if (!mStackSupervisor.isCurrentProfileLocked(task.userId) && notShownWhenLocked) {
             // Put non-current user tasks below current user tasks.
             while (--taskNdx >= 0) {
                 final TaskRecord tmpTask = mTaskHistory.get(taskNdx);
-                if (!isCurrentProfileLocked(tmpTask.userId)
+                if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.userId)
                         || tmpTask.topRunningActivityLocked(null) == null) {
                     break;
                 }

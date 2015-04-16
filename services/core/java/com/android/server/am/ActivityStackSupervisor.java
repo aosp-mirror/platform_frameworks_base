@@ -24,6 +24,7 @@ import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
+import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
@@ -1381,8 +1382,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
+        final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
+
         if (err == ActivityManager.START_SUCCESS) {
-            final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
             Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
                     + "} from uid " + callingUid
                     + " on display " + (container == null ? (mFocusedStack == null ?
@@ -1406,7 +1408,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         final int launchFlags = intent.getFlags();
 
-        if ((launchFlags&Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0 && sourceRecord != null) {
+        if ((launchFlags & Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0 && sourceRecord != null) {
             // Transfer the result target from the source activity to the new
             // one being started, including any failures.
             if (requestCode >= 0) {
@@ -1448,6 +1450,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // We couldn't find the specific class specified in the Intent.
             // Also the end of the line.
             err = ActivityManager.START_CLASS_NOT_FOUND;
+        }
+
+        if (err == ActivityManager.START_SUCCESS
+                && !isCurrentProfileLocked(userId)
+                && (aInfo.flags & FLAG_SHOW_FOR_ALL_USERS) == 0) {
+            // Trying to launch a background activity that doesn't show for all users.
+            err = ActivityManager.START_NOT_CURRENT_USER_ACTIVITY;
         }
 
         if (err == ActivityManager.START_SUCCESS && sourceRecord != null
@@ -3229,6 +3238,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
      */
     public void startBackgroundUserLocked(int userId, UserStartedState uss) {
         mStartingBackgroundUsers.add(uss);
+    }
+
+    /** Checks whether the userid is a profile of the current user. */
+    boolean isCurrentProfileLocked(int userId) {
+        if (userId == mCurrentUser) return true;
+        for (int i = 0; i < mService.mCurrentProfileIds.length; i++) {
+            if (mService.mCurrentProfileIds[i] == userId) return true;
+        }
+        return false;
     }
 
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(boolean remove) {
