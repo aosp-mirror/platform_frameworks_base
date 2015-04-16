@@ -907,10 +907,11 @@
          what gets persisted. -->
     <attr name="persistableMode">
         <!-- The default. If this activity forms the root of a task then that task will be
-             persisted across reboots but only the launching intent will be used. All
-             activities above this activity in the task will not be persisted. In addition
-             this activity will not be passed a PersistableBundle into which it could have
-             stored its state. -->
+             persisted across reboots but only the launching intent will be used. If the task
+             relinquishes its identity then the intent used is that of the topmost inherited
+             identity. All activities above this activity in the task will not be persisted.
+             In addition this activity will not be passed a PersistableBundle into which it
+             could have stored its state. -->
         <enum name="persistRootOnly" value="0" />
         <!-- If this activity forms the root of a task then that task will not be persisted
              across reboots -->
