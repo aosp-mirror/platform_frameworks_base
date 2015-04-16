@@ -236,6 +236,9 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#TextView_elegantTextHeight
  * @attr ref android.R.styleable#TextView_letterSpacing
  * @attr ref android.R.styleable#TextView_fontFeatureSettings
+ * @attr ref android.R.styleable#TextView_breakStrategy
+ * @attr ref android.R.styleable#TextView_leftIndents
+ * @attr ref android.R.styleable#TextView_rightIndents
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
@@ -551,6 +554,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private float mSpacingAdd = 0.0f;
 
     private int mBreakStrategy;
+    private int[] mLeftIndents;
+    private int[] mRightIndents;
 
     private int mMaximum = Integer.MAX_VALUE;
     private int mMaxMode = LINES;
@@ -1146,6 +1151,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_breakStrategy:
                 mBreakStrategy = a.getInt(attr, Layout.BREAK_STRATEGY_SIMPLE);
+                break;
+
+            case com.android.internal.R.styleable.TextView_leftIndents:
+                TypedArray margins = res.obtainTypedArray(a.getResourceId(attr, View.NO_ID));
+                mLeftIndents = parseDimensionArray(margins);
+                break;
+
+            case com.android.internal.R.styleable.TextView_rightIndents:
+                margins = res.obtainTypedArray(a.getResourceId(attr, View.NO_ID));
+                mRightIndents = parseDimensionArray(margins);
+                break;
             }
         }
         a.recycle();
@@ -1419,6 +1435,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
+    }
+
+    private int[] parseDimensionArray(TypedArray dimens) {
+        if (dimens == null) {
+            return null;
+        }
+        int[] result = new int[dimens.length()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = dimens.getDimensionPixelSize(i, 0);
+        }
+        return result;
     }
 
     /**
@@ -3016,6 +3043,51 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Layout.BreakStrategy
     public int getBreakStrategy() {
         return mBreakStrategy;
+    }
+
+    /**
+     * Set indents. Arguments are arrays holding an indent amount, one per line, measured in
+     * pixels. For lines past the last element in the array, the last element repeats.
+     *
+     * @param leftIndents array of indent values for left margin, in pixels
+     * @param rightIndents array of indent values for right margin, in pixels
+     *
+     * @see #getLeftIndents()
+     * @see #getRightIndents()
+     *
+     * @attr ref android.R.styleable#TextView_leftIndents
+     * @attr ref android.R.styleable#TextView_rightIndents
+     */
+    public void setIndents(@Nullable int[] leftIndents, @Nullable int[] rightIndents) {
+        mLeftIndents = leftIndents;
+        mRightIndents = rightIndents;
+        if (mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    /**
+     * Get left indents. See {#link setMargins} for more details.
+     *
+     * @return left indents
+     * @see #setIndents(int[], int[])
+     * @attr ref android.R.styleable#TextView_leftIndents
+     */
+    public int[] getLeftIndents() {
+        return mLeftIndents;
+    }
+
+    /**
+     * Get right indents. See {#link setMargins} for more details.
+     *
+     * @return right indents
+     * @see #setIndents(int[], int[])
+     * @attr ref android.R.styleable#TextView_rightIndents
+     */
+    public int[] getRightIndents() {
+        return mRightIndents;
     }
 
     /**
@@ -6564,6 +6636,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setSpacingAdd(mSpacingAdd)
                         .setIncludePad(mIncludePad)
                         .setBreakStrategy(mBreakStrategy);
+                if (mLeftIndents != null || mRightIndents != null) {
+                    builder.setIndents(mLeftIndents, mRightIndents);
+                }
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
                             .setEllipsizedWidth(ellipsisWidth)
@@ -6652,6 +6727,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setSpacingAdd(mSpacingAdd)
                     .setIncludePad(mIncludePad)
                     .setBreakStrategy(mBreakStrategy);
+            if (mLeftIndents != null || mRightIndents != null) {
+                builder.setIndents(mLeftIndents, mRightIndents);
+            }
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
                         .setEllipsizedWidth(ellipsisWidth)
