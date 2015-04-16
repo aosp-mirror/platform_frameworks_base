@@ -517,13 +517,6 @@
         android:description="@string/permdesc_accessCoarseLocation"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to create mock location providers for testing. -->
-    <permission android:name="android.permission.ACCESS_MOCK_LOCATION"
-        android:permissionGroup="android.permission-group.LOCATION"
-        android:label="@string/permlab_accessMockLocation"
-        android:description="@string/permdesc_accessMockLocation"
-        android:protectionLevel="dangerous" />
-
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device telephony                         -->
     <!-- ====================================================================== -->
@@ -734,12 +727,6 @@
     <!-- =============================================================== -->
     <eat-comment />
 
-
-    <!-- =============================================================== -->
-    <!-- Permissions for accessing the user dictionary                   -->
-    <!-- =============================================================== -->
-    <eat-comment />
-
     <!-- Used for permissions that provide access to the user
          calendar to create / view events.-->
     <permission-group android:name="android.permission-group.USER_DICTIONARY"
@@ -847,6 +834,12 @@
     <permission android:name="android.permission.LOCATION_HARDWARE"
         android:protectionLevel="signature|system" />
     <uses-permission android:name="android.permission.LOCATION_HARDWARE"/>
+
+    <!-- Allows an application to create mock location providers for testing. -->
+    <permission android:name="android.permission.ACCESS_MOCK_LOCATION"
+        android:label="@string/permlab_accessMockLocation"
+        android:description="@string/permdesc_accessMockLocation"
+        android:protectionLevel="normal" />
 
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
