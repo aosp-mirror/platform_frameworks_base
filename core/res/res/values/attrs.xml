@@ -5790,6 +5790,20 @@
         <attr name="matchOrder" format="string" />
     </declare-styleable>
 
+    <!-- @hide For internal use only. Use only as directed. -->
+    <declare-styleable name="EpicenterClipReveal">
+        <attr name="centerClipBounds" format="boolean" />
+        <attr name="interpolatorX" format="reference" />
+        <attr name="interpolatorY" format="reference" />
+    </declare-styleable>
+
+    <!-- @hide For internal use only. Use only as directed. -->
+    <declare-styleable name="EpicenterTranslate">
+        <attr name="interpolatorX" />
+        <attr name="interpolatorY" />
+        <attr name="interpolatorZ" format="reference" />
+    </declare-styleable>
+
     <!-- Use <code>fade</code>as the root tag of the XML resource that
          describes a {@link android.transition.Fade Fade} transition.
          The attributes of the {@link android.R.styleable#Transition Transition}

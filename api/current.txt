@@ -34701,6 +34701,7 @@ package android.view {
     method protected int getBottomPaddingOffset();
     method public float getCameraDistance();
     method public android.graphics.Rect getClipBounds();
+    method public boolean getClipBounds(android.graphics.Rect);
     method public final boolean getClipToOutline();
     method public java.lang.CharSequence getContentDescription();
     method public final android.content.Context getContext();

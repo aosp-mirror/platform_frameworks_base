@@ -13,13 +13,20 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
                android:transitionOrdering="together">
-     <transition class="com.android.internal.transition.EpicenterClipReveal"
-         android:interpolator="@android:interpolator/accelerate_cubic"
-         android:startDelay="50"
-         android:duration="300" />
-     <fade
-         android:interpolator="@android:interpolator/linear"
-         android:duration="100" />
+    <!-- Start from location of epicenter, move to popup location. -->
+    <transition
+        class="com.android.internal.transition.EpicenterTranslate"
+        android:duration="300" />
+
+    <!-- Start from size of epicenter, expand to full width/height. -->
+    <transition
+        class="com.android.internal.transition.EpicenterClipReveal"
+        android:centerClipBounds="true"
+        android:duration="300" />
+
+    <!-- Quickly fade in. -->
+    <fade android:duration="100" />
 </transitionSet>
