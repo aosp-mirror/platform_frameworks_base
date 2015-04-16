@@ -97,7 +97,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         // Delete a character.
         final int start = Selection.getSelectionEnd(content);
         final int end;
-        if (isForwardDelete || event.isShiftPressed() || isShiftActive) {
+        if (isForwardDelete) {
             end = TextUtils.getOffsetAfter(content, start);
         } else {
             end = TextUtils.getOffsetBefore(content, start);
