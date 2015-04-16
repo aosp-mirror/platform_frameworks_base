@@ -167,6 +167,12 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
                     KeyStoreKeyProperties.UserAuthenticator.allToKeymaster(
                             spec.getUserAuthenticators()));
+            long secureUserId = GateKeeper.getSecureUserId();
+            if (secureUserId == 0) {
+                throw new IllegalStateException("Secure lock screen must be enabled"
+                        + " to generate keys requiring user authentication");
+            }
+            args.addLong(KeymasterDefs.KM_TAG_USER_SECURE_ID, secureUserId);
         }
         if (spec.isInvalidatedOnNewFingerprintEnrolled()) {
             // TODO: Add the invalidate on fingerprint enrolled constraint once Keymaster supports

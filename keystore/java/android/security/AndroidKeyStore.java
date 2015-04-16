@@ -535,6 +535,12 @@ public class AndroidKeyStore extends KeyStoreSpi {
             args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
                     KeyStoreKeyProperties.UserAuthenticator.allToKeymaster(
                             params.getUserAuthenticators()));
+            long secureUserId = GateKeeper.getSecureUserId();
+            if (secureUserId == 0) {
+                throw new IllegalStateException("Secure lock screen must be enabled"
+                        + " to import keys requiring user authentication");
+            }
+            args.addLong(KeymasterDefs.KM_TAG_USER_SECURE_ID, secureUserId);
         }
         if (params.isInvalidatedOnNewFingerprintEnrolled()) {
             // TODO: Add the invalidate on fingerprint enrolled constraint once Keymaster supports
