@@ -24,7 +24,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * BLAS
  *
- * @hide
  **/
 public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
     private Allocation mLUT;
@@ -1492,7 +1491,6 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
      *
      * 8-bit GEMM-like operation for neural networks
      *
-     * @hide
      **/
     public void BNNM(Allocation A, int a_offset, Allocation B, int b_offset, Allocation C, int c_offset, int c_mult) {
         validateL3(Element.U8(mRS), NO_TRANSPOSE, TRANSPOSE, 0, A, B, C);

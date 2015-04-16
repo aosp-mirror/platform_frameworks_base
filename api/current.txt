@@ -27990,6 +27990,62 @@ package android.renderscript {
     method public void setLUT(android.renderscript.Allocation);
   }
 
+  public final class ScriptIntrinsicBLAS extends android.renderscript.ScriptIntrinsic {
+    method public void BNNM(android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation, int, int);
+    method public void CGEMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
+    method public void CHEMM(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method public void CHER2K(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method public void CHERK(int, int, float, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method public void CSYMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
+    method public void CSYR2K(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
+    method public void CSYRK(int, int, float, float, android.renderscript.Allocation, float, float, android.renderscript.Allocation);
+    method public void CTRMM(int, int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void CTRSM(int, int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void DGEMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method public void DSYMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method public void DSYR2K(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method public void DSYRK(int, int, double, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method public void DTRMM(int, int, int, int, double, android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void DTRSM(int, int, int, int, double, android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void SGEMM(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method public void SSYMM(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method public void SSYR2K(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method public void SSYRK(int, int, float, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method public void STRMM(int, int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void STRSM(int, int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void ZGEMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
+    method public void ZHEMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method public void ZHER2K(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method public void ZHERK(int, int, double, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method public void ZSYMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
+    method public void ZSYR2K(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
+    method public void ZSYRK(int, int, double, double, android.renderscript.Allocation, double, double, android.renderscript.Allocation);
+    method public void ZTRMM(int, int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation);
+    method public void ZTRSM(int, int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation);
+    method public static android.renderscript.ScriptIntrinsicBLAS create(android.renderscript.RenderScript);
+    field public static final int CONJ_TRANSPOSE = 113; // 0x71
+    field public static final int LEFT = 141; // 0x8d
+    field public static final int LOWER = 122; // 0x7a
+    field public static final int NON_UNIT = 131; // 0x83
+    field public static final int NO_TRANSPOSE = 111; // 0x6f
+    field public static final int RIGHT = 142; // 0x8e
+    field public static final int TRANSPOSE = 112; // 0x70
+    field public static final int UNIT = 132; // 0x84
+    field public static final int UPPER = 121; // 0x79
+  }
+
+  public static abstract class ScriptIntrinsicBLAS.Diag implements java.lang.annotation.Annotation {
+  }
+
+  public static abstract class ScriptIntrinsicBLAS.Side implements java.lang.annotation.Annotation {
+  }
+
+  public static abstract class ScriptIntrinsicBLAS.Transpose implements java.lang.annotation.Annotation {
+  }
+
+  public static abstract class ScriptIntrinsicBLAS.Uplo implements java.lang.annotation.Annotation {
+  }
+
   public class ScriptIntrinsicBlend extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicBlend create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation);
