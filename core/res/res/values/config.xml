@@ -423,6 +423,9 @@
          point on the move. A value of 0 means no periodic scans will be used in the framework. -->
     <integer translatable="false" name="config_wifi_framework_scan_interval">300000</integer>
 
+    <!-- Integer indicating disconnect mode scan interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_disconnected_scan_interval">15000</integer>
+
     <!-- Integer indicating associated partial scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_framework_associated_scan_interval">20000</integer>
 
@@ -471,6 +474,9 @@
 
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
+
+    <!-- Wifi HAL supported PNO -->
+    <bool translatable="false" name="config_wifi_hal_pno_enable">false</bool>
 
     <!-- Idle Receive current for wifi radio. 0 by default-->
     <integer translatable="false" name="config_wifi_idle_receive_cur_ma">1</integer>
