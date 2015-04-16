@@ -20,7 +20,7 @@ import com.android.SdkConstants;
 import com.android.ide.common.rendering.api.ActionBarCallback;
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
-import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.resources.ResourceType;
@@ -28,10 +28,7 @@ import com.android.ide.common.resources.IntArrayWrapper;
 import com.android.util.Pair;
 import com.android.utils.ILogger;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -40,7 +37,7 @@ import java.util.Map;
 import com.google.android.collect.Maps;
 
 @SuppressWarnings("deprecation") // For Pair
-public class LayoutLibTestCallback extends ClassLoader implements IProjectCallback {
+public class LayoutLibTestCallback extends LayoutlibCallback {
 
     private static final String PROJECT_CLASSES_LOCATION = "/testApp/MyApplication/build/intermediates/classes/debug/";
     private static final String PACKAGE_NAME = "com.android.layoutlib.test.myapplication";
@@ -48,16 +45,16 @@ public class LayoutLibTestCallback extends ClassLoader implements IProjectCallba
     private final Map<Integer, Pair<ResourceType, String>> mProjectResources = Maps.newHashMap();
     private final Map<IntArrayWrapper, String> mStyleableValueToNameMap = Maps.newHashMap();
     private final Map<ResourceType, Map<String, Integer>> mResources = Maps.newHashMap();
-    private final Map<String, Class<?>> mClasses = Maps.newHashMap();
     private final ILogger mLog;
     private final ActionBarCallback mActionBarCallback = new ActionBarCallback();
+    private final ClassLoader mModuleClassLoader = new ModuleClassLoader(PROJECT_CLASSES_LOCATION);
 
     public LayoutLibTestCallback(ILogger logger) {
         mLog = logger;
     }
 
     public void initResources() throws ClassNotFoundException {
-        Class<?> rClass = loadClass(PACKAGE_NAME + ".R");
+        Class<?> rClass = mModuleClassLoader.loadClass(PACKAGE_NAME + ".R");
         Class<?>[] nestedClasses = rClass.getDeclaredClasses();
         for (Class<?> resClass : nestedClasses) {
             final ResourceType resType = ResourceType.getEnum(resClass.getSimpleName());
@@ -91,40 +88,11 @@ public class LayoutLibTestCallback extends ClassLoader implements IProjectCallba
         }
     }
 
-    @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
-        Class<?> aClass = mClasses.get(name);
-        if (aClass != null) {
-            return aClass;
-        }
-        String pathName = PROJECT_CLASSES_LOCATION.concat(name.replace('.', '/')).concat(".class");
-        InputStream classInputStream = getClass().getResourceAsStream(pathName);
-        if (classInputStream == null) {
-            throw new ClassNotFoundException("Unable to find class " + name + " at " + pathName);
-        }
-        byte[] data;
-        try {
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            int nRead;
-            data = new byte[16384];
-            while ((nRead = classInputStream.read(data, 0, data.length)) != -1) {
-                buffer.write(data, 0, nRead);
-            }
-            buffer.flush();
-            data = buffer.toByteArray();
-        } catch (IOException e) {
-            // Wrap the exception with ClassNotFoundException so that caller can deal with it.
-            throw new ClassNotFoundException("Unable to load class " + name, e);
-        }
-        aClass = defineClass(name, data, 0, data.length);
-        mClasses.put(name, aClass);
-        return aClass;
-    }
 
     @Override
     public Object loadView(String name, Class[] constructorSignature, Object[] constructorArgs)
             throws Exception {
-        Class<?> viewClass = findClass(name);
+        Class<?> viewClass = mModuleClassLoader.loadClass(name);
         Constructor<?> viewConstructor = viewClass.getConstructor(constructorSignature);
         viewConstructor.setAccessible(true);
         return viewConstructor.newInstance(constructorArgs);
@@ -179,5 +147,10 @@ public class LayoutLibTestCallback extends ClassLoader implements IProjectCallba
     @Override
     public ActionBarCallback getActionBarCallback() {
         return mActionBarCallback;
+    }
+
+    @Override
+    public boolean supports(int ideFeature) {
+        return false;
     }
 }

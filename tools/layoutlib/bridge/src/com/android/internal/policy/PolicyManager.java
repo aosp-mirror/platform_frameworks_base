@@ -43,7 +43,7 @@ public class PolicyManager {
     }
 
     public static LayoutInflater makeNewLayoutInflater(Context context) {
-        return new BridgeInflater(context, RenderAction.getCurrentContext().getProjectCallback());
+        return new BridgeInflater(context, RenderAction.getCurrentContext().getLayoutlibCallback());
     }
 
     public static WindowManagerPolicy makeNewWindowManager() {
