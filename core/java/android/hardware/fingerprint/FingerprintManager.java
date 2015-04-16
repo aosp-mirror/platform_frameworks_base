@@ -199,12 +199,12 @@ public class FingerprintManager {
      */
     public static class CryptoObject {
 
-        CryptoObject(Signature signature) {
+        public CryptoObject(Signature signature) {
             mSignature = signature;
             mCipher = null;
         }
 
-        CryptoObject(Cipher cipher) {
+        public CryptoObject(Cipher cipher) {
             mCipher = cipher;
             mSignature = null;
         }

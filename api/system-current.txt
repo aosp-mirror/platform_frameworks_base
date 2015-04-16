@@ -14096,6 +14096,8 @@ package android.hardware.fingerprint {
   }
 
   public static class FingerprintManager.CryptoObject {
+    ctor public FingerprintManager.CryptoObject(java.security.Signature);
+    ctor public FingerprintManager.CryptoObject(javax.crypto.Cipher);
     method public javax.crypto.Cipher getCipher();
     method public java.security.Signature getSignature();
   }
@@ -60221,3 +60223,4 @@ package org.xmlpull.v1.sax2 {
   }
 
 }
+
