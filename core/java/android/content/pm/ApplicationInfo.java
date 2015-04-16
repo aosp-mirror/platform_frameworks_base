@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Printer;
 
 import com.android.internal.util.ArrayUtils;
@@ -935,6 +936,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isUpdatedSystemApp() {
         return (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+    }
+
+    /** @hide */
+    public boolean isInternal() {
+        return (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0;
+    }
+
+    /** @hide */
+    public boolean isExternalAsec() {
+        return TextUtils.isEmpty(volumeUuid)
+                && (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
 
     /**

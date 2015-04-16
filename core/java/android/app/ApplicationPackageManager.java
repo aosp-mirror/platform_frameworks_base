@@ -67,6 +67,8 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
@@ -1422,6 +1424,61 @@ final class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
+    }
+
+    @Override
+    public @NonNull VolumeInfo getApplicationCurrentVolume(ApplicationInfo app) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        if (app.isInternal()) {
+            return Preconditions.checkNotNull(
+                    storage.findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL));
+        } else if (app.isExternalAsec()) {
+            final List<VolumeInfo> vols = storage.getVolumes();
+            for (VolumeInfo vol : vols) {
+                if ((vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isPrimary()) {
+                    return vol;
+                }
+            }
+            throw new IllegalStateException("Failed to find primary public volume");
+        } else {
+            return Preconditions.checkNotNull(storage.findVolumeByUuid(app.volumeUuid));
+        }
+    }
+
+    @Override
+    public @NonNull List<VolumeInfo> getApplicationCandidateVolumes(ApplicationInfo app) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final List<VolumeInfo> vols = storage.getVolumes();
+        final List<VolumeInfo> candidates = new ArrayList<>();
+        for (VolumeInfo vol : vols) {
+            if (isCandidateVolume(app, vol)) {
+                candidates.add(vol);
+            }
+        }
+        return candidates;
+    }
+
+    private static boolean isCandidateVolume(ApplicationInfo app, VolumeInfo vol) {
+        // Private internal is always an option
+        if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.getId())) {
+            return true;
+        }
+
+        // System apps and apps demanding internal storage can't be moved
+        // anywhere else
+        if (app.isSystemApp()
+                || app.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+            return false;
+        }
+
+        // Moving into an ASEC on public primary is only an option when app is
+        // internal, or already in ASEC
+        if ((vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isPrimary()) {
+            return app.isInternal() || app.isExternalAsec();
+        }
+
+        // Otherwise we can move to any private volume
+        return (vol.getType() == VolumeInfo.TYPE_PRIVATE);
     }
 
     @Override

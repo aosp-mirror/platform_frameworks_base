@@ -20,6 +20,7 @@ import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
@@ -4161,6 +4162,12 @@ public abstract class PackageManager {
     /** {@hide} */
     public abstract void movePackageAndData(String packageName, String volumeUuid,
             IPackageMoveObserver observer);
+
+    /** {@hide} */
+    public abstract @Nullable VolumeInfo getApplicationCurrentVolume(ApplicationInfo app);
+
+    /** {@hide} */
+    public abstract @NonNull List<VolumeInfo> getApplicationCandidateVolumes(ApplicationInfo app);
 
     /**
      * Returns the device identity that verifiers can use to associate their scheme to a particular
