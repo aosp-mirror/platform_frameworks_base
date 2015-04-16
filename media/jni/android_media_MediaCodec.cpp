@@ -70,6 +70,11 @@ static struct CodecActionCodes {
     jint codecActionRecoverable;
 } gCodecActionCodes;
 
+static struct ExceptionReason {
+    jint reasonHardware;
+    jint reasonReclaimed;
+} gExceptionReason;
+
 struct fields_t {
     jfieldID context;
     jmethodID postEventFromNativeID;
@@ -568,7 +573,7 @@ static jthrowable createCodecException(
             env, env->FindClass("android/media/MediaCodec$CodecException"));
     CHECK(clazz.get() != NULL);
 
-    const jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "(IILjava/lang/String;)V");
+    const jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "(IILjava/lang/String;I)V");
     CHECK(ctor != NULL);
 
     ScopedLocalRef<jstring> msgObj(
@@ -587,7 +592,9 @@ static jthrowable createCodecException(
         break;
     }
 
-    return (jthrowable)env->NewObject(clazz.get(), ctor, err, actionCode, msgObj.get());
+    // TODO: propagate reason from MediaCodec.
+    int reason = gExceptionReason.reasonHardware;
+    return (jthrowable)env->NewObject(clazz.get(), ctor, err, actionCode, msgObj.get(), reason);
 }
 
 void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
@@ -1453,6 +1460,16 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     field = env->GetStaticFieldID(clazz.get(), "ACTION_RECOVERABLE", "I");
     CHECK(field != NULL);
     gCodecActionCodes.codecActionRecoverable =
+        env->GetStaticIntField(clazz.get(), field);
+
+    field = env->GetStaticFieldID(clazz.get(), "REASON_HARDWARE", "I");
+    CHECK(field != NULL);
+    gExceptionReason.reasonHardware =
+        env->GetStaticIntField(clazz.get(), field);
+
+    field = env->GetStaticFieldID(clazz.get(), "REASON_RECLAIMED", "I");
+    CHECK(field != NULL);
+    gExceptionReason.reasonReclaimed =
         env->GetStaticIntField(clazz.get(), field);
 }
 
