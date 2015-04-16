@@ -150,6 +150,7 @@ public class Type extends BaseObj {
     }
 
     /**
+     * @hide
       * Return the dimension of the specified array.
       *
       * @param arrayNum  The array dimension to query
@@ -169,6 +170,7 @@ public class Type extends BaseObj {
     }
 
     /**
+     * @hide
       * Return the number of array dimensions.
       *
       * @return int
@@ -382,6 +384,7 @@ public class Type extends BaseObj {
         }
 
         /**
+         * @hide
          * Adds an array dimension to the builder
          *
          * @param dim

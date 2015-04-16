@@ -208,7 +208,7 @@ public class AllocationAdapter extends Allocation {
     }
 
     /**
-     *
+     * @hide
      */
     public void setArray(int arrayNum, int arrayVal) {
         if (mAdaptedAllocation.getType().getArray(arrayNum) == 0) {
