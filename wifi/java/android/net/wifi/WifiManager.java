@@ -20,10 +20,16 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.net.DhcpInfo;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.wifi.ScanSettings;
 import android.net.wifi.WifiChannel;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -38,6 +44,7 @@ import android.util.SparseArray;
 import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
@@ -568,6 +575,7 @@ public class WifiManager {
 
     private Context mContext;
     IWifiManager mService;
+    private final int mTargetSdkVersion;
 
     private static final int INVALID_KEY = 0;
     private static int sListenerKey = 1;
@@ -576,10 +584,16 @@ public class WifiManager {
 
     private static AsyncChannel sAsyncChannel;
     private static CountDownLatch sConnected;
+    private static ConnectivityManager sCM;
 
     private static final Object sThreadRefLock = new Object();
     private static int sThreadRefCount;
     private static HandlerThread sHandlerThread;
+
+    @GuardedBy("sCM")
+    // TODO: Introduce refcounting and make this a per-process static callback, instead of a
+    // per-WifiManager callback.
+    private PinningNetworkCallback mNetworkCallback;
 
     /**
      * Create a new WifiManager instance.
@@ -594,6 +608,7 @@ public class WifiManager {
     public WifiManager(Context context, IWifiManager service) {
         mContext = context;
         mService = service;
+        mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
         init();
     }
 
@@ -740,6 +755,20 @@ public class WifiManager {
      * networks are disabled, and an attempt to connect to the selected
      * network is initiated. This may result in the asynchronous delivery
      * of state change events.
+     * <p>
+     * <b>Note:</b> If an application's target SDK version is
+     * {@link android.os.Build.VERSION_CODES#MNC} or newer, network
+     * communication may not use Wi-Fi even if Wi-Fi is connected; traffic may
+     * instead be sent through another network, such as cellular data,
+     * Bluetooth tethering, or Ethernet. For example, traffic will never use a
+     * Wi-Fi network that does not provide Internet access (e.g. a wireless
+     * printer), if another network that does offer Internet access (e.g.
+     * cellular data) is available. Applications that need to ensure that their
+     * network traffic uses Wi-Fi should use APIs such as
+     * {@link Network#bindSocket(java.net.Socket)},
+     * {@link Network#openConnection(java.net.URL)}, or
+     * {@link ConnectivityManager#bindProcessToNetwork} to do so.
+     *
      * @param netId the ID of the network in the list of configured networks
      * @param disableOthers if true, disable all other networks. The way to
      * select a particular network to connect to is specify {@code true}
@@ -747,11 +776,23 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      */
     public boolean enableNetwork(int netId, boolean disableOthers) {
-        try {
-            return mService.enableNetwork(netId, disableOthers);
-        } catch (RemoteException e) {
-            return false;
+        final boolean pin = disableOthers && mTargetSdkVersion < Build.VERSION_CODES.MNC;
+        if (pin) {
+            registerPinningNetworkCallback();
         }
+
+        boolean success;
+        try {
+            success = mService.enableNetwork(netId, disableOthers);
+        } catch (RemoteException e) {
+            success = false;
+        }
+
+        if (pin && !success) {
+            unregisterPinningNetworkCallback();
+        }
+
+        return success;
     }
 
     /**
@@ -1949,6 +1990,92 @@ public class WifiManager {
     private void validateChannel() {
         if (sAsyncChannel == null) throw new IllegalStateException(
                 "No permission to access and change wifi or a bad initialization");
+    }
+
+    private void initConnectivityManager() {
+        // TODO: what happens if an app calls a WifiManager API before ConnectivityManager is
+        // registered? Can we fix this by starting ConnectivityService before WifiService?
+        if (sCM == null) {
+            sCM = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (sCM == null) {
+                throw new IllegalStateException("Bad luck, ConnectivityService not started.");
+            }
+        }
+    }
+
+    /**
+     * A NetworkCallback that pins the process to the first wifi network to connect.
+     *
+     * We use this to maintain compatibility with pre-M apps that call WifiManager.enableNetwork()
+     * to connect to a Wi-Fi network that has no Internet access, and then assume that they will be
+     * able to use that network because it's the system default.
+     *
+     * In order to maintain compatibility with apps that call setProcessDefaultNetwork themselves,
+     * we try not to set the default network unless they have already done so, and we try not to
+     * clear the default network unless we set it ourselves.
+     *
+     * This should maintain behaviour that's compatible with L, which would pin the whole system to
+     * any wifi network that was created via enableNetwork(..., true) until that network
+     * disconnected.
+     *
+     * Note that while this hack allows network traffic to flow, it is quite limited. For example:
+     *
+     * 1. setProcessDefaultNetwork only affects this process, so:
+     *    - Any subprocesses spawned by this process will not be pinned to Wi-Fi.
+     *    - If this app relies on any other apps on the device also being on Wi-Fi, that won't work
+     *      either, because other apps on the device will not be pinned.
+     * 2. The behaviour of other APIs is not modified. For example:
+     *    - getActiveNetworkInfo will return the system default network, not Wi-Fi.
+     *    - There will be no CONNECTIVITY_ACTION broadcasts about TYPE_WIFI.
+     *    - getProcessDefaultNetwork will not return null, so if any apps are relying on that, they
+     *      will be surprised as well.
+     */
+    private class PinningNetworkCallback extends NetworkCallback {
+        private Network mPinnedNetwork;
+
+        @Override
+        public void onPreCheck(Network network) {
+            if (sCM.getProcessDefaultNetwork() == null && mPinnedNetwork == null) {
+                sCM.setProcessDefaultNetwork(network);
+                mPinnedNetwork = network;
+                Log.d(TAG, "Wifi alternate reality enabled on network " + network);
+            }
+        }
+
+        @Override
+        public void onLost(Network network) {
+            if (network.equals(mPinnedNetwork) && network.equals(sCM.getProcessDefaultNetwork())) {
+                sCM.setProcessDefaultNetwork(null);
+                Log.d(TAG, "Wifi alternate reality disabled on network " + network);
+                mPinnedNetwork = null;
+                unregisterPinningNetworkCallback();
+            }
+        }
+    }
+
+    private void registerPinningNetworkCallback() {
+        initConnectivityManager();
+        synchronized (sCM) {
+            if (mNetworkCallback == null) {
+                // TODO: clear all capabilities.
+                NetworkRequest request = new NetworkRequest.Builder()
+                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .build();
+                mNetworkCallback = new PinningNetworkCallback();
+                sCM.registerNetworkCallback(request, mNetworkCallback);
+            }
+        }
+    }
+
+    private void unregisterPinningNetworkCallback() {
+        initConnectivityManager();
+        synchronized (sCM) {
+            if (mNetworkCallback != null) {
+                sCM.unregisterNetworkCallback(mNetworkCallback);
+                mNetworkCallback = null;
+            }
+        }
     }
 
     /**

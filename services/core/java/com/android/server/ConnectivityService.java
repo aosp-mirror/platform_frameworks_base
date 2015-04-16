@@ -4255,9 +4255,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             networkAgent.created = true;
             updateLinkProperties(networkAgent, null);
             notifyIfacesChanged();
-            notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
+
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
             scheduleUnvalidatedPrompt(networkAgent);
+
             if (networkAgent.isVPN()) {
                 // Temporarily disable the default proxy (not global).
                 synchronized (mProxyLock) {
@@ -4270,9 +4271,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 // TODO: support proxy per network.
             }
+
             // Consider network even though it is not yet validated.
             rematchNetworkAndRequests(networkAgent, NascentState.NOT_JUST_VALIDATED,
                     ReapUnvalidatedNetworks.REAP);
+
+            // This has to happen after matching the requests, because callbacks are just requests.
+            notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
         } else if (state == NetworkInfo.State.DISCONNECTED ||
                 state == NetworkInfo.State.SUSPENDED) {
             networkAgent.asyncChannel.disconnect();
