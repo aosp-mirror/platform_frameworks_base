@@ -441,7 +441,8 @@ public class StatusBarKeyguardViewManager {
         mPhoneStatusBar.keyguardGoingAway();
     }
 
-    public void animateCollapsePanels() {
-        mPhoneStatusBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+    public void animateCollapsePanels(float speedUpFactor) {
+        mPhoneStatusBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
+                false /* delayed */, speedUpFactor);
     }
 }

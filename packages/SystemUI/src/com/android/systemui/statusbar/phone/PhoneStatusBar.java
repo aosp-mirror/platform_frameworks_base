@@ -1981,14 +1981,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void animateCollapsePanels(int flags) {
-        animateCollapsePanels(flags, false /* force */, false /* delayed */);
+        animateCollapsePanels(flags, false /* force */, false /* delayed */,
+                1.0f /* speedUpFactor */);
     }
 
     public void animateCollapsePanels(int flags, boolean force) {
-        animateCollapsePanels(flags, force, false /* delayed*/);
+        animateCollapsePanels(flags, force, false /* delayed */, 1.0f /* speedUpFactor */);
     }
 
     public void animateCollapsePanels(int flags, boolean force, boolean delayed) {
+        animateCollapsePanels(flags, force, delayed, 1.0f /* speedUpFactor */);
+    }
+
+    public void animateCollapsePanels(int flags, boolean force, boolean delayed,
+            float speedUpFactor) {
         if (!force &&
                 (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
             runPostCollapseRunnables();
@@ -2012,7 +2018,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindowManager.setStatusBarFocusable(false);
 
             mStatusBarWindow.cancelExpandHelper();
-            mStatusBarView.collapseAllPanels(true /* animate */, delayed);
+            mStatusBarView.collapseAllPanels(true /* animate */, delayed, speedUpFactor);
         }
     }
 
@@ -2055,7 +2061,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void animateCollapseQuickSettings() {
         if (mState == StatusBarState.SHADE) {
-            mStatusBarView.collapseAllPanels(true, false /* delayed */);
+            mStatusBarView.collapseAllPanels(true, false /* delayed */, 1.0f /* speedUpFactor */);
         }
     }
 
@@ -2068,7 +2074,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-        mStatusBarView.collapseAllPanels(/*animate=*/ false, false /* delayed*/);
+        mStatusBarView.collapseAllPanels(/*animate=*/ false, false /* delayed*/,
+                1.0f /* speedUpFactor */);
 
         mNotificationPanel.closeQs();
 
@@ -2158,7 +2165,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
             if (!showing && mState == StatusBarState.SHADE) {
-                mStatusBarView.collapseAllPanels(false /* animate */, false /* delayed */);
+                mStatusBarView.collapseAllPanels(false /* animate */, false /* delayed */,
+                        1.0f /* speedUpFactor */);
             }
         }
         if (mNavigationBarView != null

@@ -511,9 +511,10 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    protected void flingToHeight(float vel, boolean expand, float target) {
+    protected void flingToHeight(float vel, boolean expand, float target,
+            float collapseSpeedUpFactor) {
         mHeadsUpTouchHelper.notifyFling(!expand);
-        super.flingToHeight(vel, expand, target);
+        super.flingToHeight(vel, expand, target, collapseSpeedUpFactor);
     }
 
     @Override
