@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,12 +15,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false">
-        <bitmap android:src="@drawable/scrubber_control_off_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
-    <item>
-        <bitmap android:src="@drawable/scrubber_control_on_mtrl_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
+    <item android:state_enabled="false"
+          android:color="?attr/colorControlNormal" />
+    <item android:color="?attr/colorControlActivated" />
 </selector>

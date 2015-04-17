@@ -118,7 +118,9 @@
     <!-- Padding above and below selection dialog lists. -->
     <dimen name="dialog_list_padding_vertical_material">8dp</dimen>
 
-    <dimen name="scrubber_track_height_material">2dp</dimen>
+    <dimen name="seekbar_track_background_height_material">2dp</dimen>
+    <dimen name="seekbar_track_progress_height_material">2dp</dimen>
+
     <dimen name="progress_bar_height_material">4dp</dimen>
 
     <!-- Material time picker dimensions. -->
