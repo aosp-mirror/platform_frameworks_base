@@ -283,7 +283,7 @@ public class DisplayListCanvas extends Canvas {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawPatch(mNativeCanvasWrapper, bitmap, patch.mNativeChunk,
+        nDrawPatch(mNativeCanvasWrapper, bitmap.getSkBitmap(), patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
@@ -293,11 +293,11 @@ public class DisplayListCanvas extends Canvas {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawPatch(mNativeCanvasWrapper, bitmap, patch.mNativeChunk,
+        nDrawPatch(mNativeCanvasWrapper, bitmap.getSkBitmap(), patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
-    private static native void nDrawPatch(long renderer, Bitmap bitmap, long chunk,
+    private static native void nDrawPatch(long renderer, long bitmap, long chunk,
             float left, float top, float right, float bottom, long paint);
 
     public void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,

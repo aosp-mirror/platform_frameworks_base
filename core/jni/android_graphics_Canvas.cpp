@@ -318,12 +318,11 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
                                            indices, indexCount, *paint);
 }
 
-static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject jbitmap,
+static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jlong bitmapHandle,
                        jfloat left, jfloat top, jlong paintHandle, jint canvasDensity,
                        jint screenDensity, jint bitmapDensity) {
     Canvas* canvas = get_canvas(canvasHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
     if (canvasDensity == bitmapDensity || canvasDensity == 0 || bitmapDensity == 0) {
@@ -333,9 +332,9 @@ static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject
                 filteredPaint = *paint;
             }
             filteredPaint.setFilterQuality(kLow_SkFilterQuality);
-            canvas->drawBitmap(bitmap, left, top, &filteredPaint);
+            canvas->drawBitmap(*bitmap, left, top, &filteredPaint);
         } else {
-            canvas->drawBitmap(bitmap, left, top, paint);
+            canvas->drawBitmap(*bitmap, left, top, paint);
         }
     } else {
         canvas->save(SkCanvas::kMatrixClip_SaveFlag);
@@ -349,39 +348,37 @@ static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject
         }
         filteredPaint.setFilterQuality(kLow_SkFilterQuality);
 
-        canvas->drawBitmap(bitmap, 0, 0, &filteredPaint);
+        canvas->drawBitmap(*bitmap, 0, 0, &filteredPaint);
         canvas->restore();
     }
 }
 
-static void drawBitmapMatrix(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
+static void drawBitmapMatrix(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
                              jlong matrixHandle, jlong paintHandle) {
+    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
-    get_canvas(canvasHandle)->drawBitmap(bitmap, *matrix, paint);
+    get_canvas(canvasHandle)->drawBitmap(*bitmap, *matrix, paint);
 }
 
-static void drawBitmapRect(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
+static void drawBitmapRect(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
                            float srcLeft, float srcTop, float srcRight, float srcBottom,
                            float dstLeft, float dstTop, float dstRight, float dstBottom,
                            jlong paintHandle, jint screenDensity, jint bitmapDensity) {
     Canvas* canvas = get_canvas(canvasHandle);
+    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
 
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     if (screenDensity != 0 && screenDensity != bitmapDensity) {
         Paint filteredPaint;
         if (paint) {
             filteredPaint = *paint;
         }
         filteredPaint.setFilterQuality(kLow_SkFilterQuality);
-        canvas->drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
+        canvas->drawBitmap(*bitmap, srcLeft, srcTop, srcRight, srcBottom,
                            dstLeft, dstTop, dstRight, dstBottom, &filteredPaint);
     } else {
-        canvas->drawBitmap(bitmap, srcLeft, srcTop, srcRight, srcBottom,
+        canvas->drawBitmap(*bitmap, srcLeft, srcTop, srcRight, srcBottom,
                            dstLeft, dstTop, dstRight, dstBottom, paint);
     }
 }
@@ -409,17 +406,16 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
     get_canvas(canvasHandle)->drawBitmap(bitmap, x, y, paint);
 }
 
-static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
+static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
                            jint meshWidth, jint meshHeight, jfloatArray jverts,
                            jint vertIndex, jintArray jcolors, jint colorIndex, jlong paintHandle) {
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     AutoJavaFloatArray vertA(env, jverts, vertIndex + (ptCount << 1));
     AutoJavaIntArray colorA(env, jcolors, colorIndex + ptCount);
 
+    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
-    get_canvas(canvasHandle)->drawBitmapMesh(bitmap, meshWidth, meshHeight,
+    get_canvas(canvasHandle)->drawBitmapMesh(*bitmap, meshWidth, meshHeight,
                                              vertA.ptr(), colorA.ptr(), paint);
 }
 
@@ -704,11 +700,11 @@ static JNINativeMethod gMethods[] = {
     {"native_drawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
     {"native_drawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
     {"nativeDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
-    {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
-    {"nativeDrawBitmapMatrix", "(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
-    {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
+    {"native_drawBitmap","(JJFFJIII)V", (void*) CanvasJNI::drawBitmap},
+    {"nativeDrawBitmapMatrix", "(JJJJ)V", (void*)CanvasJNI::drawBitmapMatrix},
+    {"native_drawBitmap","(JJFFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
     {"native_drawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
-    {"nativeDrawBitmapMesh", "(JLandroid/graphics/Bitmap;II[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
+    {"nativeDrawBitmapMesh", "(JJII[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
     {"native_drawText","(J[CIIFFIJJ)V", (void*) CanvasJNI::drawTextChars},
     {"native_drawText","(JLjava/lang/String;IIFFIJJ)V", (void*) CanvasJNI::drawTextString},
     {"native_drawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
