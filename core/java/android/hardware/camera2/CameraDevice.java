@@ -580,7 +580,8 @@ public abstract class CameraDevice implements AutoCloseable {
          * indicating that the camera device is in use already.
          *
          * <p>
-         * This error can be produced when opening the camera fails.
+         * This error can be produced when opening the camera fails due to the camera
+        *  being used by a higher-priority camera API client.
          * </p>
          *
          * @see #onError
@@ -678,7 +679,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * {@link CameraAccessException}. The disconnection could be due to a
          * change in security policy or permissions; the physical disconnection
          * of a removable camera device; or the camera being needed for a
-         * higher-priority use case.</p>
+         * higher-priority camera API client.</p>
          *
          * <p>There may still be capture callbacks that are invoked
          * after this method is called, or new image buffers that are delivered
@@ -688,8 +689,9 @@ public abstract class CameraDevice implements AutoCloseable {
          * about the disconnection.</p>
          *
          * <p>You should clean up the camera with {@link CameraDevice#close} after
-         * this happens, as it is not recoverable until opening the camera again
-         * after it becomes {@link CameraManager.AvailabilityCallback#onCameraAvailable available}.
+         * this happens, as it is not recoverable until the camera can be opened
+         * again. For most use cases, this will be when the camera again becomes
+         * {@link CameraManager.AvailabilityCallback#onCameraAvailable available}.
          * </p>
          *
          * @param camera the device that has been disconnected
