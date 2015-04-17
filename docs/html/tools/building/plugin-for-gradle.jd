@@ -15,7 +15,7 @@ page.title=Android Plug-in for Gradle
 <li><a href="{@docRoot}sdk/installing/studio-build.html">
 Build System Overview</a></li>
 <li><a href="{@docRoot}tools/building/index.html">
-Buidling and Running</a></li>
+Building and Running</a></li>
 <li><a href="{@docRoot}tools/building/building-studio.html">
 Building and Running from Android Studio</a></li>
 </ul>
@@ -273,16 +273,9 @@ tasks are:</p>
    <dd><p>Performs the clean.</p></dd>
 </dl>
 
-<p>The Android plugin provides additional tasks for <em>connectedCheck</em> and <em>deviceCheck</em>
+<p>The Android plugin provides the <em>connectedCheck</em> and <em>deviceCheck</em> tasks
 for checks run on connected, emulated, and remote devices. Gradle tasks can be viewed by clicking
-the Gradle tab</a> in the right margin.
-<img src="{@docRoot}images/tools/studio-gradle-tab.png"></p>
-<p class="img-caption"><strong>Figure 1:</strong> Gradle tab</p>
-
-<p>Running a top-level task, runs all the dependent tasks. For example, the <em>assemble</em> task
-has dependent tasks for <em>assembleDebug</em> and <em>assembleRelease</em> to make the debug and
-release APKs. The <em>assemble</em> task depends on these tasks so calling it builds both APKs.
-These tasks can also be called independently to build the debug or release APK separately. </p>
+the Gradle tab</a> in the right margin.</p>
 
 <p>You can view the list of available tasks and invoke any task from Android Studio and from
 the command line, as described in
