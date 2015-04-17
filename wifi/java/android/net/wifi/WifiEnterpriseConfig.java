@@ -596,7 +596,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * match test-example.com.
      * @param domain The domain value
      */
-    public void setDomSuffixMatch(String domain) {
+    public void setDomainSuffixMatch(String domain) {
         setFieldValue(DOM_SUFFIX_MATCH_KEY, domain);
     }
 
@@ -604,7 +604,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * Get the domain_suffix_match value. See setDomSuffixMatch.
      * @return The domain value.
      */
-    public String getDomSubjectMatch() {
+    public String getDomainSubjectMatch() {
         return getFieldValue(DOM_SUFFIX_MATCH_KEY, "");
     }
 
