@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.Manifest;
 import android.annotation.SystemApi;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -212,8 +213,10 @@ public class AppOpsManager {
     public static final int OP_ASSIST_STRUCTURE = 49;
     /** @hide Received a screenshot from assist. */
     public static final int OP_ASSIST_SCREENSHOT = 50;
+    /** @hide Read the phone state. */
+    public static final int OP_READ_PHONE_STATE = 51;
     /** @hide */
-    public static final int _NUM_OP = 51;
+    public static final int _NUM_OP = 52;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -294,6 +297,7 @@ public class AppOpsManager {
             OP_WRITE_WALLPAPER,
             OP_ASSIST_STRUCTURE,
             OP_ASSIST_SCREENSHOT,
+            OP_READ_PHONE_STATE
     };
 
     /**
@@ -352,6 +356,7 @@ public class AppOpsManager {
             null,
             null,
             null,
+            null
     };
 
     /**
@@ -409,7 +414,8 @@ public class AppOpsManager {
             "ACTIVATE_VPN",
             "WRITE_WALLPAPER",
             "ASSIST_STRUCTURE",
-            "ASSIST_SCREENSHOT"
+            "ASSIST_SCREENSHOT",
+            "OP_READ_PHONE_STATE"
     };
 
     /**
@@ -468,6 +474,7 @@ public class AppOpsManager {
             null, // no permission for supporting wallpaper
             null, // no permission for receiving assist structure
             null, // no permission for receiving assist screenshot
+            Manifest.permission.READ_PHONE_STATE
     };
 
     /**
@@ -527,6 +534,7 @@ public class AppOpsManager {
             UserManager.DISALLOW_WALLPAPER, // WRITE_WALLPAPER
             null, // ASSIST_STRUCTURE
             null, // ASSIST_SCREENSHOT
+            null  // READ_PHONE_STATE
     };
 
     /**
@@ -585,6 +593,7 @@ public class AppOpsManager {
             false, //WALLPAPER
             false, //ASSIST_STRUCTURE
             false, //ASSIST_SCREENSHOT
+            false, //READ_PHONE_STATE
     };
 
     /**
@@ -642,6 +651,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED
     };
 
     /**
@@ -703,6 +713,7 @@ public class AppOpsManager {
             false,
             false,
             false,
+            false
     };
 
     private static HashMap<String, Integer> sOpStrToOp = new HashMap<String, Integer>();

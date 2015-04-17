@@ -272,10 +272,6 @@ public class SubscriptionManager {
      * for #onSubscriptionsChanged to be invoked.
      */
     public static class OnSubscriptionsChangedListener {
-        /** @hide */
-        public static final String PERMISSION_ON_SUBSCRIPTIONS_CHANGED =
-                android.Manifest.permission.READ_PHONE_STATE;
-
         private final Handler mHandler  = new Handler() {
             @Override
             public void handleMessage(Message msg) {

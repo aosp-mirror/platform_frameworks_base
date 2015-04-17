@@ -74,6 +74,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.IProcessObserver;
@@ -136,6 +137,7 @@ import android.util.SparseIntArray;
 import android.util.TrustedTime;
 import android.util.Xml;
 
+import com.android.server.AppOpsService;
 import libcore.io.IoUtils;
 
 import com.android.internal.R;
@@ -292,6 +294,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final AtomicFile mPolicyFile;
 
+    private final AppOpsManager mAppOps;
+
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
 
@@ -326,6 +330,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mSuppressDefaultPolicy = suppressDefaultPolicy;
 
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"));
+
+        mAppOps = context.getSystemService(AppOpsManager.class);
     }
 
     public void bindConnectivityManager(IConnectivityManager connManager) {
@@ -1593,15 +1599,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     void addNetworkPolicyLocked(NetworkPolicy policy) {
-        NetworkPolicy[] policies = getNetworkPolicies();
+        NetworkPolicy[] policies = getNetworkPolicies(mContext.getOpPackageName());
         policies = ArrayUtils.appendElement(NetworkPolicy.class, policies, policy);
         setNetworkPolicies(policies);
     }
 
     @Override
-    public NetworkPolicy[] getNetworkPolicies() {
+    public NetworkPolicy[] getNetworkPolicies(String callingPackage) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
         mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, TAG);
+
+        if (mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return new NetworkPolicy[0];
+        }
 
         synchronized (mRulesLock) {
             final int size = mNetworkPolicy.size();
@@ -1614,7 +1625,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void normalizePoliciesLocked() {
-        normalizePoliciesLocked(getNetworkPolicies());
+        normalizePoliciesLocked(getNetworkPolicies(mContext.getOpPackageName()));
     }
 
     private void normalizePoliciesLocked(NetworkPolicy[] policies) {

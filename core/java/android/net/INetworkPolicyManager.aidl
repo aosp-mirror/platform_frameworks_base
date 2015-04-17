@@ -45,7 +45,7 @@ interface INetworkPolicyManager {
 
     /** Control network policies atomically. */
     void setNetworkPolicies(in NetworkPolicy[] policies);
-    NetworkPolicy[] getNetworkPolicies();
+    NetworkPolicy[] getNetworkPolicies(String callingPackage);
 
     /** Snooze limit on policy matching given template. */
     void snoozeLimit(in NetworkTemplate template);

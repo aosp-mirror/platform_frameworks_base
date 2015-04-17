@@ -61,12 +61,14 @@ public class NetworkPolicyManager {
      */
     public static final String EXTRA_NETWORK_TEMPLATE = "android.net.NETWORK_TEMPLATE";
 
+    private final Context mContext;
     private INetworkPolicyManager mService;
 
-    public NetworkPolicyManager(INetworkPolicyManager service) {
+    public NetworkPolicyManager(Context context, INetworkPolicyManager service) {
         if (service == null) {
             throw new IllegalArgumentException("missing INetworkPolicyManager");
         }
+        mContext = context;
         mService = service;
     }
 
@@ -158,7 +160,7 @@ public class NetworkPolicyManager {
 
     public NetworkPolicy[] getNetworkPolicies() {
         try {
-            return mService.getNetworkPolicies();
+            return mService.getNetworkPolicies(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
         }

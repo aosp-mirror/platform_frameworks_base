@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -84,7 +85,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private static final boolean VDBG = false; // STOPSHIP if true
 
     private static class Record {
-        String pkgForDebug;
+        String callingPackage;
 
         IBinder binder;
 
@@ -109,7 +110,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         @Override
         public String toString() {
-            return "{pkgForDebug=" + pkgForDebug + " binder=" + binder + " callback=" + callback
+            return "{callingPackage=" + callingPackage + " binder=" + binder
+                    + " callback=" + callback
                     + " onSubscriptionsChangedListenererCallback="
                                             + onSubscriptionsChangedListenerCallback
                     + " callerUid=" + callerUid + " subId=" + subId + " phoneId=" + phoneId
@@ -124,6 +126,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private final ArrayList<Record> mRecords = new ArrayList<Record>();
 
     private final IBatteryStats mBatteryStats;
+
+    private final AppOpsManager mAppOps;
 
     private boolean hasNotifySubscriptionInfoChangedOccurred = false;
 
@@ -327,6 +331,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
         mConnectedApns = new ArrayList<String>();
+
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
     }
 
     public void systemRunning() {
@@ -340,18 +346,24 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void addOnSubscriptionsChangedListener(String pkgForDebug,
+    public void addOnSubscriptionsChangedListener(String callingPackage,
             IOnSubscriptionsChangedListener callback) {
         int callerUid = UserHandle.getCallingUserId();
         int myUid = UserHandle.myUserId();
         if (VDBG) {
-            log("listen oscl: E pkg=" + pkgForDebug + " myUid=" + myUid
+            log("listen oscl: E pkg=" + callingPackage + " myUid=" + myUid
                 + " callerUid="  + callerUid + " callback=" + callback
                 + " callback.asBinder=" + callback.asBinder());
         }
 
-        /* Checks permission and throws Security exception */
-        checkOnSubscriptionsChangedListenerPermission();
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.READ_PHONE_STATE, null);
+
+        if (mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return;
+        }
+
         Record r = null;
 
         synchronized (mRecords) {
@@ -372,7 +384,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
 
             r.onSubscriptionsChangedListenerCallback = callback;
-            r.pkgForDebug = pkgForDebug;
+            r.callingPackage = callingPackage;
             r.callerUid = callerUid;
             r.events = 0;
             if (DBG) {
@@ -399,12 +411,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             IOnSubscriptionsChangedListener callback) {
         if (DBG) log("listen oscl: Unregister");
         remove(callback.asBinder());
-    }
-
-    private void checkOnSubscriptionsChangedListenerPermission() {
-        mContext.enforceCallingOrSelfPermission(
-                SubscriptionManager.OnSubscriptionsChangedListener
-                    .PERMISSION_ON_SUBSCRIPTIONS_CHANGED, null);
     }
 
     @Override
@@ -446,12 +452,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         listen(pkgForDebug, callback, events, notifyNow, subId);
     }
 
-    private void listen(String pkgForDebug, IPhoneStateListener callback, int events,
+    private void listen(String callingPackage, IPhoneStateListener callback, int events,
             boolean notifyNow, int subId) {
         int callerUid = UserHandle.getCallingUserId();
         int myUid = UserHandle.myUserId();
         if (VDBG) {
-            log("listen: E pkg=" + pkgForDebug + " events=0x" + Integer.toHexString(events)
+            log("listen: E pkg=" + callingPackage + " events=0x" + Integer.toHexString(events)
                 + " notifyNow=" + notifyNow + " subId=" + subId + " myUid=" + myUid
                 + " callerUid=" + callerUid);
         }
@@ -459,6 +465,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (events != PhoneStateListener.LISTEN_NONE) {
             /* Checks permission and throws Security exception */
             checkListenerPermission(events);
+
+            if ((events & PHONE_STATE_PERMISSION_MASK) != 0) {
+                if (mAppOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, Binder.getCallingUid(),
+                        callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                    return;
+                }
+            }
+
             synchronized (mRecords) {
                 // register
                 Record r = null;
@@ -478,7 +492,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
 
                 r.callback = callback;
-                r.pkgForDebug = pkgForDebug;
+                r.callingPackage = callingPackage;
                 r.callerUid = callerUid;
                 // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
                 // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
@@ -631,7 +645,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (mRecords.get(i).binder == binder) {
                     if (DBG) {
                         Record r = mRecords.get(i);
-                        log("remove: binder=" + binder + "r.pkgForDebug" + r.pkgForDebug
+                        log("remove: binder=" + binder + "r.callingPackage" + r.callingPackage
                                 + "r.callback" + r.callback);
                     }
                     mRecords.remove(i);
@@ -1380,7 +1394,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                android.Manifest.permission.READ_PHONE_STATE);
+                android.Manifest.permission.READ_PHONE_STATE,
+                AppOpsManager.OP_READ_PHONE_STATE);
     }
 
     private void broadcastDataConnectionStateChanged(int state,

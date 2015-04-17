@@ -664,7 +664,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getDeviceId();
+            return telephony.getDeviceId(mContext.getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1975,7 +1975,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                number = telephony.getLine1NumberForDisplay(subId);
+                number = telephony.getLine1NumberForDisplay(subId, mContext.getOpPackageName());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -2096,7 +2096,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                alphaTag = telephony.getLine1AlphaTagForDisplay(subId);
+                alphaTag = telephony.getLine1AlphaTagForDisplay(subId,
+                        mContext.getOpPackageName());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -3342,7 +3343,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return new String[0];
-            return telephony.getPcscfAddress(apnType);
+            return telephony.getPcscfAddress(apnType, mContext.getOpPackageName());
         } catch (RemoteException e) {
             return new String[0];
         }
@@ -3759,7 +3760,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.isSimPinEnabled();
+                return telephony.isSimPinEnabled(mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isSimPinEnabled", e);
         }
@@ -4026,7 +4027,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.isVideoCallingEnabled();
+                return telephony.isVideoCallingEnabled(mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isVideoCallingEnabled", e);
         }

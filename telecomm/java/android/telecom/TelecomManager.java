@@ -359,7 +359,8 @@ public class TelecomManager {
     public PhoneAccountHandle getDefaultOutgoingPhoneAccount(String uriScheme) {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getDefaultOutgoingPhoneAccount(uriScheme);
+                return getTelecomService().getDefaultOutgoingPhoneAccount(uriScheme,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getDefaultOutgoingPhoneAccount", e);
@@ -443,7 +444,7 @@ public class TelecomManager {
     public List<PhoneAccountHandle> getSimCallManagers() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getSimCallManagers();
+                return getTelecomService().getSimCallManagers(mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getSimCallManagers");
@@ -491,7 +492,8 @@ public class TelecomManager {
     public List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(String uriScheme) {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getPhoneAccountsSupportingScheme(uriScheme);
+                return getTelecomService().getPhoneAccountsSupportingScheme(uriScheme,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getPhoneAccountsSupportingScheme", e);
@@ -511,7 +513,7 @@ public class TelecomManager {
     public List<PhoneAccountHandle> getCallCapablePhoneAccounts() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getCallCapablePhoneAccounts();
+                return getTelecomService().getCallCapablePhoneAccounts(mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts", e);
@@ -711,7 +713,8 @@ public class TelecomManager {
     public boolean isVoiceMailNumber(PhoneAccountHandle accountHandle, String number) {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().isVoiceMailNumber(accountHandle, number);
+                return getTelecomService().isVoiceMailNumber(accountHandle, number,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling ITelecomService#isVoiceMailNumber.", e);
@@ -729,7 +732,8 @@ public class TelecomManager {
     public String getVoiceMailNumber(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getVoiceMailNumber(accountHandle);
+                return getTelecomService().getVoiceMailNumber(accountHandle,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling ITelecomService#hasVoiceMailNumber.", e);
@@ -746,7 +750,8 @@ public class TelecomManager {
     public String getLine1Number(PhoneAccountHandle accountHandle) {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getLine1Number(accountHandle);
+                return getTelecomService().getLine1Number(accountHandle,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling ITelecomService#getLine1Number.", e);
@@ -764,7 +769,7 @@ public class TelecomManager {
     public boolean isInCall() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().isInCall();
+                return getTelecomService().isInCall(mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling isInCall().", e);
@@ -806,7 +811,7 @@ public class TelecomManager {
     public boolean isRinging() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().isRinging();
+                return getTelecomService().isRinging(mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get ringing state of phone app.", e);
@@ -872,7 +877,7 @@ public class TelecomManager {
     public boolean isTtySupported() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().isTtySupported();
+                return getTelecomService().isTtySupported(mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get TTY supported state.", e);
@@ -893,7 +898,7 @@ public class TelecomManager {
     public int getCurrentTtyMode() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getCurrentTtyMode();
+                return getTelecomService().getCurrentTtyMode(mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get the current TTY mode.", e);
@@ -1045,7 +1050,7 @@ public class TelecomManager {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
-                service.showInCallScreen(showDialpad);
+                service.showInCallScreen(showDialpad, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#showCallScreen", e);
             }

@@ -860,13 +860,19 @@ class ContextImpl extends Context {
     @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission) {
+        sendBroadcastAsUser(intent, user, receiverPermission, AppOpsManager.OP_NONE);
+    }
+
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, int appOp) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
             intent.prepareToLeaveProcess();
             ActivityManagerNative.getDefault().broadcastIntent(
-                mMainThread.getApplicationThread(), intent, resolvedType, null,
-                Activity.RESULT_OK, null, null, receiverPermission, AppOpsManager.OP_NONE, false, false,
-                user.getIdentifier());
+                    mMainThread.getApplicationThread(), intent, resolvedType, null,
+                    Activity.RESULT_OK, null, null, receiverPermission, appOp, false, false,
+                    user.getIdentifier());
         } catch (RemoteException e) {
         }
     }
