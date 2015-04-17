@@ -36560,6 +36560,7 @@ package android.view {
     ctor public ViewGroup(android.content.Context, android.util.AttributeSet, int);
     ctor public ViewGroup(android.content.Context, android.util.AttributeSet, int, int);
     method public boolean addStatesFromChildren();
+    method public void addTransientView(android.view.View, int);
     method public void addView(android.view.View);
     method public void addView(android.view.View, int);
     method public void addView(android.view.View, int, int);
@@ -36611,6 +36612,9 @@ package android.view {
     method public int getNestedScrollAxes();
     method public int getPersistentDrawingCache();
     method public boolean getTouchscreenBlocksFocus();
+    method public android.view.View getTransientView(int);
+    method public int getTransientViewCount();
+    method public int getTransientViewIndex(int);
     method public int indexOfChild(android.view.View);
     method public final void invalidateChild(android.view.View, android.graphics.Rect);
     method public android.view.ViewParent invalidateChildInParent(int[], android.graphics.Rect);
@@ -36644,6 +36648,7 @@ package android.view {
     method public void removeAllViews();
     method public void removeAllViewsInLayout();
     method protected void removeDetachedView(android.view.View, boolean);
+    method public void removeTransientView(android.view.View);
     method public void removeView(android.view.View);
     method public void removeViewAt(int);
     method public void removeViewInLayout(android.view.View);

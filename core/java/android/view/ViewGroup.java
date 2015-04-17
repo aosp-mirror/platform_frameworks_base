@@ -494,6 +494,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     private int mNestedScrollAxes;
 
+    // Used to manage the list of transient views, added by addTransientView()
+    private List<Integer> mTransientIndices = null;
+    private List<View> mTransientViews = null;
+
+
     /**
      * Empty ActionMode used as a sentinel in recursive entries to startActionModeForChild.
      *
@@ -2822,6 +2827,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.dispatchAttachedToWindow(info,
                     visibility | (child.mViewFlags & VISIBILITY_MASK));
         }
+        final int transientCount = mTransientIndices == null ? 0 : mTransientIndices.size();
+        for (int i = 0; i < transientCount; ++i) {
+            View view = mTransientViews.get(i);
+            view.dispatchAttachedToWindow(info, visibility | (view.mViewFlags & VISIBILITY_MASK));
+        }
     }
 
     @Override
@@ -2991,6 +3001,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             children[i].dispatchDetachedFromWindow();
         }
         clearDisappearingChildren();
+        final int transientCount = mTransientViews == null ? 0 : mTransientIndices.size();
+        for (int i = 0; i < transientCount; ++i) {
+            View view = mTransientViews.get(i);
+            view.dispatchDetachedFromWindow();
+        }
         super.dispatchDetachedFromWindow();
     }
 
@@ -3291,6 +3306,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final long drawingTime = getDrawingTime();
 
         if (usingRenderNodeProperties) canvas.insertReorderBarrier();
+        final int transientCount = mTransientIndices == null ? 0 : mTransientIndices.size();
+        int transientIndex = transientCount != 0 ? 0 : -1;
         // Only use the preordered list if not HW accelerated, since the HW pipeline will do the
         // draw reordering internally
         final ArrayList<View> preorderedList = usingRenderNodeProperties
@@ -3298,11 +3315,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final boolean customOrder = preorderedList == null
                 && isChildrenDrawingOrderEnabled();
         for (int i = 0; i < childrenCount; i++) {
+            while (transientIndex >= 0 && mTransientIndices.get(transientIndex) == i) {
+                final View transientChild = mTransientViews.get(transientIndex);
+                if ((transientChild.mViewFlags & VISIBILITY_MASK) == VISIBLE ||
+                        transientChild.getAnimation() != null) {
+                    more |= drawChild(canvas, transientChild, drawingTime);
+                }
+                transientIndex++;
+                if (transientIndex >= transientCount) {
+                    transientIndex = -1;
+                }
+            }
             int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
             final View child = (preorderedList == null)
                     ? children[childIndex] : preorderedList.get(childIndex);
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
                 more |= drawChild(canvas, child, drawingTime);
+            }
+        }
+        while (transientIndex >= 0) {
+            // there may be additional transient views after the normal views
+            final View transientChild = mTransientViews.get(transientIndex);
+            if ((transientChild.mViewFlags & VISIBILITY_MASK) == VISIBLE ||
+                    transientChild.getAnimation() != null) {
+                more |= drawChild(canvas, transientChild, drawingTime);
+            }
+            transientIndex++;
+            if (transientIndex >= transientCount) {
+                break;
             }
         }
         if (preorderedList != null) preorderedList.clear();
@@ -3785,6 +3825,135 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * This method adds a view to this container at the specified index purely for the
+     * purposes of allowing that view to draw even though it is not a normal child of
+     * the container. That is, the view does not participate in layout, focus, accessibility,
+     * input, or other normal view operations; it is purely an item to be drawn during the normal
+     * rendering operation of this container. The index that it is added at is the order
+     * in which it will be drawn, with respect to the other views in the container.
+     * For example, a transient view added at index 0 will be drawn before all other views
+     * in the container because it will be drawn first (including before any real view
+     * at index 0). There can be more than one transient view at any particular index;
+     * these views will be drawn in the order in which they were added to the list of
+     * transient views. The index of transient views can also be greater than the number
+     * of normal views in the container; that just means that they will be drawn after all
+     * other views are drawn.
+     *
+     * <p>Note that since transient views do not participate in layout, they must be sized
+     * manually or, more typically, they should just use the size that they had before they
+     * were removed from their container.</p>
+     *
+     * <p>Transient views are useful for handling animations of views that have been removed
+     * from the container, but which should be animated out after the removal. Adding these
+     * views as transient views allows them to participate in drawing without side-effecting
+     * the layout of the container.</p>
+     *
+     * <p>Transient views must always be explicitly {@link #removeTransientView(View) removed}
+     * from the container when they are no longer needed. For example, a transient view
+     * which is added in order to fade it out in its old location should be removed
+     * once the animation is complete.</p>
+     *
+     * @param view The view to be added
+     * @param index The index at which this view should be drawn, must be >= 0.
+     * This value is relative to the {@link #getChildAt(int) index} values in the normal
+     * child list of this container, where any transient view at a particular index will
+     * be drawn before any normal child at that same index.
+     */
+    public void addTransientView(View view, int index) {
+        if (index < 0) {
+            return;
+        }
+        if (mTransientIndices == null) {
+            mTransientIndices = new ArrayList<Integer>();
+            mTransientViews = new ArrayList<View>();
+        }
+        final int oldSize = mTransientIndices.size();
+        if (oldSize > 0) {
+            int insertionIndex;
+            for (insertionIndex = 0; insertionIndex < oldSize; ++insertionIndex) {
+                if (index < mTransientIndices.get(insertionIndex)) {
+                    break;
+                }
+            }
+            mTransientIndices.add(insertionIndex, index);
+            mTransientViews.add(insertionIndex, view);
+        } else {
+            mTransientIndices.add(index);
+            mTransientViews.add(view);
+        }
+        view.mParent = this;
+        view.dispatchAttachedToWindow(mAttachInfo, (mViewFlags&VISIBILITY_MASK));
+        invalidate(true);
+    }
+
+    /**
+     * Removes a view from the list of transient views in this container. If there is no
+     * such transient view, this method does nothing.
+     *
+     * @param view The transient view to be removed
+     */
+    public void removeTransientView(View view) {
+        if (mTransientViews == null) {
+            return;
+        }
+        final int size = mTransientViews.size();
+        for (int i = 0; i < size; ++i) {
+            if (view == mTransientViews.get(i)) {
+                mTransientViews.remove(i);
+                mTransientIndices.remove(i);
+                view.mParent = null;
+                view.dispatchDetachedFromWindow();
+                invalidate(true);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Returns the number of transient views in this container. Specific transient
+     * views and the index at which they were added can be retrieved via
+     * {@link #getTransientView(int)} and {@link #getTransientViewIndex(int)}.
+     *
+     * @see #addTransientView(View, int)
+     * @return The number of transient views in this container
+     */
+    public int getTransientViewCount() {
+        return mTransientIndices == null ? 0 : mTransientIndices.size();
+    }
+
+    /**
+     * Given a valid position within the list of transient views, returns the index of
+     * the transient view at that position.
+     *
+     * @param position The position of the index being queried. Must be at least 0
+     * and less than the value returned by {@link #getTransientViewCount()}.
+     * @return The index of the transient view stored in the given position if the
+     * position is valid, otherwise -1
+     */
+    public int getTransientViewIndex(int position) {
+        if (position < 0 || mTransientIndices == null || position >= mTransientIndices.size()) {
+            return -1;
+        }
+        return mTransientIndices.get(position);
+    }
+
+    /**
+     * Given a valid position within the list of transient views, returns the
+     * transient view at that position.
+     *
+     * @param position The position of the view being queried. Must be at least 0
+     * and less than the value returned by {@link #getTransientViewCount()}.
+     * @return The transient view stored in the given position if the
+     * position is valid, otherwise null
+     */
+    public View getTransientView(int position) {
+        if (mTransientViews == null || position >= mTransientViews.size()) {
+            return null;
+        }
+        return mTransientViews.get(position);
+    }
+
+    /**
      * <p>Adds a child view. If no layout parameters are already set on the child, the
      * default parameters for this ViewGroup are set on the child.</p>
      * 
@@ -4096,6 +4265,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child.getVisibility() != View.GONE) {
             notifySubtreeAccessibilityStateChangedIfNeeded();
         }
+
+        if (mTransientIndices != null) {
+            final int transientCount = mTransientIndices.size();
+            for (int i = 0; i < transientCount; ++i) {
+                final int oldIndex = mTransientIndices.get(i);
+                if (index <= oldIndex) {
+                    mTransientIndices.set(i, oldIndex + 1);
+                }
+            }
+        }
     }
 
     private void addInArray(View child, int index) {
@@ -4339,6 +4518,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (view.getVisibility() != View.GONE) {
             notifySubtreeAccessibilityStateChangedIfNeeded();
+        }
+
+        int transientCount = mTransientIndices == null ? 0 : mTransientIndices.size();
+        for (int i = 0; i < transientCount; ++i) {
+            final int oldIndex = mTransientIndices.get(i);
+            if (index < oldIndex) {
+                mTransientIndices.set(i, oldIndex - 1);
+            }
         }
     }
 
