@@ -3993,9 +3993,11 @@
     <!-- Lock-to-app unlock password string -->
     <string name="lock_to_app_unlock_password">Ask for password before unpinning</string>
 
-    <!-- Notification shown when device owner silently installs a package -->
+    <!-- Notification shown when device owner silently installs a package [CHAR LIMIT=NONE] -->
     <string name="package_installed_device_owner">Installed by your administrator</string>
-    <!-- Notification shown when device owner silently deletes a package -->
+    <!-- Notification shown when device owner silently updates a package [CHAR LIMIT=NONE] -->
+    <string name="package_updated_device_owner">Updated by your administrator</string>
+    <!-- Notification shown when device owner silently deletes a package [CHAR LIMIT=NONE] -->
     <string name="package_deleted_device_owner">Deleted by your administrator</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->

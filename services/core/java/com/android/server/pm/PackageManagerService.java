@@ -1596,6 +1596,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         res.origPackage);
                 break;
             }
+            case PackageManager.INSTALL_SUCCEEDED: {
+                extras = new Bundle();
+                extras.putBoolean(Intent.EXTRA_REPLACING,
+                        res.removedInfo != null && res.removedInfo.removedPackage != null);
+                break;
+            }
         }
         return extras;
     }
