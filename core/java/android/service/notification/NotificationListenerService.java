@@ -358,6 +358,20 @@ public abstract class NotificationListenerService extends Service {
     }
 
     /**
+     * Inform the notification manager that these notifications have been viewed by the
+     * user.
+     * @param keys Notifications to mark as seen.
+     */
+    public final void setNotificationsShown(String[] keys) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().setNotificationsShownFromListener(mWrapper, keys);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
      * Sets the notification trim that will be received via {@link #onNotificationPosted}.
      *
      * <p>

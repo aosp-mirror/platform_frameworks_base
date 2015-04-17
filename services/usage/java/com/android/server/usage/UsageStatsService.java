@@ -28,6 +28,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -435,9 +436,7 @@ public class UsageStatsService extends SystemService implements
         DevicePolicyManager dpm = getContext().getSystemService(DevicePolicyManager.class);
         if (dpm == null) return false;
         List<ComponentName> components = dpm.getActiveAdminsAsUser(userId);
-        if (components == null) {
-            return false;
-        }
+        if (components == null) return false;
         final int size = components.size();
         for (int i = 0; i < size; i++) {
             if (components.get(i).getPackageName().equals(packageName)) {

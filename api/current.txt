@@ -16430,6 +16430,14 @@ package android.media {
     method public abstract void onAudioDeviceConnection();
   }
 
+  public abstract interface OnAudioRecordRoutingListener {
+    method public abstract void onAudioRecordRouting(android.media.AudioRecord);
+  }
+
+  public abstract interface OnAudioTrackRoutingListener {
+    method public abstract void onAudioTrackRouting(android.media.AudioTrack);
+  }
+
   public final class PlaybackSettings {
     ctor public PlaybackSettings();
     method public android.media.PlaybackSettings allowDefaults();
@@ -16446,14 +16454,6 @@ package android.media {
     field public static final int AUDIO_FALLBACK_MODE_MUTE = 1; // 0x1
     field public static final int AUDIO_STRETCH_MODE_DEFAULT = 0; // 0x0
     field public static final int AUDIO_STRETCH_MODE_VOICE = 1; // 0x1
-  }
-
-  public abstract interface OnAudioRecordRoutingListener {
-    method public abstract void onAudioRecordRouting(android.media.AudioRecord);
-  }
-
-  public abstract interface OnAudioTrackRoutingListener {
-    method public abstract void onAudioTrackRouting(android.media.AudioTrack);
   }
 
   public final class Rating implements android.os.Parcelable {
@@ -28912,6 +28912,7 @@ package android.service.notification {
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap);
     method public final void requestInterruptionFilter(int);
     method public final void requestListenerHints(int);
+    method public final void setNotificationsShown(java.lang.String[]);
     field public static final int HINT_HOST_DISABLE_EFFECTS = 1; // 0x1
     field public static final int INTERRUPTION_FILTER_ALARMS = 4; // 0x4
     field public static final int INTERRUPTION_FILTER_ALL = 1; // 0x1
