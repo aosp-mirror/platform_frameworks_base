@@ -61,6 +61,7 @@ import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.DebugUtils;
@@ -533,7 +534,11 @@ class MountService extends IMountService.Stub
                     break;
                 }
                 case H_FSTRIM: {
-                    waitForReady();
+                    if (!isReady()) {
+                        Slog.i(TAG, "fstrim requested, but no daemon connection yet; trying again");
+                        sendMessageDelayed(obtainMessage(H_FSTRIM), DateUtils.SECOND_IN_MILLIS);
+                    }
+
                     Slog.i(TAG, "Running fstrim idle maintenance");
 
                     // Remember when we kicked it off
