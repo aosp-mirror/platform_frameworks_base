@@ -388,7 +388,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         byte[] currentHandle = getCurrentHandle(userId);
 
         if (pattern == null) {
+            getGateKeeperService().clearSecureUserId(userId);
             mStorage.writePatternHash(null, userId);
+            maybeUpdateKeystore(null, userId);
             return;
         }
 
@@ -414,7 +416,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         byte[] currentHandle = getCurrentHandle(userId);
 
         if (password == null) {
+            getGateKeeperService().clearSecureUserId(userId);
             mStorage.writePasswordHash(null, userId);
+            maybeUpdateKeystore(null, userId);
             return;
         }
 

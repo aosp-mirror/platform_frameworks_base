@@ -69,4 +69,11 @@ interface IGateKeeperService {
      * @param uid the Android user id
      */
     long getSecureUserId(int uid);
+
+    /**
+     * Clears secure user id associated with the provided Android ID.
+     * Must be called when password is set to NONE.
+     * @param uid the Android user id.
+     */
+    void clearSecureUserId(int uid);
 }
