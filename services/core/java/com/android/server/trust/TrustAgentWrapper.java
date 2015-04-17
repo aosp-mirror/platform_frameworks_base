@@ -116,7 +116,7 @@ public class TrustAgentWrapper {
                     }
                     mTrusted = true;
                     mMessage = (CharSequence) msg.obj;
-                    boolean initiatedByUser = msg.arg1 != 0;
+                    int flags = msg.arg1;
                     long durationMs = msg.getData().getLong(DATA_DURATION);
                     if (durationMs > 0) {
                         final long duration;
@@ -141,8 +141,8 @@ public class TrustAgentWrapper {
                     }
                     mTrustManagerService.mArchive.logGrantTrust(mUserId, mName,
                             (mMessage != null ? mMessage.toString() : null),
-                            durationMs, initiatedByUser);
-                    mTrustManagerService.updateTrust(mUserId, initiatedByUser);
+                            durationMs, flags);
+                    mTrustManagerService.updateTrust(mUserId, flags);
                     break;
                 case MSG_TRUST_TIMEOUT:
                     if (DEBUG) Slog.v(TAG, "Trust timed out : " + mName.flattenToShortString());
@@ -156,7 +156,7 @@ public class TrustAgentWrapper {
                     if (msg.what == MSG_REVOKE_TRUST) {
                         mTrustManagerService.mArchive.logRevokeTrust(mUserId, mName);
                     }
-                    mTrustManagerService.updateTrust(mUserId, false);
+                    mTrustManagerService.updateTrust(mUserId, 0);
                     break;
                 case MSG_RESTART_TIMEOUT:
                     destroy();
@@ -171,7 +171,7 @@ public class TrustAgentWrapper {
                             if (DEBUG) Log.v(TAG, "Re-enabling agent because it acknowledged "
                                     + "enabled features: " + mName);
                             mTrustDisabledByDpm = false;
-                            mTrustManagerService.updateTrust(mUserId, false);
+                            mTrustManagerService.updateTrust(mUserId, 0);
                         }
                     } else {
                         if (DEBUG) Log.w(TAG, "Ignoring MSG_SET_TRUST_AGENT_FEATURES_COMPLETED "
@@ -185,7 +185,7 @@ public class TrustAgentWrapper {
                         mMessage = null;
                     }
                     mTrustManagerService.mArchive.logManagingTrust(mUserId, mName, mManagingTrust);
-                    mTrustManagerService.updateTrust(mUserId, false);
+                    mTrustManagerService.updateTrust(mUserId, 0);
                     break;
             }
         }
@@ -194,12 +194,12 @@ public class TrustAgentWrapper {
     private ITrustAgentServiceCallback mCallback = new ITrustAgentServiceCallback.Stub() {
 
         @Override
-        public void grantTrust(CharSequence userMessage, long durationMs, boolean initiatedByUser) {
+        public void grantTrust(CharSequence userMessage, long durationMs, int flags) {
             if (DEBUG) Slog.v(TAG, "enableTrust(" + userMessage + ", durationMs = " + durationMs
-                        + ", initiatedByUser = " + initiatedByUser + ")");
+                        + ", flags = " + flags + ")");
 
             Message msg = mHandler.obtainMessage(
-                    MSG_GRANT_TRUST, initiatedByUser ? 1 : 0, 0, userMessage);
+                    MSG_GRANT_TRUST, flags, 0, userMessage);
             msg.getData().putLong(DATA_DURATION, durationMs);
             msg.sendToTarget();
         }
@@ -381,7 +381,7 @@ public class TrustAgentWrapper {
         }
         if (mTrustDisabledByDpm != trustDisabled) {
             mTrustDisabledByDpm = trustDisabled;
-            mTrustManagerService.updateTrust(mUserId, false);
+            mTrustManagerService.updateTrust(mUserId, 0);
         }
         return trustDisabled;
     }

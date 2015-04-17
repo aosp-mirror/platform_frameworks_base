@@ -30942,7 +30942,8 @@ package android.service.trust {
 
   public class TrustAgentService extends android.app.Service {
     ctor public TrustAgentService();
-    method public final void grantTrust(java.lang.CharSequence, long, boolean);
+    method public final deprecated void grantTrust(java.lang.CharSequence, long, boolean);
+    method public final void grantTrust(java.lang.CharSequence, long, int);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public boolean onConfigure(java.util.List<android.os.PersistableBundle>);
     method public void onDeviceLocked();
@@ -30951,6 +30952,8 @@ package android.service.trust {
     method public void onUnlockAttempt(boolean);
     method public final void revokeTrust();
     method public final void setManagingTrust(boolean);
+    field public static final int FLAG_GRANT_TRUST_DISMISS_KEYGUARD = 2; // 0x2
+    field public static final int FLAG_GRANT_TRUST_INITIATED_BY_USER = 1; // 0x1
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.trust.TrustAgentService";
     field public static final java.lang.String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
   }

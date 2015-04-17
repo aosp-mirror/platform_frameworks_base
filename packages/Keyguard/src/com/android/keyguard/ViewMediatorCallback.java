@@ -76,4 +76,9 @@ public interface ViewMediatorCallback {
      *         (legacy API)
      */
     boolean isInputRestricted();
+
+    /**
+     * @return true if the screen is on
+     */
+    boolean isScreenOn();
 }

@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.os.SystemClock;
+import android.service.trust.TrustAgentService;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -69,14 +70,27 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         }
 
         @Override
-        public void onTrustInitiatedByUser(int userId) {
+        public void onTrustGrantedWithFlags(int flags, int userId) {
             if (userId != mLockPatternUtils.getCurrentUser()) return;
             if (!isAttachedToWindow()) return;
+            boolean bouncerVisible = isVisibleToUser();
+            boolean initiatedByUser =
+                    (flags & TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER) != 0;
+            boolean dismissKeyguard =
+                    (flags & TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD) != 0;
 
-            if (isVisibleToUser()) {
-                dismiss(false /* authenticated */);
-            } else {
-                mViewMediatorCallback.playTrustedSound();
+            if (initiatedByUser || dismissKeyguard) {
+                if (mViewMediatorCallback.isScreenOn() && (bouncerVisible || dismissKeyguard)) {
+                    if (!bouncerVisible) {
+                        // The trust agent dismissed the keyguard without the user proving
+                        // that they are present (by swiping up to show the bouncer). That's fine if
+                        // the user proved presence via some other way to the trust agent.
+                        Log.i(TAG, "TrustAgent dismissed Keyguard.");
+                    }
+                    dismiss(false /* authenticated */);
+                } else {
+                    mViewMediatorCallback.playTrustedSound();
+                }
             }
         }
     };
