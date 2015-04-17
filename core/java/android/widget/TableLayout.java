@@ -467,7 +467,7 @@ public class TableLayout extends LinearLayout {
      */
     @Override
     void measureVertical(int widthMeasureSpec, int heightMeasureSpec) {
-        findLargestCells(widthMeasureSpec);
+        findLargestCells(widthMeasureSpec, heightMeasureSpec);
         shrinkAndStretchColumns(widthMeasureSpec);
 
         super.measureVertical(widthMeasureSpec, heightMeasureSpec);
@@ -479,7 +479,7 @@ public class TableLayout extends LinearLayout {
      *
      * @param widthMeasureSpec the measure constraint imposed by our parent
      */
-    private void findLargestCells(int widthMeasureSpec) {
+    private void findLargestCells(int widthMeasureSpec, int heightMeasureSpec) {
         boolean firstRow = true;
 
         // find the maximum width for each column
@@ -502,7 +502,7 @@ public class TableLayout extends LinearLayout {
                 final ViewGroup.LayoutParams layoutParams = row.getLayoutParams();
                 layoutParams.height = LayoutParams.WRAP_CONTENT;
 
-                final int[] widths = row.getColumnsWidths(widthMeasureSpec);
+                final int[] widths = row.getColumnsWidths(widthMeasureSpec, heightMeasureSpec);
                 final int newLength = widths.length;
                 // this is the first row, we just need to copy the values
                 if (firstRow) {

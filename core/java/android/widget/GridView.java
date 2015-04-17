@@ -1071,7 +1071,8 @@ public class GridView extends AbsListView {
             p.forceAdd = true;
 
             int childHeightSpec = getChildMeasureSpec(
-                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), 0, p.height);
+                    MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec),
+                            MeasureSpec.UNSPECIFIED), 0, p.height);
             int childWidthSpec = getChildMeasureSpec(
                     MeasureSpec.makeMeasureSpec(mColumnWidth, MeasureSpec.EXACTLY), 0, p.width);
             child.measure(childWidthSpec, childHeightSpec);
