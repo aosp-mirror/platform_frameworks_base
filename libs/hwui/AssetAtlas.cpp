@@ -82,12 +82,12 @@ void AssetAtlas::updateTextureId() {
 ///////////////////////////////////////////////////////////////////////////////
 
 AssetAtlas::Entry* AssetAtlas::getEntry(const SkBitmap* bitmap) const {
-    ssize_t index = mEntries.indexOfKey(bitmap->pixelRef());
+    ssize_t index = mEntries.indexOfKey(bitmap);
     return index >= 0 ? mEntries.valueAt(index) : nullptr;
 }
 
 Texture* AssetAtlas::getEntryTexture(const SkBitmap* bitmap) const {
-    ssize_t index = mEntries.indexOfKey(bitmap->pixelRef());
+    ssize_t index = mEntries.indexOfKey(bitmap);
     return index >= 0 ? mEntries.valueAt(index)->texture : nullptr;
 }
 
@@ -120,7 +120,7 @@ void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
     const float height = float(mTexture->height);
 
     for (int i = 0; i < count; ) {
-        SkPixelRef* pixelRef = reinterpret_cast<SkPixelRef*>(map[i++]);
+        SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(map[i++]);
         // NOTE: We're converting from 64 bit signed values to 32 bit
         // signed values. This is guaranteed to be safe because the "x"
         // and "y" coordinate values are guaranteed to be representable
@@ -131,21 +131,21 @@ void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
         bool rotated = map[i++] > 0;
 
         // Bitmaps should never be null, we're just extra paranoid
-        if (!pixelRef) continue;
+        if (!bitmap) continue;
 
         const UvMapper mapper(
-                x / width, (x + pixelRef->info().width()) / width,
-                y / height, (y + pixelRef->info().height()) / height);
+                x / width, (x + bitmap->width()) / width,
+                y / height, (y + bitmap->height()) / height);
 
         Texture* texture = new DelegateTexture(caches, mTexture);
-        texture->blend = !SkAlphaTypeIsOpaque(pixelRef->info().alphaType());
-        texture->width = pixelRef->info().width();
-        texture->height = pixelRef->info().height();
+        texture->blend = !bitmap->isOpaque();
+        texture->width = bitmap->width();
+        texture->height = bitmap->height();
 
-        Entry* entry = new Entry(pixelRef, x, y, rotated, texture, mapper, *this);
+        Entry* entry = new Entry(bitmap, x, y, rotated, texture, mapper, *this);
         texture->uvMapper = &entry->uvMapper;
 
-        mEntries.add(entry->pixelRef, entry);
+        mEntries.add(entry->bitmap, entry);
     }
 }
 
