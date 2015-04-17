@@ -76,6 +76,11 @@ public final class WebViewFactory {
     private static boolean sAddressSpaceReserved = false;
     private static PackageInfo sPackageInfo;
 
+    private static class MissingWebViewPackageException extends AndroidRuntimeException {
+        public MissingWebViewPackageException(String message) { super(message); }
+        public MissingWebViewPackageException(Exception e) { super(e); }
+    }
+
     /** @hide */
     public static String[] getWebViewPackageNames() {
         return AppGlobals.getInitialApplication().getResources().getStringArray(
@@ -110,9 +115,10 @@ public final class WebViewFactory {
             } catch (PackageManager.NameNotFoundException e) {
             }
         }
-        throw new AndroidRuntimeException("Could not find a loadable WebView package");
+        throw new MissingWebViewPackageException("Could not find a loadable WebView package");
     }
 
+    // throws MissingWebViewPackageException
     private static ApplicationInfo getWebViewApplicationInfo() {
         if (sPackageInfo == null)
             return findPreferredWebViewPackage().applicationInfo;
@@ -144,25 +150,7 @@ public final class WebViewFactory {
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
-                // First fetch the package info so we can log the webview package version.
-                sPackageInfo = findPreferredWebViewPackage();
-                Log.i(LOGTAG, "Loading " + sPackageInfo.packageName + " version " +
-                    sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
-
-                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
-                loadNativeLibrary();
-                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-
-                Class<WebViewFactoryProvider> providerClass;
-                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getFactoryClass()");
-                try {
-                    providerClass = getFactoryClass();
-                } catch (ClassNotFoundException e) {
-                    Log.e(LOGTAG, "error loading provider", e);
-                    throw new AndroidRuntimeException(e);
-                } finally {
-                    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-                }
+                Class<WebViewFactoryProvider> providerClass = getProviderClass();
 
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
@@ -184,7 +172,44 @@ public final class WebViewFactory {
         }
     }
 
-    private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
+    private static Class<WebViewFactoryProvider> getProviderClass() {
+        try {
+            // First fetch the package info so we can log the webview package version.
+            sPackageInfo = findPreferredWebViewPackage();
+            Log.i(LOGTAG, "Loading " + sPackageInfo.packageName + " version " +
+                sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
+
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
+            loadNativeLibrary();
+            Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
+            try {
+                return getChromiumProviderClass();
+            } catch (ClassNotFoundException e) {
+                Log.e(LOGTAG, "error loading provider", e);
+                throw new AndroidRuntimeException(e);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+        } catch (MissingWebViewPackageException e) {
+            // If the package doesn't exist, then try loading the null WebView instead.
+            // If that succeeds, then this is a device without WebView support; if it fails then
+            // swallow the failure, complain that the real WebView is missing and rethrow the
+            // original exception.
+            try {
+                return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
+            } catch (ClassNotFoundException e2) {
+                // Ignore.
+            }
+            Log.e(LOGTAG, "Chromium WebView package does not exist", e);
+            throw new AndroidRuntimeException(e);
+        }
+    }
+
+    // throws MissingWebViewPackageException
+    private static Class<WebViewFactoryProvider> getChromiumProviderClass()
+            throws ClassNotFoundException {
         Application initialApplication = AppGlobals.getInitialApplication();
         try {
             // Construct a package context to load the Java code into the current app.
@@ -202,17 +227,7 @@ public final class WebViewFactory {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
         } catch (PackageManager.NameNotFoundException e) {
-            // If the package doesn't exist, then try loading the null WebView instead.
-            // If that succeeds, then this is a device without WebView support; if it fails then
-            // swallow the failure, complain that the real WebView is missing and rethrow the
-            // original exception.
-            try {
-                return (Class<WebViewFactoryProvider>) Class.forName(NULL_WEBVIEW_FACTORY);
-            } catch (ClassNotFoundException e2) {
-                // Ignore.
-            }
-            Log.e(LOGTAG, "Chromium WebView package does not exist", e);
-            throw new AndroidRuntimeException(e);
+            throw new MissingWebViewPackageException(e);
         }
     }
 
@@ -315,8 +330,8 @@ public final class WebViewFactory {
         prepareWebViewInSystemServer(nativeLibs);
     }
 
-    private static String[] getWebViewNativeLibraryPaths()
-            throws PackageManager.NameNotFoundException {
+    // throws MissingWebViewPackageException
+    private static String[] getWebViewNativeLibraryPaths() {
         ApplicationInfo ai = getWebViewApplicationInfo();
         final String NATIVE_LIB_FILE_NAME = getWebViewLibrary(ai);
 
@@ -443,7 +458,7 @@ public final class WebViewFactory {
             } else if (DEBUG) {
                 Log.v(LOGTAG, "loaded with relro file");
             }
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (MissingWebViewPackageException e) {
             Log.e(LOGTAG, "Failed to list WebView package libraries for loadNativeLibrary", e);
         }
     }
