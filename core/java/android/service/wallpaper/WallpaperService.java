@@ -17,6 +17,7 @@
 package android.service.wallpaper;
 
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.os.SystemProperties;
 import android.view.WindowInsets;
 
@@ -185,6 +186,7 @@ public abstract class WallpaperService extends Service {
 
         DisplayManager mDisplayManager;
         Display mDisplay;
+        private int mDisplayState;
 
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
             {
@@ -228,7 +230,19 @@ public abstract class WallpaperService extends Service {
                 throw new UnsupportedOperationException(
                         "Wallpapers do not support keep screen on");
             }
-            
+
+            @Override
+            public Canvas lockCanvas() {
+                if (mDisplayState == Display.STATE_DOZE
+                        || mDisplayState == Display.STATE_DOZE_SUSPEND) {
+                    try {
+                        mSession.pokeDrawLock(mWindow);
+                    } catch (RemoteException e) {
+                        // System server died, can be ignored.
+                    }
+                }
+                return super.lockCanvas();
+            }
         };
 
         final class WallpaperInputEventReceiver extends InputEventReceiver {
@@ -831,9 +845,12 @@ public abstract class WallpaperService extends Service {
             
             mWindow.setSession(mSession);
 
+            mLayout.packageName = getPackageName();
+
             mDisplayManager = (DisplayManager)getSystemService(Context.DISPLAY_SERVICE);
             mDisplayManager.registerDisplayListener(mDisplayListener, mCaller.getHandler());
             mDisplay = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
+            mDisplayState = mDisplay.getState();
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
             onCreate(mSurfaceHolder);
@@ -873,8 +890,8 @@ public abstract class WallpaperService extends Service {
 
         void reportVisibility() {
             if (!mDestroyed) {
-                boolean visible = mVisible
-                        & mDisplay != null && mDisplay.getState() != Display.STATE_OFF;
+                mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getState();
+                boolean visible = mVisible && mDisplayState != Display.STATE_OFF;
                 if (mReportedVisible != visible) {
                     mReportedVisible = visible;
                     if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + visible
