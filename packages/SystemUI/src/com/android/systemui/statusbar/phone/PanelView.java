@@ -101,6 +101,12 @@ public abstract class PanelView extends FrameLayout {
 
     private boolean mPeekPending;
     private boolean mCollapseAfterPeek;
+
+    /**
+     * Speed-up factor to be used when {@link #mFlingCollapseRunnable} runs the next time.
+     */
+    private float mNextCollapseSpeedUpFactor = 1.0f;
+
     private boolean mExpanding;
     private boolean mGestureWaitForTouchSlop;
     private Runnable mPeekRunnable = new Runnable() {
@@ -164,7 +170,7 @@ public abstract class PanelView extends FrameLayout {
                     postOnAnimation(new Runnable() {
                         @Override
                         public void run() {
-                            collapse(false /* delayed */);
+                            collapse(false /* delayed */, 1.0f /* speedUpFactor */);
                         }
                     });
                 }
@@ -563,12 +569,17 @@ public abstract class PanelView extends FrameLayout {
     }
 
     protected void fling(float vel, boolean expand) {
-        cancelPeek();
-        float target = expand ? getMaxPanelHeight() : 0.0f;
-        flingToHeight(vel, expand, target);
+        fling(vel, expand, 1.0f /* collapseSpeedUpFactor */);
     }
 
-    protected void flingToHeight(float vel, boolean expand, float target) {
+    protected void fling(float vel, boolean expand, float collapseSpeedUpFactor) {
+        cancelPeek();
+        float target = expand ? getMaxPanelHeight() : 0.0f;
+        flingToHeight(vel, expand, target, collapseSpeedUpFactor);
+    }
+
+    protected void flingToHeight(float vel, boolean expand, float target,
+            float collapseSpeedUpFactor) {
         // Hack to make the expand transition look nice when clear all button is visible - we make
         // the animation only to the last notification, and then jump to the maximum panel height so
         // clear all just fades in and the decelerating motion is towards the last notification.
@@ -600,7 +611,8 @@ public abstract class PanelView extends FrameLayout {
             // Make it shorter if we run a canned animation
             if (vel == 0) {
                 animator.setDuration((long)
-                        (animator.getDuration() * getCannedFlingDurationFactor()));
+                        (animator.getDuration() * getCannedFlingDurationFactor()
+                                / collapseSpeedUpFactor));
             }
         }
         animator.addListener(new AnimatorListenerAdapter() {
@@ -745,7 +757,7 @@ public abstract class PanelView extends FrameLayout {
         mBar = panelBar;
     }
 
-    public void collapse(boolean delayed) {
+    public void collapse(boolean delayed, float speedUpFactor) {
         if (DEBUG) logf("collapse: " + this);
         if (mPeekPending || mPeekAnimator != null) {
             mCollapseAfterPeek = true;
@@ -761,9 +773,10 @@ public abstract class PanelView extends FrameLayout {
             mClosing = true;
             notifyExpandingStarted();
             if (delayed) {
+                mNextCollapseSpeedUpFactor = speedUpFactor;
                 postDelayed(mFlingCollapseRunnable, 120);
             } else {
-                fling(0, false /* expand */);
+                fling(0, false /* expand */, speedUpFactor);
             }
         }
     }
@@ -771,7 +784,7 @@ public abstract class PanelView extends FrameLayout {
     private final Runnable mFlingCollapseRunnable = new Runnable() {
         @Override
         public void run() {
-            fling(0, false /* expand */);
+            fling(0, false /* expand */, mNextCollapseSpeedUpFactor);
         }
     };
 
@@ -975,7 +988,7 @@ public abstract class PanelView extends FrameLayout {
     protected final Runnable mPostCollapseRunnable = new Runnable() {
         @Override
         public void run() {
-            collapse(false /* delayed */);
+            collapse(false /* delayed */, 1.0f /* speedUpFactor */);
         }
     };
 

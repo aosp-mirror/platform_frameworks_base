@@ -140,7 +140,7 @@ public class PanelBar extends FrameLayout {
         mPanelHolder.setSelectedPanel(mTouchingPanel);
         for (PanelView pv : mPanels) {
             if (pv != panel) {
-                pv.collapse(false /* delayed */);
+                pv.collapse(false /* delayed */, 1.0f /* speedUpFactor */);
             }
         }
     }
@@ -186,11 +186,11 @@ public class PanelBar extends FrameLayout {
                 (fullyOpenedPanel!=null)?" fullyOpened":"", fullyClosed?" fullyClosed":"");
     }
 
-    public void collapseAllPanels(boolean animate, boolean delayed) {
+    public void collapseAllPanels(boolean animate, boolean delayed, float speedUpFactor) {
         boolean waiting = false;
         for (PanelView pv : mPanels) {
             if (animate && !pv.isFullyCollapsed()) {
-                pv.collapse(delayed);
+                pv.collapse(delayed, speedUpFactor);
                 waiting = true;
             } else {
                 pv.resetViews();

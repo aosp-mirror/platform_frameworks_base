@@ -171,6 +171,11 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private static final String KEYGUARD_ANALYTICS_SETTING = "keyguard_analytics";
 
+    /**
+     * How much faster we collapse the lockscreen when authenticating with fingerprint.
+     */
+    private static final float FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR = 1.3f;
+
     /** The stream type that the lock sounds are tied to. */
     private int mUiSoundsStreamType;
 
@@ -441,7 +446,8 @@ public class KeyguardViewMediator extends SystemUI {
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mViewMediatorCallback.keyguardDone(true);
             } else {
-                mStatusBarKeyguardViewManager.animateCollapsePanels();
+                mStatusBarKeyguardViewManager.animateCollapsePanels(
+                        FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
             }
         };
 
