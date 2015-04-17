@@ -45,6 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.Material.DatePicker.DateLabel"
+        android:gravity="start"
         android:maxLines="2"
         android:ellipsize="none"
         tools:text="Thu, Sep 30"

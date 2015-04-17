@@ -34,8 +34,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.DayPickerView.OnDaySelectedListener;
 import android.widget.YearPickerView.OnYearSelectedListener;
 
@@ -549,7 +547,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         final int listPosition = ss.getListPosition();
         if (listPosition != -1) {
             if (currentView == VIEW_MONTH_DAY) {
-                mDayPickerView.setCurrentItem(listPosition);
+                mDayPickerView.setPosition(listPosition);
             } else if (currentView == VIEW_YEAR) {
                 final int listPositionOffset = ss.getListPositionOffset();
                 mYearPickerView.setSelectionFromTop(listPosition, listPositionOffset);

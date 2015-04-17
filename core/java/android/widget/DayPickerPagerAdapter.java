@@ -36,7 +36,7 @@ import java.util.Calendar;
 /**
  * An adapter for a list of {@link android.widget.SimpleMonthView} items.
  */
-class DayPickerAdapter extends PagerAdapter {
+class DayPickerPagerAdapter extends PagerAdapter {
     private static final int MONTHS_IN_YEAR = 12;
 
     private final Calendar mMinDate = Calendar.getInstance();
@@ -63,7 +63,7 @@ class DayPickerAdapter extends PagerAdapter {
     private int mCount;
     private int mFirstDayOfWeek;
 
-    public DayPickerAdapter(@NonNull Context context, @LayoutRes int layoutResId,
+    public DayPickerPagerAdapter(@NonNull Context context, @LayoutRes int layoutResId,
             @IdRes int calendarViewId) {
         mInflater = LayoutInflater.from(context);
         mLayoutResId = layoutResId;
@@ -200,7 +200,8 @@ class DayPickerAdapter extends PagerAdapter {
 
         final int yearOffset = (day.get(Calendar.YEAR) - mMinDate.get(Calendar.YEAR));
         final int monthOffset = (day.get(Calendar.MONTH) - mMinDate.get(Calendar.MONTH));
-        return yearOffset * MONTHS_IN_YEAR + monthOffset;
+        final int position = yearOffset * MONTHS_IN_YEAR + monthOffset;
+        return position;
     }
 
     @Override
@@ -253,8 +254,6 @@ class DayPickerAdapter extends PagerAdapter {
 
         v.setMonthParams(selectedDay, month, year, mFirstDayOfWeek,
                 enabledDayRangeStart, enabledDayRangeEnd);
-        v.setPrevEnabled(position > 0);
-        v.setNextEnabled(position < mCount - 1);
 
         final ViewHolder holder = new ViewHolder(position, itemView, v);
         mItems.put(position, holder);
@@ -298,15 +297,8 @@ class DayPickerAdapter extends PagerAdapter {
                 setSelectedDay(day);
 
                 if (mOnDaySelectedListener != null) {
-                    mOnDaySelectedListener.onDaySelected(DayPickerAdapter.this, day);
+                    mOnDaySelectedListener.onDaySelected(DayPickerPagerAdapter.this, day);
                 }
-            }
-        }
-
-        @Override
-        public void onNavigationClick(SimpleMonthView view, int direction, boolean animate) {
-            if (mOnDaySelectedListener != null) {
-                mOnDaySelectedListener.onNavigationClick(DayPickerAdapter.this, direction, animate);
             }
         }
     };
@@ -324,7 +316,6 @@ class DayPickerAdapter extends PagerAdapter {
     }
 
     public interface OnDaySelectedListener {
-        public void onDaySelected(DayPickerAdapter view, Calendar day);
-        public void onNavigationClick(DayPickerAdapter view, int direction, boolean animate);
+        public void onDaySelected(DayPickerPagerAdapter view, Calendar day);
     }
 }

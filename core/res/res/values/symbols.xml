@@ -2242,4 +2242,6 @@
   <java-symbol type="layout" name="chooser_grid" />
   <java-symbol type="layout" name="resolve_grid_item" />
   <java-symbol type="id" name="title_icon" />
+  <java-symbol type="id" name="day_picker_view_pager" />
+  <java-symbol type="layout" name="day_picker_content_material" />
 </resources>

@@ -572,7 +572,7 @@ public abstract class Drawable {
      * Specifies a tint blending mode for this drawable.
      * <p>
      * Defines how this drawable's tint color should be blended into the drawable
-     * before it is drawn to screen. Default tint mode is {@link PorterDuff.Mode#MULTIPLY}.
+     * before it is drawn to screen. Default tint mode is {@link PorterDuff.Mode#SRC_IN}.
      * </p>
      * <p class="note"><strong>Note:</strong> Setting a color filter via
      * {@link #setColorFilter(ColorFilter)} or
