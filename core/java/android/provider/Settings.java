@@ -189,6 +189,36 @@ public final class Settings {
             "android.settings.USAGE_ACCESS_SETTINGS";
 
     /**
+     * Activity Category: Show application settings related to usage access.
+     * <p>
+     * An activity that provides a user interface for adjusting usage access related
+     * preferences for its containing application. Optional but recommended for apps that
+     * use {@link android.Manifest.permission#PACKAGE_USAGE_STATS}.
+     * <p>
+     * The activity may define meta-data to describe what usage access is
+     * used for within their app with {@link #METADATA_USAGE_ACCESS_REASON}, which
+     * will be displayed in Settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String INTENT_CATEGORY_USAGE_ACCESS_CONFIG =
+            "android.intent.category.USAGE_ACCESS_CONFIG";
+
+    /**
+     * Metadata key: Reason for needing usage access.
+     * <p>
+     * A key for metadata attached to an activity that receives action
+     * {@link #INTENT_CATEGORY_USAGE_ACCESS_CONFIG}, shown to the
+     * user as description of how the app uses usage access.
+     * <p>
+     */
+    public static final String METADATA_USAGE_ACCESS_REASON =
+            "android.settings.metadata.USAGE_ACCESS_REASON";
+
+    /**
      * Activity Action: Show settings to allow configuration of security and
      * location privacy.
      * <p>
