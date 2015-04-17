@@ -233,8 +233,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private Intent getCameraIntent() {
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         boolean currentUserHasTrust = updateMonitor.getUserHasTrust(
-                mLockPatternUtils.getCurrentUser());
-        boolean secure = mLockPatternUtils.isSecure(mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
+        boolean secure = mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser());
         return (secure && !currentUserHasTrust) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
     }
 
@@ -245,7 +245,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         ResolveInfo resolved = mContext.getPackageManager().resolveActivityAsUser(getCameraIntent(),
                 PackageManager.MATCH_DEFAULT_ONLY,
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
         boolean visible = !isCameraDisabledByDpm() && resolved != null
                 && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance);
         mCameraImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -339,13 +339,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 0 /* velocityDp - N/A */);
         mIndicationController.showTransientIndication(
                 R.string.keyguard_indication_trust_disabled);
-        mLockPatternUtils.requireCredentialEntry(mLockPatternUtils.getCurrentUser());
+        mLockPatternUtils.requireCredentialEntry(KeyguardUpdateMonitor.getCurrentUser());
     }
 
     public void prewarmCamera() {
         Intent intent = getCameraIntent();
         String targetPackage = PreviewInflater.getTargetPackage(mContext, intent,
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
         if (targetPackage != null) {
             Intent prewarm = new Intent(MediaStore.ACTION_STILL_IMAGE_CAMERA_PREWARM);
             prewarm.setPackage(targetPackage);
@@ -361,7 +361,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mPrewarmSent = false;
         Intent intent = getCameraIntent();
         String targetPackage = PreviewInflater.getTargetPackage(mContext, intent,
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
         if (targetPackage != null) {
             Intent prewarm = new Intent(MediaStore.ACTION_STILL_IMAGE_CAMERA_COOLDOWN);
             prewarm.setPackage(targetPackage);
@@ -375,7 +375,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mPrewarmSent = false;
         final Intent intent = getCameraIntent();
         boolean wouldLaunchResolverActivity = PreviewInflater.wouldLaunchResolverActivity(
-                mContext, intent, mLockPatternUtils.getCurrentUser());
+                mContext, intent, KeyguardUpdateMonitor.getCurrentUser());
         if (intent == SECURE_CAMERA_INTENT && !wouldLaunchResolverActivity) {
             AsyncTask.execute(new Runnable() {
                 @Override

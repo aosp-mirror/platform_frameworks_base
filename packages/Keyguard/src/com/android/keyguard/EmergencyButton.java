@@ -120,7 +120,7 @@ public class EmergencyButton extends Button {
             KeyguardUpdateMonitor.getInstance(mContext).reportEmergencyCallAction(
                     true /* bypassHandler */);
             getContext().startActivityAsUser(INTENT_EMERGENCY_DIAL,
-                    new UserHandle(mLockPatternUtils.getCurrentUser()));
+                    new UserHandle(KeyguardUpdateMonitor.getCurrentUser()));
         }
     }
 
@@ -138,7 +138,7 @@ public class EmergencyButton extends Button {
                     visible = mEnableEmergencyCallWhileSimLocked;
                 } else {
                     // Only show if there is a secure screen (pin/pattern/SIM pin/SIM puk);
-                    visible = mLockPatternUtils.isSecure(mLockPatternUtils.getCurrentUser());
+                    visible = mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser());
                 }
             }
         }

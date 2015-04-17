@@ -131,7 +131,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         // stealth mode will be the same for the life of this screen
         mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(
-                mLockPatternUtils.getCurrentUser()));
+                KeyguardUpdateMonitor.getCurrentUser()));
 
         // vibrate mode will be the same for the life of this screen
         mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
@@ -178,7 +178,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
         if (deadline != 0) {
             handleAttemptLockout(deadline);
         } else {
@@ -215,7 +215,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         }
 
         public void onPatternDetected(List<LockPatternView.Cell> pattern) {
-            if (mLockPatternUtils.checkPattern(pattern, mLockPatternUtils.getCurrentUser())) {
+            if (mLockPatternUtils.checkPattern(pattern, KeyguardUpdateMonitor.getCurrentUser())) {
                 mCallback.reportUnlockAttempt(true);
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
                 mCallback.dismiss(true);
@@ -233,7 +233,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                 if (registeredAttempt &&
                         0 == (attempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
-                            mLockPatternUtils.getCurrentUser());
+                            KeyguardUpdateMonitor.getCurrentUser());
                     handleAttemptLockout(deadline);
                 } else {
                     mSecurityMessageDisplay.setMessage(R.string.kg_wrong_pattern, true);

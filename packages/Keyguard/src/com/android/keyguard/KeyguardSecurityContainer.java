@@ -261,7 +261,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
         SecurityMode mode = mSecurityModel.getSecurityMode();
         final boolean usingPattern = mode == KeyguardSecurityModel.SecurityMode.Pattern;
-        final int currentUser = mLockPatternUtils.getCurrentUser();
+        final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
         final DevicePolicyManager dpm = mLockPatternUtils.getDevicePolicyManager();
         final int failedAttemptsBeforeWipe =
                 dpm.getMaximumFailedPasswordsForWipe(null, currentUser);
@@ -296,7 +296,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 (failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) == 0;
         }
         monitor.reportFailedUnlockAttempt();
-        mLockPatternUtils.reportFailedPasswordAttempt(mLockPatternUtils.getCurrentUser());
+        mLockPatternUtils.reportFailedPasswordAttempt(KeyguardUpdateMonitor.getCurrentUser());
         if (showTimeout) {
             showTimeoutDialog();
         }
@@ -321,7 +321,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     boolean showNextSecurityScreenOrFinish(boolean authenticated) {
         if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
         boolean finish = false;
-        if (mUpdateMonitor.getUserHasTrust(mLockPatternUtils.getCurrentUser())) {
+        if (mUpdateMonitor.getUserHasTrust(KeyguardUpdateMonitor.getCurrentUser())) {
             finish = true;
         } else if (SecurityMode.None == mCurrentSecuritySelection) {
             SecurityMode securityMode = mSecurityModel.getSecurityMode();
@@ -431,7 +431,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             if (success) {
                 monitor.clearFailedUnlockAttempts();
                 mLockPatternUtils.reportSuccessfulPasswordAttempt(
-                        mLockPatternUtils.getCurrentUser());
+                        KeyguardUpdateMonitor.getCurrentUser());
             } else {
                 KeyguardSecurityContainer.this.reportFailedUnlockAttempt();
             }

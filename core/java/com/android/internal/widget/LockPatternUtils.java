@@ -17,6 +17,7 @@
 package com.android.internal.widget;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
@@ -143,11 +144,6 @@ public class LockPatternUtils {
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
 
-    private final boolean mMultiUserMode;
-
-    // The current user is set by KeyguardViewMediator and shared by all LockPatternUtils.
-    private static volatile int sCurrentUserId = UserHandle.USER_NULL;
-
     public DevicePolicyManager getDevicePolicyManager() {
         if (mDevicePolicyManager == null) {
             mDevicePolicyManager =
@@ -172,12 +168,6 @@ public class LockPatternUtils {
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-
-        // If this is being called by the system or by an application like keyguard that
-        // has permision INTERACT_ACROSS_USERS, then LockPatternUtils will operate in multi-user
-        // mode where calls are for the current user rather than the user of the calling process.
-        mMultiUserMode = context.checkCallingOrSelfPermission(
-            Manifest.permission.INTERACT_ACROSS_USERS_FULL) == PackageManager.PERMISSION_GRANTED;
     }
 
     private ILockSettings getLockSettings() {
@@ -239,32 +229,6 @@ public class LockPatternUtils {
         getDevicePolicyManager().reportSuccessfulPasswordAttempt(userId);
         getTrustManager().reportUnlockAttempt(true /* authenticated */, userId);
     }
-
-    public void setCurrentUser(int userId) {
-        sCurrentUserId = userId;
-    }
-
-    public int getCurrentUser() {
-        if (sCurrentUserId != UserHandle.USER_NULL) {
-            // Someone is regularly updating using setCurrentUser() use that value.
-            return sCurrentUserId;
-        }
-        try {
-            return ActivityManagerNative.getDefault().getCurrentUser().id;
-        } catch (RemoteException re) {
-            return UserHandle.USER_OWNER;
-        }
-    }
-
-//    private int getCurrentOrCallingUserId() {
-//        if (mMultiUserMode) {
-//            // TODO: This is a little inefficient. See if all users of this are able to
-//            // handle USER_CURRENT and pass that instead.
-//            return getCurrentUser();
-//        } else {
-//            return UserHandle.getCallingUserId();
-//        }
-//    }
 
     /**
      * Check to see if a pattern matches the saved pattern.
@@ -1129,7 +1093,7 @@ public class LockPatternUtils {
     }
 
     public void setCredentialRequiredToDecrypt(boolean required) {
-        if (getCurrentUser() != UserHandle.USER_OWNER) {
+        if (ActivityManager.getCurrentUser() != UserHandle.USER_OWNER) {
             Log.w(TAG, "Only device owner may call setCredentialRequiredForDecrypt()");
             return;
         }

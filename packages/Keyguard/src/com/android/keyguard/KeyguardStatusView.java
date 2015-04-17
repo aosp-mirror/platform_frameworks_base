@@ -201,9 +201,9 @@ public class KeyguardStatusView extends GridLayout {
         ContentResolver res = getContext().getContentResolver();
         String info = null;
         final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled(
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
         if (ownerInfoEnabled) {
-            info = mLockPatternUtils.getOwnerInfo(mLockPatternUtils.getCurrentUser());
+            info = mLockPatternUtils.getOwnerInfo(KeyguardUpdateMonitor.getCurrentUser());
         }
         return info;
     }

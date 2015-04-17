@@ -68,7 +68,7 @@ public class KeyguardSecurityModel {
         }
 
         final int security = mLockPatternUtils.getActivePasswordQuality(
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
         switch (security) {
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

@@ -80,7 +80,7 @@ public class UnlockMethodCache {
     }
 
     private void update(boolean updateAlways) {
-        int user = mLockPatternUtils.getCurrentUser();
+        int user = KeyguardUpdateMonitor.getCurrentUser();
         boolean secure = mLockPatternUtils.isSecure(user);
         boolean currentlyInsecure = !secure ||  mKeyguardUpdateMonitor.getUserHasTrust(user);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);

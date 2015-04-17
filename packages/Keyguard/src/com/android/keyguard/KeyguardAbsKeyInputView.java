@@ -64,7 +64,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         resetPasswordText(false /* animate */);
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
         if (shouldLockout(deadline)) {
             handleAttemptLockout(deadline);
         } else {
@@ -107,7 +107,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     protected void verifyPasswordAndUnlock() {
         String entry = getPasswordText();
-        if (mLockPatternUtils.checkPassword(entry, mLockPatternUtils.getCurrentUser())) {
+        if (mLockPatternUtils.checkPassword(entry, KeyguardUpdateMonitor.getCurrentUser())) {
             mCallback.reportUnlockAttempt(true);
             mCallback.dismiss(true);
         } else {
@@ -118,7 +118,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                 int attempts = KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts();
                 if (0 == (attempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
-                            mLockPatternUtils.getCurrentUser());
+                            KeyguardUpdateMonitor.getCurrentUser());
                     handleAttemptLockout(deadline);
                 }
             }

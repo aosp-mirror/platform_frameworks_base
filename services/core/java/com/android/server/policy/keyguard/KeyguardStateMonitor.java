@@ -41,11 +41,13 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     private volatile boolean mSimSecure;
     private volatile boolean mInputRestricted;
 
+    private int mCurrentUserId;
+
     private final LockPatternUtils mLockPatternUtils;
 
     public KeyguardStateMonitor(Context context, IKeyguardService service) {
         mLockPatternUtils = new LockPatternUtils(context);
-        mLockPatternUtils.setCurrentUser(ActivityManager.getCurrentUser());
+        mCurrentUserId = ActivityManager.getCurrentUser();
         try {
             service.addStateMonitorCallback(this);
         } catch (RemoteException e) {
@@ -58,7 +60,7 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
     }
 
     public boolean isSecure() {
-        return mLockPatternUtils.isSecure(mLockPatternUtils.getCurrentUser()) || mSimSecure;
+        return mLockPatternUtils.isSecure(getCurrentUser()) || mSimSecure;
     }
 
     public boolean isInputRestricted() {
@@ -75,8 +77,12 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
         mSimSecure = simSecure;
     }
 
-    public void setCurrentUser(int userId) {
-        mLockPatternUtils.setCurrentUser(userId);
+    public synchronized void setCurrentUser(int userId) {
+        mCurrentUserId = userId;
+    }
+
+    private synchronized int getCurrentUser() {
+        return mCurrentUserId;
     }
 
     @Override // Binder interface
