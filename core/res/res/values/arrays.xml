@@ -352,9 +352,8 @@
        <item>@drawable/ratingbar_small_material</item>
        <item>@drawable/ratingbar_indicator_material</item>
        <item>@drawable/scrollbar_handle_material</item>
-       <item>@drawable/scrubber_control_material_anim</item>
-       <item>@drawable/scrubber_control_selector_material</item>
-       <item>@drawable/scrubber_progress_horizontal_material</item>
+       <item>@drawable/seekbar_thumb_material_anim</item>
+       <item>@drawable/seekbar_track_material</item>
        <item>@drawable/spinner_background_material</item>
        <item>@drawable/spinner_textfield_background_material</item>
        <item>@drawable/switch_thumb_material_anim</item>
