@@ -53,7 +53,6 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
-import android.os.SystemProperties;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
@@ -506,10 +505,7 @@ public class DirectoryFragment extends Fragment {
             open.setVisible(!manageOrBrowse);
             share.setVisible(manageOrBrowse);
             delete.setVisible(manageOrBrowse);
-
-            // TODO: unhide copying when ready
-            copy.setVisible(manageOrBrowse &&
-                    SystemProperties.getBoolean("debug.documentsui.enable_copy", false));
+            copy.setVisible(manageOrBrowse);
 
             return true;
         }
