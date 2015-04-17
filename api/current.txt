@@ -2026,6 +2026,7 @@ package android {
     field public static final int ThemeOverlay_Material_Dark = 16974411; // 0x103024b
     field public static final int ThemeOverlay_Material_Dark_ActionBar = 16974412; // 0x103024c
     field public static final int ThemeOverlay_Material_Dialog = 16974564; // 0x10302e4
+    field public static final int ThemeOverlay_Material_Dialog_Alert = 16974566; // 0x10302e6
     field public static final int ThemeOverlay_Material_Light = 16974410; // 0x103024a
     field public static final int Theme_Black = 16973832; // 0x1030008
     field public static final int Theme_Black_NoTitleBar = 16973833; // 0x1030009

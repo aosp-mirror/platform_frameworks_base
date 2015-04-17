@@ -182,7 +182,7 @@ please see themes_device_defaults.xml.
         <item name="dialogPreferredPadding">@dimen/dialog_padding_material</item>
 
         <!-- AlertDialog attributes -->
-        <item name="alertDialogTheme">@style/ThemeOverlay.Material.Dialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Material.Dialog.Alert</item>
         <item name="alertDialogStyle">@style/AlertDialog.Material</item>
         <item name="alertDialogCenterButtons">false</item>
         <item name="alertDialogIcon">@drawable/ic_dialog_alert_material</item>
@@ -538,7 +538,7 @@ please see themes_device_defaults.xml.
         <item name="dialogPreferredPadding">@dimen/dialog_padding_material</item>
 
         <!-- AlertDialog attributes -->
-        <item name="alertDialogTheme">@style/ThemeOverlay.Material.Dialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Material.Dialog.Alert</item>
         <item name="alertDialogStyle">@style/AlertDialog.Material.Light</item>
         <item name="alertDialogCenterButtons">false</item>
         <item name="alertDialogIcon">@drawable/ic_dialog_alert_material</item>
@@ -880,6 +880,11 @@ please see themes_device_defaults.xml.
         <item name="listDivider">@null</item>
 
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+    </style>
+
+    <style name="ThemeOverlay.Material.Dialog.Alert">
+        <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
+        <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Variant of the material (dark) theme with no action bar. -->
