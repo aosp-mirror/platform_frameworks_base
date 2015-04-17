@@ -470,7 +470,11 @@ applied to each build. </p>
 <li>fullRelease</li>
 </ul>
 
-<p>To build this example, invoke the <code>assemble</code> task from Android Studio or from the
-command line.</p>
+<p>To build this example, click the <strong>Build</strong> menu option in Android Studio or invoke
+the <code>assemble</code> task from the command line. </p>
+
+<p class="note"><strong>Note:</strong> The <strong>Build &gt; Make Project</strong> option compiles
+all the source files in the entire project that have been modified since the last compilation. The
+<strong>Build &gt; Rebuild Project</strong> option recomplies all the source files in the project.</p>
 
 <p>Separate output folders are created for each build variant. </p>
