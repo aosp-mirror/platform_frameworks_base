@@ -108,8 +108,7 @@ public final class FloatingToolbar {
     }
 
     /**
-     * Sets the custom listener for invocation of menu items in this floating
-     * toolbar.
+     * Sets the custom listener for invocation of menu items in this floating toolbar.
      */
     public FloatingToolbar setOnMenuItemClickListener(
             MenuItem.OnMenuItemClickListener menuItemClickListener) {
@@ -188,10 +187,25 @@ public final class FloatingToolbar {
     }
 
     /**
-     * Returns {@code true} if this popup is currently showing. {@code false} otherwise.
+     * Hides this floating toolbar. This is a no-op if the toolbar is not showing.
+     * Use {@link #isHidden()} to distinguish between a hidden and a dismissed toolbar.
+     */
+    public void hide() {
+        mPopup.hide();
+    }
+
+    /**
+     * Returns {@code true} if this toolbar is currently showing. {@code false} otherwise.
      */
     public boolean isShowing() {
         return mPopup.isShowing();
+    }
+
+    /**
+     * Returns {@code true} if this toolbar is currently hidden. {@code false} otherwise.
+     */
+    public boolean isHidden() {
+        return mPopup.isHidden();
     }
 
     /**
@@ -306,8 +320,9 @@ public final class FloatingToolbar {
                     public void onAnimationRepeat(Animation animation) {
                     }
                 };
-        private final AnimatorSet mGrowFadeInFromBottomAnimation;
-        private final AnimatorSet mShrinkFadeOutFromBottomAnimation;
+        private final AnimatorSet mShowAnimation;
+        private final AnimatorSet mDismissAnimation;
+        private final AnimatorSet mHideAnimation;
 
         private final Runnable mOpenOverflow = new Runnable() {
             @Override
@@ -324,7 +339,8 @@ public final class FloatingToolbar {
 
         private final Region mTouchableRegion = new Region();
 
-        private boolean mDismissAnimating;
+        private boolean mDismissed = true; // tracks whether this popup is dismissed or dismissing.
+        private boolean mHidden; // tracks whether this popup is hidden or hiding.
 
         private FloatingToolbarOverflowPanel mOverflowPanel;
         private FloatingToolbarMainPanel mMainPanel;
@@ -340,15 +356,22 @@ public final class FloatingToolbar {
             mParent = Preconditions.checkNotNull(parent);
             mContentContainer = createContentContainer(parent.getContext());
             mPopupWindow = createPopupWindow(mContentContainer);
-            mGrowFadeInFromBottomAnimation = createGrowFadeInFromBottom(mContentContainer);
-            mShrinkFadeOutFromBottomAnimation = createShrinkFadeOutFromBottomAnimation(
+            mShowAnimation = createGrowFadeInFromBottom(mContentContainer);
+            mDismissAnimation = createShrinkFadeOutFromBottomAnimation(
                     mContentContainer,
                     new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             mPopupWindow.dismiss();
-                            mDismissAnimating = false;
                             setMainPanelAsContent();
+                        }
+                    });
+            mHideAnimation = createShrinkFadeOutFromBottomAnimation(
+                    mContentContainer,
+                    new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mPopupWindow.dismiss();
                         }
                     });
             // Make the touchable area of this popup be the area specified by mTouchableRegion.
@@ -404,10 +427,12 @@ public final class FloatingToolbar {
                 return;
             }
 
-            stopDismissAnimation();
+            mHidden = false;
+            mDismissed = false;
+            stopDismissAndHideAnimations();
             preparePopupContent();
             mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, x, y);
-            growFadeInFromBottom();
+            runShowAnimation();
         }
 
         /**
@@ -418,8 +443,23 @@ public final class FloatingToolbar {
                 return;
             }
 
-            mDismissAnimating = true;
-            shrinkFadeOutFromBottom();
+            mHidden = false;
+            mDismissed = true;
+            runDismissAnimation();
+            setZeroTouchableSurface();
+        }
+
+        /**
+         * Hides this popup. This is a no-op if this popup is not showing.
+         * Use {@link #isHidden()} to distinguish between a hidden and a dismissed popup.
+         */
+        public void hide() {
+            if (!isShowing()) {
+                return;
+            }
+
+            mHidden = true;
+            runHideAnimation();
             setZeroTouchableSurface();
         }
 
@@ -427,16 +467,23 @@ public final class FloatingToolbar {
          * Returns {@code true} if this popup is currently showing. {@code false} otherwise.
          */
         public boolean isShowing() {
-            return mPopupWindow.isShowing() && !mDismissAnimating;
+            return mPopupWindow.isShowing() && !mDismissed && !mHidden;
+        }
+
+        /**
+         * Returns {@code true} if this popup is currently hidden. {@code false} otherwise.
+         */
+        public boolean isHidden() {
+            return mHidden;
         }
 
         /**
          * Updates the coordinates of this popup.
          * The specified coordinates may be adjusted to make sure the popup is entirely on-screen.
+         * This is a no-op if this popup is not showing.
          */
         public void updateCoordinates(int x, int y) {
-            if (mDismissAnimating) {
-                // Already being dismissed. Ignore.
+            if (!isShowing()) {
                 return;
             }
 
@@ -483,22 +530,29 @@ public final class FloatingToolbar {
         }
 
         /**
-         * Performs the "grow and fade in from the bottom" animation on the floating popup.
+         * Performs the "show" animation on the floating popup.
          */
-        private void growFadeInFromBottom() {
-            mGrowFadeInFromBottomAnimation.start();
+        private void runShowAnimation() {
+            mShowAnimation.start();
         }
 
         /**
-         * Performs the "shrink and fade out from bottom" animation on the floating popup.
+         * Performs the "dismiss" animation on the floating popup.
          */
-        private void shrinkFadeOutFromBottom() {
-            mShrinkFadeOutFromBottomAnimation.start();
+        private void runDismissAnimation() {
+            mDismissAnimation.start();
         }
 
-        private void stopDismissAnimation() {
-            mDismissAnimating = false;
-            mShrinkFadeOutFromBottomAnimation.cancel();
+        /**
+         * Performs the "hide" animation on the floating popup.
+         */
+        private void runHideAnimation() {
+            mHideAnimation.start();
+        }
+
+        private void stopDismissAndHideAnimations() {
+            mDismissAnimation.cancel();
+            mHideAnimation.cancel();
         }
 
         /**
