@@ -20,8 +20,6 @@ import android.os.IBinder;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
-import android.view.WindowManager;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -165,5 +163,18 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void appTransitionStarting(long startTime, long duration) {
+    }
+
+    @Override
+    protected void updateHeadsUp(String key, NotificationData.Entry entry, boolean shouldInterrupt,
+            boolean alertAgain) {
+    }
+
+    @Override
+    protected void setHeadsUpUser(int newUserId) {
+    }
+
+    protected boolean isSnoozedPackage(StatusBarNotification sbn) {
+        return false;
     }
 }

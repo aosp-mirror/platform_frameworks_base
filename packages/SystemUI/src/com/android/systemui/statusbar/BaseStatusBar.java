@@ -687,13 +687,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         setHeadsUpUser(newUserId);
     }
 
-    private void setHeadsUpUser(int newUserId) {
-        mHeadsUpManager.setUser(newUserId);
-    }
-
-    public boolean isHeadsUp(String key) {
-      return mHeadsUpManager.isHeadsUp(key);
-    }
+    protected abstract void setHeadsUpUser(int newUserId);
 
     @Override  // NotificationData.Environment
     public boolean isNotificationForCurrentProfiles(StatusBarNotification n) {
@@ -1578,7 +1572,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                             mCurrentUserId);
             dismissKeyguardThenExecute(new OnDismissAction() {
                 public boolean onDismiss() {
-                    if (mHeadsUpManager.isHeadsUp(mNotificationKey)) {
+                    if (mHeadsUpManager != null && mHeadsUpManager.isHeadsUp(mNotificationKey)) {
                         // Release the HUN notification to the shade.
                         //
                         // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
@@ -1941,20 +1935,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         setAreThereNotifications();
     }
 
-    private void updateHeadsUp(String key, Entry entry, boolean shouldInterrupt,
-            boolean alertAgain) {
-        final boolean wasHeadsUp = isHeadsUp(key);
-        if (wasHeadsUp) {
-            mHeadsUpManager.updateNotification(entry, alertAgain);
-            if (!shouldInterrupt) {
-                // We don't want this to be interrupting anymore, lets remove it
-                mHeadsUpManager.removeNotification(key);
-            }
-        } else if (shouldInterrupt && alertAgain) {
-            // This notification was updated to be a heads-up, show it!
-            mHeadsUpManager.showNotification(entry);
-        }
-    }
+    protected abstract void updateHeadsUp(String key, Entry entry, boolean shouldInterrupt,
+            boolean alertAgain);
 
     private void logUpdate(Entry oldEntry, Notification n) {
         StatusBarNotification oldNotification = oldEntry.notification;
@@ -2075,7 +2057,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        if (mHeadsUpManager.isSnoozed(sbn.getPackageName())) {
+        if (isSnoozedPackage(sbn)) {
             return false;
         }
 
@@ -2108,6 +2090,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) Log.d(TAG, "interrupt: " + interrupt);
         return interrupt;
     }
+
+    protected abstract boolean isSnoozedPackage(StatusBarNotification sbn);
 
     public void setInteracting(int barWindow, boolean interacting) {
         // hook for subclasses
