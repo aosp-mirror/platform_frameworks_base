@@ -510,14 +510,47 @@ static void android_media_AudioTrack_finalize(JNIEnv *env,  jobject thiz) {
     android_media_AudioTrack_release(env, thiz);
 }
 
+// overloaded JNI array helper functions (same as in android_media_AudioRecord)
+static inline
+jbyte *envGetArrayElements(JNIEnv *env, jbyteArray array, jboolean *isCopy) {
+    return env->GetByteArrayElements(array, isCopy);
+}
+
+static inline
+void envReleaseArrayElements(JNIEnv *env, jbyteArray array, jbyte *elems, jint mode) {
+    env->ReleaseByteArrayElements(array, elems, mode);
+}
+
+static inline
+jshort *envGetArrayElements(JNIEnv *env, jshortArray array, jboolean *isCopy) {
+    return env->GetShortArrayElements(array, isCopy);
+}
+
+static inline
+void envReleaseArrayElements(JNIEnv *env, jshortArray array, jshort *elems, jint mode) {
+    env->ReleaseShortArrayElements(array, elems, mode);
+}
+
+static inline
+jfloat *envGetArrayElements(JNIEnv *env, jfloatArray array, jboolean *isCopy) {
+    return env->GetFloatArrayElements(array, isCopy);
+}
+
+static inline
+void envReleaseArrayElements(JNIEnv *env, jfloatArray array, jfloat *elems, jint mode) {
+    env->ReleaseFloatArrayElements(array, elems, mode);
+}
+
 // ----------------------------------------------------------------------------
-jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const jbyte* data,
-                  jint offsetInBytes, jint sizeInBytes, bool blocking = true) {
+template <typename T>
+static jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const T *data,
+                         jint offsetInSamples, jint sizeInSamples, bool blocking) {
     // give the data to the native AudioTrack object (the data starts at the offset)
     ssize_t written = 0;
     // regular write() or copy the data to the AudioTrack's shared memory?
+    size_t sizeInBytes = sizeInSamples * sizeof(T);
     if (track->sharedBuffer() == 0) {
-        written = track->write(data + offsetInBytes, sizeInBytes, blocking);
+        written = track->write(data + offsetInSamples, sizeInBytes, blocking);
         // for compatibility with earlier behavior of write(), return 0 in this case
         if (written == (ssize_t) WOULD_BLOCK) {
             written = 0;
@@ -527,54 +560,58 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const jbyte* da
         if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
             sizeInBytes = track->sharedBuffer()->size();
         }
-        memcpy(track->sharedBuffer()->pointer(), data + offsetInBytes, sizeInBytes);
+        memcpy(track->sharedBuffer()->pointer(), data + offsetInSamples, sizeInBytes);
         written = sizeInBytes;
     }
+    if (written > 0) {
+        return written / sizeof(T);
+    }
+    // for compatibility, error codes pass through unchanged
     return written;
 }
 
 // ----------------------------------------------------------------------------
-static jint android_media_AudioTrack_write_byte(JNIEnv *env,  jobject thiz,
-                                                  jbyteArray javaAudioData,
-                                                  jint offsetInBytes, jint sizeInBytes,
-                                                  jint javaAudioFormat,
-                                                  jboolean isWriteBlocking) {
-    //ALOGV("android_media_AudioTrack_write_byte(offset=%d, sizeInBytes=%d) called",
-    //    offsetInBytes, sizeInBytes);
+template <typename T>
+static jint android_media_AudioTrack_writeArray(JNIEnv *env, jobject thiz,
+                                                T javaAudioData,
+                                                jint offsetInSamples, jint sizeInSamples,
+                                                jint javaAudioFormat,
+                                                jboolean isWriteBlocking) {
+    //ALOGV("android_media_AudioTrack_writeArray(offset=%d, sizeInSamples=%d) called",
+    //        offsetInSamples, sizeInSamples);
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "Unable to retrieve AudioTrack pointer for write()");
-        return 0;
+        return (jint)AUDIO_JAVA_INVALID_OPERATION;
     }
 
-    // get the pointer for the audio data from the java array
+    if (javaAudioData == NULL) {
+        ALOGE("NULL java array of audio data to play");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
     // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
     // a way that it becomes much more efficient. When doing so, we will have to prevent the
     // AudioSystem callback to be called while in critical section (in case of media server
     // process crash for instance)
-    jbyte* cAudioData = NULL;
-    if (javaAudioData) {
-        cAudioData = (jbyte *)env->GetByteArrayElements(javaAudioData, NULL);
-        if (cAudioData == NULL) {
-            ALOGE("Error retrieving source of audio data to play, can't play");
-            return 0; // out of memory or no data to load
-        }
-    } else {
-        ALOGE("NULL java array of audio data to play, can't play");
-        return 0;
+
+    // get the pointer for the audio data from the java array
+    auto cAudioData = envGetArrayElements(env, javaAudioData, NULL);
+    if (cAudioData == NULL) {
+        ALOGE("Error retrieving source of audio data to play");
+        return (jint)AUDIO_JAVA_BAD_VALUE; // out of memory or no data to load
     }
 
-    jint written = writeToTrack(lpTrack, javaAudioFormat, cAudioData, offsetInBytes, sizeInBytes,
-            isWriteBlocking == JNI_TRUE /* blocking */);
+    jint samplesWritten = writeToTrack(lpTrack, javaAudioFormat, cAudioData,
+            offsetInSamples, sizeInSamples, isWriteBlocking == JNI_TRUE /* blocking */);
 
-    env->ReleaseByteArrayElements(javaAudioData, cAudioData, 0);
+    envReleaseArrayElements(env, javaAudioData, cAudioData, 0);
 
-    //ALOGV("write wrote %d (tried %d) bytes in the native AudioTrack with offset %d",
-    //     (int)written, (int)(sizeInBytes), (int)offsetInBytes);
-    return written;
+    //ALOGV("write wrote %d (tried %d) samples in the native AudioTrack with offset %d",
+    //        (int)samplesWritten, (int)(sizeInSamples), (int)offsetInSamples);
+    return samplesWritten;
 }
-
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject thiz,
@@ -586,7 +623,7 @@ static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject th
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Unable to retrieve AudioTrack pointer for write()");
-        return 0;
+        return (jint)AUDIO_JAVA_INVALID_OPERATION;
     }
 
     ScopedBytesRO bytes(env, javaBytes);
@@ -600,90 +637,6 @@ static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject th
 
     return written;
 }
-
-// ----------------------------------------------------------------------------
-static jint android_media_AudioTrack_write_short(JNIEnv *env,  jobject thiz,
-                                                  jshortArray javaAudioData,
-                                                  jint offsetInShorts, jint sizeInShorts,
-                                                  jint javaAudioFormat) {
-
-    //ALOGV("android_media_AudioTrack_write_short(offset=%d, sizeInShorts=%d) called",
-    //    offsetInShorts, sizeInShorts);
-    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
-    if (lpTrack == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-            "Unable to retrieve AudioTrack pointer for write()");
-        return 0;
-    }
-
-    // get the pointer for the audio data from the java array
-    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
-    // a way that it becomes much more efficient. When doing so, we will have to prevent the
-    // AudioSystem callback to be called while in critical section (in case of media server
-    // process crash for instance)
-    jshort* cAudioData = NULL;
-    if (javaAudioData) {
-        cAudioData = (jshort *)env->GetShortArrayElements(javaAudioData, NULL);
-        if (cAudioData == NULL) {
-            ALOGE("Error retrieving source of audio data to play, can't play");
-            return 0; // out of memory or no data to load
-        }
-    } else {
-        ALOGE("NULL java array of audio data to play, can't play");
-        return 0;
-    }
-    jint written = writeToTrack(lpTrack, javaAudioFormat, (jbyte *)cAudioData,
-                                offsetInShorts * sizeof(short), sizeInShorts * sizeof(short),
-            true /*blocking write, legacy behavior*/);
-    env->ReleaseShortArrayElements(javaAudioData, cAudioData, 0);
-
-    if (written > 0) {
-        written /= sizeof(short);
-    }
-    //ALOGV("write wrote %d (tried %d) shorts in the native AudioTrack with offset %d",
-    //     (int)written, (int)(sizeInShorts), (int)offsetInShorts);
-
-    return written;
-}
-
-
-// ----------------------------------------------------------------------------
-static jint android_media_AudioTrack_write_float(JNIEnv *env,  jobject thiz,
-                                                  jfloatArray javaAudioData,
-                                                  jint offsetInFloats, jint sizeInFloats,
-                                                  jint javaAudioFormat,
-                                                  jboolean isWriteBlocking) {
-
-    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
-    if (lpTrack == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-            "Unable to retrieve AudioTrack pointer for write()");
-        return 0;
-    }
-
-    jfloat* cAudioData = NULL;
-    if (javaAudioData) {
-        cAudioData = (jfloat *)env->GetFloatArrayElements(javaAudioData, NULL);
-        if (cAudioData == NULL) {
-            ALOGE("Error retrieving source of audio data to play, can't play");
-            return 0; // out of memory or no data to load
-        }
-    } else {
-        ALOGE("NULL java array of audio data to play, can't play");
-        return 0;
-    }
-    jint written = writeToTrack(lpTrack, javaAudioFormat, (jbyte *)cAudioData,
-                                offsetInFloats * sizeof(float), sizeInFloats * sizeof(float),
-                                isWriteBlocking == JNI_TRUE /* blocking */);
-    env->ReleaseFloatArrayElements(javaAudioData, cAudioData, 0);
-
-    if (written > 0) {
-        written /= sizeof(float);
-    }
-
-    return written;
-}
-
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_get_native_frame_count(JNIEnv *env,  jobject thiz) {
@@ -976,12 +929,12 @@ static JNINativeMethod gMethods[] = {
                                          (void *)android_media_AudioTrack_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioTrack_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioTrack_release},
-    {"native_write_byte",    "([BIIIZ)I",(void *)android_media_AudioTrack_write_byte},
+    {"native_write_byte",    "([BIIIZ)I",(void *)android_media_AudioTrack_writeArray<jbyteArray>},
     {"native_write_native_bytes",
                              "(Ljava/lang/Object;IIIZ)I",
                                          (void *)android_media_AudioTrack_write_native_bytes},
-    {"native_write_short",   "([SIII)I", (void *)android_media_AudioTrack_write_short},
-    {"native_write_float",   "([FIIIZ)I",(void *)android_media_AudioTrack_write_float},
+    {"native_write_short",   "([SIIIZ)I",(void *)android_media_AudioTrack_writeArray<jshortArray>},
+    {"native_write_float",   "([FIIIZ)I",(void *)android_media_AudioTrack_writeArray<jfloatArray>},
     {"native_setVolume",     "(FF)V",    (void *)android_media_AudioTrack_set_volume},
     {"native_get_native_frame_count",
                              "()I",      (void *)android_media_AudioTrack_get_native_frame_count},
