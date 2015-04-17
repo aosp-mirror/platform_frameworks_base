@@ -370,14 +370,6 @@ public abstract class InCallService extends Service {
         public abstract void registerCallback(VideoCall.Callback callback);
 
         /**
-         * @deprecated Use {@code VideoCall#registerCallback} instead.
-         */
-        @Deprecated
-        public void setVideoCallListener(VideoCall.Listener videoCallListener) {
-            registerCallback(videoCallListener);
-        }
-
-        /**
          * Sets the camera to be used for video recording in a video call.
          *
          * @param cameraId The id of the camera.
@@ -540,11 +532,5 @@ public abstract class InCallService extends Service {
              */
             public abstract void onCameraCapabilitiesChanged(CameraCapabilities cameraCapabilities);
         }
-
-        /**
-         * @deprecated Use {@code VideoCall.Callback} instead.
-         */
-        @Deprecated
-        public static abstract class Listener extends Callback { }
     }
 }
