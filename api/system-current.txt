@@ -33173,6 +33173,7 @@ package android.telephony {
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method public int getCallState();
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
+    method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
     method public java.lang.String getCdmaMdn();
     method public java.lang.String getCdmaMdn(int);
     method public java.lang.String getCdmaMin();
