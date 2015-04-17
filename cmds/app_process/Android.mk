@@ -56,6 +56,7 @@ LOCAL_MODULE_TAGS := eng
 LOCAL_MODULE_PATH := $(TARGET_OUT_EXECUTABLES)/asan
 LOCAL_MODULE_STEM := app_process
 LOCAL_ADDRESS_SANITIZER := true
+LOCAL_CLANG := true
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
