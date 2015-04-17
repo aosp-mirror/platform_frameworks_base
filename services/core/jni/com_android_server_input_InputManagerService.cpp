@@ -752,7 +752,7 @@ void NativeInputManager::setInteractive(bool interactive) {
 
 void NativeInputManager::reloadCalibration() {
     mInputManager->getReader()->requestRefreshConfiguration(
-            InputReaderConfiguration::TOUCH_AFFINE_TRANSFORMATION);
+            InputReaderConfiguration::CHANGE_TOUCH_AFFINE_TRANSFORMATION);
 }
 
 TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
