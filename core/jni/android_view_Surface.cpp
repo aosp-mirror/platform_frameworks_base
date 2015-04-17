@@ -74,6 +74,11 @@ static struct {
     jfieldID bottom;
 } gRectClassInfo;
 
+static struct {
+    jfieldID mSurfaceFormat;
+    jmethodID setNativeBitmap;
+} gCanvasClassInfo;
+
 // ----------------------------------------------------------------------------
 
 // this is just a pointer we use to pass to inc/decStrong
@@ -314,6 +319,9 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         return 0;
     }
 
+    // Associate a SkCanvas object to this surface
+    env->SetIntField(canvasObj, gCanvasClassInfo.mSurfaceFormat, outBuffer.format);
+
     SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
                                          convertPixelFormat(outBuffer.format),
                                          kPremul_SkAlphaType);
@@ -331,12 +339,12 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         bitmap.setPixels(NULL);
     }
 
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
-    nativeCanvas->setBitmap(bitmap);
+    env->CallVoidMethod(canvasObj, gCanvasClassInfo.setNativeBitmap,
+                        reinterpret_cast<jlong>(&bitmap));
 
     if (dirtyRectPtr) {
-        nativeCanvas->clipRect(dirtyRect.left, dirtyRect.top,
-                dirtyRect.right, dirtyRect.bottom);
+        SkCanvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
+        nativeCanvas->clipRect( SkRect::Make(reinterpret_cast<const SkIRect&>(dirtyRect)) );
     }
 
     if (dirtyRectObj) {
@@ -362,8 +370,7 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     }
 
     // detach the canvas from the surface
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvasObj);
-    nativeCanvas->setBitmap(SkBitmap());
+    env->CallVoidMethod(canvasObj, gCanvasClassInfo.setNativeBitmap, (jlong)0);
 
     // unlock surface
     status_t err = surface->unlockAndPost();
@@ -557,6 +564,10 @@ int register_android_view_Surface(JNIEnv* env)
     gSurfaceClassInfo.mLock = GetFieldIDOrDie(env,
             gSurfaceClassInfo.clazz, "mLock", "Ljava/lang/Object;");
     gSurfaceClassInfo.ctor = GetMethodIDOrDie(env, gSurfaceClassInfo.clazz, "<init>", "(J)V");
+
+    clazz = FindClassOrDie(env, "android/graphics/Canvas");
+    gCanvasClassInfo.mSurfaceFormat = GetFieldIDOrDie(env, clazz, "mSurfaceFormat", "I");
+    gCanvasClassInfo.setNativeBitmap = GetMethodIDOrDie(env, clazz, "setNativeBitmap", "(J)V");
 
     clazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.left = GetFieldIDOrDie(env, clazz, "left", "I");

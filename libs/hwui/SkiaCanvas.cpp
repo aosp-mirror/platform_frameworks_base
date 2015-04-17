@@ -31,7 +31,7 @@ namespace android {
 // Holds an SkCanvas reference plus additional native data.
 class SkiaCanvas : public Canvas {
 public:
-    explicit SkiaCanvas(const SkBitmap& bitmap);
+    explicit SkiaCanvas(SkBitmap* bitmap);
 
     /**
      *  Create a new SkiaCanvas.
@@ -49,7 +49,7 @@ public:
         return mCanvas.get();
     }
 
-    virtual void setBitmap(const SkBitmap& bitmap) override;
+    virtual void setBitmap(SkBitmap* bitmap, bool copyState) override;
 
     virtual bool isOpaque() override;
     virtual int width() override;
@@ -145,7 +145,19 @@ private:
     SkAutoTDelete<SkDeque> mSaveStack; // lazily allocated, tracks partial saves.
 };
 
-Canvas* Canvas::create_canvas(const SkBitmap& bitmap) {
+// Construct an SkCanvas from the bitmap.
+static SkCanvas* createCanvas(SkBitmap* bitmap) {
+    if (bitmap) {
+        return SkNEW_ARGS(SkCanvas, (*bitmap));
+    }
+
+    // Create an empty bitmap device to prevent callers from crashing
+    // if they attempt to draw into this canvas.
+    SkBitmap emptyBitmap;
+    return new SkCanvas(emptyBitmap);
+}
+
+Canvas* Canvas::create_canvas(SkBitmap* bitmap) {
     return new SkiaCanvas(bitmap);
 }
 
@@ -153,8 +165,8 @@ Canvas* Canvas::create_canvas(SkCanvas* skiaCanvas) {
     return new SkiaCanvas(skiaCanvas);
 }
 
-SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
-    mCanvas.reset(new SkCanvas(bitmap));
+SkiaCanvas::SkiaCanvas(SkBitmap* bitmap) {
+    mCanvas.reset(createCanvas(bitmap));
 }
 
 // ----------------------------------------------------------------------------
@@ -179,11 +191,11 @@ private:
     SkCanvas* m_dstCanvas;
 };
 
-void SkiaCanvas::setBitmap(const SkBitmap& bitmap) {
-    SkCanvas* newCanvas = new SkCanvas(bitmap);
+void SkiaCanvas::setBitmap(SkBitmap* bitmap, bool copyState) {
+    SkCanvas* newCanvas = createCanvas(bitmap);
     SkASSERT(newCanvas);
 
-    if (!bitmap.isNull()) {
+    if (copyState) {
         // Copy the canvas matrix & clip state.
         newCanvas->setMatrix(mCanvas->getTotalMatrix());
         if (NULL != mCanvas->getDevice() && NULL != newCanvas->getDevice()) {

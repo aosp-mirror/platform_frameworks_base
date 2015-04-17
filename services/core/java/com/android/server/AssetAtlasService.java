@@ -199,6 +199,9 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
         private final ArrayList<Bitmap> mBitmaps;
         private final int mPixelCount;
 
+        private long mNativeBitmap;
+
+        // Used for debugging only
         private Bitmap mAtlasBitmap;
 
         Renderer(ArrayList<Bitmap> bitmaps, int pixelCount) {
@@ -296,7 +299,9 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
                 }
 
                 final long endRender = System.nanoTime();
-                result = nUploadAtlas(buffer, mAtlasBitmap);
+                if (mNativeBitmap != 0) {
+                    result = nUploadAtlas(buffer, mNativeBitmap);
+                }
 
                 final long endUpload = System.nanoTime();
                 if (DEBUG_ATLAS) {
@@ -321,8 +326,14 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
          * @param height
          */
         private Canvas acquireCanvas(int width, int height) {
-            mAtlasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            return new Canvas(mAtlasBitmap);
+            if (DEBUG_ATLAS_TEXTURE) {
+                mAtlasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                return new Canvas(mAtlasBitmap);
+            } else {
+                Canvas canvas = new Canvas();
+                mNativeBitmap = nAcquireAtlasCanvas(canvas, width, height);
+                return canvas;
+            }
         }
 
         /**
@@ -332,8 +343,8 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
          * to disk in /data/system/atlas.png for debugging.
          */
         private void releaseCanvas(Canvas canvas) {
-            canvas.setBitmap(null);
             if (DEBUG_ATLAS_TEXTURE) {
+                canvas.setBitmap(null);
 
                 File systemDirectory = new File(Environment.getDataDirectory(), "system");
                 File dataFile = new File(systemDirectory, "atlas.png");
@@ -347,13 +358,18 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
                 } catch (IOException e) {
                     // Ignore
                 }
+
+                mAtlasBitmap.recycle();
+                mAtlasBitmap = null;
+            } else {
+                nReleaseAtlasCanvas(canvas, mNativeBitmap);
             }
-            mAtlasBitmap.recycle();
-            mAtlasBitmap = null;
         }
     }
 
-    private static native boolean nUploadAtlas(GraphicBuffer buffer, Bitmap bitmap);
+    private static native long nAcquireAtlasCanvas(Canvas canvas, int width, int height);
+    private static native void nReleaseAtlasCanvas(Canvas canvas, long bitmap);
+    private static native boolean nUploadAtlas(GraphicBuffer buffer, long bitmap);
 
     @Override
     public boolean isCompatible(int ppid) {

@@ -47,8 +47,39 @@ namespace android {
 #define FENCE_TIMEOUT 2000000000
 
 // ----------------------------------------------------------------------------
+// JNI Helpers
+// ----------------------------------------------------------------------------
+
+static struct {
+    jmethodID setNativeBitmap;
+} gCanvasClassInfo;
+
+#define INVOKEV(object, method, ...) \
+    env->CallVoidMethod(object, method, __VA_ARGS__)
+
+// ----------------------------------------------------------------------------
 // Canvas management
 // ----------------------------------------------------------------------------
+
+static jlong com_android_server_AssetAtlasService_acquireCanvas(JNIEnv* env, jobject,
+        jobject canvas, jint width, jint height) {
+
+    SkBitmap* bitmap = new SkBitmap;
+    bitmap->allocN32Pixels(width, height);
+    bitmap->eraseColor(0);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, reinterpret_cast<jlong>(bitmap));
+
+    return reinterpret_cast<jlong>(bitmap);
+}
+
+static void com_android_server_AssetAtlasService_releaseCanvas(JNIEnv* env, jobject,
+        jobject canvas, jlong bitmapHandle) {
+
+    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, (jlong)0);
+
+    delete bitmap;
+}
 
 #define CLEANUP_GL_AND_RETURN(result) \
     if (fence != EGL_NO_SYNC_KHR) eglDestroySyncKHR(display, fence); \
@@ -62,12 +93,9 @@ namespace android {
     return result;
 
 static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject,
-        jobject graphicBuffer, jobject bitmapHandle) {
+        jobject graphicBuffer, jlong bitmapHandle) {
 
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, bitmapHandle, &bitmap);
-    SkAutoLockPixels alp(bitmap);
-
+    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     // The goal of this method is to copy the bitmap into the GraphicBuffer
     // using the GPU to swizzle the texture content
     sp<GraphicBuffer> buffer(graphicBufferForJavaObject(env, graphicBuffer));
@@ -158,9 +186,9 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
         }
 
         // Upload the content of the bitmap in the GraphicBuffer
-        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap.bytesPerPixel());
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap.width(), bitmap.height(),
-                GL_RGBA, GL_UNSIGNED_BYTE, bitmap.getPixels());
+        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap->width(), bitmap->height(),
+                GL_RGBA, GL_UNSIGNED_BYTE, bitmap->getPixels());
         if (glGetError() != GL_NO_ERROR) {
             ALOGW("Could not upload to texture");
             CLEANUP_GL_AND_RETURN(JNI_FALSE);
@@ -205,11 +233,20 @@ static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject
 const char* const kClassPathName = "com/android/server/AssetAtlasService";
 
 static JNINativeMethod gMethods[] = {
-    { "nUploadAtlas", "(Landroid/view/GraphicBuffer;Landroid/graphics/Bitmap;)Z",
+    { "nAcquireAtlasCanvas", "(Landroid/graphics/Canvas;II)J",
+            (void*) com_android_server_AssetAtlasService_acquireCanvas },
+    { "nReleaseAtlasCanvas", "(Landroid/graphics/Canvas;J)V",
+            (void*) com_android_server_AssetAtlasService_releaseCanvas },
+    { "nUploadAtlas", "(Landroid/view/GraphicBuffer;J)Z",
             (void*) com_android_server_AssetAtlasService_upload },
 };
 
 int register_android_server_AssetAtlasService(JNIEnv* env) {
+    jclass clazz;
+
+    FIND_CLASS(clazz, "android/graphics/Canvas");
+    GET_METHOD_ID(gCanvasClassInfo.setNativeBitmap, clazz, "setNativeBitmap", "(J)V");
+
     return jniRegisterNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

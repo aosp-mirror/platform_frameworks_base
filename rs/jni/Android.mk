@@ -25,7 +25,6 @@ LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     frameworks/rs \
     frameworks/base/core/jni \
-    frameworks/base/libs/hwui \
     $(rs_generated_include_dir)
 
 LOCAL_CFLAGS += -Wno-unused-parameter -std=c++11

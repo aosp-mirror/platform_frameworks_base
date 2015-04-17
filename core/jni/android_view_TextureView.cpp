@@ -48,6 +48,11 @@ static struct {
 } gRectClassInfo;
 
 static struct {
+    jfieldID mSurfaceFormat;
+    jmethodID setNativeBitmap;
+} gCanvasClassInfo;
+
+static struct {
     jfieldID nativeWindow;
 } gTextureViewClassInfo;
 
@@ -167,9 +172,13 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
         bitmap.setPixels(NULL);
     }
 
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
-    nativeCanvas->setBitmap(bitmap);
-    nativeCanvas->clipRect(rect.left, rect.top, rect.right, rect.bottom);
+    SET_INT(canvas, gCanvasClassInfo.mSurfaceFormat, buffer.format);
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, reinterpret_cast<jlong>(&bitmap));
+
+    SkRect clipRect;
+    clipRect.set(rect.left, rect.top, rect.right, rect.bottom);
+    SkCanvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
+    nativeCanvas->clipRect(clipRect);
 
     if (dirtyRect) {
         INVOKEV(dirtyRect, gRectClassInfo.set,
@@ -182,8 +191,7 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
 static void android_view_TextureView_unlockCanvasAndPost(JNIEnv* env, jobject,
         jlong nativeWindow, jobject canvas) {
 
-    Canvas* nativeCanvas = GraphicsJNI::getNativeCanvas(env, canvas);
-    nativeCanvas->setBitmap(SkBitmap());
+    INVOKEV(canvas, gCanvasClassInfo.setNativeBitmap, (jlong)0);
 
     if (nativeWindow) {
         sp<ANativeWindow> window((ANativeWindow*) nativeWindow);
@@ -216,6 +224,10 @@ int register_android_view_TextureView(JNIEnv* env) {
     gRectClassInfo.top = GetFieldIDOrDie(env, clazz, "top", "I");
     gRectClassInfo.right = GetFieldIDOrDie(env, clazz, "right", "I");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, clazz, "bottom", "I");
+
+    clazz = FindClassOrDie(env, "android/graphics/Canvas");
+    gCanvasClassInfo.mSurfaceFormat = GetFieldIDOrDie(env, clazz, "mSurfaceFormat", "I");
+    gCanvasClassInfo.setNativeBitmap = GetMethodIDOrDie(env, clazz, "setNativeBitmap", "(J)V");
 
     clazz = FindClassOrDie(env, "android/view/TextureView");
     gTextureViewClassInfo.nativeWindow = GetFieldIDOrDie(env, clazz, "mNativeWindow", "J");

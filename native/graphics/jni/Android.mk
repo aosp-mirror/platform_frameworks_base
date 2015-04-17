@@ -24,8 +24,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_C_INCLUDES += \
     frameworks/base/native/include \
-    frameworks/base/core/jni/android/graphics \
-    frameworks/base/libs/hwui
+    frameworks/base/core/jni/android/graphics
 
 LOCAL_MODULE:= libjnigraphics
 
