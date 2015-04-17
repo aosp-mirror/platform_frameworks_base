@@ -85,7 +85,6 @@ public class CarrierConfigManager {
      *
      *  @hide
      */
-    @SystemApi
     public static final String STRING_VVM_DESTINATION_NUMBER = "string_vvm_destination_number";
 
     /**
@@ -93,15 +92,13 @@ public class CarrierConfigManager {
      *
      * @hide
      */
-    @SystemApi
-    public static final String SHORT_VVM_PORT_NUMBER = "string_vvm_port_number";
+    public static final String INT_VVM_PORT_NUMBER = "int_vvm_port_number";
 
     /**
      * The type of visual voicemail protocol the carrier adheres to (see below).
      *
      * @hide
      */
-    @SystemApi
     public static final String STRING_VVM_TYPE = "string_vvm_type";
 
     /* Visual voicemail protocols */
@@ -111,7 +108,6 @@ public class CarrierConfigManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String VVM_TYPE_OMTP = "vvm_type_omtp";
 
     private final static String TAG = "CarrierConfigManager";
@@ -127,6 +123,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(BOOL_SHOW_APN_SETTING_CDMA, false);
 
         sDefaults.putInt(INT_VOLTE_REPLACEMENT_RAT, 0);
+
+        sDefaults.putString(STRING_VVM_DESTINATION_NUMBER, "");
+        sDefaults.putString(STRING_VVM_TYPE, "");
+        sDefaults.putInt(INT_VVM_PORT_NUMBER, 0);
     }
 
     /**
