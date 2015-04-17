@@ -143,75 +143,67 @@ public class FingerprintService extends SystemService {
                     + ", mAuthClients = " + mAuthClient + ", mEnrollClient = " + mEnrollClient);
         if (mEnrollClient != null) {
             final IBinder token = mEnrollClient.token;
-            if (doNotify(mEnrollClient, type, arg1, arg2, arg3)) {
-                stopEnrollment(token);
+            if (dispatchNotify(mEnrollClient, type, arg1, arg2, arg3)) {
+                stopEnrollment(token, false);
+                removeClient(mEnrollClient);
             }
         }
         if (mAuthClient != null) {
             final IBinder token = mAuthClient.token;
-            if (doNotify(mAuthClient, type, arg1, arg2, arg3)) {
-                stopAuthentication(token);
+            if (dispatchNotify(mAuthClient, type, arg1, arg2, arg3)) {
+                stopAuthentication(token, false);
+                removeClient(mAuthClient);
             }
         }
         if (mRemoveClient != null) {
-            if (doNotify(mRemoveClient, type, arg1, arg2, arg3)) {
+            if (dispatchNotify(mRemoveClient, type, arg1, arg2, arg3)) {
                 removeClient(mRemoveClient);
             }
         }
     }
 
-    // Returns true if the operation is done, i.e. authentication completed
-    boolean doNotify(ClientMonitor clientMonitor, int type, int arg1, int arg2, int arg3) {
+    /*
+     * Dispatch notify events to clients.
+     *
+     * @return true if the operation is done, i.e. authentication completed
+     */
+    boolean dispatchNotify(ClientMonitor clientMonitor, int type, int arg1, int arg2, int arg3) {
         ContentResolver contentResolver = mContext.getContentResolver();
         boolean operationCompleted = false;
+        int fpId;
+        int groupId;
+        int remaining;
+        int acquireInfo;
         switch (type) {
             case FINGERPRINT_ERROR:
-                {
-                    final int error = arg1;
-                    clientMonitor.sendError(error);
-                    removeClient(clientMonitor);
-                    operationCompleted = true; // any error means the operation is done
-                }
+                fpId = arg1;
+                operationCompleted = clientMonitor.sendError(fpId);
                 break;
             case FINGERPRINT_ACQUIRED:
-                clientMonitor.sendAcquired(arg1 /* acquireInfo */);
+                acquireInfo = arg1;
+                operationCompleted = clientMonitor.sendAcquired(acquireInfo);
                 break;
             case FINGERPRINT_AUTHENTICATED:
-                {
-                    final int fpId = arg1;
-                    final int groupId = arg2;
-                    clientMonitor.sendAuthenticated(fpId, groupId);
-                    if (fpId == 0) {
-                        if (clientMonitor == mAuthClient) {
-                            operationCompleted = handleFailedAttempt(clientMonitor);
-                        }
-                    } else {
-                        mLockoutReset.run(); // a valid fingerprint resets lockout
-                    }
-                }
+                fpId = arg1;
+                groupId = arg2;
+                operationCompleted = clientMonitor.sendAuthenticated(fpId, groupId);
                 break;
             case FINGERPRINT_TEMPLATE_ENROLLING:
-                {
-                    final int fpId = arg1;
-                    final int groupId = arg2;
-                    final int remaining = arg3;
-                    clientMonitor.sendEnrollResult(fpId, groupId, remaining);
-                    if (remaining == 0) {
-                        addTemplateForUser(clientMonitor, contentResolver, fpId);
-                        operationCompleted = true; // enroll completed
-                    }
+                fpId = arg1;
+                groupId = arg2;
+                remaining = arg3;
+                operationCompleted = clientMonitor.sendEnrollResult(fpId, groupId, remaining);
+                if (remaining == 0) {
+                    addTemplateForUser(clientMonitor, contentResolver, fpId);
+                    operationCompleted = true; // enroll completed
                 }
                 break;
             case FINGERPRINT_TEMPLATE_REMOVED:
-                {
-                    final int fingerId = arg1;
-                    final int groupId = arg2;
-                    removeTemplateForUser(clientMonitor, contentResolver, fingerId);
-                    if (fingerId == 0) {
-                        operationCompleted = true; // remove completed
-                    } else {
-                        clientMonitor.sendRemoved(fingerId, groupId);
-                    }
+                fpId = arg1;
+                groupId = arg2;
+                operationCompleted = clientMonitor.sendRemoved(fpId, groupId);
+                if (fpId != 0) {
+                    removeTemplateForUser(clientMonitor, contentResolver, fpId);
                 }
                 break;
         }
@@ -235,7 +227,9 @@ public class FingerprintService extends SystemService {
     }
 
     private void resetFailedAttempts() {
-        if (DEBUG) Slog.v(TAG, "Reset fingerprint lockout");
+        if (DEBUG && inLockoutMode()) {
+            Slog.v(TAG, "Reset fingerprint lockout");
+        }
         mFailedAttempts = 0;
     }
 
@@ -283,19 +277,21 @@ public class FingerprintService extends SystemService {
 
     private void stopPendingOperations() {
         if (mEnrollClient != null) {
-            stopEnrollment(mEnrollClient.token);
+            stopEnrollment(mEnrollClient.token, true);
         }
         if (mAuthClient != null) {
-            stopAuthentication(mAuthClient.token);
+            stopAuthentication(mAuthClient.token, true);
         }
         // mRemoveClient is allowed to continue
     }
 
-    void stopEnrollment(IBinder token) {
+    void stopEnrollment(IBinder token, boolean notify) {
         final ClientMonitor client = mEnrollClient;
         if (client == null || client.token != token) return;
         int result = nativeStopEnrollment();
-        client.sendError(FingerprintManager.FINGERPRINT_ERROR_CANCELED);
+        if (notify) {
+            client.sendError(FingerprintManager.FINGERPRINT_ERROR_CANCELED);
+        }
         removeClient(mEnrollClient);
         if (result != 0) {
             Slog.w(TAG, "startEnrollCancel failed, result=" + result);
@@ -321,11 +317,13 @@ public class FingerprintService extends SystemService {
         }
     }
 
-    void stopAuthentication(IBinder token) {
+    void stopAuthentication(IBinder token, boolean notify) {
         final ClientMonitor client = mAuthClient;
         if (client == null || client.token != token) return;
         int result = nativeStopAuthentication();
-        client.sendError(FingerprintManager.FINGERPRINT_ERROR_CANCELED);
+        if (notify) {
+            client.sendError(FingerprintManager.FINGERPRINT_ERROR_CANCELED);
+        }
         removeClient(mAuthClient);
         if (result != 0) {
             Slog.w(TAG, "stopAuthentication failed, result=" + result);
@@ -408,74 +406,89 @@ public class FingerprintService extends SystemService {
             }
         }
 
+        /*
+         * @return true if we're done.
+         */
         private boolean sendRemoved(int fingerId, int groupId) {
             IFingerprintServiceReceiver rx = receiver.get();
-            if (rx != null) {
-                try {
-                    rx.onRemoved(mHalDeviceId, fingerId, groupId);
-                    return true;
-                } catch (RemoteException e) {
-                    if (DEBUG) Slog.v(TAG, "Failed to invoke sendRemoved:", e);
-                }
+            if (rx == null) return true; // client not listening
+            try {
+                rx.onRemoved(mHalDeviceId, fingerId, groupId);
+                return fingerId == 0;
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to notify Removed:", e);
             }
-            removeClient(this);
             return false;
         }
 
+        /*
+         * @return true if we're done.
+         */
         private boolean sendEnrollResult(int fpId, int groupId, int remaining) {
             IFingerprintServiceReceiver rx = receiver.get();
-            if (rx != null) {
-                try {
-                    rx.onEnrollResult(mHalDeviceId, fpId, groupId, remaining);
-                    return true;
-                } catch (RemoteException e) {
-                    if (DEBUG) Slog.v(TAG, "Failed to invoke sendEnrollResult:", e);
-                }
+            if (rx == null) return true; // client not listening
+            try {
+                rx.onEnrollResult(mHalDeviceId, fpId, groupId, remaining);
+                return remaining == 0;
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to notify EnrollResult:", e);
+                return true;
             }
-            removeClient(this);
-            return false;
         }
 
+        /*
+         * @return true if we're done.
+         */
         private boolean sendAuthenticated(int fpId, int groupId) {
             IFingerprintServiceReceiver rx = receiver.get();
+            boolean result = false;
             if (rx != null) {
                 try {
                     rx.onAuthenticated(mHalDeviceId, fpId, groupId);
-                    return true;
                 } catch (RemoteException e) {
-                    if (DEBUG) Slog.v(TAG, "Failed to invoke sendProcessed:", e);
+                    Slog.w(TAG, "Failed to notify Authenticated:", e);
+                    result = true; // client failed
                 }
+            } else {
+                result = true; // client not listening
             }
-            removeClient(this);
-            return false;
+            if (fpId <= 0) {
+                result |= handleFailedAttempt(this);
+            } else {
+                result |= true; // we have a valid fingerprint
+                mLockoutReset.run();
+            }
+            return result;
         }
 
+        /*
+         * @return true if we're done.
+         */
         private boolean sendAcquired(int acquiredInfo) {
             IFingerprintServiceReceiver rx = receiver.get();
-            if (rx != null) {
-                try {
-                    rx.onAcquired(mHalDeviceId, acquiredInfo);
-                    return true;
-                } catch (RemoteException e) {
-                    if (DEBUG) Slog.v(TAG, "Failed to invoke sendAcquired:", e);
-                }
+            if (rx == null) return true; // client not listening
+            try {
+                rx.onAcquired(mHalDeviceId, acquiredInfo);
+                return false; // acquisition continues...
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke sendAcquired:", e);
+                return true; // client failed
             }
-            removeClient(this);
-            return false;
         }
 
+        /*
+         * @return true if we're done.
+         */
         private boolean sendError(int error) {
             IFingerprintServiceReceiver rx = receiver.get();
             if (rx != null) {
                 try {
                     rx.onError(mHalDeviceId, error);
-                    return true;
                 } catch (RemoteException e) {
-                    if (DEBUG) Slog.v(TAG, "Failed to invoke sendError:", e);
+                    Slog.w(TAG, "Failed to invoke sendError:", e);
                 }
             }
-            removeClient(this);
-            return false;
+            return true; // errors always terminate progress
         }
     }
 
@@ -507,7 +520,7 @@ public class FingerprintService extends SystemService {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    stopEnrollment(token);
+                    stopEnrollment(token, true);
                 }
             });
         }
@@ -533,7 +546,7 @@ public class FingerprintService extends SystemService {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    stopAuthentication(token);
+                    stopAuthentication(token, true);
                 }
             });
         }
