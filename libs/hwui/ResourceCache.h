@@ -53,11 +53,11 @@ public:
 
 class BitmapKey {
 public:
-    BitmapKey(const SkBitmap& bitmap)
+    BitmapKey(const SkBitmap* bitmap)
         : mRefCount(1)
-        , mBitmapDimensions(bitmap.dimensions())
-        , mPixelRefOrigin(bitmap.pixelRefOrigin())
-        , mPixelRefStableID(bitmap.pixelRef()->getStableID()) { }
+        , mBitmapDimensions(bitmap->dimensions())
+        , mPixelRefOrigin(bitmap->pixelRefOrigin())
+        , mPixelRefStableID(bitmap->pixelRef()->getStableID()) { }
 
     void operator=(const BitmapKey& other);
     bool operator==(const BitmapKey& other) const;
@@ -101,7 +101,7 @@ public:
      * The cache stores a copy of the provided resource or refs an existing resource
      * if the bitmap has previously been inserted and returns the cached copy.
      */
-    const SkBitmap* insert(const SkBitmap& resource);
+    const SkBitmap* insert(const SkBitmap* resource);
 
     void incrementRefcount(const Res_png_9patch* resource);
 
