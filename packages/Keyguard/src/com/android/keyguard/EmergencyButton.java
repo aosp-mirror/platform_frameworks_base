@@ -138,7 +138,7 @@ public class EmergencyButton extends Button {
                     visible = mEnableEmergencyCallWhileSimLocked;
                 } else {
                     // Only show if there is a secure screen (pin/pattern/SIM pin/SIM puk);
-                    visible = mLockPatternUtils.isSecure();
+                    visible = mLockPatternUtils.isSecure(mLockPatternUtils.getCurrentUser());
                 }
             }
         }

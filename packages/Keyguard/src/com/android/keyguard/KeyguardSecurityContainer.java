@@ -296,7 +296,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 (failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) == 0;
         }
         monitor.reportFailedUnlockAttempt();
-        mLockPatternUtils.reportFailedPasswordAttempt();
+        mLockPatternUtils.reportFailedPasswordAttempt(mLockPatternUtils.getCurrentUser());
         if (showTimeout) {
             showTimeoutDialog();
         }
@@ -430,7 +430,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             if (success) {
                 monitor.clearFailedUnlockAttempts();
-                mLockPatternUtils.reportSuccessfulPasswordAttempt();
+                mLockPatternUtils.reportSuccessfulPasswordAttempt(
+                        mLockPatternUtils.getCurrentUser());
             } else {
                 KeyguardSecurityContainer.this.reportFailedUnlockAttempt();
             }

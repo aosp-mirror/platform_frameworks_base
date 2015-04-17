@@ -234,8 +234,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         boolean currentUserHasTrust = updateMonitor.getUserHasTrust(
                 mLockPatternUtils.getCurrentUser());
-        return mLockPatternUtils.isSecure() && !currentUserHasTrust
-                ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
+        boolean secure = mLockPatternUtils.isSecure(mLockPatternUtils.getCurrentUser());
+        return (secure && !currentUserHasTrust) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
     }
 
     private void updateCameraVisibility() {
