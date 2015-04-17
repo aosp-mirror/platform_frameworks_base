@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,44 @@
 
 package android.widget;
 
-import com.android.internal.widget.ViewPager;
 import com.android.internal.R;
+import com.android.internal.widget.ViewPager;
+import com.android.internal.widget.ViewPager.OnPageChangeListener;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.MathUtils;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
 import libcore.icu.LocaleData;
 
-/**
- * This displays a list of months in a calendar format with selectable days.
- */
-class DayPickerView extends ViewPager {
+class DayPickerView extends ViewGroup {
+    private static final int DEFAULT_LAYOUT = R.layout.day_picker_content_material;
     private static final int DEFAULT_START_YEAR = 1900;
     private static final int DEFAULT_END_YEAR = 2100;
+
+    private static final int[] ATTRS_TEXT_COLOR = new int[] { R.attr.textColor };
 
     private final Calendar mSelectedDay = Calendar.getInstance();
     private final Calendar mMinDate = Calendar.getInstance();
     private final Calendar mMaxDate = Calendar.getInstance();
 
-    private final ArrayList<View> mMatchParentChildren = new ArrayList<>(1);
+    private final AccessibilityManager mAccessibilityManager;
 
-    private final DayPickerAdapter mAdapter;
+    private final ViewPager mViewPager;
+    private final ImageButton mPrevButton;
+    private final ImageButton mNextButton;
+
+    private final DayPickerPagerAdapter mAdapter;
 
     /** Temporary calendar used for date calculations. */
     private Calendar mTempCalendar;
@@ -57,16 +64,20 @@ class DayPickerView extends ViewPager {
         this(context, null);
     }
 
-    public DayPickerView(Context context, AttributeSet attrs) {
+    public DayPickerView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, R.attr.calendarViewStyle);
     }
 
-    public DayPickerView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public DayPickerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public DayPickerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public DayPickerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        mAccessibilityManager = (AccessibilityManager) context.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.CalendarView, defStyleAttr, defStyleRes);
@@ -93,14 +104,44 @@ class DayPickerView extends ViewPager {
         a.recycle();
 
         // Set up adapter.
-        mAdapter = new DayPickerAdapter(context,
+        mAdapter = new DayPickerPagerAdapter(context,
                 R.layout.date_picker_month_item_material, R.id.month_view);
         mAdapter.setMonthTextAppearance(monthTextAppearanceResId);
         mAdapter.setDayOfWeekTextAppearance(dayOfWeekTextAppearanceResId);
         mAdapter.setDayTextAppearance(dayTextAppearanceResId);
         mAdapter.setDaySelectorColor(daySelectorColor);
 
-        setAdapter(mAdapter);
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        final ViewGroup content = (ViewGroup) inflater.inflate(DEFAULT_LAYOUT, this, false);
+
+        // Transfer all children from content to here.
+        while (content.getChildCount() > 0) {
+            final View child = content.getChildAt(0);
+            content.removeViewAt(0);
+            addView(child);
+        }
+
+        mPrevButton = (ImageButton) findViewById(R.id.prev);
+        mPrevButton.setOnClickListener(mOnClickListener);
+
+        mNextButton = (ImageButton) findViewById(R.id.next);
+        mNextButton.setOnClickListener(mOnClickListener);
+
+        mViewPager = (ViewPager) findViewById(R.id.day_picker_view_pager);
+        mViewPager.setAdapter(mAdapter);
+        mViewPager.setOnPageChangeListener(mOnPageChangedListener);
+
+        // Proxy the month text color into the previous and next buttons.
+        if (monthTextAppearanceResId != 0) {
+            final TypedArray ta = mContext.obtainStyledAttributes(null,
+                    ATTRS_TEXT_COLOR, 0, monthTextAppearanceResId);
+            final ColorStateList monthColor = ta.getColorStateList(0);
+            if (monthColor != null) {
+                mPrevButton.setImageTintList(monthColor);
+                mNextButton.setImageTintList(monthColor);
+            }
+            ta.recycle();
+        }
 
         // Set up min and max dates.
         final Calendar tempDate = Calendar.getInstance();
@@ -127,109 +168,68 @@ class DayPickerView extends ViewPager {
         setDate(setDateMillis, false);
 
         // Proxy selection callbacks to our own listener.
-        mAdapter.setOnDaySelectedListener(new DayPickerAdapter.OnDaySelectedListener() {
+        mAdapter.setOnDaySelectedListener(new DayPickerPagerAdapter.OnDaySelectedListener() {
             @Override
-            public void onDaySelected(DayPickerAdapter adapter, Calendar day) {
+            public void onDaySelected(DayPickerPagerAdapter adapter, Calendar day) {
                 if (mOnDaySelectedListener != null) {
                     mOnDaySelectedListener.onDaySelected(DayPickerView.this, day);
                 }
-            }
-
-            @Override
-            public void onNavigationClick(DayPickerAdapter view, int direction, boolean animate) {
-                // ViewPager clamps input values, so we don't need to worry
-                // about passing invalid indices.
-                final int nextItem = getCurrentItem() + direction;
-                setCurrentItem(nextItem, animate);
             }
         });
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        populate();
+        final ViewPager viewPager = mViewPager;
+        measureChild(viewPager, widthMeasureSpec, heightMeasureSpec);
 
-        // Everything below is mostly copied from FrameLayout.
-        int count = getChildCount();
+        final int measuredWidthAndState = viewPager.getMeasuredWidthAndState();
+        final int measuredHeightAndState = viewPager.getMeasuredHeightAndState();
+        setMeasuredDimension(measuredWidthAndState, measuredHeightAndState);
 
-        final boolean measureMatchParentChildren =
-                MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.EXACTLY ||
-                        MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.EXACTLY;
+        final int pagerWidth = viewPager.getMeasuredWidth();
+        final int pagerHeight = viewPager.getMeasuredHeight();
+        final int buttonWidthSpec = MeasureSpec.makeMeasureSpec(pagerWidth, MeasureSpec.AT_MOST);
+        final int buttonHeightSpec = MeasureSpec.makeMeasureSpec(pagerHeight, MeasureSpec.AT_MOST);
+        mPrevButton.measure(buttonWidthSpec, buttonHeightSpec);
+        mNextButton.measure(buttonWidthSpec, buttonHeightSpec);
+    }
 
-        int maxHeight = 0;
-        int maxWidth = 0;
-        int childState = 0;
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        final ImageButton leftButton = mPrevButton;
+        final ImageButton rightButton = mNextButton;
 
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
-                measureChild(child, widthMeasureSpec, heightMeasureSpec);
-                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                maxWidth = Math.max(maxWidth, child.getMeasuredWidth());
-                maxHeight = Math.max(maxHeight, child.getMeasuredHeight());
-                childState = combineMeasuredStates(childState, child.getMeasuredState());
-                if (measureMatchParentChildren) {
-                    if (lp.width == LayoutParams.MATCH_PARENT ||
-                            lp.height == LayoutParams.MATCH_PARENT) {
-                        mMatchParentChildren.add(child);
-                    }
-                }
-            }
+        final int width = right - left;
+        final int height = bottom - top;
+        mViewPager.layout(0, 0, width, height);
+
+        if (mViewPager.getChildCount() < 1) {
+            leftButton.setVisibility(View.INVISIBLE);
+            rightButton.setVisibility(View.INVISIBLE);
+            return;
         }
 
-        // Account for padding too
-        maxWidth += getPaddingLeft() + getPaddingRight();
-        maxHeight += getPaddingTop() + getPaddingBottom();
+        final SimpleMonthView monthView = (SimpleMonthView) mViewPager.getChildAt(0);
+        final int monthHeight = monthView.getMonthHeight();
+        final int cellWidth = monthView.getCellWidth();
 
-        // Check against our minimum height and width
-        maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
-        maxWidth = Math.max(maxWidth, getSuggestedMinimumWidth());
+        // Vertically center the previous/next buttons within the month
+        // header, horizontally center within the day cell.
+        final int leftDW = leftButton.getMeasuredWidth();
+        final int leftDH = leftButton.getMeasuredHeight();
+        final int leftIconTop = monthView.getPaddingTop() + (monthHeight - leftDH) / 2;
+        final int leftIconLeft = monthView.getPaddingLeft() + (cellWidth - leftDW) / 2;
+        leftButton.layout(leftIconLeft, leftIconTop, leftIconLeft + leftDW, leftIconTop + leftDH);
+        leftButton.setVisibility(View.VISIBLE);
 
-        // Check against our foreground's minimum height and width
-        final Drawable drawable = getForeground();
-        if (drawable != null) {
-            maxHeight = Math.max(maxHeight, drawable.getMinimumHeight());
-            maxWidth = Math.max(maxWidth, drawable.getMinimumWidth());
-        }
-
-        setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childState),
-                resolveSizeAndState(maxHeight, heightMeasureSpec,
-                        childState << MEASURED_HEIGHT_STATE_SHIFT));
-
-        count = mMatchParentChildren.size();
-        if (count > 1) {
-            for (int i = 0; i < count; i++) {
-                final View child = mMatchParentChildren.get(i);
-
-                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                final int childWidthMeasureSpec;
-                final int childHeightMeasureSpec;
-
-                if (lp.width == LayoutParams.MATCH_PARENT) {
-                    childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                            getMeasuredWidth() - getPaddingLeft() - getPaddingRight(),
-                            MeasureSpec.EXACTLY);
-                } else {
-                    childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
-                            getPaddingLeft() + getPaddingRight(),
-                            lp.width);
-                }
-
-                if (lp.height == LayoutParams.MATCH_PARENT) {
-                    childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                            getMeasuredHeight() - getPaddingTop() - getPaddingBottom(),
-                            MeasureSpec.EXACTLY);
-                } else {
-                    childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
-                            getPaddingTop() + getPaddingBottom(),
-                            lp.height);
-                }
-
-                child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-            }
-        }
-
-        mMatchParentChildren.clear();
+        final int rightDW = rightButton.getMeasuredWidth();
+        final int rightDH = rightButton.getMeasuredHeight();
+        final int rightIconTop = monthView.getPaddingTop() + (monthHeight - rightDH) / 2;
+        final int rightIconRight = width - monthView.getPaddingRight() - (cellWidth - rightDW) / 2;
+        rightButton.layout(rightIconRight - rightDW, rightIconTop,
+                rightIconRight, rightIconTop + rightDH);
+        rightButton.setVisibility(View.VISIBLE);
     }
 
     public void setDayOfWeekTextAppearance(int resId) {
@@ -284,8 +284,8 @@ class DayPickerView extends ViewPager {
         }
 
         final int position = getPositionFromDay(timeInMillis);
-        if (position != getCurrentItem()) {
-            setCurrentItem(position, animate);
+        if (position != mViewPager.getCurrentItem()) {
+            mViewPager.setCurrentItem(position, animate);
         }
 
         mTempCalendar.setTimeInMillis(timeInMillis);
@@ -365,10 +365,57 @@ class DayPickerView extends ViewPager {
      * Gets the position of the view that is most prominently displayed within the list view.
      */
     public int getMostVisiblePosition() {
-        return getCurrentItem();
+        return mViewPager.getCurrentItem();
     }
 
+    public void setPosition(int position) {
+        mViewPager.setCurrentItem(position, false);
+    }
+
+    private final OnPageChangeListener mOnPageChangedListener = new OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            final float alpha = Math.abs(0.5f - positionOffset) * 2.0f;
+            mPrevButton.setAlpha(alpha);
+            mNextButton.setAlpha(alpha);
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {}
+
+        @Override
+        public void onPageSelected(int position) {
+            mPrevButton.setVisibility(
+                    position > 0 ? View.VISIBLE : View.INVISIBLE);
+            mNextButton.setVisibility(
+                    position < (mAdapter.getCount() - 1) ? View.VISIBLE : View.INVISIBLE);
+        }
+    };
+
+    private final OnClickListener mOnClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final int direction;
+            if (v == mPrevButton) {
+                direction = -1;
+            } else if (v == mNextButton) {
+                direction = 1;
+            } else {
+                return;
+            }
+
+            // Animation is expensive for accessibility services since it sends
+            // lots of scroll and content change events.
+            final boolean animate = !mAccessibilityManager.isEnabled();
+
+            // ViewPager clamps input values, so we don't need to worry
+            // about passing invalid indices.
+            final int nextItem = mViewPager.getCurrentItem() + direction;
+            mViewPager.setCurrentItem(nextItem, animate);
+        }
+    };
+
     public interface OnDaySelectedListener {
-        public void onDaySelected(DayPickerView view, Calendar day);
+        void onDaySelected(DayPickerView view, Calendar day);
     }
 }

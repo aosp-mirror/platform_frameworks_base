@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.StyleRes;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.DayPickerView.OnDaySelectedListener;
 
 import java.util.Calendar;
 
@@ -109,8 +110,7 @@ class CalendarViewMaterialDelegate extends CalendarView.AbstractCalendarViewDele
         mOnDateChangeListener = listener;
     }
 
-    private final DayPickerView.OnDaySelectedListener mOnDaySelectedListener =
-            new DayPickerView.OnDaySelectedListener() {
+    private final OnDaySelectedListener mOnDaySelectedListener = new OnDaySelectedListener() {
         @Override
         public void onDaySelected(DayPickerView view, Calendar day) {
             if (mOnDateChangeListener != null) {
