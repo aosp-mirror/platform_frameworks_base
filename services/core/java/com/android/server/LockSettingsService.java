@@ -134,7 +134,11 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     public void systemReady() {
         migrateOldData();
-        getGateKeeperService();
+        try {
+            getGateKeeperService();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failure retrieving IGateKeeperService", e);
+        }
         mStorage.prefetchUser(UserHandle.USER_OWNER);
     }
 
@@ -695,7 +699,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         return null;
     }
 
-    private synchronized IGateKeeperService getGateKeeperService() {
+    private class GateKeeperDiedRecipient implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            mGateKeeperService.asBinder().unlinkToDeath(this, 0);
+            mGateKeeperService = null;
+        }
+    }
+
+    private synchronized IGateKeeperService getGateKeeperService()
+            throws RemoteException {
         if (mGateKeeperService != null) {
             return mGateKeeperService;
         }
@@ -703,6 +716,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         final IBinder service =
             ServiceManager.getService("android.service.gatekeeper.IGateKeeperService");
         if (service != null) {
+            service.linkToDeath(new GateKeeperDiedRecipient(), 0);
             mGateKeeperService = IGateKeeperService.Stub.asInterface(service);
             return mGateKeeperService;
         }
