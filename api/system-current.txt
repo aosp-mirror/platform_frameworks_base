@@ -16110,6 +16110,7 @@ package android.media {
   public class AudioRecord {
     ctor public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
     ctor public AudioRecord(android.media.AudioAttributes, android.media.AudioFormat, int, int) throws java.lang.IllegalArgumentException;
+    method public void addOnAudioRecordRoutingListener(android.media.OnAudioRecordRoutingListener, android.os.Handler);
     method public int getAudioFormat();
     method public int getAudioSessionId();
     method public int getAudioSource();
@@ -16120,6 +16121,7 @@ package android.media {
     method public int getNotificationMarkerPosition();
     method public int getPositionNotificationPeriod();
     method public int getRecordingState();
+    method public android.media.AudioDeviceInfo getRoutedDevice();
     method public int getSampleRate();
     method public int getState();
     method public int read(byte[], int, int);
@@ -16130,6 +16132,7 @@ package android.media {
     method public int read(java.nio.ByteBuffer, int);
     method public int read(java.nio.ByteBuffer, int, int);
     method public void release();
+    method public void removeOnAudioRecordRoutingListener(android.media.OnAudioRecordRoutingListener);
     method public int setNotificationMarkerPosition(int);
     method public int setPositionNotificationPeriod(int);
     method public void setRecordPositionUpdateListener(android.media.AudioRecord.OnRecordPositionUpdateListener);
@@ -16174,6 +16177,7 @@ package android.media {
     ctor public AudioTrack(int, int, int, int, int, int) throws java.lang.IllegalArgumentException;
     ctor public AudioTrack(int, int, int, int, int, int, int) throws java.lang.IllegalArgumentException;
     ctor public AudioTrack(android.media.AudioAttributes, android.media.AudioFormat, int, int, int) throws java.lang.IllegalArgumentException;
+    method public void addOnAudioTrackRoutingListener(android.media.OnAudioTrackRoutingListener, android.os.Handler);
     method public int attachAuxEffect(int);
     method public void flush();
     method public int getAudioFormat();
@@ -16191,6 +16195,7 @@ package android.media {
     method public int getPlaybackRate();
     method public int getPositionNotificationPeriod();
     method public android.media.AudioDeviceInfo getPreferredOutputDevice();
+    method public android.media.AudioDeviceInfo getRoutedDevice();
     method public int getSampleRate();
     method public int getState();
     method public int getStreamType();
@@ -16199,6 +16204,7 @@ package android.media {
     method public void play() throws java.lang.IllegalStateException;
     method public void release();
     method public int reloadStaticData();
+    method public void removeOnAudioTrackRoutingListener(android.media.OnAudioTrackRoutingListener);
     method public int setAuxEffectSendLevel(float);
     method public int setLoopPoints(int, int, int);
     method public int setNotificationMarkerPosition(int);
@@ -17560,6 +17566,14 @@ package android.media {
 
   public abstract interface OnAudioDeviceConnectionListener {
     method public abstract void onAudioDeviceConnection();
+  }
+
+  public abstract interface OnAudioRecordRoutingListener {
+    method public abstract void onAudioRecordRouting(android.media.AudioRecord);
+  }
+
+  public abstract interface OnAudioTrackRoutingListener {
+    method public abstract void onAudioTrackRouting(android.media.AudioTrack);
   }
 
   public final class Rating implements android.os.Parcelable {

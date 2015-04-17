@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Iterator;
 
 import android.annotation.IntDef;
@@ -32,6 +33,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.ArrayMap;
 import android.util.Log;
 
 /**
@@ -112,6 +114,11 @@ public class AudioRecord
      * Event id denotes when previously set update period has elapsed during recording.
      */
     private static final int NATIVE_EVENT_NEW_POS = 3;
+
+    /**
+     * Event id denotes when the routing changes.
+     */
+    private final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
 
     private final static String TAG = "android.media.AudioRecord";
 
@@ -1117,7 +1124,7 @@ public class AudioRecord
      * Sets the listener the AudioRecord notifies when a previously set marker is reached or
      * for each periodic record head position update.
      * Use this method to receive AudioRecord events in the Handler associated with another
-     * thread than the one in which you created the AudioTrack instance.
+     * thread than the one in which you created the AudioRecord instance.
      * @param listener
      * @param handler the Handler that will receive the event notification messages.
      */
@@ -1157,6 +1164,115 @@ public class AudioRecord
         return native_set_marker_pos(markerInFrames);
     }
 
+
+    //--------------------------------------------------------------------------
+    // (Re)Routing Info
+    //--------------------
+    /**
+     * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioRecord.
+     */
+    public AudioDeviceInfo getRoutedDevice() {
+        return null;
+    }
+
+    /**
+     * The message sent to apps when the routing of this AudioRecord changes if they provide
+     * a {#link Handler} object to addOnAudioRecordRoutingListener().
+     */
+    private ArrayMap<OnAudioRecordRoutingListener, NativeRoutingEventHandlerDelegate>
+        mRoutingChangeListeners =
+            new ArrayMap<OnAudioRecordRoutingListener, NativeRoutingEventHandlerDelegate>();
+
+    /**
+     * Adds an {@link OnAudioRecordRoutingListener} to receive notifications of routing changes
+     * on this AudioRecord.
+     */
+    public void addOnAudioRecordRoutingListener(OnAudioRecordRoutingListener listener,
+            android.os.Handler handler) {
+        if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
+            synchronized (mRoutingChangeListeners) {
+                mRoutingChangeListeners.put(
+                    listener, new NativeRoutingEventHandlerDelegate(this, listener, handler));
+            }
+        }
+    }
+
+    /**
+     * Removes an {@link OnAudioRecordRoutingListener} which has been previously added
+     * to receive notifications of changes to the set of connected audio devices.
+     */
+    public void removeOnAudioRecordRoutingListener(OnAudioRecordRoutingListener listener) {
+        synchronized (mRoutingChangeListeners) {
+            if (mRoutingChangeListeners.containsKey(listener)) {
+                mRoutingChangeListeners.remove(listener);
+            }
+        }
+    }
+
+    /**
+     * Helper class to handle the forwarding of native events to the appropriate listener
+     * (potentially) handled in a different thread
+     */
+    private class NativeRoutingEventHandlerDelegate {
+        private final Handler mHandler;
+
+        NativeRoutingEventHandlerDelegate(final AudioRecord record,
+                                   final OnAudioRecordRoutingListener listener,
+                                   Handler handler) {
+            // find the looper for our new event handler
+            Looper looper;
+            if (handler != null) {
+                looper = handler.getLooper();
+            } else {
+                // no given handler, use the looper the AudioRecord was created in
+                looper = mInitializationLooper;
+            }
+
+            // construct the event handler with this looper
+            if (looper != null) {
+                // implement the event handler delegate
+                mHandler = new Handler(looper) {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        if (record == null) {
+                            return;
+                        }
+                        switch(msg.what) {
+                        case NATIVE_EVENT_ROUTING_CHANGE:
+                            if (listener != null) {
+                                listener.onAudioRecordRouting(record);
+                            }
+                            break;
+                        default:
+                            loge("Unknown native event type: " + msg.what);
+                            break;
+                        }
+                    }
+                };
+            } else {
+                mHandler = null;
+            }
+        }
+
+        Handler getHandler() {
+            return mHandler;
+        }
+    }
+    /**
+     * Sends device list change notification to all listeners.
+     */
+    private void broadcastRoutingChange() {
+        Collection<NativeRoutingEventHandlerDelegate> values;
+        synchronized (mRoutingChangeListeners) {
+            values = mRoutingChangeListeners.values();
+        }
+        for(NativeRoutingEventHandlerDelegate delegate : values) {
+            Handler handler = delegate.getHandler();
+            if (handler != null) {
+                handler.sendEmptyMessage(NATIVE_EVENT_ROUTING_CHANGE);
+            }
+        }
+    }
 
     /**
      * Sets the period at which the listener is called, if set with

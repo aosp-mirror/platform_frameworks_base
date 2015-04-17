@@ -21,6 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.NioUtils;
+import java.util.Collection;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -35,6 +36,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.app.IAppOpsService;
@@ -174,6 +176,12 @@ public class AudioTrack
      */
     private static final int NATIVE_EVENT_NEW_POS = 4;
 
+    /**
+     * Event id denotes when the routing changes.
+     */
+    private final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
+
+
     private final static String TAG = "android.media.AudioTrack";
 
 
@@ -222,7 +230,7 @@ public class AudioTrack
     /**
      * Handler for events coming from the native code.
      */
-    private NativeEventHandlerDelegate mEventHandlerDelegate;
+    private NativePositionEventHandlerDelegate mEventHandlerDelegate;
     /**
      * Looper associated with the thread that creates the AudioTrack instance.
      */
@@ -1216,7 +1224,7 @@ public class AudioTrack
     public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener listener,
                                                     Handler handler) {
         if (listener != null) {
-            mEventHandlerDelegate = new NativeEventHandlerDelegate(this, listener, handler);
+            mEventHandlerDelegate = new NativePositionEventHandlerDelegate(this, listener, handler);
         } else {
             mEventHandlerDelegate = null;
         }
@@ -1884,6 +1892,66 @@ public class AudioTrack
         return mPreferredDevice;
     }
 
+    //--------------------------------------------------------------------------
+    // (Re)Routing Info
+    //--------------------
+    /**
+     * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioTrack.
+     */
+    public AudioDeviceInfo getRoutedDevice() {
+        return null;
+    }
+
+    /**
+     * The message sent to apps when the routing of this AudioTrack changes if they provide
+     * a {#link Handler} object to addOnAudioTrackRoutingListener().
+     */
+    private ArrayMap<OnAudioTrackRoutingListener, NativeRoutingEventHandlerDelegate>
+        mRoutingChangeListeners =
+            new ArrayMap<OnAudioTrackRoutingListener, NativeRoutingEventHandlerDelegate>();
+
+    /**
+     * Adds an {@link OnAudioTrackRoutingListener} to receive notifications of routing changes
+     * on this AudioTrack.
+     */
+    public void addOnAudioTrackRoutingListener(OnAudioTrackRoutingListener listener,
+            android.os.Handler handler) {
+        if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
+            synchronized (mRoutingChangeListeners) {
+                mRoutingChangeListeners.put(
+                    listener, new NativeRoutingEventHandlerDelegate(this, listener, handler));
+            }
+        }
+    }
+
+    /**
+     * Removes an {@link OnAudioTrackRoutingListener} which has been previously added
+     * to receive notifications of changes to the set of connected audio devices.
+     */
+    public void removeOnAudioTrackRoutingListener(OnAudioTrackRoutingListener listener) {
+        synchronized (mRoutingChangeListeners) {
+            if (mRoutingChangeListeners.containsKey(listener)) {
+                mRoutingChangeListeners.remove(listener);
+            }
+        }
+    }
+
+    /**
+     * Sends device list change notification to all listeners.
+     */
+    private void broadcastRoutingChange() {
+        Collection<NativeRoutingEventHandlerDelegate> values;
+        synchronized (mRoutingChangeListeners) {
+            values = mRoutingChangeListeners.values();
+        }
+        for(NativeRoutingEventHandlerDelegate delegate : values) {
+            Handler handler = delegate.getHandler();
+            if (handler != null) {
+                handler.sendEmptyMessage(NATIVE_EVENT_ROUTING_CHANGE);
+            }
+        }
+    }
+
     //---------------------------------------------------------
     // Interface definitions
     //--------------------
@@ -1912,10 +1980,10 @@ public class AudioTrack
      * Helper class to handle the forwarding of native events to the appropriate listener
      * (potentially) handled in a different thread
      */
-    private class NativeEventHandlerDelegate {
+    private class NativePositionEventHandlerDelegate {
         private final Handler mHandler;
 
-        NativeEventHandlerDelegate(final AudioTrack track,
+        NativePositionEventHandlerDelegate(final AudioTrack track,
                                    final OnPlaybackPositionUpdateListener listener,
                                    Handler handler) {
             // find the looper for our new event handler
@@ -1963,6 +2031,55 @@ public class AudioTrack
         }
     }
 
+    /**
+     * Helper class to handle the forwarding of native events to the appropriate listener
+     * (potentially) handled in a different thread
+     */
+    private class NativeRoutingEventHandlerDelegate {
+        private final Handler mHandler;
+
+        NativeRoutingEventHandlerDelegate(final AudioTrack track,
+                                   final OnAudioTrackRoutingListener listener,
+                                   Handler handler) {
+            // find the looper for our new event handler
+            Looper looper;
+            if (handler != null) {
+                looper = handler.getLooper();
+            } else {
+                // no given handler, use the looper the AudioTrack was created in
+                looper = mInitializationLooper;
+            }
+
+            // construct the event handler with this looper
+            if (looper != null) {
+                // implement the event handler delegate
+                mHandler = new Handler(looper) {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        if (track == null) {
+                            return;
+                        }
+                        switch(msg.what) {
+                        case NATIVE_EVENT_ROUTING_CHANGE:
+                            if (listener != null) {
+                                listener.onAudioTrackRouting(track);
+                            }
+                            break;
+                        default:
+                            loge("Unknown native event type: " + msg.what);
+                            break;
+                        }
+                    }
+                };
+            } else {
+                mHandler = null;
+            }
+        }
+
+        Handler getHandler() {
+            return mHandler;
+        }
+    }
 
     //---------------------------------------------------------
     // Java methods called from the native side
@@ -1976,7 +2093,7 @@ public class AudioTrack
             return;
         }
 
-        NativeEventHandlerDelegate delegate = track.mEventHandlerDelegate;
+        NativePositionEventHandlerDelegate delegate = track.mEventHandlerDelegate;
         if (delegate != null) {
             Handler handler = delegate.getHandler();
             if (handler != null) {
