@@ -1867,6 +1867,35 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     }
 
+    protected void updateHeadsUp(String key, Entry entry, boolean shouldInterrupt,
+            boolean alertAgain) {
+        final boolean wasHeadsUp = isHeadsUp(key);
+        if (wasHeadsUp) {
+            mHeadsUpManager.updateNotification(entry, alertAgain);
+            if (!shouldInterrupt) {
+                // We don't want this to be interrupting anymore, lets remove it
+                mHeadsUpManager.removeNotification(key);
+            }
+        } else if (shouldInterrupt && alertAgain) {
+            // This notification was updated to be a heads-up, show it!
+            mHeadsUpManager.showNotification(entry);
+        }
+    }
+
+    protected void setHeadsUpUser(int newUserId) {
+        if (mHeadsUpManager != null) {
+            mHeadsUpManager.setUser(newUserId);
+        }
+    }
+
+    public boolean isHeadsUp(String key) {
+        return mHeadsUpManager.isHeadsUp(key);
+    }
+
+    protected boolean isSnoozedPackage(StatusBarNotification sbn) {
+        return mHeadsUpManager.isSnoozed(sbn.getPackageName());
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
