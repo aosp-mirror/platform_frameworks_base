@@ -152,10 +152,15 @@ public abstract class BatteryStats implements Parcelable {
     private static final String[] STAT_NAMES = { "l", "c", "u" };
 
     /**
-     * Bump the version on this if the checkin format changes.
+     * Current version of checkin data format.
+     */
+    static final String CHECKIN_VERSION = "14";
+
+    /**
+     * Old version, we hit 9 and ran out of room, need to remove.
      */
     private static final int BATTERY_STATS_CHECKIN_VERSION = 9;
-    
+
     private static final long BYTES_PER_KB = 1024;
     private static final long BYTES_PER_MB = 1048576; // 1024^2
     private static final long BYTES_PER_GB = 1073741824; //1024^3
@@ -1055,22 +1060,23 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE_GPS_ON_FLAG = 1<<29;
         public static final int STATE_WIFI_FULL_LOCK_FLAG = 1<<28;
         public static final int STATE_WIFI_SCAN_FLAG = 1<<27;
-        public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<26;
+        public static final int STATE_WIFI_RADIO_ACTIVE_FLAG = 1<<26;
         public static final int STATE_MOBILE_RADIO_ACTIVE_FLAG = 1<<25;
         // These are on the lower bits used for the command; if they change
         // we need to write another int of data.
         public static final int STATE_SENSOR_ON_FLAG = 1<<23;
         public static final int STATE_AUDIO_ON_FLAG = 1<<22;
         public static final int STATE_PHONE_SCANNING_FLAG = 1<<21;
-        public static final int STATE_SCREEN_ON_FLAG = 1<<20;
-        public static final int STATE_BATTERY_PLUGGED_FLAG = 1<<19;
-        public static final int STATE_PHONE_IN_CALL_FLAG = 1<<18;
-        public static final int STATE_CHARGING_FLAG = 1<<17;
-        public static final int STATE_BLUETOOTH_ON_FLAG = 1<<16;
+        public static final int STATE_SCREEN_ON_FLAG = 1<<20;       // consider moving to states2
+        public static final int STATE_BATTERY_PLUGGED_FLAG = 1<<19; // consider moving to states2
+        // empty slot
+        // empty slot
+        public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<16;
 
         public static final int MOST_INTERESTING_STATES =
-            STATE_BATTERY_PLUGGED_FLAG | STATE_SCREEN_ON_FLAG
-            | STATE_PHONE_IN_CALL_FLAG | STATE_BLUETOOTH_ON_FLAG;
+            STATE_BATTERY_PLUGGED_FLAG | STATE_SCREEN_ON_FLAG;
+
+        public static final int SETTLE_TO_ZERO_STATES = 0xffff0000 & ~MOST_INTERESTING_STATES;
 
         public int states;
 
@@ -1088,9 +1094,15 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE2_WIFI_ON_FLAG = 1<<28;
         public static final int STATE2_FLASHLIGHT_FLAG = 1<<27;
         public static final int STATE2_DEVICE_IDLE_FLAG = 1<<26;
+        public static final int STATE2_CHARGING_FLAG = 1<<25;
+        public static final int STATE2_PHONE_IN_CALL_FLAG = 1<<24;
+        public static final int STATE2_BLUETOOTH_ON_FLAG = 1<<23;
 
         public static final int MOST_INTERESTING_STATES2 =
-            STATE2_POWER_SAVE_FLAG | STATE2_WIFI_ON_FLAG | STATE2_DEVICE_IDLE_FLAG;
+            STATE2_POWER_SAVE_FLAG | STATE2_WIFI_ON_FLAG | STATE2_DEVICE_IDLE_FLAG
+            | STATE2_CHARGING_FLAG | STATE2_PHONE_IN_CALL_FLAG | STATE2_BLUETOOTH_ON_FLAG;
+
+        public static final int SETTLE_TO_ZERO_STATES2 = 0xffff0000 & ~MOST_INTERESTING_STATES2;
 
         public int states2;
 
@@ -1137,8 +1149,10 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_PACKAGE_UNINSTALLED = 0x000d;
         // Event for a package being uninstalled.
         public static final int EVENT_ALARM = 0x000e;
+        // Record that we have decided we need to collect new stats data.
+        public static final int EVENT_COLLECT_EXTERNAL_STATS = 0x000f;
         // Number of event types.
-        public static final int EVENT_COUNT = 0x000f;
+        public static final int EVENT_COUNT = 0x0010;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1750,14 +1764,12 @@ public abstract class BatteryStats implements Parcelable {
         new BitDescription(HistoryItem.STATE_WIFI_FULL_LOCK_FLAG, "wifi_full_lock", "Wl"),
         new BitDescription(HistoryItem.STATE_WIFI_SCAN_FLAG, "wifi_scan", "Ws"),
         new BitDescription(HistoryItem.STATE_WIFI_MULTICAST_ON_FLAG, "wifi_multicast", "Wm"),
+        new BitDescription(HistoryItem.STATE_WIFI_RADIO_ACTIVE_FLAG, "wifi_radio", "Wr"),
         new BitDescription(HistoryItem.STATE_MOBILE_RADIO_ACTIVE_FLAG, "mobile_radio", "Pr"),
         new BitDescription(HistoryItem.STATE_PHONE_SCANNING_FLAG, "phone_scanning", "Psc"),
         new BitDescription(HistoryItem.STATE_AUDIO_ON_FLAG, "audio", "a"),
         new BitDescription(HistoryItem.STATE_SCREEN_ON_FLAG, "screen", "S"),
         new BitDescription(HistoryItem.STATE_BATTERY_PLUGGED_FLAG, "plugged", "BP"),
-        new BitDescription(HistoryItem.STATE_PHONE_IN_CALL_FLAG, "phone_in_call", "Pcl"),
-        new BitDescription(HistoryItem.STATE_CHARGING_FLAG, "charging", "ch"),
-        new BitDescription(HistoryItem.STATE_BLUETOOTH_ON_FLAG, "bluetooth", "b"),
         new BitDescription(HistoryItem.STATE_DATA_CONNECTION_MASK,
                 HistoryItem.STATE_DATA_CONNECTION_SHIFT, "data_conn", "Pcn",
                 DATA_CONNECTION_NAMES, DATA_CONNECTION_NAMES),
@@ -1778,10 +1790,13 @@ public abstract class BatteryStats implements Parcelable {
             = new BitDescription[] {
         new BitDescription(HistoryItem.STATE2_POWER_SAVE_FLAG, "power_save", "ps"),
         new BitDescription(HistoryItem.STATE2_VIDEO_ON_FLAG, "video", "v"),
-        new BitDescription(HistoryItem.STATE2_WIFI_RUNNING_FLAG, "wifi_running", "Wr"),
+        new BitDescription(HistoryItem.STATE2_WIFI_RUNNING_FLAG, "wifi_running", "Ww"),
         new BitDescription(HistoryItem.STATE2_WIFI_ON_FLAG, "wifi", "W"),
         new BitDescription(HistoryItem.STATE2_FLASHLIGHT_FLAG, "flashlight", "fl"),
         new BitDescription(HistoryItem.STATE2_DEVICE_IDLE_FLAG, "device_idle", "di"),
+        new BitDescription(HistoryItem.STATE2_CHARGING_FLAG, "charging", "ch"),
+        new BitDescription(HistoryItem.STATE2_PHONE_IN_CALL_FLAG, "phone_in_call", "Pcl"),
+        new BitDescription(HistoryItem.STATE2_BLUETOOTH_ON_FLAG, "bluetooth", "b"),
         new BitDescription(HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK,
                 HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_SHIFT, "wifi_signal_strength", "Wss",
                 new String[] { "0", "1", "2", "3", "4" },
@@ -1793,12 +1808,12 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
             "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn",
-            "motion", "active", "pkginst", "pkgunin", "alarm"
+            "motion", "active", "pkginst", "pkgunin", "alarm", "stats"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
-            "Esm", "Eac", "Epi", "Epu", "Eal"
+            "Esm", "Eac", "Epi", "Epu", "Eal", "Est"
     };
 
     /**
@@ -4883,7 +4898,8 @@ public abstract class BatteryStats implements Parcelable {
         prepareForDumpLocked();
 
         dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
-                "13", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
+                CHECKIN_VERSION, getParcelVersion(), getStartPlatformVersion(),
+                getEndPlatformVersion());
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
