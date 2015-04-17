@@ -16184,6 +16184,7 @@ package android.media {
     method public int getPlaybackHeadPosition();
     method public int getPlaybackRate();
     method public int getPositionNotificationPeriod();
+    method public android.media.AudioDeviceInfo getPreferredOutputDevice();
     method public int getSampleRate();
     method public int getState();
     method public int getStreamType();
@@ -16200,6 +16201,7 @@ package android.media {
     method public void setPlaybackPositionUpdateListener(android.media.AudioTrack.OnPlaybackPositionUpdateListener, android.os.Handler);
     method public int setPlaybackRate(int);
     method public int setPositionNotificationPeriod(int);
+    method public boolean setPreferredOutputDevice(android.media.AudioDeviceInfo);
     method protected deprecated void setState(int);
     method public deprecated int setStereoVolume(float, float);
     method public int setVolume(float);

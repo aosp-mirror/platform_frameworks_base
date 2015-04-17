@@ -1851,6 +1851,39 @@ public class AudioTrack
         return err == 0 ? SUCCESS : ERROR;
     }
 
+    //--------------------------------------------------------------------------
+    // Explicit Routing
+    //--------------------
+    private AudioDeviceInfo mPreferredDevice = null;
+
+    /**
+     * Specifies an audio device (via and {@link AudioDeviceInfo} object) to route
+     * the output from this AudioTrack.
+     * @param deviceSpec The {@link AudioDeviceInfo} specifying the physical audio device.
+     *  If deviceSpec is null, default routing is restored.
+     * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
+     * does not correspond to a valid audio output device.
+     */
+    public boolean setPreferredOutputDevice(AudioDeviceInfo deviceSpec) {
+        // Do some validation....
+        if (deviceSpec != null && !deviceSpec.isSink()) {
+            return false;
+        }
+
+        mPreferredDevice = deviceSpec;
+        int routingDeviceId = mPreferredDevice != null ? deviceSpec.getId() : 0;
+
+        return native_setOutputDevice(routingDeviceId);
+    }
+
+    /**
+     * Returns the selected output specified by {@link #setPreferredOutputDevice}. Note that this
+     * is not guarenteed to correspond to the actual device being used for playback.
+     */
+    public AudioDeviceInfo getPreferredOutputDevice() {
+        return mPreferredDevice;
+    }
+
     //---------------------------------------------------------
     // Interface definitions
     //--------------------
@@ -2026,6 +2059,8 @@ public class AudioTrack
 
     private native final int native_attachAuxEffect(int effectId);
     private native final int native_setAuxEffectSendLevel(float level);
+
+    private native final boolean native_setOutputDevice(int deviceId);
 
     //---------------------------------------------------------
     // Utility methods
