@@ -67,26 +67,13 @@ selected build variant. For more information, see the
 <a href="{@docRoot}sdk/installing/studio-build.html">Build System</a> guide.</p>
 
 <p>To view the list of all available build tasks in Android Studio, click <strong>Gradle</strong>
-on the right side of the IDE window. The <em>Gradle tasks</em> panel appears as shown in
-figure 2. Double-click any build task to run it in Android Studio. To hide the <em>Gradle tasks</em>
-panel, click <strong>Gradle</strong> again.</p>
+on the right side of the IDE window. The <em>Gradle tasks</em> panel appears.</p>
 
-<img src="{@docRoot}images/tools/studio-gradle-panel.png" alt="" />
-<p class="img-caption"><strong>Figure 2.</strong> The list of build tasks in Android Studio.</p>
 
 <h3 id="buildRelease">Build a release version</h3>
 
-<p>You can now build the release version of your application for distribution. To build it from Android
-Studio:</p>
-
-<ol>
-    <li>Click <strong>Gradle</strong> on the right side of the IDE window.</li>
-    <li>On the <em>All tasks</em> section of the sidebar that appears, expand
-        <strong>BuildSystemExample</strong>.</li>
-    <li>Expand <strong>:app</strong> and double-click <strong>assembleRelease</strong>.</li>
-</ol>
-
-<p>You can use this procedure to invoke any build task from Android Studio.</p>
+<p>You can now use the <strong>Build</strong> menu options to build the release version of your
+application for distribution. </p>
 
 <p>The build generates an APK for each build variant:
 the <code>app/build/apk/</code> directory contains packages named
