@@ -20029,6 +20029,7 @@ package android.nfc {
 
   public final class NfcEvent {
     field public final android.nfc.NfcAdapter nfcAdapter;
+    field public final byte peerLlcpVersion;
   }
 
   public final class NfcManager {
