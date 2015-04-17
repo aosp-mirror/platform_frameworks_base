@@ -19,6 +19,7 @@
 #include <map>
 
 #include <ScopedUtfChars.h>
+#include <ScopedLocalRef.h>
 
 #include <utils/Log.h>
 #include <utils/Looper.h>
@@ -178,21 +179,21 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
 class Receiver : public LooperCallback {
     sp<SensorEventQueue> mSensorQueue;
     sp<MessageQueue> mMessageQueue;
-    jobject mReceiverObject;
+    jobject mReceiverWeakGlobal;
     jfloatArray mScratch;
 public:
     Receiver(const sp<SensorEventQueue>& sensorQueue,
             const sp<MessageQueue>& messageQueue,
-            jobject receiverObject, jfloatArray scratch) {
+            jobject receiverWeak, jfloatArray scratch) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         mSensorQueue = sensorQueue;
         mMessageQueue = messageQueue;
-        mReceiverObject = env->NewGlobalRef(receiverObject);
+        mReceiverWeakGlobal = env->NewGlobalRef(receiverWeak);
         mScratch = (jfloatArray)env->NewGlobalRef(scratch);
     }
     ~Receiver() {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        env->DeleteGlobalRef(mReceiverObject);
+        env->DeleteGlobalRef(mReceiverWeakGlobal);
         env->DeleteGlobalRef(mScratch);
     }
     sp<SensorEventQueue> getSensorEventQueue() const {
@@ -213,6 +214,8 @@ private:
     virtual int handleEvent(int fd, int events, void* data) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         sp<SensorEventQueue> q = reinterpret_cast<SensorEventQueue *>(data);
+        ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
+
         ssize_t n;
         ASensorEvent buffer[16];
         while ((n = q->read(buffer, 16)) > 0) {
@@ -228,9 +231,11 @@ private:
                 if (buffer[i].type == SENSOR_TYPE_META_DATA) {
                     // This is a flush complete sensor event. Call dispatchFlushCompleteEvent
                     // method.
-                    env->CallVoidMethod(mReceiverObject,
-                                        gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
-                                        buffer[i].meta_data.sensor);
+                    if (receiverObj.get()) {
+                        env->CallVoidMethod(receiverObj.get(),
+                                            gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
+                                            buffer[i].meta_data.sensor);
+                    }
                 } else {
                     int8_t status;
                     switch (buffer[i].type) {
@@ -247,12 +252,14 @@ private:
                         status = SENSOR_STATUS_ACCURACY_HIGH;
                         break;
                     }
-                    env->CallVoidMethod(mReceiverObject,
-                                        gBaseEventQueueClassInfo.dispatchSensorEvent,
-                                        buffer[i].sensor,
-                                        mScratch,
-                                        status,
-                                        buffer[i].timestamp);
+                    if (receiverObj.get()) {
+                        env->CallVoidMethod(receiverObj.get(),
+                                            gBaseEventQueueClassInfo.dispatchSensorEvent,
+                                            buffer[i].sensor,
+                                            mScratch,
+                                            status,
+                                            buffer[i].timestamp);
+                    }
                 }
                 if (env->ExceptionCheck()) {
                     mSensorQueue->sendAck(buffer, n);
@@ -269,7 +276,7 @@ private:
     }
 };
 
-static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ, jobject msgQ,
+static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQWeak, jobject msgQ,
         jfloatArray scratch, jstring packageName) {
     SensorManager& mgr(SensorManager::getInstance());
     ScopedUtfChars packageUtf(env, packageName);
@@ -282,7 +289,7 @@ static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject event
         return 0;
     }
 
-    sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQ, scratch);
+    sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQWeak, scratch);
     receiver->incStrong((void*)nativeInitSensorEventQueue);
     return jlong(receiver.get());
 }
@@ -325,7 +332,7 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
 
 static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
-     "(Landroid/hardware/SystemSensorManager$BaseEventQueue;Landroid/os/MessageQueue;[FLjava/lang/String;)J",
+     "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;[FLjava/lang/String;)J",
      (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
