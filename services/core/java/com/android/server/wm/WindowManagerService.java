@@ -709,6 +709,11 @@ public class WindowManagerService extends IWindowManager.Stub
     private WindowContentFrameStats mTempWindowRenderStats;
 
     final class DragInputEventReceiver extends InputEventReceiver {
+        // Set, if stylus button was down at the start of the drag.
+        private boolean mStylusButtonDownAtStart;
+        // Indicates the first event to check for button state.
+        private boolean mIsStartEvent = true;
+
         public DragInputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
         }
@@ -724,6 +729,18 @@ public class WindowManagerService extends IWindowManager.Stub
                     boolean endDrag = false;
                     final float newX = motionEvent.getRawX();
                     final float newY = motionEvent.getRawY();
+                    final boolean isStylusButtonDown =
+                            (motionEvent.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS)
+                            && (motionEvent.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0;
+
+                    if (mIsStartEvent) {
+                        if (isStylusButtonDown) {
+                            // First event and the button was down, check for the button being
+                            // lifted in the future, if that happens we'll drop the item.
+                            mStylusButtonDownAtStart = true;
+                        }
+                        mIsStartEvent = false;
+                    }
 
                     switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
@@ -733,9 +750,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     } break;
 
                     case MotionEvent.ACTION_MOVE: {
-                        synchronized (mWindowMap) {
-                            // move the surface and tell the involved window(s) where we are
-                            mDragState.notifyMoveLw(newX, newY);
+                        if (mStylusButtonDownAtStart && !isStylusButtonDown) {
+                            if (DEBUG_DRAG) Slog.d(TAG, "Button no longer pressed; dropping at "
+                                    + newX + "," + newY);
+                            synchronized (mWindowMap) {
+                                endDrag = mDragState.notifyDropLw(newX, newY);
+                            }
+                        } else {
+                            synchronized (mWindowMap) {
+                                // move the surface and tell the involved window(s) where we are
+                                mDragState.notifyMoveLw(newX, newY);
+                            }
                         }
                     } break;
 
@@ -759,6 +784,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         synchronized (mWindowMap) {
                             mDragState.endDragLw();
                         }
+                        mStylusButtonDownAtStart = false;
+                        mIsStartEvent = true;
                     }
 
                     handled = true;
