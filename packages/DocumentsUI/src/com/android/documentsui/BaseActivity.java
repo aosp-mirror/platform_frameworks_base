@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -95,6 +96,9 @@ abstract class BaseActivity extends Activity {
         /** Instance state for every shown directory */
         public HashMap<String, SparseArray<Parcelable>> dirState = Maps.newHashMap();
 
+        /** Currently copying file */
+        public List<DocumentInfo> selectedDocumentsForCopy = new ArrayList<DocumentInfo>();
+
         public static final int ACTION_OPEN = 1;
         public static final int ACTION_CREATE = 2;
         public static final int ACTION_GET_CONTENT = 3;
@@ -134,6 +138,7 @@ abstract class BaseActivity extends Activity {
             DurableUtils.writeToParcel(out, stack);
             out.writeString(currentSearch);
             out.writeMap(dirState);
+            out.writeList(selectedDocumentsForCopy);
         }
 
         public static final Creator<State> CREATOR = new Creator<State>() {
@@ -154,6 +159,7 @@ abstract class BaseActivity extends Activity {
                 DurableUtils.readFromParcel(in, state.stack);
                 state.currentSearch = in.readString();
                 in.readMap(state.dirState, null);
+                in.readList(state.selectedDocumentsForCopy, null);
                 return state;
             }
 
