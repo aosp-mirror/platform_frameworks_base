@@ -857,6 +857,11 @@ public class Am extends BaseCommand {
                             "Error: Activity not started, voice control not allowed for: "
                                     + intent);
                     break;
+                case ActivityManager.START_NOT_CURRENT_USER_ACTIVITY:
+                    out.println(
+                            "Error: Not allowed to start background user activity"
+                            + " that shouldn't be displayed for all users.");
+                    break;
                 default:
                     out.println(
                             "Error: Activity not started, unknown error code " + res);

@@ -86,6 +86,13 @@ public class ActivityManager {
     public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
 
     /**
+     * Result for IActivityManager.startActivity: trying to start a background user
+     * activity that shouldn't be displayed for all users.
+     * @hide
+     */
+    public static final int START_NOT_CURRENT_USER_ACTIVITY = -8;
+
+    /**
      * Result for IActivityManager.startActivity: trying to start an activity under voice
      * control when that activity does not support the VOICE category.
      * @hide
