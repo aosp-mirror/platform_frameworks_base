@@ -14919,6 +14919,7 @@ package android.media {
     method public int getNativeFrameCount() throws java.lang.IllegalStateException;
     method public int getNotificationMarkerPosition();
     method public int getPositionNotificationPeriod();
+    method public android.media.AudioDeviceInfo getPreferredInputDevice();
     method public int getRecordingState();
     method public int getSampleRate();
     method public int getState();
@@ -14932,6 +14933,7 @@ package android.media {
     method public void release();
     method public int setNotificationMarkerPosition(int);
     method public int setPositionNotificationPeriod(int);
+    method public boolean setPreferredInputDevice(android.media.AudioDeviceInfo);
     method public void setRecordPositionUpdateListener(android.media.AudioRecord.OnRecordPositionUpdateListener);
     method public void setRecordPositionUpdateListener(android.media.AudioRecord.OnRecordPositionUpdateListener, android.os.Handler);
     method public void startRecording() throws java.lang.IllegalStateException;

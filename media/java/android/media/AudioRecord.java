@@ -1174,6 +1174,39 @@ public class AudioRecord
     }
 
 
+    //--------------------------------------------------------------------------
+    // Explicit Routing
+    //--------------------
+    private AudioDeviceInfo mPreferredDevice = null;
+
+    /**
+     * Specifies an audio device (via an {@link AudioDeviceInfo} object) to route
+     * the input to this AudioRecord.
+     * @param deviceSpec The {@link AudioDeviceInfo} specifying the audio source.
+     *  If deviceSpec is null, default routing is restored.
+     * @return true if successful, false if the specified {@link AudioDeviceInfo} is non-null and
+     * does not correspond to a valid audio input device.
+     */
+    public boolean setPreferredInputDevice(AudioDeviceInfo deviceInfo) {
+        // Do some validation....
+        if (deviceInfo != null && !deviceInfo.isSource()) {
+            return false;
+        }
+
+        mPreferredDevice = deviceInfo;
+        int preferredDeviceId = mPreferredDevice != null ? deviceInfo.getId() : 0;
+
+        return native_setInputDevice(preferredDeviceId);
+    }
+
+    /**
+     * Returns the selected input specified by {@link #setPreferredInputDevice}. Note that this
+     * is not guarenteed to correspond to the actual device being used for recording.
+     */
+    public AudioDeviceInfo getPreferredInputDevice() {
+        return mPreferredDevice;
+    }
+
     //---------------------------------------------------------
     // Interface definitions
     //--------------------
@@ -1303,6 +1336,8 @@ public class AudioRecord
 
     static private native final int native_get_min_buff_size(
             int sampleRateInHz, int channelCount, int audioFormat);
+
+    private native final boolean native_setInputDevice(int deviceId);
 
 
     //---------------------------------------------------------
