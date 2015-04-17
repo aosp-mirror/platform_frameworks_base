@@ -84,4 +84,7 @@
   <java-symbol type="bool" name="config_allowNotificationIconTextTinting" />
   <java-symbol type="color" name="notification_text_default_color" />
   <java-symbol type="color" name="sender_text_color" />
+
+  <!-- Doze invert -->
+  <java-symbol type="bool" name="config_invert_colors_on_doze" />
 </resources>
