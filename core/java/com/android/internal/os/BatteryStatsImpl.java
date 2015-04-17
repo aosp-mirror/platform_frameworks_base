@@ -19,8 +19,6 @@ package com.android.internal.os;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -84,7 +82,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -107,7 +104,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 124 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 125 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -386,12 +383,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     final StopwatchTimer[] mWifiSignalStrengthsTimer =
             new StopwatchTimer[NUM_WIFI_SIGNAL_STRENGTH_BINS];
 
-    boolean mBluetoothOn;
-    StopwatchTimer mBluetoothOnTimer;
-
-    int mBluetoothState = -1;
-    final StopwatchTimer[] mBluetoothStateTimer = new StopwatchTimer[NUM_BLUETOOTH_STATES];
-
     int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     long mMobileRadioActiveStartTime;
     StopwatchTimer mMobileRadioActiveTimer;
@@ -401,9 +392,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     LongSamplingCounter mMobileRadioActiveUnknownCount;
 
     int mWifiRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
-
-    /** Bluetooth headset object */
-    BluetoothHeadset mBtHeadset;
 
     /**
      * These provide time bases that discount the time the device is plugged
@@ -461,9 +449,6 @@ public final class BatteryStatsImpl extends BatteryStats {
     final ArrayList<DailyItem> mDailyItems = new ArrayList<>();
 
     long mLastWriteTime = 0; // Milliseconds
-
-    private int mBluetoothPingCount;
-    private int mBluetoothPingStart = -1;
 
     private int mPhoneServiceState = -1;
     private int mPhoneServiceStateRaw = -1;
@@ -1807,32 +1792,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         return kwlt;
     }
 
-    private int getCurrentBluetoothPingCount() {
-        if (mBtHeadset != null) {
-            List<BluetoothDevice> deviceList = mBtHeadset.getConnectedDevices();
-            if (deviceList.size() > 0) {
-                return mBtHeadset.getBatteryUsageHint(deviceList.get(0));
-            }
-        }
-        return -1;
-    }
-
-    public int getBluetoothPingCount() {
-        if (mBluetoothPingStart == -1) {
-            return mBluetoothPingCount;
-        } else if (mBtHeadset != null) {
-            return getCurrentBluetoothPingCount() - mBluetoothPingStart;
-        }
-        return 0;
-    }
-
-    public void setBtHeadset(BluetoothHeadset headset) {
-        if (headset != null && mBtHeadset == null && isOnBattery() && mBluetoothPingStart == -1) {
-            mBluetoothPingStart = getCurrentBluetoothPingCount();
-        }
-        mBtHeadset = headset;
-    }
-
     private int writeHistoryTag(HistoryTag tag) {
         Integer idxObj = mHistoryTagPool.get(tag);
         int idx;
@@ -2550,17 +2509,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void updateTimeBasesLocked(boolean unplugged, boolean screenOff, long uptime,
             long realtime) {
-        if (mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime)) {
-            if (unplugged) {
-                // Track bt headset ping count
-                mBluetoothPingStart = getCurrentBluetoothPingCount();
-                mBluetoothPingCount = 0;
-            } else {
-                // Track bt headset ping count
-                mBluetoothPingCount = getBluetoothPingCount();
-                mBluetoothPingStart = -1;
-            }
-        }
+        mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime);
 
         boolean unpluggedScreenOff = unplugged && screenOff;
         if (unpluggedScreenOff != mOnBatteryScreenOffTimeBase.isRunning()) {
@@ -3967,46 +3916,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteBluetoothOnLocked() {
-        if (!mBluetoothOn) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            final long uptime = SystemClock.uptimeMillis();
-            mHistoryCur.states2 |= HistoryItem.STATE2_BLUETOOTH_ON_FLAG;
-            if (DEBUG_HISTORY) Slog.v(TAG, "Bluetooth on to: "
-                    + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime, uptime);
-            mBluetoothOn = true;
-            mBluetoothOnTimer.startRunningLocked(elapsedRealtime);
-            scheduleSyncExternalStatsLocked("bluetooth-on");
-        }
-    }
-
-    public void noteBluetoothOffLocked() {
-        if (mBluetoothOn) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            final long uptime = SystemClock.uptimeMillis();
-            mHistoryCur.states2 &= ~HistoryItem.STATE2_BLUETOOTH_ON_FLAG;
-            if (DEBUG_HISTORY) Slog.v(TAG, "Bluetooth off to: "
-                    + Integer.toHexString(mHistoryCur.states));
-            addHistoryRecordLocked(elapsedRealtime, uptime);
-            mBluetoothOn = false;
-            mBluetoothOnTimer.stopRunningLocked(elapsedRealtime);
-            scheduleSyncExternalStatsLocked("bluetooth-off");
-        }
-    }
-
-    public void noteBluetoothStateLocked(int bluetoothState) {
-        if (DEBUG) Log.i(TAG, "Bluetooth state -> " + bluetoothState);
-        if (mBluetoothState != bluetoothState) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            if (mBluetoothState >= 0) {
-                mBluetoothStateTimer[mBluetoothState].stopRunningLocked(elapsedRealtime);
-            }
-            mBluetoothState = bluetoothState;
-            mBluetoothStateTimer[bluetoothState].startRunningLocked(elapsedRealtime);
-        }
-    }
-
     int mWifiFullLockNesting = 0;
 
     public void noteFullWifiLockAcquiredLocked(int uid) {
@@ -4359,20 +4268,6 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getWifiSignalStrengthCount(int strengthBin, int which) {
         return mWifiSignalStrengthsTimer[strengthBin].getCountLocked(which);
-    }
-
-    @Override public long getBluetoothOnTime(long elapsedRealtimeUs, int which) {
-        return mBluetoothOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
-    }
-
-    @Override public long getBluetoothStateTime(int bluetoothState,
-            long elapsedRealtimeUs, int which) {
-        return mBluetoothStateTimer[bluetoothState].getTotalTimeLocked(
-                elapsedRealtimeUs, which);
-    }
-
-    @Override public int getBluetoothStateCount(int bluetoothState, int which) {
-        return mBluetoothStateTimer[bluetoothState].getCountLocked(which);
     }
 
     @Override public boolean hasBluetoothActivityReporting() {
@@ -6828,10 +6723,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiSignalStrengthsTimer[i] = new StopwatchTimer(null, -800-i, null,
                     mOnBatteryTimeBase);
         }
-        mBluetoothOnTimer = new StopwatchTimer(null, -6, null, mOnBatteryTimeBase);
-        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i, null, mOnBatteryTimeBase);
-        }
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
         mFlashlightOnTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase);
@@ -7447,10 +7338,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].reset(false);
         }
-        mBluetoothOnTimer.reset(false);
-        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i].reset(false);
-        }
         for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
             mBluetoothActivityCounters[i].reset(false);
             mWifiActivityCounters[i].reset(false);
@@ -7775,16 +7662,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
                     info.getControllerIdleTimeMillis());
 
-            final double powerDrainMaMs;
-            if (mPowerProfile.getAveragePower(
-                    PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE) == 0) {
-                powerDrainMaMs = 0.0;
-            } else {
-                powerDrainMaMs = info.getControllerEnergyUsed()
-                        / mPowerProfile.getAveragePower(
-                        PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE);
+            final double opVoltage = mPowerProfile.getAveragePower(
+                    PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE);
+            if (opVoltage != 0) {
+                mWifiActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked(
+                        (long)(info.getControllerEnergyUsed() / opVoltage));
             }
-            mWifiActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked((long) powerDrainMaMs);
         }
     }
 
@@ -7872,8 +7755,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                     info.getControllerTxTimeMillis());
             mBluetoothActivityCounters[CONTROLLER_IDLE_TIME].addCountLocked(
                     info.getControllerIdleTimeMillis());
-            mBluetoothActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked(
-                    info.getControllerEnergyUsed());
+
+            final double opVoltage = mPowerProfile.getAveragePower(
+                    PowerProfile.POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE);
+            if (opVoltage != 0) {
+                mBluetoothActivityCounters[CONTROLLER_POWER_DRAIN].addCountLocked(
+                        (long) (info.getControllerEnergyUsed() / opVoltage));
+            }
         }
     }
 
@@ -8972,16 +8860,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
         }
-        mBluetoothOn = false;
-        mBluetoothOnTimer.readSummaryFromParcelLocked(in);
-        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i].readSummaryFromParcelLocked(in);
-        }
-
         for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
             mBluetoothActivityCounters[i].readSummaryFromParcelLocked(in);
         }
-
         for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
             mWifiActivityCounters[i].readSummaryFromParcelLocked(in);
         }
@@ -9295,10 +9176,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
-        mBluetoothOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-        }
         for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
             mBluetoothActivityCounters[i].writeSummaryFromParcelLocked(out);
         }
@@ -9608,17 +9485,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiSignalStrengthsTimer[i] = new StopwatchTimer(null, -800-i,
                     null, mOnBatteryTimeBase, in);
         }
-        mBluetoothOn = false;
-        mBluetoothOnTimer = new StopwatchTimer(null, -6, null, mOnBatteryTimeBase, in);
-        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i,
-                    null, mOnBatteryTimeBase, in);
-        }
-
         for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
             mBluetoothActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
         }
-
         for (int i = 0; i < NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
             mWifiActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
         }
@@ -9647,9 +9516,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeStepTracker.readFromParcel(in);
         mChargeStepTracker.readFromParcel(in);
         mLastWriteTime = in.readLong();
-
-        mBluetoothPingCount = in.readInt();
-        mBluetoothPingStart = -1;
 
         mKernelWakelockStats.clear();
         int NKW = in.readInt();
@@ -9768,10 +9634,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
         }
-        mBluetoothOnTimer.writeToParcel(out, uSecRealtime);
-        for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-            mBluetoothStateTimer[i].writeToParcel(out, uSecRealtime);
-        }
         for (int i=0; i< NUM_CONTROLLER_ACTIVITY_TYPES; i++) {
             mBluetoothActivityCounters[i].writeToParcel(out);
         }
@@ -9797,8 +9659,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeStepTracker.writeToParcel(out);
         mChargeStepTracker.writeToParcel(out);
         out.writeLong(mLastWriteTime);
-
-        out.writeInt(getBluetoothPingCount());
 
         if (inclUids) {
             out.writeInt(mKernelWakelockStats.size());
@@ -9917,12 +9777,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
                 pr.println("*** Wifi signal strength #" + i + ":");
                 mWifiSignalStrengthsTimer[i].logState(pr, "  ");
-            }
-            pr.println("*** Bluetooth timer:");
-            mBluetoothOnTimer.logState(pr, "  ");
-            for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
-                pr.println("*** Bluetooth active type #" + i + ":");
-                mBluetoothStateTimer[i].logState(pr, "  ");
             }
             pr.println("*** Flashlight timer:");
             mFlashlightOnTimer.logState(pr, "  ");

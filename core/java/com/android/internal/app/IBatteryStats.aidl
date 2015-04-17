@@ -95,9 +95,6 @@ interface IBatteryStats {
     void noteWifiState(int wifiState, String accessPoint);
     void noteWifiSupplicantStateChanged(int supplState, boolean failedAuth);
     void noteWifiRssiChanged(int newRssi);
-    void noteBluetoothOn();
-    void noteBluetoothOff();
-    void noteBluetoothState(int bluetoothState);
     void noteFullWifiLockAcquired(int uid);
     void noteFullWifiLockReleased(int uid);
     void noteWifiScanStarted(int uid);
