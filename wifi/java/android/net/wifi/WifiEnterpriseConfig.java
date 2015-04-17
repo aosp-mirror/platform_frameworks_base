@@ -56,6 +56,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     /** @hide */
     public static final String ALTSUBJECT_MATCH_KEY = "altsubject_match";
     /** @hide */
+    public static final String DOM_SUFFIX_MATCH_KEY = "domain_suffix_match";
+    /** @hide */
     public static final String OPP_KEY_CACHING     = "proactive_key_caching";
     /**
      * String representing the keystore OpenSSL ENGINE's ID.
@@ -574,6 +576,36 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public String getAltSubjectMatch() {
         return getFieldValue(ALTSUBJECT_MATCH_KEY, "");
+    }
+
+    /**
+     * Set the domain_suffix_match directive on wpa_supplicant. This is the parameter to use
+     * for Hotspot 2.0 defined matching of AAA server certs per WFA HS2.0 spec, section 7.3.3.2,
+     * second paragraph.
+     *
+     * From wpa_supplicant documentation:
+     * Constraint for server domain name. If set, this FQDN is used as a suffix match requirement
+     * for the AAAserver certificate in SubjectAltName dNSName element(s). If a matching dNSName is
+     * found, this constraint is met. If no dNSName values are present, this constraint is matched
+     * against SubjectName CN using same suffix match comparison.
+     * Suffix match here means that the host/domain name is compared one label at a time starting
+     * from the top-level domain and all the labels in domain_suffix_match shall be included in the
+     * certificate. The certificate may include additional sub-level labels in addition to the
+     * required labels.
+     * For example, domain_suffix_match=example.com would match test.example.com but would not
+     * match test-example.com.
+     * @param domain The domain value
+     */
+    public void setDomSuffixMatch(String domain) {
+        setFieldValue(DOM_SUFFIX_MATCH_KEY, domain);
+    }
+
+    /**
+     * Get the domain_suffix_match value. See setDomSuffixMatch.
+     * @return The domain value.
+     */
+    public String getDomSubjectMatch() {
+        return getFieldValue(DOM_SUFFIX_MATCH_KEY, "");
     }
 
     /**
