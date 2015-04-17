@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import android.annotation.Nullable;
 import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
@@ -1398,6 +1399,11 @@ public final class BridgeContext extends Context {
     @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission) {
+        // pass
+    }
+
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            @Nullable String receiverPermission, int appOp) {
         // pass
     }
 
