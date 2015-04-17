@@ -1009,12 +1009,13 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
         TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
     }
+    Rect modelRect = Rect(rect.getWidth(), rect.getHeight());
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setMeshTexturedIndexedQuads(&quadVertices[0], count * 6)
             .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode(), Blend::ModeOrderSwap::NoSwap)
             .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-            .setModelViewOffsetRectSnap(0, 0, rect)
+            .setModelViewOffsetRectSnap(rect.left, rect.top, modelRect)
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
             .build();
     DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
