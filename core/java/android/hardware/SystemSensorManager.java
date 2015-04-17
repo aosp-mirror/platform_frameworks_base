@@ -26,6 +26,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import dalvik.system.CloseGuard;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -224,8 +225,8 @@ public class SystemSensorManager extends SensorManager {
      * the queues and the listeners.
      */
     private static abstract class BaseEventQueue {
-        private native long nativeInitBaseEventQueue(BaseEventQueue eventQ, MessageQueue msgQ,
-                float[] scratch, String packageName);
+        private native long nativeInitBaseEventQueue(WeakReference<BaseEventQueue> eventQWeak,
+                MessageQueue msgQ, float[] scratch, String packageName);
         private static native int nativeEnableSensor(long eventQ, int handle, int rateUs,
                 int maxBatchReportLatencyUs);
         private static native int nativeDisableSensor(long eventQ, int handle);
@@ -240,7 +241,8 @@ public class SystemSensorManager extends SensorManager {
         protected final SystemSensorManager mManager;
 
         BaseEventQueue(Looper looper, SystemSensorManager manager) {
-            nSensorEventQueue = nativeInitBaseEventQueue(this, looper.getQueue(), mScratch,
+            nSensorEventQueue = nativeInitBaseEventQueue(new WeakReference<BaseEventQueue>(this),
+                    looper.getQueue(), mScratch,
                     manager.mPackageName);
             mCloseGuard.open("dispose");
             mManager = manager;
