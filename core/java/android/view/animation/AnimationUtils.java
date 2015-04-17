@@ -16,7 +16,10 @@
 
 package android.view.animation;
 
+import android.app.Activity;
 import android.content.res.Configuration;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -48,7 +51,7 @@ public class AnimationUtils {
     private static final float RECOMMENDED_FIELD_OF_VIEW_FOR_TV = 40f;
     private static final float ESTIMATED_VIEWING_DISTANCE_FOR_WATCH = 11f;
     private static final float AVERAGE_VIEWING_DISTANCE_FOR_PHONES = 14.2f;
-    private static final float N5_DIAGONAL_VIEW_ANGLE = 19.58f;
+    private static final float N5_DIAGONAL_VIEW_ANGLE = 19.887228f;
     private static final float N5_DENSITY = 3.0f;
     private static final float N5_DPI = 443f;
 
@@ -451,5 +454,19 @@ public class AnimationUtils {
         float baselineAnglePerDp = (float) Math.atan2((N5_DENSITY / N5_DPI) / 2,
                 AVERAGE_VIEWING_DISTANCE_FOR_PHONES) * 2;
         return anglePerDp / baselineAnglePerDp;
+    }
+
+    /**
+     * @hide
+     */
+    public static DisplayMetrics getRealDisplayMetrics(Context context) {
+        DisplayMetrics metrics = new DisplayMetrics();
+        if (context instanceof Activity) {
+            ((Activity) context).getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
+        } else {
+            ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
+                    .getRealMetrics(metrics);
+        }
+        return metrics;
     }
 }

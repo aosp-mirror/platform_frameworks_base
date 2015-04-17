@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.ConstantState;
 import android.content.res.Resources;
@@ -37,7 +38,7 @@ public abstract class Animator implements Cloneable {
     public static final int HINT_NO_SCALE = 0;
 
     /**
-     * Set this scale hint (using {@link #setDurationScaleHint(int, Resources)} when the animation's
+     * Set this scale hint (using {@link #setDurationScaleHint(Context, int)} when the animation's
      * moving distance is proportional to the screen size. (e.g. a view coming in from the bottom of
      * the screen to top/center). With this scale hint set, the animation duration will be
      * automatically scaled based on screen size.
@@ -45,7 +46,7 @@ public abstract class Animator implements Cloneable {
     public static final int HINT_DISTANCE_PROPORTIONAL_TO_SCREEN_SIZE = 1;
 
     /**
-     * Set this scale hint (using {@link #setDurationScaleHint(int, Resources)}) if the animation
+     * Set this scale hint (using {@link #setDurationScaleHint(Context, int)}) if the animation
      * has pre-defined moving distance in dp that does not vary from device to device. This is
      * extremely useful when the animation needs to run on both phones/tablets and TV, because TV
      * has inflated dp and therefore will have a longer visual arc for the same animation than on
@@ -237,12 +238,27 @@ public abstract class Animator implements Cloneable {
      * users' field of view. Therefore, the duration scale factor is determined by the ratio of the
      * angular movement on current devices to that on the baseline device (i.e. Nexus 5).
      *
+     * @param context Context used to determine the display metrics
      * @param hint an indicator on how the animation is defined. The hint could be
      *             {@link #HINT_NO_SCALE}, {@link #HINT_DISTANCE_PROPORTIONAL_TO_SCREEN_SIZE} or
      *             {@link #HINT_DISTANCE_DEFINED_IN_DP}.
-     * @param res The resources {@see android.content.res.Resources} for getting display metrics
      */
-    public void setDurationScaleHint(int hint, Resources res) {
+    public void setDurationScaleHint(Context context, int hint) {
+        if (ANIM_DEBUG) {
+            Log.d("ANIM_DEBUG", "distance based duration hint: " + hint);
+        }
+        if (hint == mDurationScaleHint) {
+            return;
+        }
+        if (hint == HINT_NO_SCALE) {
+            mDurationScaleHint = hint;
+            return;
+        }
+        DisplayMetrics metrics = AnimationUtils.getRealDisplayMetrics(context);
+        setDurationScaleHint(context.getResources(), metrics, hint);
+    }
+
+    void setDurationScaleHint(Resources res, DisplayMetrics metrics, int hint) {
         if (ANIM_DEBUG) {
             Log.d("ANIM_DEBUG", "distance based duration hint: " + hint);
         }
@@ -252,9 +268,9 @@ public abstract class Animator implements Cloneable {
         mDurationScaleHint = hint;
         if (hint != HINT_NO_SCALE) {
             int uiMode = res.getConfiguration().uiMode & Configuration.UI_MODE_TYPE_MASK;
-            DisplayMetrics metrics = res.getDisplayMetrics();
-            float width = metrics.widthPixels / metrics.xdpi;
-            float height = metrics.heightPixels / metrics.ydpi;
+            float dpi = metrics.xdpi;
+            float width = metrics.widthPixels / dpi;
+            float height = metrics.heightPixels / dpi;
             float viewingDistance = AnimationUtils.getViewingDistance(width, height, uiMode);
             if (ANIM_DEBUG) {
                 Log.d("ANIM_DEBUG", "width, height, viewing distance, uimode: "
@@ -263,7 +279,7 @@ public abstract class Animator implements Cloneable {
             mScreenSizeBasedDurationScale = AnimationUtils
                     .getScreenSizeBasedDurationScale(width, height, viewingDistance);
             mDpBasedDurationScale = AnimationUtils.getDpBasedDurationScale(
-                    metrics.density, metrics.xdpi, viewingDistance);
+                    metrics.density, dpi, viewingDistance);
             if (ANIM_DEBUG) {
                 Log.d("ANIM_DEBUG", "screen based scale, dp based scale: " +
                         mScreenSizeBasedDurationScale + ", " + mDpBasedDurationScale);
