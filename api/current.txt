@@ -2880,7 +2880,7 @@ package android.animation {
     method public void removePauseListener(android.animation.Animator.AnimatorPauseListener);
     method public void resume();
     method public abstract android.animation.Animator setDuration(long);
-    method public void setDurationScaleHint(int, android.content.res.Resources);
+    method public void setDurationScaleHint(android.content.Context, int);
     method public abstract void setInterpolator(android.animation.TimeInterpolator);
     method public abstract void setStartDelay(long);
     method public void setTarget(java.lang.Object);

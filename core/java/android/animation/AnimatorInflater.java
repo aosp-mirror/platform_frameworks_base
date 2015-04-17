@@ -26,6 +26,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.PathParser;
 import android.util.StateSet;
@@ -85,34 +86,47 @@ public class AnimatorInflater {
     /**
      * Loads an {@link Animator} object from a resource
      *
-     * @param context Application context used to access resources
+     * @param context Context used to access resources
      * @param id The resource id of the animation to load
      * @return The animator object reference by the specified id
      * @throws android.content.res.Resources.NotFoundException when the animation cannot be loaded
      */
     public static Animator loadAnimator(Context context, @AnimatorRes int id)
             throws NotFoundException {
-        return loadAnimator(context.getResources(), context.getTheme(), id);
+        return loadAnimator(context, context.getTheme(), id);
     }
 
     /**
      * Loads an {@link Animator} object from a resource
      *
-     * @param resources The resources
+     * @param context Context used to access resources
      * @param theme The theme
      * @param id The resource id of the animation to load
      * @return The animator object reference by the specified id
      * @throws android.content.res.Resources.NotFoundException when the animation cannot be loaded
      * @hide
      */
-    public static Animator loadAnimator(Resources resources, Theme theme, int id)
+    public static Animator loadAnimator(Context context, Theme theme, int id)
             throws NotFoundException {
-        return loadAnimator(resources, theme, id, 1);
+        return loadAnimator(context, theme, id, 1);
     }
 
     /** @hide */
     public static Animator loadAnimator(Resources resources, Theme theme, int id,
             float pathErrorScale) throws NotFoundException {
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        return loadAnimator(resources, theme, id, pathErrorScale, metrics);
+    }
+
+    private static Animator loadAnimator(Context context, Theme theme, int id, float pathErrorScale)
+            throws NotFoundException {
+        DisplayMetrics metrics = AnimationUtils.getRealDisplayMetrics(context);
+        return loadAnimator(context.getResources(), theme, id, pathErrorScale, metrics);
+    }
+
+    private static Animator loadAnimator(Resources resources, Theme theme, int id,
+            float pathErrorScale, DisplayMetrics metrics) {
+
         final ConfigurationBoundResourceCache<Animator> animatorCache = resources
                 .getAnimatorCache();
         Animator animator = animatorCache.get(id, theme);
@@ -127,7 +141,7 @@ public class AnimatorInflater {
         XmlResourceParser parser = null;
         try {
             parser = resources.getAnimation(id);
-            animator = createAnimatorFromXml(resources, theme, parser, pathErrorScale);
+            animator = createAnimatorFromXml(resources, theme, parser, pathErrorScale, metrics);
             if (animator != null) {
                 animator.appendChangingConfigurations(getChangingConfigs(resources, id));
                 final ConstantState<Animator> constantState = animator.createConstantState();
@@ -239,7 +253,8 @@ public class AnimatorInflater {
                         }
                         if (animator == null) {
                             animator = createAnimatorFromXml(context.getResources(),
-                                    context.getTheme(), parser, 1f);
+                                    context.getTheme(), parser, 1f,
+                                    AnimationUtils.getRealDisplayMetrics(context));
                         }
 
                         if (animator == null) {
@@ -656,15 +671,15 @@ public class AnimatorInflater {
     }
 
     private static Animator createAnimatorFromXml(Resources res, Theme theme, XmlPullParser parser,
-            float pixelSize)
+            float pixelSize, DisplayMetrics metrics)
             throws XmlPullParserException, IOException {
         return createAnimatorFromXml(res, theme, parser, Xml.asAttributeSet(parser), null, 0,
-                pixelSize);
+                pixelSize, metrics);
     }
 
     private static Animator createAnimatorFromXml(Resources res, Theme theme, XmlPullParser parser,
-            AttributeSet attrs, AnimatorSet parent, int sequenceOrdering, float pixelSize)
-            throws XmlPullParserException, IOException {
+            AttributeSet attrs, AnimatorSet parent, int sequenceOrdering, float pixelSize,
+            DisplayMetrics metrics) throws XmlPullParserException, IOException {
         Animator anim = null;
         ArrayList<Animator> childAnims = null;
 
@@ -683,9 +698,9 @@ public class AnimatorInflater {
             boolean gotValues = false;
 
             if (name.equals("objectAnimator")) {
-                anim = loadObjectAnimator(res, theme, attrs, pixelSize);
+                anim = loadObjectAnimator(res, theme, attrs, pixelSize, metrics);
             } else if (name.equals("animator")) {
-                anim = loadAnimator(res, theme, attrs, null, pixelSize);
+                anim = loadAnimator(res, theme, attrs, null, pixelSize, metrics);
             } else if (name.equals("set")) {
                 anim = new AnimatorSet();
                 TypedArray a;
@@ -697,10 +712,10 @@ public class AnimatorInflater {
                 anim.appendChangingConfigurations(a.getChangingConfigurations());
                 int ordering = a.getInt(R.styleable.AnimatorSet_ordering, TOGETHER);
                 createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering,
-                        pixelSize);
+                        pixelSize, metrics);
                 final int hint = a.getInt(R.styleable.AnimatorSet_durationScaleHint,
                         HINT_NO_SCALE);
-                anim.setDurationScaleHint(hint, res);
+                anim.setDurationScaleHint(res, metrics, hint);
                 a.recycle();
             } else if (name.equals("propertyValuesHolder")) {
                 PropertyValuesHolder[] values = loadValues(res, theme, parser,
@@ -980,10 +995,10 @@ public class AnimatorInflater {
     }
 
     private static ObjectAnimator loadObjectAnimator(Resources res, Theme theme, AttributeSet attrs,
-            float pathErrorScale) throws NotFoundException {
+            float pathErrorScale, DisplayMetrics metrics) throws NotFoundException {
         ObjectAnimator anim = new ObjectAnimator();
 
-        loadAnimator(res, theme, attrs, anim, pathErrorScale);
+        loadAnimator(res, theme, attrs, anim, pathErrorScale, metrics);
 
         return anim;
     }
@@ -998,7 +1013,7 @@ public class AnimatorInflater {
      *            ObjectAnimator
      */
     private static ValueAnimator loadAnimator(Resources res, Theme theme,
-            AttributeSet attrs, ValueAnimator anim, float pathErrorScale)
+            AttributeSet attrs, ValueAnimator anim, float pathErrorScale, DisplayMetrics metrics)
             throws NotFoundException {
         TypedArray arrayAnimator = null;
         TypedArray arrayObjectAnimator = null;
@@ -1039,7 +1054,7 @@ public class AnimatorInflater {
 
         final int hint = arrayAnimator.getInt(R.styleable.Animator_durationScaleHint,
                 HINT_NO_SCALE);
-        anim.setDurationScaleHint(hint, res);
+        anim.setDurationScaleHint(res, metrics, hint);
         arrayAnimator.recycle();
         if (arrayObjectAnimator != null) {
             arrayObjectAnimator.recycle();
