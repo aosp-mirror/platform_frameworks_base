@@ -808,8 +808,14 @@ final class ActivityStack {
     final boolean startPausingLocked(boolean userLeaving, boolean uiSleeping, boolean resuming,
             boolean dontWait) {
         if (mPausingActivity != null) {
-            Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity);
-            completePauseLocked(false);
+            Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
+                    + " state=" + mPausingActivity.state);
+            if (!mService.isSleeping()) {
+                // Avoid recursion among check for sleep and complete pause during sleeping.
+                // Because activity will be paused immediately after resume, just let pause
+                // be completed by the order of activity paused from clients.
+                completePauseLocked(false);
+            }
         }
         ActivityRecord prev = mResumedActivity;
         if (prev == null) {
