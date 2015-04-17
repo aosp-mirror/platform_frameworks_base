@@ -3,16 +3,27 @@ parent.title=Tools
 parent.link=index.html
 @jd:body
 
-<p>Hierarchy Viewer allows you to debug and optimize your user 
-interface. It provides a visual representation of the layout's View hierarchy 
-(the Layout View) and a magnified inspector of the display (the Pixel Perfect View). 
+<p>The Hierarchy Viewer allows you to debug and optimize your user
+interface. It provides a visual representation of the layout's View hierarchy
+(the Layout View) and a magnified inspector of the display (the Pixel Perfect View). </p>
+
+<p>To start the Hierarchy Viewer, do one of the following: </p>
+
+<ul>
+<li> From Android Studio, choose <strong>Tools &gt; Android Device Monitor</strong> or click the
+Android Device Monitor icon
+<img src="{@docRoot}images/tools/hierarchicalviewer-icon.png" alt=""/>. Click the Open Perspectives
+icon <img src="{@docRoot}images/tools/studio-DDMS-open-perspective-icon.png" alt=""/> and select
+<strong>Hierarchy View</strong>. </li>
+<li>From the SDK <code>tools/</code> directory, enter:
+  <pre>monitor</pre> </li>
+</ul>
+
+<p>For more information on how to use the Hierarchy Viewer, see
+<a href="{@docRoot}tools/debugging/debugging-ui.html">Optimizing Your UI</a>.
 </p>
 
-<p>To start Hierarchy Viewer, enter the following command from the SDK <code>tools/</code> directory:</p>
-  <pre>hierarchyviewer</pre>
-</ol>
+<p class="note"><strong>Note:</strong> The command line version of Hierarchy Viewer has been
+deprecated. </p>
 
-<p>For more information on how to use Hierarchy Viewer, see 
-<a href="{@docRoot}tools/debugging/debugging-ui.html">Debugging and Profiling UIs</a>
-</p>
 
