@@ -303,10 +303,13 @@ public abstract class CameraMetadata<TKey> {
      * <p>The minimal set of capabilities that every camera
      * device (regardless of {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel})
      * supports.</p>
-     * <p>This capability is listed by all devices, and
+     * <p>This capability is listed by all normal devices, and
      * indicates that the camera device has a feature set
      * that's comparable to the baseline requirements for the
      * older android.hardware.Camera API.</p>
+     * <p>Devices with the DEPTH_OUTPUT capability might not list this
+     * capability, indicating that they support only depth measurement,
+     * not standard color output.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -545,6 +548,11 @@ public abstract class CameraMetadata<TKey> {
      * {@link CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE android.control.awbLockAvailable} are also guaranteed
      * to be <code>true</code> so burst capture with these two locks ON
      * yields consistent image output.</p>
+     * <p>On a camera device that reports the HIGH_RESOLUTION hardware
+     * level, meaning the device supports very large capture sizes,
+     * BURST_CAPTURE means that at least 8-megapixel images can be
+     * captured at <code>&gt;=</code> 20 fps, and maximum-resolution images can be
+     * captured at <code>&gt;=</code> 10 fps.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
      * @see CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE
@@ -595,6 +603,42 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING = 7;
+
+    /**
+     * <p>The camera device can produce depth measurements from its field of view.</p>
+     * <p>This capability requires the camera device to support the following:</p>
+     * <ul>
+     * <li>DEPTH16 is supported as an output format.</li>
+     * <li>DEPTH_POINT_CLOUD is optionally supported as an output format.</li>
+     * <li>This camera device, and all camera devices with the same android.lens.info.facing,
+     *   will list the following calibration entries in both CameraCharacteristics and
+     *   CaptureResults:<ul>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>android.lens.intrinsicCalibration</li>
+     * <li>android.lens.radialDistortion</li>
+     * </ul>
+     * </li>
+     * <li>The {@link CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE android.depth.depthIsExclusive} entry is listed by this device.</li>
+     * <li>A LIMITED camera with only the DEPTH_OUTPUT capability does not have to support
+     *   normal YUV_420_888, JPEG, and PRIV-format outputs. It only has to support the DEPTH16
+     *   format.</li>
+     * </ul>
+     * <p>Generally, depth output operates at a slower frame rate than standard color capture,
+     * so the DEPTH16 and DEPTH_POINT_CLOUD formats will commonly have a stall duration that
+     * should be accounted for (see
+     * android.hardware.camera2.StreamConfigurationMap#getOutputStallDuration).  On a device
+     * that supports both depth and color-based output, to enable smooth preview, using a
+     * repeating burst is recommended, where a depth-output target is only included once
+     * every N frames, where N is the ratio between preview output rate and depth output
+     * rate, including depth stall time.</p>
+     *
+     * @see CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
@@ -807,6 +851,13 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY = 2;
+
+    /**
+     * <p>This camera device is capable of supporting advanced imaging applications at full rate,
+     * and additional high-resolution outputs at lower rates.</p>
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_HIGH_RESOLUTION = 3;
 
     //
     // Enumeration values for CameraCharacteristics#SYNC_MAX_LATENCY

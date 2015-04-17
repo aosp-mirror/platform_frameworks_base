@@ -13473,6 +13473,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AF;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AWB;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Boolean> DEPTH_DEPTH_IS_EXCLUSIVE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> EDGE_AVAILABLE_EDGE_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Boolean> FLASH_INFO_AVAILABLE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES;
@@ -13701,6 +13702,7 @@ package android.hardware.camera2 {
     field public static final int HOT_PIXEL_MODE_HIGH_QUALITY = 2; // 0x2
     field public static final int HOT_PIXEL_MODE_OFF = 0; // 0x0
     field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1; // 0x1
+    field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_HIGH_RESOLUTION = 3; // 0x3
     field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY = 2; // 0x2
     field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0; // 0x0
     field public static final int LENS_FACING_BACK = 1; // 0x1
@@ -13719,6 +13721,7 @@ package android.hardware.camera2 {
     field public static final int NOISE_REDUCTION_MODE_OFF = 0; // 0x0
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE = 0; // 0x0
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6; // 0x6
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8; // 0x8
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2; // 0x2
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 1; // 0x1
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING = 4; // 0x4
