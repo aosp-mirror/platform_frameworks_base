@@ -208,6 +208,10 @@
             </intent-filter>
         </receiver>
 
+        <!-- Callback for dismissing screenshot notification after a share target is picked -->
+        <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
+                  android:exported="false" />
+
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
             android:exported="true"
