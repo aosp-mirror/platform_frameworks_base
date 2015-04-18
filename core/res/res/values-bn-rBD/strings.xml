@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"অ্যাপ্লিকেশানটিকে আপনার টিভি বা SIM কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তা নির্বিশেষে সমস্ত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"অ্যাপ্লিকেশানটিকে আপনার ফোনে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"আপনার পাঠ্য বার্তা সম্পাদনা করুন (SMS বা MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"অ্যাপ্লিকেশানকে আপনার ট্যাবলেটে বা সিম কার্ডে SMS বার্তাগুলি লিখতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার বার্তাগুলি মুছে দিতে পারে৷"</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"অ্যাপ্লিকেশানকে আপনার টিভি বা SIM কার্ডে সংরক্ষিত SMS বার্তাগুলি লেখার অনুমতি দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার বার্তাগুলি মুছে দিতে পারে৷"</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"অ্যাপ্লিকেশানকে আপনার ফোন বা সিম কার্ডে SMS বার্তাগুলি লিখতে দেয়৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার বার্তাগুলি মুছে দিতে পারে৷"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"পাঠ্য বার্তা পান (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"অ্যাপ্লিকেশানটিকে WAP বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"চলমান অ্যাপ্লিকেশান উদ্ধার করে"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"আঙ্গুলের ছাপ আংশিক সনাক্ত করা হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"আঙ্গুলের ছাপ নেওয়ার সেন্সরটি অপরিস্কার৷ অনুগ্রহ করে পরিষ্কার করে আবার চেষ্টা করুন৷"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"আঙ্গুল অতি দ্রুত সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"আঙ্গুল ধীরে সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার অনুপলব্ধ৷"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"আঙ্গুলের ছাপ সংরক্ষণ করা যাবে না৷ অনুগ্রহ করে একটি বিদ্যমান আঙ্গুলের ছাপ সরান৷"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"আঙ্গুলের ছাপ নেওয়ার সময়সীমা শেষ হযেছে৷ আবার চেষ্টা করুন৷"</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"আঙ্গুলের ছাপ অপারেশন বাতিল করা হয়েছে৷"</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"অনেকবার প্রচেষ্টা করা হয়েছে৷ পরে আবার চেষ্টা করুন৷"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"আবার চেষ্টা করুন৷"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"সিঙ্ক সেটিংস পড়ে"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"অ্যাপ্লিকেশানকে SD কার্ডে লেখার অনুমতি দেয়৷"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP কল করুন/গ্রহণ করুন"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"অ্যাপ্লিকেশানকে SIP কল করতে ও গ্রহণ করতে অনুমতি দেয়।"</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"নতুন টেলিকম SIM সংযোগগুলির নিবন্ধন"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"অ্যাপ্লিকেশানটিকে নতুন টেলিকম SIM সংযোগগুলি নিবন্ধিত করতে অনুমোদিত করে৷"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"নতুন টেলিকম সংযোগগুলির নিবন্ধন"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"নতুন টেলিকম সংযোগ নিবন্ধিত করতে অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷"</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"টেলিকম সংযোগগুলি পরিচালনা করুন"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"টেলিকম সংযোগগুলি পরিচালনা করতে  অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷"</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"কলে-থাকা স্ক্রীণের সাথে ইন্টারঅ্যাক্ট করে"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ব্যবহারকারী কখন এবং কীভাবে কলে-থাকা স্ক্রীণটিকে দেখতে পাবেন, অ্যাপ্লিকেশানটিকে তা নিয়ন্ত্রণ করতে দেয়৷"</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"টেলিফোন পরিষেবার সাথে ইন্টারঅ্যাক্ট করুন"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"কল করা/গ্রহণ করার জন্য অ্যাপ্লিকেশানটিকে টেলিফোন পরিষেবার সাথে ইন্টারঅ্যাক্ট করার অনুমতি দেয়।"</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"কলে-থাকা এক ব্যবহারকারী অভিজ্ঞতা সরবরাহ করুন"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"অ্যাপ্লিকেশানটিকে কলে-থাকা এক ব্যবহারকারী অভিজ্ঞতা সরবরাহের অনুমতি দেয়।"</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"তারিখ অনুযায়ী নেটওয়ার্কের ব্যবহার পড়ে"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"অ্যাপ্লিকেশানটিকে নিদিষ্ট নেটওয়ার্ক এবং অ্যাপ্লিকেশানগুলির জন্য পূর্বের নেটওয়ার্কের ব্যবহার পড়তে দেয়৷"</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"নেটওয়ার্ক নীতি পরিচালনা করে"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"অ্যাপ্লিকেশানকে নেটওয়ার্ক নীতির পরিচালনা করতে এবং অ্যাপ্লিকেশান নির্দিষ্ট নীতিগুলি নির্ধারণ করতে দেয়৷"</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"নেটওয়ার্ক ব্যবহারের হিসাবরক্ষণ পরিবর্তন করে"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"অ্যাপ্লিকেশানগুলি অনুযায়ী কীভাবে নেটওয়ার্কের ব্যবহার ধার্য করা হবে তার সংশোধন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ সাধারণ অ্যাপ্লিকেশানগুলির ব্যবহার করার জন্য নয়৷"</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"বিজ্ঞপ্তিগুলি অ্যাক্সেস করে"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"অ্যাপ্লিকেশানটিকে অন্যান্য অ্যাপ্লিকেশান যেগুলি পোস্ট করে সেগুলি সমেত, বিজ্ঞপ্তিগুলি পুনরুদ্ধার করতে, পরীক্ষা করতে এবং সাফ করার অনুমতি দেয়৷"</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"একটি বিজ্ঞপ্তি শ্রোতা পরিষেবাতে সংলগ্ন করে"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ধারককে, একটি বিজ্ঞপ্তি শ্রোতা পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"একটি শর্ত প্রদানকারীর পরিষেবা বাঁধাই করে"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"ধারককে, একটি শর্ত প্রদানকারী পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"একটি স্বপ্নের পরিষেবার সাথে যুক্ত হন"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"ধারককে, একটি স্বপ্নের পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ক্যারিয়ারের প্রদেয় কনফিগারেশন অ্যাপ্লিকেশানকে দিয়ে কাজ করায়"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ধারককে, ক্যারিয়ারের প্রদেয় কনফিগারেশন অ্যাপ্লিকেশানকে দিয়ে কাজ করানোর অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"নেটওয়ার্ক অবস্থার উপর পর্যবেক্ষণের জন্য নজর রাখে"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"নেটওয়ার্ক অবস্থার উপর পর্যবেক্ষণের জন্য একটি অ্যাপ্লিকেশানকে শোনার জন্য অনুমতি নেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"ইনপুট ডিভাইস ক্রমাঙ্কন পরিবর্তন করে"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"অ্যাপ্লিকেশানকে টাচ স্ক্রীণের ক্রমাঙ্গন প্যারামিটার সংশোধন করতে দেয়৷ সাধারণ অ্যাপ্লিকেশানগুলির জন্য দরকারী নয়৷"</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM শংসাপত্রগুলি অ্যাক্সেস করে"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM শংসাপত্রগুলির বিধান এবং ব্যবহারা করার অনুমতি দিন৷ সাধারণ অ্যাপ্লিকেশানগুলির জন্য কোনোদিন প্রয়োজন হয় না৷"</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android বীম স্থানান্তর স্থিতি গ্রহণ করুন"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"এই অ্যাপ্লিকেশানকে বর্তমান Android বীম স্থানান্তর সম্বন্ধে তথ্য গ্রহণ করার অনুমিত দেয়"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM শংসাপত্রগুলি সরান"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"কোনো অ্যাপ্লিকেশানকে DRM শংসাপত্রগুলি সরানোর অনুমতি দেয়। সাধারণ অ্যাপ্লিকেশানগুলির জন্য কখনো প্রয়োজন হয় না।"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"একটি ক্যারিয়ার বার্তাপ্রেরণ পরিষেবা আবদ্ধ করতে"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ধারককে, একটি ক্যারিয়ার বার্তাপ্রেরণ পরিষেবার উচ্চ স্তরের ইন্টারফেসে জুড়তে অনুমতি দেয়৷ সধারণ অ্যাপ্লিকেশানগুলির জন্য কখনই প্রয়োজন হয় না৷"</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"পাসওয়ার্ড নিয়মগুলি সেট করে"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"স্ক্রীন লক করার পাসওয়ার্ডগুলিতে অনুমতিপ্রাপ্ত অক্ষর এবং দৈর্ঘ্য নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"স্ক্রীণ আনলক করার প্রচেষ্টাগুলি নিরীক্ষণ করে"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"আনলক করতে বা জরুরী কল করতে মেনু টিপুন৷"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"আনলক করতে মেনু টিপুন৷"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"আনলক করতে প্যাটার্ন আঁকুন"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"জরুরী"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"কলে ফিরুন"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"সঠিক!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"আবার চেষ্টা করুন"</string>
@@ -1029,36 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"প্রার্থীরা"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> প্রস্তুত করা হচ্ছে"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ত্রুটি রয়েছে কিনা পরীক্ষা করা হচ্ছে"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"নতুন <xliff:g id="NAME">%s</xliff:g> সনাক্ত করা হয়েছে"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ফটোগুলি এবং মিডিয়া স্থানান্তর করার জন্য"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> ক্ষতিগ্রস্ত হয়েছে"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> ক্ষতিগ্রস্ত হয়েছে; এটি পুনরায় ফর্ম্যাট করার চেষ্টা করুন"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> অপ্রত্যাশিতভাবে মুছে ফেলা হয়েছে"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ডেটা যাতে হারিয়ে না যায় তার জন্য সরানোর আগে <xliff:g id="NAME">%s</xliff:g> আনমাউন্ট করুন"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> সরানো হয়েছে"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> মুছে ফেলা হয়েছে; নতুন একটি ঢোকান"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"এখনও <xliff:g id="NAME">%s</xliff:g> সরিয়ে ফেলা হচ্ছে..."</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"সরাবেন না"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"সেটআপ"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"বের করে নিন"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"ঘুরে দেখুন"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"কোনো সমরূপ কার্যকলাপ খুঁজে পাওয়া যায়নি৷"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"মিডিয়া আউটপুট রুট করুন"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"অ্যাপ্লিকেশানটিকে অন্যান্য বহিরাগত ডিভাইসে মিডিয়া আউটপুট রুট করার অনুমতি দেয়৷"</string>
@@ -1188,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"অভ্যন্তরীণ সঞ্চয়স্থান"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD কার্ড"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"USB সঞ্চয়স্থান"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"সম্পাদনা করুন"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ডেটা ব্যবহারের সতর্কতা"</string>
@@ -1450,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"আপনার দ্বারা এটি বন্ধ করা পর্যন্ত"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"সঙ্কুচিত করুন"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"বাধাগুলিকে অবরুদ্ধ করুন"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"বিরক্ত করবেন না"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ডাউনটাইম"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"প্রতি সোম-শুক্র রাত"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"সপ্তাহান্ত"</string>

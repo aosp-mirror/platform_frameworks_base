@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Antaa sovelluksen lukea tablet-laitteeseen tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden arkaluonteisuudesta."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Antaa sovelluksen lukea televisioon tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden sisällöstä tai arkaluonteisuudesta."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Antaa sovelluksen lukea puhelimeen tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden arkaluonteisuudesta."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"muokkaa tekstiviestejä (teksti tai multimedia)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Antaa sovelluksen kirjoittaa tablet-laitteelle tai SIM-kortille tallennettuihin tekstiviesteihin. Haitalliset sovellukset voivat poistaa viestejä."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Antaa sovelluksen kirjoittaa televisioon tai SIM-kortille tallennettuihin tekstiviesteihin. Haitalliset sovellukset voivat poistaa viestejä."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Antaa sovelluksen kirjoittaa puhelimelle tai SIM-kortille tallennettuihin tekstiviesteihin. Haitalliset sovellukset voivat poistaa viestejä."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"vastaanota tekstiviestejä (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sormenjälki havaittiin vain osittain. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Sormenjäljen käsittely epäonnistui. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sormenjälkitunnistin on likainen. Puhdista tunnistin ja yritä uudelleen."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Liikutit sormea liian nopeasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Sormenjälkilaitteisto ei ole käytettävissä."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sormenjälkeä ei voida tallentaa. Poista aiemmin lisätty sormenjälki."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Sormenjälkitunnistimen toiminta aikakatkaistiin. Yritä uudelleen."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Sormenjälkitoiminto peruutettiin."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Liian monta yritystä. Yritä myöhemmin uudelleen."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Yritä uudelleen."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lue synkronointiasetuksia"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Antaa sovelluksen kirjoittaa SD-kortille."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"soita/vastaanota SIP-puheluja"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Sallii sovelluksen soittaa ja vastaanottaa SIP-puheluja."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"rekisteröidä uusia tietoliikenne-SIM-yhteyksiä"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Antaa sovelluksen rekisteröidä uusia tietoliikenne-SIM-yhteyksiä."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"rekisteröidä uusia tietoliikenneyhteyksiä"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Antaa sovelluksen rekisteröidä uusia tietoliikenneyhteyksiä."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"tietoliikenneyhteyksien hallinta"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Antaa sovelluksen hallita tietoliikenneyhteyksiä."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"Vuorovaikutteinen puhelunäyttö"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Antaa sovelluksen määrätä, milloin ja millaisena käyttäjä näkee puhelunäytön."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"Puhelinpalveluiden yhteyslupa"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Sallii sovelluksen olla yhteydessä puhelinpalveluihin soittamista / puhelujen vastaanottamista varten."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"mahdollistavat puhelukokemuksen"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Antaa sovelluksen määrätä puhelukokemuksen."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"verkonkäyttöhistorian lukeminen"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Sallii sovelluksen lukea tiettyjen verkkojen ja sovellusten verkonkäyttöhistoriaa."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"verkkokäytännön hallinnointi"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Sallii sovelluksen hallinnoida verkkokäytäntöjä ja määritellä sovelluskohtaisia sääntöjä."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"verkon käytön seurannan muokkaaminen"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Antaa sovelluksen muokata, miten sovellusten verkonkäyttöä lasketaan. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"käytä ilmoituksia"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Antaa sovelluksen noutaa, tutkia ja tyhjentää ilmoituksia (myös muiden sovelluksien lähettämiä)."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"sido ilmoituskuuntelijapalveluun"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Antaa sovelluksen sitoutua ilmoituskuuntelijan ylimmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ehtojen toimituspalveluun sitominen"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Antaa sovelluksen luoda sidoksen ehtojen toimituspalvelun ylätason rajapintaan. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"sitoudu Unelma-palveluun"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Antaa sovelluksen sitoutua Unelma-palvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Palveluntarjoajan määrityssovelluksen käynnistäminen"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Antaa luvanhaltijan käynnistää palveluntarjoajan määrityssovelluksen. Ei tavallisten sovelluksien käyttöön."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"verkon tilahavaintojen kuunteleminen"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Antaa sovellukselle luvan kuunnella verkon tilahavaintoja. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"Muuttaa syöttölaitteen kalibrointia."</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Antaa sovelluksen muokata kosketusnäytön kalibrointiparametreja. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM-varmenteiden käyttö"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Antaa sovelluksen käyttää DRM-varmenteita ja hallita niiden käyttäjiä. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Vastaanota Android Beam -siirron tilatietoja"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Antaa sovelluksen vastaanottaa tietoja nykyisistä Android Beam -siirroista"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-varmenteiden poistaminen"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Antaa sovelluksen poistaa DRM-varmenteita. Ei tavallisten sovellusten käyttöön."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"Operaattorin viestipalveluun sitoutuminen"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Antaa sovelluksen sitoutua operaattorin viestipalvelun ylätason liittymään. Ei tavallisten sovellusten käyttöön."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoi ruudun ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Poista lukitus tai soita hätäpuhelu painamalla Valikko-painiketta."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Poista lukitus painamalla Valikko-painiketta."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Poista lukitus piirtämällä kuvio"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Hätäpuhelu"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Palaa puheluun"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Oikein!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Yritä uudelleen"</string>
@@ -1029,36 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidaatit"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Valmistellaan kohdetta <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Tarkistetaan virheiden varalta."</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Uusi <xliff:g id="NAME">%s</xliff:g> on havaittu."</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Kuvien ja mediatiedostojen siirtämiseen"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> on vahingoittunut"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> on vahingoittunut. Kokeile alustaa se uudelleen."</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> poistettiin yllättäen"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Poista <xliff:g id="NAME">%s</xliff:g> käytöstä ennen sen irrottamista estääksesi tietoja katoamasta."</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> on poistettu"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> on poistettu. Aseta uusi."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Kohteen <xliff:g id="NAME">%s</xliff:g> poisto on kesken…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Älä poista."</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"Asennus"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Poista"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Tutustu"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Osuvia toimintoja ei löytynyt."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Median reititys"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Antaa sovelluksen reitittää mediaa muihin ulkoisiin laitteisiin."</string>
@@ -1188,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Sisäinen tallennustila"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-kortti"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"USB-tallennustila"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Muokkaa"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Tiedonsiirtovaroitus"</string>
@@ -1450,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Kunnes poistat tämän käytöstä"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Kutista"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"Estä keskeytykset"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Älä häiritse"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Vapaalla"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Arki-illat"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Viikonloput"</string>

@@ -382,10 +382,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Колдонмого планшетиңизде же SIM-картаңызда сакталган SMS билдирүүлөрүңүздү окуганга уруксат берет. Бул колдонмого SMS билдирүүлөрүңүздү, алардын мазмунуна же конфиденциалдуулугуна карабастан, окууга уруксат берет."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Колдонмого сыналгыңызда же SIM картаңызда сакталган SMS билдирүүлөрүн окуу мүмкүнчүлүгүн берет. Ушуну менен колдонмо бардык SMS билдирүүлөрүн, алардын мазмунуна же купуялуулугуна карабастан окуй алат."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Колдонмого телефонуңузда же SIM-картаңызда сакталган SMS билдирүүлөрүңүздү окуганга уруксат берет. Бул колдонмого SMS билдирүүлөрүңүздү, алардын мазмунуна же конфиденциалдуулугуна карабастан, окуганга уруксат берет."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"билдирүүлөрүңүздү (SMS же MMS) өзгөртүү"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Колдонмого планшетиңизде же SIM картаңызда сакталган SMS билдирүүлөргө жазуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор билдирүүлөрүңүздү жок кылып салышы мүмкүн."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Колдонмого сыналгы же SIM картаңызда сакталган SMS билдирүүлөрүн жазуу мүмкүнчүлүгүн берет. Зыянкеч колдонмолор билдирүүлөрүңүздү жок кылып салышы мүмкүн."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Колдонмого телефонуңузда же SIM картаңызда сакталган SMS билдирүүлөргө жазуу мүмкүнчүлүгүн берет. Кесепеттүү колдонмолор билдирүүлөрүңүздү жок кылып салышы мүмкүн."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"билдирүүлөрдү (WAP) кабыл алуу"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Колдонмого WAP билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"иштеп жаткан колдонмолорду түшүрүп алуу"</string>
@@ -557,21 +553,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Манжа изи жарым-жартылай аныкталды. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Манжа изи иштелбей койду. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Манжа изинин сенсору кирдеп калган. Тазалап, кайра аракет кылыңыз."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Манжа өтө тез жылдырылды. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Манжа өтө жай жылдырылды. Кайра аракет кылыңыз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Манжа изинин аппараттык камсыздоосу жеткиликтүү эмес."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Манжа изин сактоо мүмкүн эмес. Учурдагы манжа изин алып салыңыз."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Манжа изин күтүү мөөнөтү бүттү. Кайра аракет кылыңыз."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Манжа изи иш-аракети жокко чыгарылды."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Аракеттер өтө көп болду. Кийинчерээк кайра аракет кылыңыз."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Кайра бир аракеттениңиз."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <!-- no translation found for permlab_readSyncSettings (6201810008230503052) -->
@@ -599,6 +590,53 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Колдонмого SD картага жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP чалуу/чалууну кабыл алуу"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Колдонмого SIP чалууларга жана чалууларды кабыл алууга мүмкүнчүлүк берет."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"жаңы телеком SIM туташууларын каттоо"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Колдонмого жаңы телеком SIM туташууларын каттоо мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"жаңы телеком туташууларын каттоо"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Колдонмого жаңы телеком туташууларын каттоо мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"телеком туташууларын башкаруу"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Колдонмого телеком туташууларын башкаруу мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"чалуу экраны менен байланыштыруу"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Колдонмого чалуу экраны качан жана кандай көрүнө тургандыгын башкаруу мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефония кызматтары"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Колдонмого чалууларды жасоо/кабыл алуу үчүн телефония кызматтары менен байланышууга уруксат берет."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"чалуу ичиндеги колдонуучу тажрыйбасын камсыз кылуу"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Колдонмого чалуу учурундагы колдонуучу тажрыйбасын камсыз кылуу мүмкүнчүлүгүн берет."</string>
+    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
+    <skip />
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Колдонмого белгилүү бир тармактарга жана колдонмолорго байланыштуу тармактын колдонулушу жөнүндө таржымалды окуу мүмкүнчүлүгүн берет."</string>
+    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
+    <skip />
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Колдонмого тармак саясаттарын башкаруу жана колдонмого мүнөздүү эрежелерди белгилөө мүмкүнчүлүгүн берет."</string>
+    <!-- no translation found for permlab_modifyNetworkAccounting (5088217309088729650) -->
+    <skip />
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Колдонмого желени башка колдонмолордун пайдалануусун башкарган тууралоолорду киргизүү уруксатын берет. Жөнөкөй колдонмолор үчүн эмес."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"эскертүүлөр менен иштөө"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Колдонмого (башка колдонмолор жайгаштырган дагы) эскертүүлөрдү алуу, изилдөө, жана аларды тазалоо мүмкүнчүлүгүн берет."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"эскертүү тыңшагыч кызматына байланыштыруу"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ээсине эскертүү тыңшагыч кызматтын жогорку деңгээл интерфейсине туташуу мүмкүнчүлүгүн берет. Жөнөкөй колдонмолордо эч качан керектелбейт."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"шарт түзүүчү кызматына жалгаштыруу"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Кармоочуга шарт түзүүчү кызматтын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"dream кызматына жалгаштыруу"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Кармоочуга dream кызматынын жогорку деңгээлдеги интерфейсине жалгашуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"оператордун конфигурациялык колдонмосун чакыруу"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ээсине оператор тарабынан берилген конфигурация колдонмосун чакыруу мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"тармак абалынын көрсөткүчтөрүн тыңшоо"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Колдонмого тармак абалынын көрсөткүчтөрүн тыңшоо мүмкүнчүлүгүн берет. Жалпыга багышталган колдонмолордо эч качан колдонулбашы керек."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"киргизүү түзмөгүнүн калибрлөөсүн өзгөртүү"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Колдонмого сенсордук экрандын калибрлөө параметрлерин өзгөртүү мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM тастыктамаларына кирүү"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Колдонмого DRM тастыктамаларын ишке киргизип, колдонуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam өткөрүү абалын алуу"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Бул колдонмого учурдагы Android Beam өткөрүүлөрү жөнүндө маалымат алуу мүмкүнчүлүгүн берет"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM тастыктамаларын алып салуу"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Колдонмого DRM тастыктамаларын алып салуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбайт."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордун билдирүү кызматына байланышуу"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Кармоочуга оператордун билдирүү кызматынын жогорку деңгээлдеги интерфейсине байланышуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбашы мүмкүн."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
@@ -830,8 +868,7 @@
     <skip />
     <!-- no translation found for lockscreen_pattern_instructions (7478703254964810302) -->
     <skip />
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Тез жардам"</string>
     <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
     <skip />
     <!-- no translation found for lockscreen_pattern_correct (9039008650362261237) -->
@@ -1378,36 +1415,21 @@
     <skip />
     <!-- no translation found for candidates_style (4333913089637062257) -->
     <skip />
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> даярдалууда"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Каталар текшерилүүдө"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Жаңы <xliff:g id="NAME">%s</xliff:g> аныкталды"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Сүрөттөрдү жана медиа өткөрүү үчүн"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> бүлүнгөн"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> бүлүнгөн; аны кайра форматтап көрүңүз"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> күтүүсүздөн алынып салынды"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Дайындарды жоготуунун алдын алуу үчүн чыгаруудан мурун <xliff:g id="NAME">%s</xliff:g> түзмөгүн бошотуңуз"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> алынды"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> алынды; жаңысын салыңыз"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> дагы эле чыгарылууда…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Чыгарба"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"Орнотуу"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Чыгаруу"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Изилдөө"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Туура келген аракеттер табылбады."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа чыгарылышын багыттоо"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
@@ -1586,6 +1608,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Ички сактагыч"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-карта"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <!-- no translation found for storage_usb (3017954059538517278) -->
     <skip />
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Өзгөртүү"</string>
@@ -1864,7 +1892,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Бул өчүрүлгөнгө чейин"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Жыйнап коюу"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"Үзгүлтүккө учуратууларды бөгөттөө"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Тынчымды алба"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Аракетсиз убакыт"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Иш түндөрү"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Дем алыш күндөрү"</string>

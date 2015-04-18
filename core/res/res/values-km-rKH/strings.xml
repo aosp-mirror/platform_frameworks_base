@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ឲ្យ​កម្មវិធី​​អាន​សារ SMS ដែល​មាន​ក្នុង​កុំព្យូទ័រ​បន្ទះ ឬ​ស៊ីម​កាត។ វា​ឲ្យ​កម្មវិធី​អាន​សារ SMS ទាក់ទង​នឹង​មាតិកា ឬ​ព័ត៌មាន​សម្ងាត់។"</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"អនុញ្ញាតឲ្យកម្មវិធីអានសារ SMS ដែលបានផ្ទុកនៅក្នុងទូរទស្សន៍ ឬស៊ីមកាតរបស់អ្នក។ វាអនុញ្ញាតឲ្យកម្មវិធីអានសារ SMS ទាំងអស់ ដោយមិនគិតពីមាតិកា ឬព័ត៌មានសម្ងាត់ឡើយ។"</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"ឲ្យ​​កម្មវិធី​អាន​សារ SMS ដែល​បាន​រក្សាទុក​ក្នុង​ទូរស័ព្ទ ឬ​​ស៊ីម​កាត​។ វា​ឲ្យ​កម្មវិធី​អាន​សារ SMS ទាំង​អស់​ ទាក់ទង​នឹង​មាតិកា​ ឬ​ព័ត៌មាន​សម្ងាត់។"</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"កែសម្រួល​សារ​អត្ថបទ​របស់​អ្នក (សារ SMS ឬ MMS​)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"ឲ្យ​កម្មវិធី​សរសេរ​សារ SMS ដែល​​បាន​រក្សាទុក​ក្នុង​កុំព្យូទ័រ​បន្ទះ ឬ​ស៊ីម​កាត​របស់​អ្នក។ កម្មវិធី​ព្យាបាទ​អាច​លុប​សារ​របស់​អ្នក។"</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"អនុញ្ញាតឲ្យកម្មវិធីសរសេរទៅសារ SMS ដែលបានផ្ទុកនៅលើទូរទស្សន៍ ឬស៊ីមកាតរបស់អ្នក។ កម្មវិធីព្យាបាទអាចលុបសាររបស់អ្នក។"</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"ឲ្យ​កម្មវិធី​សរសេរ​សារ SMS ដែល​បាន​រក្សាទុក​ក្នុង​ទូរស័ព្ទ ឬ​​ស៊ីម​កាត។ កម្មវិធី​ព្យាបាទ​អាច​លុប​សារ​របស់​អ្នក។"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ទទួល​សារ​អត្ថបទ (WAP​)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​សារ WAP ។ សិទ្ធិ​នេះ​​មានលទ្ធភាព​តាមដាន ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ឲ្យ​អ្នក​ដោយ​មិន​បង្ហា​ញ។"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ទៅ​យក​កម្មវិធី​កំពុង​ដំណើរការ"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ផ្តិតម្រាមដៃប្រលាក់ហើយ។ សូមសម្អាត ហើយព្យាយាមម្តងទៀត។"</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ម្រាមដៃផ្លាស់ទីលឿនពេក។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"ម្រាមដៃមានចលនាយឺតពេក។ សូមព្យាយាមម្តងទៀត។"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ផ្នែករឹងស្នាមម្រាមដៃមិនមានទេ។"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"មិនអាចផ្ទុកស្នាមម្រាមដៃទេ។ សូមយកស្នាមម្រាមដៃដែលមានស្រាប់ចេញ។"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ការផ្តិតម្រាមដៃបានអស់ពេល។ សូមព្យាយាមម្តងទៀត។"</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"បានបោះបង់ប្រតិបត្តិការស្នាមម្រាមដៃ។"</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ព្យាយាមម្ដងទៀត។"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"អាន​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"ឲ្យ​​កម្មវិធី​សរសេរ​ទៅ​កាត​អេសឌី។"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"បង្កើត/ទទួល ការ​ហៅ SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"​ឲ្យ​​កម្មវិធី បង្កើត និង​ទទួល​ការ​ហៅ SIP ។"</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ស៊ី​ម​ទូរគមនាគមន៍​ថ្មី"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​ចុះ​ឈ្មោះ​​​ជា​មួយ​ស៊ី​ម​ទូរគមនាគមន៍​ថ្មី"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ទូរគមនាគមន៍​ថ្មី"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"ឲ្យ​កម្មវិធី​ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ទូរគមនាគមន៍​ថ្មី។"</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"គ្រប់គ្រង​ការ​ភ្ជាប់​ទូរគមនាគមន៍"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​ការ​ភ្ជាប់​ទូរគមនាគមន៍។"</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ទាក់ទង​ជា​មួយ​អេក្រង់​ហៅ​ចូល"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ពេលវេលា និង​វិធី​ដែល​អ្នកប្រើ​មើល​ឃើញ​អេក្រង់​ហៅ​ចូល។"</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ទាក់ទង​ជា​មួយ​សេវាកម្ម​ទូរស័ព្ទ"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​សេវាកម្ម​ទូរស័ព្ទ ដើម្បី​ហៅ/ទទួល​ការ​ហៅ។"</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ផ្ដល់​​បទពិសោធន៍​អ្នក​ប្រើ​ហៅ​ចូល"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ឲ្យ​កម្មវិធី​ផ្ដល់​បទពិសោធន៍​អ្នក​ប្រើ​ហៅ​ចូល។"</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"អាន​ការ​ប្រើ​បណ្ដាញ​ពិសេស"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"ឲ្យ​កម្មវិធី​អាន​ការ​ប្រើ​បណ្ដាញ​ជា​ប្រវត្តិ​សាស្ត្រ​សម្រាប់​បណ្ដាញ និង​កម្មវិធី​ជាក់លាក់។"</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"គ្រប់គ្រង​គោលនយោបាយ​បណ្ដាញ"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​គោលនយោបាយ​បណ្ដាញ និង​កំណត់​ក្បួន​ជាក់លាក់​សម្រាប់​កម្មវិធី។"</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"កែ​គណនី​ប្រើ​បណ្ដាញ"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ឲ្យ​កម្មវិធី​កែ​វិធី​គិត​ថ្លៃ​សេវាកម្ម​ប្រើ​បណ្ដាញ​​តាម​កម្មវិធី។ មិន​សម្រាប់​ប្រើ​ដោយ​កម្មវិធី​ធម្មតា។"</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"ចូល​ដំណើរ​ការ​ការ​ជូន​ដំណឹង"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ឲ្យ​កម្មវិធី​ទៅ​យក ពិនិត្យ និង​សម្អាត​ការ​ជូន​ដំណឹង រួមមាន​​ប្រកាស​ដោយ​កម្មវិធី​ផ្សេងៗ។"</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ចង​ទៅ​សេវាកម្ម​ស្ដាប់​ការ​ជូន​ដំណឹង"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ឲ្យ​ម្ចាស់​ចង​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​កម្មវិធី​ស្ដាប់​ការ​ជូន​ដំណឹង។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​​ទេ។"</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ភ្ជាប់​ទៅ​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​លក្ខខណ្ឌ"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​​របស់​សេវាកម្ម​ក្រុមហ៊ុន​ផ្ដល់​លក្ខខណ្ឌ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"ភ្ជាប់​ទៅ​សេវាកម្ម​ស្រមោល​ស្រមៃ"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ភ្ជាប់​ទៅ​ចំណុច​ប្រទាក់​កម្រិត​កំពូល​នៃ​សេវាកម្ម​ស្រមើ​ស្រមៃ។ មិន​គួរ​ចាំបាច់​​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ដកហូត​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ដែល​បាន​ផ្ដល់​ដោយ​ក្រុមហ៊ុន​បញ្ជូន"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"អនុញ្ញាត​ឲ្យ​ម្ចាស់​ដក​ហូត​កម្មវិធី​កំណត់​រចនាសម្ព័ន្ធ​ដែល​បាន​ផ្ដល់​ដោយ​ក្រុមហ៊ុន​បញ្ជូន។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"សង្កេត​មើល​លើ​លក្ខខណ្ឌ​បណ្ដាញ"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"ឲ្យ​កម្មវិធី​សង្កេត​មើល​​លើ​លក្ខខណ្ឌ​បណ្ដាញ​។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"ប្ដូរ​​ចំណុច​ឧបករណ៍​បញ្ចូល"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"ឲ្យ​​កម្មវិធី​កែ​ប៉ារ៉ាម៉ែត្រ​កែ​ចំណុច​​នៃ​ការ​ប៉ះ​អេក្រង់។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"ចូល​មើល​វិញ្ញាបនបត្រ DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"ឲ្យ​កម្មវិធី​ផ្ដល់ និង​ប្រើ​វិញ្ញាបនបត្រ DRM ។ មិន​គួរ​ចាំបាច់​សម្រាប់​កម្មវិធី​ធម្មតា​ទេ។"</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"ទទួល​ស្ថានភាព​ផ្ទេរ Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ឲ្យ​កម្មវិធី​ទទួល​ព័ត៌មាន​អំពី​ការ​ផ្ទេរ​​ Android Beam បច្ចុប្បន្ន"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"លុប​​វិញ្ញាបនបត្រ DRM ចេញ"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"អនុញ្ញាត​ឲ្យ​​កម្មវិធី​លុប​ចេញ​វិញ្ញាបនបត្រ DRM ​។ គួរ​តែ​មិន​ត្រូវការ​សម្រាប់​កម្មវិធី​ធម្មតា​។"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ភ្ជាប់ទៅសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"អនុញ្ញាតឲ្យអ្នកប្រើភ្ជាប់ទៅអ៊ីនធឺហ្វេសកម្រិតខ្ពស់នៃសេវាកម្មសារអ្នកផ្តល់សេវាកម្មទូរស័ព្ទ។ មិនគួរចាំបាច់សម្រាប់កម្មវិធីធម្មតាទេ។"</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ពិនិត្យ​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ​ ឬ​ហៅ​ពេល​អាសន្ន។"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ។"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"គូរ​លំនាំ ដើម្បី​ដោះ​សោ"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"បន្ទាន់"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"ត្រឡប់​ទៅ​ការ​ហៅ"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ត្រឹមត្រូវ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ព្យាយាម​ម្ដង​ទៀត"</string>
@@ -1031,36 +1065,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"បេក្ខជន"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"កំពុងរៀបចំ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"កំពុងពិនិត្យរកកំហុស"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"បានរកឃើញ <xliff:g id="NAME">%s</xliff:g> ថ្មី"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"សម្រាប់ផ្ទេររូបភាព និងមេឌៀ"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> មានការខូចខាត"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> មានការខូចខាត សូមព្យាយាមសម្អាតវាម្តងទៀត"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញដោយមិនបានរំពឹងទុក"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ផ្តាច់ <xliff:g id="NAME">%s</xliff:g> មុនពេលដកចេញដើម្បីជៀងវាងការបាត់បង់ទិន្នន័យ"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញ"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញ សូមដោតចូលថ្មីមួយទៀត"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"នៅកំពុងដក <xliff:g id="NAME">%s</xliff:g> ចេញ…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"កុំដកចេញ"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"ដំឡើង"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ដកចេញ"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"រុករក"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"រក​មិន​ឃើញ​សកម្មភាព​ផ្គូផ្គង។"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ឲ្យ​កម្មវិធី​នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ​ទៅ​ឧបករណ៍​​ខាង​ក្រៅ​ផ្សេង។"</string>
@@ -1190,6 +1209,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"ឧបករណ៍​ផ្ទុក​ខាង​ក្នុង"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"កាត​អេសឌី"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"កែសម្រួល​"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ការព្រមាន​ប្រើ​ទិន្នន័យ"</string>
@@ -1452,7 +1477,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"រហូត​ដល់ពេល​​អ្នក​បិទ​វា"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"បង្រួម"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"រារាំងការរំខាន"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"កុំរំខាន"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ពេលមិនដំណើរការ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"យប់ថ្ងៃធ្វើការ"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"ចុងសប្តាហ៍"</string>

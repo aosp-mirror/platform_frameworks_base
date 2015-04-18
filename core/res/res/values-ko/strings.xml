@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"앱이 태블릿 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 허용합니다. 이렇게 하면 앱이 콘텐츠 또는 비밀유지와 관계 없이 모든 SMS 메시지를 읽을 수 있습니다."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"앱이 TV 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 허용합니다. 이 경우 내용의 기밀성과 관계없이 앱이 모든 SMS 메시지를 읽을 수 있게 됩니다."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"앱이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 허용합니다. 이렇게 하면 앱이 콘텐츠 또는 비밀유지와 관계 없이 모든 SMS 메시지를 읽을 수 있습니다."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"내 문자 메시지 수정(SMS 또는 MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"앱이 태블릿 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"앱이 TV 또는 SIM 카드에 저장된 SMS 메시지에 작성할 수 있도록 허용합니다. 이 경우 악성 앱이 메시지를 삭제할 수 있습니다."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"앱이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"문자 메시지 받기(WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"앱이 WAP 메시지를 수신하고 처리할 수 있도록 허용합니다. 이는 앱이 사용자에게 표시하지 않고 기기로 전송된 메시지를 모니터링 또는 삭제할 수도 있다는 것을 의미합니다."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"실행 중인 앱 검색"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"지문이 일부만 인식되었습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"지문 센서를 깨끗이 닦고 다시 시도하세요."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"손가락을 너무 빨리 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"지문 인식 하드웨어를 사용할 수 없습니다."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"지문을 저장할 수 없습니다. 기존 지문을 삭제하세요."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"지문 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"지문 인식 작업이 취소되었습니다."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"다시 시도해 보세요."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"앱이 SD 카드에 쓸 수 있도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP 통화 발신/수신"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"앱에서 SIP 통화를 발신 및 수신하도록 허용"</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"새로운 통신 SIM 연결 등록"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"앱이 새 통신 SIM 연결을 등록할 수 있게 허용합니다."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"새로운 통신 연결 등록"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"앱이 새 통신 연결을 등록할 수 있게 허용합니다."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"통신 연결 관리"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"앱이 통신 연결을 관리할 수 있게 허용합니다."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"통화 화면과 상호작용"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"앱에서 사용자가 통화 화면을 보는 시기와 방법을 제어하도록 허용합니다."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"전화 서비스와 상호 작용"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"앱을 전화 서비스와 상호 작용하도록 허용하여 전화를 송수신하세요."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"통화 사용자 경험 제공"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"앱에서 통화 사용자 경험을 제공하도록 허용합니다."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"이전 네트워크 사용량 읽기"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"앱이 특정 네트워크 및 앱에 대한 이전 네트워크 사용량을 읽을 수 있도록 허용합니다."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"네트워크 정책 관리"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"앱이 네트워크 정책을 관리하고 앱별 규칙을 정의할 수 있도록 허용합니다."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"네트워크 사용량 계산 수정"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"애플리케이션이 애플리케이션의 네트워크 사용량을 계산하는 방식을 수정할 수 있도록 허용합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"알림 액세스"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"앱이 다른 앱에서 게시한 알림을 비롯하여 알림을 검색하고 살펴보며 삭제할 수 있도록 허용합니다."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"알림 수신기 서비스 사용"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"권한을 가진 프로그램이 알림 수신기 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"조건 제공자 서비스 사용"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"권한을 가진 프로그램이 조건 제공자 서비스의 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"드림 서비스에 연결"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"권한을 가진 프로그램이 드림 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"이동통신사에서 제공한 구성 앱 호출"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"권한을 가진 프로그램이 이동통신사에서 제공한 구성 앱을 호출하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"네트워크 상태에 대한 관측 보고 수신"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"애플리케이션이 네트워크 상태에 대한 관측 보고를 수신하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"입력 기기 보정 변경"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"앱이 터치 스크린의 보정 매개변수를 수정할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM 인증서에 액세스"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"애플리케이션이 DRM 인증서를 프로비저닝하고 사용하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam 전송 상태 수신"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"이 애플리케이션이 현재 Android Beam 전송 관련 정보를 수신하도록 허용합니다."</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM 인증서 삭제"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"애플리케이션이 DRM 인증서를 삭제하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"이동통신사 메시지 서비스에 고정"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
@@ -1028,35 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> 준비 중"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"오류 확인 중"</string>
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"새로운 <xliff:g id="NAME">%s</xliff:g> 감지됨"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"사진 및 미디어를 전송하는 데 사용합니다."</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> 손상됨"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g>이(가) 손상되었습니다. 다시 포맷해 보세요."</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>이(가) 예기치 않게 삭제됨"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"데이터 손실을 피하려면 <xliff:g id="NAME">%s</xliff:g>을(를) 마운트 해제한 다음 삭제하세요."</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> 삭제됨"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g>이(가) 삭제되었습니다. 새로 삽입하세요."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"아직 <xliff:g id="NAME">%s</xliff:g> 꺼내는 중…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"삭제하지 마세요."</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"설정"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"꺼내기"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"둘러보기"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"일치하는 활동이 없습니다."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"미디어 출력 연결"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"앱이 미디어 출력을 기타 외부 기기에 연결할 수 있도록 허용합니다."</string>
@@ -1186,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"내부 저장소"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD 카드"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"USB 저장소"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"수정"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"데이터 사용 경고"</string>
@@ -1448,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"이 기능을 사용 중지할 때까지"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"알림 차단"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"알림 일시중지"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"다운타임"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"평일 밤"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"주말"</string>

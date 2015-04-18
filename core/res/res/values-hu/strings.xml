@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen a táblagépen vagy SIM kártyán tárolt SMS-ekhez. Így az alkalmazás hozzáférhet az összes SMS-hez, azok tartalmától és titkos jellegétől függetlenül."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Lehetővé teszi az alkalmazás számára a tévéjén vagy SIM kártyáján tárolt SMS-ek elolvasását. Ezzel az alkalmazás az összes SMS-t elolvashatja, tekintet nélkül tartalmukra vagy bizalmas jellegükre."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Lehetővé teszi az alkalmazás számára, hogy hozzáférjen a telefonon vagy SIM kártyán tárolt SMS-ekhez. Így az alkalmazás hozzáférhet az összes SMS-hez, azok tartalmától és titkos jellegétől függetlenül."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"szöveges üzenetek (SMS vagy MMS) szerkesztése"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Lehetővé teszi az alkalmazás számára, hogy írjon a táblagépen vagy a SIM kártyán lévő SMS-ekbe. A rosszindulatú alkalmazások törölhetik az üzeneteket."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Lehetővé teszi az alkalmazás számára, hogy felülírja a tévéjén vagy SIM kártyáján tárolt SMS-eket. A rosszindulatú alkalmazások ezáltal törölhetik az Ön üzeneteit."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Lehetővé teszi az alkalmazás számára, hogy írjon a telefonon vagy a SIM kártyán lévő SMS-ekbe. A rosszindulatú alkalmazások törölhetik az üzeneteket."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"szöveges üzenetek (WAP) fogadása"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lehetővé teszi az alkalmazás számára, hogy WAP-üzeneteket fogadjon és dolgozzon fel. Ez azt is jelenti, hogy az alkalmazás megfigyelheti vagy törölheti a beérkező üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"futó alkalmazások lekérése"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"A rendszer az ujjlenyomatnak csak egy részletét érzékelte. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nem sikerült feldolgozni az ujjlenyomatot. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Az ujjlenyomat-olvasó koszos. Tisztítsa meg, majd próbálkozzon újra."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Túl hamar vette el az ujját. Próbálkozzon újra."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Túl lassan vette el az ujját. Próbálkozzon újra."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Az ujjlenyomathoz szükséges hardver nem érhető el."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Az ujjlenyomat nem tárolható. Távolítson el egy meglévő ujjlenyomatot."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Az ujjlenyomat-beolvasási műveletkor időtúllépés történt. Próbálkozzon újra."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Ujjlenyomattal kapcsolatos művelet megszakítva"</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Túl sok próbálkozás. Próbálja újra később."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Próbálkozzon újra."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"szinkronizálási beállítások olvasása"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Lehetővé teszi az alkalmazás számára, hogy írjon az SD-kártyára."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP-hívások indítása/fogadása"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP-hívások indításának és fogadásának engedélyezése az alkalmazás számára."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"új telekommunikációs SIM kapcsolatok regisztrálása"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Engedélyezi az alkalmazásnak új telekommunikációs SIM kapcsolatok regisztrálását."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"új telekommunikációs kapcsolatok regisztrálása"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Engedélyezi az alkalmazásnak új telekommunikációs kapcsolatok regisztrálását."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"telekommunikációs kapcsolatok kezelése"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Engedélyezi az alkalmazásnak a telekommunikációs kapcsolatok kezelését."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interakció a hívás közbeni képernyővel"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Lehetővé teszi, hogy az alkalmazás felügyelje, a felhasználók mikor és hogyan láthatják a hívás közbeni képernyőt."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"együttműködés a telefonos szolgáltatásokkal"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Lehetővé teszi, hogy az alkalmazás a telefonos szolgáltatásokkal együttműködve hívásokat kezdeményezzen/fogadjon."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"hívás közbeni felhasználói élmény biztosítása"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Lehetővé teszi, hogy az alkalmazás hívás közbeni felhasználói élményt biztosítson."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"hálózathasználati előzmények beolvasása"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Lehetővé teszi az alkalmazás számára a hálózathasználati előzmények beolvasását adott hálózatok és alkalmazások esetében."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"hálózati házirend kezelése"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Lehetővé teszi az alkalmazás számára, hogy kezelje a hálózati irányelveket és meghatározza az alkalmazásspecifikus szabályokat."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"hálózathasználat elszámolásának módosítása"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Lehetővé teszi az alkalmazás számára annak módosítását, hogy a hálózathasználatot hogyan számolják el az alkalmazások esetében. Normál alkalmazások nem használhatják."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"hozzáférési értesítések"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Lehetővé teszi, hogy az alkalmazás értesítéseket kérdezzen le, vizsgáljon és tisztítson meg, beleértve az egyéb alkalmazások által közzétett értesítéseket is."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"csatlakozzon értesítésfigyelő szolgáltatáshoz"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lehetővé teszi a használó számára, hogy csatlakozzon egy értesítésfigyelő szolgáltatás legfelső szintű felületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"csatlakozás egy feltételbiztosító szolgáltatáshoz"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Lehetővé teszi a használó számára, hogy csatlakozzon egy feltételbiztosító szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"csatlakozás egy képernyővédő szolgáltatáshoz"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Lehetővé teszi a használó számára, hogy csatlakozzon egy képernyővédő szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"a szolgáltatói konfigurációs alkalmazás hívása"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Lehetővé teszi a használó számára a szolgáltató által biztosított konfigurációs alkalmazás hívását. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"hálózati körülményekkel kapcsolatos észrevételek figyelemmel kísérése"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Lehetővé teszi egy alkalmazás számára, hogy figyelemmel kísérje a hálózati körülményekkel kapcsolatos észrevételeket. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"beviteli eszköz kalibrációjának módosítása"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Lehetővé teszi, hogy az alkalmazás módosítsa az érintőképernyő kalibrációs paramétereit. A normál alkalmazásoknál erre elvileg soha nincs szükség."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM-tanúsítványokhoz való hozzáférés"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Engedélyezi egy alkalmazás számára a DRM-tanúsítványokhoz való hozzáférést és azok használatát. Átlagos alkalmazásoknak erre nem lehet szükségük."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam-átviteli állapot fogadása"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Lehetővé teszi az alkalmazás számára a folyamatban lévő Android Beam-átvitelekről szóló információk fogadását"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-tanúsítványok eltávolítása"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Lehetővé teszi, hogy az alkalmazás eltávolítsa a DRM-tanúsítványokat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"kapcsolódás egy üzenetszolgáltatáshoz"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Lehetővé teszi, hogy a tulajdonos kapcsolódjon egy üzenetszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"A képernyőzár jelszavaiban és PIN kódjaiban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Képernyőzár-feloldási kísérletek figyelése"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"A feloldáshoz vagy segélyhívás kezdeményezéséhez nyomja meg a Menü gombot."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Rajzolja le a mintát a feloldáshoz"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Vészhívás"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Hívás folytatása"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Helyes!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Próbálja újra"</string>
@@ -1029,36 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"jelöltek"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> előkészítése"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Hibák keresése"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Új <xliff:g id="NAME">%s</xliff:g> észlelve"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotók és más médiatartalmak átviteléhez"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"A(z) <xliff:g id="NAME">%s</xliff:g> sérült"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"A(z) <xliff:g id="NAME">%s</xliff:g> sérült, próbálja meg újraformázni"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"A(z) <xliff:g id="NAME">%s</xliff:g> váratlanul eltávolítva"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Az adatvesztés elkerülése érdekében kezdje a(z) <xliff:g id="NAME">%s</xliff:g> leválasztásával, mielőtt eltávolítaná azt"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> eltávolítva"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"A(z) <xliff:g id="NAME">%s</xliff:g> el lett távolítva; helyezzen be egy másikat"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"A(z) <xliff:g id="NAME">%s</xliff:g> kiadása még folyamatban van…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Ne távolítsa el"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"Beállítás"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Kiadás"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Felfedezés"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nincs megfelelő tevékenység."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Médiafájlok kimenetének irányítása"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Lehetővé teszi az alkalmazás számára, hogy más külső eszközökre irányítsa a médiafájlok lejátszását."</string>
@@ -1188,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Belső tárhely"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-kártya"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"USB-tár"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Szerkesztés"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Adathasználati figyelmeztetés"</string>
@@ -1450,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Amíg ki nem kapcsolja ezt"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Összecsukás"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"Megszakítások tiltása"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne zavarjanak"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Inaktivitás"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Hétköznap esténként"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Hétvégente"</string>

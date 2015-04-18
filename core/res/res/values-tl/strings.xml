@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong tablet o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Pinapayagan ang app na mabasa ang mga mensaheng SMS na nakaimbak sa iyong TV o SIM card. Nagbibigay-daan ito sa app na mabasa ang lahat ng mensaheng SMS, kahit ano pang content nito o kung kumpidensyal ito."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Pinapayagan ang app na magbasa ng mga mensaheng SMS na naka-imbak sa iyong telepono o SIM card. Pinapayagan nito ang app na basahin ang lahat ng mensaheng SMS, ano pa man ang nilalaman at katayuan sa pagiging kumpedensyal ng mga ito."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"i-edit ang iyong mga text message (SMS o MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Pinapayagan ang app na magsulat sa mga mensaheng SMS na nakaimbak sa iyong tablet o SIM card. Maaaring tanggalin ng nakakahamak na apps ang iyong mga mensahe."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Nagbibigay-daan sa app na magsulat sa mga mensaheng SMS na nakaimbak sa iyong TV o SIM card. Maaaring i-delete ng mga nakakahamak na app ang iyong mga mensahe."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Pinapayagan ang app na magsulat sa mga mensaheng SMS na nakaimbak sa iyong telepono o SIM card. Maaaring tanggalin ng nakakahamak na apps ang iyong mga mensahe."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tumanggap ng mga text message (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng WAP. Kabilang sa pahintulot na ito ang kakayahang sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyo nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Masyadong mabilis ang paggalaw ng daliri. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hindi available ang hardware na ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Hindi maiimbak ang fingerprint. Mangyaring mag-alis ng umiiral nang fingerprint."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Nag-time out ang fingerprint. Subukang muli."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Nakansela ang operasyong ginagamitan ng fingerprint."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Masyadong maraming beses sumubok. Subukang muli sa ibang pagkakataon."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Subukang muli."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"basahin ang mga setting ng sync"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Pinapayagan ang app na magsulat sa SD card."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"magsagawa/tumanggap ng mga tawag sa SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Pinapayagan ang app na magsagawa at makatanggap ng mga tawag sa SIP."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"magrehistro ng mga bagong koneksyon sa SIM ng telecom"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Pinapayagan ang app na magrehistro ng mga bagong koneksyon sa SIM ng telecom."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"magrehistro ng mga bagong koneksyon sa telecom"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Pinapayagan ang app na magrehistro ng mga bagong koneksyon sa telecom."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"papamahalaan ang mga koneksyon sa telecom"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Pinapayagan ang app na mamahala ng mga koneksyon sa telecom."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"makipag-ugnayan sa in-call na screen"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Nagbibigay-daan sa app na kontrolin kung kailan at kung paano makikita ng user ang in-call na screen."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"makipag-ugnayan sa mga serbisyo sa telephony"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Pinapayagan ang app na makipag-ugnayan sa mga serbisyo sa telephony upang tumawag/makatanggap ng mga tawag."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"magbigay ng in-call na karanasan sa user"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Nagbibigay-daan sa app na magbigay ng in-call na karanasan sa user."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"basahin ang makasaysayang paggamit ng network"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Pinapayagan ang app na basahin ang makasaysayang paggamit network para sa mga tukoy na network at apps."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"pamahalaan ang patakaran ng network"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Pinapayagan ang app na pamahalaan ang mga patakaran ng network at ilarawan ang mga patakarang tukoy sa app."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"baguhin ang pagkukuwenta sa paggamit ng network"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Pinapayagan ang app na baguhin kung paano isinasaalang-alang ang paggamit ng network laban sa apps. Hindi para sa paggamit ng normal na apps."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"i-access ang mga notification"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Pinapayagan ang app na kumuha, sumuri, at mag-clear ng mga notification, kabilang ang mga na-post ng iba pang apps."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mapailalim sa isang serbisyo ng notification listener"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nagbibigay-daan sa may-ari na mapailalim sa interface sa tuktok na antas ng isang serbisyo ng notification listener. Hindi dapat kailanganin para sa karaniwang apps kahit kailan."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"i-bind sa isang serbisyo sa pagbibigay ng kundisyon"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Nagbibigay-daan sa naghahawak na i-bind ang top-level na interface ng isang serbisyo sa pagbibigay ng kundisyon. Hindi kailanman dapat kailanganin ng mga normal na app."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"sumailalim sa isang serbisyo ng dream"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Pinapayagan ang may-ari na sumailalim sa interface ng serbisyo ng dream na nasa nangungunang antas. Hindi kailanman dapat na kailanganin para sa mga normal na app."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"paganahin ang app ng configuration na ibinigay ng carrier"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Nagbibigay-daan sa may-ari na paganahin ang app ng configuration na ibinigay ng carrier. Hindi dapat kailanganin para sa normal na apps kahit kailan."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"makinig sa mga obserbasyon sa mga kundisyon ng network"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Nagbibigay-daan sa isang application na makinig sa mga obserbasyon sa mga kundisyon ng network. Dapat na hindi kailanman kakailanganin para sa normal na apps."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"baguhin ang pag-calibrate ng input device"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Pinapayagan ang app na baguhin ang mga parameter sa pag-calibrate ng touch screen. Hindi dapat kailanganin sa normal na apps."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"access sa Mga DRM certificate"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Nagbibigay-daan sa isang application na makapagbigay at gumamit ng mga DRM certficate. Hindi dapat kailanman kailanganin para sa mga normal na app."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Tanggapin ang status ng paglilipat ng Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Pinapayagan ang application na ito na tumanggap ng impormasyon tungkol sa mga kasalukuyang paglilipat ng Android Beam"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"alisin ang mga DRM certificate"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Nagbibigay-daan sa isang application na alisin ang mga DRM certficate. Hindi dapat kailanman kailanganin para sa karaniwang apps."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"sumailalim sa isang serbisyo ng pagmemensahe ng carrier"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Binibigyang-daan ang may-ari na sumailalim sa interface sa nangungunang antas ng isang serbisyo ng pagmemensahe ng carrier. Hindi kailanman dapat kailanganin para sa mga normal na app."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa lock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -1028,36 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"mga kandidato"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Inihahanda ang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sinusuri para sa mga error"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Na-detect ang bagong <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para sa paglilipat ng mga larawan at media"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Nasira ang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Nasira ang <xliff:g id="NAME">%s</xliff:g>; Subukan itong i-reformat"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Hindi inaasahang naalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"I-unmount ang <xliff:g id="NAME">%s</xliff:g> bago alisin upang maiwasan ang pagkawala ng data"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Inalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Inalis ang <xliff:g id="NAME">%s</xliff:g>; maglagay ng bago"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Ine-eject pa rin ang <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Huwag alisin"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"I-setup"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"I-eject"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"I-explore"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Walang nahanap na mga tumutugmang aktibidad."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"I-route ang output ng media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Pinapayagan ang application na mag-route ng output ng media sa iba pang mga panlabas na device."</string>
@@ -1187,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Panloob na storage"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD card"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"I-edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Babala sa paggamit ng data"</string>
@@ -1449,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hanggang sa i-off mo ito"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"I-collapse"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"I-block ang mga pagkaantala"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Huwag istorbohin"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Walang serbisyo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Mga Weeknight"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Sabado at Linggo"</string>

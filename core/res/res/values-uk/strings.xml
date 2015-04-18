@@ -272,10 +272,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Дозволяє програмі читати SMS повідомлення, збережені в планшетному ПК чи на SIM-карті. Це дозволяє програмі читати всі SMS повідомлення, незалежно від вмісту чи конфіденційності."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Додаток може читати SMS-повідомлення, збережені в телевізорі чи на SIM-карті. Завдяки цьому додаток може читати всі SMS-повідомлення, незалежно від їх вмісту чи конфіденційності."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Дозволяє програмі читати SMS повідомлення, збережені в телефоні чи на SIM-карті. Це дозволяє програмі читати всі SMS повідомлення, незалежно від вмісту чи конфіденційності."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"редагувати текстові повідомлення (SMS або MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Дозволяє програмі писати в SMS повідомлення, збережені в планшетному ПК чи на SIM-карті. Шкідливі програми можуть видаляти ваші повідомлення."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Додаток може записувати в SMS-повідомлення, збережені в телевізорі чи на SIM-карті. Шкідливі додатки можуть видаляти ваші повідомлення."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Дозволяє програмі писати в SMS повідомлення, збережені в телефоні чи на SIM-карті. Шкідливі програми можуть видаляти ваші повідомлення."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"отримувати текстові повідомлення (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Дозволяє програмі отримувати й обробляти WAP-повідомлення. Це означає, що програма може відстежувати чи видаляти повідомлення, надіслані на ваш пристрій, навіть не показуючи їх вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"отримувати запущені програми"</string>
@@ -431,21 +427,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток розпізнано частково. Повторіть спробу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчик відбитків забруднився. Очистьте його та повторіть спробу."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Ви забрали палець надто швидко. Повторіть спробу."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Ви забрали палець надто повільно. Повторіть спробу."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратне забезпечення для сканування відбитка недоступне."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Не вдалося зберегти відбиток. Видаліть наявний відбиток."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час очікування відбитка минув. Повторіть спробу."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Дію з відбитком скасовано."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Забагато спроб. Спробуйте пізніше."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторіть спробу."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читати налаштування синхронізації"</string>
@@ -470,6 +461,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Дозволяє програмі записувати на карту SD."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"здійснювати й отримувати дзвінки через протокол SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Додаток зможе здійснювати й отримувати дзвінки через протокол SIP."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"реєструвати нові телекомунікаційні з’єднання SIM-карт"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Додаток може реєструвати нові телекомунікаційні з’єднання SIM-карт."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"реєструвати нові телекомунікаційні з’єднання"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Додаток може реєструвати нові телекомунікаційні з’єднання."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"керування телекомунікаційними з’єднаннями"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Додаток може керувати телекомунікаційними з’єднаннями."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"взаємодіяти з екраном вхідного дзвінка"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Додаток може контролювати, коли та як користувач бачить екран вхідного дзвінка."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"взаємодіяти з телефонними службами"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Дозволяє додатку взаємодіяти з телефонними службами, щоб здійснювати/приймати дзвінки."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"працювати під час розмови"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Додаток може працювати під час розмови."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"читати історію використання мережі"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Дозволяє програмі читати історію використання мережі для певних мереж і програм."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"керувати політикою мережі"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Дозволяє програмі керувати політикою мережі та визначити спеціальні правила для програм."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"змінювати облік використання мережі"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Дозволяє програмі змінювати метод підрахунку того, як програми використовують мережу. Не для використання звичайними програмами."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"отримувати доступ до сповіщень"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Дозволяє програмі отримувати, перевіряти й очищати сповіщення, зокрема опубліковані іншими програмами."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"прив’язуватися до служби читання сповіщень"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Дозволяє власнику прив’язуватися до інтерфейсу верхнього рівня служби читання сповіщень. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"підключитися до служби постачання умов"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби постачання умов. Звичайні додатки ніколи не використовують цей дозвіл."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"підключення до служби заставок"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби заставок. Звичайні додатки ніколи не використовують цей дозвіл."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"викликати надану оператором програму конфігурації"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Дозволяє власнику викликати надану оператором програму конфігурації. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"прослуховувати дані спостережень за станом мережі"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Дозволяє програмі прослуховувати дані спостережень за станом мережі. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"змінювати калібрування пристрою введення"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Програма може змінювати параметри калібрування сенсорного екрана. Ніколи не застосовується для звичайних програм."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"отримувати доступ до сертифікатів DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Дозволяє додатку надавати та використовувати сертифікати DRM. Ніколи не застосовується для звичайних додатків."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Отримувати інформацію про стан функції Передавання даних Android."</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Додаток може отримувати інформацію про поточне передавання даних за допомогою функції Передавання даних Android"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"видаляти сертифікати DRM"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Власник може видаляти сертифікати DRM. Ніколи не застосовується для звичайних додатків."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"підключатися до служби надсилання повідомлень через оператора"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби надсилання повідомлень через оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>
@@ -630,8 +665,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Натис. меню, щоб розбл. чи зробити авар. виклик."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Натисн. меню, щоб розбл."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Намал. ключ, щоб розбл."</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Екстрені служби"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Поверн. до дзвін."</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Повторіть спробу"</string>
@@ -1043,36 +1077,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"кандидати"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Підготовка пристрою пам’яті <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Виявлення помилок"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Виявлено новий пристрій пам’яті (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Для перенесення фотографій і медіафайлів"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Пристрій пам’яті <xliff:g id="NAME">%s</xliff:g> пошкоджено"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Пристрій пам’яті <xliff:g id="NAME">%s</xliff:g> пошкоджено. Спробуйте переформатувати його"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> несподівано вийнято"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Перш ніж виймати пристрій пам’яті <xliff:g id="NAME">%s</xliff:g>, відключіть його, щоб не втратити дані"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Ви вийняли пристрій пам’яті <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Ви вийняли пристрій пам’яті <xliff:g id="NAME">%s</xliff:g>. Вставте новий пристрій"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Відключення пристрою пам’яті <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Не виймайте пристрій пам’яті"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"Налаштувати"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Відключити"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Переглянути"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Відповідні дії не знайдено."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Скеровувати вивід медіа-даних"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Дозволяє програмі скеровувати вивід медіа-даних на інші зовнішні пристрої."</string>
@@ -1204,6 +1223,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Внутрішня пам’ять"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Карта SD"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"Носій USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Редагувати"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Застереження про використ. даних"</string>
@@ -1476,7 +1501,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Доки ви не вимкнете"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Згорнути"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"Блокування сповіщень"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Не турбувати"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Простій"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Увечері в робочі дні"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"У вихідні"</string>

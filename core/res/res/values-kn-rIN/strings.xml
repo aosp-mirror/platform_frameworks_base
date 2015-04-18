@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅಥವಾ ಸಿಮ್‌ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ವಿಷಯ ಅಥವಾ ಗೌಪ್ಯತೆಯನ್ನು ಲೆಕ್ಕಿಸದೆಯೇ, ಎಲ್ಲಾ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"ನಿಮ್ಮ ಟಿವಿ ಅಥವಾ SIM ಕಾರ್ಡ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ವಿಷಯ ಅಥವಾ ಗೋಪ್ಯತೆಯನ್ನು ಪರಿಗಣಿಸದೆ, ಎಲ್ಲಾ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"ನಿಮ್ಮ ಫೋನ್ ಅಥವಾ ಸಿಮ್‌ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ವಿಷಯ ಅಥವಾ ಗೌಪ್ಯತೆಯನ್ನು ಲೆಕ್ಕಿಸದೆಯೇ, ಎಲ್ಲಾ SMS ಸಂದೇಶಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"ನಿಮ್ಮ ಪಠ್ಯ ಸಂದೇಶಗಳನ್ನು ಸಂಪಾದಿಸಿ (SMS ಅಥವಾ MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ ಅಥವಾ ಸಿಮ್‌ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ SMS ಸಂದೇಶಗಳನ್ನು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನಿಮ್ಮ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಬಹುದು."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"ನಿಮ್ಮ ಟಿವಿ ಅಥವಾ SIM ಕಾರ್ಡ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ SMS ಸಂದೇಶಗಳನ್ನು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನಿಮ್ಮ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಬಹುದು."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"ನಿಮ್ಮ ಫೋನ್‌ ಅಥವಾ ಸಿಮ್‌ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ SMS ಸಂದೇಶಗಳಲ್ಲಿ ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ದುರುದ್ದೇಶಪೂರಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನಿಮ್ಮ ಸಂದೇಶಗಳನ್ನು ಅಳಿಸಬಹುದು."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ಪಠ್ಯ ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸಿ (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಮತ್ತು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು, ನಿಮಗೆ ಕಳುಹಿಸಲಾಗಿರುವ ಸಂದೇಶಗಳನ್ನು ನಿಮಗೆ ತೋರಿಸದೆಯೇ, ಅವುಗಳನ್ನು ಮಾನಿಟರ್ ಮಾಡುವ ಅಥವಾ ಅಳಿಸುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ರನ್‌ ಆಗುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಹಿಂಪಡೆಯಿರಿ"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ಭಾಗಶಃ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸಾರ್ ಕೊಳೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ಬೆರಳನ್ನು ಅತಿ ವೇಗವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"ಬೆರಳನ್ನು ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ತೆಗೆದುಹಾಕಿ."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳು. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ರೀಡ್‌ ಮಾಡು"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SD ಕಾರ್ಡ್‌ಗೆ ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ಹೊಸ ಟೆಲಿಕಾಮ್ ಸಿಮ್‌ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಿ"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಹೊಸ ಟೆಲಿಕಾಮ್ ಸಿಮ್‌ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಲು ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"ಹೊಸ ಟೆಲಿಕಾಮ್ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಿ"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"ಹೊಸ ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಣಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ಒಳ-ಕರೆ ಪರದೆಯ ಮೂಲಕ ಸಂವಹನ ನಡೆಸಿ"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ಬಳಕೆದಾರರು ಒಳ-ಕರೆಯ ಪರದೆಯನ್ನು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ನೋಡುತ್ತಾರೆ ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ಟೆಲಿಫೋನಿ ಸೇವೆಗಳೊಂದಿಗೆ ಸಂವಾದ ನಡೆಸಿ"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"ಕರೆಗಳನ್ನು ಮಾಡಲು/ಸ್ವೀಕರಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ ಲಿಫೋನಿ ಸೇವೆಗಳ ಜೊತೆ ಸಂವಾದ ನಡೆಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಕೊಡಿ."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ಒಳ ಕರೆ ಬಳಕೆದಾರರ ಅನುಭವವನ್ನು ಒದಗಿಸಿ"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"ಒಳ ಕರೆಯ ಬಳಕೆದಾರರ ಅನುಭವವನ್ನು ಒದಗಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ಐತಿಹಾಸಿಕ ನೆಟ್‌ವರ್ಕ್ ಬಳಕೆಯನ್ನು ಓದಿರಿ"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"ನಿರ್ದಿಷ್ಟ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಐತಿಹಾಸಿಕ ನೆಟ್‌ವರ್ಕ್‌ನ ಬಳಕೆಯನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ನೆಟ್‌ವರ್ಕ್ ನೀತಿಯನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"ನೆಟ್‌‌ವರ್ಕ್‌ ನೀತಿಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್ ನಿರ್ದಿಷ್ಟ ನಿಯಮಗಳನ್ನು ವ್ಯಾಖ್ಯಾನಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ನೆಟವರ್ಕ್ ಬಳಕೆಯ ಲೆಕ್ಕ ಪರಿಶೋಧನೆಯನ್ನು ಮಾರ್ಪಡಿಸಿ"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಿಗೆ ವಿರುದ್ಧವಾಗಿ ನೆಟ್‍‍ವರ್ಕ್ ಬಳಕೆಯನ್ನು ಹೇಗೆ ಲೆಕ್ಕಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳಲ್ಲಿ ಬಳಸಲಾಗುವುದಿಲ್ಲ."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"ಅಧಿಸೂಚನೆಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೂಲಕ ಪೋಸ್ಟ್ ಮಾಡಿರುವ ಅಧಿಸೂಚನೆಗಳೂ ಸೇರಿದಂತೆ, ಅಂತಹ ಅಧಿಸೂಚನೆಗಳನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳಲು, ಪರೀಕ್ಷಿಸಲು ಮತ್ತು ತೆರವುಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"ಅಧಿಸೂಚನೆ ಕೇಳುಗರ ಸೇವೆಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"ಅಧಿಸೂಚನೆ ಕೇಳುಗ ಸೇವೆಯ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"ಕಂಡೀಶನ್‌‌ ಪೂರೈಕೆದಾರರ ಸೇವೆಯನ್ನು ಪ್ರತಿಬಂಧಿಸು"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"ಕಂಡೀಶನ್‌ ಪೂರೈಕೆದಾರರ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"ಕನಸಿನ ಸೇವೆಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"ಕನಸಿನ ಸೇವೆಯ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಮಾಲೀಕರಿಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ವಾಹಕ-ಒದಗಿಸಿರುವ ಕಾನ್ಫಿಗರೇಶನ್ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ವಿನಂತಿಸಿಕೊಳ್ಳಿ"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ವಾಹಕ-ಒದಗಿಸಿರುವ ಕಾನ್ಫಿಗರೇಶನ್ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ವಿನಂತಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ನೆಟ್‌ವರ್ಕ್ ಪರಿಸ್ಥಿತಿಗಳ ಕುರಿತು ಪರಿಶೀಲನೆಗಳನ್ನು ಆಲಿಸಿ"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"ನೆಟ್‌ವರ್ಕ್ ಪರಿಸ್ಥಿತಿಗಳ ಕುರಿತು ಪರಿಶೀಲನೆಗಾಗಿ ಆಲಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"ಇನ್‌ಪುಟ್‌‌ ಸಾಧನ ಮಾಪನಾಂಕ ನಿರ್ಣಯವನ್ನು ಬದಲಾಯಿಸಿ"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"ಸ್ಪರ್ಶದ ಪರದೆಯ ಮಾಪನಾಂಕ ನಿರ್ಣಯ ಪ್ಯಾರಾಮೀಟರ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM ಪ್ರಮಾಣಪತ್ರಗಳಿಗೆ ಅನುಮತಿ ಕಲ್ಪಿಸಲು ಮತ್ತು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam ವರ್ಗಾವಣೆ ಸ್ಥಿತಿಯನ್ನು ಸ್ವೀಕರಿಸಿ"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ಪ್ರಸ್ತುತ Android Beam ವರ್ಗಾವಣೆಗಳ ಕುರಿತ ಮಾಹಿತಿಯನ್ನು ಸ್ವೀಕರಿಸಲು ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸಿ"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ವಾಹಕ ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಸೇವೆಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ವಾಹಕ ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಸೇವೆಯ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ಪರದೆ ಲಾಕ್‌ನಲ್ಲಿನ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಿನ್‌ಗಳ ಅನುಮತಿಸಲಾದ ಅಕ್ಷರಗಳ ಪ್ರಮಾಣವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ಪರದೆಯ-ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮಾನಿಟರ್ ಮಾಡಿ"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ ಇಲ್ಲವೇ ತುರ್ತು ಕರೆಯನ್ನು ಮಾಡಿ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನಮೂನೆ ಚಿತ್ರಿಸಿ"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"ತುರ್ತು"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"ಕರೆಗೆ ಹಿಂತಿರುಗು"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ಸರಿಯಾಗಿದೆ!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸು"</string>
@@ -1029,36 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"ಅಭ್ಯರ್ಥಿಗಳು"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ದೋಷಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"ಹೊಸ <xliff:g id="NAME">%s</xliff:g> ಪತ್ತೆಯಾಗಿದೆ"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ಫೋಟೋಗಳು ಮತ್ತು ಮಾಧ್ಯಮವನ್ನು ವರ್ಗಾಯಿಸಲು"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> ಹಾನಿಯಾಗಿದೆ"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> ಹಾನಿಯಾಗಿದೆ; ಅದನ್ನು ಮರುಫಾರ್ಮ್ಯಾಟ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ಅನಿರೀಕ್ಷಿತವಾಗಿ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ಡೇಟಾ ನಷ್ಟವನ್ನು ತಪ್ಪಿಸಲು ತೆಗೆದುಹಾಕುವುದಕ್ಕೂ ಮುನ್ನ <xliff:g id="NAME">%s</xliff:g> ಅಳವಡಿಕೆಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ; ಹೊಸದನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ಇನ್ನೂ ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ತೆಗೆದುಹಾಕಬೇಡಿ"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"ಸೆಟಪ್"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಎಜೆಕ್ಟ್ ಮಾಡು"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"ಅನ್ವೇಷಿಸಿ"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ಯಾವುದೇ ಹೊಂದಾಣಿಕೆಯ ಚಟುವಟಿಕೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"ಮೀಡಿಯಾ ಔಟ್‍ಪುಟ್ ಅನ್ನು ರೂಟ್ ಮಾಡಿ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ಇತರ ಬಾಹ್ಯ ಸಾಧನಗಳಿಗೆ ಮೀಡಿಯಾ ಔಟ್‍‍ಪುಟ್ ಅನ್ನು ರೂಟ್ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
@@ -1188,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"ಆಂತರಿಕ ಸಂಗ್ರಹಣೆ"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD ಕಾರ್ಡ್"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"USB ಸಂಗ್ರಹಣೆ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ಸಂಪಾದಿಸು"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ಡೇಟಾ ಬಳಕೆಯ ಎಚ್ಚರಿಕೆ"</string>
@@ -1450,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"ನೀವಿದನ್ನು ಆಫ್‌ ಮಾಡುವವರೆಗೆ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ಸಂಕುಚಿಸು"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"ಅಡಚಣೆಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ಸ್ಥಗಿತಕಾಲ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"ವಾರದ ರಾತ್ರಿಗಳು"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"ವಾರಾಂತ್ಯಗಳು"</string>
