@@ -148,6 +148,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-карта отсутствует."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим полета."</string>
+    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
+    <skip />
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
@@ -171,8 +173,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Заблокированный экран."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Настройки"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Обзор."</string>
-    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
-    <skip />
+    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"Подтвердить"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Пользователь <xliff:g id="USER">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Модуль Wi-Fi отключен."</string>
@@ -307,10 +308,8 @@
     <string name="description_direction_up" msgid="7169032478259485180">"Проведите вверх, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Проведите влево, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Никаких оповещений, даже от будильника."</string>
-    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
-    <skip />
-    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"Вибрация и звуки будут отключены. Вас могут побеспокоить только сигналы будильника, напоминания, уведомления о мероприятиях и звонки от выбранных абонентов."</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"Настроить"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Не беспокоить"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Только важные оповещения"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"Только будильник"</string>
@@ -346,12 +345,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Продолжить сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Начать заново"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Да, продолжить"</string>
-    <!-- no translation found for guest_notification_title (1585278533840603063) -->
-    <skip />
-    <!-- no translation found for guest_notification_text (7513706222848825467) -->
-    <skip />
-    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
-    <skip />
+    <string name="guest_notification_title" msgid="1585278533840603063">"Пользователь \"Гость\""</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"Удалите аккаунт гостя, чтобы стереть все приложения и данные."</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"УДАЛИТЬ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Добавить пользователя?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"После создания профиля его необходимо настроить.\n\nОбновлять приложения для всех аккаунтов может любой пользователь устройства."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Включен режим энергосбережения"</string>
@@ -403,6 +399,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Нет"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> назначено регулятором громкости"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Нажмите, чтобы восстановить приложение по умолчанию."</string>
-    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Вы вошли в профиль Android for Work"</string>
 </resources>

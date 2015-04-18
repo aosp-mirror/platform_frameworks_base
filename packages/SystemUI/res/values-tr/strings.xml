@@ -146,6 +146,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM kart yok."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Uçak modu."</string>
+    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
+    <skip />
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Pil yüzdesi: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistem ayarları."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Bildirimler."</string>
@@ -167,8 +169,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Kilit ekranı"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Ayarlar"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Genel Bakış."</string>
-    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
-    <skip />
+    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"Onayla"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Kullanıcı: <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Kablosuz kapatıldı."</string>
@@ -303,10 +304,8 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> için yukarı kaydırın."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> için sola kaydırın."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Kesinti yok. Uyarı bile yok."</string>
-    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
-    <skip />
-    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"Belirttiğiniz alarmlar, hatırlatıcılar, etkinlikler ve arayanlar hariç olmak üzere, sesler ve titreşimlerle rahatsız edilmezsiniz."</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"Özelleştir"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Kesinti yok"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Sadece öncelikli kesintiler"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"Yalnızca alarmlar"</string>
@@ -342,12 +341,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Oturumunuza devam etmek istiyor musunuz?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Baştan başla"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Evet, devam et"</string>
-    <!-- no translation found for guest_notification_title (1585278533840603063) -->
-    <skip />
-    <!-- no translation found for guest_notification_text (7513706222848825467) -->
-    <skip />
-    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
-    <skip />
+    <string name="guest_notification_title" msgid="1585278533840603063">"Misafir kullanıcı"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"Uygulamaları ve verileri silmek için misafiri kaldır"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"MİSAFİR KALDIRILSIN MI?"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Yeni kullanıcı eklensin mi?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yeni bir kullanıcı eklediğinizde, bu kişinin kendi alanını ayarlaması gerekir.\n\nHerhangi bir kullanıcı, diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Pil tasarrufu açık"</string>
@@ -399,6 +395,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Reddet"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ses denetimi iletişim kutusu olarak ayarlandı"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Orijinali geri yüklemek için dokunun."</string>
-    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"İş profilindesiniz"</string>
 </resources>

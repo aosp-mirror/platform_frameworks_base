@@ -146,6 +146,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"কোনো সিম নেই৷"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth টিথারিং৷"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"বিমান মোড৷"</string>
+    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
+    <skip />
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ ব্যাটারি রয়েছে৷"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"সিস্টেম সেটিংস৷"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"বিজ্ঞপ্তিগুলি৷"</string>
@@ -167,8 +169,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"লক স্ক্রীন।"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"সেটিংস"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"এক নজরে৷"</string>
-    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
-    <skip />
+    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"নিশ্চিত করুন"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ব্যবহারকারী <xliff:g id="USER">%s</xliff:g>৷"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"WiFi বন্ধ হয়েছে।"</string>
@@ -303,10 +304,8 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য উপরের দিকে স্লাইড করুন৷"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> এর জন্য বাম দিকে স্লাইড করুন৷"</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"কোনো ব্যাঘাত ছাড়াই। এমনকি অ্যালার্মও নয়।"</string>
-    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
-    <skip />
-    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"আপনার নির্দিষ্ট অ্যালার্ম, অনুস্মারক, ইভেন্ট, এবং কলারগুলি ব্যতীত আপনাকে শব্দ এবং কম্পনগুলির দ্বারা বিরক্ত করা হবে না৷"</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"কাস্টমাইজ করুন"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"কোনো বাধা নয়"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"শুধুমাত্র প্রাধান্য বাধাগুলি"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"শুধুমাত্র অ্যালার্মগুলি"</string>
@@ -342,12 +341,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"আপনি কি আপনার সেশনটি অবিরত রাখতে চান?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"আবার শুরু করুন"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"হ্যাঁ, অবিরত থাকুন"</string>
-    <!-- no translation found for guest_notification_title (1585278533840603063) -->
-    <skip />
-    <!-- no translation found for guest_notification_text (7513706222848825467) -->
-    <skip />
-    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
-    <skip />
+    <string name="guest_notification_title" msgid="1585278533840603063">"অতিথি ব্যবহারকারী"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"অ্যাপ্লিকেশানগুলি এবং ডেটা মুছে ফেলতে অতিথি সরান"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"অতিথি সরান"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট আপ করে নিতে হবে৷\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন৷"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ব্যাটারি সেভার চালু রয়েছে"</string>
@@ -399,6 +395,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"প্রত্যাখ্যান করুন"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> হল ভলিউম ডায়লগ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"আসলটি পুনঃস্থাপন করতে স্পর্শ করুন৷"</string>
-    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"আপনি কাজের প্রোফাইলে রয়েছেন"</string>
 </resources>

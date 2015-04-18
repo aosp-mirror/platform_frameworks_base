@@ -146,6 +146,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"沒有 SIM 卡。"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網路共用"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛行模式。"</string>
+    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
+    <skip />
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
@@ -169,8 +171,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"螢幕鎖定。"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"設定"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"總覽。"</string>
-    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
-    <skip />
+    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"確認"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"使用者：<xliff:g id="USER">%s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>。"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"WiFi 已關閉。"</string>
@@ -305,10 +306,8 @@
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"不干擾 (即使鬧鐘也不例外)。"</string>
-    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
-    <skip />
-    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"您不會受到聲音和振動干擾 (鬧鐘、提醒、活動和指定來電者例外)。"</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"自訂"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"不允許干擾"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"僅限優先干擾"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"僅允許鬧鐘"</string>
@@ -344,12 +343,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"您要繼續這個工作階段嗎？"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"重新開始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"是，請繼續"</string>
-    <!-- no translation found for guest_notification_title (1585278533840603063) -->
-    <skip />
-    <!-- no translation found for guest_notification_text (7513706222848825467) -->
-    <skip />
-    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
-    <skip />
+    <string name="guest_notification_title" msgid="1585278533840603063">"訪客使用者"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"移除訪客以刪除應用程式和資料"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"移除訪客"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"新增使用者？"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"新增的使用者需要自行設定個人空間。\n\n任何使用者皆可為其他所有使用者更新應用程式。"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"節約耗電量模式已啟用"</string>
@@ -401,6 +397,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒絕"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在是預設的音量控制對話方塊。"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸這裡即可恢復原始設定。"</string>
-    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"您目前在 Work 設定檔"</string>
 </resources>
