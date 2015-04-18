@@ -3356,8 +3356,15 @@
     <!-- Storage description for internal storage. [CHAR LIMIT=NONE] -->
     <string name="storage_internal">Internal storage</string>
 
-    <!-- Storage description for the SD card. [CHAR LIMIT=NONE] -->
+    <!-- Storage description for a generic SD card. [CHAR LIMIT=NONE] -->
     <string name="storage_sd_card">SD card</string>
+    <!-- Storage description for a SD card from a specific manufacturer. [CHAR LIMIT=NONE] -->
+    <string name="storage_sd_card_label"><xliff:g id="manufacturer" example="SanDisk">%s</xliff:g> SD card</string>
+
+    <!-- Storage description for a generic USB drive. [CHAR LIMIT=NONE] -->
+    <string name="storage_usb_drive">USB drive</string>
+    <!-- Storage description for a USB drive from a specific manufacturer. [CHAR LIMIT=NONE] -->
+    <string name="storage_usb_drive_label"><xliff:g id="manufacturer" example="Seagate">%s</xliff:g> USB drive</string>
 
     <!-- Storage description for USB storage. [CHAR LIMIT=NONE] -->
     <string name="storage_usb">USB storage</string>

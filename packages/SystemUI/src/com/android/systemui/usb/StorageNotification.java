@@ -107,8 +107,8 @@ public class StorageNotification extends SystemUI {
             case VolumeInfo.STATE_UNMOUNTED:
                 onVolumeUnmounted(vol);
                 break;
-            case VolumeInfo.STATE_MOUNTING:
-                onVolumeMounting(vol);
+            case VolumeInfo.STATE_CHECKING:
+                onVolumeChecking(vol);
                 break;
             case VolumeInfo.STATE_MOUNTED:
                 onVolumeMounted(vol);
@@ -116,14 +116,17 @@ public class StorageNotification extends SystemUI {
             case VolumeInfo.STATE_FORMATTING:
                 onVolumeFormatting(vol);
                 break;
-            case VolumeInfo.STATE_UNMOUNTING:
-                onVolumeUnmounting(vol);
+            case VolumeInfo.STATE_EJECTING:
+                onVolumeEjecting(vol);
                 break;
             case VolumeInfo.STATE_UNMOUNTABLE:
                 onVolumeUnmountable(vol);
                 break;
             case VolumeInfo.STATE_REMOVED:
                 onVolumeRemoved(vol);
+                break;
+            case VolumeInfo.STATE_BAD_REMOVAL:
+                onVolumeBadRemoval(vol);
                 break;
         }
     }
@@ -132,7 +135,7 @@ public class StorageNotification extends SystemUI {
         // Ignored
     }
 
-    private void onVolumeMounting(VolumeInfo vol) {
+    private void onVolumeChecking(VolumeInfo vol) {
         final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
         final CharSequence title = mContext.getString(
                 R.string.ext_media_checking_notification_title, disk.getDescription());
@@ -194,7 +197,7 @@ public class StorageNotification extends SystemUI {
         // Ignored
     }
 
-    private void onVolumeUnmounting(VolumeInfo vol) {
+    private void onVolumeEjecting(VolumeInfo vol) {
         final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
         final CharSequence title = mContext.getString(
                 R.string.ext_media_unmounting_notification_title, disk.getDescription());
@@ -238,6 +241,26 @@ public class StorageNotification extends SystemUI {
                 R.string.ext_media_nomedia_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
                 R.string.ext_media_nomedia_notification_message, disk.getDescription());
+
+        final Notification notif = buildNotificationBuilder(title, text)
+                .setSmallIcon(R.drawable.stat_notify_sdcard)
+                .setCategory(Notification.CATEGORY_ERROR)
+                .build();
+
+        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
+    }
+
+    private void onVolumeBadRemoval(VolumeInfo vol) {
+        if (!vol.isPrimary()) {
+            // Ignore non-primary media
+            return;
+        }
+
+        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
+        final CharSequence title = mContext.getString(
+                R.string.ext_media_badremoval_notification_title, disk.getDescription());
+        final CharSequence text = mContext.getString(
+                R.string.ext_media_badremoval_notification_message, disk.getDescription());
 
         final Notification notif = buildNotificationBuilder(title, text)
                 .setSmallIcon(R.drawable.stat_notify_sdcard)

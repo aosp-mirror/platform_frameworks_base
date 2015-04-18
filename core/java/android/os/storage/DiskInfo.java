@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.DebugUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -46,7 +47,6 @@ public class DiskInfo implements Parcelable {
     public final int flags;
     public long size;
     public String label;
-    public String[] volumeIds;
 
     public DiskInfo(String id, int flags) {
         this.id = Preconditions.checkNotNull(id);
@@ -58,7 +58,6 @@ public class DiskInfo implements Parcelable {
         flags = parcel.readInt();
         size = parcel.readLong();
         label = parcel.readString();
-        volumeIds = parcel.readStringArray();
     }
 
     public @NonNull String getId() {
@@ -66,11 +65,19 @@ public class DiskInfo implements Parcelable {
     }
 
     public String getDescription() {
-        // TODO: splice vendor label into these strings
+        final Resources res = Resources.getSystem();
         if ((flags & FLAG_SD) != 0) {
-            return Resources.getSystem().getString(com.android.internal.R.string.storage_sd_card);
+            if (TextUtils.isEmpty(label)) {
+                return res.getString(com.android.internal.R.string.storage_sd_card);
+            } else {
+                return res.getString(com.android.internal.R.string.storage_sd_card_label, label);
+            }
         } else if ((flags & FLAG_USB) != 0) {
-            return Resources.getSystem().getString(com.android.internal.R.string.storage_usb);
+            if (TextUtils.isEmpty(label)) {
+                return res.getString(com.android.internal.R.string.storage_usb_drive);
+            } else {
+                return res.getString(com.android.internal.R.string.storage_usb_drive_label, label);
+            }
         } else {
             return null;
         }
@@ -96,13 +103,11 @@ public class DiskInfo implements Parcelable {
     }
 
     public void dump(IndentingPrintWriter pw) {
-        pw.println("DiskInfo:");
+        pw.println("DiskInfo{" + id + "}:");
         pw.increaseIndent();
-        pw.printPair("id", id);
         pw.printPair("flags", DebugUtils.flagsToString(getClass(), "FLAG_", flags));
         pw.printPair("size", size);
         pw.printPair("label", label);
-        pw.printPair("volumeIds", volumeIds);
         pw.decreaseIndent();
         pw.println();
     }
@@ -156,6 +161,5 @@ public class DiskInfo implements Parcelable {
         parcel.writeInt(this.flags);
         parcel.writeLong(size);
         parcel.writeString(label);
-        parcel.writeStringArray(volumeIds);
     }
 }

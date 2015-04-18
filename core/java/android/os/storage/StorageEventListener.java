@@ -43,4 +43,7 @@ public class StorageEventListener {
 
     public void onVolumeMetadataChanged(VolumeInfo vol) {
     }
+
+    public void onDiskUnsupported(DiskInfo disk) {
+    }
 }

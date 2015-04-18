@@ -2214,6 +2214,9 @@
 
   <java-symbol type="string" name="storage_internal" />
   <java-symbol type="string" name="storage_sd_card" />
+  <java-symbol type="string" name="storage_sd_card_label" />
+  <java-symbol type="string" name="storage_usb_drive" />
+  <java-symbol type="string" name="storage_usb_drive_label" />
   <java-symbol type="string" name="storage_usb" />
 
   <!-- Floating toolbar -->
