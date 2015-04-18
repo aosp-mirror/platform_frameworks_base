@@ -782,7 +782,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            Bundle bundle = telephony.getCellLocation();
+            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName());
             if (bundle.isEmpty()) return null;
             CellLocation cl = CellLocation.newFromBundle(bundle);
             if (cl.isEmpty())
@@ -2729,7 +2729,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getAllCellInfo();
+            return telephony.getAllCellInfo(mContext.getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {

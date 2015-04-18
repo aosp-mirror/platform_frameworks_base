@@ -343,7 +343,7 @@ interface ITelephony {
      */
     boolean isDataConnectivityPossible();
 
-    Bundle getCellLocation();
+    Bundle getCellLocation(String callingPkg);
 
     /**
      * Returns the neighboring cell information of the device.
@@ -507,7 +507,7 @@ interface ITelephony {
     /**
      * Returns the all observed cell information of the device.
      */
-    List<CellInfo> getAllCellInfo();
+    List<CellInfo> getAllCellInfo(String callingPkg);
 
     /**
      * Sets minimum time in milli-seconds between onCellInfoChanged
