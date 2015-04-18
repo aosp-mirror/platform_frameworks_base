@@ -412,6 +412,16 @@ public class UserManager {
     public static final String DISALLOW_SAFE_BOOT = "no_safe_boot";
 
     /**
+     * Specifies if a user is not allowed to record audio. This restriction is always enabled for
+     * background users. The default value is <code>false</code>.
+     *
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_RECORD_AUDIO = "no_record_audio";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *
@@ -688,9 +698,11 @@ public class UserManager {
      */
     @Deprecated
     public void setUserRestriction(String key, boolean value, UserHandle userHandle) {
-        Bundle bundle = getUserRestrictions(userHandle);
-        bundle.putBoolean(key, value);
-        setUserRestrictions(bundle, userHandle);
+        try {
+            mService.setUserRestriction(key, value, userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set user restriction", re);
+        }
     }
 
     /**
