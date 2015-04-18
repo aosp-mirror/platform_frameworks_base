@@ -466,9 +466,9 @@ public class UserManager {
     }
 
     /**
-     * Returns the user handle for the user that the calling process is running on.
+     * Returns the user handle for the user that this process is running under.
      *
-     * @return the user handle of the user making this call.
+     * @return the user handle of this process.
      * @hide
      */
     public int getUserHandle() {
@@ -502,6 +502,17 @@ public class UserManager {
     public boolean isUserAGoat() {
         return mContext.getPackageManager()
                 .isPackageAvailable("com.coffeestainstudios.goatsimulator");
+    }
+
+    /**
+     * Used to check if this process is running under the system user. The system user
+     * is the initial user that is implicitly created on first boot and hosts most of the
+     * system services.
+     *
+     * @return whether this process is running under the system user.
+     */
+    public boolean isSystemUser() {
+        return UserHandle.myUserId() == UserHandle.USER_OWNER;
     }
 
     /**
