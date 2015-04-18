@@ -361,7 +361,7 @@ public class PackageHelper {
         VolumeInfo bestCandidate = null;
         long bestCandidateAvailBytes = Long.MIN_VALUE;
         for (VolumeInfo vol : storageManager.getVolumes()) {
-            if (vol.type == VolumeInfo.TYPE_PRIVATE && vol.state == VolumeInfo.STATE_MOUNTED) {
+            if (vol.type == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
                 final long availBytes = storageManager.getStorageBytesUntilLow(new File(vol.path));
                 if (availBytes >= sizeBytes) {
                     allCandidates.add(vol.fsUuid);

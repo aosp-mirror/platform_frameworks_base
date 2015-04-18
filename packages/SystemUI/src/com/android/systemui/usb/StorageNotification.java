@@ -60,7 +60,7 @@ public class StorageNotification extends SystemUI {
             // Avoid kicking notifications when getting early metadata before
             // mounted. If already mounted, we're being kicked because of a
             // nickname or init'ed change.
-            if (vol.getState() == VolumeInfo.STATE_MOUNTED) {
+            if (vol.isMountedReadable()) {
                 onVolumeStateChangedInternal(vol, vol.getState(), vol.getState());
             }
         }
@@ -111,6 +111,7 @@ public class StorageNotification extends SystemUI {
                 onVolumeChecking(vol);
                 break;
             case VolumeInfo.STATE_MOUNTED:
+            case VolumeInfo.STATE_MOUNTED_READ_ONLY:
                 onVolumeMounted(vol);
                 break;
             case VolumeInfo.STATE_FORMATTING:
@@ -136,7 +137,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private void onVolumeChecking(VolumeInfo vol) {
-        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
+        final DiskInfo disk = vol.getDisk();
         final CharSequence title = mContext.getString(
                 R.string.ext_media_checking_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
@@ -156,7 +157,7 @@ public class StorageNotification extends SystemUI {
         // Don't annoy when user dismissed in past
         if (vol.isSnoozed()) return;
 
-        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
+        final DiskInfo disk = vol.getDisk();
         final Notification notif;
         if (disk.isAdoptable() && !vol.isInited()) {
             final CharSequence title = disk.getDescription();
@@ -198,7 +199,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private void onVolumeEjecting(VolumeInfo vol) {
-        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
+        final DiskInfo disk = vol.getDisk();
         final CharSequence title = mContext.getString(
                 R.string.ext_media_unmounting_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
@@ -215,7 +216,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private void onVolumeUnmountable(VolumeInfo vol) {
-        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
+        final DiskInfo disk = vol.getDisk();
         final CharSequence title = mContext.getString(
                 R.string.ext_media_unmountable_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
@@ -236,7 +237,7 @@ public class StorageNotification extends SystemUI {
             return;
         }
 
-        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
+        final DiskInfo disk = vol.getDisk();
         final CharSequence title = mContext.getString(
                 R.string.ext_media_nomedia_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
@@ -256,7 +257,7 @@ public class StorageNotification extends SystemUI {
             return;
         }
 
-        final DiskInfo disk = mStorageManager.findDiskById(vol.getDiskId());
+        final DiskInfo disk = vol.getDisk();
         final CharSequence title = mContext.getString(
                 R.string.ext_media_badremoval_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
