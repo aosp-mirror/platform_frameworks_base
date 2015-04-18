@@ -98,6 +98,13 @@ public interface IMountServiceListener extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_onDiskUnsupported: {
+                    data.enforceInterface(DESCRIPTOR);
+                    final DiskInfo disk = (DiskInfo) data.readParcelable(null);
+                    onDiskUnsupported(disk);
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -198,6 +205,22 @@ public interface IMountServiceListener extends IInterface {
                     _data.recycle();
                 }
             }
+
+            @Override
+            public void onDiskUnsupported(DiskInfo disk) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeParcelable(disk, 0);
+                    mRemote.transact(Stub.TRANSACTION_onDiskUnsupported, _data, _reply,
+                            android.os.IBinder.FLAG_ONEWAY);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
         }
 
         static final int TRANSACTION_onUsbMassStorageConnectionChanged = (IBinder.FIRST_CALL_TRANSACTION + 0);
@@ -206,6 +229,7 @@ public interface IMountServiceListener extends IInterface {
 
         static final int TRANSACTION_onVolumeStateChanged = (IBinder.FIRST_CALL_TRANSACTION + 2);
         static final int TRANSACTION_onVolumeMetadataChanged = (IBinder.FIRST_CALL_TRANSACTION + 3);
+        static final int TRANSACTION_onDiskUnsupported = (IBinder.FIRST_CALL_TRANSACTION + 4);
     }
 
     /**
@@ -230,4 +254,6 @@ public interface IMountServiceListener extends IInterface {
             throws RemoteException;
 
     public void onVolumeMetadataChanged(VolumeInfo vol) throws RemoteException;
+
+    public void onDiskUnsupported(DiskInfo disk) throws RemoteException;
 }

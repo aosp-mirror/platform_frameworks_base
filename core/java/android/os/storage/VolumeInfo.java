@@ -63,15 +63,17 @@ public class VolumeInfo implements Parcelable {
     public static final int TYPE_OBB = 4;
 
     public static final int STATE_UNMOUNTED = 0;
-    public static final int STATE_MOUNTING = 1;
+    public static final int STATE_CHECKING = 1;
     public static final int STATE_MOUNTED = 2;
-    public static final int STATE_FORMATTING = 3;
-    public static final int STATE_UNMOUNTING = 4;
-    public static final int STATE_UNMOUNTABLE = 5;
-    public static final int STATE_REMOVED = 6;
+    public static final int STATE_MOUNTED_READ_ONLY = 3;
+    public static final int STATE_FORMATTING = 4;
+    public static final int STATE_EJECTING = 5;
+    public static final int STATE_UNMOUNTABLE = 6;
+    public static final int STATE_REMOVED = 7;
+    public static final int STATE_BAD_REMOVAL = 8;
 
-    public static final int FLAG_PRIMARY = 1 << 0;
-    public static final int FLAG_VISIBLE = 1 << 1;
+    public static final int MOUNT_FLAG_PRIMARY = 1 << 0;
+    public static final int MOUNT_FLAG_VISIBLE = 1 << 1;
 
     public static final int USER_FLAG_INITED = 1 << 0;
     public static final int USER_FLAG_SNOOZED = 1 << 1;
@@ -97,10 +99,10 @@ public class VolumeInfo implements Parcelable {
 
     static {
         sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTED, Environment.MEDIA_UNMOUNTED);
-        sStateToEnvironment.put(VolumeInfo.STATE_MOUNTING, Environment.MEDIA_CHECKING);
+        sStateToEnvironment.put(VolumeInfo.STATE_CHECKING, Environment.MEDIA_CHECKING);
         sStateToEnvironment.put(VolumeInfo.STATE_MOUNTED, Environment.MEDIA_MOUNTED);
         sStateToEnvironment.put(VolumeInfo.STATE_FORMATTING, Environment.MEDIA_UNMOUNTED);
-        sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTING, Environment.MEDIA_EJECTING);
+        sStateToEnvironment.put(VolumeInfo.STATE_EJECTING, Environment.MEDIA_EJECTING);
         sStateToEnvironment.put(VolumeInfo.STATE_UNMOUNTABLE, Environment.MEDIA_UNMOUNTABLE);
         sStateToEnvironment.put(VolumeInfo.STATE_REMOVED, Environment.MEDIA_REMOVED);
 
@@ -115,8 +117,9 @@ public class VolumeInfo implements Parcelable {
     /** vold state */
     public final String id;
     public final int type;
-    public int flags = 0;
-    public int userId = -1;
+    public final String diskId;
+    public int mountFlags = 0;
+    public int mountUserId = -1;
     public int state = STATE_UNMOUNTED;
     public String fsType;
     public String fsUuid;
@@ -125,28 +128,28 @@ public class VolumeInfo implements Parcelable {
 
     /** Framework state */
     public final int mtpIndex;
-    public String diskId;
     public String nickname;
     public int userFlags = 0;
 
-    public VolumeInfo(String id, int type, int mtpIndex) {
+    public VolumeInfo(String id, int type, String diskId, int mtpIndex) {
         this.id = Preconditions.checkNotNull(id);
         this.type = type;
+        this.diskId = diskId;
         this.mtpIndex = mtpIndex;
     }
 
     public VolumeInfo(Parcel parcel) {
         id = parcel.readString();
         type = parcel.readInt();
-        flags = parcel.readInt();
-        userId = parcel.readInt();
+        diskId = parcel.readString();
+        mountFlags = parcel.readInt();
+        mountUserId = parcel.readInt();
         state = parcel.readInt();
         fsType = parcel.readString();
         fsUuid = parcel.readString();
         fsLabel = parcel.readString();
         path = parcel.readString();
         mtpIndex = parcel.readInt();
-        diskId = parcel.readString();
         nickname = parcel.readString();
         userFlags = parcel.readInt();
     }
@@ -209,11 +212,11 @@ public class VolumeInfo implements Parcelable {
     }
 
     public boolean isPrimary() {
-        return (flags & FLAG_PRIMARY) != 0;
+        return (mountFlags & MOUNT_FLAG_PRIMARY) != 0;
     }
 
     public boolean isVisible() {
-        return (flags & FLAG_VISIBLE) != 0;
+        return (mountFlags & MOUNT_FLAG_VISIBLE) != 0;
     }
 
     public boolean isInited() {
@@ -225,7 +228,7 @@ public class VolumeInfo implements Parcelable {
     }
 
     public boolean isVisibleToUser(int userId) {
-        if (type == TYPE_PUBLIC && userId == this.userId) {
+        if (type == TYPE_PUBLIC && userId == this.mountUserId) {
             return isVisible();
         } else if (type == TYPE_EMULATED) {
             return isVisible();
@@ -241,7 +244,7 @@ public class VolumeInfo implements Parcelable {
     public File getPathForUser(int userId) {
         if (path == null) {
             return null;
-        } else if (type == TYPE_PUBLIC && userId == this.userId) {
+        } else if (type == TYPE_PUBLIC && userId == this.mountUserId) {
             return new File(path);
         } else if (type == TYPE_EMULATED) {
             return new File(path, Integer.toString(userId));
@@ -333,12 +336,12 @@ public class VolumeInfo implements Parcelable {
     }
 
     public void dump(IndentingPrintWriter pw) {
-        pw.println("VolumeInfo:");
+        pw.println("VolumeInfo{" + id + "}:");
         pw.increaseIndent();
-        pw.printPair("id", id);
         pw.printPair("type", DebugUtils.valueToString(getClass(), "TYPE_", type));
-        pw.printPair("flags", DebugUtils.flagsToString(getClass(), "FLAG_", flags));
-        pw.printPair("userId", userId);
+        pw.printPair("diskId", diskId);
+        pw.printPair("mountFlags", DebugUtils.flagsToString(getClass(), "MOUNT_FLAG_", mountFlags));
+        pw.printPair("mountUserId", mountUserId);
         pw.printPair("state", DebugUtils.valueToString(getClass(), "STATE_", state));
         pw.println();
         pw.printPair("fsType", fsType);
@@ -347,7 +350,6 @@ public class VolumeInfo implements Parcelable {
         pw.println();
         pw.printPair("path", path);
         pw.printPair("mtpIndex", mtpIndex);
-        pw.printPair("diskId", diskId);
         pw.printPair("nickname", nickname);
         pw.printPair("userFlags", DebugUtils.flagsToString(getClass(), "USER_FLAG_", userFlags));
         pw.decreaseIndent();
@@ -401,15 +403,15 @@ public class VolumeInfo implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(id);
         parcel.writeInt(type);
-        parcel.writeInt(this.flags);
-        parcel.writeInt(userId);
+        parcel.writeString(diskId);
+        parcel.writeInt(mountFlags);
+        parcel.writeInt(mountUserId);
         parcel.writeInt(state);
         parcel.writeString(fsType);
         parcel.writeString(fsUuid);
         parcel.writeString(fsLabel);
         parcel.writeString(path);
         parcel.writeInt(mtpIndex);
-        parcel.writeString(diskId);
         parcel.writeString(nickname);
         parcel.writeInt(userFlags);
     }

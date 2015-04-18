@@ -1534,15 +1534,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (vol.type == VolumeInfo.TYPE_PRIVATE) {
                 if (vol.state == VolumeInfo.STATE_MOUNTED) {
                     loadPrivatePackages(vol);
-                } else if (vol.state == VolumeInfo.STATE_UNMOUNTING) {
+                } else if (vol.state == VolumeInfo.STATE_EJECTING) {
                     unloadPrivatePackages(vol);
                 }
             }
 
-            if (vol.isPrimary() && vol.type == VolumeInfo.TYPE_PUBLIC) {
+            if (vol.type == VolumeInfo.TYPE_PUBLIC && vol.isPrimary()) {
                 if (vol.state == VolumeInfo.STATE_MOUNTED) {
                     updateExternalMediaStatus(true, false);
-                } else if (vol.state == VolumeInfo.STATE_UNMOUNTING) {
+                } else if (vol.state == VolumeInfo.STATE_EJECTING) {
                     updateExternalMediaStatus(false, false);
                 }
             }

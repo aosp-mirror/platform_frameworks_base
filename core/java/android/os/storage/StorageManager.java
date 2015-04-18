@@ -87,6 +87,7 @@ public class StorageManager {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
         private static final int MSG_VOLUME_METADATA_CHANGED = 3;
+        private static final int MSG_DISK_UNSUPPORTED = 4;
 
         final StorageEventListener mCallback;
         final Handler mHandler;
@@ -111,6 +112,10 @@ public class StorageManager {
                     return true;
                 case MSG_VOLUME_METADATA_CHANGED:
                     mCallback.onVolumeMetadataChanged((VolumeInfo) args.arg1);
+                    args.recycle();
+                    return true;
+                case MSG_DISK_UNSUPPORTED:
+                    mCallback.onDiskUnsupported((DiskInfo) args.arg1);
                     args.recycle();
                     return true;
             }
@@ -146,6 +151,13 @@ public class StorageManager {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = vol;
             mHandler.obtainMessage(MSG_VOLUME_METADATA_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void onDiskUnsupported(DiskInfo disk) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = disk;
+            mHandler.obtainMessage(MSG_DISK_UNSUPPORTED, args).sendToTarget();
         }
     }
 

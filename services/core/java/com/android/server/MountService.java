@@ -103,6 +103,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -215,8 +216,7 @@ class MountService extends IMountService.Stub
         public static final int DISK_CREATED = 640;
         public static final int DISK_SIZE_CHANGED = 641;
         public static final int DISK_LABEL_CHANGED = 642;
-        public static final int DISK_VOLUME_CREATED = 643;
-        public static final int DISK_VOLUME_DESTROYED = 644;
+        public static final int DISK_UNSUPPORTED = 643;
         public static final int DISK_DESTROYED = 649;
 
         public static final int VOLUME_CREATED = 650;
@@ -583,7 +583,8 @@ class MountService extends IMountService.Stub
                 case H_VOLUME_MOUNT: {
                     final VolumeInfo vol = (VolumeInfo) msg.obj;
                     try {
-                        mConnector.execute("volume", "mount", vol.id, vol.flags, vol.userId);
+                        mConnector.execute("volume", "mount", vol.id, vol.mountFlags,
+                                vol.mountUserId);
                     } catch (NativeDaemonConnectorException ignored) {
                     }
                     break;
@@ -658,7 +659,7 @@ class MountService extends IMountService.Stub
 
             // Create a stub volume that represents internal storage
             final VolumeInfo internal = new VolumeInfo(VolumeInfo.ID_PRIVATE_INTERNAL,
-                    VolumeInfo.TYPE_PRIVATE, 0);
+                    VolumeInfo.TYPE_PRIVATE, null, 0);
             internal.state = VolumeInfo.STATE_MOUNTED;
             internal.path = Environment.getDataDirectory().getAbsolutePath();
             mVolumes.put(internal.id, internal);
@@ -826,34 +827,15 @@ class MountService extends IMountService.Stub
                 if (disk != null) {
                     disk.label = cooked[2];
                 }
-                break;
-            }
-            case VoldResponseCode.DISK_VOLUME_CREATED: {
-                if (cooked.length != 3) break;
-                final String diskId = cooked[1];
-                final String volId = cooked[2];
-                final DiskInfo disk = mDisks.get(diskId);
-                if (disk != null) {
-                    disk.volumeIds = ArrayUtils.appendElement(String.class, disk.volumeIds, volId);
-                }
-                final VolumeInfo vol = mVolumes.get(volId);
-                if (vol != null) {
-                    vol.diskId = diskId;
+                if (disk.label != null) {
+                    disk.label = disk.label.trim();
                 }
                 break;
             }
-            case VoldResponseCode.DISK_VOLUME_DESTROYED: {
-                if (cooked.length != 3) break;
-                final String diskId = cooked[1];
-                final String volId = cooked[2];
-                final DiskInfo disk = mDisks.get(diskId);
-                if (disk != null) {
-                    disk.volumeIds = ArrayUtils.removeElement(String.class, disk.volumeIds, volId);
-                }
-                final VolumeInfo vol = mVolumes.get(volId);
-                if (vol != null) {
-                    vol.diskId = null;
-                }
+            case VoldResponseCode.DISK_UNSUPPORTED: {
+                if (cooked.length != 2) break;
+                final DiskInfo disk = mDisks.get(cooked[1]);
+                mCallbacks.notifyDiskUnsupported(disk);
                 break;
             }
             case VoldResponseCode.DISK_DESTROYED: {
@@ -863,11 +845,11 @@ class MountService extends IMountService.Stub
             }
 
             case VoldResponseCode.VOLUME_CREATED: {
-                if (cooked.length != 3) break;
                 final String id = cooked[1];
                 final int type = Integer.parseInt(cooked[2]);
+                final String diskId = (cooked.length == 4) ? cooked[3] : null;
                 final int mtpIndex = allocateMtpIndex(id);
-                final VolumeInfo vol = new VolumeInfo(id, type, mtpIndex);
+                final VolumeInfo vol = new VolumeInfo(id, type, diskId, mtpIndex);
                 mVolumes.put(id, vol);
                 onVolumeCreatedLocked(vol);
                 break;
@@ -942,16 +924,24 @@ class MountService extends IMountService.Stub
                 StorageManager.PROP_PRIMARY_PHYSICAL, false);
         // TODO: enable switching to another emulated primary
         if (VolumeInfo.ID_EMULATED_INTERNAL.equals(vol.id) && !primaryPhysical) {
-            vol.flags |= VolumeInfo.FLAG_PRIMARY;
-            vol.flags |= VolumeInfo.FLAG_VISIBLE;
+            vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
+            vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
 
         } else if (vol.type == VolumeInfo.TYPE_PUBLIC) {
             if (primaryPhysical) {
-                vol.flags |= VolumeInfo.FLAG_PRIMARY;
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
             }
-            vol.flags |= VolumeInfo.FLAG_VISIBLE;
-            vol.userId = UserHandle.USER_OWNER;
+
+            // Adoptable public disks are visible to apps, since they meet
+            // public API requirement of being in a stable location.
+            final DiskInfo disk = mDisks.get(vol.getDiskId());
+            if (disk != null && disk.isAdoptable()) {
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
+            }
+
+            vol.mountUserId = UserHandle.USER_OWNER;
             mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
 
         } else if (vol.type == VolumeInfo.TYPE_PRIVATE) {
@@ -983,7 +973,7 @@ class MountService extends IMountService.Stub
             }
         }
 
-        if (vol.type == VolumeInfo.TYPE_PUBLIC && vol.state == VolumeInfo.STATE_UNMOUNTING) {
+        if (vol.type == VolumeInfo.TYPE_PUBLIC && vol.state == VolumeInfo.STATE_EJECTING) {
             // TODO: this should eventually be handled by new ObbVolume state changes
             /*
              * Some OBBs might have been unmounted when this volume was
@@ -1221,7 +1211,7 @@ class MountService extends IMountService.Stub
             enforceUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA);
         }
         try {
-            mConnector.execute("volume", "mount", vol.id, vol.flags, vol.userId);
+            mConnector.execute("volume", "mount", vol.id, vol.mountFlags, vol.mountUserId);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -2633,6 +2623,7 @@ class MountService extends IMountService.Stub
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
         private static final int MSG_VOLUME_METADATA_CHANGED = 3;
+        private static final int MSG_DISK_UNSUPPORTED = 4;
 
         private final RemoteCallbackList<IMountServiceListener>
                 mCallbacks = new RemoteCallbackList<>();
@@ -2680,6 +2671,10 @@ class MountService extends IMountService.Stub
                     callback.onVolumeMetadataChanged((VolumeInfo) args.arg1);
                     break;
                 }
+                case MSG_DISK_UNSUPPORTED: {
+                    callback.onDiskUnsupported((DiskInfo) args.arg1);
+                    break;
+                }
             }
         }
 
@@ -2703,6 +2698,12 @@ class MountService extends IMountService.Stub
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = vol;
             obtainMessage(MSG_VOLUME_METADATA_CHANGED, args).sendToTarget();
+        }
+
+        private void notifyDiskUnsupported(DiskInfo disk) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = disk;
+            obtainMessage(MSG_DISK_UNSUPPORTED, args).sendToTarget();
         }
     }
 
@@ -2757,6 +2758,7 @@ class MountService extends IMountService.Stub
             pw.increaseIndent();
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
+                if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.id)) continue;
                 vol.dump(pw);
             }
             pw.decreaseIndent();
