@@ -17,6 +17,8 @@
 package com.android.server.policy;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
@@ -251,6 +253,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowManagerFuncs mWindowManagerFuncs;
     WindowManagerInternal mWindowManagerInternal;
     PowerManager mPowerManager;
+    ActivityManagerInternal mActivityManagerInternal;
     DreamManagerInternal mDreamManagerInternal;
     IStatusBarService mStatusBarService;
     boolean mPreloadedRecentApps;
@@ -492,6 +495,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mShowingLockscreen;
     boolean mShowingDream;
     boolean mDreamingLockscreen;
+    boolean mDreamingSleepTokenNeeded;
+    SleepToken mDreamingSleepToken;
     boolean mKeyguardSecure;
     boolean mKeyguardSecureIncludingHidden;
     volatile boolean mKeyguardOccluded;
@@ -598,6 +603,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK = 12;
     private static final int MSG_POWER_DELAYED_PRESS = 13;
     private static final int MSG_POWER_LONG_PRESS = 14;
+    private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 15;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -645,6 +651,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_POWER_LONG_PRESS:
                     powerLongPress();
+                    break;
+                case MSG_UPDATE_DREAMING_SLEEP_TOKEN:
+                    updateDreamingSleepToken(msg.arg1 != 0);
                     break;
             }
         }
@@ -1219,6 +1228,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
 
         // Init display burn-in protection
@@ -4235,6 +4245,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // while the dream is showing.
         if (!mShowingDream) {
             mDreamingLockscreen = mShowingLockscreen;
+            if (mDreamingSleepTokenNeeded) {
+                mDreamingSleepTokenNeeded = false;
+                mHandler.obtainMessage(MSG_UPDATE_DREAMING_SLEEP_TOKEN, 0, 1).sendToTarget();
+            }
+        } else {
+            if (!mDreamingSleepTokenNeeded) {
+                mDreamingSleepTokenNeeded = true;
+                mHandler.obtainMessage(MSG_UPDATE_DREAMING_SLEEP_TOKEN, 1, 1).sendToTarget();
+            }
         }
 
         if (mStatusBar != null) {
@@ -5847,6 +5866,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void updateDreamingSleepToken(boolean acquire) {
+        if (acquire) {
+            if (mDreamingSleepToken == null) {
+                mDreamingSleepToken = mActivityManagerInternal.acquireSleepToken("Dream");
+            }
+        } else {
+            if (mDreamingSleepToken != null) {
+                mDreamingSleepToken.release();
+            }
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void enableScreenAfterBoot() {
@@ -6483,7 +6514,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mStatusBarLayer="); pw.println(mStatusBarLayer);
         pw.print(prefix); pw.print("mShowingLockscreen="); pw.print(mShowingLockscreen);
                 pw.print(" mShowingDream="); pw.print(mShowingDream);
-                pw.print(" mDreamingLockscreen="); pw.println(mDreamingLockscreen);
+                pw.print(" mDreamingLockscreen="); pw.print(mDreamingLockscreen);
+                pw.print(" mDreamingSleepToken="); pw.println(mDreamingSleepToken);
         if (mLastInputMethodWindow != null) {
             pw.print(prefix); pw.print("mLastInputMethodWindow=");
                     pw.println(mLastInputMethodWindow);

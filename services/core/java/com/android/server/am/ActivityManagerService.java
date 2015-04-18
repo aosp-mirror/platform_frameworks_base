@@ -110,6 +110,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
@@ -1008,6 +1009,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      * State of external calls telling us if the device is awake or asleep.
      */
     private int mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
+
+    /**
+     * A list of tokens that cause the top activity to be put to sleep.
+     * They are used by components that may hide and block interaction with underlying
+     * activities.
+     */
+    final ArrayList<SleepToken> mSleepTokens = new ArrayList<SleepToken>();
 
     static final int LOCK_SCREEN_HIDDEN = 0;
     static final int LOCK_SCREEN_LEAVING = 1;
@@ -9810,15 +9818,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             return false;
         }
 
+        // TODO: Transform the lock screen state into a sleep token instead.
         switch (mWakefulness) {
             case PowerManagerInternal.WAKEFULNESS_AWAKE:
             case PowerManagerInternal.WAKEFULNESS_DREAMING:
-                // If we're interactive but applications are already paused then defer
-                // resuming them until the lock screen is hidden.
-                return mSleeping && mLockScreenShown != LOCK_SCREEN_HIDDEN;
             case PowerManagerInternal.WAKEFULNESS_DOZING:
-                // If we're dozing then pause applications whenever the lock screen is shown.
-                return mLockScreenShown != LOCK_SCREEN_HIDDEN;
+                // Pause applications whenever the lock screen is shown or any sleep
+                // tokens have been acquired.
+                return (mLockScreenShown != LOCK_SCREEN_HIDDEN || !mSleepTokens.isEmpty());
             case PowerManagerInternal.WAKEFULNESS_ASLEEP:
             default:
                 // If we're asleep then pause applications unconditionally.
@@ -12947,6 +12954,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (dumpPackage == null) {
             pw.println("  mWakefulness="
                     + PowerManagerInternal.wakefulnessToString(mWakefulness));
+            pw.println("  mSleepTokens=" + mSleepTokens);
             pw.println("  mSleeping=" + mSleeping + " mLockScreenShown="
                     + lockScreenShownToString());
             pw.println("  mShuttingDown=" + mShuttingDown + " mTestPssMode=" + mTestPssMode);
@@ -19719,6 +19727,42 @@ public final class ActivityManagerService extends ActivityManagerNative
                 String processName, String abiOverride, int uid, Runnable crashHandler) {
             return ActivityManagerService.this.startIsolatedProcess(entryPoint, entryPointArgs,
                     processName, abiOverride, uid, crashHandler);
+        }
+
+        @Override
+        public SleepToken acquireSleepToken(String tag) {
+            Preconditions.checkNotNull(tag);
+
+            synchronized (ActivityManagerService.this) {
+                SleepTokenImpl token = new SleepTokenImpl(tag);
+                mSleepTokens.add(token);
+                updateSleepIfNeededLocked();
+                return token;
+            }
+        }
+    }
+
+    private final class SleepTokenImpl extends SleepToken {
+        private final String mTag;
+        private final long mAcquireTime;
+
+        public SleepTokenImpl(String tag) {
+            mTag = tag;
+            mAcquireTime = SystemClock.uptimeMillis();
+        }
+
+        @Override
+        public void release() {
+            synchronized (ActivityManagerService.this) {
+                if (mSleepTokens.remove(this)) {
+                    updateSleepIfNeededLocked();
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "{\"" + mTag + "\", acquire at " + TimeUtils.formatUptime(mAcquireTime) + "}";
         }
     }
 
