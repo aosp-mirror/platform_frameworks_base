@@ -2571,10 +2571,11 @@ public class TelephonyManager {
      *               LISTEN_ flags.
      */
     public void listen(PhoneStateListener listener, int events) {
-        String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
+        if (mContext == null) return;
         try {
             Boolean notifyNow = (getITelephony() != null);
-            sRegistry.listenForSubscriber(listener.mSubId, pkgForDebug, listener.callback, events, notifyNow);
+            sRegistry.listenForSubscriber(listener.mSubId, mContext.getOpPackageName(),
+                    listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
         } catch (NullPointerException ex) {
