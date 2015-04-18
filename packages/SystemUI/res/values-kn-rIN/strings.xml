@@ -146,6 +146,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ಯಾವುದೇ ಸಿಮ್‌ ಇಲ್ಲ."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ಬ್ಲೂಟೂತ್‌‌ ಟೆಥರಿಂಗ್."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ಏರೋಪ್ಲೇನ್‌ ಮೋಡ್‌"</string>
+    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
+    <skip />
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ಬ್ಯಾಟರಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರತಿಶತ."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ಅಧಿಸೂಚನೆಗಳು."</string>
@@ -167,8 +169,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ಲಾಕ್‌ ಪರದೆ."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ಸಮಗ್ರ ನೋಟ."</string>
-    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
-    <skip />
+    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"ದೃಢೀಕರಿಸು"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ಬಳಕೆದಾರ <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"ವೈಫೈ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -303,10 +304,8 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಮೇಲಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ಗಾಗಿ ಎಡಕ್ಕೆ ಸ್ಲೈಡ್ ಮಾಡಿ."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"ಅಲಾರಂಗಳನ್ನು ಸೇರಿದಂತೆ ಯಾವುದೇ ಅಡಚಣೆಗಳಿಲ್ಲ."</string>
-    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
-    <skip />
-    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"ಅಲಾರಮ್‌ಗಳು, ಜ್ಞಾಪನೆಗಳು, ಈವೆಂಟ್‌ಗಳು ಮತ್ತು ನೀವು ಸೂಚಿಸುವ ಕರೆದಾರರನ್ನು ಹೊರತುಪಡಿಸಿ, ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳಿಂದ ನಿಮಗೆ ತೊಂದರೆ ಆಗುವುದಿಲ್ಲ."</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"ಕಸ್ಟಮೈಸ್ ಮಾಡು"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"ಯಾವುದೇ ಅಡಚಣೆಗಳಿಲ್ಲ"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"ಆದ್ಯತೆಯ ಅಡಚಣೆಗಳು ಮಾತ್ರ"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
@@ -342,12 +341,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"ನಿಮ್ಮ ಸೆಷನ್‌ ಮುಂದುವರಿಸಲು ಇಚ್ಚಿಸುವಿರಾ?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"ಹೌದು, ಮುಂದುವರಿ"</string>
-    <!-- no translation found for guest_notification_title (1585278533840603063) -->
-    <skip />
-    <!-- no translation found for guest_notification_text (7513706222848825467) -->
-    <skip />
-    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
-    <skip />
+    <string name="guest_notification_title" msgid="1585278533840603063">"ಅತಿಥಿ ಬಳಕೆದಾರ"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲು ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"ಅತಿಥಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸುವುದೇ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸ್ಥಾಪಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನವೀಕರಿಸಬಹುದು."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ಬ್ಯಾಟರಿ ರಕ್ಷಕ ಆನ್ ಆಗಿದೆ"</string>
@@ -399,6 +395,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ನಿರಾಕರಿಸು"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ವಾಲ್ಯೂಮ್ ಸಂವಾದವಾಗಿದೆ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ಮೂಲ ಮರುಸ್ಥಾಪಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
-    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"ನೀವು ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿರುವಿರಿ"</string>
 </resources>

@@ -146,6 +146,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​ប៊្លូធូស។"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ពេលជិះ​យន្តហោះ"</string>
+    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
+    <skip />
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ថ្ម <xliff:g id="NUMBER">%d</xliff:g> ភាគរយ។"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ការ​កំណត់​ប្រព័ន្ធ​។"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ការ​ជូន​ដំណឹង។"</string>
@@ -167,8 +169,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ចាក់​សោ​អេក្រង់។"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ការកំណត់"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ទិដ្ឋភាព​។"</string>
-    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
-    <skip />
+    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"បញ្ជាក់"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"អ្នក​ប្រើ <xliff:g id="USER">%s</xliff:g> ។"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"បាន​បិទ​វ៉ាយហ្វាយ។"</string>
@@ -303,10 +304,8 @@
     <string name="description_direction_up" msgid="7169032478259485180">"រុញ​ឡើង​លើ​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"រុញ​ទៅ​ឆ្វេង​ដើម្បី <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ។"</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"គ្មាន​ការ​ផ្អាក។ គ្មាន​ការ​ជូនដំណឹង​ពី​ព្រឹត្តិការណ៍។"</string>
-    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
-    <skip />
-    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"អ្នកនឹងមិនរំខានដោយសម្លេង និងរំញ័រឡើយ លើកលែងតែសម្លេងរោទិ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅដែលអ្នកបញ្ជាក់។"</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"ប្ដូរតាមបំណង"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"គ្មាន​ការ​ផ្អាក"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"តែ​ការ​ផ្អាក​អាទិភាព​ប៉ុណ្ណោះ"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"សំឡេងរោទ៍ប៉ុណ្ណោះ"</string>
@@ -342,12 +341,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"តើ​អ្នក​ចង់​បន្ត​សម័យ​របស់​អ្នក​?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ចាប់ផ្ដើម"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"បាទ​/ចាស ​បន្ត"</string>
-    <!-- no translation found for guest_notification_title (1585278533840603063) -->
-    <skip />
-    <!-- no translation found for guest_notification_text (7513706222848825467) -->
-    <skip />
-    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
-    <skip />
+    <string name="guest_notification_title" msgid="1585278533840603063">"អ្នកប្រើភ្ញៀវ"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"យកភ្ញៀវចេញដើម្បីលុបកម្មវិធី និងទិន្នន័យ"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"យកភ្ញៀវចេញ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"បន្ថែម​អ្នកប្រើ​ថ្មី?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ពេល​អ្នក​បន្ថែម​អ្នកប្រើ​ថ្មី អ្នកប្រើ​នោះ​ត្រូវ​កំណត់​ទំហំ​ផ្ទាល់​របស់​គេ។\n\nអ្នក​ប្រើ​ណាមួយ​ក៏​អាច​ធ្វើ​បច្ចុប្បន្នភាព​កម្មវិធី​សម្រាប់​អ្នកប្រើ​ផ្សេង​បាន​ដែរ។"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"កម្មវិធី​សន្សំ​ថ្ម​គឺ​បើក"</string>
@@ -399,6 +395,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"បដិសេធ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> គឺជាប្រអប់សម្លេង"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ប៉ះដើម្បីស្តារច្បាប់ដើម។"</string>
-    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"អ្នកកំពុងនៅក្នុងប្រវត្តិរូបការងារ"</string>
 </resources>

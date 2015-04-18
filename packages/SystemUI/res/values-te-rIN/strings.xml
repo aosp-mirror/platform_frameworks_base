@@ -146,6 +146,8 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"సిమ్ లేదు."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"బ్లూటూత్ టెథెరింగ్."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ఎయిర్‌ప్లేన్ మోడ్."</string>
+    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
+    <skip />
     <string name="accessibility_battery_level" msgid="7451474187113371965">"బ్యాటరీ <xliff:g id="NUMBER">%d</xliff:g> శాతం."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"సిస్టమ్ సెట్టింగ్‌లు."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"నోటిఫికేషన్‌లు."</string>
@@ -167,8 +169,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"లాక్ స్క్రీన్."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"సెట్టింగ్‌లు"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"అవలోకనం."</string>
-    <!-- no translation found for accessibility_desc_confirm (3446792278337969766) -->
-    <skip />
+    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"నిర్ధారిస్తుంది"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"వినియోగదారు <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"వైఫై ఆఫ్ చేయబడింది."</string>
@@ -303,10 +304,8 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం పైకి స్లైడ్ చేయండి."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం ఎడమవైపుకు స్లైడ్ చేయండి."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"అంతరాయాలు లేవు. అలారాలు కూడా లేవు."</string>
-    <!-- no translation found for zen_priority_introduction (7253045784560169993) -->
-    <skip />
-    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
-    <skip />
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు."</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"అనుకూలీకరించు"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"అంతరాయాలు లేకుండా"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"ప్రాధాన్య అంతరాయాలు మాత్రమే"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"అలారాలు మాత్రమే"</string>
@@ -342,12 +341,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"మొదటి నుండి ప్రారంభించు"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"అవును, కొనసాగించు"</string>
-    <!-- no translation found for guest_notification_title (1585278533840603063) -->
-    <skip />
-    <!-- no translation found for guest_notification_text (7513706222848825467) -->
-    <skip />
-    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
-    <skip />
+    <string name="guest_notification_title" msgid="1585278533840603063">"అతిథి వినియోగదారు"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"అనువర్తనాలు మరియు డేటాను తొలగించడానికి అతిథిని తీసివేయండి"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"అతిథిని తీసివేయి"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"కొత్త వినియోగదారుని జోడించాలా?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"మీరు కొత్త వినియోగదారుని జోడించినప్పుడు, ఆ వ్యక్తి తన స్థలాన్ని సెటప్ చేసుకోవాలి.\n\nఏ వినియోగదారు అయినా మిగతా అందరు వినియోగదారుల కోసం అనువర్తనాలను నవీకరించగలరు."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"బ్యాటర్ సేవర్ ఆన్ చేయబడింది"</string>
@@ -399,6 +395,5 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"తిరస్కరించు"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> అనేది వాల్యూమ్ డైలాగ్"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"అసలుదాన్ని పునరుద్ధరించడానికి తాకండి."</string>
-    <!-- no translation found for managed_profile_foreground_toast (3199278359979281097) -->
-    <skip />
+    <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"మీరు కార్యాలయ ప్రొఫైల్‌లో ఉన్నారు"</string>
 </resources>
