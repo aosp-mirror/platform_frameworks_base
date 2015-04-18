@@ -506,6 +506,16 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public @Nullable VolumeInfo findPrivateForEmulated(VolumeInfo emulatedVol) {
+        return findVolumeById(emulatedVol.getId().replace("emulated", "private"));
+    }
+
+    /** {@hide} */
+    public @Nullable VolumeInfo findEmulatedForPrivate(VolumeInfo privateVol) {
+        return findVolumeById(privateVol.getId().replace("private", "emulated"));
+    }
+
+    /** {@hide} */
     public @NonNull List<VolumeInfo> getVolumes() {
         return getVolumes(0);
     }
@@ -523,10 +533,9 @@ public class StorageManager {
     public @Nullable String getBestVolumeDescription(VolumeInfo vol) {
         String descrip = vol.getDescription();
 
-        if (vol.diskId != null) {
-            final DiskInfo disk = findDiskById(vol.diskId);
-            if (disk != null && TextUtils.isEmpty(descrip)) {
-                descrip = disk.getDescription();
+        if (vol.disk != null) {
+            if (TextUtils.isEmpty(descrip)) {
+                descrip = vol.disk.getDescription();
             }
         }
 

@@ -103,7 +103,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -688,12 +687,12 @@ class MountService extends IMountService.Stub
         synchronized (mVolumes) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
-                if (vol.isVisibleToUser(userId) && vol.state == VolumeInfo.STATE_MOUNTED) {
+                if (vol.isVisibleToUser(userId) && vol.isMountedReadable()) {
                     final StorageVolume userVol = vol.buildStorageVolume(mContext, userId);
                     mHandler.obtainMessage(H_VOLUME_BROADCAST, userVol).sendToTarget();
 
-                    mCallbacks.notifyStorageStateChanged(userVol.getPath(),
-                            Environment.MEDIA_MOUNTED, Environment.MEDIA_MOUNTED);
+                    final String envState = VolumeInfo.getEnvironmentForState(vol.getState());
+                    mCallbacks.notifyStorageStateChanged(userVol.getPath(), envState, envState);
                 }
             }
             mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userId);
@@ -822,13 +821,13 @@ class MountService extends IMountService.Stub
                 break;
             }
             case VoldResponseCode.DISK_LABEL_CHANGED: {
-                if (cooked.length != 3) break;
                 final DiskInfo disk = mDisks.get(cooked[1]);
                 if (disk != null) {
-                    disk.label = cooked[2];
-                }
-                if (disk.label != null) {
-                    disk.label = disk.label.trim();
+                    final StringBuilder builder = new StringBuilder();
+                    for (int i = 2; i < cooked.length; i++) {
+                        builder.append(cooked[i]).append(' ');
+                    }
+                    disk.label = builder.toString().trim();
                 }
                 break;
             }
@@ -848,8 +847,9 @@ class MountService extends IMountService.Stub
                 final String id = cooked[1];
                 final int type = Integer.parseInt(cooked[2]);
                 final String diskId = (cooked.length == 4) ? cooked[3] : null;
+                final DiskInfo disk = mDisks.get(diskId);
                 final int mtpIndex = allocateMtpIndex(id);
-                final VolumeInfo vol = new VolumeInfo(id, type, diskId, mtpIndex);
+                final VolumeInfo vol = new VolumeInfo(id, type, disk, mtpIndex);
                 mVolumes.put(id, vol);
                 onVolumeCreatedLocked(vol);
                 break;
@@ -885,10 +885,13 @@ class MountService extends IMountService.Stub
                 break;
             }
             case VoldResponseCode.VOLUME_FS_LABEL_CHANGED: {
-                if (cooked.length != 3) break;
                 final VolumeInfo vol = mVolumes.get(cooked[1]);
                 if (vol != null) {
-                    vol.fsLabel = cooked[2];
+                    final StringBuilder builder = new StringBuilder();
+                    for (int i = 2; i < cooked.length; i++) {
+                        builder.append(cooked[i]).append(' ');
+                    }
+                    vol.fsLabel = builder.toString().trim();
                 }
                 mCallbacks.notifyVolumeMetadataChanged(vol.clone());
                 break;
@@ -1351,7 +1354,7 @@ class MountService extends IMountService.Stub
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
-                if (vol.isPrimary() && vol.state == VolumeInfo.STATE_MOUNTED) {
+                if (vol.isPrimary() && vol.isMountedWritable()) {
                     // Cool beans, we have a mounted primary volume
                     return;
                 }
@@ -2711,9 +2714,47 @@ class MountService extends IMountService.Stub
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
+        for (String arg : args) {
+            if ("--clear-metadata".equals(arg)) {
+                synchronized (mLock) {
+                    mMetadata.clear();
+                    writeMetadataLocked();
+                }
+            }
+        }
+
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ", 160);
+        synchronized (mLock) {
+            pw.println("Disks:");
+            pw.increaseIndent();
+            for (int i = 0; i < mDisks.size(); i++) {
+                final DiskInfo disk = mDisks.valueAt(i);
+                disk.dump(pw);
+            }
+            pw.decreaseIndent();
+
+            pw.println();
+            pw.println("Volumes:");
+            pw.increaseIndent();
+            for (int i = 0; i < mVolumes.size(); i++) {
+                final VolumeInfo vol = mVolumes.valueAt(i);
+                if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.id)) continue;
+                vol.dump(pw);
+            }
+            pw.decreaseIndent();
+
+            pw.println();
+            pw.println("Metadata:");
+            pw.increaseIndent();
+            for (int i = 0; i < mMetadata.size(); i++) {
+                final VolumeMetadata meta = mMetadata.valueAt(i);
+                meta.dump(pw);
+            }
+            pw.decreaseIndent();
+        }
 
         synchronized (mObbMounts) {
+            pw.println();
             pw.println("mObbMounts:");
             pw.increaseIndent();
             final Iterator<Entry<IBinder, List<ObbState>>> binders = mObbMounts.entrySet()
@@ -2739,36 +2780,6 @@ class MountService extends IMountService.Stub
                 pw.print(e.getKey());
                 pw.print(" -> ");
                 pw.println(e.getValue());
-            }
-            pw.decreaseIndent();
-        }
-
-        synchronized (mLock) {
-            pw.println();
-            pw.println("Disks:");
-            pw.increaseIndent();
-            for (int i = 0; i < mDisks.size(); i++) {
-                final DiskInfo disk = mDisks.valueAt(i);
-                disk.dump(pw);
-            }
-            pw.decreaseIndent();
-
-            pw.println();
-            pw.println("Volumes:");
-            pw.increaseIndent();
-            for (int i = 0; i < mVolumes.size(); i++) {
-                final VolumeInfo vol = mVolumes.valueAt(i);
-                if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.id)) continue;
-                vol.dump(pw);
-            }
-            pw.decreaseIndent();
-
-            pw.println();
-            pw.println("Metadata:");
-            pw.increaseIndent();
-            for (int i = 0; i < mMetadata.size(); i++) {
-                final VolumeMetadata meta = mMetadata.valueAt(i);
-                meta.dump(pw);
             }
             pw.decreaseIndent();
         }
