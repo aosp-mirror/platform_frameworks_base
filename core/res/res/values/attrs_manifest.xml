@@ -842,6 +842,11 @@
          via adb.  The default value of this attribute is <code>true</code>. -->
     <attr name="allowBackup" format="boolean" />
 
+    <!-- Applications will set this in their manifest to opt-in to or out of full app data back-up
+         and restore. Alternatively they can set it to an xml resource within their app that will
+         be parsed by the BackupAgent to selectively backup files indicated within that xml. -->
+    <attr name="fullBackupContent" format="reference|boolean" />
+
     <!-- Indicates that even though the application provides a <code>BackupAgent</code>,
          only full-data streaming backup operations are to be performed to save the app's
          data.  This lets the app rely on full-data backups while still participating in
@@ -1189,6 +1194,7 @@
         <attr name="backupAgent" />
         <attr name="allowBackup" />
         <attr name="fullBackupOnly" />
+        <attr name="fullBackupContent" />
         <attr name="killAfterRestore" />
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
