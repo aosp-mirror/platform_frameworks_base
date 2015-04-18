@@ -1837,6 +1837,7 @@ public class MediaPlayer implements SubtitleController.Listener
         public static final int MEDIA_TRACK_TYPE_AUDIO = 2;
         public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3;
         public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4;
+        public static final int MEDIA_TRACK_TYPE_METADATA = 5;
 
         final int mTrackType;
         final MediaFormat mFormat;
@@ -2577,6 +2578,7 @@ public class MediaPlayer implements SubtitleController.Listener
     private static final int MEDIA_ERROR = 100;
     private static final int MEDIA_INFO = 200;
     private static final int MEDIA_SUBTITLE_DATA = 201;
+    private static final int MEDIA_META_DATA = 202;
 
     private TimeProvider mTimeProvider;
 
@@ -2721,6 +2723,18 @@ public class MediaPlayer implements SubtitleController.Listener
                     SubtitleData data = new SubtitleData(parcel);
                     parcel.recycle();
                     mOnSubtitleDataListener.onSubtitleData(mMediaPlayer, data);
+                }
+                return;
+
+            case MEDIA_META_DATA:
+                if (mOnTimedMetaDataListener == null) {
+                    return;
+                }
+                if (msg.obj instanceof Parcel) {
+                    Parcel parcel = (Parcel) msg.obj;
+                    TimedMetaData data = TimedMetaData.createTimedMetaDataFromParcel(parcel);
+                    parcel.recycle();
+                    mOnTimedMetaDataListener.onTimedMetaData(mMediaPlayer, data);
                 }
                 return;
 
@@ -2959,6 +2973,46 @@ public class MediaPlayer implements SubtitleController.Listener
     }
 
     private OnSubtitleDataListener mOnSubtitleDataListener;
+
+    /**
+     * Interface definition of a callback to be invoked when a
+     * track has timed metadata available.
+     *
+     * @see MediaPlayer#setOnTimedMetaDataListener(OnTimedMetaDataListener)
+     */
+    public interface OnTimedMetaDataListener
+    {
+        /**
+         * Called to indicate avaliable timed metadata
+         * <p>
+         * This method will be called as timed metadata is extracted from the media,
+         * in the same order as it occurs in the media. The timing of this event is
+         * not controlled by the associated timestamp.
+         *
+         * @param mp             the MediaPlayer associated with this callback
+         * @param data           the timed metadata sample associated with this event
+         */
+        public void onTimedMetaData(MediaPlayer mp, TimedMetaData data);
+    }
+
+    /**
+     * Register a callback to be invoked when a selected track has timed metadata available.
+     * <p>
+     * Currently only HTTP live streaming data URI's embedded with timed ID3 tags generates
+     * {@link TimedMetaData}.
+     *
+     * @see MediaPlayer#selectTrack(int)
+     * @see MediaPlayer.OnTimedMetaDataListener
+     * @see TimedMetaData
+     *
+     * @param listener the callback that will be run
+     */
+    public void setOnTimedMetaDataListener(OnTimedMetaDataListener listener)
+    {
+        mOnTimedMetaDataListener = listener;
+    }
+
+    private OnTimedMetaDataListener mOnTimedMetaDataListener;
 
     /* Do not change these values without updating their counterparts
      * in include/media/mediaplayer.h!

@@ -17209,6 +17209,7 @@ package android.media {
     method public void setOnInfoListener(android.media.MediaPlayer.OnInfoListener);
     method public void setOnPreparedListener(android.media.MediaPlayer.OnPreparedListener);
     method public void setOnSeekCompleteListener(android.media.MediaPlayer.OnSeekCompleteListener);
+    method public void setOnTimedMetaDataListener(android.media.MediaPlayer.OnTimedMetaDataListener);
     method public void setOnTimedTextListener(android.media.MediaPlayer.OnTimedTextListener);
     method public void setOnVideoSizeChangedListener(android.media.MediaPlayer.OnVideoSizeChangedListener);
     method public void setPlaybackRate(float, int);
@@ -17266,6 +17267,10 @@ package android.media {
     method public abstract void onSeekComplete(android.media.MediaPlayer);
   }
 
+  public static abstract interface MediaPlayer.OnTimedMetaDataListener {
+    method public abstract void onTimedMetaData(android.media.MediaPlayer, android.media.TimedMetaData);
+  }
+
   public static abstract interface MediaPlayer.OnTimedTextListener {
     method public abstract void onTimedText(android.media.MediaPlayer, android.media.TimedText);
   }
@@ -17281,6 +17286,7 @@ package android.media {
     method public int getTrackType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int MEDIA_TRACK_TYPE_AUDIO = 2; // 0x2
+    field public static final int MEDIA_TRACK_TYPE_METADATA = 5; // 0x5
     field public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4; // 0x4
     field public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3; // 0x3
     field public static final int MEDIA_TRACK_TYPE_UNKNOWN = 0; // 0x0
@@ -17755,6 +17761,11 @@ package android.media {
     method public static android.graphics.Bitmap extractThumbnail(android.graphics.Bitmap, int, int);
     method public static android.graphics.Bitmap extractThumbnail(android.graphics.Bitmap, int, int, int);
     field public static final int OPTIONS_RECYCLE_INPUT = 2; // 0x2
+  }
+
+  public class TimedMetaData {
+    method public byte[] getRawData();
+    method public long getTimeUs();
   }
 
   public final class TimedText {
