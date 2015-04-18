@@ -18,6 +18,7 @@ package android.media;
 
 import android.Manifest;
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -882,8 +883,12 @@ public class MediaRouter {
      * @param types type flags indicating which types this route should be used for.
      *              The route must support at least a subset.
      * @param route Route to select
+     * @throws IllegalArgumentException if the given route is {@code null}
      */
-    public void selectRoute(int types, RouteInfo route) {
+    public void selectRoute(int types, @NonNull RouteInfo route) {
+        if (route == null) {
+            throw new IllegalArgumentException("Route cannot be null.");
+        }
         selectRouteStatic(types, route, true);
     }
 
@@ -894,7 +899,8 @@ public class MediaRouter {
         selectRouteStatic(types, route, explicit);
     }
 
-    static void selectRouteStatic(int types, RouteInfo route, boolean explicit) {
+    static void selectRouteStatic(int types, @NonNull RouteInfo route, boolean explicit) {
+        assert(route != null);
         final RouteInfo oldRoute = sStatic.mSelectedRoute;
         if (oldRoute == route) return;
         if (!route.matchesTypes(types)) {
@@ -917,7 +923,7 @@ public class MediaRouter {
         final WifiDisplay activeDisplay =
                 sStatic.mDisplayService.getWifiDisplayStatus().getActiveDisplay();
         final boolean oldRouteHasAddress = oldRoute != null && oldRoute.mDeviceAddress != null;
-        final boolean newRouteHasAddress = route != null && route.mDeviceAddress != null;
+        final boolean newRouteHasAddress = route.mDeviceAddress != null;
         if (activeDisplay != null || oldRouteHasAddress || newRouteHasAddress) {
             if (newRouteHasAddress && !matchesDeviceAddress(activeDisplay, route)) {
                 if (sStatic.mCanConfigureWifiDisplays) {
