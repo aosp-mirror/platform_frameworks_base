@@ -38,8 +38,7 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Slėpti SD kortelę"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Rodyti failo dydį"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Slėpti failo dydį"</string>
-    <!-- no translation found for button_copy (8706475544635021302) -->
-    <skip />
+    <string name="button_copy" msgid="8706475544635021302">"Kopijuoti"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"Pasirinkta: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Pagal pavadinimą"</string>
     <string name="sort_date" msgid="586080032956151448">"Pagal keitimo datą"</string>
@@ -68,13 +67,14 @@
       <item quantity="other">Kopijuojama <xliff:g id="COUNT_1">%1$d</xliff:g> failų.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Ruošiamasi kopijuoti…"</string>
-    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
-    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
-    <skip />
-    <!-- no translation found for retry (7564024179122207376) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
-    <skip />
+    <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
+      <item quantity="one">Klaida kopijuojant <xliff:g id="COUNT_1">%1$d</xliff:g> failą.</item>
+      <item quantity="few">Klaida kopijuojant <xliff:g id="COUNT_1">%1$d</xliff:g> failus.</item>
+      <item quantity="many">Klaida kopijuojant <xliff:g id="COUNT_1">%1$d</xliff:g> failo.</item>
+      <item quantity="other">Klaida kopijuojant <xliff:g id="COUNT_1">%1$d</xliff:g> failų.</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="4483108577842961665">"Palieskite, kad peržiūr. išsamią informaciją"</string>
+    <string name="retry" msgid="7564024179122207376">"Bandyti dar kartą"</string>
+    <string name="copy_failure_alert_title" msgid="616726451967793549">"Klaida kopijuojant failus"</string>
+    <string name="copy_failure_alert_content" msgid="2655232627616241542">"Šie failai nenukopijuoti: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

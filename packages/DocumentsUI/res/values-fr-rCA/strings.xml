@@ -38,8 +38,7 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Masquer la carte SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Afficher taille fichier"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Masquer taille fichier"</string>
-    <!-- no translation found for button_copy (8706475544635021302) -->
-    <skip />
+    <string name="button_copy" msgid="8706475544635021302">"Copier"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> sélectionné(s)"</string>
     <string name="sort_name" msgid="9183560467917256779">"Par nom"</string>
     <string name="sort_date" msgid="586080032956151448">"Par date de modification"</string>
@@ -66,13 +65,12 @@
       <item quantity="other">Copier de <xliff:g id="COUNT_1">%1$d</xliff:g> fichiers en cours.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Préparation de la copie en cours"</string>
-    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
-    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
-    <skip />
-    <!-- no translation found for retry (7564024179122207376) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
-    <skip />
+    <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
+      <item quantity="one">Erreur lors de la copie de <xliff:g id="COUNT_1">%1$d</xliff:g> fichier.</item>
+      <item quantity="other">Erreur lors de la copie de <xliff:g id="COUNT_1">%1$d</xliff:g> fichiers.</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="4483108577842961665">"Touchez ici pour afficher les détails"</string>
+    <string name="retry" msgid="7564024179122207376">"Réessayer"</string>
+    <string name="copy_failure_alert_title" msgid="616726451967793549">"Erreur lors de la copie des fichiers"</string>
+    <string name="copy_failure_alert_content" msgid="2655232627616241542">"Les fichiers suivants n\'ont pas été copiés : <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

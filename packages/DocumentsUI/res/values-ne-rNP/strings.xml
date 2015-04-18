@@ -38,8 +38,7 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD कार्ड लुकाउनुहोस्"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"फाइल आकार देखाउनुहोस्"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"फाइल आकार लुकाउनुहोस्"</string>
-    <!-- no translation found for button_copy (8706475544635021302) -->
-    <skip />
+    <string name="button_copy" msgid="8706475544635021302">"प्रतिलिपि बनाउनुहोस्"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> चयन गरियो"</string>
     <string name="sort_name" msgid="9183560467917256779">"नाम अनुसार"</string>
     <string name="sort_date" msgid="586080032956151448">"परिमार्जित मिति अनुसार"</string>
@@ -66,13 +65,12 @@
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> फाइल प्रतिलिपि गर्दै।</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"प्रतिलिपिको लागि तयारी गर्दै ..."</string>
-    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
-    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
-    <skip />
-    <!-- no translation found for retry (7564024179122207376) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
-    <skip />
+    <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरु प्रतिलिपि बनाउदा त्रुटि।</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> फाइल प्रतिलिपि बनाउदा त्रुटि।</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="4483108577842961665">"विवरणहरू हेर्न छुनुहोस्"</string>
+    <string name="retry" msgid="7564024179122207376">"पुनःप्रयास गर्नुहोस्"</string>
+    <string name="copy_failure_alert_title" msgid="616726451967793549">"फाइलहरु प्रतिलिपिमा त्रुटि"</string>
+    <string name="copy_failure_alert_content" msgid="2655232627616241542">"निम्नलिखित फाइलहरूको प्रतिलिपि बनाइएको छैनन्: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

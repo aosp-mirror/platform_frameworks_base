@@ -38,8 +38,7 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Ẩn thẻ SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Hiển thị kích thước tệp"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Ẩn kích thước tệp"</string>
-    <!-- no translation found for button_copy (8706475544635021302) -->
-    <skip />
+    <string name="button_copy" msgid="8706475544635021302">"Sao chép"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"Đã chọn <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Theo tên"</string>
     <string name="sort_date" msgid="586080032956151448">"Theo ngày sửa đổi"</string>
@@ -66,13 +65,12 @@
       <item quantity="one">Đang sao chép <xliff:g id="COUNT_0">%1$d</xliff:g> tệp.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Đang chuẩn bị sao chép…"</string>
-    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
-    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
-    <skip />
-    <!-- no translation found for retry (7564024179122207376) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
-    <skip />
+    <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
+      <item quantity="other">Lỗi khi sao chép <xliff:g id="COUNT_1">%1$d</xliff:g> tệp.</item>
+      <item quantity="one">Lỗi khi sao chép <xliff:g id="COUNT_0">%1$d</xliff:g> tệp.</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="4483108577842961665">"Chạm để xem chi tiết"</string>
+    <string name="retry" msgid="7564024179122207376">"Thử lại"</string>
+    <string name="copy_failure_alert_title" msgid="616726451967793549">"Lỗi khi sao chép tệp"</string>
+    <string name="copy_failure_alert_content" msgid="2655232627616241542">"Các tệp sau không được sao chép: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

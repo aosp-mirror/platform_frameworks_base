@@ -38,8 +38,7 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"‏הסתר כרטיס SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"הצג גודל קובץ"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"הסתר גודל קובץ"</string>
-    <!-- no translation found for button_copy (8706475544635021302) -->
-    <skip />
+    <string name="button_copy" msgid="8706475544635021302">"העתק"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> נבחרו"</string>
     <string name="sort_name" msgid="9183560467917256779">"לפי שם"</string>
     <string name="sort_date" msgid="586080032956151448">"לפי תאריך שינוי"</string>
@@ -68,13 +67,14 @@
       <item quantity="one">מעתיק קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"מתכונן להעתקה..."</string>
-    <!-- no translation found for copy_error_notification_title (4911333304372840735) -->
-    <!-- no translation found for notification_touch_for_details (4483108577842961665) -->
-    <skip />
-    <!-- no translation found for retry (7564024179122207376) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_title (616726451967793549) -->
-    <skip />
-    <!-- no translation found for copy_failure_alert_content (2655232627616241542) -->
-    <skip />
+    <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
+      <item quantity="two">אירעה שגיאה בהעתקה של <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="many">אירעה שגיאה בהעתקה של <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="other">אירעה שגיאה בהעתקה של <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים.</item>
+      <item quantity="one">אירעה שגיאה בהעתקה של קובץ <xliff:g id="COUNT_0">%1$d</xliff:g>.</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="4483108577842961665">"גע כדי להציג את הפרטים"</string>
+    <string name="retry" msgid="7564024179122207376">"נסה שוב"</string>
+    <string name="copy_failure_alert_title" msgid="616726451967793549">"אירעה שגיאה בהעתקת קבצים"</string>
+    <string name="copy_failure_alert_content" msgid="2655232627616241542">"הקבצים הבאים לא הועתקו: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>
