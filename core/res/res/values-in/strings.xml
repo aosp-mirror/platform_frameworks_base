@@ -219,7 +219,7 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Aplikasi pribadi"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Kantor"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontak"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"mengakses dan memodifikasi kontak"</string>
+    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"mengakses dan mengubah kontak"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"mengakses lokasi Anda"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informasi sosial Anda"</string>
@@ -237,7 +237,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="2429930670410559293">"menggunakan kamera perangkat"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepon"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"menggunakan teleponi perangkat"</string>
+    <string name="permgroupdesc_phone" msgid="2016641188146068700">"menggunakan sistem telefoni perangkat"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensor"</string>
     <string name="permgroupdesc_sensors" msgid="2987451839455524494">"mengakses sensor dan perangkat yang dapat dikenakan"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Mengambil konten jendela"</string>
@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Memungkinkan aplikasi membaca pesan SMS yang tersimpan di tablet atau kartu SIM Anda. Izin ini memungkinkan aplikasi membaca semua pesan SMS, terlepas dari konten atau kerahasiaan."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Mengizinkan aplikasi untuk membaca pesan SMS yang disimpan di TV atau kartu SIM. Izin ini memungkinkan aplikasi untuk membaca semua pesan SMS, apa pun isinya atau meski bersifat rahasia."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Memungkinkan aplikasi membaca pesan SMS yang tersimpan di ponsel atau kartu SIM Anda. Izin ini memungkinkan aplikasi membaca semua pesan SMS, terlepas dari konten atau kerahasiaan."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"edit pesan teks (SMS atau MMS) Anda"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Mengizinkan apl menulis ke pesan SMS yang tersimpan di tablet atau kartu SIM. Apl berbahaya dapat menghapus pesan Anda."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Mengizinkan aplikasi untuk menulis ke pesan SMS yang disimpan di TV atau kartu SIM. Aplikasi yang berbahaya mungkin menghapus pesan."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Mengizinkan apl menulis ke pesan SMS yang tersimpan di ponsel atau kartu SIM. Apl berbahaya dapat menghapus pesan Anda."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"terima pesan teks (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Memungkinkan aplikasi menerima dan memproses pesan WAP. Izin ini mencakup kemampuan untuk memantau atau menghapus pesan yang dikirim kepada Anda tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"mengambil apl yang berjalan"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sebagian sidik jari terdeteksi. Coba lagi."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Tidak dapat memproses sidik jari. Coba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sensor sidik jari kotor. Bersihkan dan coba lagi."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Jari digerakkan terlalu cepat. Coba lagi."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Jari digerakkan terlalu lambat. Coba lagi."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Perangkat keras sidik jari tidak tersedia."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sidik jari tidak dapat disimpan. Hapus sidik jari yang ada."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Waktu sidik jari habis. Coba lagi."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operasi sidik jari dibatalkan."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Terlalu banyak upaya. Coba lagi nanti."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Coba lagi."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"baca setelan sinkron"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Memungkinkan apl menulis ke kartu SD."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"lakukan/terima panggilan SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Izinkan aplikasi melakukan dan menerima panggilan SIP."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"daftarkan sambungan SIM telekomunikasi baru"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Izinkan aplikasi untuk mendaftarkan sambungan SIM telekomunikasi baru."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"daftarkan sambungan telekomunikasi baru"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Izinkan aplikasi untuk mendaftarkan sambungan telekomunikasi baru."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"kelola sambungan telekomunikasi"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Mengizinkan aplikasi untuk mengelola sambungan telekomunikasi."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"berinteraksi dengan layar dalam panggilan"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Memungkinkan aplikasi mengontrol kapan dan bagaimana pengguna melihat layar dalam panggilan."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"berinteraksi dengan layanan telepon"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Memungkinkan aplikasi berinteraksi dengan layanan telepon untuk melakukan/menerima panggilan."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"memberikan pengalaman pengguna dalam panggilan"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Memungkinkan aplikasi memberikan pengalaman pengguna dalam panggilan."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"baca riwayat penggunaan jaringan"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Mengizinkan apl membaca penggunaan jaringan historis untuk apl dan jaringan tertentu."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"kelola kebijakan jaringan"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Mengizinkan apl mengelola kebijakan jaringan dan menentukan peraturan khusus apl."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"mengubah penghitungan penggunaan jaringan"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Mengizinkan apl memodifikasi cara penggunaan jaringan diperhitungkan terhadap apl. Tidak untuk digunakan oleh apl normal."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"mengakses pemberitahuan"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Mengizinkan aplikasi mengambil, memeriksa, dan menghapus pemberitahuan, termasuk pemberitahuan yang diposkan oleh aplikasi lain."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mengikat layanan pendengar pemberitahuan"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Memungkinkan pemegang mengikat antarmuka tingkat teratas dari suatu layanan pendengar pemberitahuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"mengikat ke layanan penyedia ketentuan"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Memungkinkan pemegang mengikat antarmuka tingkat tinggi dari layanan penyedia ketentuan. Tidak pernah diperlukan oleh aplikasi normal."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"mengikat ke layanan lamunan"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Memungkinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan lamunan. Tidak pernah diperlukan oleh aplikasi normal."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"memanggil aplikasi konfigurasi yang disediakan operator"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Memungkinkan pemegang meminta aplikasi konfigurasi yang disediakan operator. Tidak pernah diperlukan aplikasi normal."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"mendengar untuk observasi kondisi jaringan"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Memungkinkan aplikasi mendengar untuk observasi kondisi jaringan. Tidak pernah dibutuhkan oleh aplikasi normal."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"mengubah kalibrasi perangkat masukan"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Memungkinkan aplikasi mengubah parameter kalibrasi layar sentuh. Tidak diperlukan oleh aplikasi normal."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"mengakses sertifikat DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Memungkinkan aplikasi menyediakan dan menggunakan sertifikat DRM. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Menerima status transfer Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Memungkinkan aplikasi ini menerima informasi tentang transfer Android Beam saat ini"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"membuang serifikat DRM"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Memungkinkan aplikasi membuang sertifikat DRM. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ikat ke layanan perpesanan operator"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Mengizinkan operator untuk mengikat ke antarmuka tingkat tinggi dari suatu layanan perpesanan operator. Fitur ini seharusnya tidak diperlukan oleh aplikasi normal."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Upaya pembukaan kunci layar monitor"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tekan Menu untuk membuka atau melakukan panggilan darurat."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tekan Menu untuk membuka."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Buat pola untuk membuka"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Darurat"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Kembali ke panggilan"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Perbaiki!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Coba lagi"</string>
@@ -1029,36 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"calon"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Menyiapkan <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Memeriksa kesalahan"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> baru terdeteksi"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Untuk mentransfer foto dan media"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> rusak"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> rusak; coba format ulang"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> tiba-tiba dicabut"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Lingsirkan <xliff:g id="NAME">%s</xliff:g> sebelum mencabut agar data tidak hilang"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> dicabut"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> dicabut; colokkan yang baru"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Masih mengeluarkan <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Jangan cabut"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"Siapkan"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Keluarkan"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Jelajahi"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Tidak ditemukan aktivitas yang sesuai."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Menentukan rute keluaran media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Memungkinkan aplikasi menentukan rute keluaran media ke perangkat eksternal lainnya."</string>
@@ -1188,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Penyimpanan internal"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Kartu SD"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"Penyimpanan USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Peringatan penggunaan data"</string>
@@ -1450,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hingga Anda menonaktifkan ini"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Ciutkan"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"Blokir gangguan"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Jangan ganggu"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Waktu non-operasional"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Malam hari kerja"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Akhir pekan"</string>

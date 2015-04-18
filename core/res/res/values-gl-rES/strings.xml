@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite á aplicación ler as mensaxes SMS que están almacenadas no teu tablet ou tarxeta SIM. Isto permite á aplicación ler todas as mensaxes SMS, independentemente do seu contido ou confidencialidade."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Permite que a aplicación consulte mensaxes SMS almacenadas na televisión ou na tarxeta SIM. A aplicación pode utilizar este permiso para ler todas as túas mensaxes SMS, independentemente do contido ou nivel de confidencialidade."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Permite á aplicación ler as mensaxes SMS que están almacenadas no teu teléfono ou tarxeta SIM. Isto permite á aplicación ler todas as mensaxes SMS, independentemente do seu contido ou confidencialidade."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"editar as túas mensaxes de texto (SMS ou MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Permite á aplicación escribir en mensaxes SMS almacenadas no teu tablet ou tarxeta SIM. É posible que aplicacións maliciosas eliminen as túas mensaxes."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Permite que a aplicación escriba nas mensaxes SMS almacenadas na televisión ou na tarxeta SIM. As aplicacións maliciosas poden eliminar as mensaxes."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Permite á aplicación escribir en mensaxes SMS almacenadas no teu teléfono ou tarxeta SIM. É posible que aplicacións maliciosas eliminen as túas mensaxes."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"recibir mensaxes de texto (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite á aplicación recibir e procesar mensaxes WAP. Este permiso inclúe a capacidade de supervisar ou eliminar mensaxes enviadas a ti sen mostrarchas."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicacións en execución"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Detectouse unha impresión dixital parcial. Téntao de novo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Non se puido procesar a impresión dixital. Téntao de novo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"O sensor de impresión dixital está sucio. Límpao e téntao de novo."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"O dedo moveuse demasiado rápido. Téntao de novo."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"O dedo moveuse demasiado lento. Téntao de novo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware de impresión dixital non dispoñible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Non se pode almacenar a impresión dixital. Elimina unha impresión dixital existente."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Esgotouse o tempo de espera da impresión dixital. Téntao de novo."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Cancelouse a operación da impresión dixital."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Demasiados intentos. Téntao de novo máis tarde."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Téntao de novo."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler a configuración de sincronización"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Permite á aplicación escribir na tarxeta SD."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"facer/recibir chamadas SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Permite que a aplicación faga e reciba chamadas SIP."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"rexistrar novas conexións SIM de telecomunicacións"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Permite que a aplicación rexistre novas conexións SIM de telecomunicacións."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"rexistrar novas conexións de telecomunicacións"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Permite que a aplicación rexistre novas conexións de telecomunicacións."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"xestionar conexións de telecomunicacións"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Permite que a aplicación xestione conexións de telecomunicacións."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interactuar cunha pantalla de chamada"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Permite á aplicación controlar cando e como ve o usuario a pantalla de chamada."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"interactuar cos servizos de telefonía"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Permite que a aplicación interactúe cos servizos de telefonía para facer ou recibir chamadas."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"proporcionar unha experiencia de usuario durante a chamada"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Permite á aplicación proporcionar unha experiencia de usuario durante a chamada."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ler o historial de uso da rede"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Permite á aplicación ler o uso da rede histórico de redes e aplicacións específicas."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"xestionar a política de rede"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Permite á aplicación xestionar políticas de rede e definir normas específicas de aplicacións."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modificar o reconto de uso da rede"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Permite á aplicación modificar a forma de contabilizar o uso da rede por parte das aplicacións. Non está destinado a ser utilizado por aplicacións normais."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"acceso ás notificacións"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite á aplicación recuperar, examinar e borrar notificacións, incluídas as publicadas por outras aplicacións."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincular a un servizo de axente de escoita de notificacións"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite ao propietario vincularse á interface de nivel superior dun servizo axente de escoita de notificacións.  Non debería ser nunca necesario para as aplicacións normais."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"vincular a un servizo de provedor de condicións"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite ao propietario vincularse á interface de nivel superior dun servizo provedor de condicións. As aplicacións normais non deberían necesitar este permiso."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"vincular a un servizo de soños"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite ao propietario vincularse á interface de nivel superior dun servizo de soños. As aplicacións normais non deberían necesitar este permiso."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invocar a aplicación de configuración fornecida polo operador"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite ao propietario invocar a aplicación de configuración fornecida polo operador.  Non debería ser nunca necesario para as aplicacións normais.."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"escoitar observacións sobre as condicións da rede"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite a unha aplicación escoitar observacións acerca das condicións da rede. Non se debería necesitar nunca para aplicacións normais."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"cambiar a calibración do dispositivo de entrada"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permite á aplicación modificar os parámetros de calibración da pantalla táctil. As aplicacións normais non deberían necesitar este permiso."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"acceso a certificados DRM"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permite a unha aplicación fornecer e utilizar certificados DRM. Non se deberían precisar nunca para as aplicacións normais."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Recibir estado das transferencias de Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permite a esta aplicación recibir información acerca das transferencias actuais de Android Beam"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"eliminar certificados DRM"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite a unha aplicación eliminar os certificados DRM. As aplicacións normais non o deberían precisar nunca."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"vincular a un servizo de mensaxería"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite ao propietario vincularse á interface de nivel superior dun servizo de mensaxería. As aplicacións normais non deberían necesitar este permiso."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer as normas de contrasinal"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controla a lonxitude e os caracteres permitidos nos contrasinais e nos PIN de bloqueo da pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisar os intentos de desbloqueo da pantalla"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Preme Menú para desbloquear ou realizar unha chamada de emerxencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Preme Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Crea o padrón de desbloqueo"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Emerxencia"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Volver á chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Téntao de novo"</string>
@@ -1029,36 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Preparando a <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Comprobando se hai erros"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Detectouse unha <xliff:g id="NAME">%s</xliff:g> nova"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para transferir fotos e contidos multimedia"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"A <xliff:g id="NAME">%s</xliff:g> está danada"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"A <xliff:g id="NAME">%s</xliff:g> está danada. Proba a formatala"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Retirouse a <xliff:g id="NAME">%s</xliff:g> de forma inesperada"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Desactiva a <xliff:g id="NAME">%s</xliff:g> antes de retirala para evitar a perda de datos"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Retirouse a <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Retirouse a <xliff:g id="NAME">%s</xliff:g>. Insire unha nova"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Aínda expulsando a <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Non retirar"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"Configuración"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Expulsar"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorar"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Non se atoparon actividades que coincidan."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Dirixir saída multimedia"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite a unha aplicación dirixir a saída multimedia a outros dispositivos externos."</string>
@@ -1188,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Almacenamento interno"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Tarxeta SD"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"almacenamento USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editar"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Aviso de uso de datos"</string>
@@ -1450,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Ata que desactives isto"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"Bloquear interrupcións"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Non molestar"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tempo de inactividade"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Noites pola semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Fins de semana"</string>

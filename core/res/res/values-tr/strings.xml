@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Uygulamaya tabletinizde veya SIM kartta saklanan SMS iletilerini okuma izni verir. Bu izin, uygulamanın tüm SMS iletilerini içeriğinden veya gizliliğinden bağımsız olarak okumasına olanak sağlar."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Uygulamaya, TV\'nizde veya SIM kartta depolanmış SMS iletilerini okuma izni verir. Bu izin, uygulamanın içeriğe veya gizliliğe bakılmaksızın tüm SMS iletilerini okumasına olanak sağlar."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Uygulamaya telefonunuzda veya SIM kartta saklanan SMS iletilerini okuma izni verir. Bu izin, uygulamanın tüm SMS iletilerini içeriğinden veya gizliliğinden bağımsız olarak okumasına olanak sağlar."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"kısa mesajlarımı (SMS veya MMS) düzenle"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Uygulamaya, tabletinizde veya SIM kartınızda depolanan SMS iletilerine yazma izni verir. Kötü amaçlı uygulamalar iletilerinizi silebilir."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Uygulamaya, TV\'niz ya da SIM kartınızda saklanan SMS iletilerine yazma izni verir. Kötü amaçlı uygulamalar iletilerinizi silebilir."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Uygulamaya, telefonunuzdaki veya SIM kartınızdaki SMS iletilerine yazma izni verir. Kötü amaçlı uygulamalar iletilerinizi silebilir."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"kısa mesajları (WAP) al"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Uygulamaya WAP mesajlarını alma ve işleme izni verir. Buna, size gönderilen mesajları takip edip size göstermeden silebilme izni de dahildir."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"çalışan uygulamaları al"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Parmak izinin tümü algılanamadı. Lütfen tekrar deneyin."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Parmak izi işlenemedi. Lütfen tekrar deneyin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Parmak izi sensörü kirli. Lütfen temizleyin ve tekrar deneyin."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Parmak hareketi çok hızlıydı. Lütfen tekrar deneyin."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Parmak hareketi çok yavaştı. Lütfen tekrar deneyin."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Parmak izi donanımı kullanılamıyor."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Parmak izi depolanamıyor. Lütfen mevcut parmak izlerinden birini kaldırın."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Parmak izi için zaman aşımı oluştu. Tekrar deneyin."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Parmak izi işlemi iptal edildi."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Tekrar deneyin."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını okuma"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Uygulamaya, SD karta yazma izni verir."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP çağrıları yapma/alma"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Uygulamanın SIP çağrıları yapmasına ve almasına izin verir."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"yeni telekomünikasyon SIM bağlantılarını kaydettir"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Uygulamanın yeni telekomünikasyon SIM bağlantıları kaydettirmesine izin verir."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"yeni telekomünikasyon bağlantıları kaydettir"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Uygulamanın yeni telekomünikasyon bağlantıları kaydettirmesine izin verir."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"telekomunikasyon bağlantılarını yönet"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Uygulamanın telekomünikasyon bağlantılarını yönetmesine izin verir."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"çağrı ekranıyla etkileşimde bulunma"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Uygulamaya, kullanıcının çağrı ekranını ne zaman ve nasıl göreceğini denetleme izni verir."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"telefon hizmetleriyle etkileşimde bulunma"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Uygulamanın çağrı yapmak/almak için telefon hizmetleriyle etkileşimde bulunmasına izin verir."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"çağrı içi kullanıcı deneyimi sağlama"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Uygulamaya, çağrı içi kullanım deneyimi sağlama izin verir."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"geçmiş ağ kullanımını oku"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Uygulamaya, özel ağlar ve uygulamalar için ağ kullanım geçmişini okuma izni verir."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"ağ politikasını yönet"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Uygulamaya, ağ politikalarını yönetme ve uygulamaya özgü kuralları tanımlama izni verir."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ağ kullanım hesaplamasını değiştir"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Uygulamaya, ağın uygulamalara göre nasıl kullanılacağını değiştirme izni verir. Normal uygulamalar tarafından kullanılmak için değildir."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"bildirimlere eriş"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Uygulamanın bildirimler almasına, bildirimleri incelemesine ve temizlemesine izin verir. Buna diğer uygulamalar tarafından yayınlanan bildirimler de dahildir."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bildirim dinleyici hizmetine bağlan"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"İzin sahibine bir bildirim dinleyici hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bir durum sağlayıcı hizmetine bağlanma"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"İzin sahibinin, bir durum sağlayıcı hizmete ait üst düzey arayüze bağlanmasına izin verir. Normal uygulamalar için hiçbir zaman gerekli değildir."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"bir dream hizmetine bağla"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"İzin sahibine bir dream hizmetinin üst seviye arayüzüne bağlanma olanağı sunar. Normal uygulamalarda hiçbir zaman ihtiyaç duyulmamalıdır."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"operatör tarafından sağlanan yapılandırma uygulamasını çalıştır"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"İzin sahibine, operatör tarafından sağlanan yapılandırma uygulamasını çalıştırma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ağ koşullarındaki gözlemleri dinle"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Bir uygulamaya, ağ koşullarındaki gözlemleri dinleme izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"giriş cihazı kalibrasyonunu değiştir"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Uygulamaya, dokunmatik ekranın kalibrasyon parametrelerini değiştirme izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM sertifikalarına eriş"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Bir uygulamanın DRM sertifikaları için temel hazırlık yapmasına ve bunları kullanmasına izin verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam aktarım durumunu al"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Bu uygulamanın mevcut Android Beam aktarımlarıyla ilgili bilgi almasına izin verir"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM sertifikalarını kaldırma"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Uygulamaya, DRM sertifikalarını kaldırma izin verir. Normal uygulamalar için asla gerekmemelidir."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"operatör mesajlaşma hizmetine bağlan"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"İzin sahibinin, operatör mesajlaşma hizmetinin üst düzey arayüzüne bağlanmasına olanak verir. Normal uygulamalarda hiçbir zaman gerekmez."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetleyin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Kilidi açmak için Menü\'ye basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Kilit açmak için deseni çizin"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Acil durum çağrısı"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Çağrıya dön"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Tekrar deneyin"</string>
@@ -1029,35 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"adaylar"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> hazırlanıyor"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Hatalar denetleniyor"</string>
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Yeni <xliff:g id="NAME">%s</xliff:g> algılandı"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotoğraf ve medya aktarmak için"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> zarar görmüş"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> zarar görmüş, tekrar biçimlendirmeyi deneyin"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> beklenmedik şekilde çıkartıldı"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Veri kaybı olmaması için <xliff:g id="NAME">%s</xliff:g> birimini kaldırmadan önce bağlantısını kesin"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> kaldırıldı"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> kaldırıldı; yeni bir tane takın"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> çıkarma işlemi devam ediyor…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Kaldırma"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"Kurulum"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Çıkar"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Keşfedin"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Eşleşen hiçbir etkinlik bulunamadı."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Medya çıktısını yönlendir"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Uygulamaya medya çıktısını başka harici cihazlara yönlendirme izni verir."</string>
@@ -1187,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Dahili depolama birimi"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD kart"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"USB bellek"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Düzenle"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Veri kullanım uyarısı"</string>
@@ -1449,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Siz bunu kapatana kadar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Daralt"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"Kesintileri engelle"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Rahatsız etmeyin"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Bildirim istenmeyen zaman"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Hafta içi her gece"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Hafta sonu"</string>

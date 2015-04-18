@@ -270,10 +270,6 @@
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Разрешава на приложението да чете SMS съобщенията, съхранени на таблета или SIM картата ви. Това разрешение му позволява да чете всички съобщения независимо от съдържанието или поверителността."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Разрешава на приложението да чете съхраняваните в телевизора или SIM картата ви SMS съобщения. Това му позволява да чете всички текстови съобщения, независимо от съдържанието или поверителността им."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Разрешава на приложението да чете SMS съобщенията, съхранени на телефона или SIM картата ви. Това разрешение му позволява да чете всички съобщения независимо от съдържанието или поверителността."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"редактиране на текстовите ви съобщения (SMS или MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Разрешава на приложението да записва в SMS съобщенията, съхранени в таблета или в SIM картата ви. Злонамерените приложения могат да изтрият съобщенията ви."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Разрешава на приложението да записва върху съхраняваните в телевизора или SIM картата ви SMS съобщения. Злонамерените приложения може да изтрият съобщенията ви."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Разрешава на приложението да записва в SMS съобщенията, съхранени в телефона или в SIM картата ви. Злонамерените приложения могат да изтрият съобщенията ви."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"получаване на текстови съобщения (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Разрешава на приложението да получава и обработва WAP съобщения. Това разрешение включва възможността да наблюдава или изтрива изпратените до вас, без да ви ги покаже."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"извличане на изпълняваните приложения"</string>
@@ -429,21 +425,16 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Открит е частичен отпечатък. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатъкът не можа да се обработи. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорът за отпечатъци е мръсен. Моля, почистете го и опитайте отново."</string>
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Отместихте пръста си твърде бързо. Моля, опитайте отново."</string>
     <string name="fingerprint_acquired_too_slow" msgid="7381891107120721078">"Преместихте пръста си твърде бавно. Моля, опитайте отново."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хардуерът за отпечатъци не е налице."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Отпечатъкът не може да бъде съхранен. Моля, премахнете съществуващ."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Времето за изчакване за отпечатък изтече. Опитайте отново."</string>
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Операцията за отпечатък е анулирана."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Твърде много опити. Пробвайте отново по-късно."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Опитайте отново."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"четене на настройките за синхронизиране"</string>
@@ -468,6 +459,50 @@
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Разрешава на приложението да записва върху SD картата."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"извършване/получаване на обаждания чрез SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Разрешава на приложението да извършва и получава обаждания чрез SIP."</string>
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"регистриране на нови телекомуникационни връзки за SIM карти"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Разрешава на приложението да регистрира новите телекомуникационни връзки за SIM карти."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"регистриране на нови телекомуникационни връзки"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Разрешава на приложението да регистрира новите телекомуникационни връзки."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"управление на телекомуникационните връзки"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Разрешава на приложението да управлява телекомуникационните връзки."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"взаимодействие с екрана за обаждане"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Разрешава на приложението да контролира кога и как потребителят вижда екрана за обаждане."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"взаимодействие с телефонни услуги"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Разрешава на приложението да взаимодейства с телефонни услуги за извършване/получаване на обаждания."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"предоставяне на опции за практическа работа по време на обаждане"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Разрешава на приложението да предоставя опции за практическа работа по време на обаждане."</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"четене на употребата на мрежата до момента"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Разрешава на приложението да чете употребата на данни за конкретни мрежи и приложения до момента."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"управление на правилата на мрежата"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Разрешава на приложението да управлява правилата на мрежата и да определя такива за конкретно приложение."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"промяна на отчетността на употребата на мрежа"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Разрешава на приложението да променя това как употребата на мрежа се отчита спрямо приложенията. Не е предназначено за нормални приложения."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"достъп до известията"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"Разрешава на приложението да извлича, преглежда и изчиства известия, включително публикуваните от други приложения."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"обвързване с услуга за слушател на известия"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Разрешава на притежателя да се обвърже с интерфейса от първо ниво на услуга за слушател на известия. Нормалните приложения не би трябвало никога да се нуждаят от това."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"свързване с услуга за предоставяне на условия"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Разрешава на притежателя да се свърже с интерфейса от най-високото ниво на услуга за предоставяне на условия. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"свързване с услуга за „мечти“"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Разрешава на притежателя да се свърже с интерфейса от най-високото ниво на услуга за „мечти“. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"извикване на предоставеното от оператора приложение за конфигуриране"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Разрешава на притежателя да извиква предоставеното от оператора приложение за конфигуриране. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"слушане за наблюдения на мрежовите условия"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Разрешава на приложението да слуша за наблюдения на мрежовите условия. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"промяна на калибрирането на устройството за въвеждане"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Разрешава на приложението да променя параметрите на калибриране на сензорния екран. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"достъп до сертификатите за управление на цифровите права (DRM)"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Разрешава на приложението да обезпечава и използва сертификатите за управление на цифровите права (DRM). Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Получаване на състоянието на прехвърлянията чрез Android Лъч"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Разрешава на това приложение да получава информация относно текущите прехвърляния чрез Android Лъч"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"премахване на сертификатите за управление на цифровите права (DRM)"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Разрешава на приложението да премахва сертификатите за управление на цифровите права (DRM). Нормалните приложения би трябвало никога да се нуждаят от това."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"свързване с услуга за съобщения от оператор"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Разрешава на притежателя да се свърже към интерфейса от най-високото ниво на услуга за съобщения от оператор. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
+    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Задаване на правила за паролата"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролира дължината и разрешените знаци за паролите и ПИН кодовете за заключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Наблюдаване на опитите за отключване на екрана"</string>
@@ -628,8 +663,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Натиснете „Меню“, за да отключите или да извършите спешно обаждане."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Натиснете „Меню“, за да отключите."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Нарисувайте фигура, за да отключите"</string>
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Спешни случаи"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Назад към обаждането"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правилно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Опитайте отново"</string>
@@ -1029,36 +1063,21 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"кандидати"</u></string>
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (4863279349863279603) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (7391672496565685690) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (8317198948634872507) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>: Подготвя се"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Проверява се за грешки"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Открито е ново хранилище (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"За прехвърляне на снимки и мултимедия"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g>: Има повреда"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"Хранилището (<xliff:g id="NAME">%s</xliff:g>) е повредено. Опитайте да го преформатирате"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>: Неочаквано премахване"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Спрете хранилището (<xliff:g id="NAME">%s</xliff:g>), преди да го извадите, за да не загубите данни"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Премахнахте <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Хранилището (<xliff:g id="NAME">%s</xliff:g>) е премахнато. Поставете ново"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g>: Още се изважда…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Не премахвайте"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"Настройване"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Изваждане"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Изследване"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Не бяха намерени съответстващи дейности."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Насочване на изходящата мултимедия"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Разрешава на приложението да насочва изходящата мултимедия към други външни устройства."</string>
@@ -1188,6 +1207,12 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"„%1$s“, „%2$s“ – %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Вътрешно хранилище"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD карта"</string>
+    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
+    <skip />
+    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
+    <skip />
     <string name="storage_usb" msgid="3017954059538517278">"USB хранилище"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Редактиране"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Предупрежд. за ползване на данни"</string>
@@ -1450,7 +1475,7 @@
     <string name="zen_mode_forever" msgid="7420011936770086993">"Докато не изключите това"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Свиване"</string>
-    <string name="zen_mode_feature_name" msgid="289097150786114338">"Блокиране на прекъсванията"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Не безпокойте"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Почивка"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Делничните вечери"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Събота и неделя"</string>
