@@ -371,7 +371,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final long deltaBytes = lengthBytes - stat.st_size;
                 // Only need to free up space when writing to internal stage
                 if (stageDir != null && deltaBytes > 0) {
-                    mPm.freeStorage(deltaBytes);
+                    mPm.freeStorage(params.volumeUuid, deltaBytes);
                 }
                 Libcore.os.posix_fallocate(targetFd, 0, lengthBytes);
             }

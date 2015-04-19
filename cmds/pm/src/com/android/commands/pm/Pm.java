@@ -1691,9 +1691,13 @@ public final class Pm {
             showUsage();
             return 1;
         }
+        String volumeUuid = nextArg();
+        if ("internal".equals(volumeUuid)) {
+            volumeUuid = null;
+        }
         ClearDataObserver obs = new ClearDataObserver();
         try {
-            mPm.freeStorageAndNotify(sizeVal, obs);
+            mPm.freeStorageAndNotify(volumeUuid, sizeVal, obs);
             synchronized (obs) {
                 while (!obs.finished) {
                     try {
@@ -1884,7 +1888,7 @@ public final class Pm {
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
-        System.err.println("       pm trim-caches DESIRED_FREE_SPACE");
+        System.err.println("       pm trim-caches DESIRED_FREE_SPACE [internal|UUID]");
         System.err.println("       pm create-user [--profileOf USER_ID] [--managed] USER_NAME");
         System.err.println("       pm remove-user USER_ID");
         System.err.println("       pm get-max-users");

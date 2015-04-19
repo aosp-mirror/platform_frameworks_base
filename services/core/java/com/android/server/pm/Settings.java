@@ -207,6 +207,8 @@ final class Settings {
 
     private static int mFirstAvailableUid = 0;
 
+    // TODO: store SDK versions and fingerprint for each volume UUID
+
     // These are the last platform API version we were using for
     // the apps installed on internal and external storage.  It is
     // used to grant newer permissions one time during a system upgrade.
@@ -3437,7 +3439,7 @@ final class Settings {
             // Only system apps are initially installed.
             ps.setInstalled((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0, userHandle);
             // Need to create a data directory for all apps under this user.
-            installer.createUserData(ps.name,
+            installer.createUserData(ps.volumeUuid, ps.name,
                     UserHandle.getUid(userHandle, ps.appId), userHandle,
                     ps.pkg.applicationInfo.seinfo);
         }

@@ -535,21 +535,16 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @hide - to match hiding in superclass
-     */
+    /** {@hide} */
     @Override
-    public void freeStorageAndNotify(
-            long idealStorageSize, IPackageDataObserver observer) {
+    public void freeStorageAndNotify(String volumeUuid, long idealStorageSize,
+            IPackageDataObserver observer) {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @hide - to match hiding in superclass
-     */
+    /** {@hide} */
     @Override
-    public void freeStorage(
-            long idealStorageSize, IntentSender pi) {
+    public void freeStorage(String volumeUuid, long idealStorageSize, IntentSender pi) {
         throw new UnsupportedOperationException();
     }
 

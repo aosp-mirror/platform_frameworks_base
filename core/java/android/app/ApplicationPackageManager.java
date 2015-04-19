@@ -1520,19 +1520,21 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
     }
+
     @Override
-    public void freeStorageAndNotify(long idealStorageSize, IPackageDataObserver observer) {
+    public void freeStorageAndNotify(String volumeUuid, long idealStorageSize,
+            IPackageDataObserver observer) {
         try {
-            mPM.freeStorageAndNotify(idealStorageSize, observer);
+            mPM.freeStorageAndNotify(volumeUuid, idealStorageSize, observer);
         } catch (RemoteException e) {
             // Should never happen!
         }
     }
 
     @Override
-    public void freeStorage(long freeStorageSize, IntentSender pi) {
+    public void freeStorage(String volumeUuid, long freeStorageSize, IntentSender pi) {
         try {
-            mPM.freeStorage(freeStorageSize, pi);
+            mPM.freeStorage(volumeUuid, freeStorageSize, pi);
         } catch (RemoteException e) {
             // Should never happen!
         }

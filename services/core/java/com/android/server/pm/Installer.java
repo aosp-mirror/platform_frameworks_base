@@ -48,6 +48,9 @@ public final class Installer extends SystemService {
         if (TextUtils.isEmpty(arg)) {
             return "!";
         } else {
+            if (arg.indexOf('\0') != -1 || arg.indexOf(' ') != -1) {
+                throw new IllegalArgumentException(arg);
+            }
             return arg;
         }
     }
