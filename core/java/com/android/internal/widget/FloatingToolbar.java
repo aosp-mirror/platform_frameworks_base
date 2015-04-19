@@ -288,13 +288,8 @@ public final class FloatingToolbar {
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        // This animation should never be run if the overflow panel has not been
-                        // initialized.
-                        Preconditions.checkNotNull(mOverflowPanel);
-                        mContentContainer.removeAllViews();
-                        mContentContainer.addView(mOverflowPanel.getView());
+                        setOverflowPanelAsContent();
                         mOverflowPanel.fadeIn(true);
-                        setContentAreaAsTouchableSurface();
                     }
 
                     @Override
@@ -307,13 +302,8 @@ public final class FloatingToolbar {
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        // This animation should never be run if the main panel has not been
-                        // initialized.
-                        Preconditions.checkNotNull(mMainPanel);
-                        mContentContainer.removeAllViews();
-                        mContentContainer.addView(mMainPanel.getView());
+                        setMainPanelAsContent();
                         mMainPanel.fadeIn(true);
-                        setContentAreaAsTouchableSurface();
                     }
 
                     @Override
@@ -323,6 +313,24 @@ public final class FloatingToolbar {
         private final AnimatorSet mShowAnimation;
         private final AnimatorSet mDismissAnimation;
         private final AnimatorSet mHideAnimation;
+        private final AnimationSet mOpenOverflowAnimation = new AnimationSet(true) {
+            @Override
+            public void cancel() {
+                if (hasStarted() && !hasEnded()) {
+                    super.cancel();
+                    setOverflowPanelAsContent();
+                }
+            }
+        };
+        private final AnimationSet mCloseOverflowAnimation = new AnimationSet(true) {
+            @Override
+            public void cancel() {
+                if (hasStarted() && !hasEnded()) {
+                    super.cancel();
+                    setMainPanelAsContent();
+                }
+            }
+        };
 
         private final Runnable mOpenOverflow = new Runnable() {
             @Override
@@ -363,7 +371,7 @@ public final class FloatingToolbar {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             mPopupWindow.dismiss();
-                            setMainPanelAsContent();
+                            mContentContainer.removeAllViews();
                         }
                     });
             mHideAnimation = createShrinkFadeOutFromBottomAnimation(
@@ -429,8 +437,15 @@ public final class FloatingToolbar {
 
             mHidden = false;
             mDismissed = false;
-            stopDismissAndHideAnimations();
+            cancelAllAnimations();
+            // Make sure a panel is set as the content.
+            if (mContentContainer.getChildCount() == 0) {
+                setMainPanelAsContent();
+            }
             preparePopupContent();
+            // If we're yet to show the popup, set the container visibility to zero.
+            // The "show" animation will make this visible.
+            mContentContainer.setAlpha(0);
             mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, x, y);
             runShowAnimation();
         }
@@ -487,6 +502,7 @@ public final class FloatingToolbar {
                 return;
             }
 
+            cancelAllAnimations();
             preparePopupContent();
             mPopupWindow.update(x, y, getWidth(), getHeight());
         }
@@ -550,21 +566,24 @@ public final class FloatingToolbar {
             mHideAnimation.start();
         }
 
-        private void stopDismissAndHideAnimations() {
+        private void cancelAllAnimations() {
+            mShowAnimation.cancel();
             mDismissAnimation.cancel();
             mHideAnimation.cancel();
+            mOpenOverflowAnimation.cancel();
+            mCloseOverflowAnimation.cancel();
         }
 
         /**
          * Opens the floating toolbar overflow.
          * This method should not be called if menu items have not been laid out with
-         * {@link #layoutMenuItems(List, MenuItem.OnMenuItemClickListener, int)}.
+         * {@link #layoutMenuItems(java.util.List, MenuItem.OnMenuItemClickListener, int)}.
          *
          * @throws IllegalStateException if called when menu items have not been laid out.
          */
         private void openOverflow() {
-            Preconditions.checkNotNull(mMainPanel);
-            Preconditions.checkNotNull(mOverflowPanel);
+            Preconditions.checkState(mMainPanel != null);
+            Preconditions.checkState(mOverflowPanel != null);
 
             mMainPanel.fadeOut(true);
             Size overflowPanelSize = mOverflowPanel.measure();
@@ -601,11 +620,11 @@ public final class FloatingToolbar {
             widthAnimation.setDuration(240);
             heightAnimation.setDuration(180);
             heightAnimation.setStartOffset(60);
-            AnimationSet animation = new AnimationSet(true);
-            animation.setAnimationListener(mOnOverflowOpened);
-            animation.addAnimation(widthAnimation);
-            animation.addAnimation(heightAnimation);
-            mContentContainer.startAnimation(animation);
+            mOpenOverflowAnimation.getAnimations().clear();
+            mOpenOverflowAnimation.setAnimationListener(mOnOverflowOpened);
+            mOpenOverflowAnimation.addAnimation(widthAnimation);
+            mOpenOverflowAnimation.addAnimation(heightAnimation);
+            mContentContainer.startAnimation(mOpenOverflowAnimation);
         }
 
         /**
@@ -613,11 +632,11 @@ public final class FloatingToolbar {
          * This method should not be called if menu items have not been laid out with
          * {@link #layoutMenuItems(java.util.List, MenuItem.OnMenuItemClickListener, int)}.
          *
-         * @throws IllegalStateException
+         * @throws IllegalStateException if called when menu items have not been laid out.
          */
         private void closeOverflow() {
-            Preconditions.checkNotNull(mMainPanel);
-            Preconditions.checkNotNull(mOverflowPanel);
+            Preconditions.checkState(mMainPanel != null);
+            Preconditions.checkState(mOverflowPanel != null);
 
             mOverflowPanel.fadeOut(true);
             Size mainPanelSize = mMainPanel.measure();
@@ -653,58 +672,42 @@ public final class FloatingToolbar {
             widthAnimation.setDuration(150);
             widthAnimation.setStartOffset(150);
             heightAnimation.setDuration(210);
-            AnimationSet animation = new AnimationSet(true);
-            animation.setAnimationListener(mOnOverflowClosed);
-            animation.addAnimation(widthAnimation);
-            animation.addAnimation(heightAnimation);
-            mContentContainer.startAnimation(animation);
+            mCloseOverflowAnimation.getAnimations().clear();
+            mCloseOverflowAnimation.setAnimationListener(mOnOverflowClosed);
+            mCloseOverflowAnimation.addAnimation(widthAnimation);
+            mCloseOverflowAnimation.addAnimation(heightAnimation);
+            mContentContainer.startAnimation(mCloseOverflowAnimation);
         }
 
         /**
          * Prepares the content container for show and update calls.
          */
         private void preparePopupContent() {
-            // Do not call this method if main view panel has not been initialized.
-            Preconditions.checkNotNull(mMainPanel);
-
-            // If we're yet to show the popup, set the container visibility to zero.
-            // The "show" animation will make this visible.
-            if (!mPopupWindow.isShowing()) {
-                mContentContainer.setAlpha(0);
+            // Reset visibility.
+            if (mMainPanel != null) {
+                mMainPanel.fadeIn(false);
             }
-
-            // Make sure panels are visible.
-            mMainPanel.fadeIn(false);
             if (mOverflowPanel != null) {
                 mOverflowPanel.fadeIn(false);
             }
 
-            // Make sure a panel is set as the content.
-            if (mContentContainer.getChildCount() == 0) {
-                mContentContainer.addView(mMainPanel.getView());
+            // Reset position.
+            if (mMainPanel != null
+                    && mContentContainer.getChildAt(0) == mMainPanel.getView()) {
+                positionMainPanel();
             }
-
-            // Make sure the main panel is at the correct position.
-            if (mContentContainer.getChildAt(0) == mMainPanel.getView()) {
-                float x = mPopupWindow.getWidth()
-                        - (mMainPanel.getView().getMeasuredWidth() + mMarginHorizontal);
-                mContentContainer.setX(x);
-
-                float y = mMarginVertical;
-                if  (mOverflowDirection == OVERFLOW_DIRECTION_UP) {
-                    y = getHeight()
-                            - (mMainPanel.getView().getMeasuredHeight() + mMarginVertical);
-                }
-                mContentContainer.setY(y);
+            if (mOverflowPanel != null
+                    && mContentContainer.getChildAt(0) == mOverflowPanel.getView()) {
+                positionOverflowPanel();
             }
-
-            setContentAreaAsTouchableSurface();
         }
 
         /**
          * Sets the current content to be the main view panel.
          */
         private void setMainPanelAsContent() {
+            // This should never be called if the main panel has not been initialized.
+            Preconditions.checkNotNull(mMainPanel);
             mContentContainer.removeAllViews();
             Size mainPanelSize = mMainPanel.measure();
             ViewGroup.LayoutParams params = mContentContainer.getLayoutParams();
@@ -712,6 +715,53 @@ public final class FloatingToolbar {
             params.height = mainPanelSize.getHeight();
             mContentContainer.setLayoutParams(params);
             mContentContainer.addView(mMainPanel.getView());
+            setContentAreaAsTouchableSurface();
+        }
+
+        /**
+         * Sets the current content to be the overflow view panel.
+         */
+        private void setOverflowPanelAsContent() {
+            // This should never be called if the overflow panel has not been initialized.
+            Preconditions.checkNotNull(mOverflowPanel);
+            mContentContainer.removeAllViews();
+            Size overflowPanelSize = mOverflowPanel.measure();
+            ViewGroup.LayoutParams params = mContentContainer.getLayoutParams();
+            params.width = overflowPanelSize.getWidth();
+            params.height = overflowPanelSize.getHeight();
+            mContentContainer.setLayoutParams(params);
+            mContentContainer.addView(mOverflowPanel.getView());
+            setContentAreaAsTouchableSurface();
+        }
+
+        /**
+         * Places the main view panel at the appropriate resting coordinates.
+         */
+        private void positionMainPanel() {
+            Preconditions.checkNotNull(mMainPanel);
+            float x = mPopupWindow.getWidth()
+                    - (mMainPanel.getView().getMeasuredWidth() + mMarginHorizontal);
+            mContentContainer.setX(x);
+
+            float y = mMarginVertical;
+            if  (mOverflowDirection == OVERFLOW_DIRECTION_UP) {
+                y = getHeight()
+                        - (mMainPanel.getView().getMeasuredHeight() + mMarginVertical);
+            }
+            mContentContainer.setY(y);
+            setContentAreaAsTouchableSurface();
+        }
+
+        /**
+         * Places the main view panel at the appropriate resting coordinates.
+         */
+        private void positionOverflowPanel() {
+            Preconditions.checkNotNull(mOverflowPanel);
+            float x = mPopupWindow.getWidth()
+                    - (mOverflowPanel.getView().getMeasuredWidth() + mMarginHorizontal);
+            mContentContainer.setX(x);
+            mContentContainer.setY(mMarginVertical);
+            setContentAreaAsTouchableSurface();
         }
 
         private void updatePopupSize() {
@@ -1080,6 +1130,7 @@ public final class FloatingToolbar {
         }
 
         public void fadeIn(boolean animate) {
+            cancelFadeAnimations();
             if (animate) {
                 mFadeInAnimation.start();
             } else {
@@ -1088,11 +1139,17 @@ public final class FloatingToolbar {
         }
 
         public void fadeOut(boolean animate) {
+            cancelFadeAnimations();
             if (animate) {
                 mFadeOutAnimation.start();
             } else {
                 mView.setAlpha(0);
             }
+        }
+
+        private void cancelFadeAnimations() {
+            mFadeInAnimation.cancel();
+            mFadeOutAnimation.cancel();
         }
     }
 
