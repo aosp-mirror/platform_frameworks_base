@@ -744,16 +744,15 @@ interface ITelephony {
     int checkCarrierPrivilegesForPackage(String pkgname);
 
     /**
-     * Returns list of the package names of the carrier apps that should handle the input intent
-     * and have carrier privileges for the given phoneId.
+     * Returns the package name of the carrier apps that should handle the input intent.
      *
+     * @param packageManager PackageManager for getting receivers.
      * @param intent Intent that will be sent.
-     * @param phoneId The phoneId on which the carrier app has carrier privileges.
-     * @return list of carrier app package names that can handle the intent on phoneId.
+     * @return list of carrier app package names that can handle the intent.
      *         Returns null if there is an error and an empty list if there
      *         are no matching packages.
      */
-    List<String> getCarrierPackageNamesForIntentAndPhone(in Intent intent, int phoneId);
+    List<String> getCarrierPackageNamesForIntent(in Intent intent);
 
     /**
      * Set the line 1 phone number string and its alphatag for the current ICCID
