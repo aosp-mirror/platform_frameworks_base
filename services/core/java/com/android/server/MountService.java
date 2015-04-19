@@ -215,7 +215,7 @@ class MountService extends IMountService.Stub
         public static final int DISK_CREATED = 640;
         public static final int DISK_SIZE_CHANGED = 641;
         public static final int DISK_LABEL_CHANGED = 642;
-        public static final int DISK_UNSUPPORTED = 643;
+        public static final int DISK_SCANNED = 643;
         public static final int DISK_DESTROYED = 649;
 
         public static final int VOLUME_CREATED = 650;
@@ -303,6 +303,10 @@ class MountService extends IMountService.Stub
     @GuardedBy("mLock")
     private ArrayMap<String, VolumeMetadata> mMetadata = new ArrayMap<>();
 
+    /** Map from disk ID to latches */
+    @GuardedBy("mLock")
+    private ArrayMap<String, CountDownLatch> mDiskScanLatches = new ArrayMap<>();
+
     private DiskInfo findDiskById(String id) {
         synchronized (mLock) {
             final DiskInfo disk = mDisks.get(id);
@@ -343,6 +347,17 @@ class MountService extends IMountService.Stub
             mMetadata.put(meta.fsUuid, meta);
         }
         return meta;
+    }
+
+    private CountDownLatch findOrCreateDiskScanLatch(String diskId) {
+        synchronized (mLock) {
+            CountDownLatch latch = mDiskScanLatches.get(diskId);
+            if (latch == null) {
+                latch = new CountDownLatch(1);
+                mDiskScanLatches.put(diskId, latch);
+            }
+            return latch;
+        }
     }
 
     private static int sNextMtpIndex = 1;
@@ -620,7 +635,7 @@ class MountService extends IMountService.Stub
     }
 
     private void waitForLatch(CountDownLatch latch, String condition) {
-        for (;;) {
+        while (true) {
             try {
                 if (latch.await(5000, TimeUnit.MILLISECONDS)) {
                     return;
@@ -629,7 +644,7 @@ class MountService extends IMountService.Stub
                             + " still waiting for " + condition + "...");
                 }
             } catch (InterruptedException e) {
-                Slog.w(TAG, "Interrupt while waiting for MountService to be ready.");
+                Slog.w(TAG, "Interrupt while waiting for " + condition);
             }
         }
     }
@@ -831,10 +846,12 @@ class MountService extends IMountService.Stub
                 }
                 break;
             }
-            case VoldResponseCode.DISK_UNSUPPORTED: {
+            case VoldResponseCode.DISK_SCANNED: {
                 if (cooked.length != 2) break;
                 final DiskInfo disk = mDisks.get(cooked[1]);
-                mCallbacks.notifyDiskUnsupported(disk);
+                if (disk != null) {
+                    onDiskScannedLocked(disk);
+                }
                 break;
             }
             case VoldResponseCode.DISK_DESTROYED: {
@@ -920,6 +937,25 @@ class MountService extends IMountService.Stub
         }
 
         return true;
+    }
+
+    private void onDiskScannedLocked(DiskInfo disk) {
+        final CountDownLatch latch = mDiskScanLatches.remove(disk.id);
+        if (latch != null) {
+            latch.countDown();
+        }
+
+        boolean empty = true;
+        for (int i = 0; i < mVolumes.size(); i++) {
+            final VolumeInfo vol = mVolumes.valueAt(i);
+            if (Objects.equals(disk.id, vol.getDiskId())) {
+                empty = false;
+            }
+        }
+
+        if (empty) {
+            mCallbacks.notifyDiskUnsupported(disk);
+        }
     }
 
     private void onVolumeCreatedLocked(VolumeInfo vol) {
@@ -1291,11 +1327,13 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         waitForReady();
 
+        final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
             mConnector.execute("volume", "partition", diskId, "public");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
+        waitForLatch(latch, "partitionPublic");
     }
 
     @Override
@@ -1303,11 +1341,13 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         waitForReady();
 
+        final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
             mConnector.execute("volume", "partition", diskId, "private");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
+        waitForLatch(latch, "partitionPrivate");
     }
 
     @Override
@@ -1315,11 +1355,13 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         waitForReady();
 
+        final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
             mConnector.execute("volume", "partition", diskId, "mixed", ratio);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
+        waitForLatch(latch, "partitionMixed");
     }
 
     @Override
