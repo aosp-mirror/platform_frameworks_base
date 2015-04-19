@@ -22,42 +22,48 @@ import com.android.internal.telephony.ISubscriptionListener;
 
 interface ISub {
     /**
+     * @param callingPackage The package maing the call.
      * @return a list of all subscriptions in the database, this includes
      * all subscriptions that have been seen.
      */
-    List<SubscriptionInfo> getAllSubInfoList();
+    List<SubscriptionInfo> getAllSubInfoList(String callingPackage);
 
     /**
+     * @param callingPackage The package maing the call.
      * @return the count of all subscriptions in the database, this includes
      * all subscriptions that have been seen.
      */
-    int getAllSubInfoCount();
+    int getAllSubInfoCount(String callingPackage);
 
     /**
      * Get the active SubscriptionInfo with the subId key
      * @param subId The unique SubscriptionInfo key in database
+     * @param callingPackage The package maing the call.
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfo(int subId);
+    SubscriptionInfo getActiveSubscriptionInfo(int subId, String callingPackage);
 
     /**
      * Get the active SubscriptionInfo associated with the iccId
      * @param iccId the IccId of SIM card
+     * @param callingPackage The package maing the call.
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfoForIccId(String iccId);
+    SubscriptionInfo getActiveSubscriptionInfoForIccId(String iccId, String callingPackage);
 
     /**
      * Get the active SubscriptionInfo associated with the slotIdx
      * @param slotIdx the slot which the subscription is inserted
+     * @param callingPackage The package maing the call.
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIdx);
+    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIdx, String callingPackage);
 
     /**
      * Get the SubscriptionInfo(s) of the active subscriptions. The records will be sorted
      * by {@link SubscriptionInfo#getSimSlotIndex} then by {@link SubscriptionInfo#getSubscriptionId}.
      *
+     * @param callingPackage The package maing the call.
      * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
      * <ul>
      * <li>
@@ -74,12 +80,13 @@ interface ISub {
      * </li>
      * </ul>
      */
-    List<SubscriptionInfo> getActiveSubscriptionInfoList();
+    List<SubscriptionInfo> getActiveSubscriptionInfoList(String callingPackage);
 
     /**
+     * @param callingPackage The package maing the call.
      * @return the number of active subscriptions
      */
-    int getActiveSubInfoCount();
+    int getActiveSubInfoCount(String callingPackage);
 
     /**
      * @return the maximum number of subscriptions this device will support at any one time.
@@ -90,50 +97,57 @@ interface ISub {
      * Add a new SubscriptionInfo to subinfo database if needed
      * @param iccId the IccId of the SIM card
      * @param slotId the slot which the SIM is inserted
+     * @param callingPackage The package maing the call.
      * @return the URL of the newly created row or the updated row
      */
-    int addSubInfoRecord(String iccId, int slotId);
+    int addSubInfoRecord(String iccId, int slotId, String callingPackage);
 
     /**
      * Set SIM icon tint color by simInfo index
      * @param tint the icon tint color of the SIM
      * @param subId the unique SubscriptionInfo index in database
+     * @param callingPackage The package maing the call.
      * @return the number of records updated
      */
-    int setIconTint(int tint, int subId);
+    int setIconTint(int tint, int subId, String callingPackage);
 
     /**
      * Set display name by simInfo index
      * @param displayName the display name of SIM card
      * @param subId the unique SubscriptionInfo index in database
+     * @param callingPackage The package maing the call.
      * @return the number of records updated
      */
-    int setDisplayName(String displayName, int subId);
+    int setDisplayName(String displayName, int subId, String callingPackage);
 
     /**
      * Set display name by simInfo index with name source
      * @param displayName the display name of SIM card
      * @param subId the unique SubscriptionInfo index in database
      * @param nameSource, 0: DEFAULT_SOURCE, 1: SIM_SOURCE, 2: USER_INPUT
+     * @param callingPackage The package maing the call.
      * @return the number of records updated
      */
-    int setDisplayNameUsingSrc(String displayName, int subId, long nameSource);
+    int setDisplayNameUsingSrc(String displayName, int subId, long nameSource,
+            String callingPackage);
 
     /**
      * Set phone number by subId
      * @param number the phone number of the SIM
      * @param subId the unique SubscriptionInfo index in database
+     * @param callingPackage The package maing the call.
      * @return the number of records updated
      */
-    int setDisplayNumber(String number, int subId);
+    int setDisplayNumber(String number, int subId, String callingPackage);
 
     /**
      * Set data roaming by simInfo index
      * @param roaming 0:Don't allow data when roaming, 1:Allow data when roaming
+     * @param callingPackage The package maing the call.
      * @param subId the unique SubscriptionInfo index in database
      * @return the number of records updated
      */
-    int setDataRoaming(int roaming, int subId);
+    int setDataRoaming(int roaming, int subId, String callingPackage);
 
     int getSlotId(int subId);
 
@@ -141,7 +155,7 @@ interface ISub {
 
     int getDefaultSubId();
 
-    int clearSubInfo();
+    int clearSubInfo(String callingPackage);
 
     int getPhoneId(int subId);
 
@@ -161,7 +175,7 @@ interface ISub {
 
     void setDefaultSmsSubId(int subId);
 
-    void clearDefaultsForInactiveSubIds();
+    void clearDefaultsForInactiveSubIds(String callingPackage);
 
     int[] getActiveSubIdList();
 
