@@ -40,20 +40,21 @@ var RESOURCE_COLLECTIONS = {
   "launch/static": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=1RIz-cmTQB4",
-      "http://www.youtube.com/watch?v=MVBMWDzyHAI",
-      "http://android-developers.blogspot.com/2013/11/app-translation-service-now-available.html",
-      "http://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
-      "http://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
-      "distribute/essentials/quality/tablets.html",
-      "distribute/users/build-buzz.html",
-      "distribute/monetize/premium.html",
+      "distribute/googleplay/about.html",
+      "distribute/googleplay/guide.html",
+      "about/versions/lollipop.html",
+      "distribute/googleplay/wear.html",
+      "distribute/googleplay/tv.html",
+      "distribute/googleplay/edu/about.html",
+      "distribute/googleplay/families/about.html",
+      "distribute/monetize/subscriptions.html",
       "distribute/monetize/freemium.html",
       "distribute/monetize/ads.html",
-      "distribute/essentials/best-practices/apps.html",
-      "distribute/essentials/best-practices/games.html",
-      "distribute/users/know-your-user.html",
-      "distribute/googleplay/developer-console.html"
+      "distribute/users/promote-with-ads.html",
+      "distribute/engage/deep-linking.html",
+      "distribute/engage/game-services.html",
+      "distribute/essentials/optimizing-your-app.html",
+      "distribute/engage/easy-signin.html",
     ]
   },
   "launch/static/ja": {
