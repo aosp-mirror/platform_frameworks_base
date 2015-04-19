@@ -100,72 +100,75 @@ public class StorageNotification extends SystemUI {
 
         Log.d(TAG, vol.toString());
 
-        // New state means we tear down any old notifications
-        mNotificationManager.cancelAsUser(vol.getId(), NOTIF_ID, UserHandle.ALL);
-
+        final Notification notif;
         switch (newState) {
             case VolumeInfo.STATE_UNMOUNTED:
-                onVolumeUnmounted(vol);
+                notif = onVolumeUnmounted(vol);
                 break;
             case VolumeInfo.STATE_CHECKING:
-                onVolumeChecking(vol);
+                notif = onVolumeChecking(vol);
                 break;
             case VolumeInfo.STATE_MOUNTED:
             case VolumeInfo.STATE_MOUNTED_READ_ONLY:
-                onVolumeMounted(vol);
+                notif = onVolumeMounted(vol);
                 break;
             case VolumeInfo.STATE_FORMATTING:
-                onVolumeFormatting(vol);
+                notif = onVolumeFormatting(vol);
                 break;
             case VolumeInfo.STATE_EJECTING:
-                onVolumeEjecting(vol);
+                notif = onVolumeEjecting(vol);
                 break;
             case VolumeInfo.STATE_UNMOUNTABLE:
-                onVolumeUnmountable(vol);
+                notif = onVolumeUnmountable(vol);
                 break;
             case VolumeInfo.STATE_REMOVED:
-                onVolumeRemoved(vol);
+                notif = onVolumeRemoved(vol);
                 break;
             case VolumeInfo.STATE_BAD_REMOVAL:
-                onVolumeBadRemoval(vol);
+                notif = onVolumeBadRemoval(vol);
                 break;
+            default:
+                notif = null;
+                break;
+        }
+
+        if (notif != null) {
+            mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
+        } else {
+            mNotificationManager.cancelAsUser(vol.getId(), NOTIF_ID, UserHandle.ALL);
         }
     }
 
-    private void onVolumeUnmounted(VolumeInfo vol) {
+    private Notification onVolumeUnmounted(VolumeInfo vol) {
         // Ignored
+        return null;
     }
 
-    private void onVolumeChecking(VolumeInfo vol) {
+    private Notification onVolumeChecking(VolumeInfo vol) {
         final DiskInfo disk = vol.getDisk();
         final CharSequence title = mContext.getString(
                 R.string.ext_media_checking_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
                 R.string.ext_media_checking_notification_message, disk.getDescription());
 
-        final Notification notif = buildNotificationBuilder(title, text)
-                .setSmallIcon(R.drawable.stat_notify_sdcard_prepare)
+        return buildNotificationBuilder(vol, title, text)
                 .setCategory(Notification.CATEGORY_PROGRESS)
                 .setPriority(Notification.PRIORITY_LOW)
                 .setOngoing(true)
                 .build();
-
-        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
-    private void onVolumeMounted(VolumeInfo vol) {
+    private Notification onVolumeMounted(VolumeInfo vol) {
         // Don't annoy when user dismissed in past
-        if (vol.isSnoozed()) return;
+        if (vol.isSnoozed()) return null;
 
         final DiskInfo disk = vol.getDisk();
-        final Notification notif;
         if (disk.isAdoptable() && !vol.isInited()) {
             final CharSequence title = disk.getDescription();
             final CharSequence text = mContext.getString(
                     R.string.ext_media_new_notification_message, disk.getDescription());
 
-            notif = buildNotificationBuilder(title, text)
-                    .setSmallIcon(R.drawable.stat_notify_sdcard)
+            return buildNotificationBuilder(vol, title, text)
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_init_action),
                             buildInitPendingIntent(vol)))
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_unmount_action),
@@ -179,8 +182,7 @@ public class StorageNotification extends SystemUI {
             final CharSequence text = mContext.getString(
                     R.string.ext_media_ready_notification_message, disk.getDescription());
 
-            notif = buildNotificationBuilder(title, text)
-                    .setSmallIcon(R.drawable.stat_notify_sdcard)
+            return buildNotificationBuilder(vol, title, text)
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_browse_action),
                             buildBrowsePendingIntent(vol)))
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_unmount_action),
@@ -190,51 +192,44 @@ public class StorageNotification extends SystemUI {
                     .setPriority(Notification.PRIORITY_LOW)
                     .build();
         }
-
-        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
-    private void onVolumeFormatting(VolumeInfo vol) {
+    private Notification onVolumeFormatting(VolumeInfo vol) {
         // Ignored
+        return null;
     }
 
-    private void onVolumeEjecting(VolumeInfo vol) {
+    private Notification onVolumeEjecting(VolumeInfo vol) {
         final DiskInfo disk = vol.getDisk();
         final CharSequence title = mContext.getString(
                 R.string.ext_media_unmounting_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
                 R.string.ext_media_unmounting_notification_message, disk.getDescription());
 
-        final Notification notif = buildNotificationBuilder(title, text)
-                .setSmallIcon(R.drawable.stat_notify_sdcard_prepare)
+        return buildNotificationBuilder(vol, title, text)
                 .setCategory(Notification.CATEGORY_PROGRESS)
                 .setPriority(Notification.PRIORITY_LOW)
                 .setOngoing(true)
                 .build();
-
-        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
-    private void onVolumeUnmountable(VolumeInfo vol) {
+    private Notification onVolumeUnmountable(VolumeInfo vol) {
         final DiskInfo disk = vol.getDisk();
         final CharSequence title = mContext.getString(
                 R.string.ext_media_unmountable_notification_title, disk.getDescription());
         final CharSequence text = mContext.getString(
                 R.string.ext_media_unmountable_notification_message, disk.getDescription());
 
-        final Notification notif = buildNotificationBuilder(title, text)
-                .setSmallIcon(R.drawable.stat_notify_sdcard)
+        return buildNotificationBuilder(vol, title, text)
                 .setContentIntent(buildDetailsPendingIntent(vol))
                 .setCategory(Notification.CATEGORY_ERROR)
                 .build();
-
-        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
-    private void onVolumeRemoved(VolumeInfo vol) {
+    private Notification onVolumeRemoved(VolumeInfo vol) {
         if (!vol.isPrimary()) {
             // Ignore non-primary media
-            return;
+            return null;
         }
 
         final DiskInfo disk = vol.getDisk();
@@ -243,18 +238,15 @@ public class StorageNotification extends SystemUI {
         final CharSequence text = mContext.getString(
                 R.string.ext_media_nomedia_notification_message, disk.getDescription());
 
-        final Notification notif = buildNotificationBuilder(title, text)
-                .setSmallIcon(R.drawable.stat_notify_sdcard)
+        return buildNotificationBuilder(vol, title, text)
                 .setCategory(Notification.CATEGORY_ERROR)
                 .build();
-
-        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
-    private void onVolumeBadRemoval(VolumeInfo vol) {
+    private Notification onVolumeBadRemoval(VolumeInfo vol) {
         if (!vol.isPrimary()) {
             // Ignore non-primary media
-            return;
+            return null;
         }
 
         final DiskInfo disk = vol.getDisk();
@@ -263,16 +255,31 @@ public class StorageNotification extends SystemUI {
         final CharSequence text = mContext.getString(
                 R.string.ext_media_badremoval_notification_message, disk.getDescription());
 
-        final Notification notif = buildNotificationBuilder(title, text)
-                .setSmallIcon(R.drawable.stat_notify_sdcard)
+        return buildNotificationBuilder(vol, title, text)
                 .setCategory(Notification.CATEGORY_ERROR)
                 .build();
-
-        mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
     }
 
-    private Notification.Builder buildNotificationBuilder(CharSequence title, CharSequence text) {
+    private int getSmallIcon(VolumeInfo vol) {
+        if (vol.disk.isSd()) {
+            switch (vol.getState()) {
+                case VolumeInfo.STATE_CHECKING:
+                case VolumeInfo.STATE_EJECTING:
+                    return R.drawable.stat_notify_sdcard_prepare;
+                default:
+                    return R.drawable.stat_notify_sdcard;
+            }
+        } else if (vol.disk.isUsb()) {
+            return R.drawable.stat_sys_data_usb;
+        } else {
+            return R.drawable.stat_notify_sdcard;
+        }
+    }
+
+    private Notification.Builder buildNotificationBuilder(VolumeInfo vol, CharSequence title,
+            CharSequence text) {
         return new Notification.Builder(mContext)
+                .setSmallIcon(getSmallIcon(vol))
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentText(text)

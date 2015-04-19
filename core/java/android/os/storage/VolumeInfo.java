@@ -49,7 +49,10 @@ import java.util.Objects;
  * @hide
  */
 public class VolumeInfo implements Parcelable {
-    public static final String EXTRA_VOLUME_ID = "android.os.storage.extra.VOLUME_ID";
+    public static final String ACTION_VOLUME_STATE_CHANGED =
+            "android.os.storage.action.VOLUME_STATE_CHANGED";
+    public static final String EXTRA_VOLUME_ID =
+            "android.os.storage.extra.VOLUME_ID";
 
     /** Stub volume representing internal private storage */
     public static final String ID_PRIVATE_INTERNAL = "private";
