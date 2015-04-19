@@ -3630,20 +3630,14 @@ public class TelephonyManager {
     /** @hide */
     @SystemApi
     public List<String> getCarrierPackageNamesForIntent(Intent intent) {
-        return getCarrierPackageNamesForIntentAndPhone(intent, getDefaultPhone());
-    }
-
-    /** @hide */
-    @SystemApi
-    public List<String> getCarrierPackageNamesForIntentAndPhone(Intent intent, int phoneId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getCarrierPackageNamesForIntentAndPhone(intent, phoneId);
+                return telephony.getCarrierPackageNamesForIntent(intent);
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone RemoteException", ex);
+            Rlog.e(TAG, "getCarrierPackageNamesForIntent RemoteException", ex);
         } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone NPE", ex);
+            Rlog.e(TAG, "getCarrierPackageNamesForIntent NPE", ex);
         }
         return null;
     }
