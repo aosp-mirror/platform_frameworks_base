@@ -76,6 +76,25 @@ var RESOURCE_COLLECTIONS = {
       "intl/ja/distribute/monetize/ads.html"
     ]
   },
+  "launch/static/ko": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=7X9Ue0Nfdh4&index=2&list=PL_WJkTbDHdBksDBRoqfeyLchEQqBAOlNl",
+      "https://www.youtube.com/watch?v=83FpwuschCQ",
+      "http://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
+      "http://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
+      "http://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
+      "intl/ko/distribute/googleplay/developer-console.html#alpha-beta",
+      "intl/ko/distribute/googleplay/guide.html",
+      "intl/ko/distribute/essentials/quality/core.html",
+      "https://support.google.com/googleplay/android-developer/answer/4430948?hl=ko",
+      "intl/ko/support.html",
+      "intl/ko/distribute/essentials/quality/wear.html",
+      "intl/ko/tv/index.html",
+      "intl/ko/google/play-services/games.html",
+      "intl/ko/distribute/monetize/ads.html"
+    ]
+  },
   "distribute/gp/gplanding": {
     "resources": [
       "distribute/googleplay/about.html",
