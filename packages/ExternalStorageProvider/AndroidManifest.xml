@@ -19,9 +19,7 @@
 
         <receiver android:name=".MountReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.MEDIA_MOUNTED" />
-                <action android:name="android.intent.action.MEDIA_UNMOUNTED" />
-                <data android:scheme="file" />
+                <action android:name="android.os.storage.action.VOLUME_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 

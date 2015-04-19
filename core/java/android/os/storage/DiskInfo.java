@@ -64,19 +64,29 @@ public class DiskInfo implements Parcelable {
         return id;
     }
 
+    private boolean isInteresting(String label) {
+        if (TextUtils.isEmpty(label)) {
+            return false;
+        }
+        if (label.toLowerCase().contains("generic")) {
+            return false;
+        }
+        return true;
+    }
+
     public String getDescription() {
         final Resources res = Resources.getSystem();
         if ((flags & FLAG_SD) != 0) {
-            if (TextUtils.isEmpty(label)) {
-                return res.getString(com.android.internal.R.string.storage_sd_card);
-            } else {
+            if (isInteresting(label)) {
                 return res.getString(com.android.internal.R.string.storage_sd_card_label, label);
+            } else {
+                return res.getString(com.android.internal.R.string.storage_sd_card);
             }
         } else if ((flags & FLAG_USB) != 0) {
-            if (TextUtils.isEmpty(label)) {
-                return res.getString(com.android.internal.R.string.storage_usb_drive);
-            } else {
+            if (isInteresting(label)) {
                 return res.getString(com.android.internal.R.string.storage_usb_drive_label, label);
+            } else {
+                return res.getString(com.android.internal.R.string.storage_usb_drive);
             }
         } else {
             return null;

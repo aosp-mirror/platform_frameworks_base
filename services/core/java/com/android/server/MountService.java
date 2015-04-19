@@ -861,7 +861,7 @@ class MountService extends IMountService.Stub
                     final int oldState = vol.state;
                     final int newState = Integer.parseInt(cooked[2]);
                     vol.state = newState;
-                    onVolumeStateChangedLocked(vol, oldState, newState);
+                    onVolumeStateChangedLocked(vol.clone(), oldState, newState);
                 }
                 break;
             }
@@ -955,8 +955,37 @@ class MountService extends IMountService.Stub
         }
     }
 
+    private boolean isBroadcastWorthy(VolumeInfo vol) {
+        switch (vol.getType()) {
+            case VolumeInfo.TYPE_PUBLIC:
+            case VolumeInfo.TYPE_EMULATED:
+                break;
+            default:
+                return false;
+        }
+
+        switch (vol.getState()) {
+            case VolumeInfo.STATE_MOUNTED:
+            case VolumeInfo.STATE_MOUNTED_READ_ONLY:
+            case VolumeInfo.STATE_EJECTING:
+            case VolumeInfo.STATE_UNMOUNTED:
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
     private void onVolumeStateChangedLocked(VolumeInfo vol, int oldState, int newState) {
-        mCallbacks.notifyVolumeStateChanged(vol.clone(), oldState, newState);
+        mCallbacks.notifyVolumeStateChanged(vol, oldState, newState);
+
+        if (isBroadcastWorthy(vol)) {
+            final Intent intent = new Intent(VolumeInfo.ACTION_VOLUME_STATE_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            // TODO: require receiver to hold permission
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        }
 
         final String oldStateEnv = VolumeInfo.getEnvironmentForState(oldState);
         final String newStateEnv = VolumeInfo.getEnvironmentForState(newState);
