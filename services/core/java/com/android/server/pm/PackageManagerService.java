@@ -1533,6 +1533,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
             if (vol.type == VolumeInfo.TYPE_PRIVATE) {
                 if (vol.state == VolumeInfo.STATE_MOUNTED) {
+                    // TODO: ensure that private directories exist for all active users
+                    // TODO: remove user data whose serial number doesn't match
                     loadPrivatePackages(vol);
                 } else if (vol.state == VolumeInfo.STATE_EJECTING) {
                     unloadPrivatePackages(vol);
@@ -1967,7 +1969,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         psit.remove();
                         logCriticalInfo(Log.WARN, "System package " + ps.name
                                 + " no longer exists; wiping its data");
-                        removeDataDirsLI(ps.name);
+                        removeDataDirsLI(null, ps.name);
                     } else {
                         final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(ps.name);
                         if (disabledPs.codePath == null || !disabledPs.codePath.exists()) {
@@ -2012,7 +2014,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (deletedPkg == null) {
                         msg = "Updated system package " + deletedAppName
                                 + " no longer exists; wiping its data";
-                        removeDataDirsLI(deletedAppName);
+                        removeDataDirsLI(null, deletedAppName);
                     } else {
                         msg = "Updated system app + " + deletedAppName
                                 + " no longer present; removing system privileges for "
@@ -2128,8 +2130,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             mIsUpgrade = !Build.FINGERPRINT.equals(mSettings.mFingerprint);
             if (mIsUpgrade && !onlyCore) {
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
-                for (String pkgName : mSettings.mPackages.keySet()) {
-                    deleteCodeCacheDirsLI(pkgName);
+                for (int i = 0; i < mSettings.mPackages.size(); i++) {
+                    final PackageSetting ps = mSettings.mPackages.valueAt(i);
+                    deleteCodeCacheDirsLI(ps.volumeUuid, ps.name);
                 }
                 mSettings.mFingerprint = Build.FINGERPRINT;
             }
@@ -2309,7 +2312,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     void cleanupInstallFailedPackage(PackageSetting ps) {
         logCriticalInfo(Log.WARN, "Cleaning up incompletely installed app: " + ps.name);
 
-        removeDataDirsLI(ps.name);
+        removeDataDirsLI(ps.volumeUuid, ps.name);
         if (ps.codePath != null) {
             if (ps.codePath.isDirectory()) {
                 mInstaller.rmPackageDir(ps.codePath.getAbsolutePath());
@@ -2604,9 +2607,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-
     @Override
-    public void freeStorageAndNotify(final long freeStorageSize, final IPackageDataObserver observer) {
+    public void freeStorageAndNotify(final String volumeUuid, final long freeStorageSize,
+            final IPackageDataObserver observer) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
         // Queue up an async operation since clearing cache may take a little while.
@@ -2615,7 +2618,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mHandler.removeCallbacks(this);
                 int retCode = -1;
                 synchronized (mInstallLock) {
-                    retCode = mInstaller.freeCache(freeStorageSize);
+                    retCode = mInstaller.freeCache(volumeUuid, freeStorageSize);
                     if (retCode < 0) {
                         Slog.w(TAG, "Couldn't clear application caches");
                     }
@@ -2632,7 +2635,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void freeStorage(final long freeStorageSize, final IntentSender pi) {
+    public void freeStorage(final String volumeUuid, final long freeStorageSize,
+            final IntentSender pi) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_CACHE, null);
         // Queue up an async operation since clearing cache may take a little while.
@@ -2641,7 +2645,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mHandler.removeCallbacks(this);
                 int retCode = -1;
                 synchronized (mInstallLock) {
-                    retCode = mInstaller.freeCache(freeStorageSize);
+                    retCode = mInstaller.freeCache(volumeUuid, freeStorageSize);
                     if (retCode < 0) {
                         Slog.w(TAG, "Couldn't clear application caches");
                     }
@@ -2660,9 +2664,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
-    void freeStorage(long freeStorageSize) throws IOException {
+    void freeStorage(String volumeUuid, long freeStorageSize) throws IOException {
         synchronized (mInstallLock) {
-            if (mInstaller.freeCache(freeStorageSize) < 0) {
+            if (mInstaller.freeCache(volumeUuid, freeStorageSize) < 0) {
                 throw new IOException("Failed to free enough space");
             }
         }
@@ -5481,15 +5485,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private int createDataDirsLI(String packageName, int uid, String seinfo) {
+    private int createDataDirsLI(String volumeUuid, String packageName, int uid, String seinfo) {
         int[] users = sUserManager.getUserIds();
-        int res = mInstaller.install(packageName, uid, uid, seinfo);
+        int res = mInstaller.install(volumeUuid, packageName, uid, uid, seinfo);
         if (res < 0) {
             return res;
         }
         for (int user : users) {
             if (user != 0) {
-                res = mInstaller.createUserData(packageName,
+                res = mInstaller.createUserData(volumeUuid, packageName,
                         UserHandle.getUid(user, uid), user, seinfo);
                 if (res < 0) {
                     return res;
@@ -5499,11 +5503,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return res;
     }
 
-    private int removeDataDirsLI(String packageName) {
+    private int removeDataDirsLI(String volumeUuid, String packageName) {
         int[] users = sUserManager.getUserIds();
         int res = 0;
         for (int user : users) {
-            int resInner = mInstaller.remove(packageName, user);
+            int resInner = mInstaller.remove(volumeUuid, packageName, user);
             if (resInner < 0) {
                 res = resInner;
             }
@@ -5512,11 +5516,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         return res;
     }
 
-    private int deleteCodeCacheDirsLI(String packageName) {
+    private int deleteCodeCacheDirsLI(String volumeUuid, String packageName) {
         int[] users = sUserManager.getUserIds();
         int res = 0;
         for (int user : users) {
-            int resInner = mInstaller.deleteCodeCacheFiles(packageName, user);
+            int resInner = mInstaller.deleteCodeCacheFiles(volumeUuid, packageName, user);
             if (resInner < 0) {
                 res = resInner;
             }
@@ -5651,7 +5655,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return res;
         } finally {
             if (!success && (scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
-                removeDataDirsLI(pkg.packageName);
+                removeDataDirsLI(pkg.volumeUuid, pkg.packageName);
             }
         }
     }
@@ -6021,8 +6025,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // This is probably because the system was stopped while
                         // installd was in the middle of messing with its libs
                         // directory.  Ask installd to fix that.
-                        int ret = mInstaller.fixUid(pkgName, pkg.applicationInfo.uid,
-                                pkg.applicationInfo.uid);
+                        int ret = mInstaller.fixUid(pkg.volumeUuid, pkgName,
+                                pkg.applicationInfo.uid, pkg.applicationInfo.uid);
                         if (ret >= 0) {
                             recovered = true;
                             String msg = "Package " + pkg.packageName
@@ -6035,7 +6039,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             || (scanFlags&SCAN_BOOTING) != 0)) {
                         // If this is a system app, we can at least delete its
                         // current data so the application will still work.
-                        int ret = removeDataDirsLI(pkgName);
+                        int ret = removeDataDirsLI(pkg.volumeUuid, pkgName);
                         if (ret >= 0) {
                             // TODO: Kill the processes first
                             // Old data gone!
@@ -6049,8 +6053,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             recovered = true;
 
                             // And now re-install the app.
-                            ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid,
-                                                   pkg.applicationInfo.seinfo);
+                            ret = createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,
+                                    pkg.applicationInfo.seinfo);
                             if (ret == -1) {
                                 // Ack should not happen!
                                 msg = prefix + pkg.packageName
@@ -6093,8 +6097,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.dataDir = dataPath.getPath();
                 if (mShouldRestoreconData) {
                     Slog.i(TAG, "SELinux relabeling of " + pkg.packageName + " issued.");
-                    mInstaller.restoreconData(pkg.packageName, pkg.applicationInfo.seinfo,
-                                pkg.applicationInfo.uid);
+                    mInstaller.restoreconData(pkg.volumeUuid, pkg.packageName,
+                            pkg.applicationInfo.seinfo, pkg.applicationInfo.uid);
                 }
             } else {
                 if (DEBUG_PACKAGE_SCANNING) {
@@ -6102,8 +6106,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.v(TAG, "Want this data dir: " + dataPath);
                 }
                 //invoke installer to do the actual installation
-                int ret = createDataDirsLI(pkgName, pkg.applicationInfo.uid,
-                                           pkg.applicationInfo.seinfo);
+                int ret = createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,
+                        pkg.applicationInfo.seinfo);
                 if (ret < 0) {
                     // Error from installer
                     throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
@@ -9590,7 +9594,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     final long sizeBytes = mContainerService.calculateInstalledSize(
                             origin.resolvedPath, isForwardLocked(), packageAbiOverride);
 
-                    if (mInstaller.freeCache(sizeBytes + lowThreshold) >= 0) {
+                    if (mInstaller.freeCache(null, sizeBytes + lowThreshold) >= 0) {
                         pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath,
                                 installFlags, packageAbiOverride);
                     }
@@ -10818,7 +10822,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 sendResourcesChangedBroadcast(false, true, pkgList, uidArray, null);
             }
 
-            deleteCodeCacheDirsLI(pkgName);
+            deleteCodeCacheDirsLI(pkg.volumeUuid, pkgName);
             try {
                 final PackageParser.Package newPackage = scanPackageLI(pkg, parseFlags,
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
@@ -10930,7 +10934,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Successfully disabled the old package. Now proceed with re-installation
-        deleteCodeCacheDirsLI(packageName);
+        deleteCodeCacheDirsLI(pkg.volumeUuid, packageName);
 
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
         pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
@@ -11661,7 +11665,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
-            removeDataDirsLI(packageName);
+            removeDataDirsLI(ps.volumeUuid, packageName);
             schedulePackageCleaning(packageName, UserHandle.USER_ALL, true);
         }
         // writer
@@ -11966,7 +11970,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 outInfo.removedAppId = appId;
                 outInfo.removedUsers = new int[] {removeUser};
             }
-            mInstaller.clearUserData(packageName, removeUser);
+            mInstaller.clearUserData(ps.volumeUuid, packageName, removeUser);
             removeKeystoreDataIfNeeded(removeUser, appId);
             schedulePackageCleaning(packageName, removeUser, false);
             synchronized (mPackages) {
@@ -12135,7 +12139,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Always delete data directories for package, even if we found no other
         // record of app. This helps users recover from UID mismatches without
         // resorting to a full data wipe.
-        int retCode = mInstaller.clearUserData(packageName, userId);
+        int retCode = mInstaller.clearUserData(pkg.volumeUuid, packageName, userId);
         if (retCode < 0) {
             Slog.w(TAG, "Couldn't remove cache files for package: " + packageName);
             return false;
@@ -12156,7 +12160,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (pkg != null && pkg.applicationInfo.primaryCpuAbi != null &&
                 !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
             final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
-            if (mInstaller.linkNativeLibraryDirectory(pkg.packageName, nativeLibPath, userId) < 0) {
+            if (mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
+                    nativeLibPath, userId) < 0) {
                 Slog.w(TAG, "Failed linking native library dir");
                 return false;
             }
@@ -12232,7 +12237,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
             return false;
         }
-        int retCode = mInstaller.deleteCacheFiles(packageName, userId);
+        int retCode = mInstaller.deleteCacheFiles(p.volumeUuid, packageName, userId);
         if (retCode < 0) {
             Slog.w(TAG, "Couldn't remove cache files for package: "
                        + packageName + " u" + userId);
@@ -12310,8 +12315,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         // TODO(multiArch): Extend getSizeInfo to look at *all* instruction sets, not
         // just the primary.
         String[] dexCodeInstructionSets = getDexCodeInstructionSets(getAppDexInstructionSets(ps));
-        int res = mInstaller.getSizeInfo(packageName, userHandle, p.baseCodePath, libDirRoot,
-                publicSrcDir, asecPath, dexCodeInstructionSets, pStats);
+        int res = mInstaller.getSizeInfo(p.volumeUuid, packageName, userHandle, p.baseCodePath,
+                libDirRoot, publicSrcDir, asecPath, dexCodeInstructionSets, pStats);
         if (res < 0) {
             return false;
         }
@@ -14305,7 +14310,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Technically, we shouldn't be doing this with the package lock
             // held.  However, this is very rare, and there is already so much
             // other disk I/O going on, that we'll let it slide for now.
-            mInstaller.removeUserDataDirs(userHandle);
+            final StorageManager storage = StorageManager.from(mContext);
+            final List<VolumeInfo> vols = storage.getVolumes();
+            for (VolumeInfo vol : vols) {
+                if (vol.getType() == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()) {
+                    final String volumeUuid = vol.getFsUuid();
+                    Slog.d(TAG, "Removing user data on volume " + volumeUuid);
+                    mInstaller.removeUserDataDirs(volumeUuid, userHandle);
+                }
+            }
         }
         mUserNeedsBadging.delete(userHandle);
         removeUnusedPackagesLILPw(userManager, userHandle);

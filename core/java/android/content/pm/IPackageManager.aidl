@@ -328,7 +328,7 @@ interface IPackageManager {
      * @param observer call back used to notify when
      * the operation is completed
      */
-     void freeStorageAndNotify(in long freeStorageSize,
+     void freeStorageAndNotify(in String volumeUuid, in long freeStorageSize,
              IPackageDataObserver observer);
 
     /**
@@ -352,7 +352,7 @@ interface IPackageManager {
      * notify when the operation is completed.May be null
      * to indicate that no call back is desired.
      */
-     void freeStorage(in long freeStorageSize,
+     void freeStorage(in String volumeUuid, in long freeStorageSize,
              in IntentSender pi);
      
     /**

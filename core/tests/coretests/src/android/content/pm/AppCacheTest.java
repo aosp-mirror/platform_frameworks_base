@@ -490,7 +490,7 @@ public class AppCacheTest extends AndroidTestCase {
             PackageDataObserver observer = new PackageDataObserver();
             //wait on observer
             synchronized(observer) {
-                getPm().freeStorageAndNotify(idealStorageSize, observer);
+                getPm().freeStorageAndNotify(null, idealStorageSize, observer);
                 long waitTime = 0;
                 while(!observer.isDone() || (waitTime > MAX_WAIT_TIME)) {
                     observer.wait(WAIT_TIME_INCR);
@@ -515,7 +515,7 @@ public class AppCacheTest extends AndroidTestCase {
         try {
             // Spin lock waiting for call back
             synchronized(r) {
-                getPm().freeStorage(idealStorageSize, pi.getIntentSender());
+                getPm().freeStorage(null, idealStorageSize, pi.getIntentSender());
                 long waitTime = 0;
                 while(!r.isDone() && (waitTime < MAX_WAIT_TIME)) {
                     r.wait(WAIT_TIME_INCR);

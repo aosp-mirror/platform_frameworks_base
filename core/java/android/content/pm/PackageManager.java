@@ -3798,7 +3798,13 @@ public abstract class PackageManager {
      * @hide
      */
     // @SystemApi
-    public abstract void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer);
+    public void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer) {
+        freeStorageAndNotify(null, freeStorageSize, observer);
+    }
+
+    /** {@hide} */
+    public abstract void freeStorageAndNotify(String volumeUuid, long freeStorageSize,
+            IPackageDataObserver observer);
 
     /**
      * Free storage by deleting LRU sorted list of cache files across
@@ -3823,7 +3829,12 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract void freeStorage(long freeStorageSize, IntentSender pi);
+    public void freeStorage(long freeStorageSize, IntentSender pi) {
+        freeStorage(null, freeStorageSize, pi);
+    }
+
+    /** {@hide} */
+    public abstract void freeStorage(String volumeUuid, long freeStorageSize, IntentSender pi);
 
     /**
      * Retrieve the size information for a package.

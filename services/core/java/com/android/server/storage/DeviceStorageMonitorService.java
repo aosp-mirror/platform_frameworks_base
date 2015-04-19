@@ -74,6 +74,8 @@ import dalvik.system.VMRuntime;
 public class DeviceStorageMonitorService extends SystemService {
     static final String TAG = "DeviceStorageMonitorService";
 
+    // TODO: extend to watch and manage caches on all private volumes
+
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
 
@@ -220,7 +222,7 @@ public class DeviceStorageMonitorService extends SystemService {
         try {
             if (localLOGV) Slog.i(TAG, "Clearing cache");
             IPackageManager.Stub.asInterface(ServiceManager.getService("package")).
-                    freeStorageAndNotify(mMemCacheTrimToThreshold, mClearCacheObserver);
+                    freeStorageAndNotify(null, mMemCacheTrimToThreshold, mClearCacheObserver);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
             mClearingCache = false;
