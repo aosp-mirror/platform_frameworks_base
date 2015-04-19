@@ -215,8 +215,10 @@ public class AppOpsManager {
     public static final int OP_ASSIST_SCREENSHOT = 50;
     /** @hide Read the phone state. */
     public static final int OP_READ_PHONE_STATE = 51;
+    /** @hide Add voicemail messages to the voicemail content provider. */
+    public static final int OP_ADD_VOICEMAIL = 52;
     /** @hide */
-    public static final int _NUM_OP = 52;
+    public static final int _NUM_OP = 53;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -297,7 +299,8 @@ public class AppOpsManager {
             OP_WRITE_WALLPAPER,
             OP_ASSIST_STRUCTURE,
             OP_ASSIST_SCREENSHOT,
-            OP_READ_PHONE_STATE
+            OP_READ_PHONE_STATE,
+            OP_ADD_VOICEMAIL
     };
 
     /**
@@ -353,6 +356,7 @@ public class AppOpsManager {
             null,
             null,
             OPSTR_ACTIVATE_VPN,
+            null,
             null,
             null,
             null,
@@ -415,7 +419,8 @@ public class AppOpsManager {
             "WRITE_WALLPAPER",
             "ASSIST_STRUCTURE",
             "ASSIST_SCREENSHOT",
-            "OP_READ_PHONE_STATE"
+            "OP_READ_PHONE_STATE",
+            "ADD_VOICEMAIL"
     };
 
     /**
@@ -474,7 +479,8 @@ public class AppOpsManager {
             null, // no permission for supporting wallpaper
             null, // no permission for receiving assist structure
             null, // no permission for receiving assist screenshot
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ADD_VOICEMAIL
     };
 
     /**
@@ -534,7 +540,8 @@ public class AppOpsManager {
             UserManager.DISALLOW_WALLPAPER, // WRITE_WALLPAPER
             null, // ASSIST_STRUCTURE
             null, // ASSIST_SCREENSHOT
-            null  // READ_PHONE_STATE
+            null, // READ_PHONE_STATE
+            null // ADD_VOICEMAIL
     };
 
     /**
@@ -594,6 +601,7 @@ public class AppOpsManager {
             false, //ASSIST_STRUCTURE
             false, //ASSIST_SCREENSHOT
             false, //READ_PHONE_STATE
+            false  //ADD_VOICEMAIL
     };
 
     /**
@@ -651,6 +659,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED
     };
 
@@ -678,6 +687,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,
