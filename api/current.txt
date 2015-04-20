@@ -5814,12 +5814,14 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_PROVISIONING_BT_MAC_ADDRESS = "android.app.extra.PROVISIONING_BT_MAC_ADDRESS";
     field public static final java.lang.String EXTRA_PROVISIONING_BT_USE_PROXY = "android.app.extra.PROVISIONING_BT_USE_PROXY";
     field public static final java.lang.String EXTRA_PROVISIONING_BT_UUID = "android.app.extra.PROVISIONING_BT_UUID";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_CERTIFICATE_CHECKSUM = "android.app.extra.PROVISIONING_DEVICE_ADMIN_CERTIFICATE_CHECKSUM";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME = "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE = "android.app.extra.PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION";
     field public static final deprecated java.lang.String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME";
+    field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_CERTIFICATE_CHECKSUM = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_CERTIFICATE_CHECKSUM";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_MINIMUM_VERSION_CODE";
     field public static final java.lang.String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM";
