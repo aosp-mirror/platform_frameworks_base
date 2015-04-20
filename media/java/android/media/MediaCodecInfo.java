@@ -160,57 +160,214 @@ public final class MediaCodecInfo {
         public CodecProfileLevel[] profileLevels;  // NOTE this array is modifiable by user
 
         // from OMX_COLOR_FORMATTYPE
+        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
         public static final int COLOR_FormatMonochrome              = 1;
+        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
         public static final int COLOR_Format8bitRGB332              = 2;
+        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
         public static final int COLOR_Format12bitRGB444             = 3;
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format16bitARGB4444           = 4;
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format16bitARGB1555           = 5;
+
+        /**
+         * 16 bits per pixel RGB color format, with 5-bit red & blue and 6-bit green component.
+         * <p>
+         * Using LSB 16-bit byte ordering, colors stored as Red 15:11, Green 10:5, Blue 4:0.
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |     BLUE     |      GREEN      |     RED      |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0           4  5     7   0     2  3           7
+         * bit
+         * </pre>
+         */
         public static final int COLOR_Format16bitRGB565             = 6;
+        /** @deprecated Use {@link #COLOR_Format16bitRGB565}. */
         public static final int COLOR_Format16bitBGR565             = 7;
+        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
         public static final int COLOR_Format18bitRGB666             = 8;
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format18bitARGB1665           = 9;
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format19bitARGB1666           = 10;
+
+        /**
+         * 24 bits per pixel RGB color format, with 8-bit red, green & blue components.
+         * <p>
+         * Using LSB 24-bit byte ordering, colors stored as Red 23:16, Green 15:8, Blue 7:0.
+         * <pre>
+         *         byte              byte             byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----->
+         * +-----------------+-----------------+-----------------+
+         * |       BLUE      |      GREEN      |       RED       |
+         * +-----------------+-----------------+-----------------+
+         * </pre>
+         */
         public static final int COLOR_Format24bitRGB888             = 11;
+        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
         public static final int COLOR_Format24bitBGR888             = 12;
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format24bitARGB1887           = 13;
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format25bitARGB1888           = 14;
+
+        /**
+         * 32 bits per pixel ARGB color format, with 8-bit alpha, red, green & blue components.
+         * <p>
+         * Using LSB 32-bit byte ordering, colors stored as Alpha 31:24, Red 23:16, Green 15:8,
+         * Blue 7:0.
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+-----------------+-----------------+-----------------+
+         * |       BLUE      |      GREEN      |       RED       |      ALPHA      |
+         * +-----------------+-----------------+-----------------+-----------------+
+         * </pre>
+         */
         public static final int COLOR_Format32bitBGRA8888           = 15;
+
+        /**
+         * 32 bits per pixel ARGB color format, with 8-bit alpha, red, green & blue components.
+         * <p>
+         * Using LSB 32-bit byte ordering, colors stored as Alpha 31:24, Red 7:0, Green 15:8,
+         * Blue 23:16.
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+-----------------+-----------------+-----------------+
+         * |       RED       |      GREEN      |       BLUE      |      ALPHA      |
+         * +-----------------+-----------------+-----------------+-----------------+
+         * </pre>
+         */
         public static final int COLOR_Format32bitARGB8888           = 16;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV411Planar            = 17;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV411PackedPlanar      = 18;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV420Planar            = 19;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV420PackedPlanar      = 20;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV420SemiPlanar        = 21;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422Planar            = 22;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422PackedPlanar      = 23;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422SemiPlanar        = 24;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYCbYCr                  = 25;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYCrYCb                  = 26;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatCbYCrY                  = 27;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatCrYCbY                  = 28;
+
         public static final int COLOR_FormatYUV444Interleaved       = 29;
+
         public static final int COLOR_FormatRawBayer8bit            = 30;
         public static final int COLOR_FormatRawBayer10bit           = 31;
         public static final int COLOR_FormatRawBayer8bitcompressed  = 32;
+
+        /** @deprecated Use {@link #COLOR_FormatL8}. */
         public static final int COLOR_FormatL2                      = 33;
+        /** @deprecated Use {@link #COLOR_FormatL8}. */
         public static final int COLOR_FormatL4                      = 34;
+
+        /**
+         * 8 bits per pixel Y color format.
+         * <p>
+         * Each byte contains a single pixel.
+         */
         public static final int COLOR_FormatL8                      = 35;
+
+        /**
+         * 16 bits per pixel, little-endian Y color format.
+         * <p>
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |                       Y                       |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0                    7   0                    7
+         * bit
+         * </pre>
+         */
         public static final int COLOR_FormatL16                     = 36;
+        /** @deprecated Use {@link #COLOR_FormatL32}. */
         public static final int COLOR_FormatL24                     = 37;
+
+        /**
+         * 32 bits per pixel, little-endian Y color format.
+         * <p>
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+-----------------+-----------------+-----------------+
+         * |                                   Y                                   |
+         * +-----------------+-----------------+-----------------+-----------------+
+         *  0               7 0               7 0               7 0               7
+         * bit
+         * </pre>
+         */
         public static final int COLOR_FormatL32                     = 38;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV420PackedSemiPlanar  = 39;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422PackedSemiPlanar  = 40;
+
+        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
         public static final int COLOR_Format18BitBGR666             = 41;
+
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format24BitARGB6666           = 42;
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format24BitABGR6666           = 43;
 
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
         // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.
         // In OMX this is called OMX_COLOR_FormatAndroidOpaque.
         public static final int COLOR_FormatSurface                   = 0x7F000789;
+
+        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
         public static final int COLOR_Format32BitRGBA8888             = 0x7F00A000;
+
+        /**
+         * Flexible 12 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
+         * components.
+         * <p>
+         * Chroma planes are subsampled by 2 both horizontally and vertically.
+         * Use this format with {@link Image}.
+         *
+         * @see Image#getFormat
+         */
         // This corresponds to YUV_420_888 format
         public static final int COLOR_FormatYUV420Flexible            = 0x7F420888;
+
+        /**
+         * Flexible 16 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
+         * components.
+         * <p>
+         * Chroma planes are horizontally subsampled by 2.
+         * Use this format with {@link Image}.
+         *
+         * @see Image#getFormat
+         */
+        // This corresponds to YUV_422_888 format
+        public static final int COLOR_FormatYUV422Flexible            = 0x7F422888;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00;
 
         /**
