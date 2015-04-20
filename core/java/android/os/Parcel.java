@@ -115,15 +115,15 @@ import java.util.Set;
  * later reading.</p>
  * 
  * <p>There are also some methods that provide a more efficient way to work
- * with Parcelables: {@link #writeTypedArray},
- * {@link #writeTypedList(List)},
- * {@link #readTypedArray} and {@link #readTypedList}.  These methods
+ * with Parcelables: {@link #writeTypedObject}, {@link #writeTypedArray},
+ * {@link #writeTypedList}, {@link #readTypedObject},
+ * {@link #createTypedArray} and {@link #createTypedArrayList}.  These methods
  * do not write the class information of the original object: instead, the
  * caller of the read function must know what type to expect and pass in the
  * appropriate {@link Parcelable.Creator Parcelable.Creator} instead to
  * properly construct the new object and read its data.  (To more efficient
- * write and read a single Parceable object, you can directly call
- * {@link Parcelable#writeToParcel Parcelable.writeToParcel} and
+ * write and read a single Parceable object that is not null, you can directly
+ * call {@link Parcelable#writeToParcel Parcelable.writeToParcel} and
  * {@link Parcelable.Creator#createFromParcel Parcelable.Creator.createFromParcel}
  * yourself.)</p>
  * 
@@ -1223,6 +1223,24 @@ public final class Parcel {
     }
 
     /**
+     * Flatten the Parcelable object into the parcel.
+     *
+     * @param val The Parcelable object to be written.
+     * @param parcelableFlags Contextual flags as per
+     * {@link Parcelable#writeToParcel(Parcel, int) Parcelable.writeToParcel()}.
+     *
+     * @see #readTypedObject
+     */
+    public final <T extends Parcelable> void writeTypedObject(T val, int parcelableFlags) {
+        if (val != null) {
+            writeInt(1);
+            val.writeToParcel(this, parcelableFlags);
+        } else {
+            writeInt(0);
+        }
+    }
+
+    /**
      * Flatten a generic object in to a parcel.  The given Object value may
      * currently be one of the following types:
      *
@@ -2135,6 +2153,25 @@ public final class Parcel {
     @Deprecated
     public final <T> T[] readTypedArray(Parcelable.Creator<T> c) {
         return createTypedArray(c);
+    }
+
+    /**
+     * Read and return a typed Parcelable object from a parcel.
+     * Returns null if the previous written object was null.
+     * The object <em>must</em> have previous been written via
+     * {@link #writeTypedObject} with the same object type.
+     *
+     * @return A newly created object of the type that was previously
+     *         written.
+     *
+     * @see #writeTypedObject
+     */
+    public final <T> T readTypedObject(Parcelable.Creator<T> c) {
+        if (readInt() != 0) {
+            return c.createFromParcel(this);
+        } else {
+            return null;
+        }
     }
 
     /**

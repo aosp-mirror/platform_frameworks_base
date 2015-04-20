@@ -23294,6 +23294,7 @@ package android.os {
     method public final android.os.IBinder readStrongBinder();
     method public final void readTypedArray(T[], android.os.Parcelable.Creator<T>);
     method public final void readTypedList(java.util.List<T>, android.os.Parcelable.Creator<T>);
+    method public final T readTypedObject(android.os.Parcelable.Creator<T>);
     method public final java.lang.Object readValue(java.lang.ClassLoader);
     method public final void recycle();
     method public final void setDataCapacity(int);
@@ -23338,6 +23339,7 @@ package android.os {
     method public final void writeStrongInterface(android.os.IInterface);
     method public final void writeTypedArray(T[], int);
     method public final void writeTypedList(java.util.List<T>);
+    method public final void writeTypedObject(T, int);
     method public final void writeValue(java.lang.Object);
     field public static final android.os.Parcelable.Creator<java.lang.String> STRING_CREATOR;
   }
