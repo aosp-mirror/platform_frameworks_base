@@ -11818,8 +11818,12 @@ package android.graphics {
     method public int getHinting();
     method public float getLetterSpacing();
     method public android.graphics.MaskFilter getMaskFilter();
+    method public int getOffsetForAdvance(char[], int, int, int, int, boolean, float);
+    method public int getOffsetForAdvance(java.lang.CharSequence, int, int, int, int, boolean, float);
     method public android.graphics.PathEffect getPathEffect();
     method public deprecated android.graphics.Rasterizer getRasterizer();
+    method public float getRunAdvance(char[], int, int, int, int, boolean, int);
+    method public float getRunAdvance(java.lang.CharSequence, int, int, int, int, boolean, int);
     method public android.graphics.Shader getShader();
     method public android.graphics.Paint.Cap getStrokeCap();
     method public android.graphics.Paint.Join getStrokeJoin();
