@@ -32,6 +32,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.ProtocolException;
+import java.net.UnknownServiceException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -337,7 +338,10 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         } catch (NoRouteToHostException e) {
             Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
             return MEDIA_ERROR_UNSUPPORTED;
-        } catch (IOException e) {
+        } catch (UnknownServiceException e) {
+            Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
+            return MEDIA_ERROR_UNSUPPORTED;
+        }catch (IOException e) {
             if (VERBOSE) {
                 Log.d(TAG, "readAt " + offset + " / " + size + " => -1");
             }
