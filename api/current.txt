@@ -30104,7 +30104,7 @@ package android.telecom {
     field public static final android.os.Parcelable.Creator<android.telecom.CameraCapabilities> CREATOR;
   }
 
-  public abstract class Conference implements android.telecom.IConferenceable {
+  public abstract class Conference implements android.telecom.Conferenceable {
     ctor public Conference(android.telecom.PhoneAccountHandle);
     method public final boolean addConnection(android.telecom.Connection);
     method public final void destroy();
@@ -30138,7 +30138,10 @@ package android.telecom {
     field public static final long CONNECT_TIME_NOT_SPECIFIED = 0L; // 0x0L
   }
 
-  public abstract class Connection implements android.telecom.IConferenceable {
+  public abstract interface Conferenceable {
+  }
+
+  public abstract class Connection implements android.telecom.Conferenceable {
     ctor public Connection();
     method public static java.lang.String capabilitiesToString(int);
     method public static android.telecom.Connection createCanceledConnection();
@@ -30151,7 +30154,7 @@ package android.telecom {
     method public final java.lang.String getCallerDisplayName();
     method public final int getCallerDisplayNamePresentation();
     method public final android.telecom.Conference getConference();
-    method public final java.util.List<android.telecom.IConferenceable> getConferenceables();
+    method public final java.util.List<android.telecom.Conferenceable> getConferenceables();
     method public final int getConnectionCapabilities();
     method public final android.telecom.DisconnectCause getDisconnectCause();
     method public final int getState();
@@ -30175,7 +30178,7 @@ package android.telecom {
     method public final void setAudioModeIsVoip(boolean);
     method public final void setCallerDisplayName(java.lang.String, int);
     method public final void setConferenceableConnections(java.util.List<android.telecom.Connection>);
-    method public final void setConferenceables(java.util.List<android.telecom.IConferenceable>);
+    method public final void setConferenceables(java.util.List<android.telecom.Conferenceable>);
     method public final void setConnectionCapabilities(int);
     method public final void setConnectionService(android.telecom.ConnectionService);
     method public final void setDialing();
@@ -30301,9 +30304,6 @@ package android.telecom {
     method public boolean isEmpty();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telecom.GatewayInfo> CREATOR;
-  }
-
-  public abstract interface IConferenceable {
   }
 
   public abstract class InCallService extends android.app.Service {
