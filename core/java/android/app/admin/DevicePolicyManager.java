@@ -754,11 +754,12 @@ public class DevicePolicyManager {
     public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 0x0002;
 
     /**
-     * Broadcast action: notify that a new local OTA policy has been set by the device owner.
-     * The new policy can be retrieved by {@link #getOtaPolicy()}.
+     * Broadcast action: notify that a new local system update policy has been set by the device
+     * owner. The new policy can be retrieved by {@link #getSystemUpdatePolicy()}.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_OTA_POLICY_CHANGED = "android.app.action.OTA_POLICY_CHANGED";
+    public static final String ACTION_SYSTEM_UPDATE_POLICY_CHANGED
+            = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
 
 
     /**
@@ -4143,46 +4144,46 @@ public class DevicePolicyManager {
         }
     }
 
-    /*
-     * Called by device owners to set a local OTA update policy. When a new OTA policy is set,
-     * {@link #ACTION_OTA_POLICY_CHANGED} is broadcasted.
+    /**
+     * Called by device owners to set a local system update policy. When a new policy is set,
+     * {@link #ACTION_SYSTEM_UPDATE_POLICY_CHANGED} is broadcasted.
      *
      * @param who Which {@link DeviceAdminReceiver} this request is associated with. All components
-     * in the device owner package can set OTA policies and the most recent policy takes effect.
-     * @param policy the new OTA policy, or null to clear the current policy.
-     * @see OtaPolicy
+     * in the device owner package can set system update policies and the most recent policy takes
+     * effect.
+     * @param policy the new policy, or null to clear the current policy.
+     * @see SystemUpdatePolicy
      */
-    public void setOtaPolicy(ComponentName who, OtaPolicy policy) {
+    public void setSystemUpdatePolicy(ComponentName who, SystemUpdatePolicy policy) {
         if (mService != null) {
             try {
                 if (policy != null) {
-                    mService.setOtaPolicy(who, policy.getPolicyBundle());
+                    mService.setSystemUpdatePolicy(who, policy.getPolicyBundle());
                 } else {
-                    mService.setOtaPolicy(who, null);
+                    mService.setSystemUpdatePolicy(who, null);
                 }
             } catch (RemoteException re) {
-                Log.w(TAG, "Error calling setOtaPolicy", re);
+                Log.w(TAG, "Error calling setSystemUpdatePolicy", re);
             }
         }
     }
 
     /**
-     * Retrieve a local OTA update policy set previously by {@link #setOtaPolicy}.
+     * Retrieve a local system update policy set previously by {@link #setSystemUpdatePolicy}.
      *
-     * @return The current OTA policy object, or null if no policy is set or the system does not
-     * support managed OTA.
+     * @return The current policy object, or null if no policy is set.
      */
-    public OtaPolicy getOtaPolicy() {
+    public SystemUpdatePolicy getSystemUpdatePolicy() {
         if (mService != null) {
             try {
-                PersistableBundle bundle = mService.getOtaPolicy();
+                PersistableBundle bundle = mService.getSystemUpdatePolicy();
                 if (bundle != null) {
-                    return new OtaPolicy(bundle);
+                    return new SystemUpdatePolicy(bundle);
                 } else {
                     return null;
                 }
             } catch (RemoteException re) {
-                Log.w(TAG, "Error calling getOtaPolicy", re);
+                Log.w(TAG, "Error calling getSystemUpdatePolicy", re);
             }
         }
         return null;

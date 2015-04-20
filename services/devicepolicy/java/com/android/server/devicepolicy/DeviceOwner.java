@@ -60,7 +60,7 @@ class DeviceOwner {
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_COMPONENT_NAME = "component";
     private static final String ATTR_USERID = "userId";
-    private static final String TAG_OTA_POLICY = "ota-policy";
+    private static final String TAG_SYSTEM_UPDATE_POLICY = "system-update-policy";
 
     private AtomicFile fileForWriting;
 
@@ -77,8 +77,8 @@ class DeviceOwner {
     // Internal state for the profile owner packages.
     private final HashMap<Integer, OwnerInfo> mProfileOwners = new HashMap<Integer, OwnerInfo>();
 
-    // Local OTA policy controllable by device owner.
-    private PersistableBundle mOtaPolicy;
+    // Local system update policy controllable by device owner.
+    private PersistableBundle mSystemUpdatePolicy;
 
     // Private default constructor.
     private DeviceOwner() {
@@ -192,16 +192,16 @@ class DeviceOwner {
         return mProfileOwners.keySet();
     }
 
-    PersistableBundle getOtaPolicy() {
-        return mOtaPolicy;
+    PersistableBundle getSystemUpdatePolicy() {
+        return mSystemUpdatePolicy;
     }
 
-    void setOtaPolicy(PersistableBundle otaPolicy) {
-        mOtaPolicy = otaPolicy;
+    void setSystemUpdatePolicy(PersistableBundle systemUpdatePolicy) {
+        mSystemUpdatePolicy = systemUpdatePolicy;
     }
 
-    void clearOtaPolicy() {
-        mOtaPolicy = null;
+    void clearSystemUpdatePolicy() {
+        mSystemUpdatePolicy = null;
     }
 
     boolean hasDeviceOwner() {
@@ -290,8 +290,8 @@ class DeviceOwner {
                         profileOwnerInfo = new OwnerInfo(profileOwnerName, profileOwnerPackageName);
                     }
                     mProfileOwners.put(userId, profileOwnerInfo);
-                } else if (TAG_OTA_POLICY.equals(tag)) {
-                    mOtaPolicy = PersistableBundle.restoreFromXml(parser);
+                } else if (TAG_SYSTEM_UPDATE_POLICY.equals(tag)) {
+                    mSystemUpdatePolicy = PersistableBundle.restoreFromXml(parser);
                 } else {
                     throw new XmlPullParserException(
                             "Unexpected tag in device owner file: " + tag);
@@ -358,15 +358,15 @@ class DeviceOwner {
                 }
             }
 
-            // Write OTA policy tag
-            if (mOtaPolicy != null) {
-                out.startTag(null, TAG_OTA_POLICY);
+            // Write system update policy tag
+            if (mSystemUpdatePolicy != null) {
+                out.startTag(null, TAG_SYSTEM_UPDATE_POLICY);
                 try {
-                    mOtaPolicy.saveToXml(out);
+                    mSystemUpdatePolicy.saveToXml(out);
                 } catch (XmlPullParserException e) {
-                    Slog.e(TAG, "Failed to save OTA policy", e);
+                    Slog.e(TAG, "Failed to save system update policy", e);
                 }
-                out.endTag(null, TAG_OTA_POLICY);
+                out.endTag(null, TAG_SYSTEM_UPDATE_POLICY);
             }
             out.endDocument();
             out.flush();
