@@ -314,7 +314,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
      * @return whether the touch is valid and should not be discarded
      */
     public boolean shouldSwallowClick(String key) {
-        if (mClock.currentTimeMillis() < mHeadsUpEntries.get(key).postTime) {
+        HeadsUpEntry entry = mHeadsUpEntries.get(key);
+        if (entry != null && mClock.currentTimeMillis() < entry.postTime) {
             return true;
         }
         return false;
