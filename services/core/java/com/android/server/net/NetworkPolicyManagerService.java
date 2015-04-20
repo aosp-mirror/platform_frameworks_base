@@ -2307,7 +2307,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         // Turn mobile data limit off
-        NetworkPolicy[] policies = getNetworkPolicies();
+        NetworkPolicy[] policies = getNetworkPolicies(mContext.getOpPackageName());
         NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriber);
         for (NetworkPolicy policy : policies) {
             if (policy.template.equals(template)) {
