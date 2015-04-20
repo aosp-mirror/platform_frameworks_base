@@ -290,7 +290,9 @@ public final class PermissionsState {
                     permissions.add(permission);
                 }
             } else {
-                if (hasRuntimePermission(permission, userId)) {
+                if (hasInstallPermission(permission)) {
+                    permissions.add(permission);
+                } else if (hasRuntimePermission(permission, userId)) {
                     permissions.add(permission);
                 }
             }
