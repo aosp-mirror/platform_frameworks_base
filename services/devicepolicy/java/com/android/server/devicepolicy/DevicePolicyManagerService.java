@@ -6015,24 +6015,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setOtaPolicy(ComponentName who, PersistableBundle policy) {
+    public void setSystemUpdatePolicy(ComponentName who, PersistableBundle policy) {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             if (policy == null) {
-                mDeviceOwner.clearOtaPolicy();
+                mDeviceOwner.clearSystemUpdatePolicy();
             } else {
-                mDeviceOwner.setOtaPolicy(policy);
+                mDeviceOwner.setSystemUpdatePolicy(policy);
             }
             mDeviceOwner.writeOwnerFile();
         }
-        mContext.sendBroadcastAsUser(new Intent(DevicePolicyManager.ACTION_OTA_POLICY_CHANGED),
+        mContext.sendBroadcastAsUser(
+                new Intent(DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED),
                 UserHandle.OWNER);
     }
 
     @Override
-    public PersistableBundle getOtaPolicy() {
+    public PersistableBundle getSystemUpdatePolicy() {
         synchronized (this) {
-            return mDeviceOwner.getOtaPolicy();
+            return mDeviceOwner.getSystemUpdatePolicy();
         }
     }
 }

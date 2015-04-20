@@ -219,8 +219,8 @@ interface IDevicePolicyManager {
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 
     void sendDeviceInitializerStatus(int statusCode, String description);
-    void setOtaPolicy(in ComponentName who, in PersistableBundle policy);
-    PersistableBundle getOtaPolicy();
+    void setSystemUpdatePolicy(in ComponentName who, in PersistableBundle policy);
+    PersistableBundle getSystemUpdatePolicy();
 
     boolean setKeyguardEnabledState(in ComponentName admin, boolean enabled);
     void setStatusBarEnabledState(in ComponentName who, boolean enabled);

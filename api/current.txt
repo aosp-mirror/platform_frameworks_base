@@ -5712,7 +5712,6 @@ package android.app.admin {
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);
     method public int getMaximumFailedPasswordsForWipe(android.content.ComponentName);
     method public long getMaximumTimeToLock(android.content.ComponentName);
-    method public android.app.admin.OtaPolicy getOtaPolicy();
     method public long getPasswordExpiration(android.content.ComponentName);
     method public long getPasswordExpirationTimeout(android.content.ComponentName);
     method public int getPasswordHistoryLength(android.content.ComponentName);
@@ -5730,6 +5729,7 @@ package android.app.admin {
     method public boolean getScreenCaptureDisabled(android.content.ComponentName);
     method public boolean getStorageEncryption(android.content.ComponentName);
     method public int getStorageEncryptionStatus();
+    method public android.app.admin.SystemUpdatePolicy getSystemUpdatePolicy();
     method public java.util.List<android.os.PersistableBundle> getTrustAgentConfiguration(android.content.ComponentName, android.content.ComponentName);
     method public boolean hasCaCertInstalled(android.content.ComponentName, byte[]);
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
@@ -5766,7 +5766,6 @@ package android.app.admin {
     method public void setMasterVolumeMuted(android.content.ComponentName, boolean);
     method public void setMaximumFailedPasswordsForWipe(android.content.ComponentName, int);
     method public void setMaximumTimeToLock(android.content.ComponentName, long);
-    method public void setOtaPolicy(android.content.ComponentName, android.app.admin.OtaPolicy);
     method public void setPasswordExpirationTimeout(android.content.ComponentName, long);
     method public void setPasswordHistoryLength(android.content.ComponentName, int);
     method public void setPasswordMinimumLength(android.content.ComponentName, int);
@@ -5787,6 +5786,7 @@ package android.app.admin {
     method public void setSecureSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public void setStatusBarEnabledState(android.content.ComponentName, boolean);
     method public int setStorageEncryption(android.content.ComponentName, boolean);
+    method public void setSystemUpdatePolicy(android.content.ComponentName, android.app.admin.SystemUpdatePolicy);
     method public void setTrustAgentConfiguration(android.content.ComponentName, android.content.ComponentName, android.os.PersistableBundle);
     method public void setUninstallBlocked(android.content.ComponentName, java.lang.String, boolean);
     method public boolean setUserEnabled(android.content.ComponentName);
@@ -5797,10 +5797,10 @@ package android.app.admin {
     method public void wipeData(int);
     field public static final java.lang.String ACTION_ADD_DEVICE_ADMIN = "android.app.action.ADD_DEVICE_ADMIN";
     field public static final java.lang.String ACTION_MANAGED_PROFILE_PROVISIONED = "android.app.action.MANAGED_PROFILE_PROVISIONED";
-    field public static final java.lang.String ACTION_OTA_POLICY_CHANGED = "android.app.action.OTA_POLICY_CHANGED";
     field public static final java.lang.String ACTION_PROVISION_MANAGED_PROFILE = "android.app.action.PROVISION_MANAGED_PROFILE";
     field public static final java.lang.String ACTION_SET_NEW_PASSWORD = "android.app.action.SET_NEW_PASSWORD";
     field public static final java.lang.String ACTION_START_ENCRYPTION = "android.app.action.START_ENCRYPTION";
+    field public static final java.lang.String ACTION_SYSTEM_UPDATE_POLICY_CHANGED = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
     field public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
     field public static final int ENCRYPTION_STATUS_ACTIVE = 3; // 0x3
     field public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4; // 0x4
@@ -5867,21 +5867,21 @@ package android.app.admin {
     field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
   }
 
-  public class OtaPolicy {
-    ctor public OtaPolicy();
+  public class SystemUpdatePolicy {
+    ctor public SystemUpdatePolicy();
     method public int getInstallWindowEnd();
     method public int getInstallWindowStart();
     method public int getPolicyType();
     method public void setAutomaticInstallPolicy();
     method public void setPostponeInstallPolicy();
-    method public void setWindowedInstallPolicy(int, int) throws android.app.admin.OtaPolicy.InvalidWindowException;
+    method public void setWindowedInstallPolicy(int, int) throws android.app.admin.SystemUpdatePolicy.InvalidWindowException;
     field public static final int TYPE_INSTALL_AUTOMATIC = 1; // 0x1
     field public static final int TYPE_INSTALL_WINDOWED = 2; // 0x2
     field public static final int TYPE_POSTPONE = 3; // 0x3
   }
 
-  public static class OtaPolicy.InvalidWindowException extends java.lang.Exception {
-    ctor public OtaPolicy.InvalidWindowException(java.lang.String);
+  public static class SystemUpdatePolicy.InvalidWindowException extends java.lang.Exception {
+    ctor public SystemUpdatePolicy.InvalidWindowException(java.lang.String);
   }
 
 }
