@@ -341,9 +341,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Bạn có muốn tiếp tục phiên của mình không?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Bắt đầu lại"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Có, tiếp tục"</string>
-    <string name="guest_notification_title" msgid="1585278533840603063">"Người dùng phiên khách"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Xóa phiên khách để xóa ứng dụng và dữ liệu"</string>
-    <string name="guest_notification_remove_action" msgid="8820670703892101990">"XÓA PHIÊN KHÁCH"</string>
+    <string name="guest_notification_title" msgid="1585278533840603063">"Người dùng khách"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"Xóa khách để xóa ứng dụng và dữ liệu"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"XÓA KHÁCH"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Thêm người dùng mới?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Khi bạn thêm người dùng mới, người dùng đó cần thiết lập dung lượng lưu trữ của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Trình tiết kiệm pin đang bật"</string>
