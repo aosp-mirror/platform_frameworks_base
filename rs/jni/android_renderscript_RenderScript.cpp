@@ -1102,8 +1102,9 @@ static jlong
 nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, jint mip,
                             jobject jbitmap, jint usage)
 {
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    SkBitmap const * nativeBitmap =
+            GraphicsJNI::getSkBitmap(_env, jbitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
@@ -1118,8 +1119,9 @@ static jlong
 nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, jlong con, jlong type,
                                         jint mip, jobject jbitmap, jint usage)
 {
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    SkBitmap const * nativeBitmap =
+            GraphicsJNI::getSkBitmap(_env, jbitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
@@ -1134,8 +1136,9 @@ static jlong
 nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, jint mip,
                                 jobject jbitmap, jint usage)
 {
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    SkBitmap const * nativeBitmap =
+            GraphicsJNI::getSkBitmap(_env, jbitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
@@ -1149,8 +1152,9 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong ty
 static void
 nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jobject jbitmap)
 {
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    SkBitmap const * nativeBitmap =
+            GraphicsJNI::getSkBitmap(_env, jbitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
     int w = bitmap.width();
     int h = bitmap.height();
 
@@ -1165,8 +1169,9 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, j
 static void
 nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jobject jbitmap)
 {
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    SkBitmap const * nativeBitmap =
+            GraphicsJNI::getSkBitmap(_env, jbitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
 
     bitmap.lockPixels();
     void* ptr = bitmap.getPixels();

@@ -618,25 +618,23 @@ static int getType(SkColorType colorType)
 static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
         jobject jbitmap)
 {
-    SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &nativeBitmap);
-    return getInternalFormat(nativeBitmap.colorType());
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
+    return getInternalFormat(nativeBitmap->colorType());
 }
 
 static jint util_getType(JNIEnv *env, jclass clazz,
         jobject jbitmap)
 {
-    SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &nativeBitmap);
-    return getType(nativeBitmap.colorType());
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
+    return getType(nativeBitmap->colorType());
 }
 
 static jint util_texImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint internalformat,
         jobject jbitmap, jint type, jint border)
 {
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
     SkColorType colorType = bitmap.colorType();
     if (internalformat < 0) {
         internalformat = getInternalFormat(colorType);
@@ -682,8 +680,8 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint xoffset, jint yoffset,
         jobject jbitmap, jint format, jint type)
 {
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
+    const SkBitmap& bitmap(*nativeBitmap);
     SkColorType colorType = bitmap.colorType();
     if (format < 0) {
         format = getInternalFormat(colorType);
