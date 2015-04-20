@@ -1207,12 +1207,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Panloob na storage"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD card"</string>
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD card"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB drive"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB drive"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"I-edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Babala sa paggamit ng data"</string>
