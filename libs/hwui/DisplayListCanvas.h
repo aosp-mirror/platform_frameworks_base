@@ -52,9 +52,7 @@ namespace uirenderer {
 
 class DeferredDisplayList;
 class DeferredLayerUpdater;
-class DisplayListRenderer;
 class DisplayListOp;
-class DisplayListRenderer;
 class DrawOp;
 class RenderNode;
 class StateOp;
@@ -62,10 +60,10 @@ class StateOp;
 /**
  * Records drawing commands in a display list for later playback into an OpenGLRenderer.
  */
-class ANDROID_API DisplayListRenderer: public Canvas, public CanvasStateClient {
+class ANDROID_API DisplayListCanvas: public Canvas, public CanvasStateClient {
 public:
-    DisplayListRenderer();
-    virtual ~DisplayListRenderer();
+    DisplayListCanvas();
+    virtual ~DisplayListCanvas();
 
     void insertReorderBarrier(bool enableReorder);
 
@@ -139,7 +137,7 @@ public:
     virtual SkCanvas* asSkCanvas() override;
 
     virtual void setBitmap(SkBitmap* bitmap, bool copyState) override {
-        LOG_ALWAYS_FATAL("DisplayListRenderer is not backed by a bitmap.");
+        LOG_ALWAYS_FATAL("DisplayListCanvas is not backed by a bitmap.");
     }
 
     virtual bool isOpaque() override { return false; }
@@ -216,7 +214,7 @@ public:
     virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
             const float* verts, const float* tex, const int* colors,
             const uint16_t* indices, int indexCount, const SkPaint& paint) override
-        { /* DisplayListRenderer does not support drawVertices(); ignore */ }
+        { /* DisplayListCanvas does not support drawVertices(); ignore */ }
 
     // Bitmap-based
     virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) override;
@@ -382,7 +380,7 @@ private:
 
     friend class RenderNode;
 
-}; // class DisplayListRenderer
+}; // class DisplayListCanvas
 
 }; // namespace uirenderer
 }; // namespace android

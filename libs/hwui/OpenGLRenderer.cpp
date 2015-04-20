@@ -17,7 +17,6 @@
 #include "OpenGLRenderer.h"
 
 #include "DeferredDisplayList.h"
-#include "DisplayListRenderer.h"
 #include "GammaFontRenderer.h"
 #include "Glop.h"
 #include "GlopBuilder.h"

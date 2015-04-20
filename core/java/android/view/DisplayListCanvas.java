@@ -88,10 +88,10 @@ public class DisplayListCanvas extends Canvas {
     ///////////////////////////////////////////////////////////////////////////
 
     private DisplayListCanvas() {
-        super(nCreateDisplayListRenderer());
+        super(nCreateDisplayListCanvas());
     }
 
-    private static native long nCreateDisplayListRenderer();
+    private static native long nCreateDisplayListCanvas();
 
     public static void setProperty(String name, String value) {
         nSetProperty(name, value);

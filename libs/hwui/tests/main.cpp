@@ -21,7 +21,7 @@
 #include <ui/PixelFormat.h>
 
 #include <AnimationContext.h>
-#include <DisplayListRenderer.h>
+#include <DisplayListCanvas.h>
 #include <RenderNode.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
@@ -40,15 +40,15 @@ public:
     }
 };
 
-static DisplayListRenderer* startRecording(RenderNode* node) {
-    DisplayListRenderer* renderer = new DisplayListRenderer();
+static DisplayListCanvas* startRecording(RenderNode* node) {
+    DisplayListCanvas* renderer = new DisplayListCanvas();
     renderer->setViewport(node->stagingProperties().getWidth(),
             node->stagingProperties().getHeight());
     renderer->prepare();
     return renderer;
 }
 
-static void endRecording(DisplayListRenderer* renderer, RenderNode* node) {
+static void endRecording(DisplayListCanvas* renderer, RenderNode* node) {
     renderer->finish();
     node->setStagingDisplayList(renderer->finishRecording());
     delete renderer;
@@ -58,7 +58,7 @@ class TreeContentAnimation {
 public:
     virtual ~TreeContentAnimation() {}
     virtual int getFrameCount() { return 150; }
-    virtual void createContent(int width, int height, DisplayListRenderer* renderer) = 0;
+    virtual void createContent(int width, int height, DisplayListCanvas* renderer) = 0;
     virtual void doFrame(int frameNr) = 0;
 
     template <class T>
@@ -89,7 +89,7 @@ public:
 
         android::uirenderer::Rect DUMMY;
 
-        DisplayListRenderer* renderer = startRecording(rootNode);
+        DisplayListCanvas* renderer = startRecording(rootNode);
         animation.createContent(width, height, renderer);
         endRecording(renderer, rootNode);
 
@@ -110,7 +110,7 @@ public:
 class ShadowGridAnimation : public TreeContentAnimation {
 public:
     std::vector< sp<RenderNode> > cards;
-    void createContent(int width, int height, DisplayListRenderer* renderer) override {
+    void createContent(int width, int height, DisplayListCanvas* renderer) override {
         android::uirenderer::Rect DUMMY;
 
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
@@ -142,7 +142,7 @@ private:
         node->mutateStagingProperties().mutableOutline().setShouldClip(true);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y | RenderNode::Z);
 
-        DisplayListRenderer* renderer = startRecording(node.get());
+        DisplayListCanvas* renderer = startRecording(node.get());
         renderer->drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
         endRecording(renderer, node.get());
         return node;
@@ -152,7 +152,7 @@ private:
 class RectGridAnimation : public TreeContentAnimation {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, DisplayListRenderer* renderer) override {
+    void createContent(int width, int height, DisplayListCanvas* renderer) override {
         android::uirenderer::Rect DUMMY;
 
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
@@ -174,7 +174,7 @@ private:
         node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        DisplayListRenderer* renderer = startRecording(node.get());
+        DisplayListCanvas* renderer = startRecording(node.get());
         renderer->drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
 
         float rects[width * height];
@@ -201,7 +201,7 @@ private:
 class OvalAnimation : public TreeContentAnimation {
 public:
     sp<RenderNode> card;
-    void createContent(int width, int height, DisplayListRenderer* renderer) override {
+    void createContent(int width, int height, DisplayListCanvas* renderer) override {
         android::uirenderer::Rect DUMMY;
 
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
@@ -224,7 +224,7 @@ private:
         node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
-        DisplayListRenderer* renderer = startRecording(node.get());
+        DisplayListCanvas* renderer = startRecording(node.get());
 
         SkPaint paint;
         paint.setAntiAlias(true);
