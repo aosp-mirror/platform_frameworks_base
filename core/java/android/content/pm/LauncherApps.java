@@ -146,6 +146,7 @@ public class LauncherApps {
         try {
             activities = mService.getLauncherActivities(packageName, user);
         } catch (RemoteException re) {
+            throw new RuntimeException("Failed to call LauncherAppsService");
         }
         if (activities == null) {
             return Collections.EMPTY_LIST;
