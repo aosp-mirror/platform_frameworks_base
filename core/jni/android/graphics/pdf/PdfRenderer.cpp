@@ -243,21 +243,19 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
 }
 
 static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong pagePtr,
-        jobject jbitmap, jint destLeft, jint destTop, jint destRight, jint destBottom,
+        jlong bitmapPtr, jint destLeft, jint destTop, jint destRight, jint destBottom,
         jlong matrixPtr, jint renderMode) {
 
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
+    SkBitmap* skBitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
     SkMatrix* skMatrix = reinterpret_cast<SkMatrix*>(matrixPtr);
 
-    SkBitmap skBitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &skBitmap);
+    skBitmap->lockPixels();
 
-    SkAutoLockPixels alp(skBitmap);
+    const int stride = skBitmap->width() * 4;
 
-    const int stride = skBitmap.width() * 4;
-
-    FPDF_BITMAP bitmap = FPDFBitmap_CreateEx(skBitmap.width(), skBitmap.height(),
-            FPDFBitmap_BGRA, skBitmap.getPixels(), stride);
+    FPDF_BITMAP bitmap = FPDFBitmap_CreateEx(skBitmap->width(), skBitmap->height(),
+            FPDFBitmap_BGRA, skBitmap->getPixels(), stride);
 
     if (!bitmap) {
         ALOGE("Erorr creating bitmap");
@@ -280,7 +278,8 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
     renderPageBitmap(bitmap, page, destLeft, destTop, destRight,
             destBottom, skMatrix, renderFlags);
 
-    skBitmap.notifyPixelsChanged();
+    skBitmap->notifyPixelsChanged();
+    skBitmap->unlockPixels();
 }
 
 static JNINativeMethod gPdfRenderer_Methods[] = {
@@ -288,7 +287,7 @@ static JNINativeMethod gPdfRenderer_Methods[] = {
     {"nativeClose", "(J)V", (void*) nativeClose},
     {"nativeGetPageCount", "(J)I", (void*) nativeGetPageCount},
     {"nativeScaleForPrinting", "(J)Z", (void*) nativeScaleForPrinting},
-    {"nativeRenderPage", "(JJLandroid/graphics/Bitmap;IIIIJI)V", (void*) nativeRenderPage},
+    {"nativeRenderPage", "(JJJIIIIJI)V", (void*) nativeRenderPage},
     {"nativeOpenPageAndGetSize", "(JILandroid/graphics/Point;)J", (void*) nativeOpenPageAndGetSize},
     {"nativeClosePage", "(J)V", (void*) nativeClosePage}
 };

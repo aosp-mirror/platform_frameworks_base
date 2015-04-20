@@ -277,9 +277,8 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
     EGLConfig  cnf = getConfig(_env, config);
     jint* base = 0;
 
-    SkBitmap nativeBitmap;
-    GraphicsJNI::getSkBitmap(_env, native_pixmap, &nativeBitmap);
-    SkPixelRef* ref = nativeBitmap.pixelRef();
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(_env, native_pixmap);
+    SkPixelRef* ref = nativeBitmap ? nativeBitmap->pixelRef() : 0;
     if (ref == NULL) {
         jniThrowException(_env, "java/lang/IllegalArgumentException", "Bitmap has no PixelRef");
         return;
@@ -290,10 +289,10 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
 
     egl_native_pixmap_t pixmap;
     pixmap.version = sizeof(pixmap);
-    pixmap.width  = nativeBitmap.width();
-    pixmap.height = nativeBitmap.height();
-    pixmap.stride = nativeBitmap.rowBytes() / nativeBitmap.bytesPerPixel();
-    pixmap.format = convertPixelFormat(nativeBitmap.colorType());
+    pixmap.width  = nativeBitmap->width();
+    pixmap.height = nativeBitmap->height();
+    pixmap.stride = nativeBitmap->rowBytes() / nativeBitmap->bytesPerPixel();
+    pixmap.format = convertPixelFormat(nativeBitmap->colorType());
     pixmap.data   = (uint8_t*)ref->pixels();
 
     base = beginNativeAttribList(_env, attrib_list);

@@ -27,16 +27,18 @@ int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    SkBitmap bm;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bm);
+    SkBitmap* bm = GraphicsJNI::getSkBitmap(env, jbitmap);
+    if (NULL == bm) {
+        return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
+    }
 
     if (info) {
-        info->width     = bm.width();
-        info->height    = bm.height();
-        info->stride    = bm.rowBytes();
+        info->width     = bm->width();
+        info->height    = bm->height();
+        info->stride    = bm->rowBytes();
         info->flags     = 0;
 
-        switch (bm.colorType()) {
+        switch (bm->colorType()) {
             case kN32_SkColorType:
                 info->format = ANDROID_BITMAP_FORMAT_RGBA_8888;
                 break;
@@ -62,18 +64,17 @@ int AndroidBitmap_lockPixels(JNIEnv* env, jobject jbitmap, void** addrPtr) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    SkPixelRef* pixelRef = GraphicsJNI::getSkPixelRef(env, jbitmap);
-    if (!pixelRef) {
+    SkBitmap* bm = GraphicsJNI::getSkBitmap(env, jbitmap);
+    if (NULL == bm) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
 
-    pixelRef->lockPixels();
-    void* addr = pixelRef->pixels();
+    bm->lockPixels();
+    void* addr = bm->getPixels();
     if (NULL == addr) {
-        pixelRef->unlockPixels();
+        bm->unlockPixels();
         return ANDROID_BITMAP_RESULT_ALLOCATION_FAILED;
     }
-    pixelRef->ref();
 
     if (addrPtr) {
         *addrPtr = addr;
@@ -86,8 +87,8 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    SkPixelRef* pixelRef = GraphicsJNI::getSkPixelRef(env, jbitmap);
-    if (!pixelRef) {
+    SkBitmap* bm = GraphicsJNI::getSkBitmap(env, jbitmap);
+    if (NULL == bm) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
 
@@ -95,11 +96,9 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
     // bitmaps.  Note that this will slow down read-only accesses to the
     // bitmaps, but the NDK methods are primarily intended to be used for
     // writes.
-    pixelRef->notifyPixelsChanged();
+    bm->notifyPixelsChanged();
 
-    pixelRef->unlockPixels();
-    pixelRef->unref();
-
+    bm->unlockPixels();
     return ANDROID_BITMAP_RESULT_SUCCESS;
 }
 

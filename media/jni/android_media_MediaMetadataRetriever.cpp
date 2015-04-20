@@ -281,16 +281,15 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
         return NULL;
     }
 
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jBitmap, &bitmap);
+    SkBitmap *bitmap = GraphicsJNI::getSkBitmap(env, jBitmap);
 
-    bitmap.lockPixels();
-    rotate((uint16_t*)bitmap.getPixels(),
+    bitmap->lockPixels();
+    rotate((uint16_t*)bitmap->getPixels(),
            (uint16_t*)((char*)videoFrame + sizeof(VideoFrame)),
            videoFrame->mWidth,
            videoFrame->mHeight,
            videoFrame->mRotationAngle);
-    bitmap.unlockPixels();
+    bitmap->unlockPixels();
 
     if (videoFrame->mDisplayWidth  != videoFrame->mWidth ||
         videoFrame->mDisplayHeight != videoFrame->mHeight) {
