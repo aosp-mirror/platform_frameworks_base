@@ -23,7 +23,6 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 /**
  * A global state to track all input states for the algorithm.
@@ -128,10 +127,6 @@ public class AmbientState {
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
-    }
-
-    public TreeSet<HeadsUpManager.HeadsUpEntry> getSortedHeadsUpEntries() {
-        return mHeadsUpManager.getSortedEntries();
     }
 
     public float getStackTranslation() {
