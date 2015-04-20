@@ -1109,11 +1109,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleTerminateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // In cast of termination, do not check ARC configuration in that AVR device
-        // might be removed already.
-
-        // In case where <Terminate Arc> is started by <Request ARC Termination>
-        // need to clean up RequestArcInitiationAction.
+        if (mService .isPowerStandbyOrTransient()) {
+            setArcStatus(false);
+            return true;
+        }
+        // Do not check ARC configuration since the AVR might have been already removed.
+        // Clean up RequestArcTerminationAction in case <Terminate Arc> was started by
+        // <Request ARC Termination>.
         removeAction(RequestArcTerminationAction.class);
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getSource(), false);

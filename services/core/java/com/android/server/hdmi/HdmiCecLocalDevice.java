@@ -176,6 +176,7 @@ abstract class HdmiCecLocalDevice {
     void init() {
         assertRunOnServiceThread();
         mPreferredAddress = getPreferredAddress();
+        mPendingActionClearedCallback = null;
     }
 
     /**
@@ -837,16 +838,16 @@ abstract class HdmiCecLocalDevice {
      *
      * @param initiatedByCec true if this sequence is initiated
      *        by the reception the CEC messages like &lt;Standby&gt;
-     * @param origialCallback callback interface to get notified when all pending actions are
+     * @param originalCallback callback interface to get notified when all pending actions are
      *        cleared
      */
     protected void disableDevice(boolean initiatedByCec,
-            final PendingActionClearedCallback origialCallback) {
+            final PendingActionClearedCallback originalCallback) {
         mPendingActionClearedCallback = new PendingActionClearedCallback() {
             @Override
             public void onCleared(HdmiCecLocalDevice device) {
                 mHandler.removeMessages(MSG_DISABLE_DEVICE_TIMEOUT);
-                origialCallback.onCleared(device);
+                originalCallback.onCleared(device);
             }
         };
         mHandler.sendMessageDelayed(Message.obtain(mHandler, MSG_DISABLE_DEVICE_TIMEOUT),
@@ -864,6 +865,9 @@ abstract class HdmiCecLocalDevice {
             HdmiCecFeatureAction action = iter.next();
             action.finish(false);
             iter.remove();
+        }
+        if (mPendingActionClearedCallback != null) {
+            mPendingActionClearedCallback.onCleared(this);
         }
     }
 
