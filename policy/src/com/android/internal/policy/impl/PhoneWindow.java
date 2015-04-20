@@ -25,7 +25,6 @@ import static android.view.WindowManager.LayoutParams.*;
 import android.app.SearchManager;
 import android.os.UserHandle;
 import com.android.internal.R;
-import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -62,7 +61,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -76,7 +74,6 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextThemeWrapper;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
@@ -280,6 +277,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private Boolean mSharedElementsUseOverlay;
 
     private Rect mTempRect;
+    private Rect mOutsets = new Rect();
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -2380,19 +2378,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
-        public WindowInsets dispatchApplyWindowInsets(WindowInsets insets) {
-            if (mOutsetBottomPx != 0) {
-                WindowInsets newInsets = insets.replaceSystemWindowInsets(
-                        insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
-                        insets.getSystemWindowInsetRight(), mOutsetBottomPx);
-                return super.dispatchApplyWindowInsets(newInsets);
-            } else {
-                return super.dispatchApplyWindowInsets(insets);
-            }
-        }
-
-
-        @Override
         public boolean onTouchEvent(MotionEvent event) {
             return onInterceptTouchEvent(event);
         }
@@ -2603,11 +2588,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
 
-            if (mOutsetBottomPx != 0) {
+            getOutsets(mOutsets);
+            if (mOutsets.top > 0 || mOutsets.bottom > 0) {
                 int mode = MeasureSpec.getMode(heightMeasureSpec);
                 if (mode != MeasureSpec.UNSPECIFIED) {
                     int height = MeasureSpec.getSize(heightMeasureSpec);
-                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(height + mOutsetBottomPx, mode);
+                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                            height + mOutsets.top + mOutsets.bottom, mode);
+                }
+            }
+            if (mOutsets.left > 0 || mOutsets.right > 0) {
+                int mode = MeasureSpec.getMode(widthMeasureSpec);
+                if (mode != MeasureSpec.UNSPECIFIED) {
+                    int width = MeasureSpec.getSize(widthMeasureSpec);
+                    widthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                            width + mOutsets.left + mOutsets.right, mode);
                 }
             }
 
@@ -2641,6 +2636,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             if (measure) {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+            super.onLayout(changed, left, top, right, bottom);
+            getOutsets(mOutsets);
+            if (mOutsets.left > 0) {
+                offsetLeftAndRight(-mOutsets.left);
+            }
+            if (mOutsets.top > 0) {
+                offsetTopAndBottom(-mOutsets.top);
             }
         }
 
@@ -3431,19 +3438,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (a.getBoolean(R.styleable.Window_windowActivityTransitions, false)) {
             requestFeature(FEATURE_ACTIVITY_TRANSITIONS);
-        }
-
-        final WindowManager windowService = (WindowManager) getContext().getSystemService(
-                Context.WINDOW_SERVICE);
-        if (windowService != null) {
-            final Display display = windowService.getDefaultDisplay();
-            final boolean shouldUseBottomOutset =
-                    display.getDisplayId() == Display.DEFAULT_DISPLAY
-                            || (getForcedWindowFlags() & FLAG_FULLSCREEN) != 0;
-            if (shouldUseBottomOutset) {
-                mOutsetBottomPx = ScreenShapeHelper.getWindowOutsetBottomPx(
-                        getContext().getResources().getDisplayMetrics(), a);
-            }
         }
 
         final Context context = getContext();
