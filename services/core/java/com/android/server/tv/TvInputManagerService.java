@@ -18,8 +18,6 @@ package com.android.server.tv;
 
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
-import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
-import static android.media.tv.TvInputManager.INPUT_STATE_UNKNOWN;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -800,7 +798,7 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     UserState userState = getUserStateLocked(resolvedUserId);
                     TvInputState state = userState.inputMap.get(inputId);
-                    return state == null ? INPUT_STATE_UNKNOWN : state.state;
+                    return state == null ? INPUT_STATE_CONNECTED : state.state;
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1908,7 +1906,7 @@ public final class TvInputManagerService extends SystemService {
 
                 for (TvInputState inputState : userState.inputMap.values()) {
                     if (inputState.info.getComponent().equals(component)
-                            && inputState.state != INPUT_STATE_DISCONNECTED) {
+                            && inputState.state != INPUT_STATE_CONNECTED) {
                         notifyInputStateChangedLocked(userState, inputState.info.getId(),
                                 inputState.state, null);
                     }
@@ -1957,13 +1955,6 @@ public final class TvInputManagerService extends SystemService {
                     serviceState.callback = null;
 
                     abortPendingCreateSessionRequestsLocked(serviceState, null, mUserId);
-
-                    for (TvInputState inputState : userState.inputMap.values()) {
-                        if (inputState.info.getComponent().equals(component)) {
-                            notifyInputStateChangedLocked(userState, inputState.info.getId(),
-                                    INPUT_STATE_DISCONNECTED, null);
-                        }
-                    }
                 }
             }
         }
@@ -2508,9 +2499,6 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private static class SessionNotFoundException extends IllegalArgumentException {
-        public SessionNotFoundException() {
-        }
-
         public SessionNotFoundException(String name) {
             super(name);
         }
