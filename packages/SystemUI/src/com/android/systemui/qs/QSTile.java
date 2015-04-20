@@ -149,6 +149,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         return mState;
     }
 
+    public void setDetailListening(boolean listening) {
+        // optional
+    }
+
     // call only on tile worker looper
 
     private void handleSetCallback(Callback callback) {

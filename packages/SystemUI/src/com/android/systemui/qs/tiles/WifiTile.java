@@ -67,9 +67,16 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     public void setListening(boolean listening) {
         if (listening) {
             mController.addNetworkSignalChangedCallback(mCallback);
-            mWifiController.addAccessPointCallback(mDetailAdapter);
         } else {
             mController.removeNetworkSignalChangedCallback(mCallback);
+        }
+    }
+
+    @Override
+    public void setDetailListening(boolean listening) {
+        if (listening) {
+            mWifiController.addAccessPointCallback(mDetailAdapter);
+        } else {
             mWifiController.removeAccessPointCallback(mDetailAdapter);
         }
     }
