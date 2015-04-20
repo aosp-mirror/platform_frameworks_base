@@ -240,23 +240,30 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
         boolean handled = Touch.onTouchEvent(widget, buffer, event);
 
-        if (widget.isFocused() && !widget.didTouchFocusSelect()) {
-            if (action == MotionEvent.ACTION_DOWN) {
-                // Capture the mouse pointer down location to ensure selection starts
-                // right under the mouse (and is not influenced by cursor location).
-                // The code below needs to run for mouse events.
-                // For touch events, the code should run only when selection is active.
-                if (isMouse || isTouchSelecting(isMouse, buffer)) {
-                    int offset = widget.getOffsetForPosition(event.getX(), event.getY());
-                    buffer.setSpan(LAST_TAP_DOWN, offset, offset, Spannable.SPAN_POINT_POINT);
-                    // Disallow intercepting of the touch events, so that
-                    // users can scroll and select at the same time.
-                    // without this, users would get booted out of select
-                    // mode once the view detected it needed to scroll.
-                    widget.getParent().requestDisallowInterceptTouchEvent(true);
+        if (widget.didTouchFocusSelect() && !isMouse) {
+            return handled;
+        }
+        if (action == MotionEvent.ACTION_DOWN) {
+            // Capture the mouse pointer down location to ensure selection starts
+            // right under the mouse (and is not influenced by cursor location).
+            // The code below needs to run for mouse events.
+            // For touch events, the code should run only when selection is active.
+            if (isMouse || isTouchSelecting(isMouse, buffer)) {
+                if (!widget.isFocused()) {
+                    if (!widget.requestFocus()) {
+                        return handled;
+                    }
                 }
-            } else if (action == MotionEvent.ACTION_MOVE) {
-
+                int offset = widget.getOffsetForPosition(event.getX(), event.getY());
+                buffer.setSpan(LAST_TAP_DOWN, offset, offset, Spannable.SPAN_POINT_POINT);
+                // Disallow intercepting of the touch events, so that
+                // users can scroll and select at the same time.
+                // without this, users would get booted out of select
+                // mode once the view detected it needed to scroll.
+                widget.getParent().requestDisallowInterceptTouchEvent(true);
+            }
+        } else if (widget.isFocused()) {
+            if (action == MotionEvent.ACTION_MOVE) {
                 // Cursor can be active at any location in the text while mouse pointer can start
                 // selection from a totally different location. Use LAST_TAP_DOWN span to ensure
                 // text selection will start from mouse pointer location.
