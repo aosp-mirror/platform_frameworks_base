@@ -2598,5 +2598,4 @@
     <public type="style" name="Theme.DeviceDefault.Dialog.Alert" />
     <public type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />
 
-  <public type="attr" name="extractNativeLibs" />
 </resources>

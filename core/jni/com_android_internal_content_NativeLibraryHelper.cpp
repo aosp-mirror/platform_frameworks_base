@@ -33,7 +33,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -174,11 +173,7 @@ sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char
 static install_status_t
 copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName)
 {
-    void** args = reinterpret_cast<void**>(arg);
-    jstring* javaNativeLibPath = (jstring*) args[0];
-    jboolean extractNativeLibs = *(jboolean*) args[1];
-    jboolean hasNativeBridge = *(jboolean*) args[2];
-
+    jstring* javaNativeLibPath = (jstring*) arg;
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
 
     size_t uncompLen;
@@ -186,31 +181,13 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     long crc;
     time_t modTime;
 
-    int method;
-    off64_t offset;
-
-    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, NULL, &offset, &when, &crc)) {
+    if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, &when, &crc)) {
         ALOGD("Couldn't read zip entry info\n");
         return INSTALL_FAILED_INVALID_APK;
-    }
-
-    if (!extractNativeLibs) {
-        // check if library is uncompressed and page-aligned
-        if (method != ZipFileRO::kCompressStored) {
-            ALOGD("Library '%s' is compressed - will not be able to open it directly from apk.\n",
-                fileName);
-            return INSTALL_FAILED_INVALID_APK;
-        }
-
-        if (offset % PAGE_SIZE != 0) {
-            ALOGD("Library '%s' is not page-aligned - will not be able to open it directly from"
-                " apk.\n", fileName);
-            return INSTALL_FAILED_INVALID_APK;
-        }
-
-        if (!hasNativeBridge) {
-          return INSTALL_SUCCEEDED;
-        }
+    } else {
+        struct tm t;
+        ZipUtils::zipTimeToTimespec(when, &t);
+        modTime = mktime(&t);
     }
 
     // Build local file path
@@ -231,9 +208,6 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     }
 
     // Only copy out the native file if it's different.
-    struct tm t;
-    ZipUtils::zipTimeToTimespec(when, &t);
-    modTime = mktime(&t);
     struct stat64 st;
     if (!isFileDifferent(localFileName, uncompLen, modTime, crc, &st)) {
         return INSTALL_SUCCEEDED;
@@ -491,12 +465,10 @@ static int findSupportedAbi(JNIEnv *env, jlong apkHandle, jobjectArray supported
 
 static jint
 com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env, jclass clazz,
-        jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
-        jboolean extractNativeLibs, jboolean hasNativeBridge)
+        jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi)
 {
-    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &hasNativeBridge };
     return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi,
-            copyFileIfChanged, reinterpret_cast<void*>(args));
+            copyFileIfChanged, &javaNativeLibPath);
 }
 
 static jlong
@@ -576,7 +548,7 @@ static JNINativeMethod gMethods[] = {
             "(J)V",
             (void *)com_android_internal_content_NativeLibraryHelper_close},
     {"nativeCopyNativeBinaries",
-            "(JLjava/lang/String;Ljava/lang/String;ZZ)I",
+            "(JLjava/lang/String;Ljava/lang/String;)I",
             (void *)com_android_internal_content_NativeLibraryHelper_copyNativeBinaries},
     {"nativeSumNativeBinaries",
             "(JLjava/lang/String;)J",
