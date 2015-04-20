@@ -23628,6 +23628,7 @@ package android.os {
     field public static final java.lang.String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
     field public static final java.lang.String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
     field public static final java.lang.String DISALLOW_MOUNT_PHYSICAL_MEDIA = "no_physical_media";
+    field public static final java.lang.String DISALLOW_NETWORK_RESET = "no_network_reset";
     field public static final java.lang.String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
     field public static final java.lang.String DISALLOW_OUTGOING_CALLS = "no_outgoing_calls";
     field public static final java.lang.String DISALLOW_REMOVE_USER = "no_remove_user";

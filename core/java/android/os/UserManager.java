@@ -199,6 +199,20 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_TETHERING = "no_config_tethering";
 
     /**
+     * Specifies if a user is disallowed from resetting network settings
+     * from Settings. This can only be set by device owners and profile owners on the primary user.
+     * The default value is <code>false</code>.
+     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * primary user can reset the network settings of the device.
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_NETWORK_RESET = "no_network_reset";
+
+    /**
      * Specifies if a user is disallowed from factory resetting
      * from Settings. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.

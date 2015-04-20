@@ -950,6 +950,7 @@ public class UserManagerService extends IUserManager.Stub {
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_VPN);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_NETWORK_RESET);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_FACTORY_RESET);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADD_USER);
         writeBoolean(serializer, restrictions, UserManager.ENSURE_VERIFY_APPS);
@@ -1078,6 +1079,7 @@ public class UserManagerService extends IUserManager.Stub {
         readBoolean(parser, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
         readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_VPN);
         readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_NETWORK_RESET);
         readBoolean(parser, restrictions, UserManager.DISALLOW_FACTORY_RESET);
         readBoolean(parser, restrictions, UserManager.DISALLOW_ADD_USER);
         readBoolean(parser, restrictions, UserManager.ENSURE_VERIFY_APPS);
