@@ -1076,7 +1076,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Vẫn đang ngắt kết nối <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Không tháo"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"Thiết lập"</string>
-    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Ngắt kết nối"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Tháo"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Khám phá"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Không tìm thấy hoạt động nào phù hợp."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Định tuyến thiết bị ra phương tiện"</string>

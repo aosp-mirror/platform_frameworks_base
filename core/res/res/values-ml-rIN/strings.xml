@@ -1064,16 +1064,16 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"കാൻഡിഡേറ്റുകൾ"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> തയ്യാറാകുന്നു"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"പിശകുകൾക്കായി പരിശോധിക്കുന്നു"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"പിശകുകളുണ്ടോയെന്നു പരിശോധിക്കുന്നു"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"പുതിയ <xliff:g id="NAME">%s</xliff:g> എന്നതിനെ തിരിച്ചറിഞ്ഞു"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ഫോട്ടോകളും മീഡിയയും മാറ്റുന്നതിന്"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ഫോട്ടോകളും മീഡിയയും ട്രാൻസ്‌ഫർ ചെയ്യാൻ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> കേടായി"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> കേടായി; അത് വീണ്ടും ഫോർമാറ്റുചെയ്യുന്നതിന് ശ്രമിക്കുക"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"വിവരങ്ങൾ നഷ്‌ടപ്പെടുന്നത് ഒഴിവാക്കാൻ നീക്കംചെയ്യുന്നതിനുമുമ്പ് <xliff:g id="NAME">%s</xliff:g> അൺ‌മൗണ്ടുചെയ്യുക"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> നീക്കംചെയ്‌തു; പുതിയതൊന്ന് ചേർക്കുക"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"തുടർന്നും <xliff:g id="NAME">%s</xliff:g> എന്നതിനെ ഒഴിവാക്കുന്നു…"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"ഇപ്പോഴും <xliff:g id="NAME">%s</xliff:g> ഒഴിവാക്കപ്പെടുന്നു…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"നീക്കംചെയ്യരുത്"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"സജ്ജമാക്കുക"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"നിരസിക്കുക"</string>
@@ -1207,12 +1207,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"ആന്തരിക സംഭരണം"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD കാർഡ്"</string>
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD കാർഡ്"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB ഡ്രൈവ്"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ഡ്രൈവ്"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB സംഭരണം"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"എഡിറ്റുചെയ്യുക"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ഡാറ്റ ഉപയോഗ മുന്നറിയിപ്പ്"</string>
