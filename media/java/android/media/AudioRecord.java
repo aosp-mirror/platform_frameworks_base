@@ -166,9 +166,13 @@ public class AudioRecord
      */
     private int mChannelCount;
     /**
-     * The audio channel mask
+     * The audio channel position mask
      */
     private int mChannelMask;
+    /**
+     * The audio channel index mask
+     */
+    private int mChannelIndexMask;
     /**
      * The encoding of the audio samples.
      * @see AudioFormat#ENCODING_PCM_8BIT
@@ -344,14 +348,19 @@ public class AudioRecord
 
         audioParamCheck(attributes.getCapturePreset(), rate, encoding);
 
-        int channelMask = AudioFormat.CHANNEL_IN_DEFAULT;
         if ((format.getPropertySetMask()
-                & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0)
-        {
-            channelMask = format.getChannelMask();
+                & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK) != 0) {
+            mChannelIndexMask = format.getChannelIndexMask();
+            mChannelCount = format.getChannelCount();
         }
-        mChannelCount = AudioFormat.channelCountFromInChannelMask(channelMask);
-        mChannelMask = getChannelMaskFromLegacyConfig(channelMask, false);
+        if ((format.getPropertySetMask()
+                & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0) {
+            mChannelMask = getChannelMaskFromLegacyConfig(format.getChannelMask(), false);
+            mChannelCount = format.getChannelCount();
+        } else if (mChannelIndexMask == 0) {
+            mChannelMask = getChannelMaskFromLegacyConfig(AudioFormat.CHANNEL_IN_DEFAULT, false);
+            mChannelCount =  AudioFormat.channelCountFromInChannelMask(mChannelMask);
+        }
 
         audioBuffSizeCheck(bufferSizeInBytes);
 
@@ -360,7 +369,8 @@ public class AudioRecord
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
         int initResult = native_setup( new WeakReference<AudioRecord>(this),
-                mAudioAttributes, mSampleRate, mChannelMask, mAudioFormat, mNativeBufferSizeInBytes,
+                mAudioAttributes, mSampleRate, mChannelMask, mChannelIndexMask,
+                mAudioFormat, mNativeBufferSizeInBytes,
                 session);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
@@ -1269,7 +1279,7 @@ public class AudioRecord
 
     private native final int native_setup(Object audiorecord_this,
             Object /*AudioAttributes*/ attributes,
-            int sampleRate, int channelMask, int audioFormat,
+            int sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int[] sessionId);
 
     // TODO remove: implementation calls directly into implementation of native_release()

@@ -145,8 +145,7 @@ static sp<AudioRecord> setAudioRecord(JNIEnv* env, jobject thiz, const sp<AudioR
 // ----------------------------------------------------------------------------
 static jint
 android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jobject jaa, jint sampleRateInHertz, jint channelMask,
-                // Java channel masks map directly to the native definition
+        jobject jaa, jint sampleRateInHertz, jint channelMask, jint channelIndexMask,
         jint audioFormat, jint buffSizeInBytes, jintArray jSession)
 {
     //ALOGV(">> Entering android_media_AudioRecord_setup");
@@ -157,6 +156,15 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         ALOGE("Error creating AudioRecord: invalid audio attributes");
         return (jint) AUDIO_JAVA_ERROR;
     }
+
+    // channel index mask takes priority over channel position masks.
+    if (channelIndexMask) {
+        // Java channel index masks need the representation bits set.
+        channelMask = audio_channel_mask_from_representation_and_bits(
+                AUDIO_CHANNEL_REPRESENTATION_INDEX,
+                channelIndexMask);
+    }
+    // Java channel position masks map directly to the native definition
 
     if (!audio_is_input_channel(channelMask)) {
         ALOGE("Error creating AudioRecord: channel mask %#x is not valid.", channelMask);
@@ -583,7 +591,7 @@ static JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
     {"native_start",         "(II)I",    (void *)android_media_AudioRecord_start},
     {"native_stop",          "()V",    (void *)android_media_AudioRecord_stop},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/Object;IIII[I)I",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/Object;IIIII[I)I",
                                        (void *)android_media_AudioRecord_setup},
     {"native_finalize",      "()V",    (void *)android_media_AudioRecord_finalize},
     {"native_release",       "()V",    (void *)android_media_AudioRecord_release},
