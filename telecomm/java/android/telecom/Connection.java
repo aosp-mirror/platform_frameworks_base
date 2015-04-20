@@ -44,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
  * longer used and associated resources may be recovered.
  */
-public abstract class Connection implements IConferenceable {
+public abstract class Connection implements Conferenceable {
 
     public static final int STATE_INITIALIZING = 0;
 
@@ -374,7 +374,7 @@ public abstract class Connection implements IConferenceable {
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
         public void onConferenceablesChanged(
-                Connection c, List<IConferenceable> conferenceables) {}
+                Connection c, List<Conferenceable> conferenceables) {}
         public void onConferenceChanged(Connection c, Conference conference) {}
         /** @hide */
         public void onConferenceParticipantsChanged(Connection c,
@@ -788,8 +788,8 @@ public abstract class Connection implements IConferenceable {
      */
     private final Set<Listener> mListeners = Collections.newSetFromMap(
             new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
-    private final List<IConferenceable> mConferenceables = new ArrayList<>();
-    private final List<IConferenceable> mUnmodifiableConferenceables =
+    private final List<Conferenceable> mConferenceables = new ArrayList<>();
+    private final List<Conferenceable> mUnmodifiableConferenceables =
             Collections.unmodifiableList(mConferenceables);
 
     private int mState = STATE_NEW;
@@ -1277,9 +1277,9 @@ public abstract class Connection implements IConferenceable {
      *
      * @param conferenceables The conferenceables.
      */
-    public final void setConferenceables(List<IConferenceable> conferenceables) {
+    public final void setConferenceables(List<Conferenceable> conferenceables) {
         clearConferenceableList();
-        for (IConferenceable c : conferenceables) {
+        for (Conferenceable c : conferenceables) {
             // If statement checks for duplicates in input. It makes it N^2 but we're dealing with a
             // small amount of items here.
             if (!mConferenceables.contains(c)) {
@@ -1299,7 +1299,7 @@ public abstract class Connection implements IConferenceable {
     /**
      * Returns the connections or conferences with which this connection can be conferenced.
      */
-    public final List<IConferenceable> getConferenceables() {
+    public final List<Conferenceable> getConferenceables() {
         return mUnmodifiableConferenceables;
     }
 
@@ -1564,7 +1564,7 @@ public abstract class Connection implements IConferenceable {
     }
 
     private final void clearConferenceableList() {
-        for (IConferenceable c : mConferenceables) {
+        for (Conferenceable c : mConferenceables) {
             if (c instanceof Connection) {
                 Connection connection = (Connection) c;
                 connection.removeConnectionListener(mConnectionDeathListener);
