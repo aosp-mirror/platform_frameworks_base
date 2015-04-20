@@ -133,7 +133,7 @@ public abstract class BlobBackupHelper implements BackupHelper {
 
             out.writeInt(mCurrentBlobVersion);
 
-            final int N = state.size();
+            final int N = (state != null) ? state.size() : 0;
             out.writeInt(N);
             for (int i = 0; i < N; i++) {
                 out.writeUTF(state.keyAt(i));
