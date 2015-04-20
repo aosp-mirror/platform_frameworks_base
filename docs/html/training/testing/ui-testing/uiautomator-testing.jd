@@ -89,8 +89,9 @@ test runner.
 
         <pre>
 dependencies {
-    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
-    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.0.0'
+    androidTestCompile 'com.android.support.test:runner:0.2'
+    androidTestCompile 'com.android.support.test:rules:0.2'
+    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.0'
 }
 </pre>
       </li>
