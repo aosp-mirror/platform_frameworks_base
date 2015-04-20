@@ -39,7 +39,9 @@ public class EmergencyButton extends Button {
     private static final Intent INTENT_EMERGENCY_DIAL = new Intent()
             .setAction("com.android.phone.EmergencyDialer.DIAL")
             .setPackage("com.android.phone")
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
