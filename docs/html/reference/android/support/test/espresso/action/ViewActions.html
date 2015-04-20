@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../../../assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="../../../../../../assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -126,7 +127,9 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../../assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="../../../../../../assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -149,6 +152,52 @@ type="text/css">
 
 
 <a name="top"></a>
+
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
 
   <!-- Header -->
   <div id="header-wrapper">
@@ -346,6 +395,7 @@ type="text/css">
                 <li><a href="../../../../../../distribute/users/index.html">Get Users</a></li>
                 <li><a href="../../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="../../../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../../../distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="../../../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="../../../../../../distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -361,31 +411,7 @@ type="text/css">
         <div class="wrap" style="position:relative;z-index:1">
 
 
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
 
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
 
 
             <ul class="nav-x col-9 develop" style="width:100%">
@@ -483,6 +509,8 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/package-summary.html">android.support.test</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/annotation/package-summary.html">android.support.test.annotation</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/package-summary.html">android.support.test.espresso</a></li>
     <li class="selected api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/action/package-summary.html">android.support.test.espresso.action</a></li>
@@ -493,13 +521,23 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/contrib/package-summary.html">android.support.test.espresso.contrib</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/espresso/intent/package-summary.html">android.support.test.espresso.intent</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/espresso/intent/matcher/package-summary.html">android.support.test.espresso.intent.matcher</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/espresso/intent/rule/package-summary.html">android.support.test.espresso.intent.rule</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/matcher/package-summary.html">android.support.test.espresso.matcher</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/util/package-summary.html">android.support.test.espresso.util</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/runner/package-summary.html">android.support.test.runner</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/runner/intent/package-summary.html">android.support.test.runner.intent</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/runner/lifecycle/package-summary.html">android.support.test.runner.lifecycle</a></li>
     <li class="api apilevel-">
@@ -539,6 +577,8 @@ type="text/css">
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/action/GeneralClickAction.html">GeneralClickAction</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/action/GeneralSwipeAction.html">GeneralSwipeAction</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/action/KeyEventAction.html">KeyEventAction</a></li>
+          <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/action/MotionEvents.html">MotionEvents</a></li>
+          <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/action/MotionEvents.DownResultHolder.html">MotionEvents.DownResultHolder</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/action/OpenLinkAction.html">OpenLinkAction</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/action/ReplaceTextAction.html">ReplaceTextAction</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/action/ScrollToAction.html">ScrollToAction</a></li>
@@ -783,6 +823,70 @@ Summary:
             <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#actionWithAssertions(android.support.test.espresso.ViewAction)">actionWithAssertions</a></span>(<a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a> viewAction)</nobr>
+
+        <div class="jd-descrdiv">
+          Performs all assertions in <code><a href="../../../../../../">ERROR(/#globalAssertions)</a></code> and then performs the given
+ <code>ViewAction</code>
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#addGlobalAssertion(java.lang.String, android.support.test.espresso.ViewAssertion)">addGlobalAssertion</a></span>(String name, <a href="../../../../../../reference/android/support/test/espresso/ViewAssertion.html">ViewAssertion</a> viewAssertion)</nobr>
+
+        <div class="jd-descrdiv">
+          Adds a <code>ViewAssertion</code> to be run every time a <code>ViewAction</code> in this class is
+ performed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#clearGlobalAssertions()">clearGlobalAssertions</a></span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#clearText()">clearText</a></span>()</nobr>
 
         <div class="jd-descrdiv">
@@ -796,7 +900,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -819,7 +923,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -842,7 +946,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -865,7 +969,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -888,7 +992,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -911,7 +1015,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -934,7 +1038,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -958,7 +1062,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -973,30 +1077,6 @@ Summary:
         <div class="jd-descrdiv">
           Same as <code>openLinkWithText(Matcher<String> linkTextMatcher)</code>, but uses
  <code>is(linkText)</code> as the linkTextMatcher.
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-            static
-
-            <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#openLinkWithUri(java.lang.String)">openLinkWithUri</a></span>(String uri)</nobr>
-
-        <div class="jd-descrdiv">
-          Same as <code>openLinkWithUri(Matcher<Uri> uriMatcher)</code>, but uses <code>is(uri)</code> as the
- uriMatcher.
 
 
 
@@ -1040,10 +1120,11 @@ Summary:
             <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#pressBack()">pressBack</a></span>()</nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#openLinkWithUri(java.lang.String)">openLinkWithUri</a></span>(String uri)</nobr>
 
         <div class="jd-descrdiv">
-          Returns an action that clicks the back button.
+          Same as <code>openLinkWithUri(Matcher<Uri> uriMatcher)</code>, but uses <code>is(uri)</code> as the
+ uriMatcher.
 
 
 
@@ -1063,11 +1144,10 @@ Summary:
             <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#pressImeActionButton()">pressImeActionButton</a></span>()</nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#pressBack()">pressBack</a></span>()</nobr>
 
         <div class="jd-descrdiv">
-          Returns an action that presses the current action button (next, done, search, etc) on the IME
- (Input Method Editor).
+          Returns an action that clicks the back button.
 
 
 
@@ -1087,10 +1167,11 @@ Summary:
             <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#pressKey(android.support.test.espresso.action.EspressoKey)">pressKey</a></span>(<a href="../../../../../../reference/android/support/test/espresso/action/EspressoKey.html">EspressoKey</a> key)</nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#pressImeActionButton()">pressImeActionButton</a></span>()</nobr>
 
         <div class="jd-descrdiv">
-          Returns an action that presses the specified key with the specified modifiers.
+          Returns an action that presses the current action button (next, done, search, etc) on the IME
+ (Input Method Editor).
 
 
 
@@ -1133,10 +1214,56 @@ Summary:
             <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#pressKey(android.support.test.espresso.action.EspressoKey)">pressKey</a></span>(<a href="../../../../../../reference/android/support/test/espresso/action/EspressoKey.html">EspressoKey</a> key)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns an action that presses the specified key with the specified modifiers.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#pressMenuKey()">pressMenuKey</a></span>()</nobr>
 
         <div class="jd-descrdiv">
           Returns an action that presses the hardware menu key.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/action/ViewActions.html#removeGlobalAssertion(android.support.test.espresso.ViewAssertion)">removeGlobalAssertion</a></span>(<a href="../../../../../../reference/android/support/test/espresso/ViewAssertion.html">ViewAssertion</a> viewAssertion)</nobr>
+
+        <div class="jd-descrdiv">
+          Removes the given assertion from the set of assertions to be run before actions are performed.
 
 
 
@@ -1590,6 +1717,138 @@ From class
 
 
 
+<A NAME="actionWithAssertions(android.support.test.espresso.ViewAction)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
+      </span>
+      <span class="sympad">actionWithAssertions</span>
+      <span class="normal">(<a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a> viewAction)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs all assertions in <code><a href="../../../../../../">ERROR(/#globalAssertions)</a></code> and then performs the given
+ <code>ViewAction</code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>viewAction</td>
+          <td>the <code>ViewAction</code> to perform after the assertions
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="addGlobalAssertion(java.lang.String, android.support.test.espresso.ViewAssertion)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        void
+      </span>
+      <span class="sympad">addGlobalAssertion</span>
+      <span class="normal">(String name, <a href="../../../../../../reference/android/support/test/espresso/ViewAssertion.html">ViewAssertion</a> viewAssertion)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a <code>ViewAssertion</code> to be run every time a <code>ViewAction</code> in this class is
+ performed. The assertion will be run prior to performing the action.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>name</td>
+          <td>a name of the assertion to be added</td>
+        </tr>
+        <tr>
+          <th>viewAssertion</td>
+          <td>a <code>ViewAssertion</code> to be added</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalArgumentException</td>
+            <td>if the name/viewAssertion pair is already contained in the
+         global assertions.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="clearGlobalAssertions()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        void
+      </span>
+      <span class="sympad">clearGlobalAssertions</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 <A NAME="clearText()"></A>
 
 <div class="jd-details api apilevel-">
@@ -1936,40 +2195,6 @@ From class
 </div>
 
 
-<A NAME="openLinkWithUri(java.lang.String)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-
-
-
-        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
-      </span>
-      <span class="sympad">openLinkWithUri</span>
-      <span class="normal">(String uri)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Same as <code>openLinkWithUri(Matcher<Uri> uriMatcher)</code>, but uses <code>is(uri)</code> as the
- uriMatcher.
-</p></div>
-
-    </div>
-</div>
-
-
 <A NAME="openLinkWithUri(org.hamcrest.Matcher<android.net.Uri>)"></A>
 
 <div class="jd-details api apilevel-">
@@ -1998,6 +2223,40 @@ From class
 
   <div class="jd-tagdata jd-tagdescr"><p>Same as <code>openLink(Matcher<String> linkTextMatcher, Matcher<Uri> uriMatcher)</code>, but uses
  <code>any(String.class)</code> as the linkTextMatcher.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="openLinkWithUri(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
+      </span>
+      <span class="sympad">openLinkWithUri</span>
+      <span class="normal">(String uri)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Same as <code>openLinkWithUri(Matcher<Uri> uriMatcher)</code>, but uses <code>is(uri)</code> as the
+ uriMatcher.
 </p></div>
 
     </div>
@@ -2071,39 +2330,6 @@ From class
 </div>
 
 
-<A NAME="pressKey(android.support.test.espresso.action.EspressoKey)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-        static
-
-
-
-        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
-      </span>
-      <span class="sympad">pressKey</span>
-      <span class="normal">(<a href="../../../../../../reference/android/support/test/espresso/action/EspressoKey.html">EspressoKey</a> key)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns an action that presses the specified key with the specified modifiers.
-</p></div>
-
-    </div>
-</div>
-
-
 <A NAME="pressKey(int)"></A>
 
 <div class="jd-details api apilevel-">
@@ -2131,6 +2357,39 @@ From class
 
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns an action that presses the key specified by the keyCode (eg. Keyevent.KEYCODE_BACK).
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="pressKey(android.support.test.espresso.action.EspressoKey)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="../../../../../../reference/android/support/test/espresso/ViewAction.html">ViewAction</a>
+      </span>
+      <span class="sympad">pressKey</span>
+      <span class="normal">(<a href="../../../../../../reference/android/support/test/espresso/action/EspressoKey.html">EspressoKey</a> key)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an action that presses the specified key with the specified modifiers.
 </p></div>
 
     </div>
@@ -2165,6 +2424,58 @@ From class
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns an action that presses the hardware menu key.
 </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="removeGlobalAssertion(android.support.test.espresso.ViewAssertion)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        void
+      </span>
+      <span class="sympad">removeGlobalAssertion</span>
+      <span class="normal">(<a href="../../../../../../reference/android/support/test/espresso/ViewAssertion.html">ViewAssertion</a> viewAssertion)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Removes the given assertion from the set of assertions to be run before actions are performed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>viewAssertion</td>
+          <td>the assertion to remove</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalArgumentException</td>
+            <td>if the name/viewAssertion pair is not already contained in the
+         global assertions.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

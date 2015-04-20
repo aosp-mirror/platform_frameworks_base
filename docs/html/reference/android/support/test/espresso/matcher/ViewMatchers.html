@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../../../assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="../../../../../../assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -126,7 +127,9 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../../assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="../../../../../../assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -149,6 +152,52 @@ type="text/css">
 
 
 <a name="top"></a>
+
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
 
   <!-- Header -->
   <div id="header-wrapper">
@@ -346,6 +395,7 @@ type="text/css">
                 <li><a href="../../../../../../distribute/users/index.html">Get Users</a></li>
                 <li><a href="../../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="../../../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../../../distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="../../../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="../../../../../../distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -361,31 +411,7 @@ type="text/css">
         <div class="wrap" style="position:relative;z-index:1">
 
 
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
 
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
 
 
             <ul class="nav-x col-9 develop" style="width:100%">
@@ -483,6 +509,8 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/package-summary.html">android.support.test</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/annotation/package-summary.html">android.support.test.annotation</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/package-summary.html">android.support.test.espresso</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/action/package-summary.html">android.support.test.espresso.action</a></li>
@@ -492,6 +520,12 @@ type="text/css">
   <a href="../../../../../../reference/android/support/test/espresso/base/package-summary.html">android.support.test.espresso.base</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/contrib/package-summary.html">android.support.test.espresso.contrib</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/espresso/intent/package-summary.html">android.support.test.espresso.intent</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/espresso/intent/matcher/package-summary.html">android.support.test.espresso.intent.matcher</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/espresso/intent/rule/package-summary.html">android.support.test.espresso.intent.rule</a></li>
     <li class="selected api apilevel-">
   <a href="../../../../../../reference/android/support/test/espresso/matcher/package-summary.html">android.support.test.espresso.matcher</a></li>
     <li class="api apilevel-">
@@ -499,7 +533,11 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/runner/package-summary.html">android.support.test.runner</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../../reference/android/support/test/runner/intent/package-summary.html">android.support.test.runner.intent</a></li>
     <li class="api apilevel-">
   <a href="../../../../../../reference/android/support/test/runner/lifecycle/package-summary.html">android.support.test.runner.lifecycle</a></li>
     <li class="api apilevel-">
@@ -520,6 +558,7 @@ type="text/css">
       <ul>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/matcher/BoundedMatcher.html">BoundedMatcher</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/matcher/CursorMatchers.html">CursorMatchers</a></li>
+          <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/matcher/CursorMatchers.CursorMatcher.html">CursorMatchers.CursorMatcher</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/matcher/LayoutMatchers.html">LayoutMatchers</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/matcher/PreferenceMatchers.html">PreferenceMatchers</a></li>
           <li class="api apilevel-"><a href="../../../../../../reference/android/support/test/espresso/matcher/RootMatchers.html">RootMatchers</a></li>
@@ -859,8 +898,8 @@ Summary:
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#hasDescendant(org.hamcrest.Matcher<android.view.View>)">hasDescendant</a></span>(Matcher&lt;View&gt; descendantMatcher)</nobr>
 
         <div class="jd-descrdiv">
-          Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on the presence of a descendant in its
- view hierarchy.
+          Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on the presence of a descendant in its view
+ hierarchy.
 
 
 
@@ -1023,8 +1062,8 @@ Summary:
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#isChecked()">isChecked</a></span>()</nobr>
 
         <div class="jd-descrdiv">
-          Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of)
- and is in checked state.
+          Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of) and
+ is in checked state.
 
 
 
@@ -1117,8 +1156,8 @@ Summary:
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#isDisplayed()">isDisplayed</a></span>()</nobr>
 
         <div class="jd-descrdiv">
-          Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s that are currently displayed on the screen to
- the user.
+          Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s that are currently displayed on the screen to the
+ user.
 
 
 
@@ -1234,8 +1273,8 @@ Summary:
         <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#isNotChecked()">isNotChecked</a></span>()</nobr>
 
         <div class="jd-descrdiv">
-          Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of)
- and is not in checked state.
+          Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of) and
+ is not in checked state.
 
 
 
@@ -1375,8 +1414,8 @@ Summary:
 
         <div class="jd-descrdiv">
           Returns an <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
- <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description
- property value.
+ <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description property
+ value.
 
 
 
@@ -1400,8 +1439,8 @@ Summary:
 
         <div class="jd-descrdiv">
           Returns an <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
- <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description
- property value.
+ <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description property
+ value.
 
 
 
@@ -1421,11 +1460,12 @@ Summary:
             Matcher&lt;View&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#withEffectiveVisibility(android.support.test.espresso.matcher.ViewMatchers.Visibility)">withEffectiveVisibility</a></span>(<a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.Visibility.html">ViewMatchers.Visibility</a> visibility)</nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#withContentDescription(int)">withContentDescription</a></span>(int resourceId)</nobr>
 
         <div class="jd-descrdiv">
-          Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s that have "effective" visibility set to the
- given value.
+          Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+ <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description property
+ value.
 
 
 
@@ -1436,6 +1476,30 @@ Summary:
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            Matcher&lt;View&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.html#withEffectiveVisibility(android.support.test.espresso.matcher.ViewMatchers.Visibility)">withEffectiveVisibility</a></span>(<a href="../../../../../../reference/android/support/test/espresso/matcher/ViewMatchers.Visibility.html">ViewMatchers.Visibility</a> visibility)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s that have "effective" visibility set to the given
+ value.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1459,7 +1523,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1482,7 +1546,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1505,7 +1569,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1528,7 +1592,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1552,7 +1616,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1576,7 +1640,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1599,7 +1663,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1623,7 +1687,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1646,7 +1710,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1669,7 +1733,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1692,7 +1756,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1715,7 +1779,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1738,7 +1802,7 @@ Summary:
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1761,7 +1825,7 @@ Summary:
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -2198,8 +2262,8 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on the presence of a descendant in its
- view hierarchy.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on the presence of a descendant in its view
+ hierarchy.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -2397,16 +2461,17 @@ From class
  <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on their siblings.<br>
  <br>
  This may be particularly useful when a view cannot be uniquely selected on properties such as
- text or R.id. For example: a call button is repeated several times in a contacts layout
- and the only way to differentiate the call button view is by what appears next to it (e.g.
- the unique name of the contact).</p></div>
+ text or R.id. For example: a call button is repeated several times in a contacts layout and the
+ only way to differentiate the call button view is by what appears next to it (e.g. the unique
+ name of the contact).</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>siblingMatcher</td>
-          <td>a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-                       <code>Matcher</code></a> for the sibling of the view.
+          <td>a
+     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+     <code>Matcher</code></a> for the sibling of the view.
 </td>
         </tr>
       </table>
@@ -2477,8 +2542,8 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of)
- and is in checked state.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of) and
+ is in checked state.
 </p></div>
 
     </div>
@@ -2546,7 +2611,7 @@ From class
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher which only accepts a view whose height and width fit perfectly within
  the currently displayed region of this view.
- <p/>
+
  There exist views (such as ScrollViews) whose height and width are larger then the physical
  device screen by design. Such views will _never_ be completely displayed.
 </p></div>
@@ -2623,13 +2688,12 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s that are currently displayed on the screen to
- the user.
- <p/>
- Note: isDisplayed will select views that are partially displayed (eg: the full
- height/width of the view is greater then the height/width of the visible rectangle).
- If you wish to ensure the entire rectangle this view draws is displayed to the user use
- isCompletelyDisplayed.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s that are currently displayed on the screen to the
+ user.
+
+ Note: isDisplayed will select views that are partially displayed (eg: the full height/width of
+ the view is greater then the height/width of the visible rectangle). If you wish to ensure the
+ entire rectangle this view draws is displayed to the user use isCompletelyDisplayed.
 </p></div>
 
     </div>
@@ -2670,7 +2734,7 @@ From class
         <tr>
           <th>areaPercentage</td>
           <td>an integer ranging from (0, 100] indicating how much percent of the
-                       surface area of the view must be shown to the user to be accepted.
+   surface area of the view must be shown to the user to be accepted.
 </td>
         </tr>
       </table>
@@ -2805,8 +2869,8 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of)
- and is not in checked state.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of) and
+ is not in checked state.
 </p></div>
 
     </div>
@@ -3015,8 +3079,8 @@ From class
 
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns an <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
- <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description
- property value. Sugar for withContentDescription(is("string")).</p></div>
+ <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description property
+ value. Sugar for withContentDescription(is("string")).</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -3059,15 +3123,60 @@ From class
 
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns an <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
- <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description
- property value.</p></div>
+ <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description property
+ value.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>charSequenceMatcher</td>
-          <td>a <code><a href="../../../../../../reference/java/lang/CharSequence.html">CharSequence</a></code> <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-                            <code>Matcher</code></a> for the content description
+          <td>a <code><a href="../../../../../../reference/java/lang/CharSequence.html">CharSequence</a></code>
+     <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+     <code>Matcher</code></a> for the content description
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="withContentDescription(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        Matcher&lt;View&gt;
+      </span>
+      <span class="sympad">withContentDescription</span>
+      <span class="normal">(int resourceId)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
+ <code>Matcher</code></a> that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on content description property
+ value.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>resourceId</td>
+          <td>the resource id of the content description to match on.
 </td>
         </tr>
       </table>
@@ -3103,15 +3212,16 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s that have "effective" visibility set to the
- given value. Effective visibility takes into account not only the view's visibility value,
- but also that of its ancestors. In case of View.VISIBLE, this means that the view and all of
- its ancestors have visibility=VISIBLE. In case of GONE and INVISIBLE, it's the opposite -
- any GONE or INVISIBLE parent will make all of its children have their effective visibility.
- <p/>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s that have "effective" visibility set to the given
+ value. Effective visibility takes into account not only the view's visibility value, but also
+ that of its ancestors. In case of View.VISIBLE, this means that the view and all of its
+ ancestors have visibility=VISIBLE. In case of GONE and INVISIBLE, it's the opposite - any GONE
+ or INVISIBLE parent will make all of its children have their effective visibility.
+
+ <p>
+ <p>
  Note: Contrary to what the name may imply, view visibility does not directly translate into
- whether the view is displayed on screen (use isDisplayed() for that). For example,
- the view and
+ whether the view is displayed on screen (use isDisplayed() for that). For example, the view and
  all of its ancestors can have visibility=VISIBLE, but the view may need to be scrolled to in
  order to be actually visible to the user. Unless you're specifically targeting the visibility
  value with your test, use isDisplayed.
@@ -3198,7 +3308,7 @@ From class
         <tr>
           <th>stringMatcher</td>
           <td><a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-                      <code>Matcher</code></a> of <code><a href="../../../../../../reference/java/lang/String.html">String</a></code> with text to match
+     <code>Matcher</code></a> of <code><a href="../../../../../../reference/java/lang/String.html">String</a></code> with text to match
 </td>
         </tr>
       </table>
@@ -3234,8 +3344,18 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/TextView.html">TextView</a></code> based on it's hint property value. Note:
- View's Sugar for withHint(is("string")).</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/TextView.html">TextView</a></code> based on it's hint property value. Note: View's
+ Sugar for withHint(is("string")).</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>hintText</td>
+          <td><code><a href="../../../../../../reference/java/lang/String.html">String</a></code> with the hint text to match
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -3267,8 +3387,8 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on resource ids. Note: Android resource
- ids are not guaranteed to be unique. You may have to pair this matcher with another one to
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/view/View.html">View</a></code>s based on resource ids. Note: Android resource ids
+ are not guaranteed to be unique. You may have to pair this matcher with another one to
  guarantee a unique view selection.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3401,7 +3521,7 @@ From class
 
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/Spinner.html">Spinner</a></code> based on it's selected item's toString value.
- <p/>
+ <p>
  Note: Sugar for withSpinnerText(is("string")).
 </p></div>
 
@@ -3485,7 +3605,7 @@ From class
         <tr>
           <th>stringMatcher</td>
           <td><a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-                      <code>Matcher</code></a> of <code><a href="../../../../../../reference/java/lang/String.html">String</a></code> with text to match.
+     <code>Matcher</code></a> of <code><a href="../../../../../../reference/java/lang/String.html">String</a></code> with text to match.
 </td>
         </tr>
       </table>
@@ -3651,8 +3771,18 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/TextView.html">TextView</a></code> based on its text property value. Note:
- View's Sugar for withText(is("string")).</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/TextView.html">TextView</a></code> based on its text property value. Note: View's
+ Sugar for withText(is("string")).</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>text</td>
+          <td><code><a href="../../../../../../reference/java/lang/String.html">String</a></code> with the text to match
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -3685,15 +3815,14 @@ From class
 
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a matcher that matches <code><a href="../../../../../../reference/android/widget/TextView.html">TextView</a></code>s based on text property value. Note: View's
- text property is never null. If you setText(null) it will still be "". Do not use null
- matcher.</p></div>
+ text property is never null. If you setText(null) it will still be "". Do not use null matcher.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>stringMatcher</td>
           <td><a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html">
-                      <code>Matcher</code></a> of <code><a href="../../../../../../reference/java/lang/String.html">String</a></code> with text to match
+     <code>Matcher</code></a> of <code><a href="../../../../../../reference/java/lang/String.html">String</a></code> with text to match
 </td>
         </tr>
       </table>
