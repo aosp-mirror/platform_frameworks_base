@@ -225,7 +225,7 @@ page.title=Support Library
           <li> Added {@link android.support.v17.leanback.app.GuidedStepFragment},
             {@link android.support.v17.leanback.widget.GuidanceStylist} and
             {@link android.support.v17.leanback.widget.GuidedActionsStylist} to support
-            custom styling.
+            creating multi-step decision flows.
           </li>
         </ul>
       </dd>
