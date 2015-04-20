@@ -29,7 +29,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 /**
  * The Algorithm of the {@link com.android.systemui.statusbar.stack
@@ -155,7 +154,7 @@ public class StackScrollAlgorithm {
         scrollY = Math.max(0, scrollY);
         algorithmState.scrollY = (int) (scrollY + mCollapsedSize + bottomOverScroll);
 
-        updateVisibleChildren(resultState, algorithmState, ambientState);
+        updateVisibleChildren(resultState, algorithmState);
 
         // Phase 1:
         findNumberOfItemsInTopStackAndUpdateState(resultState, algorithmState, ambientState);
@@ -337,27 +336,18 @@ public class StackScrollAlgorithm {
      * Update the visible children on the state.
      */
     private void updateVisibleChildren(StackScrollState resultState,
-            StackScrollAlgorithmState state, AmbientState ambientState) {
+            StackScrollAlgorithmState state) {
         ViewGroup hostView = resultState.getHostView();
         int childCount = hostView.getChildCount();
         state.visibleChildren.clear();
         state.visibleChildren.ensureCapacity(childCount);
         int notGoneIndex = 0;
-        TreeSet<HeadsUpManager.HeadsUpEntry> headsUpEntries
-                = ambientState.getSortedHeadsUpEntries();
-        for (HeadsUpManager.HeadsUpEntry entry: headsUpEntries) {
-            ExpandableView v = entry.entry.row;
-            notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
-        }
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = (ExpandableView) hostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
+                notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
                 if (v instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-                    if (row.isHeadsUp()) {
-                        continue;
-                    }
-                    notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
 
                     // handle the notgoneIndex for the children as well
                     List<ExpandableNotificationRow> children =
@@ -372,8 +362,6 @@ public class StackScrollAlgorithm {
                             }
                         }
                     }
-                } else {
-                    notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
                 }
             }
         }
@@ -507,15 +495,25 @@ public class StackScrollAlgorithm {
             childViewState.yTranslation += ambientState.getTopPadding()
                     + ambientState.getStackTranslation();
         }
-        updateHeadsUpStates(resultState, ambientState);
+        updateHeadsUpStates(resultState, algorithmState, ambientState);
     }
 
-    private void updateHeadsUpStates(StackScrollState resultState, AmbientState ambientState) {
-        TreeSet<HeadsUpManager.HeadsUpEntry> headsUpEntries = ambientState.getSortedHeadsUpEntries();
-        for (HeadsUpManager.HeadsUpEntry entry: headsUpEntries) {
-            ExpandableNotificationRow row = entry.entry.row;
+    private void updateHeadsUpStates(StackScrollState resultState,
+            StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
+        int childCount = algorithmState.visibleChildren.size();
+        ExpandableNotificationRow topHeadsUpEntry = null;
+        for (int i = 0; i < childCount; i++) {
+            View child = algorithmState.visibleChildren.get(i);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                break;
+            }
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (!row.isHeadsUp()) {
+                break;
+            } else if (topHeadsUpEntry == null) {
+                topHeadsUpEntry = row;
+            }
             StackViewState childState = resultState.getViewStateForView(row);
-            ExpandableNotificationRow topHeadsUpEntry = ambientState.getTopHeadsUpEntry();
             boolean isTopEntry = topHeadsUpEntry == row;
             if (!row.isInShade()) {
                 childState.yTranslation = 0;
@@ -537,7 +535,6 @@ public class StackScrollAlgorithm {
                 childState.yTranslation = Math.min(childState.yTranslation,
                         bottomPosition);
             }
-
         }
     }
 
@@ -897,9 +894,6 @@ public class StackScrollAlgorithm {
     }
 
     private View findFirstVisibleChild(ViewGroup container) {
-        if (mHeadsUpManager != null && mHeadsUpManager.getTopEntry() != null) {
-            return mHeadsUpManager.getTopEntry().entry.row;
-        }
         int childCount = container.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = container.getChildAt(i);
