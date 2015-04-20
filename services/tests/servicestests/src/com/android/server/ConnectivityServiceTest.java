@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
@@ -157,7 +157,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 //        mMobile.link.addRoute(MOBILE_ROUTE_V6);
 //        mMobile.doReturnDefaults();
 //
-//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION_IMMEDIATE);
+//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION);
 //        mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mMobile.info).sendToTarget();
 //        nextConnBroadcast.get();
 //
@@ -177,7 +177,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 //        mMobile.link.addRoute(MOBILE_ROUTE_V6);
 //        mMobile.doReturnDefaults();
 //
-//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION_IMMEDIATE);
+//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION);
 //        mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mMobile.info).sendToTarget();
 //        nextConnBroadcast.get();
 //
@@ -193,7 +193,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 //        // expect that mobile will be torn down
 //        doReturn(true).when(mMobile.tracker).teardown();
 //
-//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION_IMMEDIATE);
+//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION);
 //        mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mWifi.info).sendToTarget();
 //        nextConnBroadcast.get();
 //
@@ -212,7 +212,7 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 //        mMobile.link.clear();
 //        mMobile.doReturnDefaults();
 //
-//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION_IMMEDIATE);
+//        nextConnBroadcast = mServiceContext.nextBroadcastIntent(CONNECTIVITY_ACTION);
 //        mTrackerHandler.obtainMessage(EVENT_STATE_CHANGED, mMobile.info).sendToTarget();
 //        nextConnBroadcast.get();
 //
