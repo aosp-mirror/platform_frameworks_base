@@ -66,8 +66,8 @@
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"کاپی کیلئے تیار ہو رہا ہے…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلز کاپی کرنے میں خرابی پیس آ گئی۔</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل کاپی کرنے میں خرابی پیس آ گئی۔</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلز کاپی کرنے میں خرابی پیش آ گئی۔</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل کاپی کرنے میں خرابی پیش آ گئی۔</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"تفصیلات دیکھنے کیلئے ٹچ کریں"</string>
     <string name="retry" msgid="7564024179122207376">"دوبارہ کوشش کریں"</string>
