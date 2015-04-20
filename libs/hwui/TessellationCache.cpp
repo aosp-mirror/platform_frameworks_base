@@ -386,10 +386,7 @@ void TessellationCache::precacheShadows(const Matrix4* drawTransform, const Rect
     if (mShadowProcessor == nullptr) {
         mShadowProcessor = new ShadowProcessor(Caches::getInstance());
     }
-    if (!mShadowProcessor->add(task)) {
-        mShadowProcessor->process(task);
-    }
-
+    mShadowProcessor->add(task);
     task->incStrong(nullptr); // not using sp<>s, so manually ref while in the cache
     mShadowCache.put(key, task.get());
 }
@@ -424,9 +421,7 @@ TessellationCache::Buffer* TessellationCache::getOrCreateBuffer(
         if (mProcessor == nullptr) {
             mProcessor = new TessellationProcessor(Caches::getInstance());
         }
-        if (!mProcessor->add(task)) {
-            mProcessor->process(task);
-        }
+        mProcessor->add(task);
         mCache.put(entry, buffer);
     }
     return buffer;
