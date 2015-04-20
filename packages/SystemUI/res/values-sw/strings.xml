@@ -305,7 +305,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Sogeza kushoto kwa <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Hakuna kukatizwa. Hata kama ni kengele."</string>
     <string name="zen_priority_introduction" msgid="7253045784560169993">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele, vikumbusho, matukio na wapigaji simu utakaobainisha."</string>
-    <string name="zen_priority_customize_button" msgid="7948043278226955063">"Weka mapendeleo"</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"Badilisha kukufaa"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Hakuna kukatizwa"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"Mambo yenye kipaumbele pekee yakatize"</string>
     <string name="zen_alarms" msgid="5055668280767657759">"Kengele pekee"</string>
@@ -341,9 +341,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Je, unataka kuendelea na kipindi chako?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Anza tena"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ndiyo, endelea"</string>
-    <string name="guest_notification_title" msgid="1585278533840603063">"Mtumiaji aliyealikwa"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"Ondoa aliyealikwa ili ufute programu na data"</string>
-    <string name="guest_notification_remove_action" msgid="8820670703892101990">"ONDOA ALIYEALIKWA"</string>
+    <string name="guest_notification_title" msgid="1585278533840603063">"Mtumiaji mgeni"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"Ondoa mgeni ili ufute programu na data"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"ONDOA MGENI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Ungependa kuongeza mtumiaji?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Unapomwongeza mtumiaji mpya, mtu huyo anahitaji kusanidi nafasi yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa ajili ya watumiaji wengine wote."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Kiokoa betri kimewashwa"</string>

@@ -304,7 +304,7 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"어떤 방해도 받지 않습니다. 알람도 울리지 않습니다."</string>
-    <string name="zen_priority_introduction" msgid="7253045784560169993">"지정한 알람, 알림, 이벤트, 발신자를 제외하고 소리와 진동의 방해를 받지 않습니다."</string>
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"지정한 알람, 알림, 이벤트, 발신자를 제외하고 소리와 진동을 끕니다."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"맞춤설정"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"모든 알림 차단"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"최우선 알림만 수신"</string>
