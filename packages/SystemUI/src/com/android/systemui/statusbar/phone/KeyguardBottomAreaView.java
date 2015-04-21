@@ -83,8 +83,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private static final int DOZE_ANIMATION_STAGGER_DELAY = 48;
     private static final int DOZE_ANIMATION_ELEMENT_DURATION = 250;
     private static final long TRANSIENT_FP_ERROR_TIMEOUT = 1300;
-    private static final long[] FP_ERROR_VIBRATE_PATTERN = new long[] {0, 30, 100, 30};
-    private static final long[] FP_SUCCESS_VIBRATE_PATTERN = new long[] {0, 30};
 
     private KeyguardAffordanceView mCameraImageView;
     private KeyguardAffordanceView mPhoneImageView;
@@ -551,14 +549,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 .setDuration(DOZE_ANIMATION_ELEMENT_DURATION);
     }
 
-    private void vibrateFingerprintError() {
-        mContext.getSystemService(Vibrator.class).vibrate(FP_ERROR_VIBRATE_PATTERN, -1);
-    }
-
-    private void vibrateFingerprintSuccess() {
-        mContext.getSystemService(Vibrator.class).vibrate(FP_SUCCESS_VIBRATE_PATTERN, -1);
-    }
-
     private final BroadcastReceiver mDevicePolicyReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             post(new Runnable() {
@@ -603,7 +593,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public void onFingerprintAuthenticated(int userId) {
-            vibrateFingerprintSuccess();
         }
 
         @Override
@@ -613,7 +602,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public void onFingerprintHelp(int msgId, String helpString) {
-            vibrateFingerprintError();
             mTransientFpError = true;
             mIndicationController.showTransientIndication(helpString,
                     getResources().getColor(R.color.system_warning_color, null));

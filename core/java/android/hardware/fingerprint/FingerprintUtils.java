@@ -17,6 +17,8 @@
 package android.hardware.fingerprint;
 
 import android.content.ContentResolver;
+import android.content.Context;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,6 +37,8 @@ public
 class FingerprintUtils {
     private static final boolean DEBUG = true;
     private static final String TAG = "FingerprintUtils";
+    private static final long[] FP_ERROR_VIBRATE_PATTERN = new long[] {0, 30, 100, 30};
+    private static final long[] FP_SUCCESS_VIBRATE_PATTERN = new long[] {0, 30};
 
     private static int[] toIntArray(List<Integer> list) {
         if (list == null) {
@@ -102,6 +106,20 @@ class FingerprintUtils {
             return true;
         }
         return false;
+    }
+
+    public static void vibrateFingerprintError(Context context) {
+        Vibrator vibrator = context.getSystemService(Vibrator.class);
+        if (vibrator != null) {
+            vibrator.vibrate(FP_ERROR_VIBRATE_PATTERN, -1);
+        }
+    }
+
+    public static void vibrateFingerprintSuccess(Context context) {
+        Vibrator vibrator = context.getSystemService(Vibrator.class);
+        if (vibrator != null) {
+            vibrator.vibrate(FP_SUCCESS_VIBRATE_PATTERN, -1);
+        }
     }
 
 };

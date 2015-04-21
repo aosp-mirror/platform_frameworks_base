@@ -67,6 +67,9 @@ public class FingerprintService extends SystemService {
     private static final int FINGERPRINT_TEMPLATE_ENROLLING = 3;
     private static final int FINGERPRINT_TEMPLATE_REMOVED = 4;
     private static final int FINGERPRINT_AUTHENTICATED = 5;
+    private static final long MS_PER_SEC = 1000;
+    private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30*1000;
+    private static final int MAX_FAILED_ATTEMPTS = 5;
 
     Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
@@ -90,14 +93,6 @@ public class FingerprintService extends SystemService {
             resetFailedAttempts();
         }
     };
-
-    private static final int STATE_IDLE = 0;
-    private static final int STATE_AUTHENTICATING = 1;
-    private static final int STATE_ENROLLING = 2;
-    private static final int STATE_REMOVING = 3;
-    private static final long MS_PER_SEC = 1000;
-    private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30*1000;
-    private static final int MAX_FAILED_ATTEMPTS = 5;
 
     public FingerprintService(Context context) {
         super(context);
@@ -427,6 +422,7 @@ public class FingerprintService extends SystemService {
         private boolean sendEnrollResult(int fpId, int groupId, int remaining) {
             IFingerprintServiceReceiver rx = receiver.get();
             if (rx == null) return true; // client not listening
+            FingerprintUtils.vibrateFingerprintSuccess(getContext());
             try {
                 rx.onEnrollResult(mHalDeviceId, fpId, groupId, remaining);
                 return remaining == 0;
@@ -453,8 +449,10 @@ public class FingerprintService extends SystemService {
                 result = true; // client not listening
             }
             if (fpId <= 0) {
+                FingerprintUtils.vibrateFingerprintError(getContext());
                 result |= handleFailedAttempt(this);
             } else {
+                FingerprintUtils.vibrateFingerprintSuccess(getContext());
                 result |= true; // we have a valid fingerprint
                 mLockoutReset.run();
             }
