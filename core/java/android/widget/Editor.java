@@ -39,7 +39,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
@@ -104,7 +103,6 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
-import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.EditableInputConnection;
 
 import java.text.BreakIterator;
@@ -3020,18 +3018,8 @@ public class Editor {
         }
 
         private void populateMenuWithItems(Menu menu) {
-            final boolean legacy = mTextView.getContext().getApplicationInfo().targetSdkVersion <
-                    Build.VERSION_CODES.LOLLIPOP;
-            final Context context = !legacy && menu instanceof MenuBuilder ?
-                    ((MenuBuilder) menu).getContext() :
-                    mTextView.getContext();
-            final TypedArray styledAttributes = context.obtainStyledAttributes(
-                    com.android.internal.R.styleable.SelectionModeDrawables);
-
             if (mTextView.canCut()) {
                 menu.add(0, TextView.ID_CUT, 0, com.android.internal.R.string.cut).
-                    setIcon(styledAttributes.getResourceId(
-                            R.styleable.SelectionModeDrawables_actionModeCutDrawable, 0)).
                     setAlphabeticShortcut('x').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
@@ -3039,8 +3027,6 @@ public class Editor {
 
             if (mTextView.canCopy()) {
                 menu.add(0, TextView.ID_COPY, 0, com.android.internal.R.string.copy).
-                    setIcon(styledAttributes.getResourceId(
-                            R.styleable.SelectionModeDrawables_actionModeCopyDrawable, 0)).
                     setAlphabeticShortcut('c').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
@@ -3048,23 +3034,17 @@ public class Editor {
 
             if (mTextView.canPaste()) {
                 menu.add(0, TextView.ID_PASTE, 0, com.android.internal.R.string.paste).
-                        setIcon(styledAttributes.getResourceId(
-                                R.styleable.SelectionModeDrawables_actionModePasteDrawable, 0)).
                         setAlphabeticShortcut('v').
                         setShowAsAction(
                                 MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
             }
 
             menu.add(0, TextView.ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
-                    setIcon(styledAttributes.getResourceId(
-                            R.styleable.SelectionModeDrawables_actionModeSelectAllDrawable, 0)).
                     setAlphabeticShortcut('a').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
 
             updateReplaceItem(menu);
-
-            styledAttributes.recycle();
         }
 
         private void addIntentMenuItemsForTextProcessing(Menu menu) {
