@@ -100,8 +100,6 @@ public class DirectoryFragment extends Fragment {
 
     private AbsListView mCurrentView;
 
-    private List<DocumentInfo> mSelectedDocumentsForCopy;
-
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
     public static final int TYPE_RECENT_OPEN = 3;
@@ -357,7 +355,7 @@ public class DirectoryFragment extends Fragment {
             return;
         }
 
-        final List<DocumentInfo> docs = mSelectedDocumentsForCopy;
+        final List<DocumentInfo> docs = getDisplayState(this).selectedDocumentsForCopy;
         final Intent copyIntent = new Intent(context, CopyService.class);
         copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST, new ArrayList<DocumentInfo>(docs));
         copyIntent.putExtra(CopyService.EXTRA_STACK, data.getParcelableExtra(CopyService.EXTRA_STACK));
@@ -674,7 +672,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     private void onCopyDocuments(List<DocumentInfo> docs) {
-        mSelectedDocumentsForCopy = docs;
+        getDisplayState(this).selectedDocumentsForCopy = docs;
 
         // Pop up a dialog to pick a destination.  This is inadequate but works for now.
         // TODO: Implement a picker that is to spec.
