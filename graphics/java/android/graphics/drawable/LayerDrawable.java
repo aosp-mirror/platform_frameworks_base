@@ -86,7 +86,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     LayerState mLayerState;
 
-    private int mOpacityOverride = PixelFormat.UNKNOWN;
     private int[] mPaddingL;
     private int[] mPaddingT;
     private int[] mPaddingR;
@@ -177,12 +176,39 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         // Extract the theme attributes, if any.
         state.mThemeAttrs = a.extractThemeAttrs();
 
-        mOpacityOverride = a.getInt(R.styleable.LayerDrawable_opacity, mOpacityOverride);
-
-        state.mAutoMirrored = a.getBoolean(R.styleable.LayerDrawable_autoMirrored,
-                state.mAutoMirrored);
-        state.mPaddingMode = a.getInteger(R.styleable.LayerDrawable_paddingMode,
-                state.mPaddingMode);
+        final int N = a.getIndexCount();
+        for (int i = 0; i < N; i++) {
+            int attr = a.getIndex(i);
+            switch (attr) {
+                case R.styleable.LayerDrawable_opacity:
+                    state.mOpacityOverride = a.getInt(attr, state.mOpacityOverride);
+                    break;
+                case R.styleable.LayerDrawable_paddingTop:
+                    state.mPaddingTop = a.getDimensionPixelOffset(attr, state.mPaddingTop);
+                    break;
+                case R.styleable.LayerDrawable_paddingBottom:
+                    state.mPaddingBottom = a.getDimensionPixelOffset(attr, state.mPaddingBottom);
+                    break;
+                case R.styleable.LayerDrawable_paddingLeft:
+                    state.mPaddingLeft = a.getDimensionPixelOffset(attr, state.mPaddingLeft);
+                    break;
+                case R.styleable.LayerDrawable_paddingRight:
+                    state.mPaddingRight = a.getDimensionPixelOffset(attr, state.mPaddingRight);
+                    break;
+                case R.styleable.LayerDrawable_paddingStart:
+                    state.mPaddingStart = a.getDimensionPixelOffset(attr, state.mPaddingStart);
+                    break;
+                case R.styleable.LayerDrawable_paddingEnd:
+                    state.mPaddingEnd = a.getDimensionPixelOffset(attr, state.mPaddingEnd);
+                    break;
+                case R.styleable.LayerDrawable_autoMirrored:
+                    state.mAutoMirrored = a.getBoolean(attr, state.mAutoMirrored);
+                    break;
+                case R.styleable.LayerDrawable_paddingMode:
+                    state.mPaddingMode = a.getInteger(attr, state.mPaddingMode);
+                    break;
+            }
+        }
     }
 
     /**
@@ -895,13 +921,208 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public boolean getPadding(Rect padding) {
-        if (mLayerState.mPaddingMode == PADDING_MODE_NEST) {
+        final LayerState layerState = mLayerState;
+        if (layerState.mPaddingMode == PADDING_MODE_NEST) {
             computeNestedPadding(padding);
         } else {
             computeStackedPadding(padding);
         }
 
+        // If padding was explicitly specified (e.g. not -1) then override the
+        // computed padding in that dimension.
+        if (layerState.mPaddingTop >= 0) {
+            padding.top = layerState.mPaddingTop;
+        }
+
+        if (layerState.mPaddingBottom >= 0) {
+            padding.bottom = layerState.mPaddingBottom;
+        }
+
+        final int paddingRtlLeft;
+        final int paddingRtlRight;
+        if (getLayoutDirection() == LayoutDirection.RTL) {
+            paddingRtlLeft = layerState.mPaddingEnd;
+            paddingRtlRight = layerState.mPaddingStart;
+        } else {
+            paddingRtlLeft = layerState.mPaddingStart;
+            paddingRtlRight = layerState.mPaddingEnd;
+        }
+
+        final int paddingLeft =  paddingRtlLeft >= 0 ? paddingRtlLeft : layerState.mPaddingLeft;
+        if (paddingLeft >= 0) {
+            padding.left = paddingLeft;
+        }
+
+        final int paddingRight =  paddingRtlRight >= 0 ? paddingRtlRight : layerState.mPaddingRight;
+        if (paddingRight >= 0) {
+            padding.right = paddingRight;
+        }
+
         return padding.left != 0 || padding.top != 0 || padding.right != 0 || padding.bottom != 0;
+    }
+
+    /**
+     * Sets the absolute padding.
+     * <p>
+     * If padding in a dimension is specified as {@code -1}, the resolved
+     * padding will use the value computed according to the padding mode (see
+     * {@link #setPaddingMode(int)}).
+     * <p>
+     * Calling this method clears any relative padding values previously set
+     * using {@link #setPaddingRelative(int, int, int, int)}.
+     *
+     * @param left the left padding in pixels, or -1 to use computed padding
+     * @param top the top padding in pixels, or -1 to use computed padding
+     * @param right the right padding in pixels, or -1 to use computed padding
+     * @param bottom the bottom padding in pixels, or -1 to use computed
+     *               padding
+     * @attr ref android.R.styleable#LayerDrawable_paddingLeft
+     * @attr ref android.R.styleable#LayerDrawable_paddingTop
+     * @attr ref android.R.styleable#LayerDrawable_paddingRight
+     * @attr ref android.R.styleable#LayerDrawable_paddingBottom
+     * @see #setPaddingRelative(int, int, int, int)
+     */
+    public void setPadding(int left, int top, int right, int bottom) {
+        final LayerState layerState = mLayerState;
+        layerState.mPaddingLeft = left;
+        layerState.mPaddingTop = top;
+        layerState.mPaddingRight = right;
+        layerState.mPaddingBottom = bottom;
+
+        // Clear relative padding values.
+        layerState.mPaddingStart = -1;
+        layerState.mPaddingEnd = -1;
+    }
+
+    /**
+     * Sets the relative padding.
+     * <p>
+     * If padding in a dimension is specified as {@code -1}, the resolved
+     * padding will use the value computed according to the padding mode (see
+     * {@link #setPaddingMode(int)}).
+     * <p>
+     * Calling this method clears any absolute padding values previously set
+     * using {@link #setPadding(int, int, int, int)}.
+     *
+     * @param start the start padding in pixels, or -1 to use computed padding
+     * @param top the top padding in pixels, or -1 to use computed padding
+     * @param end the end padding in pixels, or -1 to use computed padding
+     * @param bottom the bottom padding in pixels, or -1 to use computed
+     *               padding
+     * @attr ref android.R.styleable#LayerDrawable_paddingStart
+     * @attr ref android.R.styleable#LayerDrawable_paddingTop
+     * @attr ref android.R.styleable#LayerDrawable_paddingEnd
+     * @attr ref android.R.styleable#LayerDrawable_paddingBottom
+     * @see #setPadding(int, int, int, int)
+     */
+    public void setPaddingRelative(int start, int top, int end, int bottom) {
+        final LayerState layerState = mLayerState;
+        layerState.mPaddingStart = start;
+        layerState.mPaddingTop = top;
+        layerState.mPaddingEnd = end;
+        layerState.mPaddingBottom = bottom;
+
+        // Clear absolute padding values.
+        layerState.mPaddingLeft = -1;
+        layerState.mPaddingRight = -1;
+    }
+
+    /**
+     * Returns the left padding in pixels.
+     * <p>
+     * A return value of {@code -1} means there is no explicit padding set for
+     * this dimension. As a result, the value for this dimension returned by
+     * {@link #getPadding(Rect)} will be computed from the child layers
+     * according to the padding mode (see {@link #getPaddingMode()}.
+     *
+     * @return the left padding in pixels, or -1 if not explicitly specified
+     * @see #setPadding(int, int, int, int)
+     * @see #getPadding(Rect)
+     */
+    public int getLeftPadding() {
+        return mLayerState.mPaddingLeft;
+    }
+
+    /**
+     * Returns the right padding in pixels.
+     * <p>
+     * A return value of {@code -1} means there is no explicit padding set for
+     * this dimension. As a result, the value for this dimension returned by
+     * {@link #getPadding(Rect)} will be computed from the child layers
+     * according to the padding mode (see {@link #getPaddingMode()}.
+     *
+     * @return the right padding in pixels, or -1 if not explicitly specified
+     * @see #setPadding(int, int, int, int)
+     * @see #getPadding(Rect)
+     */
+    public int getRightPadding() {
+        return mLayerState.mPaddingRight;
+    }
+
+    /**
+     * Returns the start padding in pixels.
+     * <p>
+     * A return value of {@code -1} means there is no explicit padding set for
+     * this dimension. As a result, the value for this dimension returned by
+     * {@link #getPadding(Rect)} will be computed from the child layers
+     * according to the padding mode (see {@link #getPaddingMode()}.
+     *
+     * @return the start padding in pixels, or -1 if not explicitly specified
+     * @see #setPaddingRelative(int, int, int, int)
+     * @see #getPadding(Rect)
+     */
+    public int getStartPadding() {
+        return mLayerState.mPaddingStart;
+    }
+
+    /**
+     * Returns the end padding in pixels.
+     * <p>
+     * A return value of {@code -1} means there is no explicit padding set for
+     * this dimension. As a result, the value for this dimension returned by
+     * {@link #getPadding(Rect)} will be computed from the child layers
+     * according to the padding mode (see {@link #getPaddingMode()}.
+     *
+     * @return the end padding in pixels, or -1 if not explicitly specified
+     * @see #setPaddingRelative(int, int, int, int)
+     * @see #getPadding(Rect)
+     */
+    public int getEndPadding() {
+        return mLayerState.mPaddingEnd;
+    }
+
+    /**
+     * Returns the top padding in pixels.
+     * <p>
+     * A return value of {@code -1} means there is no explicit padding set for
+     * this dimension. As a result, the value for this dimension returned by
+     * {@link #getPadding(Rect)} will be computed from the child layers
+     * according to the padding mode (see {@link #getPaddingMode()}.
+     *
+     * @return the top padding in pixels, or -1 if not explicitly specified
+     * @see #setPadding(int, int, int, int)
+     * @see #setPaddingRelative(int, int, int, int)
+     * @see #getPadding(Rect)
+     */
+    public int getTopPadding() {
+        return mLayerState.mPaddingTop;
+    }
+
+    /**
+     * Returns the bottom padding in pixels.
+     * <p>
+     * A return value of {@code -1} means there is no explicit padding set for
+     * this dimension. As a result, the value for this dimension returned by
+     * {@link #getPadding(Rect)} will be computed from the child layers
+     * according to the padding mode (see {@link #getPaddingMode()}.
+     *
+     * @return the bottom padding in pixels, or -1 if not explicitly specified
+     * @see #setPadding(int, int, int, int)
+     * @see #setPaddingRelative(int, int, int, int)
+     * @see #getPadding(Rect)
+     */
+    public int getBottomPadding() {
+        return mLayerState.mPaddingBottom;
     }
 
     private void computeNestedPadding(Rect padding) {
@@ -1109,8 +1330,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * Sets the opacity of this drawable directly, instead of collecting the
-     * states from the layers
+     * Sets the opacity of this drawable directly instead of collecting the
+     * states from the layers.
      *
      * @param opacity The opacity to use, or {@link PixelFormat#UNKNOWN
      *            PixelFormat.UNKNOWN} for the default behavior
@@ -1120,13 +1341,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @see PixelFormat#OPAQUE
      */
     public void setOpacity(int opacity) {
-        mOpacityOverride = opacity;
+        mLayerState.mOpacityOverride = opacity;
     }
 
     @Override
     public int getOpacity() {
-        if (mOpacityOverride != PixelFormat.UNKNOWN) {
-            return mOpacityOverride;
+        if (mLayerState.mOpacityOverride != PixelFormat.UNKNOWN) {
+            return mLayerState.mOpacityOverride;
         }
         return mLayerState.getOpacity();
     }
@@ -1265,12 +1486,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * dimension, defaults to START or TOP. Otherwise, defaults to FILL to
      * preserve legacy behavior.
      *
-     * @param gravity
-     * @param width
-     * @param height
-     * @return
+     * @param gravity layer gravity
+     * @param width width of the layer if set, -1 otherwise
+     * @param height height of the layer if set, -1 otherwise
+     * @return the default gravity for the layer
      */
-    private int resolveGravity(int gravity, int width, int height) {
+    private static int resolveGravity(int gravity, int width, int height) {
         if (!Gravity.isHorizontal(gravity)) {
             if (width < 0) {
                 gravity |= Gravity.FILL_HORIZONTAL;
@@ -1504,6 +1725,14 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         ChildDrawable[] mChildren;
         int[] mThemeAttrs;
 
+        int mPaddingTop = -1;
+        int mPaddingBottom = -1;
+        int mPaddingLeft = -1;
+        int mPaddingRight = -1;
+        int mPaddingStart = -1;
+        int mPaddingEnd = -1;
+        int mOpacityOverride = PixelFormat.UNKNOWN;
+
         int mChangingConfigurations;
         int mChildrenChangingConfigurations;
 
@@ -1540,6 +1769,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 mAutoMirrored = orig.mAutoMirrored;
                 mPaddingMode = orig.mPaddingMode;
                 mThemeAttrs = orig.mThemeAttrs;
+                mPaddingTop = orig.mPaddingTop;
+                mPaddingBottom = orig.mPaddingBottom;
+                mPaddingLeft = orig.mPaddingLeft;
+                mPaddingRight = orig.mPaddingRight;
+                mPaddingStart = orig.mPaddingStart;
+                mPaddingEnd = orig.mPaddingEnd;
+                mOpacityOverride = orig.mOpacityOverride;
             } else {
                 mNum = 0;
                 mChildren = null;

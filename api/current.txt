@@ -12408,7 +12408,9 @@ package android.graphics.drawable {
     method public void draw(android.graphics.Canvas);
     method public android.graphics.drawable.Drawable findDrawableByLayerId(int);
     method public int findIndexByLayerId(int);
+    method public int getBottomPadding();
     method public android.graphics.drawable.Drawable getDrawable(int);
+    method public int getEndPadding();
     method public int getId(int);
     method public int getLayerGravity(int);
     method public int getLayerHeight(int);
@@ -12419,9 +12421,13 @@ package android.graphics.drawable {
     method public int getLayerInsetStart(int);
     method public int getLayerInsetTop(int);
     method public int getLayerWidth(int);
+    method public int getLeftPadding();
     method public int getNumberOfLayers();
     method public int getOpacity();
     method public int getPaddingMode();
+    method public int getRightPadding();
+    method public int getStartPadding();
+    method public int getTopPadding();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public void setAlpha(int);
@@ -12442,7 +12448,9 @@ package android.graphics.drawable {
     method public void setLayerSize(int, int, int);
     method public void setLayerWidth(int, int);
     method public void setOpacity(int);
+    method public void setPadding(int, int, int, int);
     method public void setPaddingMode(int);
+    method public void setPaddingRelative(int, int, int, int);
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
     field public static final int PADDING_MODE_NEST = 0; // 0x0
     field public static final int PADDING_MODE_STACK = 1; // 0x1

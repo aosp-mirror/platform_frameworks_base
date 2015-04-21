@@ -5169,6 +5169,20 @@
             <!-- Stack each layer directly atop the previous layer. -->
             <enum name="stack" value="1" />
         </attr>
+        <!-- Explicit top padding. Overrides child padding. -->
+        <attr name="paddingTop" />
+        <!-- Explicit bottom padding. Overrides child padding. -->
+        <attr name="paddingBottom" />
+        <!-- Explicit left padding. Overrides child padding. -->
+        <attr name="paddingLeft" />
+        <!-- Explicit right padding. Overrides child padding. -->
+        <attr name="paddingRight" />
+        <!-- Explicit start padding. Overrides child padding. Takes precedence
+             over absolute padding (e.g. left when layout direction is LTR). -->
+        <attr name="paddingStart" />
+        <!-- Explicit end padding. Overrides child padding. Takes precedence
+             over absolute padding (e.g. right when layout direction is LTR). -->
+        <attr name="paddingEnd" />
     </declare-styleable>
 
     <!-- Describes an item (or child) of a LayerDrawable. -->

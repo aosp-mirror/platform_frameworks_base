@@ -323,7 +323,21 @@ public class RippleDrawable extends LayerDrawable {
      */
     @Override
     public boolean isProjected() {
-        return getNumberOfLayers() == 0;
+        // If the maximum radius is contained entirely within the bounds, we
+        // don't need to project this ripple.
+        final int radius = mState.mMaxRadius;
+        final Rect bounds = getBounds();
+        if (radius != RADIUS_AUTO && radius <= bounds.width() / 2
+                && radius <= bounds.height() / 2) {
+            return false;
+        }
+
+        // Otherwise, if the layer is bounded then we don't need to project.
+        return !isBounded();
+    }
+
+    private boolean isBounded() {
+        return getNumberOfLayers() > 0;
     }
 
     @Override
@@ -545,7 +559,7 @@ public class RippleDrawable extends LayerDrawable {
                 y = mHotspotBounds.exactCenterY();
             }
 
-            final boolean isBounded = !isProjected();
+            final boolean isBounded = isBounded();
             mRipple = new RippleForeground(this, mHotspotBounds, x, y, isBounded);
         }
 
@@ -866,7 +880,7 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public Rect getDirtyBounds() {
-        if (isProjected()) {
+        if (!isBounded()) {
             final Rect drawingBounds = mDrawingBounds;
             final Rect dirtyBounds = mDirtyBounds;
             dirtyBounds.set(drawingBounds);
