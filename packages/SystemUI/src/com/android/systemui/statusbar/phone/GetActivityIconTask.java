@@ -59,6 +59,5 @@ class GetActivityIconTask extends AsyncTask<ComponentName, Void, Drawable> {
     @Override
     protected void onPostExecute(Drawable icon) {
         mImageView.setImageDrawable(icon);
-        mImageView.setVisibility(icon != null ? View.VISIBLE : View.GONE);
     }
 }

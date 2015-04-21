@@ -106,6 +106,11 @@ class NavigationBarAppsModel {
         mApps.add(index, name);
     }
 
+    /** Sets the app at the given index. */
+    public void setApp(int index, ComponentName name) {
+        mApps.set(index, name);
+    }
+
     /** Remove the app at the given index. */
     public ComponentName removeApp(int index) {
         return mApps.remove(index);

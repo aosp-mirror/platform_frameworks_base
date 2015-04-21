@@ -19,14 +19,13 @@ package com.android.systemui.statusbar.phone;
 import android.animation.LayoutTransition;
 import android.app.ActivityOptions;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
-import android.graphics.Canvas;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.AttributeSet;
@@ -34,7 +33,6 @@ import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -55,7 +53,8 @@ class NavigationBarApps extends LinearLayout {
     private final PackageManager mPackageManager;
     private final LayoutInflater mLayoutInflater;
 
-    // The view being dragged, or null if the user is not dragging.
+    // The view being dragged, or null if the user is not dragging. This may be a newly created
+    // placeholder view if the drag is coming from outside the apps list.
     private View mDragView;
 
     public NavigationBarApps(Context context, AttributeSet attrs) {
@@ -89,9 +88,12 @@ class NavigationBarApps extends LinearLayout {
 
         int appCount = mAppsModel.getAppCount();
         for (int i = 0; i < appCount; i++) {
-            ImageView button = createAppButton(mAppsModel.getApp(i));
-            // TODO: remove padding from leftmost button.
+            ImageView button = createAppButton();
             addView(button);
+
+            // Load the icon asynchronously.
+            ComponentName activityName = mAppsModel.getApp(i);
+            new GetActivityIconTask(mPackageManager, button).execute(activityName);
         }
     }
 
@@ -99,74 +101,111 @@ class NavigationBarApps extends LinearLayout {
      * Creates a new ImageView for a launcher activity, inflated from
      * R.layout.navigation_bar_app_item.
      */
-    private ImageView createAppButton(ComponentName activityName) {
+    private ImageView createAppButton() {
         ImageView button = (ImageView) mLayoutInflater.inflate(
                 R.layout.navigation_bar_app_item, this, false /* attachToRoot */);
-        button.setOnClickListener(new AppClickListener(activityName));
+        button.setOnClickListener(new AppClickListener());
         // TODO: Ripple effect. Use either KeyButtonRipple or the default ripple background.
         button.setOnLongClickListener(new AppLongClickListener());
-        button.setOnDragListener(new AppDragListener());
-        // Load the icon asynchronously.
-        new GetActivityIconTask(mPackageManager, button).execute(activityName);
+        button.setOnDragListener(new AppIconDragListener());
         return button;
     }
 
-    /** Starts a drag on long-click. */
     private class AppLongClickListener implements View.OnLongClickListener {
         @Override
         public boolean onLongClick(View v) {
             mDragView = v;
-            // TODO: Use real metadata for the drop, perhaps a launch intent.
-            ClipData dragData = ClipData.newPlainText("label", "text");
+            ComponentName activityName = mAppsModel.getApp(indexOfChild(v));
+            // The drag data is an Intent to launch the activity.
+            Intent mainIntent = Intent.makeMainActivity(activityName);
+            ClipData dragData = ClipData.newIntent("", mainIntent);
             // Use the ImageView to create the shadow.
-            View.DragShadowBuilder shadow = new IconDragShadowBuilder((ImageView) v);
+            View.DragShadowBuilder shadow = new AppIconDragShadowBuilder((ImageView) v);
             v.startDrag(dragData, shadow, null /* myLocalState */, 0 /* flags */);
             return true;
         }
     }
 
-    /** Creates a scaled-up version of an ImageView's Drawable for dragging. */
-    private static class IconDragShadowBuilder extends View.DragShadowBuilder {
-        private final static int ICON_SCALE = 2;
-        final Drawable mDrawable;
-        final int mWidth;
-        final int mHeight;
+    @Override
+    public boolean dispatchDragEvent(DragEvent event) {
+        // ACTION_DRAG_ENTERED is handled by each individual app icon drag listener.
+        boolean childHandled = super.dispatchDragEvent(event);
 
-        public IconDragShadowBuilder(ImageView icon) {
-            mDrawable = icon.getDrawable();
-            // The Drawable may not be the same size as the ImageView, so use the ImageView size.
-            mWidth = icon.getWidth() * ICON_SCALE;
-            mHeight = icon.getHeight() * ICON_SCALE;
+        // Other drag types are handled once per drag by this view. This is handled explicitly
+        // because attaching a DragListener to this ViewGroup does not work -- the DragListener in
+        // the children consumes the drag events.
+        boolean handled = false;
+        switch (event.getAction()) {
+            case DragEvent.ACTION_DRAG_STARTED:
+                handled = onDragStarted(event);
+                break;
+            case DragEvent.ACTION_DRAG_ENDED:
+                handled = onDragEnded();
+                break;
+            case DragEvent.ACTION_DROP:
+                handled = onDrop(event);
+                break;
         }
 
-        @Override
-        public void onProvideShadowMetrics(Point size, Point touch) {
-            size.set(mWidth, mHeight);
-            // Shift the drag shadow up slightly because the apps are at the bottom edge of the
-            // screen.
-            touch.set(mWidth / 2, mHeight * 2 / 3);
+        return handled || childHandled;
+    }
+
+    /** Returns true if a drag should be handled. */
+    private static boolean canAcceptDrag(DragEvent event) {
+        // The event must contain an intent.
+        return event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_INTENT);
+    }
+
+    /**
+     * Sets up for a drag. Runs once per drag operation. Returns true if the data represents
+     * an app shortcut and will be accepted for a drop.
+     */
+    private boolean onDragStarted(DragEvent event) {
+        if (DEBUG) Log.d(TAG, "onDragStarted");
+
+        // Ensure that an app shortcut is being dragged.
+        if (!canAcceptDrag(event)) {
+            return false;
         }
 
-        @Override
-        public void onDrawShadow(Canvas canvas) {
-            // The Drawable's native bounds may be different than the source ImageView. Force it
-            // to the correct size.
-            Rect oldBounds = mDrawable.copyBounds();
-            mDrawable.setBounds(0, 0, mWidth, mHeight);
-            mDrawable.draw(canvas);
-            mDrawable.setBounds(oldBounds);
+        // If this is an existing icon being reordered, hide the app icon. The drag shadow will
+        // continue to draw.
+        if (mDragView != null) {
+            mDragView.setVisibility(View.INVISIBLE);
         }
+
+        // Listen for the drag end event.
+        return true;
+    }
+
+    /**
+     * Creates a blank icon-sized View to create an empty space during a drag. Also creates a data
+     * model entry so the rest of the code can assume it is reordering existing entries.
+     */
+    private ImageView createPlaceholderAppButton(int index) {
+        ImageView button = createAppButton();
+        addView(button, index);
+        mAppsModel.addApp(index, null /* name */);
+        return button;
     }
 
     /**
      * Handles a drag entering an existing icon. Not implemented in the drag listener because it
      * needs to use LinearLayout/ViewGroup methods.
      */
-    private void onDragEntered(View target) {
+    private void onDragEnteredIcon(View target) {
         if (DEBUG) Log.d(TAG, "onDragEntered " + indexOfChild(target));
 
+        // If the drag didn't start from an existing icon, add an invisible placeholder to create
+        // empty space for the user to drag into.
+        if (mDragView == null) {
+            int placeholderIndex = indexOfChild(target);
+            mDragView = createPlaceholderAppButton(placeholderIndex);
+            return;
+        }
+
+        // If the user is dragging on top of the original icon location, do nothing.
         if (target == mDragView) {
-            // Nothing to do, the user is dragging on top of the original location.
             return;
         }
 
@@ -187,58 +226,93 @@ class NavigationBarApps extends LinearLayout {
         mAppsModel.addApp(targetIndex, app);
     }
 
-    private void onDrop() {
+    private boolean onDrop(DragEvent event) {
+        if (DEBUG) Log.d(TAG, "onDrop");
+
+        int dragViewIndex = indexOfChild(mDragView);
+        if (mAppsModel.getApp(dragViewIndex) == null) {
+            // The drag view was a placeholder. Unpack the drop.
+            ComponentName activityName = getActivityNameFromDragEvent(event);
+            if (activityName != null) {
+                // The drop had valid data. Update the placeholder with a real activity and icon.
+                updateAppAt(dragViewIndex, activityName);
+            } else {
+                // This wasn't a valid drop. Clean up the placeholder and model.
+                removeAppAt(dragViewIndex);
+                mDragView = null;
+            }
+        }
+
+        // The drag is complete. If the drag view still exists ensure it is visible.
+        if (mDragView != null) {
+            mDragView.setVisibility(View.VISIBLE);
+            mDragView = null;
+        }
+
         // Persist the state of the reordered icons.
         mAppsModel.savePrefs();
+        return true;
     }
 
-    /** Drag listener for app icons. */
-    private class AppDragListener implements View.OnDragListener {
+    /** Returns an app launch Intent from a DragEvent, or null if the data wasn't valid. */
+    private ComponentName getActivityNameFromDragEvent(DragEvent event) {
+        ClipData data = event.getClipData();
+        if (data == null) {
+            return null;
+        }
+        if (data.getItemCount() != 1) {
+            return null;
+        }
+        Intent intent = data.getItemAt(0).getIntent();
+        if (intent == null) {
+            return null;
+        }
+        return intent.getComponent();
+    }
+
+    /** Updates the app at a given view index. */
+    private void updateAppAt(int index, ComponentName activityName) {
+        mAppsModel.setApp(index, activityName);
+        ImageView button = (ImageView) getChildAt(index);
+        new GetActivityIconTask(mPackageManager, button).execute(activityName);
+    }
+
+    /** Removes the app at a given view index from both the UI and data model. */
+    private void removeAppAt(int index) {
+        removeViewAt(index);
+        mAppsModel.removeApp(index);
+    }
+
+    /** Cleans up at the end of the drag. */
+    private boolean onDragEnded() {
+        if (DEBUG) Log.d(TAG, "onDragEnded");
+
+        if (mDragView != null) {
+            // The icon wasn't dropped into the app list. Remove the placeholder.
+            removeAppAt(indexOfChild(mDragView));
+            mAppsModel.savePrefs();
+            mDragView = null;
+        }
+
+        return true;
+    }
+
+    /** Drag listener for individual app icons. */
+    private class AppIconDragListener implements View.OnDragListener {
         @Override
         public boolean onDrag(View v, DragEvent event) {
             switch (event.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED: {
-                    if (DEBUG) Log.d(TAG, "onStarted " + viewIndexInParent(v));
-                    // Hide the icon being dragged. The drag shadow will continue to draw.
-                    if (v == mDragView) {
-                        v.setVisibility(View.INVISIBLE);
-                    }
                     // Every button listens for drag events in order to detect enter/exit.
-                    return true;
+                    return canAcceptDrag(event);
                 }
                 case DragEvent.ACTION_DRAG_ENTERED: {
                     // Forward to NavigationBarApps.
-                    onDragEntered(v);
+                    onDragEnteredIcon(v);
                     return false;
-                }
-                case DragEvent.ACTION_DRAG_LOCATION: {
-                    // Nothing to do.
-                    return false;
-                }
-                case DragEvent.ACTION_DRAG_EXITED: {
-                    // Nothing to do.
-                    return false;
-                }
-                case DragEvent.ACTION_DROP: {
-                    onDrop();
-                    return false;
-                }
-                case DragEvent.ACTION_DRAG_ENDED: {
-                    if (DEBUG) Log.d(TAG, "onDragEnded " + viewIndexInParent(v));
-                    // Ensure the dragged app becomes visible again.
-                    if (v == mDragView) {
-                        v.setVisibility(View.VISIBLE);
-                        mDragView = null;
-                    }
-                    return true;
                 }
             }
             return false;
-        }
-
-        /** Returns a View's index in its ViewGroup parent. */
-        private int viewIndexInParent(View v) {
-            return ((ViewGroup) v.getParent()).indexOfChild(v);
         }
     }
 
@@ -246,14 +320,10 @@ class NavigationBarApps extends LinearLayout {
      * A click listener that launches an activity.
      */
     private class AppClickListener implements View.OnClickListener {
-        private final ComponentName mActivityName;
-
-        public AppClickListener(ComponentName activityName) {
-            mActivityName = activityName;
-        }
-
         @Override
         public void onClick(View v) {
+            ComponentName activityName = mAppsModel.getApp(indexOfChild(v));
+
             // TODO: Support apps from multiple user profiles. The profile will need to be stored in
             // the data model for each app shortcut.
             UserHandle user = UserHandle.OWNER;
@@ -269,7 +339,7 @@ class NavigationBarApps extends LinearLayout {
             Bundle optsBundle = opts.toBundle();
 
             // Launch the activity.
-            mLauncherApps.startMainActivity(mActivityName, user, sourceBounds, optsBundle);
+            mLauncherApps.startMainActivity(activityName, user, sourceBounds, optsBundle);
         }
     }
 }

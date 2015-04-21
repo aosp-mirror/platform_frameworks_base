@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -71,6 +72,12 @@ class NavigationBarRecents extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        // Set up the buttons.
+        for (int i = 0; i < RECENT_APP_BUTTON_IDS.length; i++) {
+            ImageView button = getRecentAppButton(i);
+            button.setOnLongClickListener(AppLongClickListener.getInstance());
+        }
+
         // TODO: When is the right time to do the initial update?
         updateRecentApps();
     }
@@ -110,6 +117,10 @@ class NavigationBarRecents extends LinearLayout {
             return;
         }
 
+        // Use the View's tag to store metadata for drag and drop.
+        button.setTag(component);
+
+        button.setVisibility(View.VISIBLE);
         // Load the activity icon on a background thread.
         new GetActivityIconTask(mPackageManager, button).execute(component);
 
@@ -149,6 +160,27 @@ class NavigationBarRecents extends LinearLayout {
                     updateRecentApps();
                 }
             });
+        }
+    }
+
+    /** Starts a drag on long-click on an app icon. */
+    private static class AppLongClickListener implements View.OnLongClickListener {
+        private static AppLongClickListener INSTANCE = new AppLongClickListener();
+
+        public static AppLongClickListener getInstance() {
+            return INSTANCE;
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            ComponentName activityName = (ComponentName) v.getTag();
+            // The drag data is an Intent to launch the activity.
+            Intent mainIntent = Intent.makeMainActivity(activityName);
+            ClipData dragData = ClipData.newIntent("", mainIntent);
+            // Use the ImageView to create the shadow.
+            View.DragShadowBuilder shadow = new AppIconDragShadowBuilder((ImageView) v);
+            v.startDrag(dragData, shadow, null /* myLocalState */, 0 /* flags */);
+            return true;
         }
     }
 }
