@@ -1288,10 +1288,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
+    final UiHandler mUiHandler;
 
-    final class MainHandler extends Handler {
-        public MainHandler(Looper looper) {
-            super(looper, null, true);
+    final class UiHandler extends Handler {
+        public UiHandler() {
+            super(com.android.server.UiThread.get().getLooper(), null, true);
         }
 
         @Override
@@ -1404,15 +1405,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 d.show();
                 ensureBootCompleted();
             } break;
-            case UPDATE_CONFIGURATION_MSG: {
-                final ContentResolver resolver = mContext.getContentResolver();
-                Settings.System.putConfiguration(resolver, (Configuration)msg.obj);
-            } break;
-            case GC_BACKGROUND_PROCESSES_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    performAppGcsIfAppropriateLocked();
-                }
-            } break;
             case WAIT_FOR_DEBUGGER_MSG: {
                 synchronized (ActivityManagerService.this) {
                     ProcessRecord app = (ProcessRecord)msg.obj;
@@ -1431,6 +1423,88 @@ public final class ActivityManagerService extends ActivityManagerNative
                             app.waitDialog = null;
                         }
                     }
+                }
+            } break;
+            case SHOW_UID_ERROR_MSG: {
+                if (mShowDialogs) {
+                    AlertDialog d = new BaseErrorDialog(mContext);
+                    d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+                    d.setCancelable(false);
+                    d.setTitle(mContext.getText(R.string.android_system_label));
+                    d.setMessage(mContext.getText(R.string.system_error_wipe_data));
+                    d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
+                            obtainMessage(DISMISS_DIALOG_MSG, d));
+                    d.show();
+                }
+            } break;
+            case SHOW_FINGERPRINT_ERROR_MSG: {
+                if (mShowDialogs) {
+                    AlertDialog d = new BaseErrorDialog(mContext);
+                    d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+                    d.setCancelable(false);
+                    d.setTitle(mContext.getText(R.string.android_system_label));
+                    d.setMessage(mContext.getText(R.string.system_error_manufacturer));
+                    d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
+                            obtainMessage(DISMISS_DIALOG_MSG, d));
+                    d.show();
+                }
+            } break;
+            case SHOW_COMPAT_MODE_DIALOG_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    ActivityRecord ar = (ActivityRecord) msg.obj;
+                    if (mCompatModeDialog != null) {
+                        if (mCompatModeDialog.mAppInfo.packageName.equals(
+                                ar.info.applicationInfo.packageName)) {
+                            return;
+                        }
+                        mCompatModeDialog.dismiss();
+                        mCompatModeDialog = null;
+                    }
+                    if (ar != null && false) {
+                        if (mCompatModePackages.getPackageAskCompatModeLocked(
+                                ar.packageName)) {
+                            int mode = mCompatModePackages.computeCompatModeLocked(
+                                    ar.info.applicationInfo);
+                            if (mode == ActivityManager.COMPAT_MODE_DISABLED
+                                    || mode == ActivityManager.COMPAT_MODE_ENABLED) {
+                                mCompatModeDialog = new CompatModeDialog(
+                                        ActivityManagerService.this, mContext,
+                                        ar.info.applicationInfo);
+                                mCompatModeDialog.show();
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            case START_USER_SWITCH_MSG: {
+                showUserSwitchDialog(msg.arg1, (String) msg.obj);
+                break;
+            }
+            case DISMISS_DIALOG_MSG: {
+                final Dialog d = (Dialog) msg.obj;
+                d.dismiss();
+                break;
+            }
+            }
+        }
+    }
+
+    final class MainHandler extends Handler {
+        public MainHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case UPDATE_CONFIGURATION_MSG: {
+                final ContentResolver resolver = mContext.getContentResolver();
+                Settings.System.putConfiguration(resolver, (Configuration) msg.obj);
+            } break;
+            case GC_BACKGROUND_PROCESSES_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    performAppGcsIfAppropriateLocked();
                 }
             } break;
             case SERVICE_TIMEOUT_MSG: {
@@ -1495,30 +1569,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                             }
                         }
                     }
-                }
-            } break;
-            case SHOW_UID_ERROR_MSG: {
-                if (mShowDialogs) {
-                    AlertDialog d = new BaseErrorDialog(mContext);
-                    d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
-                    d.setCancelable(false);
-                    d.setTitle(mContext.getText(R.string.android_system_label));
-                    d.setMessage(mContext.getText(R.string.system_error_wipe_data));
-                    d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
-                            mHandler.obtainMessage(DISMISS_DIALOG_MSG, d));
-                    d.show();
-                }
-            } break;
-            case SHOW_FINGERPRINT_ERROR_MSG: {
-                if (mShowDialogs) {
-                    AlertDialog d = new BaseErrorDialog(mContext);
-                    d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
-                    d.setCancelable(false);
-                    d.setTitle(mContext.getText(R.string.android_system_label));
-                    d.setMessage(mContext.getText(R.string.system_error_manufacturer));
-                    d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
-                            mHandler.obtainMessage(DISMISS_DIALOG_MSG, d));
-                    d.show();
                 }
             } break;
             case PROC_START_TIMEOUT_MSG: {
@@ -1621,34 +1671,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
                 }
             } break;
-            case SHOW_COMPAT_MODE_DIALOG_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    ActivityRecord ar = (ActivityRecord)msg.obj;
-                    if (mCompatModeDialog != null) {
-                        if (mCompatModeDialog.mAppInfo.packageName.equals(
-                                ar.info.applicationInfo.packageName)) {
-                            return;
-                        }
-                        mCompatModeDialog.dismiss();
-                        mCompatModeDialog = null;
-                    }
-                    if (ar != null && false) {
-                        if (mCompatModePackages.getPackageAskCompatModeLocked(
-                                ar.packageName)) {
-                            int mode = mCompatModePackages.computeCompatModeLocked(
-                                    ar.info.applicationInfo);
-                            if (mode == ActivityManager.COMPAT_MODE_DISABLED
-                                    || mode == ActivityManager.COMPAT_MODE_ENABLED) {
-                                mCompatModeDialog = new CompatModeDialog(
-                                        ActivityManagerService.this, mContext,
-                                        ar.info.applicationInfo);
-                                mCompatModeDialog.show();
-                            }
-                        }
-                    }
-                }
-                break;
-            }
             case DISPATCH_PROCESSES_CHANGED: {
                 dispatchProcessesChanged();
                 break;
@@ -1667,10 +1689,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 };
                 thread.start();
-                break;
-            }
-            case START_USER_SWITCH_MSG: {
-                showUserSwitchDialog(msg.arg1, (String) msg.obj);
                 break;
             }
             case REPORT_USER_SWITCH_MSG: {
@@ -1778,11 +1796,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error storing locale for decryption UI", e);
                 }
-                break;
-            }
-            case DISMISS_DIALOG_MSG: {
-                final Dialog d = (Dialog) msg.obj;
-                d.dismiss();
                 break;
             }
             case NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG: {
@@ -2079,6 +2092,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 android.os.Process.THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
         mHandlerThread.start();
         mHandler = new MainHandler(mHandlerThread.getLooper());
+        mUiHandler = new UiHandler();
 
         mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
                 "foreground", BROADCAST_FG_TIMEOUT, false);
@@ -2444,7 +2458,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         Message msg = Message.obtain();
         msg.what = SHOW_COMPAT_MODE_DIALOG_MSG;
         msg.obj = r.task.askedCompatMode ? null : r;
-        mHandler.sendMessage(msg);
+        mUiHandler.sendMessage(msg);
     }
 
     private int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
@@ -5101,20 +5115,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 map.put("activity", activity);
             }
 
-            mHandler.sendMessage(msg);
+            mUiHandler.sendMessage(msg);
         }
     }
 
     final void showLaunchWarningLocked(final ActivityRecord cur, final ActivityRecord next) {
         if (!mLaunchWarningShown) {
             mLaunchWarningShown = true;
-            mHandler.post(new Runnable() {
+            mUiHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     synchronized (ActivityManagerService.this) {
                         final Dialog d = new LaunchWarningWindow(mContext, cur, next);
                         d.show();
-                        mHandler.postDelayed(new Runnable() {
+                        mUiHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 synchronized (ActivityManagerService.this) {
@@ -8054,7 +8068,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             msg.what = WAIT_FOR_DEBUGGER_MSG;
             msg.obj = app;
             msg.arg1 = waiting ? 1 : 0;
-            mHandler.sendMessage(msg);
+            mUiHandler.sendMessage(msg);
         }
     }
 
@@ -11359,7 +11373,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Message msg = Message.obtain();
                     msg.what = SHOW_FACTORY_ERROR_MSG;
                     msg.getData().putCharSequence("msg", errorMsg);
-                    mHandler.sendMessage(msg);
+                    mUiHandler.sendMessage(msg);
                 }
             }
         }
@@ -11409,14 +11423,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
                     Slog.e(TAG, "UIDs on the system are inconsistent, you need to wipe your"
                             + " data partition or your device will be unstable.");
-                    mHandler.obtainMessage(SHOW_UID_ERROR_MSG).sendToTarget();
+                    mUiHandler.obtainMessage(SHOW_UID_ERROR_MSG).sendToTarget();
                 }
             } catch (RemoteException e) {
             }
 
             if (!Build.isFingerprintConsistent()) {
                 Slog.e(TAG, "Build fingerprint is not consistent, warning user");
-                mHandler.obtainMessage(SHOW_FINGERPRINT_ERROR_MSG).sendToTarget();
+                mUiHandler.obtainMessage(SHOW_FINGERPRINT_ERROR_MSG).sendToTarget();
             }
 
             long ident = Binder.clearCallingIdentity();
@@ -11702,7 +11716,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 data.put("violationMask", violationMask);
                 data.put("info", info);
                 msg.obj = data;
-                mHandler.sendMessage(msg);
+                mUiHandler.sendMessage(msg);
 
                 Binder.restoreCallingIdentity(origId);
             }
@@ -12157,7 +12171,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             data.put("result", result);
             data.put("app", r);
             msg.obj = data;
-            mHandler.sendMessage(msg);
+            mUiHandler.sendMessage(msg);
 
             Binder.restoreCallingIdentity(origId);
         }
@@ -18918,8 +18932,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             userName = userInfo.name;
             mTargetUserId = userId;
         }
-        mHandler.removeMessages(START_USER_SWITCH_MSG);
-        mHandler.sendMessage(mHandler.obtainMessage(START_USER_SWITCH_MSG, userId, 0, userName));
+        mUiHandler.removeMessages(START_USER_SWITCH_MSG);
+        mUiHandler.sendMessage(mUiHandler.obtainMessage(START_USER_SWITCH_MSG, userId, 0, userName));
         return true;
     }
 
