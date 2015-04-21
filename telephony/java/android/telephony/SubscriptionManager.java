@@ -396,7 +396,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subInfo = iSub.getActiveSubscriptionInfo(subId);
+                subInfo = iSub.getActiveSubscriptionInfo(subId, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -424,7 +424,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActiveSubscriptionInfoForIccId(iccId);
+                result = iSub.getActiveSubscriptionInfoForIccId(iccId, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -450,7 +450,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActiveSubscriptionInfoForSimSlotIndex(slotIdx);
+                result = iSub.getActiveSubscriptionInfoForSimSlotIndex(slotIdx,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -472,7 +473,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getAllSubInfoList();
+                result = iSub.getAllSubInfoList(mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -510,7 +511,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActiveSubscriptionInfoList();
+                result = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -531,7 +532,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getAllSubInfoCount();
+                result = iSub.getAllSubInfoCount(mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -551,7 +552,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActiveSubInfoCount();
+                result = iSub.getActiveSubInfoCount(mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -600,7 +601,7 @@ public class SubscriptionManager {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
                 // FIXME: This returns 1 on success, 0 on error should should we return it?
-                iSub.addSubInfoRecord(iccId, slotId);
+                iSub.addSubInfoRecord(iccId, slotId, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -630,7 +631,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setIconTint(tint, subId);
+                result = iSub.setIconTint(tint, subId, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -675,7 +676,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setDisplayNameUsingSrc(displayName, subId, nameSource);
+                result = iSub.setDisplayNameUsingSrc(displayName, subId, nameSource,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -703,7 +705,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setDisplayNumber(number, subId);
+                result = iSub.setDisplayNumber(number, subId, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -732,7 +734,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setDataRoaming(roaming, subId);
+                result = iSub.setDataRoaming(roaming, subId, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -967,7 +969,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                iSub.clearSubInfo();
+                iSub.clearSubInfo(mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1001,7 +1003,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                iSub.clearDefaultsForInactiveSubIds();
+                iSub.clearDefaultsForInactiveSubIds(mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
