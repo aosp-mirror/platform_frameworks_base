@@ -338,6 +338,7 @@ public class QSPanel extends ViewGroup {
             r.detailAdapter = r.tile.getDetailAdapter();
             if (r.detailAdapter == null) return;
         }
+        r.tile.setDetailListening(show);
         int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
         int y = r.tileView.getTop() + r.tileView.getHeight() / 2;
         handleShowDetailImpl(r, show, x, y);
