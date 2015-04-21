@@ -62,6 +62,9 @@ public final class NotificationRecord {
     // The timestamp used for ranking.
     private long mRankingTimeMs;
 
+    // The first post time, stable across updates.
+    private long mCreationTimeMs;
+
     // Is this record an update of an old record?
     public boolean isUpdate;
     private int mPackagePriority;
@@ -77,6 +80,7 @@ public final class NotificationRecord {
         this.score = score;
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
+        mCreationTimeMs = sbn.getPostTime();
     }
 
     // copy any notes that the ranking system may have made before the update
@@ -87,6 +91,7 @@ public final class NotificationRecord {
         mPackageVisibility = previous.mPackageVisibility;
         mIntercept = previous.mIntercept;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
+        mCreationTimeMs = previous.mCreationTimeMs;
         // Don't copy mGlobalSortKey, recompute it.
     }
 
@@ -167,6 +172,7 @@ public final class NotificationRecord {
         pw.println(prefix + "  mIntercept=" + mIntercept);
         pw.println(prefix + "  mGlobalSortKey=" + mGlobalSortKey);
         pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
+        pw.println(prefix + "  mCreationTimeMs=" + mCreationTimeMs);
     }
 
 
@@ -260,6 +266,13 @@ public final class NotificationRecord {
      */
     public long getRankingTimeMs() {
         return mRankingTimeMs;
+    }
+
+    /**
+     * Returns the timestamp of the first post, ignoring updates.
+     */
+    public long getCreationTimeMs() {
+        return mCreationTimeMs;
     }
 
     /**
