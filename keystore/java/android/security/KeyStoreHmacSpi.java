@@ -147,7 +147,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         resetWhilePreservingInitState();
     }
 
-    private void ensureKeystoreOperationInitialized() {
+    private void ensureKeystoreOperationInitialized() throws InvalidKeyException {
         if (mChunkedStreamer != null) {
             return;
         }
@@ -169,10 +169,10 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeyStore.getCryptoOperationException(opResult.resultCode);
+            throw KeyStore.getInvalidKeyException(opResult.resultCode);
         }
         if (opResult.token == null) {
-            throw new CryptoOperationException("Keystore returned null operation token");
+            throw new IllegalStateException("Keystore returned null operation token");
         }
         mOperationToken = opResult.token;
         mOperationHandle = opResult.operationHandle;
@@ -188,28 +188,36 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
 
     @Override
     protected void engineUpdate(byte[] input, int offset, int len) {
-        ensureKeystoreOperationInitialized();
+        try {
+            ensureKeystoreOperationInitialized();
+        } catch (InvalidKeyException e) {
+            throw new IllegalStateException("Failed to reinitialize MAC", e);
+        }
 
         byte[] output;
         try {
             output = mChunkedStreamer.update(input, offset, len);
         } catch (KeyStoreException e) {
-            throw KeyStore.getCryptoOperationException(e);
+            throw new IllegalStateException("Keystore operation failed", e);
         }
         if ((output != null) && (output.length != 0)) {
-            throw new CryptoOperationException("Update operation unexpectedly produced output");
+            throw new IllegalStateException("Update operation unexpectedly produced output");
         }
     }
 
     @Override
     protected byte[] engineDoFinal() {
-        ensureKeystoreOperationInitialized();
+        try {
+            ensureKeystoreOperationInitialized();
+        } catch (InvalidKeyException e) {
+            throw new IllegalStateException("Failed to reinitialize MAC", e);
+        }
 
         byte[] result;
         try {
             result = mChunkedStreamer.doFinal(null, 0, 0);
         } catch (KeyStoreException e) {
-            throw KeyStore.getCryptoOperationException(e);
+            throw new IllegalStateException("Keystore operation failed", e);
         }
 
         resetWhilePreservingInitState();

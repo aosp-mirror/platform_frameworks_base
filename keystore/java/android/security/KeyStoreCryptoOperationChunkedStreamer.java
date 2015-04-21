@@ -136,7 +136,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
                     // More input is available, but it wasn't included into the previous chunk
                     // because the chunk reached its maximum permitted size.
                     // Shouldn't have happened.
-                    throw new CryptoOperationException("Nothing consumed from max-sized chunk: "
+                    throw new IllegalStateException("Nothing consumed from max-sized chunk: "
                             + chunk.length + " bytes");
                 }
                 mBuffered = chunk;
@@ -148,7 +148,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
                 mBufferedOffset = opResult.inputConsumed;
                 mBufferedLength = chunk.length - opResult.inputConsumed;
             } else {
-                throw new CryptoOperationException("Consumed more than provided: "
+                throw new IllegalStateException("Consumed more than provided: "
                         + opResult.inputConsumed + ", provided: " + chunk.length);
             }
 
@@ -160,7 +160,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
                         try {
                             bufferedOutput.write(opResult.output);
                         } catch (IOException e) {
-                            throw new CryptoOperationException("Failed to buffer output", e);
+                            throw new IllegalStateException("Failed to buffer output", e);
                         }
                     }
                 } else {
@@ -173,7 +173,7 @@ public class KeyStoreCryptoOperationChunkedStreamer {
                         try {
                             bufferedOutput.write(opResult.output);
                         } catch (IOException e) {
-                            throw new CryptoOperationException("Failed to buffer output", e);
+                            throw new IllegalStateException("Failed to buffer output", e);
                         }
                         return bufferedOutput.toByteArray();
                     }
@@ -233,10 +233,10 @@ public class KeyStoreCryptoOperationChunkedStreamer {
         }
 
         if (opResult.inputConsumed < chunk.length) {
-            throw new CryptoOperationException("Keystore failed to consume all input. Provided: "
+            throw new IllegalStateException("Keystore failed to consume all input. Provided: "
                     + chunk.length + ", consumed: " + opResult.inputConsumed);
         } else if (opResult.inputConsumed > chunk.length) {
-            throw new CryptoOperationException("Keystore consumed more input than provided"
+            throw new IllegalStateException("Keystore consumed more input than provided"
                     + " . Provided: " + chunk.length + ", consumed: " + opResult.inputConsumed);
         }
 
