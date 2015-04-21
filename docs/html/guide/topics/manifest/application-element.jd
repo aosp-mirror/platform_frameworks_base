@@ -452,12 +452,11 @@ href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.<
 The default value is {@code "true"}.
 
 <p>When the attribute is set to {@code "false"}, platform components (for example, HTTP and FTP
-stacks, {@link android.webkit.WebView}, {@link android.app.DownloadManager},
-{@link android.media.MediaPlayer}) will refuse the app's requests to use cleartext traffic.
-Third-party libraries are strongly encouraged to honor this setting as well. The key reason for
-avoiding cleartext traffic is the lack of confidentiality, authenticity, and protections against
-tampering: a network attacker can eavesdrop on transmitted data and also modify it without being
-detected.
+stacks, {@link android.app.DownloadManager}, {@link android.media.MediaPlayer}) will refuse the
+app's requests to use cleartext traffic. Third-party libraries are strongly encouraged to honor this
+setting as well. The key reason for avoiding cleartext traffic is the lack of confidentiality,
+authenticity, and protections against tampering: a network attacker can eavesdrop on transmitted
+data and also modify it without being detected.
 
 <p>This flag is honored on a best effort basis because it's impossible to prevent all cleartext
 traffic from Android applications given the level of access provided to them. For example, there's
@@ -466,6 +465,8 @@ determine whether its traffic is in cleartext. However, most network traffic fro
 handled by higher-level network stacks/components which can honor this flag by either reading it
 from {@link android.content.pm.ApplicationInfo#flags ApplicationInfo.flags} or
 {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted() NetworkSecurityPolicy.isCleartextTrafficPermitted()}.
+
+<p>NOTE: {@link android.webkit.WebView} does not honor this flag.
 
 <p>During app development, StrictMode can be used to identify any cleartext traffic from the app: see
 {@link android.os.StrictMode.VmPolicy.Builder#detectCleartextNetwork() StrictMode.VmPolicy.Builder.detectCleartextNetwork()}.
