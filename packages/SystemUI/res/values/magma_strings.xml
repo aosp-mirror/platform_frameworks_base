@@ -28,6 +28,13 @@
     <string name="accessibility_quick_settings_usb_tether_changed_on">USB tethering turned on</string>
     <string name="quick_settings_usb_tether_label">USB tethering</string>
 
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Heads up</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads up off</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads up on</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads up turned off</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads up turned on</string>
+
     <!-- Screenrecord stuff -->
     <string name="screenrecord_stopdot_label">Show stop dot</string>
     <string name="screenrecord_low_quality_label">Low quality</string>
