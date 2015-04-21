@@ -28,7 +28,6 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
-
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -311,8 +310,9 @@ public class DirectoryFragment extends Fragment {
                 updateDisplayState();
 
                 // When launched into empty recents, show drawer
-                if (mType == TYPE_RECENT_OPEN && mAdapter.isEmpty() && !state.stackTouched) {
-                    ((BaseActivity) context).setRootsDrawerOpen(true);
+                if (mType == TYPE_RECENT_OPEN && mAdapter.isEmpty() && !state.stackTouched &&
+                        context instanceof DocumentsActivity) {
+                    ((DocumentsActivity) context).setRootsDrawerOpen(true);
                 }
 
                 // Restore any previous instance state

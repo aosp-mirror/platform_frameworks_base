@@ -75,7 +75,7 @@ public class PickFragment extends Fragment {
     private View.OnClickListener mPickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            final BaseActivity activity = BaseActivity.get(PickFragment.this);
+            final DocumentsActivity activity = DocumentsActivity.get(PickFragment.this);
             activity.onPickRequested(mPickTarget);
         }
     };
