@@ -266,9 +266,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         final int failedAttemptsBeforeWipe =
                 dpm.getMaximumFailedPasswordsForWipe(null, currentUser);
 
-        final int failedAttemptWarning = LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
-                - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
-
         final int remainingBeforeWipe = failedAttemptsBeforeWipe > 0 ?
                 (failedAttemptsBeforeWipe - failedAttempts)
                 : Integer.MAX_VALUE; // because DPM returns 0 if no restriction
