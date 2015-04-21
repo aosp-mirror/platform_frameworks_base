@@ -1486,6 +1486,11 @@ public class ValueAnimator extends Animator {
         anim.mPaused = false;
         anim.mResumed = false;
         anim.mStartListenersCalled = false;
+        anim.mStartTime = 0;
+        anim.mStartTimeCommitted = false;
+        anim.mPauseTime = 0;
+        anim.mCurrentFraction = 0;
+        anim.mDelayStartTime = 0;
 
         PropertyValuesHolder[] oldValues = mValues;
         if (oldValues != null) {
