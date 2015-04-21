@@ -58,6 +58,30 @@ the data layer:</p>
   <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>
   lets you listen for changes only when the user is actively using your app.
   </dd>
+
+  <dt><b>Channel</b></dt>
+  <dd>
+  You can use the
+  <a href="{@docRoot}reference/com/google/android/gms/wearable/ChannelApi.html"><code>ChannelApi</code></a>
+  class to transfer large data items, such as music and movie files, from a handheld to a wearable
+  device. The Channel API for data transfer has the following benefits:
+  <ul>
+    <li>Transfer large data files between two or more connected devices, without
+    the automatic synchronization provided when using
+    <a href="{@docRoot}reference/com/google/android/gms/wearable/Asset.html"><code>Asset</code></a>
+    objects attached to
+    <a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a>
+    objects. The Channel API saves disk space unlike the
+    <a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html"><code>DataApi</code></a>
+    class, which creates a copy of the assets on the local device before synchronizing with
+    connected devices.</li>
+    <li>Reliably send a file that is too large in size to send using the
+    <a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html"><code>MessageApi</code></a>
+    class.</li>
+    <li>Transfer streamed data, such as music pulled from a network server or voice
+    data from the microphone.</li>
+  </ul>
+  </dd>
 </dl>
 
 <p class="warning"><b>Warning:</b>
