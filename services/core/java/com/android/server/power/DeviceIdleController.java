@@ -41,6 +41,7 @@ import android.view.Display;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.SystemService;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.EventLogTags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -100,6 +101,11 @@ public class DeviceIdleController extends SystemService {
      * Scaling factor to apply to current idle timeout each time we cycle through that state.
      */
     private static final float DEFAULT_IDLE_FACTOR = 2f;
+    /**
+     * This is the minimum time we will allow until the next upcoming alarm for us to
+     * actually go in to idle mode.
+     */
+    private static final long DEFAULT_MIN_TIME_TO_ALARM = 60*60*1000L;
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
@@ -239,7 +245,7 @@ public class DeviceIdleController extends SystemService {
             becomeInactiveIfAppropriateLocked();
         } else if (screenOn) {
             mScreenOn = true;
-            becomeActiveLocked();
+            becomeActiveLocked("screen");
         }
     }
 
@@ -249,12 +255,13 @@ public class DeviceIdleController extends SystemService {
             becomeInactiveIfAppropriateLocked();
         } else if (charging) {
             mCharging = charging;
-            becomeActiveLocked();
+            becomeActiveLocked("charging");
         }
     }
 
-    void becomeActiveLocked() {
+    void becomeActiveLocked(String reason) {
         if (mState != STATE_ACTIVE) {
+            EventLogTags.writeDeviceIdle(STATE_ACTIVE, reason);
             mLocalPowerManager.setDeviceIdleMode(false);
             try {
                 mNetworkPolicyManager.setDeviceIdleMode(false);
@@ -281,10 +288,22 @@ public class DeviceIdleController extends SystemService {
             mNextIdlePendingDelay = 0;
             mNextIdleDelay = 0;
             scheduleAlarmLocked(mInactiveTimeout, false);
+            EventLogTags.writeDeviceIdle(mState, "no activity");
         }
     }
 
     void stepIdleStateLocked() {
+        EventLogTags.writeDeviceIdleStep();
+
+        final long now = SystemClock.elapsedRealtime();
+        if ((now+DEFAULT_MIN_TIME_TO_ALARM) > mAlarmManager.getNextWakeFromIdleTime()) {
+            // Whoops, there is an upcoming alarm.  We don't actually want to go idle.
+            if (mState != STATE_ACTIVE) {
+                becomeActiveLocked("alarm");
+            }
+            return;
+        }
+
         switch (mState) {
             case STATE_INACTIVE:
                 // We have now been inactive long enough, it is time to start looking
@@ -295,6 +314,7 @@ public class DeviceIdleController extends SystemService {
                 mNextIdlePendingDelay = DEFAULT_IDLE_PENDING_TIMEOUT;
                 mNextIdleDelay = DEFAULT_IDLE_TIMEOUT;
                 mState = STATE_IDLE_PENDING;
+                EventLogTags.writeDeviceIdle(mState, "step");
                 break;
             case STATE_IDLE_PENDING:
                 // We have been waiting to become idle, and now it is time!  This is the
@@ -307,6 +327,7 @@ public class DeviceIdleController extends SystemService {
                     mNextIdleDelay = DEFAULT_MAX_IDLE_TIMEOUT;
                 }
                 mState = STATE_IDLE;
+                EventLogTags.writeDeviceIdle(mState, "step");
                 mLocalPowerManager.setDeviceIdleMode(true);
                 try {
                     mNetworkPolicyManager.setDeviceIdleMode(true);
@@ -323,6 +344,7 @@ public class DeviceIdleController extends SystemService {
                     mNextIdlePendingDelay = DEFAULT_MAX_IDLE_PENDING_TIMEOUT;
                 }
                 mState = STATE_IDLE_PENDING;
+                EventLogTags.writeDeviceIdle(mState, "step");
                 mLocalPowerManager.setDeviceIdleMode(false);
                 try {
                     mNetworkPolicyManager.setDeviceIdleMode(false);
@@ -352,6 +374,7 @@ public class DeviceIdleController extends SystemService {
             }
             mState = STATE_ACTIVE;
             mInactiveTimeout = DEFAULT_MOTION_INACTIVE_TIMEOUT;
+            EventLogTags.writeDeviceIdle(mState, "motion");
             becomeInactiveIfAppropriateLocked();
         }
     }

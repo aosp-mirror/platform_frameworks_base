@@ -33,6 +33,7 @@ interface IAlarmManager {
     boolean setTime(long millis);
     void setTimeZone(String zone);
     void remove(in PendingIntent operation);
+    long getNextWakeFromIdleTime();
     AlarmManager.AlarmClockInfo getNextAlarmClock(int userId);
 }
 

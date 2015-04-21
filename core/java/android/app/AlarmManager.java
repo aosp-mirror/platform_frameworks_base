@@ -597,6 +597,15 @@ public class AlarmManager
         }
     }
 
+    /** @hide */
+    public long getNextWakeFromIdleTime() {
+        try {
+            return mService.getNextWakeFromIdleTime();
+        } catch (RemoteException ex) {
+            return Long.MAX_VALUE;
+        }
+    }
+
     /**
      * Gets information about the next alarm clock currently scheduled.
      *
