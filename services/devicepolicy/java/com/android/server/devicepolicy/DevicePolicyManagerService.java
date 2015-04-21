@@ -1634,6 +1634,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         syncDeviceCapabilitiesLocked(policy);
         updateMaximumTimeToLockLocked(policy);
         updateLockTaskPackagesLocked(policy, userHandle);
+        if (!policy.mStatusBarEnabledState) {
+            setStatusBarEnabledStateInternal(policy.mStatusBarEnabledState, userHandle);
+        }
     }
 
     private void updateLockTaskPackagesLocked(DevicePolicyData policy, int userId) {
@@ -1708,7 +1711,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        DevicePolicyData policy = getUserData(UserHandle.USER_OWNER);
+        getUserData(UserHandle.USER_OWNER);
         loadDeviceOwner();
         cleanUpOldUsers();
         // Register an observer for watching for user setup complete.
@@ -1723,11 +1726,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int userHandle = users.get(i).id;
             updateScreenCaptureDisabledInWindowManager(userHandle,
                     getScreenCaptureDisabled(null, userHandle));
-        }
-
-        if (mDeviceOwner != null && mDeviceOwner.hasDeviceOwner()
-                && !policy.mStatusBarEnabledState) {
-            setStatusBarEnabledStateInternal(STATUS_BAR_DISABLE_MASK, UserHandle.USER_OWNER);
         }
     }
 
@@ -5871,22 +5869,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             DevicePolicyData policy = getUserData(userId);
             if (policy.mStatusBarEnabledState != enabled) {
                 policy.mStatusBarEnabledState = enabled;
-                setStatusBarEnabledStateInternal(
-                        enabled ? StatusBarManager.DISABLE_NONE : STATUS_BAR_DISABLE_MASK,
-                        userId);
+                setStatusBarEnabledStateInternal(enabled, userId);
                 saveSettingsLocked(userId);
             }
         }
     }
 
-    private void setStatusBarEnabledStateInternal(int flags, int userId) {
+    private void setStatusBarEnabledStateInternal(boolean enabled, int userId) {
         long ident = Binder.clearCallingIdentity();
         try {
             IStatusBarService statusBarService = IStatusBarService.Stub.asInterface(
                     ServiceManager.checkService(Context.STATUS_BAR_SERVICE));
             if (statusBarService != null) {
-                statusBarService.disableForUser(flags, mToken,
-                        mDeviceOwner.getDeviceOwnerPackageName(), userId);
+                int flags = enabled ? StatusBarManager.DISABLE_NONE : STATUS_BAR_DISABLE_MASK;
+                statusBarService.disableForUser(flags, mToken, mContext.getPackageName(), userId);
             }
         } catch (RemoteException e) {
             Slog.e(LOG_TAG, "Failed to disable the status bar", e);
