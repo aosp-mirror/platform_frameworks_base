@@ -100,16 +100,6 @@ public class ConnectivityManager {
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
-     * Identical to {@link #CONNECTIVITY_ACTION} broadcast, but sent without any
-     * historic {@link Settings.Global#CONNECTIVITY_CHANGE_DELAY}.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String CONNECTIVITY_ACTION_IMMEDIATE =
-            "android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE";
-
-    /**
      * The device has connected to a network that has presented a captive
      * portal, which is blocking Internet connectivity. The user was presented
      * with a notification that network sign in is required,
