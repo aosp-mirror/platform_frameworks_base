@@ -16,7 +16,10 @@
 
 package android.hardware;
 
+import android.annotation.SystemApi;
+import android.os.Build;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -1554,6 +1557,103 @@ public abstract class SensorManager {
     protected abstract boolean cancelTriggerSensorImpl(TriggerEventListener listener,
             Sensor sensor, boolean disable);
 
+
+    /**
+     * For testing purposes only. Not for third party applications.
+     *
+     * Enable data injection mode in sensor service. This mode is
+     * expected to be used only for testing purposes. If the HAL is
+     * set to data injection mode, it will ignore the input from
+     * physical sensors and read sensor data that is injected from
+     * the test application. This mode is used for testing vendor
+     * implementations for various algorithms like Rotation Vector,
+     * Significant Motion, Step Counter etc.
+     *
+     * The tests which call this API need to have {@code
+     * android.permission.HARDWARE_TEST} permission which isn't
+     * available for third party applications.
+     *
+     * @param enable True to set the HAL in DATA_INJECTION mode.
+     *               False to reset the HAL back to NORMAL mode.
+     *
+     * @return true if the HAL supports data injection and false
+     *         otherwise.
+     * @hide
+     */
+    @SystemApi
+    public boolean enableDataInjectionMode(boolean enable) {
+          return enableDataInjectionImpl(enable);
+    }
+
+    /**
+     * @hide
+     */
+    protected abstract boolean enableDataInjectionImpl(boolean enable);
+
+    /**
+     * For testing purposes only. Not for third party applications.
+     *
+     * This method is used to inject raw sensor data into the HAL.
+     * Call enableDataInjection before this method to set the HAL in
+     * data injection mode. This method should be called only if a
+     * previous call to enableDataInjection has been successful and
+     * the HAL is already in data injection mode.
+     *
+     * The tests which call this API need to have {@code
+     * android.permission.HARDWARE_TEST} permission which isn't
+     * available for third party applications.
+     *
+     * @param sensor The sensor to inject.
+     * @param values Sensor values to inject. The length of this
+     *               array must be exactly equal to the number of
+     *               values reported by the sensor type.
+     * @param accuracy Accuracy of the sensor.
+     * @param timestamp Sensor timestamp associated with the event.
+     *
+     * @return boolean True if the data injection succeeds, false
+     *         otherwise.
+     * @throws IllegalArgumentException when the sensor is null,
+     *         data injection is not supported by the sensor, values
+     *         are null, incorrect number of values for the sensor,
+     *         sensor accuracy is incorrect or timestamps are
+     *         invalid.
+     * @hide
+     */
+    @SystemApi
+    public boolean injectSensorData(Sensor sensor, float[] values, int accuracy,
+                long timestamp) {
+        if (sensor == null) {
+            throw new IllegalArgumentException("sensor cannot be null");
+        }
+        if (!sensor.isDataInjectionSupported()) {
+            throw new IllegalArgumentException("sensor does not support data injection");
+        }
+        if (values == null) {
+            throw new IllegalArgumentException("sensor data cannot be null");
+        }
+        int expectedNumValues = Sensor.getMaxLengthValuesArray(sensor, Build.VERSION_CODES.MNC);
+        if (values.length != expectedNumValues) {
+            throw new  IllegalArgumentException ("Wrong number of values for sensor " +
+                    sensor.getName() + " actual=" + values.length + " expected=" +
+                                                  expectedNumValues);
+        }
+        if (accuracy < SENSOR_STATUS_NO_CONTACT || accuracy > SENSOR_STATUS_ACCURACY_HIGH) {
+            throw new IllegalArgumentException("Invalid sensor accuracy");
+        }
+        if (timestamp <= 0) {
+            throw new IllegalArgumentException("Negative or zero sensor timestamp");
+        }
+        if (timestamp > SystemClock.elapsedRealtimeNanos()) {
+            throw new IllegalArgumentException("Sensor timestamp into the future");
+        }
+        return injectSensorDataImpl(sensor, values, accuracy, timestamp);
+    }
+
+    /**
+     * @hide
+     */
+    protected abstract boolean injectSensorDataImpl(Sensor sensor, float[] values, int accuracy,
+                long timestamp);
 
     private LegacySensorManager getLegacySensorManager() {
         synchronized (mSensorListByType) {

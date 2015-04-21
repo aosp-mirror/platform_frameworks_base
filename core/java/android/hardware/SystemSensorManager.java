@@ -16,7 +16,9 @@
 
 package android.hardware;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
@@ -40,11 +42,14 @@ import java.util.List;
 public class SystemSensorManager extends SensorManager {
     private static native void nativeClassInit();
     private static native int nativeGetNextSensor(Sensor sensor, int next);
+    private static native int nativeEnableDataInjection(boolean enable);
 
     private static boolean sSensorModuleInitialized = false;
     private static final Object sSensorModuleLock = new Object();
     private static final ArrayList<Sensor> sFullSensorsList = new ArrayList<Sensor>();
     private static final SparseArray<Sensor> sHandleToSensor = new SparseArray<Sensor>();
+    private static InjectEventQueue mInjectEventQueue = null;
+    private static boolean mDataInjectionMode = false;
 
     // Listener list
     private final HashMap<SensorEventListener, SensorEventQueue> mSensorListeners =
@@ -56,6 +61,7 @@ public class SystemSensorManager extends SensorManager {
     private final Looper mMainLooper;
     private final int mTargetSdkLevel;
     private final String mPackageName;
+    private final boolean mHasDataInjectionPermissions;
 
     /** {@hide} */
     public SystemSensorManager(Context context, Looper mainLooper) {
@@ -82,6 +88,8 @@ public class SystemSensorManager extends SensorManager {
                     }
                 } while (i>0);
             }
+            mHasDataInjectionPermissions = context.checkSelfPermission(
+                    Manifest.permission.HARDWARE_TEST) == PackageManager.PERMISSION_GRANTED;
         }
     }
 
@@ -219,19 +227,72 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
+    protected boolean enableDataInjectionImpl(boolean enable) {
+        if (!mHasDataInjectionPermissions) {
+            throw new SecurityException("Permission denial. Calling enableDataInjection without "
+                    + Manifest.permission.HARDWARE_TEST);
+        }
+        synchronized (sSensorModuleLock) {
+            int ret = nativeEnableDataInjection(enable);
+            // The HAL does not support injection. Ignore.
+            if (ret != 0) {
+                Log.e(TAG, "HAL does not support data injection");
+                return false;
+            }
+            mDataInjectionMode = enable;
+            // If data injection is being disabled clean up the native resources.
+            if (!enable && mInjectEventQueue != null) {
+                mInjectEventQueue.dispose();
+                mInjectEventQueue = null;
+            }
+            return true;
+        }
+    }
+
+    protected boolean injectSensorDataImpl(Sensor sensor, float[] values, int accuracy,
+            long timestamp) {
+        if (!mHasDataInjectionPermissions) {
+            throw new SecurityException("Permission denial. Calling injectSensorData without "
+                    + Manifest.permission.HARDWARE_TEST);
+        }
+        synchronized (sSensorModuleLock) {
+            if (!mDataInjectionMode) {
+                Log.e(TAG, "Data injection mode not activated before calling injectSensorData");
+                return false;
+            }
+            if (mInjectEventQueue == null) {
+                mInjectEventQueue = new InjectEventQueue(mMainLooper, this);
+            }
+            int ret = mInjectEventQueue.injectSensorData(sensor.getHandle(), values, accuracy,
+                                                         timestamp);
+            // If there are any errors in data injection clean up the native resources.
+            if (ret != 0) {
+                mInjectEventQueue.dispose();
+                mInjectEventQueue = null;
+                mDataInjectionMode = false;
+            }
+            return ret == 0;
+        }
+    }
+
     /*
      * BaseEventQueue is the communication channel with the sensor service,
      * SensorEventQueue, TriggerEventQueue are subclases and there is one-to-one mapping between
-     * the queues and the listeners.
+     * the queues and the listeners. InjectEventQueue is also a sub-class which is a special case
+     * where data is being injected into the sensor HAL through the sensor service. It is not
+     * associated with any listener and there is one InjectEventQueue associated with a
+     * SensorManager instance.
      */
     private static abstract class BaseEventQueue {
         private native long nativeInitBaseEventQueue(WeakReference<BaseEventQueue> eventQWeak,
-                MessageQueue msgQ, float[] scratch, String packageName);
+               MessageQueue msgQ, float[] scratch, String packageName, int mode);
         private static native int nativeEnableSensor(long eventQ, int handle, int rateUs,
                 int maxBatchReportLatencyUs);
         private static native int nativeDisableSensor(long eventQ, int handle);
         private static native void nativeDestroySensorEventQueue(long eventQ);
         private static native int nativeFlushSensor(long eventQ);
+        private static native int nativeInjectSensorData(long eventQ, int handle,
+                                                    float[] values,int accuracy, long timestamp);
         private long nSensorEventQueue;
         private final SparseBooleanArray mActiveSensors = new SparseBooleanArray();
         protected final SparseIntArray mSensorAccuracies = new SparseIntArray();
@@ -240,10 +301,12 @@ public class SystemSensorManager extends SensorManager {
         private final float[] mScratch = new float[16];
         protected final SystemSensorManager mManager;
 
-        BaseEventQueue(Looper looper, SystemSensorManager manager) {
+        protected static final int OPERATING_MODE_NORMAL = 0;
+        protected static final int OPERATING_MODE_DATA_INJECTION = 1;
+
+        BaseEventQueue(Looper looper, SystemSensorManager manager, int mode) {
             nSensorEventQueue = nativeInitBaseEventQueue(new WeakReference<BaseEventQueue>(this),
-                    looper.getQueue(), mScratch,
-                    manager.mPackageName);
+                    looper.getQueue(), mScratch, manager.mPackageName, mode);
             mCloseGuard.open("dispose");
             mManager = manager;
         }
@@ -340,6 +403,11 @@ public class SystemSensorManager extends SensorManager {
                     maxBatchReportLatencyUs);
         }
 
+        protected int injectSensorDataBase(int handle, float[] values, int accuracy,
+                                           long timestamp) {
+            return nativeInjectSensorData(nSensorEventQueue, handle, values, accuracy, timestamp);
+        }
+
         private int disableSensor(Sensor sensor) {
             if (nSensorEventQueue == 0) throw new NullPointerException();
             if (sensor == null) throw new NullPointerException();
@@ -359,7 +427,7 @@ public class SystemSensorManager extends SensorManager {
 
         public SensorEventQueue(SensorEventListener listener, Looper looper,
                 SystemSensorManager manager) {
-            super(looper, manager);
+            super(looper, manager, OPERATING_MODE_NORMAL);
             mListener = listener;
         }
 
@@ -426,7 +494,7 @@ public class SystemSensorManager extends SensorManager {
 
         public TriggerEventQueue(TriggerEventListener listener, Looper looper,
                 SystemSensorManager manager) {
-            super(looper, manager);
+            super(looper, manager, OPERATING_MODE_NORMAL);
             mListener = listener;
         }
 
@@ -475,6 +543,36 @@ public class SystemSensorManager extends SensorManager {
 
         @SuppressWarnings("unused")
         protected void dispatchFlushCompleteEvent(int handle) {
+        }
+    }
+
+    static final class InjectEventQueue extends BaseEventQueue {
+        public InjectEventQueue(Looper looper, SystemSensorManager manager) {
+            super(looper, manager, OPERATING_MODE_DATA_INJECTION);
+        }
+
+        int injectSensorData(int handle, float[] values,int accuracy, long timestamp) {
+             return injectSensorDataBase(handle, values, accuracy, timestamp);
+        }
+
+        @SuppressWarnings("unused")
+        protected void dispatchSensorEvent(int handle, float[] values, int accuracy,
+                long timestamp) {
+        }
+
+        @SuppressWarnings("unused")
+        protected void dispatchFlushCompleteEvent(int handle) {
+
+        }
+
+        @SuppressWarnings("unused")
+        protected void addSensorEvent(Sensor sensor) {
+
+        }
+
+        @SuppressWarnings("unused")
+        protected void removeSensorEvent(Sensor sensor) {
+
         }
     }
 }
