@@ -433,15 +433,13 @@ public final class FloatingToolbar {
 
             mHidden = false;
             mDismissed = false;
-            cancelAllAnimations();
+            cancelDismissAndHideAnimations();
+            cancelOverflowAnimations();
             // Make sure a panel is set as the content.
             if (mContentContainer.getChildCount() == 0) {
                 setMainPanelAsContent();
             }
             preparePopupContent();
-            // If we're yet to show the popup, set the container visibility to zero.
-            // The "show" animation will make this visible.
-            mContentContainer.setAlpha(0);
             mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, x, y);
             setTouchableSurfaceInsetsComputer();
             runShowAnimation();
@@ -451,12 +449,13 @@ public final class FloatingToolbar {
          * Gets rid of this popup. If the popup isn't currently showing, this will be a no-op.
          */
         public void dismiss() {
-            if (!isShowing()) {
+            if (mDismissed) {
                 return;
             }
 
             mHidden = false;
             mDismissed = true;
+            mHideAnimation.cancel();
             runDismissAnimation();
             setZeroTouchableSurface();
         }
@@ -499,7 +498,7 @@ public final class FloatingToolbar {
                 return;
             }
 
-            cancelAllAnimations();
+            cancelOverflowAnimations();
             preparePopupContent();
             mPopupWindow.update(x, y, getWidth(), getHeight());
         }
@@ -563,10 +562,12 @@ public final class FloatingToolbar {
             mHideAnimation.start();
         }
 
-        private void cancelAllAnimations() {
-            mShowAnimation.cancel();
+        private void cancelDismissAndHideAnimations() {
             mDismissAnimation.cancel();
             mHideAnimation.cancel();
+        }
+
+        private void cancelOverflowAnimations() {
             mOpenOverflowAnimation.cancel();
             mCloseOverflowAnimation.cancel();
         }
