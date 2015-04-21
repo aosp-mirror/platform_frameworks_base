@@ -823,7 +823,10 @@ class MountService extends IMountService.Stub
             case VoldResponseCode.DISK_CREATED: {
                 if (cooked.length != 3) break;
                 final String id = cooked[1];
-                final int flags = Integer.parseInt(cooked[2]);
+                int flags = Integer.parseInt(cooked[2]);
+                if (SystemProperties.getBoolean(StorageManager.PROP_FORCE_ADOPTABLE, false)) {
+                    flags |= DiskInfo.FLAG_ADOPTABLE;
+                }
                 mDisks.put(id, new DiskInfo(id, flags));
                 break;
             }

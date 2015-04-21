@@ -69,6 +69,8 @@ public class StorageManager {
 
     /** {@hide} */
     public static final String PROP_PRIMARY_PHYSICAL = "ro.vold.primary_physical";
+    /** {@hide} */
+    public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
 
     /** {@hide} */
     public static final int FLAG_ALL_METADATA = 1 << 0;
