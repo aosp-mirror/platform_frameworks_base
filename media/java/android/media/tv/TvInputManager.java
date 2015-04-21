@@ -76,13 +76,10 @@ public final class TvInputManager {
      */
     public static final int VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = VIDEO_UNAVAILABLE_REASON_END;
 
-    private static final int TIME_SHIFT_STATUS_START = 0;
-    private static final int TIME_SHIFT_STATUS_END = 3;
-
     /**
      * Status prior to calling {@link TvInputService.Session#notifyTimeShiftStatusChanged}.
      */
-    public static final int TIME_SHIFT_STATUS_UNKNOWN = TIME_SHIFT_STATUS_START;
+    public static final int TIME_SHIFT_STATUS_UNKNOWN = 0;
 
     /**
      * The TV input does not support time shifting.
@@ -99,44 +96,40 @@ public final class TvInputManager {
      * pause/resume playback, seek to a specified time position and set playback rate and audio
      * mode.
      */
-    public static final int TIME_SHIFT_STATUS_AVAILABLE = TIME_SHIFT_STATUS_END;
+    public static final int TIME_SHIFT_STATUS_AVAILABLE = 3;
 
     public static final long TIME_SHIFT_INVALID_TIME = Long.MIN_VALUE;
 
     /**
-     * The TV input is in unknown state.
-     * <p>
-     * State for denoting unknown TV input state. The typical use case is when a requested TV
-     * input is removed from the device or it is not registered. Used in
-     * {@code ITvInputManager.getTvInputState()}.
-     * </p>
-     * @hide
-     */
-    public static final int INPUT_STATE_UNKNOWN = -1;
-
-    /**
      * The TV input is connected.
-     * <p>
-     * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputCallback#onInputStateChanged}.
-     * </p>
+     *
+     * <p>This state indicates that a source device is connected to the input port and is in the
+     * normal operation mode. It is mostly relevant to hardware inputs such as HDMI input. This is
+     * the default state for any hardware inputs where their states are unknown. Non-hardware inputs
+     * are considered connected all the time.
+     *
+     * @see #getInputState
+     * @see TvInputManager.TvInputCallback#onInputStateChanged
      */
     public static final int INPUT_STATE_CONNECTED = 0;
     /**
-     * The TV input is connected but in standby mode. It would take a while until it becomes
-     * fully ready.
-     * <p>
-     * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputCallback#onInputStateChanged}.
-     * </p>
+     * The TV input is connected but in standby mode.
+     *
+     * <p>This state indicates that a source device is connected to the input port but is in standby
+     * mode. It is mostly relevant to hardware inputs such as HDMI input.
+     *
+     * @see #getInputState
+     * @see TvInputManager.TvInputCallback#onInputStateChanged
      */
     public static final int INPUT_STATE_CONNECTED_STANDBY = 1;
     /**
      * The TV input is disconnected.
-     * <p>
-     * State for {@link #getInputState} and {@link
-     * TvInputManager.TvInputCallback#onInputStateChanged}.
-     * </p>
+     *
+     * <p>This state indicates that a source device is disconnected from the input port. It is
+     * mostly relevant to hardware inputs such as HDMI input.
+     *
+     * @see #getInputState
+     * @see TvInputManager.TvInputCallback#onInputStateChanged
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
 
@@ -553,7 +546,7 @@ public final class TvInputManager {
     }
 
     /**
-     * Callback used to monitor status of the TV input.
+     * Callback used to monitor status of the TV inputs.
      */
     public abstract static class TvInputCallback {
         /**
@@ -571,7 +564,10 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when a TV input is added.
+         * This is called when a TV input is added to the system.
+         *
+         * <p>Normally it happens when the user installs a new TV input package that implements
+         * {@link TvInputService} interface.
          *
          * @param inputId The id of the TV input.
          */
@@ -579,7 +575,10 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when a TV input is removed.
+         * This is called when a TV input is removed from the system.
+         *
+         * <p>Normally it happens when the user uninstalls the previously installed TV input
+         * package.
          *
          * @param inputId The id of the TV input.
          */
@@ -587,9 +586,10 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when a TV input is updated. The update of TV input happens when it is
-         * reinstalled or the media on which the newer version of TV input exists is
-         * available/unavailable.
+         * This is called when a TV input is updated on the system.
+         *
+         * <p>Normally it happens when a previously installed TV input package is re-installed or
+         * the media on which a newer version of the package exists becomes available/unavailable.
          *
          * @param inputId The id of the TV input.
          * @hide
@@ -902,10 +902,7 @@ public final class TvInputManager {
                 synchronized (mLock) {
                     for (TvInputInfo info : infos) {
                         String inputId = info.getId();
-                        int state = mService.getTvInputState(inputId, mUserId);
-                        if (state != INPUT_STATE_UNKNOWN) {
-                            mStateMap.put(inputId, state);
-                        }
+                        mStateMap.put(inputId, mService.getTvInputState(inputId, mUserId));
                     }
                 }
             }
@@ -945,7 +942,9 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns the state of a given TV input. It returns one of the following:
+     * Returns the state of a given TV input.
+     *
+     * <p>The state is one of the following:
      * <ul>
      * <li>{@link #INPUT_STATE_CONNECTED}
      * <li>{@link #INPUT_STATE_CONNECTED_STANDBY}
@@ -953,8 +952,7 @@ public final class TvInputManager {
      * </ul>
      *
      * @param inputId The id of the TV input.
-     * @throws IllegalArgumentException if the argument is {@code null} or if there is no
-     *        {@link TvInputInfo} corresponding to {@code inputId}.
+     * @throws IllegalArgumentException if the argument is {@code null}.
      */
     public int getInputState(String inputId) {
         if (inputId == null) {
@@ -963,7 +961,8 @@ public final class TvInputManager {
         synchronized (mLock) {
             Integer state = mStateMap.get(inputId);
             if (state == null) {
-                throw new IllegalArgumentException("Unrecognized input ID: " + inputId);
+                Log.w(TAG, "Unrecognized input ID: " + inputId);
+                return INPUT_STATE_DISCONNECTED;
             }
             return state.intValue();
         }
