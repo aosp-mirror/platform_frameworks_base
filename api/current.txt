@@ -30776,6 +30776,11 @@ package android.telephony {
     method public abstract int getDbm();
     method public abstract int getLevel();
     method public abstract int hashCode();
+    field public static final int SIGNAL_STRENGTH_GOOD = 3; // 0x3
+    field public static final int SIGNAL_STRENGTH_GREAT = 4; // 0x4
+    field public static final int SIGNAL_STRENGTH_MODERATE = 2; // 0x2
+    field public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0; // 0x0
+    field public static final int SIGNAL_STRENGTH_POOR = 1; // 0x1
   }
 
   public final class CellSignalStrengthCdma extends android.telephony.CellSignalStrength implements android.os.Parcelable {
