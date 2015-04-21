@@ -722,7 +722,7 @@ public class WifiScanner {
     /* private members and methods */
 
     private static final String TAG = "WifiScanner";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     /* commands for Wifi Service */
     private static final int BASE = Protocol.BASE_WIFI_SCANNER;
