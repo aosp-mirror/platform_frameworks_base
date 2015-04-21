@@ -68,6 +68,9 @@ public class DiskInfo implements Parcelable {
         if (TextUtils.isEmpty(label)) {
             return false;
         }
+        if (label.equalsIgnoreCase("ata")) {
+            return false;
+        }
         if (label.toLowerCase().contains("generic")) {
             return false;
         }
