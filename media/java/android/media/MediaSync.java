@@ -49,7 +49,7 @@ import java.util.List;
  *     public void onReturnAudioBuffer(MediaSync sync, ByteBuffer audioBuffer, int bufferIndex) {
  *         ...
  *     }
- * });
+ * }, null);
  * // This needs to be done since sync is paused on creation.
  * sync.setPlaybackRate(1.0f, MediaSync.PLAYBACK_RATE_AUDIO_MODE_RESAMPLE);
  *
