@@ -30,6 +30,7 @@ public class MetricsLogger implements MetricsConstants {
 
     public static final int NOTIFICATION_ZEN_MODE_SCHEDULE_RULE = 144;
     public static final int NOTIFICATION_ZEN_MODE_EXTERNAL_RULE = 145;
+    public static final int ACTION_BAN_APP_NOTES = 146;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
@@ -46,10 +47,14 @@ public class MetricsLogger implements MetricsConstants {
     }
 
     public static void action(Context context, int category) {
+        action(context, category, "");
+    }
+
+    public static void action(Context context, int category, String pkg) {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");
         }
-        EventLogTags.writeSysuiAction(category);
+        EventLogTags.writeSysuiAction(category, pkg);
     }
 
     /** Add an integer value to the monotonically increasing counter with the given name. */
