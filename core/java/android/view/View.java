@@ -15283,9 +15283,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         RenderNode renderNode = null;
         Bitmap cache = null;
-        int layerType = getLayerType();
+        int layerType = getLayerType(); // TODO: signify cache state with just 'cache' local
         if (layerType == LAYER_TYPE_SOFTWARE
                 || (!drawingWithRenderNode && layerType != LAYER_TYPE_NONE)) {
+            // If not drawing with RenderNode, treat HW layers as SW
             layerType = LAYER_TYPE_SOFTWARE;
             buildDrawingCache(true);
             cache = getDrawingCache(true);
@@ -15312,10 +15313,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sy = mScrollY;
         }
 
-        final boolean hasNoCache = cache == null || drawingWithRenderNode;
-        final boolean offsetForScroll = cache == null
-                && !drawingWithRenderNode
-                && layerType != LAYER_TYPE_HARDWARE;
+        final boolean drawingWithDrawingCache = cache != null && !drawingWithRenderNode;
+        final boolean offsetForScroll = cache == null && !drawingWithRenderNode;
 
         int restoreTo = -1;
         if (!drawingWithRenderNode || transformToApply != null) {
@@ -15388,17 +15387,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mPrivateFlags3 &= ~PFLAG3_VIEW_IS_ANIMATING_ALPHA;
                 }
                 parent.mGroupFlags |= ViewGroup.FLAG_CLEAR_TRANSFORMATION;
-                if (hasNoCache) {
+                if (!drawingWithDrawingCache) {
                     final int multipliedAlpha = (int) (255 * alpha);
                     if (!onSetAlpha(multipliedAlpha)) {
-                        int layerFlags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
-                        if ((parentFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0
-                                || layerType != LAYER_TYPE_NONE) {
-                            layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
-                        }
                         if (drawingWithRenderNode) {
                             renderNode.setAlpha(alpha * getAlpha() * getTransitionAlpha());
                         } else if (layerType == LAYER_TYPE_NONE) {
+                            int layerFlags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
+                            if ((parentFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0) {
+                                layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
+                            }
                             canvas.saveLayerAlpha(sx, sy, sx + getWidth(), sy + getHeight(),
                                     multipliedAlpha, layerFlags);
                         }
@@ -15433,33 +15431,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        if (hasNoCache) {
-            boolean layerRendered = false;
-            if (layerType == LAYER_TYPE_HARDWARE && !drawingWithRenderNode) {
-                final HardwareLayer layer = getHardwareLayer();
-                if (layer != null && layer.isValid()) {
-                    int restoreAlpha = mLayerPaint.getAlpha();
-                    mLayerPaint.setAlpha((int) (alpha * 255));
-                    ((DisplayListCanvas) canvas).drawHardwareLayer(layer, 0, 0, mLayerPaint);
-                    mLayerPaint.setAlpha(restoreAlpha);
-                    layerRendered = true;
-                } else {
-                    canvas.saveLayer(sx, sy, sx + getWidth(), sy + getHeight(), mLayerPaint);
-                }
-            }
-
-            if (!layerRendered) {
-                if (!drawingWithRenderNode) {
-                    // Fast path for layouts with no backgrounds
-                    if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
-                        mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                        dispatchDraw(canvas);
-                    } else {
-                        draw(canvas);
-                    }
-                } else {
+        if (!drawingWithDrawingCache) {
+            if (drawingWithRenderNode) {
+                mPrivateFlags &= ~PFLAG_DIRTY_MASK;
+                ((DisplayListCanvas) canvas).drawRenderNode(renderNode, parentFlags);
+            } else {
+                // Fast path for layouts with no backgrounds
+                if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                    ((DisplayListCanvas) canvas).drawRenderNode(renderNode, parentFlags);
+                    dispatchDraw(canvas);
+                } else {
+                    draw(canvas);
                 }
             }
         } else if (cache != null) {
