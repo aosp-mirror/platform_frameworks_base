@@ -37,7 +37,7 @@ LOCAL_SRC_FILES := \
     DeferredDisplayList.cpp \
     DeferredLayerUpdater.cpp \
     DisplayList.cpp \
-    DisplayListRenderer.cpp \
+    DisplayListCanvas.cpp \
     Dither.cpp \
     DrawProfiler.cpp \
     Extensions.cpp \

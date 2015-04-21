@@ -62,12 +62,13 @@ public:
  * Renderer interface. Drawing and recording classes that include a CanvasState will have
  * different use cases:
  *
- * Drawing subclasses (i.e. OpenGLRenderer) can query attributes (such as transform) or hook into
- * changes (e.g. save/restore) with minimal surface area for manipulating the stack itself.
+ * Drawing code maintaining canvas state (i.e. OpenGLRenderer) can query attributes (such as
+ * transform) or hook into changes (e.g. save/restore) with minimal surface area for manipulating
+ * the stack itself.
  *
- * Recording subclasses (i.e. DisplayListRenderer) can both record and pass through state operations
- * to CanvasState, so that not only will querying operations work (getClip/Matrix), but so
- * that quickRejection can also be used.
+ * Recording code maintaining canvas state (i.e. DisplayListCanvas) can both record and pass
+ * through state operations to CanvasState, so that not only will querying operations work
+ * (getClip/Matrix), but so that quickRejection can also be used.
  */
 
 class ANDROID_API CanvasState {

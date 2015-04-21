@@ -29,7 +29,7 @@
 #include <SkBitmap.h>
 #include <SkRegion.h>
 
-#include <DisplayListRenderer.h>
+#include <DisplayListCanvas.h>
 #include <Rect.h>
 #include <RenderNode.h>
 #include <CanvasProperty.h>
@@ -52,37 +52,37 @@ static struct {
 
 static void android_view_DisplayListCanvas_setViewport(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jint width, jint height) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     renderer->setViewport(width, height);
 }
 
 static void android_view_DisplayListCanvas_setHighContrastText(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jboolean highContrastText) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     renderer->setHighContrastText(highContrastText);
 }
 
 static void android_view_DisplayListCanvas_insertReorderBarrier(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jboolean reorderEnable) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     renderer->insertReorderBarrier(reorderEnable);
 }
 
 static void android_view_DisplayListCanvas_prepare(JNIEnv* env, jobject clazz,
         jlong rendererPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     renderer->prepare();
 }
 
 static void android_view_DisplayListCanvas_prepareDirty(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jint left, jint top, jint right, jint bottom) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     renderer->prepareDirty(left, top, right, bottom);
 }
 
 static void android_view_DisplayListCanvas_finish(JNIEnv* env, jobject clazz,
         jlong rendererPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     renderer->finish();
 }
 
@@ -110,7 +110,7 @@ static void android_view_DisplayListCanvas_setProperty(JNIEnv* env,
 
 static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong functorPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
     android::uirenderer::Rect dirty;
     renderer->callDrawGLFunction(functor, dirty);
@@ -137,7 +137,7 @@ static void android_view_DisplayListCanvas_drawPatch(JNIEnv* env, jobject clazz,
         float left, float top, float right, float bottom, jlong paintPtr) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
 
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(patchPtr);
     Paint* paint = reinterpret_cast<Paint*>(paintPtr);
     renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
@@ -146,7 +146,7 @@ static void android_view_DisplayListCanvas_drawPatch(JNIEnv* env, jobject clazz,
 static void android_view_DisplayListCanvas_drawRoundRectProps(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong leftPropPtr, jlong topPropPtr, jlong rightPropPtr,
         jlong bottomPropPtr, jlong rxPropPtr, jlong ryPropPtr, jlong paintPropPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     CanvasPropertyPrimitive* leftProp = reinterpret_cast<CanvasPropertyPrimitive*>(leftPropPtr);
     CanvasPropertyPrimitive* topProp = reinterpret_cast<CanvasPropertyPrimitive*>(topPropPtr);
     CanvasPropertyPrimitive* rightProp = reinterpret_cast<CanvasPropertyPrimitive*>(rightPropPtr);
@@ -159,7 +159,7 @@ static void android_view_DisplayListCanvas_drawRoundRectProps(JNIEnv* env, jobje
 
 static void android_view_DisplayListCanvas_drawCircleProps(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong xPropPtr, jlong yPropPtr, jlong radiusPropPtr, jlong paintPropPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
     CanvasPropertyPrimitive* yProp = reinterpret_cast<CanvasPropertyPrimitive*>(yPropPtr);
     CanvasPropertyPrimitive* radiusProp = reinterpret_cast<CanvasPropertyPrimitive*>(radiusPropPtr);
@@ -169,7 +169,7 @@ static void android_view_DisplayListCanvas_drawCircleProps(JNIEnv* env, jobject 
 
 static void android_view_DisplayListCanvas_drawRegionAsRects(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong regionPtr, jlong paintPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     SkRegion* region = reinterpret_cast<SkRegion*>(regionPtr);
     Paint* paint = reinterpret_cast<Paint*>(paintPtr);
     if (paint->getStyle() != Paint::kFill_Style ||
@@ -203,18 +203,18 @@ static void android_view_DisplayListCanvas_drawRegionAsRects(JNIEnv* env, jobjec
 
 static jlong android_view_DisplayListCanvas_finishRecording(JNIEnv* env,
         jobject clazz, jlong rendererPtr) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     return reinterpret_cast<jlong>(renderer->finishRecording());
 }
 
-static jlong android_view_DisplayListCanvas_createDisplayListRenderer(JNIEnv* env, jobject clazz) {
-    return reinterpret_cast<jlong>(new DisplayListRenderer);
+static jlong android_view_DisplayListCanvas_createDisplayListCanvas(JNIEnv* env, jobject clazz) {
+    return reinterpret_cast<jlong>(new DisplayListCanvas);
 }
 
 static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
         jobject clazz, jlong rendererPtr, jlong renderNodePtr,
         jint flags) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     android::uirenderer::Rect bounds;
     renderer->drawRenderNode(renderNode, bounds, flags);
@@ -226,7 +226,7 @@ static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
 
 static void android_view_DisplayListCanvas_drawLayer(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong layerPtr, jfloat x, jfloat y) {
-    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
     renderer->drawLayer(layer, x, y);
 }
@@ -285,7 +285,7 @@ static JNINativeMethod gMethods[] = {
     { "nFinishRecording",   "(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
     { "nDrawRenderNode",    "(JJI)V",          (void*) android_view_DisplayListCanvas_drawRenderNode },
 
-    { "nCreateDisplayListRenderer", "()J",     (void*) android_view_DisplayListCanvas_createDisplayListRenderer },
+    { "nCreateDisplayListCanvas", "()J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
 
     { "nDrawLayer",               "(JJFF)V",   (void*) android_view_DisplayListCanvas_drawLayer },
 

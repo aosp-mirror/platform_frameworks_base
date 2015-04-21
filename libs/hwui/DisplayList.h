@@ -53,7 +53,7 @@ namespace uirenderer {
 
 class DeferredDisplayList;
 class DisplayListOp;
-class DisplayListRenderer;
+class DisplayListCanvas;
 class OpenGLRenderer;
 class Rect;
 class Layer;
@@ -109,7 +109,7 @@ struct ReplayStateStruct : public PlaybackStateStruct {
  * Data structure that holds the list of commands used in display list stream
  */
 class DisplayListData {
-    friend class DisplayListRenderer;
+    friend class DisplayListCanvas;
 public:
     struct Chunk {
         // range of included ops in DLD::displayListOps

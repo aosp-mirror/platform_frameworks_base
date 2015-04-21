@@ -48,7 +48,6 @@
 #include <ScopedUtfChars.h>
 
 #include <AnimationContext.h>
-#include <DisplayListRenderer.h>
 #include <FrameInfo.h>
 #include <RenderNode.h>
 #include <renderthread/RenderProxy.h>

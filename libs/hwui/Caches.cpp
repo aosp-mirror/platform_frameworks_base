@@ -18,7 +18,6 @@
 
 #include "Caches.h"
 
-#include "DisplayListRenderer.h"
 #include "GammaFontRenderer.h"
 #include "LayerRenderer.h"
 #include "Properties.h"

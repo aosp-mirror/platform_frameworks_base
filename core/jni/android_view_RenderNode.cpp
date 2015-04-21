@@ -24,7 +24,6 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include <Animator.h>
-#include <DisplayListRenderer.h>
 #include <RenderNode.h>
 #include <Paint.h>
 
