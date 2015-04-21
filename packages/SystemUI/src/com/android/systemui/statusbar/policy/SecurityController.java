@@ -22,10 +22,6 @@ public interface SecurityController {
     String getDeviceOwnerName();
     String getProfileOwnerName();
     boolean isVpnEnabled();
-    String getVpnApp();
-    boolean isLegacyVpn();
-    String getLegacyVpnName();
-    void disconnectFromVpn();
     void onUserSwitched(int newUserId);
 
     void addCallback(SecurityControllerCallback callback);
