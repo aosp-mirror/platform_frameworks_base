@@ -41,7 +41,8 @@ public class DhcpPacketTest extends TestCase {
         private byte[] mDomainBytes, mVendorInfoBytes;
 
         public TestDhcpPacket(byte type, byte[] domainBytes, byte[] vendorInfoBytes) {
-            super(0xdeadbeef, INADDR_ANY, CLIENT_ADDR, INADDR_ANY, INADDR_ANY, CLIENT_MAC, true);
+            super(0xdeadbeef, (short) 0, INADDR_ANY, CLIENT_ADDR, INADDR_ANY, INADDR_ANY,
+                  CLIENT_MAC, true);
             mType = type;
             mDomainBytes = domainBytes;
             mVendorInfoBytes = vendorInfoBytes;

@@ -226,6 +226,11 @@ abstract class DhcpPacket {
     protected final int mTransId;
 
     /**
+     * The seconds field in the BOOTP header. Per RFC, should be nonzero in client requests only.
+     */
+    protected final short mSecs;
+
+    /**
      * The IP address of the client host.  This address is typically
      * proposed by the client (from an earlier DHCP negotiation) or
      * supplied by the server.
@@ -258,10 +263,11 @@ abstract class DhcpPacket {
      */
     abstract void finishPacket(ByteBuffer buffer);
 
-    protected DhcpPacket(int transId, Inet4Address clientIp, Inet4Address yourIp,
+    protected DhcpPacket(int transId, short secs, Inet4Address clientIp, Inet4Address yourIp,
                          Inet4Address nextIp, Inet4Address relayIp,
                          byte[] clientMac, boolean broadcast) {
         mTransId = transId;
+        mSecs = secs;
         mClientIp = clientIp;
         mYourIp = yourIp;
         mNextIp = nextIp;
@@ -347,7 +353,7 @@ abstract class DhcpPacket {
         buf.put((byte) mClientMac.length); // Hardware Address Length
         buf.put((byte) 0); // Hop Count
         buf.putInt(mTransId);  // Transaction ID
-        buf.putShort((short) 0); // Elapsed Seconds
+        buf.putShort(mSecs); // Elapsed Seconds
 
         if (broadcast) {
             buf.putShort((short) 0x8000); // Flags
@@ -642,6 +648,7 @@ abstract class DhcpPacket {
     {
         // bootp parameters
         int transactionId;
+        short secs;
         Inet4Address clientIp;
         Inet4Address yourIp;
         Inet4Address nextIp;
@@ -749,7 +756,7 @@ abstract class DhcpPacket {
         byte addrLen = packet.get();
         byte hops = packet.get();
         transactionId = packet.getInt();
-        short elapsed = packet.getShort();
+        secs = packet.getShort();
         short bootpFlags = packet.getShort();
         boolean broadcast = (bootpFlags & 0x8000) != 0;
         byte[] ipv4addr = new byte[4];
@@ -892,33 +899,33 @@ abstract class DhcpPacket {
             case -1: return null;
             case DHCP_MESSAGE_TYPE_DISCOVER:
                 newPacket = new DhcpDiscoverPacket(
-                    transactionId, clientMac, broadcast);
+                    transactionId, secs, clientMac, broadcast);
                 break;
             case DHCP_MESSAGE_TYPE_OFFER:
                 newPacket = new DhcpOfferPacket(
-                    transactionId, broadcast, ipSrc, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_REQUEST:
                 newPacket = new DhcpRequestPacket(
-                    transactionId, clientIp, clientMac, broadcast);
+                    transactionId, secs, clientIp, clientMac, broadcast);
                 break;
             case DHCP_MESSAGE_TYPE_DECLINE:
                 newPacket = new DhcpDeclinePacket(
-                    transactionId, clientIp, yourIp, nextIp, relayIp,
+                    transactionId, secs, clientIp, yourIp, nextIp, relayIp,
                     clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_ACK:
                 newPacket = new DhcpAckPacket(
-                    transactionId, broadcast, ipSrc, yourIp, clientMac);
+                    transactionId, secs, broadcast, ipSrc, yourIp, clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_NAK:
                 newPacket = new DhcpNakPacket(
-                    transactionId, clientIp, yourIp, nextIp, relayIp,
+                    transactionId, secs, clientIp, yourIp, nextIp, relayIp,
                     clientMac);
                 break;
             case DHCP_MESSAGE_TYPE_INFORM:
                 newPacket = new DhcpInformPacket(
-                    transactionId, clientIp, yourIp, nextIp, relayIp,
+                    transactionId, secs, clientIp, yourIp, nextIp, relayIp,
                     clientMac);
                 break;
             default:
@@ -998,9 +1005,9 @@ abstract class DhcpPacket {
      * parameters.
      */
     public static ByteBuffer buildDiscoverPacket(int encap, int transactionId,
-        byte[] clientMac, boolean broadcast, byte[] expectedParams) {
+        short secs, byte[] clientMac, boolean broadcast, byte[] expectedParams) {
         DhcpPacket pkt = new DhcpDiscoverPacket(
-            transactionId, clientMac, broadcast);
+            transactionId, secs, clientMac, broadcast);
         pkt.mRequestedParams = expectedParams;
         return pkt.buildPacket(encap, DHCP_SERVER, DHCP_CLIENT);
     }
@@ -1015,7 +1022,7 @@ abstract class DhcpPacket {
         Inet4Address gateway, List<Inet4Address> dnsServers,
         Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpOfferPacket(
-            transactionId, broadcast, serverIpAddr, clientIpAddr, mac);
+            transactionId, (short) 0, broadcast, serverIpAddr, clientIpAddr, mac);
         pkt.mGateway = gateway;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
@@ -1035,7 +1042,7 @@ abstract class DhcpPacket {
         Inet4Address gateway, List<Inet4Address> dnsServers,
         Inet4Address dhcpServerIdentifier, String domainName) {
         DhcpPacket pkt = new DhcpAckPacket(
-            transactionId, broadcast, serverIpAddr, clientIpAddr, mac);
+            transactionId, (short) 0, broadcast, serverIpAddr, clientIpAddr, mac);
         pkt.mGateway = gateway;
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
@@ -1051,7 +1058,7 @@ abstract class DhcpPacket {
      */
     public static ByteBuffer buildNakPacket(int encap, int transactionId,
         Inet4Address serverIpAddr, Inet4Address clientIpAddr, byte[] mac) {
-        DhcpPacket pkt = new DhcpNakPacket(transactionId, clientIpAddr,
+        DhcpPacket pkt = new DhcpNakPacket(transactionId, (short) 0, clientIpAddr,
             serverIpAddr, serverIpAddr, serverIpAddr, mac);
         pkt.mMessage = "requested address not available";
         pkt.mRequestedIp = clientIpAddr;
@@ -1062,10 +1069,10 @@ abstract class DhcpPacket {
      * Builds a DHCP-REQUEST packet from the required specified parameters.
      */
     public static ByteBuffer buildRequestPacket(int encap,
-        int transactionId, Inet4Address clientIp, boolean broadcast,
+        int transactionId, short secs, Inet4Address clientIp, boolean broadcast,
         byte[] clientMac, Inet4Address requestedIpAddress,
         Inet4Address serverIdentifier, byte[] requestedParams, String hostName) {
-        DhcpPacket pkt = new DhcpRequestPacket(transactionId, clientIp,
+        DhcpPacket pkt = new DhcpRequestPacket(transactionId, secs, clientIp,
             clientMac, broadcast);
         pkt.mRequestedIp = requestedIpAddress;
         pkt.mServerIdentifier = serverIdentifier;
