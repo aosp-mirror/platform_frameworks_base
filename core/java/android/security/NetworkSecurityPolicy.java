@@ -46,9 +46,9 @@ public class NetworkSecurityPolicy {
      * without TLS or STARTTLS) is permitted for this process.
      *
      * <p>When cleartext network traffic is not permitted, the platform's components (e.g. HTTP and
-     * FTP stacks, {@link android.webkit.WebView}, {@link android.app.DownloadManager},
-     * {@link android.media.MediaPlayer}) will refuse this process's requests to use cleartext
-     * traffic. Third-party libraries are strongly encouraged to honor this setting as well.
+     * FTP stacks, {@link android.app.DownloadManager}, {@link android.media.MediaPlayer}) will
+     * refuse this process's requests to use cleartext traffic. Third-party libraries are strongly
+     * encouraged to honor this setting as well.
      *
      * <p>This flag is honored on a best effort basis because it's impossible to prevent all
      * cleartext traffic from Android applications given the level of access provided to them. For
@@ -56,6 +56,8 @@ public class NetworkSecurityPolicy {
      * because it cannot determine whether its traffic is in cleartext. However, most network
      * traffic from applications is handled by higher-level network stacks/components which can
      * honor this aspect of the policy.
+     *
+     * <p>NOTE: {@link android.webkit.WebView} does not honor this flag.
      */
     public boolean isCleartextTrafficPermitted() {
         return libcore.net.NetworkSecurityPolicy.isCleartextTrafficPermitted();

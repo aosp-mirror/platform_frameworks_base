@@ -393,8 +393,9 @@
          WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or TLS.
          Defaults to true. If set to false {@code false}, the application declares that it does not
          intend to use cleartext network traffic, in which case platform components (e.g. HTTP
-         stacks, {@code WebView}, {@code MediaPlayer}) will refuse applications's requests to use
-         cleartext traffic. Third-party libraries are encouraged to honor this flag as well. -->
+         stacks, {@code DownloadManager}, {@code MediaPlayer}) will refuse applications's requests
+         to use cleartext traffic. Third-party libraries are encouraged to honor this flag as well.
+         -->
     <attr name="usesCleartextTraffic" format="boolean" />
 
     <!-- Declare that code from this application will need to be loaded into other
@@ -1228,9 +1229,9 @@
              HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or
              TLS). Defaults to true. If set to false {@code false}, the application declares that it
              does not intend to use cleartext network traffic, in which case platform components
-             (e.g. HTTP stacks, {@code WebView}, {@code MediaPlayer}) will refuse applications's
-             requests to use cleartext traffic. Third-party libraries are encouraged to honor this
-             flag as well. -->
+             (e.g. HTTP stacks, {@code DownloadManager}, {@code MediaPlayer}) will refuse
+             applications's requests to use cleartext traffic. Third-party libraries are encouraged
+             to honor this flag as well. -->
         <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
         <attr name="extractNativeLibs" />
