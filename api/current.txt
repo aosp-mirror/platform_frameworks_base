@@ -5801,6 +5801,7 @@ package android.app.admin {
     field public static final java.lang.String ACTION_SET_NEW_PASSWORD = "android.app.action.SET_NEW_PASSWORD";
     field public static final java.lang.String ACTION_START_ENCRYPTION = "android.app.action.START_ENCRYPTION";
     field public static final java.lang.String ACTION_SYSTEM_UPDATE_POLICY_CHANGED = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
+    field public static final int DO_NOT_ASK_CREDENTIALS_ON_BOOT = 2; // 0x2
     field public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
     field public static final int ENCRYPTION_STATUS_ACTIVE = 3; // 0x3
     field public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4; // 0x4
