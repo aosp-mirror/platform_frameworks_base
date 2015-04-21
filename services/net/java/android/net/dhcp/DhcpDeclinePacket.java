@@ -26,10 +26,10 @@ class DhcpDeclinePacket extends DhcpPacket {
     /**
      * Generates a DECLINE packet with the specified parameters.
      */
-    DhcpDeclinePacket(int transId, Inet4Address clientIp, Inet4Address yourIp,
+    DhcpDeclinePacket(int transId, short secs, Inet4Address clientIp, Inet4Address yourIp,
                       Inet4Address nextIp, Inet4Address relayIp,
                       byte[] clientMac) {
-        super(transId, clientIp, yourIp, nextIp, relayIp, clientMac, false);
+        super(transId, secs, clientIp, yourIp, nextIp, relayIp, clientMac, false);
     }
 
     public String toString() {
