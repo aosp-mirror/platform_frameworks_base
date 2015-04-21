@@ -19504,8 +19504,6 @@ package android.net.wifi {
     field public java.util.BitSet allowedKeyManagement;
     field public java.util.BitSet allowedPairwiseCiphers;
     field public java.util.BitSet allowedProtocols;
-    field public int apBand;
-    field public int apChannel;
     field public int creatorUid;
     field public android.net.wifi.WifiEnterpriseConfig enterpriseConfig;
     field public boolean hiddenSSID;
