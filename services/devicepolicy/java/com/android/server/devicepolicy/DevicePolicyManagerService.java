@@ -5626,7 +5626,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (packages != null) {
                 for (int j = 0; j < packages.length; j++) {
                     String pkg = packages[j];
-                    policy.mLockTaskPackages.add(pkg);
+                    if (pkg != null) {
+                        policy.mLockTaskPackages.add(pkg);
+                    }
                 }
             }
 
