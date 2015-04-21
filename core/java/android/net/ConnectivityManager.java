@@ -2441,17 +2441,19 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request connectivityservice to refresh network capabilities for the given
-     * {@link network}. This method returns true if the network is still active, false
-     * otherwise. Notice the method call assumes the caller has registered for
-     * listening NetworkCapabilities updates.
+     * Requests bandwidth update for a given {@link Network} and returns whether the update request
+     * is accepted by ConnectivityService. Once accepted, ConnectivityService will poll underlying
+     * network connection for updated bandwidth information. The caller will be notified via
+     * {@link ConnectivityManager.NetworkCallback} if there is an update. Notice that this
+     * method assumes that the caller has previously called {@link #registerNetworkCallback} to
+     * listen for network changes.
      *
      * @param network{@link Network} specifying which network you're interested.
-     * @hide
+     * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
      */
-    public boolean requestBwUpdate(Network network) {
+    public boolean requestBandwidthUpdate(Network network) {
         try {
-            return mService.requestBwUpdate(network);
+            return mService.requestBandwidthUpdate(network);
         } catch (RemoteException e) {
             return false;
         }
