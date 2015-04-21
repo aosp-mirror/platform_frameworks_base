@@ -283,7 +283,7 @@ public final class Parcel {
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
-    private static native long nativeGetAshmemSize(long nativePtr);
+    private static native long nativeGetBlobAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
              = new Parcelable.Creator<String>() {

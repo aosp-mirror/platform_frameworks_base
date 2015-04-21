@@ -766,7 +766,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"getGlobalAllocSize",        "()J", (void*)android_os_Parcel_getGlobalAllocSize},
     {"getGlobalAllocCount",       "()J", (void*)android_os_Parcel_getGlobalAllocCount},
 
-    {"nativeGetAshmemSize",       "(J)J", (void*)android_os_Parcel_getAshmemSize},
+    {"nativeGetBlobAshmemSize",       "(J)J", (void*)android_os_Parcel_getBlobAshmemSize},
 };
 
 const char* const kParcelPathName = "android/os/Parcel";
