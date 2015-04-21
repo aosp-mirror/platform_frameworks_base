@@ -541,8 +541,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.StackView">
-        <item name="resOutColor">@color/holo_blue_light</item>
-        <item name="clickColor">@color/holo_blue_light</item>
+        <item name="resOutColor">?attr/colorPrimary</item>
+        <item name="clickColor">?attr/colorPrimary</item>
     </style>
 
     <style name="Widget.Material.TextView" parent="Widget.TextView"/>
