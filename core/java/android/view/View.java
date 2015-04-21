@@ -15101,6 +15101,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return (mClipBounds != null) ? new Rect(mClipBounds) : null;
     }
 
+
+    /**
+     * Populates an output rectangle with the clip bounds of the view,
+     * returning {@code true} if successful or {@code false} if the view's
+     * clip bounds are {@code null}.
+     *
+     * @param outRect rectangle in which to place the clip bounds of the view
+     * @return {@code true} if successful or {@code false} if the view's
+     *         clip bounds are {@code null}
+     */
+    public boolean getClipBounds(Rect outRect) {
+        if (mClipBounds != null) {
+            outRect.set(mClipBounds);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Utility function, called by draw(canvas, parent, drawingTime) to handle the less common
      * case of an active Animation being run on the view.

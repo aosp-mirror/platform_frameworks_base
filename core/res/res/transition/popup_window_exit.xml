@@ -13,5 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
+<!-- Fade out moderately fast. -->
 <fade xmlns:android="http://schemas.android.com/apk/res/android"
-      android:interpolator="@android:interpolator/linear" />
+      android:duration="300" />
