@@ -17,34 +17,45 @@
 package com.android.documentsui;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.database.MatrixCursor;
 import android.graphics.Point;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
-import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
+import android.util.Log;
 
-import java.io.FileInputStream;
+import com.google.android.collect.Maps;
+
+import libcore.io.IoUtils;
+
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 public class StubProvider extends DocumentsProvider {
-    private static int STORAGE_SIZE = 1024 * 1024;  // 1 MB.
+    private static final String EXTRA_SIZE = "com.android.documentsui.stubprovider.SIZE";
+    private static final String EXTRA_ROOT = "com.android.documentsui.stubprovider.ROOT";
+    private static final String STORAGE_SIZE_KEY = "documentsui.stubprovider.size";
+    private static int DEFAULT_SIZE = 1024 * 1024; // 1 MB.
     private static final String TAG = "StubProvider";
-    private static final String MY_ROOT_ID = "myRoot";
-
+    private static final String MY_ROOT_ID = "sd0";
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_TITLE, Root.COLUMN_DOCUMENT_ID,
             Root.COLUMN_AVAILABLE_BYTES
@@ -54,11 +65,11 @@ public class StubProvider extends DocumentsProvider {
             Document.COLUMN_LAST_MODIFIED, Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
     };
 
-    private String mRootDocumentId;
     private HashMap<String, StubDocument> mStorage = new HashMap<String, StubDocument>();
-    private int mStorageUsedBytes;
     private Object mWriteLock = new Object();
     private String mAuthority;
+    private SharedPreferences mPrefs;
+    private Map<String, RootInfo> mRoots;
 
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
@@ -68,29 +79,61 @@ public class StubProvider extends DocumentsProvider {
 
     @Override
     public boolean onCreate() {
+        clearCacheAndBuildRoots();
+        return true;
+    }
+
+    private void clearCacheAndBuildRoots() {
         final File cacheDir = getContext().getCacheDir();
         removeRecursively(cacheDir);
-        final StubDocument document = new StubDocument(cacheDir, Document.MIME_TYPE_DIR, null);
-        mRootDocumentId = document.documentId;
-        mStorage.put(mRootDocumentId, document);
-        return true;
+        mStorage.clear();
+
+        mPrefs = getContext().getSharedPreferences(
+                "com.android.documentsui.stubprovider.preferences", Context.MODE_PRIVATE);
+        Collection<String> rootIds = mPrefs.getStringSet("roots", null);
+        if (rootIds == null) {
+            rootIds = Arrays.asList(new String[] {
+                    "sd0", "sd1"
+            });
+        }
+        // Create new roots.
+        mRoots = Maps.newHashMap();
+        for (String rootId : rootIds) {
+            final RootInfo rootInfo = new RootInfo(rootId, getSize(rootId));
+            mRoots.put(rootId, rootInfo);
+        }
+    }
+
+    /**
+     * @return Storage size, in bytes.
+     */
+    private long getSize(String rootId) {
+        final String key = STORAGE_SIZE_KEY + "." + rootId;
+        return mPrefs.getLong(key, DEFAULT_SIZE);
     }
 
     @Override
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
-        final MatrixCursor result = new MatrixCursor(projection != null ? projection : DEFAULT_ROOT_PROJECTION);
-        final RowBuilder row = result.newRow();
-        row.add(Root.COLUMN_ROOT_ID, MY_ROOT_ID);
-        row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_IS_CHILD);
-        row.add(Root.COLUMN_TITLE, "Foobar SD 4GB");
-        row.add(Root.COLUMN_DOCUMENT_ID, mRootDocumentId);
-        row.add(Root.COLUMN_AVAILABLE_BYTES, STORAGE_SIZE - mStorageUsedBytes);
+        final MatrixCursor result = new MatrixCursor(projection != null ? projection
+                : DEFAULT_ROOT_PROJECTION);
+        for (Map.Entry<String, RootInfo> entry : mRoots.entrySet()) {
+            final String id = entry.getKey();
+            final RootInfo info = entry.getValue();
+            final RowBuilder row = result.newRow();
+            row.add(Root.COLUMN_ROOT_ID, id);
+            row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_IS_CHILD);
+            row.add(Root.COLUMN_TITLE, id);
+            row.add(Root.COLUMN_DOCUMENT_ID, info.rootDocument.documentId);
+            row.add(Root.COLUMN_AVAILABLE_BYTES, info.getRemainingCapacity());
+        }
         return result;
     }
 
     @Override
-    public Cursor queryDocument(String documentId, String[] projection) throws FileNotFoundException {
-        final MatrixCursor result = new MatrixCursor(projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION);
+    public Cursor queryDocument(String documentId, String[] projection)
+            throws FileNotFoundException {
+        final MatrixCursor result = new MatrixCursor(projection != null ? projection
+                : DEFAULT_DOCUMENT_PROJECTION);
         final StubDocument file = mStorage.get(documentId);
         if (file == null) {
             throw new FileNotFoundException();
@@ -123,14 +166,12 @@ public class StubProvider extends DocumentsProvider {
                 if (!file.createNewFile()) {
                     throw new FileNotFoundException();
                 }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new FileNotFoundException();
             }
         }
 
         final StubDocument document = new StubDocument(file, mimeType, parentDocument);
-        mStorage.put(document.documentId, document);
         notifyParentChanged(document.parentId);
         return document.documentId;
     }
@@ -143,7 +184,7 @@ public class StubProvider extends DocumentsProvider {
         if (document == null || !document.file.delete())
             throw new FileNotFoundException();
         synchronized (mWriteLock) {
-            mStorageUsedBytes -= fileSize;
+            document.rootInfo.size -= fileSize;
         }
         notifyParentChanged(document.parentId);
     }
@@ -155,12 +196,13 @@ public class StubProvider extends DocumentsProvider {
         if (parentDocument == null || parentDocument.file.isFile()) {
             throw new FileNotFoundException();
         }
-        final MatrixCursor result = new MatrixCursor(projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION);
+        final MatrixCursor result = new MatrixCursor(projection != null ? projection
+                : DEFAULT_DOCUMENT_PROJECTION);
         result.setNotificationUri(getContext().getContentResolver(),
                 DocumentsContract.buildChildDocumentsUri(mAuthority, parentDocumentId));
         StubDocument document;
         for (File file : parentDocument.file.listFiles()) {
-            document = mStorage.get(StubDocument.getDocumentIdForFile(file));
+            document = mStorage.get(getDocumentIdForFile(file));
             if (document != null) {
                 includeDocument(result, document);
             }
@@ -171,7 +213,9 @@ public class StubProvider extends DocumentsProvider {
     @Override
     public Cursor queryRecentDocuments(String rootId, String[] projection)
             throws FileNotFoundException {
-        throw new FileNotFoundException();
+        final MatrixCursor result = new MatrixCursor(projection != null ? projection
+                : DEFAULT_DOCUMENT_PROJECTION);
+        return result;
     }
 
     @Override
@@ -202,8 +246,7 @@ public class StubProvider extends DocumentsProvider {
         ParcelFileDescriptor[] pipe;
         try {
             pipe = ParcelFileDescriptor.createReliablePipe();
-        }
-        catch (IOException exception) {
+        } catch (IOException exception) {
             throw new FileNotFoundException();
         }
         final ParcelFileDescriptor readPipe = pipe[0];
@@ -212,15 +255,19 @@ public class StubProvider extends DocumentsProvider {
         new Thread() {
             @Override
             public void run() {
+                InputStream inputStream = null;
+                OutputStream outputStream = null;
                 try {
-                    final FileInputStream inputStream = new FileInputStream(readPipe.getFileDescriptor());
-                    final FileOutputStream outputStream = new FileOutputStream(document.file);
+                    inputStream = new ParcelFileDescriptor.AutoCloseInputStream(readPipe);
+                    outputStream = new FileOutputStream(document.file);
                     byte[] buffer = new byte[32 * 1024];
                     int bytesToRead;
                     int bytesRead = 0;
                     while (bytesRead != -1) {
                         synchronized (mWriteLock) {
-                            bytesToRead = Math.min(STORAGE_SIZE - mStorageUsedBytes, buffer.length);
+                            // This cast is safe because the max possible value is buffer.length.
+                            bytesToRead = (int) Math.min(document.rootInfo.getRemainingCapacity(),
+                                    buffer.length);
                             if (bytesToRead == 0) {
                                 closePipeWithErrorSilently(readPipe, "Not enough space.");
                                 break;
@@ -230,15 +277,14 @@ public class StubProvider extends DocumentsProvider {
                                 break;
                             }
                             outputStream.write(buffer, 0, bytesRead);
-                            mStorageUsedBytes += bytesRead;
+                            document.rootInfo.size += bytesRead;
                         }
                     }
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     closePipeWithErrorSilently(readPipe, e.getMessage());
-                }
-                finally {
-                    closePipeSilently(readPipe);
+                } finally {
+                    IoUtils.closeQuietly(inputStream);
+                    IoUtils.closeQuietly(outputStream);
                     notifyParentChanged(document.parentId);
                 }
             }
@@ -250,24 +296,38 @@ public class StubProvider extends DocumentsProvider {
     private void closePipeWithErrorSilently(ParcelFileDescriptor pipe, String error) {
         try {
             pipe.closeWithError(error);
-        }
-        catch (IOException ignore) {
+        } catch (IOException ignore) {
         }
     }
 
-    private void closePipeSilently(ParcelFileDescriptor pipe) {
-        try {
-            pipe.close();
+    @Override
+    public Bundle call(String method, String arg, Bundle extras) {
+        Log.d(TAG, "call: " + method + arg);
+        switch (method) {
+            case "clear":
+                clearCacheAndBuildRoots();
+                return null;
+            case "configure":
+                configure(arg, extras);
+                return null;
+            default:
+                return super.call(method, arg, extras);
         }
-        catch (IOException ignore) {
-        }
+    }
+
+    private void configure(String arg, Bundle extras) {
+        Log.d(TAG, "Configure " + arg);
+        String rootName = extras.getString(EXTRA_ROOT, MY_ROOT_ID);
+        long rootSize = extras.getLong(EXTRA_SIZE, 1) * 1024 * 1024;
+        setSize(rootName, rootSize);
     }
 
     private void notifyParentChanged(String parentId) {
         getContext().getContentResolver().notifyChange(
                 DocumentsContract.buildChildDocumentsUri(mAuthority, parentId), null, false);
         // Notify also about possible change in remaining space on the root.
-        getContext().getContentResolver().notifyChange(DocumentsContract.buildRootsUri(mAuthority), null, false);
+        getContext().getContentResolver().notifyChange(DocumentsContract.buildRootsUri(mAuthority),
+                null, false);
     }
 
     private void includeDocument(MatrixCursor result, StubDocument document) {
@@ -295,22 +355,102 @@ public class StubProvider extends DocumentsProvider {
             childFile.delete();
         }
     }
-}
 
-class StubDocument {
-    public final File file;
-    public final String mimeType;
-    public final String documentId;
-    public final String parentId;
+    public void setSize(String rootId, long rootSize) {
+        RootInfo root = mRoots.get(rootId);
+        if (root != null) {
+            final String key = STORAGE_SIZE_KEY + "." + rootId;
+            Log.d(TAG, "Set size of " + key + " : " + rootSize);
 
-    StubDocument(File file, String mimeType, StubDocument parent) {
-        this.file = file;
-        this.mimeType = mimeType;
-        this.documentId = getDocumentIdForFile(file);
-        this.parentId = parent != null ? parent.documentId : null;
+            // Persist the size.
+            SharedPreferences.Editor editor = mPrefs.edit();
+            editor.putLong(key, rootSize);
+            editor.apply();
+            // Apply the size in the current instance of this provider.
+            root.capacity = rootSize;
+            getContext().getContentResolver().notifyChange(
+                    DocumentsContract.buildRootsUri(mAuthority),
+                    null, false);
+        } else {
+            Log.e(TAG, "Attempt to configure non-existent root: " + rootId);
+        }
     }
 
-    public static String getDocumentIdForFile(File file) {
+    public File createFile(String rootId, File parent, String mimeType, String name)
+            throws IOException {
+        StubDocument parentDoc = null;
+        if (parent == null) {
+            // Use the root dir as the parent, if one wasn't specified.
+            parentDoc = mRoots.get(rootId).rootDocument;
+        } else {
+            // Verify that the parent exists and is a directory.
+            parentDoc = mStorage.get(getDocumentIdForFile(parent));
+            if (parentDoc == null) {
+                throw new IllegalArgumentException("Parent file not found.");
+            }
+            if (!Document.MIME_TYPE_DIR.equals(parentDoc.mimeType)) {
+                throw new IllegalArgumentException("Parent file must be a directory.");
+            }
+        }
+        File file = new File(parentDoc.file, name);
+        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+            file.mkdir();
+        } else {
+            file.createNewFile();
+        }
+        new StubDocument(file, mimeType, parentDoc);
+        return file;
+    }
+
+    final class RootInfo {
+        public final String name;
+        public final StubDocument rootDocument;
+        public long capacity;
+        public long size;
+
+        RootInfo(String name, long capacity) {
+            this.name = name;
+            this.capacity = 1024 * 1024;
+            // Make a subdir in the cache dir for each root.
+            File rootDir = new File(getContext().getCacheDir(), name);
+            rootDir.mkdir();
+            this.rootDocument = new StubDocument(rootDir, Document.MIME_TYPE_DIR, this);
+            this.capacity = capacity;
+            this.size = 0;
+        }
+
+        public long getRemainingCapacity() {
+            return capacity - size;
+        }
+    }
+
+    final class StubDocument {
+        public final File file;
+        public final String mimeType;
+        public final String documentId;
+        public final String parentId;
+        public final RootInfo rootInfo;
+
+        StubDocument(File file, String mimeType, StubDocument parent) {
+            this.file = file;
+            this.mimeType = mimeType;
+            this.documentId = getDocumentIdForFile(file);
+            this.parentId = parent.documentId;
+            this.rootInfo = parent.rootInfo;
+            mStorage.put(this.documentId, this);
+        }
+
+        StubDocument(File file, String mimeType, RootInfo rootInfo) {
+            this.file = file;
+            this.mimeType = mimeType;
+            this.documentId = getDocumentIdForFile(file);
+            this.parentId = null;
+            this.rootInfo = rootInfo;
+            mStorage.put(this.documentId, this);
+        }
+    }
+
+    private static String getDocumentIdForFile(File file) {
         return file.getAbsolutePath();
     }
 }
