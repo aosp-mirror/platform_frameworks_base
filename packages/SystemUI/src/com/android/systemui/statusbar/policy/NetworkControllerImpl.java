@@ -173,7 +173,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
@@ -331,7 +331,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             Log.d(TAG, "onReceive: intent=" + intent);
         }
         final String action = intent.getAction();
-        if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE) ||
+        if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
                 action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
             updateConnectivity();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {

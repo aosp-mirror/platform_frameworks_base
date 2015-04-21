@@ -2012,7 +2012,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
             intentFilter = new IntentFilter();
             intentFilter.addAction(ALARM_WAKEUP);
             intentFilter.addAction(ALARM_TIMEOUT);
-            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE);
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
             intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
             intentFilter.addAction(Intent.ACTION_SCREEN_ON);
