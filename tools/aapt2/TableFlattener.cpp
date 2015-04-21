@@ -43,8 +43,7 @@ struct FlatEntry {
  */
 class MapFlattener : public ConstValueVisitor {
 public:
-    MapFlattener(BigBuffer* out, const FlatEntry& flatEntry,
-                 std::vector<std::pair<ResourceNameRef, uint32_t>>& symbols) :
+    MapFlattener(BigBuffer* out, const FlatEntry& flatEntry, SymbolEntryVector* symbols) :
             mOut(out), mSymbols(symbols) {
         mMap = mOut->nextBlock<android::ResTable_map_entry>();
         mMap->key.index = flatEntry.entryKey;
@@ -65,7 +64,7 @@ public:
 
     void flattenParent(const Reference& ref) {
         if (!ref.id.isValid()) {
-            mSymbols.push_back({
+            mSymbols->push_back({
                     ResourceNameRef(ref.name),
                     (mOut->size() - mMap->size) + sizeof(*mMap) - sizeof(android::ResTable_entry)
             });
@@ -80,7 +79,7 @@ public:
 
         // Write the key.
         if (!Res_INTERNALID(key.id.id) && !key.id.isValid()) {
-            mSymbols.push_back(std::make_pair(ResourceNameRef(key.name),
+            mSymbols->push_back(std::make_pair(ResourceNameRef(key.name),
                     mOut->size() - sizeof(*outMapEntry)));
         }
         outMapEntry->name.ident = key.id.id;
@@ -90,7 +89,7 @@ public:
 
         if (outMapEntry->value.data == 0x0) {
             visitFunc<Reference>(value, [&](const Reference& reference) {
-                mSymbols.push_back(std::make_pair(ResourceNameRef(reference.name),
+                mSymbols->push_back(std::make_pair(ResourceNameRef(reference.name),
                         mOut->size() - sizeof(outMapEntry->value.data)));
             });
         }
@@ -188,8 +187,39 @@ public:
 
 private:
     BigBuffer* mOut;
-    std::vector<std::pair<ResourceNameRef, uint32_t>>& mSymbols;
+    SymbolEntryVector* mSymbols;
     android::ResTable_map_entry* mMap;
+};
+
+/**
+ * Flattens a value, with special handling for References.
+ */
+struct ValueFlattener : ConstValueVisitor {
+    ValueFlattener(BigBuffer* out, SymbolEntryVector* symbols) :
+            result(false), mOut(out), mOutValue(nullptr), mSymbols(symbols) {
+        mOutValue = mOut->nextBlock<android::Res_value>();
+    }
+
+    virtual void visit(const Reference& ref, ValueVisitorArgs& a) override {
+        visitItem(ref, a);
+        if (mOutValue->data == 0x0) {
+            mSymbols->push_back({
+                    ResourceNameRef(ref.name),
+                    mOut->size() - sizeof(mOutValue->data)});
+        }
+    }
+
+    virtual void visitItem(const Item& item, ValueVisitorArgs&) override {
+        result = item.flatten(*mOutValue);
+        mOutValue->size = sizeof(*mOutValue);
+    }
+
+    bool result;
+
+private:
+    BigBuffer* mOut;
+    android::Res_value* mOutValue;
+    SymbolEntryVector* mSymbols;
 };
 
 TableFlattener::TableFlattener(Options options)
@@ -197,7 +227,7 @@ TableFlattener::TableFlattener(Options options)
 }
 
 bool TableFlattener::flattenValue(BigBuffer* out, const FlatEntry& flatEntry,
-        std::vector<std::pair<ResourceNameRef, uint32_t>>& symbolEntries) {
+                                  SymbolEntryVector* symbols) {
     if (flatEntry.value.isItem()) {
         android::ResTable_entry* entry = out->nextBlock<android::ResTable_entry>();
 
@@ -218,30 +248,16 @@ bool TableFlattener::flattenValue(BigBuffer* out, const FlatEntry& flatEntry,
             ResTable_entry_source* sourceBlock = out->nextBlock<ResTable_entry_source>();
             sourceBlock->pathIndex = flatEntry.sourcePathKey;
             sourceBlock->line = flatEntry.sourceLine;
-
             entry->size += sizeof(*sourceBlock);
         }
 
-        android::Res_value* outValue = out->nextBlock<android::Res_value>();
-
-        const Item& item = static_cast<const Item&>(flatEntry.value);
-        if (!item.flatten(*outValue)) {
-            return false;
-        }
-
-        if (outValue->data == 0x0) {
-            visitFunc<Reference>(item, [&](const Reference& reference) {
-                symbolEntries.push_back({
-                        ResourceNameRef(reference.name),
-                        out->size() - sizeof(outValue->data)
-                });
-            });
-        }
-        outValue->size = sizeof(*outValue);
-        return true;
+        const Item* item = static_cast<const Item*>(&flatEntry.value);
+        ValueFlattener flattener(out, symbols);
+        item->accept(flattener, {});
+        return flattener.result;
     }
 
-    MapFlattener flattener(out, flatEntry, symbolEntries);
+    MapFlattener flattener(out, flatEntry, symbols);
     flatEntry.value.accept(flattener, {});
     return true;
 }
@@ -263,7 +279,7 @@ bool TableFlattener::flatten(BigBuffer* out, const ResourceTable& table) {
         return false;
     }
 
-    std::vector<std::pair<ResourceNameRef, uint32_t>> symbolEntries;
+    SymbolEntryVector symbolEntries;
 
     StringPool typePool;
     StringPool keyPool;
@@ -401,7 +417,7 @@ bool TableFlattener::flatten(BigBuffer* out, const ResourceTable& table) {
             for (const FlatEntry& flatEntry : entry.second) {
                 assert(flatEntry.entry.entryId < type->entries.size());
                 indices[flatEntry.entry.entryId] = typeBlock.size() - entryStart;
-                if (!flattenValue(&typeBlock, flatEntry, symbolEntries)) {
+                if (!flattenValue(&typeBlock, flatEntry, &symbolEntries)) {
                     Logger::error()
                             << "failed to flatten resource '"
                             << ResourceNameRef {

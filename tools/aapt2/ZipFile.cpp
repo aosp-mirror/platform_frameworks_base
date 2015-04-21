@@ -546,7 +546,7 @@ bail:
  * If "ppEntry" is non-NULL, a pointer to the new entry will be returned.
  */
 status_t ZipFile::add(const ZipFile* pSourceZip, const ZipEntry* pSourceEntry,
-    int padding, ZipEntry** ppEntry)
+                      const char* storageName, int padding, ZipEntry** ppEntry)
 {
     ZipEntry* pEntry = NULL;
     status_t result;
@@ -570,9 +570,10 @@ status_t ZipFile::add(const ZipFile* pSourceZip, const ZipEntry* pSourceEntry,
         goto bail;
     }
 
-    result = pEntry->initFromExternal(pSourceZip, pSourceEntry);
-    if (result != NO_ERROR)
+    result = pEntry->initFromExternal(pSourceZip, pSourceEntry, storageName);
+    if (result != NO_ERROR) {
         goto bail;
+    }
     if (padding != 0) {
         result = pEntry->addPadding(padding);
         if (result != NO_ERROR)

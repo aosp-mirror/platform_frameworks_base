@@ -25,6 +25,7 @@
 #include "Linker.h"
 #include "ManifestParser.h"
 #include "ManifestValidator.h"
+#include "NameMangler.h"
 #include "Png.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
@@ -266,22 +267,50 @@ struct CompileItem {
 
 struct LinkItem {
     Source source;
-    std::string apkPath;
+    ResourceName name;
+    ConfigDescription config;
+    std::string originalPath;
+    ZipFile* apk;
 };
 
-std::string buildFileReference(const CompileItem& item) {
-    std::stringstream path;
-    path << "res/" << item.name.type;
-    if (item.config != ConfigDescription{}) {
-        path << "-" << item.config;
+template <typename TChar>
+static BasicStringPiece<TChar> getExtension(const BasicStringPiece<TChar>& str) {
+    auto iter = std::find(str.begin(), str.end(), static_cast<TChar>('.'));
+    if (iter == str.end()) {
+        return BasicStringPiece<TChar>();
     }
-    path << "/" << util::utf16ToUtf8(item.name.entry) + "." + item.extension;
+    size_t offset = (iter - str.begin()) + 1;
+    return str.substr(offset, str.size() - offset);
+}
+
+
+
+std::string buildFileReference(const ResourceNameRef& name, const ConfigDescription& config,
+                               const StringPiece& extension) {
+    std::stringstream path;
+    path << "res/" << name.type;
+    if (config != ConfigDescription{}) {
+        path << "-" << config;
+    }
+    path << "/" << util::utf16ToUtf8(name.entry);
+    if (!extension.empty()) {
+        path << "." << extension;
+    }
     return path.str();
+}
+
+std::string buildFileReference(const CompileItem& item) {
+    return buildFileReference(item.name, item.config, item.extension);
+}
+
+std::string buildFileReference(const LinkItem& item) {
+    return buildFileReference(item.name, item.config, getExtension<char>(item.originalPath));
 }
 
 bool addFileReference(const std::shared_ptr<ResourceTable>& table, const CompileItem& item) {
     StringPool& pool = table->getValueStringPool();
-    StringPool::Ref ref = pool.makeRef(util::utf8ToUtf16(buildFileReference(item)));
+    StringPool::Ref ref = pool.makeRef(util::utf8ToUtf16(buildFileReference(item)),
+                                       StringPool::Context{ 0, item.config });
     return table->addResource(item.name, item.config, item.source.line(0),
                               util::make_unique<FileReference>(ref));
 }
@@ -418,8 +447,8 @@ bool linkXml(const AaptOptions& options, const std::shared_ptr<Resolver>& resolv
         return false;
     }
 
-    if (outApk->add(outBuffer, item.apkPath.data(), ZipEntry::kCompressDeflated, nullptr) !=
-            android::NO_ERROR) {
+    if (outApk->add(outBuffer, buildFileReference(item).data(), ZipEntry::kCompressDeflated,
+                nullptr) != android::NO_ERROR) {
         Logger::error(options.output) << "failed to write linked file '" << item.source
                                       << "' to apk." << std::endl;
         return false;
@@ -502,109 +531,6 @@ bool compileManifest(const AaptOptions& options, const std::shared_ptr<Resolver>
     return true;
 }
 
-bool loadAppInfo(const Source& source, AppInfo* outInfo) {
-    std::ifstream ifs(source.path, std::ifstream::in | std::ifstream::binary);
-    if (!ifs) {
-        Logger::error(source) << strerror(errno) << std::endl;
-        return false;
-    }
-
-    ManifestParser parser;
-    std::shared_ptr<XmlPullParser> pullParser = std::make_shared<SourceXmlPullParser>(ifs);
-    return parser.parse(source, pullParser, outInfo);
-}
-
-static void printCommandsAndDie() {
-    std::cerr << "The following commands are supported:" << std::endl << std::endl;
-    std::cerr << "compile       compiles a subset of resources" << std::endl;
-    std::cerr << "link          links together compiled resources and libraries" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "run aapt2 with one of the commands and the -h flag for extra details."
-              << std::endl;
-    exit(1);
-}
-
-static AaptOptions prepareArgs(int argc, char** argv) {
-    if (argc < 2) {
-        std::cerr << "no command specified." << std::endl << std::endl;
-        printCommandsAndDie();
-    }
-
-    const StringPiece command(argv[1]);
-    argc -= 2;
-    argv += 2;
-
-    AaptOptions options;
-
-    if (command == "--version" || command == "version") {
-        std::cout << kAaptVersionStr << std::endl;
-        exit(0);
-    } else if (command == "link") {
-        options.phase = AaptOptions::Phase::Link;
-    } else if (command == "compile") {
-        options.phase = AaptOptions::Phase::Compile;
-    } else {
-        std::cerr << "invalid command '" << command << "'." << std::endl << std::endl;
-        printCommandsAndDie();
-    }
-
-    if (options.phase == AaptOptions::Phase::Compile) {
-        flag::requiredFlag("--package", "Android package name",
-                [&options](const StringPiece& arg) {
-                    options.appInfo.package = util::utf8ToUtf16(arg);
-                });
-        flag::optionalFlag("--binding", "Output directory for binding XML files",
-                [&options](const StringPiece& arg) {
-                    options.bindingOutput = Source{ arg.toString() };
-                });
-        flag::optionalSwitch("--no-version", "Disables automatic style and layout versioning",
-                             false, &options.versionStylesAndLayouts);
-
-    } else if (options.phase == AaptOptions::Phase::Link) {
-        flag::requiredFlag("--manifest", "AndroidManifest.xml of your app",
-                [&options](const StringPiece& arg) {
-                    options.manifest = Source{ arg.toString() };
-                });
-
-        flag::optionalFlag("-I", "add an Android APK to link against",
-                [&options](const StringPiece& arg) {
-                    options.libraries.push_back(Source{ arg.toString() });
-                });
-
-        flag::optionalFlag("--java", "directory in which to generate R.java",
-                [&options](const StringPiece& arg) {
-                    options.generateJavaClass = Source{ arg.toString() };
-                });
-    }
-
-    // Common flags for all steps.
-    flag::requiredFlag("-o", "Output path", [&options](const StringPiece& arg) {
-        options.output = Source{ arg.toString() };
-    });
-
-    bool help = false;
-    flag::optionalSwitch("-v", "enables verbose logging", true, &options.verbose);
-    flag::optionalSwitch("-h", "displays this help menu", true, &help);
-
-    // Build the command string for output (eg. "aapt2 compile").
-    std::string fullCommand = "aapt2";
-    fullCommand += " ";
-    fullCommand += command.toString();
-
-    // Actually read the command line flags.
-    flag::parse(argc, argv, fullCommand);
-
-    if (help) {
-        flag::usageAndDie(fullCommand);
-    }
-
-    // Copy all the remaining arguments.
-    for (const std::string& arg : flag::getArgs()) {
-        options.input.push_back(Source{ arg });
-    }
-    return options;
-}
-
 static bool compileValues(const std::shared_ptr<ResourceTable>& table, const Source& source,
                           const ConfigDescription& config) {
     std::ifstream in(source.path, std::ifstream::binary);
@@ -630,6 +556,7 @@ struct ResourcePathData {
  * [--/res/]type[-config]/name
  */
 static Maybe<ResourcePathData> extractResourcePathData(const Source& source) {
+    // TODO(adamlesinski): Use Windows path separator on windows.
     std::vector<std::string> parts = util::splitAndLowercase(source.path, '/');
     if (parts.size() < 2) {
         Logger::error(source) << "bad resource path." << std::endl;
@@ -695,6 +622,38 @@ bool writeResourceTable(const AaptOptions& options, const std::shared_ptr<Resour
     return true;
 }
 
+/**
+ * For each FileReference in the table, adds a LinkItem to the link queue for processing.
+ */
+static void addApkFilesToLinkQueue(const std::u16string& package, const Source& source,
+                                   const std::shared_ptr<ResourceTable>& table,
+                                   const std::unique_ptr<ZipFile>& apk,
+                                   std::queue<LinkItem>* outLinkQueue) {
+    bool mangle = package != table->getPackage();
+    for (auto& type : *table) {
+        for (auto& entry : type->entries) {
+            ResourceName name = { package, type->type, entry->name };
+            if (mangle) {
+                NameMangler::mangle(table->getPackage(), &name.entry);
+            }
+
+            for (auto& value : entry->values) {
+                visitFunc<FileReference>(*value.value, [&](FileReference& ref) {
+                    std::string pathUtf8 = util::utf16ToUtf8(*ref.path);
+                    outLinkQueue->push(LinkItem{
+                            source, name, value.config, pathUtf8, apk.get() });
+                    // Now rewrite the file path.
+                    if (mangle) {
+                        ref.path = table->getValueStringPool().makeRef(util::utf8ToUtf16(
+                                    buildFileReference(name, value.config,
+                                                       getExtension<char>(pathUtf8))));
+                    }
+                });
+            }
+        }
+    }
+}
+
 static constexpr int kOpenFlags = ZipFile::kOpenCreate | ZipFile::kOpenTruncate |
         ZipFile::kOpenReadWrite;
 
@@ -740,9 +699,14 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
         linkedPackages.insert(table->getPackage());
     }
 
+    std::queue<LinkItem> linkQueue;
     for (auto& p : apkFiles) {
         const std::shared_ptr<ResourceTable>& inTable = p.first;
 
+        // Collect all FileReferences and add them to the queue for processing.
+        addApkFilesToLinkQueue(options.appInfo.package, Source{}, inTable, p.second, &linkQueue);
+
+        // Merge the tables.
         if (!outTable->merge(std::move(*inTable))) {
             return false;
         }
@@ -779,39 +743,32 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
         return false;
     }
 
-    for (auto& p : apkFiles) {
-        std::unique_ptr<ZipFile>& zipFile = p.second;
+    for (; !linkQueue.empty(); linkQueue.pop()) {
+        const LinkItem& item = linkQueue.front();
 
-        // TODO(adamlesinski): Get list of files to read when processing config filter.
+        ZipEntry* entry = item.apk->getEntryByName(item.originalPath.data());
+        if (!entry) {
+            Logger::error(item.source) << "failed to find '" << item.originalPath << "'."
+                                       << std::endl;
+            return false;
+        }
 
-        const int numEntries = zipFile->getNumEntries();
-        for (int i = 0; i < numEntries; i++) {
-            ZipEntry* entry = zipFile->getEntryByIndex(i);
-            assert(entry);
+        if (util::stringEndsWith<char>(item.originalPath, ".xml")) {
+            void* uncompressedData = item.apk->uncompress(entry);
+            assert(uncompressedData);
 
-            StringPiece filename = entry->getFileName();
-            if (!util::stringStartsWith<char>(filename, "res/")) {
-                continue;
+            if (!linkXml(options, resolver, item, uncompressedData, entry->getUncompressedLen(),
+                    &outApk)) {
+                Logger::error(options.output) << "failed to link '" << item.originalPath << "'."
+                                              << std::endl;
+                return false;
             }
-
-            if (util::stringEndsWith<char>(filename, ".xml")) {
-                void* uncompressedData = zipFile->uncompress(entry);
-                assert(uncompressedData);
-
-                LinkItem item = { Source{ filename.toString() }, filename.toString() };
-
-                if (!linkXml(options, resolver, item, uncompressedData,
-                            entry->getUncompressedLen(), &outApk)) {
-                    Logger::error(options.output) << "failed to link '" << filename << "'."
-                                                  << std::endl;
-                    return false;
-                }
-            } else {
-                if (outApk.add(zipFile.get(), entry, 0, nullptr) != android::NO_ERROR) {
-                    Logger::error(options.output) << "failed to copy '" << filename << "'."
-                                                  << std::endl;
-                    return false;
-                }
+        } else {
+            if (outApk.add(item.apk, entry, buildFileReference(item).data(), 0, nullptr) !=
+                    android::NO_ERROR) {
+                Logger::error(options.output) << "failed to copy '" << item.originalPath << "'."
+                                              << std::endl;
+                return false;
             }
         }
     }
@@ -955,6 +912,109 @@ bool compile(const AaptOptions& options, const std::shared_ptr<ResourceTable>& t
 
     outApk.flush();
     return true;
+}
+
+bool loadAppInfo(const Source& source, AppInfo* outInfo) {
+    std::ifstream ifs(source.path, std::ifstream::in | std::ifstream::binary);
+    if (!ifs) {
+        Logger::error(source) << strerror(errno) << std::endl;
+        return false;
+    }
+
+    ManifestParser parser;
+    std::shared_ptr<XmlPullParser> pullParser = std::make_shared<SourceXmlPullParser>(ifs);
+    return parser.parse(source, pullParser, outInfo);
+}
+
+static void printCommandsAndDie() {
+    std::cerr << "The following commands are supported:" << std::endl << std::endl;
+    std::cerr << "compile       compiles a subset of resources" << std::endl;
+    std::cerr << "link          links together compiled resources and libraries" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "run aapt2 with one of the commands and the -h flag for extra details."
+              << std::endl;
+    exit(1);
+}
+
+static AaptOptions prepareArgs(int argc, char** argv) {
+    if (argc < 2) {
+        std::cerr << "no command specified." << std::endl << std::endl;
+        printCommandsAndDie();
+    }
+
+    const StringPiece command(argv[1]);
+    argc -= 2;
+    argv += 2;
+
+    AaptOptions options;
+
+    if (command == "--version" || command == "version") {
+        std::cout << kAaptVersionStr << std::endl;
+        exit(0);
+    } else if (command == "link") {
+        options.phase = AaptOptions::Phase::Link;
+    } else if (command == "compile") {
+        options.phase = AaptOptions::Phase::Compile;
+    } else {
+        std::cerr << "invalid command '" << command << "'." << std::endl << std::endl;
+        printCommandsAndDie();
+    }
+
+    if (options.phase == AaptOptions::Phase::Compile) {
+        flag::requiredFlag("--package", "Android package name",
+                [&options](const StringPiece& arg) {
+                    options.appInfo.package = util::utf8ToUtf16(arg);
+                });
+        flag::optionalFlag("--binding", "Output directory for binding XML files",
+                [&options](const StringPiece& arg) {
+                    options.bindingOutput = Source{ arg.toString() };
+                });
+        flag::optionalSwitch("--no-version", "Disables automatic style and layout versioning",
+                             false, &options.versionStylesAndLayouts);
+
+    } else if (options.phase == AaptOptions::Phase::Link) {
+        flag::requiredFlag("--manifest", "AndroidManifest.xml of your app",
+                [&options](const StringPiece& arg) {
+                    options.manifest = Source{ arg.toString() };
+                });
+
+        flag::optionalFlag("-I", "add an Android APK to link against",
+                [&options](const StringPiece& arg) {
+                    options.libraries.push_back(Source{ arg.toString() });
+                });
+
+        flag::optionalFlag("--java", "directory in which to generate R.java",
+                [&options](const StringPiece& arg) {
+                    options.generateJavaClass = Source{ arg.toString() };
+                });
+    }
+
+    // Common flags for all steps.
+    flag::requiredFlag("-o", "Output path", [&options](const StringPiece& arg) {
+        options.output = Source{ arg.toString() };
+    });
+
+    bool help = false;
+    flag::optionalSwitch("-v", "enables verbose logging", true, &options.verbose);
+    flag::optionalSwitch("-h", "displays this help menu", true, &help);
+
+    // Build the command string for output (eg. "aapt2 compile").
+    std::string fullCommand = "aapt2";
+    fullCommand += " ";
+    fullCommand += command.toString();
+
+    // Actually read the command line flags.
+    flag::parse(argc, argv, fullCommand);
+
+    if (help) {
+        flag::usageAndDie(fullCommand);
+    }
+
+    // Copy all the remaining arguments.
+    for (const std::string& arg : flag::getArgs()) {
+        options.input.push_back(Source{ arg });
+    }
+    return options;
 }
 
 int main(int argc, char** argv) {

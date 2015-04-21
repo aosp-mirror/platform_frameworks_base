@@ -22,6 +22,8 @@
 
 namespace aapt {
 
+using SymbolEntryVector = std::vector<std::pair<ResourceNameRef, uint32_t>>;
+
 struct FlatEntry;
 
 /**
@@ -49,8 +51,7 @@ struct TableFlattener {
     bool flatten(BigBuffer* out, const ResourceTable& table);
 
 private:
-    bool flattenValue(BigBuffer* out, const FlatEntry& flatEntry,
-                      std::vector<std::pair<ResourceNameRef, uint32_t>>& symbolEntries);
+    bool flattenValue(BigBuffer* out, const FlatEntry& flatEntry, SymbolEntryVector* symbols);
 
     Options mOptions;
 };

@@ -171,9 +171,10 @@ protected:
 
     /*
      * Initialize the structure with the contents of a ZipEntry from
-     * another file.
+     * another file. If fileName is non-NULL, override the name with fileName.
      */
-    status_t initFromExternal(const ZipFile* pZipFile, const ZipEntry* pEntry);
+    status_t initFromExternal(const ZipFile* pZipFile, const ZipEntry* pEntry,
+                              const char* fileName);
 
     /*
      * Add some pad bytes to the LFH.  We do this by adding or resizing
