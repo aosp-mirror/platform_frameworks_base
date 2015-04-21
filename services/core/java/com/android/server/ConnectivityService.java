@@ -18,7 +18,6 @@ package com.android.server;
 
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
@@ -1386,7 +1385,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     public void sendConnectedBroadcast(NetworkInfo info) {
         enforceConnectivityInternalPermission();
-        sendGeneralBroadcast(info, CONNECTIVITY_ACTION_IMMEDIATE);
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
     }
 
@@ -4365,9 +4363,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION,
                     mDefaultInetConditionPublished);
-            final Intent immediateIntent = new Intent(intent);
-            immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
-            sendStickyBroadcast(immediateIntent);
             sendStickyBroadcast(intent);
             if (newDefaultAgent != null) {
                 sendConnectedBroadcast(newDefaultAgent.networkInfo);

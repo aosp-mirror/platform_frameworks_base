@@ -98,16 +98,6 @@ public class ConnectivityManager {
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
-     * Identical to {@link #CONNECTIVITY_ACTION} broadcast, but sent without any
-     * historic {@link Settings.Global#CONNECTIVITY_CHANGE_DELAY}.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String CONNECTIVITY_ACTION_IMMEDIATE =
-            "android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE";
-
-    /**
      * The lookup key for a {@link NetworkInfo} object. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      *
