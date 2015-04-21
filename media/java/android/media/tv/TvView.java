@@ -66,10 +66,6 @@ public class TvView extends ViewGroup {
     private static final int ZORDER_MEDIA_OVERLAY = 1;
     private static final int ZORDER_ON_TOP = 2;
 
-    private static final int CAPTION_DEFAULT = 0;
-    private static final int CAPTION_ENABLED = 1;
-    private static final int CAPTION_DISABLED = 2;
-
     private static final WeakReference<TvView> NULL_TV_VIEW = new WeakReference<>(null);
 
     private static final Object sMainTvViewLock = new Object();
@@ -85,9 +81,8 @@ public class TvView extends ViewGroup {
     private MySessionCallback mSessionCallback;
     private TvInputCallback mCallback;
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
-    private boolean mHasStreamVolume;
-    private float mStreamVolume;
-    private int mCaptionEnabled;
+    private Float mStreamVolume;
+    private Boolean mCaptionEnabled;
     private String mAppPrivateCommandAction;
     private Bundle mAppPrivateCommandData;
 
@@ -253,13 +248,16 @@ public class TvView extends ViewGroup {
      }
 
     /**
-     * Sets the relative stream volume of this session to handle a change of audio focus.
+     * Sets the relative stream volume of this TvView.
      *
-     * @param volume A volume value between 0.0f to 1.0f.
+     * <p>This method is primarily used to handle audio focus changes or mute a specific TvView when
+     * multiple views are displayed. If the method has not yet been called, the TvView assumes the
+     * default value of {@code 1.0f}.
+     *
+     * @param volume A volume value between {@code 0.0f} to {@code 1.0f}.
      */
     public void setStreamVolume(float volume) {
         if (DEBUG) Log.d(TAG, "setStreamVolume(" + volume + ")");
-        mHasStreamVolume = true;
         mStreamVolume = volume;
         if (mSession == null) {
             // Volume will be set once the connection has been made.
@@ -367,7 +365,8 @@ public class TvView extends ViewGroup {
      * @param enabled {@code true} to enable, {@code false} to disable.
      */
     public void setCaptionEnabled(boolean enabled) {
-        mCaptionEnabled = enabled ? CAPTION_ENABLED : CAPTION_DISABLED;
+        if (DEBUG) Log.d(TAG, "setCaptionEnabled(" + enabled + ")");
+        mCaptionEnabled = enabled;
         if (mSession != null) {
             mSession.setCaptionEnabled(enabled);
         }
@@ -1018,13 +1017,13 @@ public class TvView extends ViewGroup {
                     }
                 }
                 createSessionOverlayView();
-                if (mCaptionEnabled != CAPTION_DEFAULT) {
-                    mSession.setCaptionEnabled(mCaptionEnabled == CAPTION_ENABLED);
-                }
-                mSession.tune(mChannelUri, mTuneParams);
-                if (mHasStreamVolume) {
+                if (mStreamVolume != null) {
                     mSession.setStreamVolume(mStreamVolume);
                 }
+                if (mCaptionEnabled != null) {
+                    mSession.setCaptionEnabled(mCaptionEnabled);
+                }
+                mSession.tune(mChannelUri, mTuneParams);
                 if (mAppPrivateCommandAction != null) {
                     mSession.sendAppPrivateCommand(
                             mAppPrivateCommandAction, mAppPrivateCommandData);

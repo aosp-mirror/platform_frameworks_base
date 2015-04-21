@@ -736,10 +736,14 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sets the relative stream volume of the current TV input session to handle the change of
-         * audio focus by setting.
+         * Sets the relative stream volume of the current TV input session.
          *
-         * @param volume Volume scale from 0.0 to 1.0.
+         * <p>The implementation should honor this request in order to handle audio focus changes or
+         * mute the current session when multiple sessions, possibly from different inputs are
+         * active. If the method has not yet been called, the implementation should assume the
+         * default value of {@code 1.0f}.
+         *
+         * @param volume A volume value between {@code 0.0f} to {@code 1.0f}.
          */
         public abstract void onSetStreamVolume(float volume);
 
