@@ -283,6 +283,8 @@ public final class Parcel {
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
+    private static native long nativeGetAshmemSize(long nativePtr);
+
     public final static Parcelable.Creator<String> STRING_CREATOR
              = new Parcelable.Creator<String>() {
         public String createFromParcel(Parcel source) {
@@ -2593,5 +2595,12 @@ public final class Parcel {
             outVal.append(key, value);
             N--;
         }
+    }
+
+    /**
+     * @hide For testing
+     */
+    public long getBlobAshmemSize() {
+        return nativeGetBlobAshmemSize(mNativePtr);
     }
 }

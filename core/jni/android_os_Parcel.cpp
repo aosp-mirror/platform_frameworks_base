@@ -704,6 +704,15 @@ static jlong android_os_Parcel_getGlobalAllocCount(JNIEnv* env, jclass clazz)
     return Parcel::getGlobalAllocCount();
 }
 
+static jlong android_os_Parcel_getBlobAshmemSize(JNIEnv* env, jclass clazz, jlong nativePtr)
+{
+    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
+    if (parcel != NULL) {
+        return parcel->getBlobAshmemSize();
+    }
+    return 0;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gParcelMethods[] = {
@@ -756,6 +765,8 @@ static const JNINativeMethod gParcelMethods[] = {
 
     {"getGlobalAllocSize",        "()J", (void*)android_os_Parcel_getGlobalAllocSize},
     {"getGlobalAllocCount",       "()J", (void*)android_os_Parcel_getGlobalAllocCount},
+
+    {"nativeGetAshmemSize",       "(J)J", (void*)android_os_Parcel_getAshmemSize},
 };
 
 const char* const kParcelPathName = "android/os/Parcel";
