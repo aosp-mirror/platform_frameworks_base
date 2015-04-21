@@ -3456,7 +3456,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public boolean requestBandwidthUpdate(Network network) {
+    public boolean requestBwUpdate(Network network) {
         enforceAccessPermission();
         NetworkAgentInfo nai = null;
         if (network == null) {
