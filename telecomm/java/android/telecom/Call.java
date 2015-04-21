@@ -213,7 +213,6 @@ public final class Call {
         /**
          * For video calls, indicates whether the outgoing video for the call can be paused using
          * the {@link android.telecom.VideoProfile.VideoState#PAUSED} VideoState.
-         * @hide
          */
         public static final int CAPABILITY_CAN_PAUSE_VIDEO = 0x00100000;
 
