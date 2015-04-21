@@ -30062,6 +30062,7 @@ package android.telecom {
     method public int getHandlePresentation();
     method public android.telecom.StatusHints getStatusHints();
     method public int getVideoState();
+    field public static final int CAPABILITY_CAN_PAUSE_VIDEO = 1048576; // 0x100000
     field public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
     field public static final int CAPABILITY_GENERIC_CONFERENCE = 16384; // 0x4000
     field public static final int CAPABILITY_HIGH_DEF_AUDIO = 32768; // 0x8000
