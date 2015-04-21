@@ -18,6 +18,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res frameworks/support/v7/recyclerview/res
+LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages android.support.v7.recyclerview
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_SRC_FILES += \
         src/com/android/printspooler/renderer/IPdfRenderer.aidl \
