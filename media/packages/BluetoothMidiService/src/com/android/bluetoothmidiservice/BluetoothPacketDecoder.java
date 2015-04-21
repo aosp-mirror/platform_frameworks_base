@@ -30,6 +30,7 @@ public class BluetoothPacketDecoder extends PacketDecoder {
     private static final String TAG = "BluetoothPacketDecoder";
 
     private final byte[] mBuffer;
+    private MidiBtleTimeTracker mTimeTracker;
 
     private final int TIMESTAMP_MASK_HIGH = 0x1F80;
     private final int TIMESTAMP_MASK_LOW = 0x7F;
@@ -41,6 +42,10 @@ public class BluetoothPacketDecoder extends PacketDecoder {
 
     @Override
     public void decodePacket(byte[] buffer, MidiReceiver receiver) {
+        if (mTimeTracker == null) {
+            mTimeTracker = new MidiBtleTimeTracker(System.nanoTime());
+        }
+
         int length = buffer.length;
 
         // NOTE his code allows running status across packets,
@@ -57,10 +62,12 @@ public class BluetoothPacketDecoder extends PacketDecoder {
         }
 
         // shift bits 0 - 5 to bits 7 - 12
-        int timestamp = (header & HEADER_TIMESTAMP_MASK) << 7;
+        int highTimestamp = (header & HEADER_TIMESTAMP_MASK) << 7;
         boolean lastWasTimestamp = false;
         int dataCount = 0;
         int previousLowTimestamp = 0;
+        long nanoTimestamp = 0;
+        int currentTimestamp = 0;
 
         // iterate through the rest of the packet, separating MIDI data from timestamps
         for (int i = 1; i < buffer.length; i++) {
@@ -69,25 +76,28 @@ public class BluetoothPacketDecoder extends PacketDecoder {
             if ((b & 0x80) != 0 && !lastWasTimestamp) {
                 lastWasTimestamp = true;
                 int lowTimestamp = b & TIMESTAMP_MASK_LOW;
-                int newTimestamp = (timestamp & TIMESTAMP_MASK_HIGH) | lowTimestamp;
                 if (lowTimestamp < previousLowTimestamp) {
-                    newTimestamp = (newTimestamp + 0x0080) & TIMESTAMP_MASK_HIGH;
+                    highTimestamp = (highTimestamp + 0x0080) & TIMESTAMP_MASK_HIGH;
                 }
                 previousLowTimestamp = lowTimestamp;
 
-                if (newTimestamp != timestamp) {
+                int newTimestamp = highTimestamp | lowTimestamp;
+                if (newTimestamp != currentTimestamp) {
                     if (dataCount > 0) {
                         // send previous message separately since it has a different timestamp
                         try {
-                           // FIXME use sendWithTimestamp
-                            receiver.send(mBuffer, 0, dataCount);
+                            receiver.sendWithTimestamp(mBuffer, 0, dataCount, nanoTimestamp);
                         } catch (IOException e) {
                             // ???
                         }
                         dataCount = 0;
                     }
+                    currentTimestamp = newTimestamp;
                 }
-                timestamp = newTimestamp;
+
+                // calculate nanoTimestamp
+                long now = System.nanoTime();
+                nanoTimestamp = mTimeTracker.convertTimestampToNanotime(currentTimestamp, now);
             } else {
                 lastWasTimestamp = false;
                 mBuffer[dataCount++] = b;
@@ -96,8 +106,7 @@ public class BluetoothPacketDecoder extends PacketDecoder {
 
         if (dataCount > 0) {
             try {
-                // FIXME use sendWithTimestamp
-                receiver.send(mBuffer, 0, dataCount);
+                receiver.sendWithTimestamp(mBuffer, 0, dataCount, nanoTimestamp);
             } catch (IOException e) {
                 // ???
             }
