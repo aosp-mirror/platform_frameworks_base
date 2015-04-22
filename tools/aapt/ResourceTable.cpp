@@ -4611,6 +4611,9 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
                                         const String16& resourceName,
                                         const sp<AaptFile>& target,
                                         const sp<XMLNode>& root) {
+    const String16 vector16("vector");
+    const String16 animatedVector16("animated-vector");
+
     const int minSdk = getMinSdkVersion(bundle);
     if (minSdk >= SDK_LOLLIPOP_MR1) {
         // Lollipop MR1 and up handles public attributes differently, no
@@ -4620,8 +4623,8 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
 
     const ConfigDescription config(target->getGroupEntry().toParams());
     if (target->getResourceType() == "" || config.sdkVersion >= SDK_LOLLIPOP_MR1) {
-        // Skip resources that have no type (AndroidManifest.xml) or are already version qualified with v21
-        // or higher.
+        // Skip resources that have no type (AndroidManifest.xml) or are already version qualified
+        // with v21 or higher.
         return NO_ERROR;
     }
 
@@ -4634,6 +4637,12 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     while (!nodesToVisit.isEmpty()) {
         sp<XMLNode> node = nodesToVisit.top();
         nodesToVisit.pop();
+
+        if (bundle->getNoVersionVectors() && (node->getElementName() == vector16 ||
+                    node->getElementName() == animatedVector16)) {
+            // We were told not to version vector tags, so skip the children here.
+            continue;
+        }
 
         const Vector<XMLNode::attribute_entry>& attrs = node->getAttributes();
         for (size_t i = 0; i < attrs.size(); i++) {
