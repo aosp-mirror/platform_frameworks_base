@@ -519,7 +519,6 @@ public final class AnimatorSet extends Animator {
 
         for (Node node : mNodes) {
             node.animation.setAllowRunningAsynchronously(false);
-            copyDurationScaleInfoTo(node.animation);
         }
 
         if (mDuration >= 0) {
