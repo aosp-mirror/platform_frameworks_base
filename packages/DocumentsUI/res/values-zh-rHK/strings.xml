@@ -66,11 +66,11 @@
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"正在準備複製…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
-      <item quantity="other">複製<xliff:g id="COUNT_1">%1$d</xliff:g>個檔案時出現錯誤。</item>
-      <item quantity="one">複製<xliff:g id="COUNT_0">%1$d</xliff:g>個檔案時出現錯誤。</item>
+      <item quantity="other">複製<xliff:g id="COUNT_1">%1$d</xliff:g>個檔案時發生錯誤。</item>
+      <item quantity="one">複製<xliff:g id="COUNT_0">%1$d</xliff:g>個檔案時發生錯誤。</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"輕觸即可查看詳情"</string>
     <string name="retry" msgid="7564024179122207376">"重試"</string>
-    <string name="copy_failure_alert_title" msgid="616726451967793549">"複製檔案時出現錯誤"</string>
-    <string name="copy_failure_alert_content" msgid="2655232627616241542">"未有複製以下檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_title" msgid="616726451967793549">"複製檔案時發生錯誤"</string>
+    <string name="copy_failure_alert_content" msgid="2655232627616241542">"沒有複製以下檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

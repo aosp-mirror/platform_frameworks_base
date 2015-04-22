@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="2783841764617238354">"દસ્તાવેજો"</string>
+    <string name="title_open" msgid="4353228937663917801">"અહીંથી ખોલો"</string>
+    <string name="title_save" msgid="2433679664882857999">"આમાં સાચવો"</string>
+    <string name="menu_create_dir" msgid="5947289605844398389">"ફોલ્ડર બનાવો"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"ગ્રિડ દૃશ્ય"</string>
+    <string name="menu_list" msgid="7279285939892417279">"સૂચિ દૃશ્ય"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"આ પ્રમાણે સૉર્ટ કરો"</string>
+    <string name="menu_search" msgid="3816712084502856974">"શોધો"</string>
+    <string name="menu_settings" msgid="6008033148948428823">"સેટિંગ્સ"</string>
+    <string name="menu_open" msgid="432922957274920903">"ખોલો"</string>
+    <string name="menu_save" msgid="2394743337684426338">"સાચવો"</string>
+    <string name="menu_share" msgid="3075149983979628146">"શેર કરો"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"કાઢી નાખો"</string>
+    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" પસંદ કરો"</string>
+    <string name="menu_select_all" msgid="4320518282375109902">"બધા પસંદ કરો"</string>
+    <string name="menu_copy" msgid="3612326052677229148">"આના પર કૉપિ કરો…"</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"આંતરિક સ્ટોરેજ દર્શાવો"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD કાર્ડ દર્શાવો"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"આંતરિક સંગ્રહ છુપાવો"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD કાર્ડ છુપાવો"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"ફાઇલ કદ દર્શાવો"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"ફાઇલ કદ છુપાવો"</string>
+    <string name="button_copy" msgid="8706475544635021302">"કૉપિ કરો"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> પસંદ કર્યા"</string>
+    <string name="sort_name" msgid="9183560467917256779">"નામ દ્વારા"</string>
+    <string name="sort_date" msgid="586080032956151448">"સંશોધન તારીખ દ્વારા"</string>
+    <string name="sort_size" msgid="3350681319735474741">"કદ દ્વારા"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"રૂટ્સ દર્શાવો"</string>
+    <string name="drawer_close" msgid="7602734368552123318">"રૂટ્સ છુપાવો"</string>
+    <string name="save_error" msgid="6167009778003223664">"દસ્તાવેજ સાચવવામાં નિષ્ફળ થયાં."</string>
+    <string name="create_error" msgid="3735649141335444215">"ફોલ્ડર બનાવવામાં નિષ્ફળ થયા"</string>
+    <string name="query_error" msgid="1222448261663503501">"દસ્તાવેજોને ક્વેરી કરવામાં નિષ્ફળ થયાં"</string>
+    <string name="root_recent" msgid="4470053704320518133">"તાજેતરના"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ખાલી"</string>
+    <string name="root_type_service" msgid="2178854894416775409">"સંગ્રહ સેવાઓ"</string>
+    <string name="root_type_shortcut" msgid="3318760609471618093">"શોર્ટકટ્સ"</string>
+    <string name="root_type_device" msgid="7121342474653483538">"ઉપકરણો"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"વધુ એપ્લિકેશન્સ"</string>
+    <string name="empty" msgid="7858882803708117596">"કોઈ આઇટમ્સ નથી"</string>
+    <string name="toast_no_application" msgid="1339885974067891667">"ફાઇલ ખોલી શકાતી નથી"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"કેટલાક દસ્તાવેજો કાઢી નાખવામાં અસમર્થ"</string>
+    <string name="share_via" msgid="8966594246261344259">"આના દ્વારા શેર કરો"</string>
+    <string name="copy_notification_title" msgid="6374299806748219777">"ફાઇલો કૉપિ કરી રહ્યાં છે"</string>
+    <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> બાકી"</string>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી રહ્યાં છે.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી રહ્યાં છે.</item>
+    </plurals>
+    <string name="copy_preparing" msgid="3896202461003039386">"કૉપિ માટે તૈયારી કરી રહ્યું છે…"</string>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરવામાં ભૂલ.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરવામાં ભૂલ.</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="4483108577842961665">"વિગતો જોવા માટે ટચ કરો"</string>
+    <string name="retry" msgid="7564024179122207376">"ફરી પ્રયાસ કરો"</string>
+    <string name="copy_failure_alert_title" msgid="616726451967793549">"ફાઇલો કૉપિ કરવામાં ભૂલ"</string>
+    <string name="copy_failure_alert_content" msgid="2655232627616241542">"નીચેની ફાઇલો કૉપિ કરેલ નથી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+</resources>
