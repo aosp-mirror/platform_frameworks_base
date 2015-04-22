@@ -5361,6 +5361,12 @@ public final class Settings {
         public static final String SMS_DEFAULT_APPLICATION = "sms_default_application";
 
         /**
+         * Specifies the package name currently configured to be the default dialer application
+         * @hide
+         */
+        public static final String DIALER_DEFAULT_APPLICATION = "dialer_default_application";
+
+        /**
          * Specifies the package name currently configured to be the emergency assistance application
          *
          * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
