@@ -765,7 +765,8 @@ public final class BroadcastQueue {
                 try {
                     perm = AppGlobals.getPackageManager().
                             checkPermission(r.requiredPermission,
-                                    info.activityInfo.applicationInfo.packageName, r.userId);
+                                    info.activityInfo.applicationInfo.packageName,
+                                    UserHandle.getUserId(info.activityInfo.applicationInfo.uid));
                 } catch (RemoteException e) {
                     perm = PackageManager.PERMISSION_DENIED;
                 }

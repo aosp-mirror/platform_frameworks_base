@@ -93,6 +93,9 @@ public final class PermissionsState {
      * @param other The other instance.
      */
     public void copyFrom(PermissionsState other) {
+        if (other == this) {
+            return;
+        }
         if (mPermissions != null) {
             if (other.mPermissions == null) {
                 mPermissions = null;
