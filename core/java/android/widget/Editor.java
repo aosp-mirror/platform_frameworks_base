@@ -1764,15 +1764,55 @@ public class Editor {
     }
 
     /**
-     * @return <code>true</code> if the cursor/current selection overlaps a {@link SuggestionSpan}.
+     * @return <code>true</code> if it's reasonable to offer to show suggestions depending on
+     * the current cursor position or selection range. This method is consistent with the
+     * method to show suggestions {@link SuggestionsPopupWindow#updateSuggestions}.
      */
-    private boolean isCursorInsideSuggestionSpan() {
+    private boolean shouldOfferToShowSuggestions() {
         CharSequence text = mTextView.getText();
         if (!(text instanceof Spannable)) return false;
 
-        SuggestionSpan[] suggestionSpans = ((Spannable) text).getSpans(
-                mTextView.getSelectionStart(), mTextView.getSelectionEnd(), SuggestionSpan.class);
-        return (suggestionSpans.length > 0);
+        final Spannable spannable = (Spannable) text;
+        final int selectionStart = mTextView.getSelectionStart();
+        final int selectionEnd = mTextView.getSelectionEnd();
+        final SuggestionSpan[] suggestionSpans = spannable.getSpans(selectionStart, selectionEnd,
+                SuggestionSpan.class);
+        if (suggestionSpans.length == 0) {
+            return false;
+        }
+        if (selectionStart == selectionEnd) {
+            // Spans overlap the cursor.
+            return true;
+        }
+        int minSpanStart = mTextView.getText().length();
+        int maxSpanEnd = 0;
+        int unionOfSpansCoveringSelectionStartStart = mTextView.getText().length();
+        int unionOfSpansCoveringSelectionStartEnd = 0;
+        for (int i = 0; i < suggestionSpans.length; i++) {
+            final int spanStart = spannable.getSpanStart(suggestionSpans[i]);
+            final int spanEnd = spannable.getSpanEnd(suggestionSpans[i]);
+            minSpanStart = Math.min(minSpanStart, spanStart);
+            maxSpanEnd = Math.max(maxSpanEnd, spanEnd);
+            if (selectionStart < spanStart || selectionStart > spanEnd) {
+                // The span doesn't cover the current selection start point.
+                continue;
+            }
+            unionOfSpansCoveringSelectionStartStart =
+                    Math.min(unionOfSpansCoveringSelectionStartStart, spanStart);
+            unionOfSpansCoveringSelectionStartEnd =
+                    Math.max(unionOfSpansCoveringSelectionStartEnd, spanEnd);
+        }
+        if (unionOfSpansCoveringSelectionStartStart >= unionOfSpansCoveringSelectionStartEnd) {
+            // No spans cover the selection start point.
+            return false;
+        }
+        if (minSpanStart < unionOfSpansCoveringSelectionStartStart
+                || maxSpanEnd > unionOfSpansCoveringSelectionStartEnd) {
+            // There is a span that is not covered by the union. In this case, we soouldn't offer
+            // to show suggestions as it's confusing.
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -3104,7 +3144,7 @@ public class Editor {
         }
 
         private void updateReplaceItem(Menu menu) {
-            boolean canReplace = mTextView.isSuggestionsEnabled() && isCursorInsideSuggestionSpan();
+            boolean canReplace = mTextView.isSuggestionsEnabled() && shouldOfferToShowSuggestions();
             boolean replaceItemExists = menu.findItem(TextView.ID_REPLACE) != null;
             if (canReplace && !replaceItemExists) {
                 menu.add(0, TextView.ID_REPLACE, 0, com.android.internal.R.string.replace).
