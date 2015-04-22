@@ -2450,8 +2450,6 @@ public class ConnectivityManager {
      *
      * @param network{@link Network} specifying which network you're interested.
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
-     *
-     * @hide
      */
     public boolean requestBandwidthUpdate(Network network) {
         try {
