@@ -470,8 +470,6 @@ public class SignalStrength implements Parcelable {
 
     /**
      * Get signal level as an int from 0..4
-     *
-     * @hide
      */
     public int getLevel() {
         int level;
