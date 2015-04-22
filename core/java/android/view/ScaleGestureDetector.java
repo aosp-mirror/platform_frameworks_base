@@ -130,7 +130,7 @@ public class ScaleGestureDetector {
     private float mFocusY;
 
     private boolean mQuickScaleEnabled;
-    private boolean mButtonScaleEnabled;
+    private boolean mStylusScaleEnabled;
 
     private float mCurrSpan;
     private float mPrevSpan;
@@ -162,7 +162,7 @@ public class ScaleGestureDetector {
     private static final float SCALE_FACTOR = .5f;
     private static final int ANCHORED_SCALE_MODE_NONE = 0;
     private static final int ANCHORED_SCALE_MODE_DOUBLE_TAP = 1;
-    private static final int ANCHORED_SCALE_MODE_BUTTON = 2;
+    private static final int ANCHORED_SCALE_MODE_STYLUS = 2;
 
 
     /**
@@ -315,14 +315,11 @@ public class ScaleGestureDetector {
         }
 
         final int count = event.getPointerCount();
-        final int toolType = event.getToolType(0);
-        final boolean isButtonTool = toolType == MotionEvent.TOOL_TYPE_STYLUS
-                || toolType == MotionEvent.TOOL_TYPE_MOUSE;
-        final boolean isAnchoredScaleButtonDown = isButtonTool && (count == 1)
+        final boolean isStylusButtonDown = (event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS)
                 && (event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0;
 
         final boolean anchoredScaleCancelled =
-                mAnchoredScaleMode == ANCHORED_SCALE_MODE_BUTTON && !isAnchoredScaleButtonDown;
+                mAnchoredScaleMode == ANCHORED_SCALE_MODE_STYLUS && !isStylusButtonDown;
         final boolean streamComplete = action == MotionEvent.ACTION_UP ||
                 action == MotionEvent.ACTION_CANCEL || anchoredScaleCancelled;
 
@@ -347,12 +344,12 @@ public class ScaleGestureDetector {
             }
         }
 
-        if (!mInProgress && mButtonScaleEnabled && !inAnchoredScaleMode()
-                && !streamComplete && isAnchoredScaleButtonDown) {
+        if (!mInProgress && mStylusScaleEnabled && !inAnchoredScaleMode()
+                && !streamComplete && isStylusButtonDown) {
             // Start of a button scale gesture
             mAnchoredScaleStartX = event.getX();
             mAnchoredScaleStartY = event.getY();
-            mAnchoredScaleMode = ANCHORED_SCALE_MODE_BUTTON;
+            mAnchoredScaleMode = ANCHORED_SCALE_MODE_STYLUS;
             mInitialSpan = 0;
         }
 
@@ -503,24 +500,22 @@ public class ScaleGestureDetector {
     }
 
     /**
-     * Sets whether the associates {@link OnScaleGestureListener} should receive onScale callbacks
-     * when the user presses a {@value MotionEvent#BUTTON_SECONDARY} (right mouse button, stylus
-     * first button) and drags the pointer on the screen. Note that this is enabled by default if
-     * the app targets API 23 and newer.
+     * Sets whether the associates {@link OnScaleGestureListener} should receive
+     * onScale callbacks when the user uses a stylus and presses the button.
+     * Note that this is enabled by default if the app targets API 23 and newer.
      *
-     * @param scales true to enable stylus or mouse scaling, false to disable.
+     * @param scales true to enable stylus scaling, false to disable.
      */
-    public void setSecondaryButtonScaleEnabled(boolean scales) {
-        mButtonScaleEnabled = scales;
+    public void setStylusScaleEnabled(boolean scales) {
+        mStylusScaleEnabled = scales;
     }
 
     /**
-     * Return whether the button scale gesture, in which the user presses a
-     * {@value MotionEvent#BUTTON_SECONDARY} (right mouse button, stylus first button) and drags the
-     * pointer on the screen, should perform scaling. {@see #setButtonScaleEnabled(boolean)}.
+     * Return whether the stylus scale gesture, in which the user uses a stylus
+     * and presses the button, should preform scaling. {@see #setButtonScaleEnabled(boolean)}.
      */
-    public boolean isSecondaryButtonScaleEnabled() {
-        return mButtonScaleEnabled;
+    public boolean isStylusScaleEnabled() {
+        return mStylusScaleEnabled;
     }
 
     /**
