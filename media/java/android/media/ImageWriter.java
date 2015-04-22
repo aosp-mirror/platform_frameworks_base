@@ -29,7 +29,6 @@ import java.nio.ByteOrder;
 import java.nio.NioUtils;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <p>
@@ -204,7 +203,7 @@ public class ImageWriter implements AutoCloseable {
         WriterSurfaceImage newImage = new WriterSurfaceImage(this);
         nativeDequeueInputImage(mNativeContext, newImage);
         mDequeuedImages.add(newImage);
-        newImage.setImageValid(true);
+        newImage.mIsImageValid = true;
         return newImage;
     }
 
@@ -260,7 +259,7 @@ public class ImageWriter implements AutoCloseable {
             throw new IllegalArgumentException("image shouldn't be null");
         }
         boolean ownedByMe = isImageOwnedByMe(image);
-        if (ownedByMe && !(((WriterSurfaceImage) image).isImageValid())) {
+        if (ownedByMe && !(((WriterSurfaceImage) image).mIsImageValid)) {
             throw new IllegalStateException("Image from ImageWriter is invalid");
         }
 
@@ -312,7 +311,7 @@ public class ImageWriter implements AutoCloseable {
             // Do not call close here, as close is essentially cancel image.
             WriterSurfaceImage wi = (WriterSurfaceImage) image;
             wi.clearSurfacePlanes();
-            wi.setImageValid(false);
+            wi.mIsImageValid = false;
         }
     }
 
@@ -555,7 +554,7 @@ public class ImageWriter implements AutoCloseable {
 
         WriterSurfaceImage wi = (WriterSurfaceImage) image;
 
-        if (!wi.isImageValid()) {
+        if (!wi.mIsImageValid) {
             throw new IllegalStateException("Image is invalid");
         }
 
@@ -568,7 +567,7 @@ public class ImageWriter implements AutoCloseable {
         cancelImage(mNativeContext, image);
         mDequeuedImages.remove(image);
         wi.clearSurfacePlanes();
-        wi.setImageValid(false);
+        wi.mIsImageValid = false;
     }
 
     private boolean isImageOwnedByMe(Image image) {
@@ -585,7 +584,6 @@ public class ImageWriter implements AutoCloseable {
 
     private static class WriterSurfaceImage extends android.media.Image {
         private ImageWriter mOwner;
-        private AtomicBoolean mIsImageValid = new AtomicBoolean(false);
         // This field is used by native code, do not access or modify.
         private long mNativeBuffer;
         private int mNativeFenceFd = -1;
@@ -604,9 +602,8 @@ public class ImageWriter implements AutoCloseable {
 
         @Override
         public int getFormat() {
-            if (!mIsImageValid.get()) {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
+
             if (mFormat == -1) {
                 mFormat = nativeGetFormat();
             }
@@ -615,9 +612,7 @@ public class ImageWriter implements AutoCloseable {
 
         @Override
         public int getWidth() {
-            if (!mIsImageValid.get()) {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
 
             if (mWidth == -1) {
                 mWidth = nativeGetWidth();
@@ -628,9 +623,7 @@ public class ImageWriter implements AutoCloseable {
 
         @Override
         public int getHeight() {
-            if (!mIsImageValid.get()) {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
 
             if (mHeight == -1) {
                 mHeight = nativeGetHeight();
@@ -641,36 +634,28 @@ public class ImageWriter implements AutoCloseable {
 
         @Override
         public long getTimestamp() {
-            if (!mIsImageValid.get()) {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
 
             return mTimestamp;
         }
 
         @Override
         public void setTimestamp(long timestamp) {
-            if (!mIsImageValid.get()) {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
 
             mTimestamp = timestamp;
         }
 
         @Override
         public boolean isOpaque() {
-            if (!mIsImageValid.get()) {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
 
             return getFormat() == ImageFormat.PRIVATE;
         }
 
         @Override
         public Plane[] getPlanes() {
-            if (!mIsImageValid.get()) {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
 
             if (mPlanes == null) {
                 int numPlanes = ImageUtils.getNumPlanesForFormat(getFormat());
@@ -682,9 +667,7 @@ public class ImageWriter implements AutoCloseable {
 
         @Override
         boolean isAttachable() {
-            if (!mIsImageValid.get()) {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
             // Don't allow Image to be detached from ImageWriter for now, as no
             // detach API is exposed.
             return false;
@@ -692,17 +675,21 @@ public class ImageWriter implements AutoCloseable {
 
         @Override
         ImageWriter getOwner() {
+            throwISEIfImageIsInvalid();
+
             return mOwner;
         }
 
         @Override
         long getNativeContext() {
+            throwISEIfImageIsInvalid();
+
             return mNativeBuffer;
         }
 
         @Override
         public void close() {
-            if (mIsImageValid.get()) {
+            if (mIsImageValid) {
                 getOwner().abortImage(this);
             }
         }
@@ -716,16 +703,8 @@ public class ImageWriter implements AutoCloseable {
             }
         }
 
-        private boolean isImageValid() {
-            return mIsImageValid.get();
-        }
-
-        private void setImageValid(boolean isValid) {
-            mIsImageValid.getAndSet(isValid);
-        }
-
         private void clearSurfacePlanes() {
-            if (mIsImageValid.get()) {
+            if (mIsImageValid) {
                 for (int i = 0; i < mPlanes.length; i++) {
                     if (mPlanes[i] != null) {
                         mPlanes[i].clearBuffer();
@@ -756,26 +735,19 @@ public class ImageWriter implements AutoCloseable {
 
             @Override
             public int getRowStride() {
-                if (WriterSurfaceImage.this.isImageValid() == false) {
-                    throw new IllegalStateException("Image is already released");
-                }
+                throwISEIfImageIsInvalid();
                 return mRowStride;
             }
 
             @Override
             public int getPixelStride() {
-                if (WriterSurfaceImage.this.isImageValid() == false) {
-                    throw new IllegalStateException("Image is already released");
-                }
+                throwISEIfImageIsInvalid();
                 return mPixelStride;
             }
 
             @Override
             public ByteBuffer getBuffer() {
-                if (WriterSurfaceImage.this.isImageValid() == false) {
-                    throw new IllegalStateException("Image is already released");
-                }
-
+                throwISEIfImageIsInvalid();
                 return mBuffer;
             }
 

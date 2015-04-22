@@ -1817,7 +1817,6 @@ final public class MediaCodec {
     /** @hide */
     public static class MediaImage extends Image {
         private final boolean mIsReadOnly;
-        private boolean mIsValid;
         private final int mWidth;
         private final int mHeight;
         private final int mFormat;
@@ -1830,36 +1829,42 @@ final public class MediaCodec {
 
         private final static int TYPE_YUV = 1;
 
+        @Override
         public int getFormat() {
-            checkValid();
+            throwISEIfImageIsInvalid();
             return mFormat;
         }
 
+        @Override
         public int getHeight() {
-            checkValid();
+            throwISEIfImageIsInvalid();
             return mHeight;
         }
 
+        @Override
         public int getWidth() {
-            checkValid();
+            throwISEIfImageIsInvalid();
             return mWidth;
         }
 
+        @Override
         public long getTimestamp() {
-            checkValid();
+            throwISEIfImageIsInvalid();
             return mTimestamp;
         }
 
+        @Override
         @NonNull
         public Plane[] getPlanes() {
-            checkValid();
+            throwISEIfImageIsInvalid();
             return Arrays.copyOf(mPlanes, mPlanes.length);
         }
 
+        @Override
         public void close() {
-            if (mIsValid) {
+            if (mIsImageValid) {
                 java.nio.NioUtils.freeDirectBuffer(mBuffer);
-                mIsValid = false;
+                mIsImageValid = false;
             }
         }
 
@@ -1869,6 +1874,7 @@ final public class MediaCodec {
          * The crop rectangle specifies the region of valid pixels in the image,
          * using coordinates in the largest-resolution plane.
          */
+        @Override
         public void setCropRect(@Nullable Rect cropRect) {
             if (mIsReadOnly) {
                 throw new ReadOnlyBufferException();
@@ -1876,11 +1882,6 @@ final public class MediaCodec {
             super.setCropRect(cropRect);
         }
 
-        private void checkValid() {
-            if (!mIsValid) {
-                throw new IllegalStateException("Image is already released");
-            }
-        }
 
         private int readInt(@NonNull ByteBuffer buffer, boolean asLong) {
             if (asLong) {
@@ -1895,7 +1896,7 @@ final public class MediaCodec {
                 long timestamp, int xOffset, int yOffset, @Nullable Rect cropRect) {
             mFormat = ImageFormat.YUV_420_888;
             mTimestamp = timestamp;
-            mIsValid = true;
+            mIsImageValid = true;
             mIsReadOnly = buffer.isReadOnly();
             mBuffer = buffer.duplicate();
 
@@ -1966,20 +1967,20 @@ final public class MediaCodec {
 
             @Override
             public int getRowStride() {
-                checkValid();
+                throwISEIfImageIsInvalid();
                 return mRowInc;
             }
 
             @Override
             public int getPixelStride() {
-                checkValid();
+                throwISEIfImageIsInvalid();
                 return mColInc;
             }
 
             @Override
             @NonNull
             public ByteBuffer getBuffer() {
-                checkValid();
+                throwISEIfImageIsInvalid();
                 return mData;
             }
 

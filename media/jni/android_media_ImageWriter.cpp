@@ -338,7 +338,7 @@ static void ImageWriter_dequeueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
     status_t res = anw->dequeueBuffer(anw.get(), &anb, &fenceFd);
     if (res != OK) {
         // TODO: handle different error cases here.
-        ALOGE("%s: Set buffer count failed: %s (%d)", __FUNCTION__, strerror(-res), res);
+        ALOGE("%s: Dequeue buffer failed: %s (%d)", __FUNCTION__, strerror(-res), res);
         jniThrowRuntimeException(env, "dequeue buffer failed");
         return;
     }
