@@ -92,6 +92,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
     private static final boolean DBG = true;
     private static final boolean STATE_DBG = false;
     private static final boolean MSG_DBG = false;
+    private static final boolean PACKET_DBG = true;
 
     // Timers and timeouts.
     private static final int SECONDS = 1000;
@@ -329,6 +330,9 @@ public class DhcpClient extends BaseDhcpStateMachine {
                     if (packet != null) {
                         maybeLog("Received packet: " + packet);
                         sendMessage(CMD_RECEIVED_PACKET, packet);
+                    } else if (PACKET_DBG) {
+                        Log.d(TAG,
+                                "Can't parse packet" + HexDump.dumpHexString(mPacket, 0, length));
                     }
                 } catch (IOException|ErrnoException e) {
                     if (!stopped) {
