@@ -360,17 +360,20 @@
     <string name="monitoring_title" msgid="169206259253048106">"Сүлжээний хяналт"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN идэвхгүйжүүлэх"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN таслах"</string>
-    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n удирдаж байна.\nТаны админ таны төхөөрөмж болон имэйл, апп-ууд болон аюулгүй вебсайтууд зэрэг таны сүлжээний үйл ажиллагааг хянах боломжтой.\n\nДэлгэрэнгүй мэдээллийг админаас авна уу."</string>
-    <string name="monitoring_description_vpn" msgid="7288268682714305659">"Та \"<xliff:g id="APPLICATION">%1$s</xliff:g>\"-д VPN холболт үүсгэх зөвшөөрөл өгсөн.\n\nЭнэ апп таны төхөөрөмж болон имэйл, апп-ууд болон аюулгүй вэбсайтууд зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Та VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") холбогдсон байна.\n\nТаны VPN үйлчилгээ үзүүлэгч нь таны төхөөрөмж болон имэйл, апп-ууд болон аюулгүй вэбсайтууд зэрэг таны сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n удирдаж байна \n Танай админ имэйл, апп-ууд, аюулгүй вэбсайтууд зэргийг оруулан таны сүлжээний үйл ажиллагааг хянах боломжтой. Дэлгэрэнгүй мэдээллийг админаас авна уу.\n\nМөн та <xliff:g id="APPLICATION">%2$s</xliff:g>-д VPN холболт үүсгэх зөвшөөрөл өгсөн байна. Энэ апп мөн сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n удирдаж байна \nТанай админ имэйл, апп-ууд, аюулгүй вэбсайтууд зэргийг оруулан таны сүлжээний үйл ажиллагааг хянах боломжтой. Дэлгэрэнгүй мэдээллийг админаас авна уу.\n\nМөн та VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\")-д холбогдсон байна. VPN үйлчилгээ үзүүлэгч таны сүлжээний үйл ажиллагааг мөн хянах боломжтой."</string>
-    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"Энэ профайлыг \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\nудирдаж байна\nТаны админ таны төхөөрөмж, сүлжээний идэвхжилт, имэйл, апп-ууд болон аюулгүй вебсайтуудыг хянах боломжтой.\n\nДэлгэрэнгүй мэдээллийг админаасаа авна уу."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n удирддаг. Таны профайлыг \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n удирддаг\nТаны админ таны төхөөрөмж, сүлжээний идэвхжилт, имэйл, апп-ууд болон аюулгүй вебсайтуудыг хянах боломжтой.\n\nДэлгэрэнгүй мэдээллийг админаасаа авна уу."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"Энэ профайлыг \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\nудирдаж байна\nТаны админ сүлжээний идэвхжилт, имэйл, апп-ууд болон аюулгүй вебсайтуудыг хянах боломжтой. Дэлгэрэнгүй мэдээллийг админаасаа авна уу.\n\nМөн та \"<xliff:g id="APPLICATION">%2$s</xliff:g>\"-д VPN холболт үүсгэх зөвшөөрөл өгсөн. Энэ апп сүлжээний идэвхжилтийг хянах боломжтой."</string>
-    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"Энэ профайлыг \n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\nудирдаж байна\nТаны админ таны сүлжээний үйл ажиллагаа, имэйл, апп-ууд, аюулгүй вебсайтуудыг хянах боломжтой. Дэлгэрэнгүй мэдээллийг админаасаа авна уу.\n\nМөн та VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\")-д холбогдсон байна. Таны VPN үйлчилгээ үзүүлэгч таны сүлжээний идэвхжилтийг хянах боломжтой."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n удирдаж байна. Таны профайлыг \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\nудирдаж байна\nТаны админ таны сүлжээний идэвхжилт, имэйл, апп-ууд, аюулгүй вэбсайтуудыг хянах боломжтой. Дэлгэрэнгүй мэдээллийг админаасаа авна уу.\n\nМөн та \"<xliff:g id="APPLICATION">%3$s</xliff:g>\"-д VPN холболт үүсгэх зөвшөөрөл өгсөн. Энэ апп нь таны сүлжээний идэвхжилтийг хянах боломжтой."</string>
-    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Энэ төхөөрөмжийг \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\n удирддаг. Таны профайлыг \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n удирддаг\nТаны админ таны төхөөрөмж, сүлжээний идэвхжилт, имэйл, апп-ууд болон аюулгүй вебсайтуудыг хянах боломжтой.Дэлгэрэнгүй мэдээллийг админаасаа авна уу.\n\nМөн та VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\")-д холбогдсон байна. Таны VPN үйлчилгээ үзүүлэгч таны сүлжээний идэвхжилтийг хянах боломжтой."</string>
+    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
+    <skip />
+    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
+    <skip />
+    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Таныг гараар онгойлгох хүртэл төхөөрөмж түгжээтэй байх болно"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Мэдэгдлийг хурдан авах"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Түгжээг тайлахын өмнө үзнэ үү"</string>

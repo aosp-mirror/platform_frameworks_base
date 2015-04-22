@@ -146,8 +146,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ไม่มีซิมการ์ด"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"การปล่อยสัญญาณบลูทูธ"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"โหมดใช้งานบนเครื่องบิน"</string>
-    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
-    <skip />
+    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"การเปลี่ยนเครือข่ายผู้ให้บริการ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"แบตเตอรี่ <xliff:g id="NUMBER">%d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"การตั้งค่าระบบ"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"การแจ้งเตือน"</string>
@@ -363,17 +362,20 @@
     <string name="monitoring_title" msgid="169206259253048106">"การตรวจสอบเครือข่าย"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"ปิดใช้ VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"ยกเลิกการเชื่อมต่อ VPN"</string>
-    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"อุปกรณ์นี้จัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย\n\nสำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบ"</string>
-    <string name="monitoring_description_vpn" msgid="7288268682714305659">"คุณให้สิทธิ์ \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" ในการตั้งค่าการเชื่อมต่อ VPN\n\nแอปนี้สามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย"</string>
-    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"คุณเชื่อมต่อกับ VPN (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") อยู่\n\nผู้ให้บริการ VPN สามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัยได้"</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nนอกจากนี้ คุณได้ให้สิทธิ์ \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" เพื่อตั้งค่าการเชื่อมต่อ VPN แอปนี้สามารถตรวจสอบกิจกรรมในเครือข่ายได้เช่นกัน"</string>
-    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nนอกจากนี้ คุณเชื่อมต่อกับ VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") ผู้ให้บริการ VPN ของคุณสามารถตรวจสอบกิจกรรมในเครือข่ายของคุณได้เช่นกัน"</string>
-    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"โปรไฟล์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย\n\nสำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบ"</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nโปรไฟล์ของคุณได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nผู้ดูแลระบบของคุณสามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย\n\nสำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบ"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"โปร์ไฟล์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบกิจกรรมเครือข่ายของคุณได้ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nนอกจากนี้ คุณได้ให้สิทธิ์ \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" ในการตั้งค่าการเชื่อมต่อ VPN แอปนี้สามารถตรวจสอบกิจกรรมเครือข่ายได้เช่นกัน"</string>
-    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"โปรไฟล์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบกิจกรรมเครือข่ายของคุณได้ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nคุณยังได้เชื่อมต่อกับ VPN (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") ผู้ให้บริการ VPN สามารถตรวจสอบกิจกรรมเครือข่ายของคุณได้เช่นกัน"</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nโปรไฟล์ของคุณได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบอุปกรณ์และกิจกรรมเครือข่าย รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบ\n\nคุณยังได้ให้สิทธิ์ \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" ในการตั้งค่าการเชื่อมต่อ VPN แอปนี้จะสามารถตรวจสอบกิจกรรมเครือข่ายได้เช่นกัน"</string>
-    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"อุปกรณ์นี้ได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nโปรไฟล์ของคุณได้รับการจัดการโดย:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nผู้ดูแลระบบสามารถตรวจสอบกิจกรรมเครือข่ายของคุณ รวมถึงอีเมล แอป และเว็บไซต์ที่ปลอดภัย สำหรับข้อมูลเพิ่มเติม โปรดติดต่อผู้ดูแลระบบของคุณ\n\nคุณยังได้เชื่อมต่อกับ VPN (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") ผู้ให้บริการ VPN สามารถตรวจสอบกิจกรรมเครือข่ายของคุณได้เช่นกัน"</string>
+    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
+    <skip />
+    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
+    <skip />
+    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"อุปกรณ์จะล็อกจนกว่าคุณจะปลดล็อกด้วยตนเอง"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"รับการแจ้งเตือนเร็วขึ้น"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ดูก่อนปลดล็อก"</string>
