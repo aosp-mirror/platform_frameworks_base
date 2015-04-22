@@ -1574,6 +1574,21 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: This is a device dedicated to showing UI
+     * on a vehicle headunit. A headunit here is defined to be inside a
+     * vehicle that may or may not be moving. A headunit uses either a
+     * primary display in the center console and/or additional displays in
+     * the instrument cluster or elsewhere in the vehicle. Headunit display(s)
+     * have limited size and resolution. The user will likely be focused on
+     * driving so limiting driver distraction is a primary concern. User input
+     * can be a variety of hard buttons, touch, rotary controllers and even mouse-
+     * like interfaces.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_AUTOMOTIVE = "android.hardware.type.automotive";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: This is a device dedicated to showing UI
      * on a television.  Television here is defined to be a typical living
      * room television experience: displayed on a big screen, where the user
      * is sitting far away from it, and the dominant form of input will be
