@@ -26,42 +26,191 @@ Unlike with data items, there is no syncing between the handheld and wearable ap
 Messages are a one-way communication mechanism that's good for remote procedure calls (RPC),
 such as sending a message to the wearable to start an activity.</p>
 
-<h2 id="SendMessage">Send a Message</h2>
+<p>Multiple wearable devices can be connected to a user’s handheld device. Each connected device in
+the network is considered a <em>node</em>. With multiple connected devices, you must consider which
+nodes receive the messages. For example, In a voice transcription app that receives voice data on
+the wearable device, you should send the message to a node with the processing power and battery
+capacity to handle the request, such as a handheld device.</p>
 
-<p>The following example shows how to send a message that indicates to the other
-side of the connection to start an activity.
-This call is synchronous and blocks processing until the message is received or until the request
-times out:</p>
-
-<p class="note"><b>Note:</b> Read more about asynchronous and synchronous calls
-to Google Play services and when to use each in
-<a href="{@docRoot}google/auth/api-client.html#Communicating">Communicate with Google Play Services</a>.
+<p class="note"><strong>Note:</strong>
+With versions of Google Play services prior to 7.3.0, only one wearable device could be connected to
+a handheld device at a time. You may need to update your existing code to take the multiple
+connected nodes feature into consideration. If you don’t implement the changes, your messages may
+not get delivered to intended devices.
 </p>
 
+<h2 id="SendMessage">Send a Message</h2>
+
+<p>A wearable app can provide functionality for users such as voice
+transcription. Users can speak into their wearable device's microphone, and have a transcription
+saved to a note. Since a wearable device typically does not have the processing power and battery
+capacity required to handle the voice transcription activity, the app should offload this work to a
+more capable, connected device.</p>
+
+<p>The following sections show you how to advertise device nodes that can process activity
+requests, discover the nodes capable of fulfilling a requested need, and send messages to those
+nodes.
+</p>
+
+<h3 id="AdvertiseCapabilities">Advertise capabilities</h3>
+
+<p>To launch an activity on a handheld device from a wearable device, use the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html"><code>MessageApi</code></a>
+class to send the request. Since multiple wearables can be connected to the handheld device, the
+wearable app needs to determine that a connected node is capable of launching the activity. In your
+handheld app, advertise that the node it runs on provides specific capabilities.</p>
+
+<p>To advertise the capabilities of your handheld app:</p>
+
+<ol>
+  <li>Create an XML configuration file in the <code>res/values/</code> directory of your project and
+  name it <code>wear.xml</code>.
+  </li>
+  <li>Add a resource named <code>android_wear_capabilities</code> to <code>wear.xml</code>.
+  </li>
+  <li>Define capabilities that the device provides.
+  </li>
+</ol>
+
+<p class="note"><strong>Note:</strong>
+Capabilities are custom strings that you define and must be unique within your app.
+</p>
+
+<p>The following example shows how to add a capability named <code>voice_transcription</code> to
+<code>wear.xml</code>:</p>
+
 <pre>
-GoogleApiClient mGoogleApiClient;
-public static final String START_ACTIVITY_PATH = "/start/MainActivity";
+&lt;resources>
+    &lt;string-array name="android_wear_capabilities">
+        &lt;item>voice_transcription&lt;/item>
+    &lt;/string-array>
+&lt;/resources>
+</pre>
+
+<h3 id="RetrieveCapabilities">Retrieve the nodes with the required capabilities</h3>
+
+<p>Initially, you can detect the capable nodes by calling the <a
+href="{@docRoot}reference/com/google/android/gms/wearable/CapabilityApi.html#getCapability(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, int)"><code>CapabilityApi.getCapability()</code></a>
+method.
+The following example shows how to manually retrieve the results of reachable nodes with the
+<code>voice_transcription</code> capability:</p>
+
+<pre>
+private static final String
+        VOICE_TRANSCRIPTION_CAPABILITY_NAME = "voice_transcription";
+
+private GoogleApiClient mGoogleApiClient;
+
 ...
 
-private void sendStartActivityMessage(String nodeId) {
-    Wearable.MessageApi.sendMessage(
-      mGoogleApiClient, nodeId, START_ACTIVITY_PATH, new byte[0]).setResultCallback(
-          new ResultCallback&lt;SendMessageResult>() {
-              &#64;Override
-              public void onResult(SendMessageResult sendMessageResult) {
-                  if (!sendMessageResult.getStatus().isSuccess()) {
-                      Log.e(TAG, "Failed to send message with status code: "
-                              + sendMessageResult.getStatus().getStatusCode());
-                  }
-              }
-          }
-      );
+private void setupVoiceTranscription() {
+    CapabilityApi.GetCapabilityResult result =
+            Wearable.CapabilityApi.getCapability(
+                    mGoogleApiClient, VOICE_TRANSCRIPTION_CAPABILITY_NAME,
+                    CapabilityApi.FILTER_REACHABLE).await();
+
+    updateTranscriptionCapability(result.getCapability());
 }
 </pre>
 
-<p>
-Here's a simple way to get a list of connected nodes that you can potentially
-send messages to:</p>
+<p>To detect capable nodes as they connect to the wearable device, register a <a
+href="{@docRoot}reference/com/google/android/gms/wearable/CapabilityApi.CapabilityListener.html"><code>CapabilityApi.CapabilityListener()</code></a>
+instance to your <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code></a>.
+The following example shows how to register the listener and retrieve the results of reachable nodes
+with the <code>voice_transcription</code> capability:</p>
+
+<pre>
+private void setupVoiceTranscription() {
+    ...
+
+    CapabilityApi.CapabilityListener capabilityListener =
+            new CapabilityApi.CapabilityListener() {
+                &#64;Override
+                public void onCapabilityChanged(CapabilityInfo capabilityInfo) {
+                    updateTranscriptionCapability(capabilityInfo);
+                }
+            };
+
+    Wearable.CapabilityApi.addCapabilityListener(
+            mGoogleApiClient,
+            capabilityListener,
+            VOICE_TRANSCRIPTION_CAPABILITY_NAME);
+}
+</pre>
+
+<p>After detecting the capable nodes, determine where to send the message. You should pick a node
+that is in close proximity to your wearable device to
+minimize message routing through multiple nodes. A nearby node is defined as one that is directly
+connected to the device. To determine if a node is nearby, call the <a
+href="{@docRoot}reference/com/google/android/gms/wearable/Node.html#isNearby()"><code>Node.isNearby()</code></a>
+method.</p>
+
+<p>The following example shows how you might determine the best node to use:</p>
+
+<pre>
+private String transcriptionNodeId = null;
+
+private void updateTranscriptionCapability(CapabilityInfo capabilityInfo) {
+    Set&lt;Node> connectedNodes = capabilityInfo.getNodes();
+
+    transcriptionNodeId = pickBestNodeId(connectedNodes);
+}
+
+private String pickBestNodeId(Set&lt;Node> nodes) {
+    String bestNodeId = null;
+    // Find a nearby node or pick one arbitrarily
+    for (Node node : nodes) {
+        if (node.isNearby()) {
+            return node.getId();
+         }
+         bestNodeId = node.getId();
+    }
+    return bestNodeId;
+}
+</pre>
+
+<h3 id="DeliverMessage">Deliver the message</h3>
+
+<p>Once you’ve identified the best node to use, send the message using the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html"><code>MessageApi</code></a>
+class.</p>
+
+<p>The following example shows how to send a message to the transcription-capable node from a
+wearable device. Verify that the node is available before you attempt to send the message. This call
+is synchronous and blocks processing until the message is received or until the request times out.
+</p>
+
+<pre>
+
+public static final String VOICE_TRANSCRIPTION_MESSAGE_PATH = "/voice_transcription";
+
+private void requestTranscription(byte[] voiceData) {
+    if (transcriptionNodeId != null) {
+        Wearable.MessageApi.sendMessage(googleApiClient, transcriptionNodeId,
+            VOICE_TRANSCRIPTION_MESSAGE_PATH, voiceData).setResultCallback(
+                  new ResultCallback<SendMessageResult>() {
+                      &#64;Override
+                      public void onResult(SendMessageResult sendMessageResult) {
+                          if (!sendMessageResult.getStatus().isSuccess()) {
+                              // Failed to send message
+                          }
+                      }
+                  }
+            );
+    } else {
+        // Unable to retrieve node with transcription capability
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> To learn more about asynchronous and synchronous calls
+to Google Play services and when to use each, see
+<a href="{@docRoot}google/auth/api-client.html#Communicating">Communicate with Google Play
+Services</a>.
+</p>
+
+<p>You can also broadcast messages to all connected nodes. To retrieve all of the
+connected nodes that you can send messages to, implement the following code:</p>
 
 <pre>
 private Collection&lt;String&gt; getNodes() {
@@ -78,22 +227,24 @@ private Collection&lt;String&gt; getNodes() {
 <h2 id="ReceiveMessage">Receive a Message</h2>
 
 <p>
-To be notified of received messages, you implement the
+To be notified of received messages, implement the
 <a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.MessageListener.html">
-<code>MessageListener</code></a> interface to provide a listener for message events. Then you register your
-listener with the
+<code>MessageListener</code></a> interface to provide a listener for message events. Then,
+register the listener with the
 <a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.MessageApi.MessageListener)">
-<code>MessageApi.addListener()</code></a> method. This example shows how you might implement the listener
-to check the <code>START_ACTIVITY_PATH</code> that the previous example used to send the message.
-If this condition is <code>true</code>, a specific activity is started.
+<code>MessageApi.addListener()</code></a> method. This example shows how you might implement the
+listener to check the <code>VOICE_TRANSCRIPTION_MESSAGE_PATH</code>. If this condition is
+<code>true</code>, start an activity to process the voice
+data.
 </p>
 
 <pre>
 &#64;Override
 public void onMessageReceived(MessageEvent messageEvent) {
-    if (messageEvent.getPath().equals(START_ACTIVITY_PATH)) {
+    if (messageEvent.getPath().equals(VOICE_TRANSCRIPTION_MESSAGE_PATH)) {
         Intent startIntent = new Intent(this, MainActivity.class);
         startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startIntent.putExtra("VOICE_DATA", messageEvent.getData());
         startActivity(startIntent);
     }
 }
