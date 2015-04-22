@@ -523,8 +523,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf, Rect sf) {
         mHaveFrame = true;
 
-        TaskStack stack = mAppToken != null ? getStack() : null;
-        if (stack != null && !stack.isFullscreen()) {
+        final TaskStack stack = mAppToken != null ? getStack() : null;
+        final boolean nonFullscreenStack = stack != null && !stack.isFullscreen();
+        if (nonFullscreenStack) {
             stack.getBounds(mContainingFrame);
             final WindowState imeWin = mService.mInputMethodWindow;
             if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this
@@ -607,9 +608,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             y = mAttrs.y;
         }
 
-        // Make sure window fits in containing frame required by {@link Gravity#apply} call.
-        w = Math.min(w, pw);
-        h = Math.min(h, ph);
+        if (nonFullscreenStack) {
+            // Make sure window fits in containing frame since it is in a non-fullscreen stack as
+            // required by {@link Gravity#apply} call.
+            w = Math.min(w, pw);
+            h = Math.min(h, ph);
+        }
+
         Gravity.apply(mAttrs.gravity, w, h, mContainingFrame,
                 (int) (x + mAttrs.horizontalMargin * pw),
                 (int) (y + mAttrs.verticalMargin * ph), mFrame);
