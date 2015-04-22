@@ -29,7 +29,7 @@ class ANDROID_API Canvas {
 public:
     virtual ~Canvas() {};
 
-    static Canvas* create_canvas(SkBitmap* bitmap);
+    static Canvas* create_canvas(const SkBitmap& bitmap);
 
     /**
      *  Create a new Canvas object which delegates to an SkCanvas.
@@ -52,7 +52,7 @@ public:
      */
     virtual SkCanvas* asSkCanvas() = 0;
 
-    virtual void setBitmap(SkBitmap* bitmap, bool copyState) = 0;
+    virtual void setBitmap(const SkBitmap& bitmap) = 0;
 
     virtual bool isOpaque() = 0;
     virtual int width() = 0;
@@ -87,7 +87,8 @@ public:
     virtual bool quickRejectRect(float left, float top, float right, float bottom) const = 0;
     virtual bool quickRejectPath(const SkPath& path) const = 0;
 
-    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op) = 0;
+    virtual bool clipRect(float left, float top, float right, float bottom,
+            SkRegion::Op op = SkRegion::kIntersect_Op) = 0;
     virtual bool clipPath(const SkPath* path, SkRegion::Op op) = 0;
     virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) = 0;
 
