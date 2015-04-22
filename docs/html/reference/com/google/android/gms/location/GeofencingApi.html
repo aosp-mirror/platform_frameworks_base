@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1352,7 +1363,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
   <div class="jd-tagdata jd-tagdescr"><p>Removes all geofences associated with the given <code>pendingIntent</code>.
  <p>
- Warning: please use <code><a href="/reference/android/app/PendingIntent.html#FLAG_UPDATE_CURRENT">FLAG_UPDATE_CURRENT</a></code>
+ Warning: <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code> is used for comparison.  Please use
+ <code><a href="/reference/android/app/PendingIntent.html#FLAG_UPDATE_CURRENT">FLAG_UPDATE_CURRENT</a></code>
  rather than <code><a href="/reference/android/app/PendingIntent.html#FLAG_CANCEL_CURRENT">FLAG_CANCEL_CURRENT</a></code> when
  creating the pending intent, otherwise you will not get the same pending
  intent you provided to

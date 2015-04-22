@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1160,6 +1171,18 @@ Summary:
     
     
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#METADATA_TAG_WALLET_API_ENABLED">METADATA_TAG_WALLET_API_ENABLED</a></td>
+        <td class="jd-descrcol" width="100%">
+          Name of the metadata tag that is a signal from your application that it uses Wallet APIs.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#RESULT_ERROR">RESULT_ERROR</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1171,7 +1194,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#STYLE_NO_TRANSITION">STYLE_NO_TRANSITION</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1186,7 +1209,7 @@ Summary:
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#STYLE_SLIDE_TRANSITION">STYLE_SLIDE_TRANSITION</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1201,7 +1224,7 @@ Summary:
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_DARK">THEME_DARK</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1215,7 +1238,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_DARK">THEME_HOLO_DARK</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1230,7 +1253,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_LIGHT">THEME_HOLO_LIGHT</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1245,7 +1268,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_LIGHT">THEME_LIGHT</a></td>
         <td class="jd-descrcol" width="100%">
@@ -2357,6 +2380,58 @@ From class
         </span>
         </div>
     
+    </div>
+</div>
+
+
+
+<A NAME="METADATA_TAG_WALLET_API_ENABLED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        METADATA_TAG_WALLET_API_ENABLED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Name of the metadata tag that is a signal from your application that it uses Wallet APIs.
+ Note:
+ In future versions this metadata tag will be required in your application manifest to use
+ Wallet APIs in your app.
+
+ Example of using the tag:
+ <application ...>
+     <meta-data
+         android:name="com.google.android.gms.wallet.api.enabled"
+         android:value="true" />
+         ...
+ </application>
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "com.google.android.gms.wallet.api.enabled"
+
+        </span>
+        </div>
+
     </div>
 </div>
 

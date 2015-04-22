@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1237,6 +1248,29 @@ android.os.Parcelable
         <td class="jd-typecol"><nobr>
 
 
+            final
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveId.html#toInvariantString()">toInvariantString</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Returns an invariant string for this <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
 
 
 
@@ -1256,7 +1290,7 @@ android.os.Parcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1867,7 +1901,8 @@ From interface
  The String representation is not guaranteed to be stable over time for a given resource so
  should never be compared for equality.   Always use <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code> and
  then <code><a href="/reference/com/google/android/gms/drive/DriveId.html#equals(java.lang.Object)">equals(Object)</a></code> to compare two identifiers to see if they refer to the
- same resource.
+ same resource. Otherwise, <code><a href="/reference/com/google/android/gms/drive/DriveId.html#toInvariantString()">toInvariantString()</a></code> is stable and can be safely
+ used for <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> comparison.
 </p></div>
 
     </div>
@@ -2008,6 +2043,47 @@ From interface
 
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="toInvariantString()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+        final
+
+
+        String
+      </span>
+      <span class="sympad">toInvariantString</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns an invariant string for this <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>. This is stable over time, so for a
+ given <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>, this value will always remain the same, and is guaranteed to be unique
+ for each <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>. The client can use it directly to compare equality of
+ <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>s, since two <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>s are equal if and only if its invariant string
+ is equal.
+ <p>
+ Note: This value cannot be used to <code><a href="/reference/com/google/android/gms/drive/DriveId.html#decodeFromString(java.lang.String)">decodeFromString(String)</a></code>, since it's not meant
+ to encode a <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>, but can be useful for client-side string-based <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code>
+ comparison, or for logging purposes.
+</p></div>
 
     </div>
 </div>

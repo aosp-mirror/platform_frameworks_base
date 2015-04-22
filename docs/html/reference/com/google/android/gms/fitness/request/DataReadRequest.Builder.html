@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1627,7 +1638,10 @@ From class
  detailed data source or aggregate data source should be specified in the request
  <p>
  This method can be used instead of <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html#aggregate(com.google.android.gms.fitness.data.DataSource, com.google.android.gms.fitness.data.DataType)">aggregate(DataSource, DataType)</a></code>
- when the application is not interested in a specific data source.</p></div>
+ when the application is not interested in a specific data source.
+ <p>
+ The resulting aggregated data can be queried via
+ <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getBuckets()">getBuckets()</a></code> and <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html#getDataSet(com.google.android.gms.fitness.data.DataType)">getDataSet(DataType)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1696,9 +1710,12 @@ From class
  aggregate data types for a given input data type
  see <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#getAggregatesForInput(com.google.android.gms.fitness.data.DataType)">getAggregatesForInput(DataType)</a></code>.
  <p>
- Aggregation should be requested in conjunction with one of the bucketing strategy: by
+ Aggregation should be requested in conjunction with one of the bucketing strategies: by
  time, session or activity.  At least one valid detailed data source or aggregate data
- source should be specified in the request.</p></div>
+ source should be specified in the request.
+ <p>
+ The resulting aggregated data can be queried via
+ <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getBuckets()">getBuckets()</a></code> and <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html#getDataSet(com.google.android.gms.fitness.data.DataType)">getDataSet(DataType)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -2241,7 +2258,10 @@ From class
  aggregate data source should be specified in the request.
  <p>
  This method can be used instead of <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html#read(com.google.android.gms.fitness.data.DataSource)">read(DataSource)</a></code> when the
- application is not interested in a specific data source.</p></div>
+ application is not interested in a specific data source.
+ <p>
+ The resulting unaggregated data can be queried via
+ <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getDataSet(com.google.android.gms.fitness.data.DataType)">getDataSet(DataType)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -2297,7 +2317,10 @@ From class
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Adds a specific data source we want to read data from to this request.  At least one
- valid detailed data source or aggregate data source should be specified in the request.</p></div>
+ valid detailed data source or aggregate data source should be specified in the request.
+ <p>
+ The resulting unaggregated data can be queried via
+ <code><a href="/reference/com/google/android/gms/fitness/result/DataReadResult.html#getDataSet(com.google.android.gms.fitness.data.DataSource)">getDataSet(DataSource)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">

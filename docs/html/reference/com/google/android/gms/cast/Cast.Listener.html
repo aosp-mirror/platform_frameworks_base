@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -974,6 +985,29 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.Listener.html#onActiveInputStateChanged(int)">onActiveInputStateChanged</a></span>(int activeInputState)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when the active-input state of the device has changed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.Listener.html#onApplicationDisconnected(int)">onApplicationDisconnected</a></span>(int statusCode)</nobr>
         
         <div class="jd-descrdiv">
@@ -988,7 +1022,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1012,7 +1046,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1035,6 +1069,29 @@ Summary:
 
 
 	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.Listener.html#onStandbyStateChanged(int)">onStandbyStateChanged</a></span>(int standbyState)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when the standby state of the device has changed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1354,6 +1411,50 @@ From class
 
 
 
+<A NAME="onActiveInputStateChanged(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onActiveInputStateChanged</span>
+      <span class="normal">(int activeInputState)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the active-input state of the device has changed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>activeInputState</td>
+          <td>The new active-input state. One of the constants
+            <code><a href="/reference/com/google/android/gms/cast/Cast.html#ACTIVE_INPUT_STATE_UNKNOWN">ACTIVE_INPUT_STATE_UNKNOWN</a></code>, <code><a href="/reference/com/google/android/gms/cast/Cast.html#ACTIVE_INPUT_STATE_NO">ACTIVE_INPUT_STATE_NO</a></code>,
+            <code><a href="/reference/com/google/android/gms/cast/Cast.html#ACTIVE_INPUT_STATE_YES">ACTIVE_INPUT_STATE_YES</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="onApplicationDisconnected(int)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1470,6 +1571,50 @@ From class
       
   <div class="jd-tagdata jd-tagdescr"><p>Called when the status of the connected application has changed.
 </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onStandbyStateChanged(int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onStandbyStateChanged</span>
+      <span class="normal">(int standbyState)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the standby state of the device has changed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>standbyState</td>
+          <td>The new standby state. One of the constants
+            <code><a href="/reference/com/google/android/gms/cast/Cast.html#STANDBY_STATE_UNKNOWN">STANDBY_STATE_UNKNOWN</a></code>, <code><a href="/reference/com/google/android/gms/cast/Cast.html#STANDBY_STATE_NO">STANDBY_STATE_NO</a></code>, or
+            <code><a href="/reference/com/google/android/gms/cast/Cast.html#STANDBY_STATE_YES">STANDBY_STATE_YES</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

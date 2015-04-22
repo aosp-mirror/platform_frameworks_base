@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1046,7 +1057,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationSettingsRequest.Builder.html#setAlwaysShow(boolean)">setAlwaysShow</a></span>(boolean show)</nobr>
 
         <div class="jd-descrdiv">
-          This method currently does nothing.
+          Always show the dialog, without the "Never" option to suppress future dialogs from this
+ app.
 
 
 
@@ -1504,14 +1516,13 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>This method currently does nothing.
- In a future release, we may introduce the ability for users to suppress future dialogs
- from a given app. Calling this method before invoking the dialog will hide this option
- from users.
+  <div class="jd-tagdata jd-tagdescr"><p>Always show the dialog, without the "Never" option to suppress future dialogs from this
+ app. When this flag is set to true, the dialog will show up if the location settings do
+ not satisfy the request, even if a user has previously chosen "Never".
 
- Use this method if and only if your dialog is the result of an explicit user-initiated
- action that requires location. Canceling this dialog should also cancel the initiated
- action in your app.
+ NOTE: Only use this method if your dialog is the result of an explicit user-initiated
+ action that requires location to proceed. Canceling this dialog should also cancel the
+ initiated action.
 </p></div>
 
     </div>

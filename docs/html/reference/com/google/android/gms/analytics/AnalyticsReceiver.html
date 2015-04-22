@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -898,16 +909,23 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">A <code><a href="/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a></code> used by Google Analytics.
- It will only be used if it is correctly declared in the manifest:
- <p>
- <pre>
- &lt;receiver android:name="com.google.android.gms.analytics.AnalyticsReceiver"
-           android:enabled="true"&gt;
-     &lt;intent-filter&gt;
-         &lt;action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" /&gt;
-     &lt;/intent-filter&gt;
- &lt;/receiver&gt;</pre>
+<p itemprop="articleBody">A <code><a href="/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a></code> used by Google Analytics. It will only be used when
+ the receiver is correctly declared in the manifest and enabled: <p>
+ <pre><code>&lt;manifest&gt;
+   &lt;application&gt;
+     &lt;!-- ... --&gt;
+
+     &lt;receiver android:name="com.google.android.gms.analytics.AnalyticsReceiver"
+         android:enabled="true"&gt;
+         &lt;intent-filter&gt;
+             &lt;action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" /&gt;
+         &lt;/intent-filter&gt;
+     &lt;/receiver&gt;
+
+     &lt;!-- ... --&gt;
+   &lt;/application&gt;
+ &lt;/manifest&gt;
+ </code></pre>
 </p>
 
 
