@@ -2701,7 +2701,8 @@ public class NotificationManagerService extends SystemService {
         // Save it for users of getHistoricalNotifications()
         mArchive.record(r.sbn);
 
-        EventLogTags.writeNotificationCanceled(canceledKey, reason);
+        int lifespan = (int) (System.currentTimeMillis() - r.getCreationTimeMs());
+        EventLogTags.writeNotificationCanceled(canceledKey, reason, lifespan);
     }
 
     /**
