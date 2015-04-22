@@ -39,17 +39,23 @@ static void finalizer(JNIEnv* env, jobject clazz, jlong canvasHandle) {
 }
 
 // Native wrapper constructor used by Canvas(Bitmap)
-static jlong initRaster(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    return reinterpret_cast<jlong>(Canvas::create_canvas(bitmap));
+static jlong initRaster(JNIEnv* env, jobject, jobject jbitmap) {
+    SkBitmap* bitmap = nullptr;
+    if (jbitmap != NULL) {
+        bitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
+    }
+    return reinterpret_cast<jlong>(Canvas::create_canvas(
+            bitmap ? *bitmap : SkBitmap()));
 }
 
 // Set the given bitmap as the new draw target (wrapped in a new SkCanvas),
 // optionally copying canvas matrix & clip state.
-static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
-                      jboolean copyState) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    get_canvas(canvasHandle)->setBitmap(bitmap, copyState);
+static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap) {
+    SkBitmap* bitmap = nullptr;
+    if (jbitmap != NULL) {
+        bitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
+    }
+    get_canvas(canvasHandle)->setBitmap(bitmap ? *bitmap : SkBitmap());
 }
 
 static jboolean isOpaque(JNIEnv*, jobject, jlong canvasHandle) {
@@ -658,8 +664,8 @@ static void freeTextLayoutCaches(JNIEnv* env, jobject) {
 
 static JNINativeMethod gMethods[] = {
     {"finalizer", "(J)V", (void*) CanvasJNI::finalizer},
-    {"initRaster", "(J)J", (void*) CanvasJNI::initRaster},
-    {"native_setBitmap", "(JJZ)V", (void*) CanvasJNI::setBitmap},
+    {"initRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
+    {"native_setBitmap", "(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
     {"native_isOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
     {"native_getWidth","(J)I", (void*) CanvasJNI::getWidth},
     {"native_getHeight","(J)I", (void*) CanvasJNI::getHeight},
