@@ -61,6 +61,9 @@ public final class PermissionsState {
 
     private static final int[] NO_GIDS = {};
 
+    private static final int FLAG_INSTALL_PERMISSIONS = 1 << 0;
+    private static final int FLAG_RUNTIME_PERMISSIONS = 1 << 1;
+
     private ArrayMap<String, PermissionData> mPermissions;
 
     private int[] mGlobalGids = NO_GIDS;
@@ -274,31 +277,7 @@ public final class PermissionsState {
      * @return The permissions or an empty set.
      */
     public Set<String> getPermissions(int userId) {
-        enforceValidUserId(userId);
-
-        if (mPermissions == null) {
-            return Collections.emptySet();
-        }
-
-        Set<String> permissions = new ArraySet<>();
-
-        final int permissionCount = mPermissions.size();
-        for (int i = 0; i < permissionCount; i++) {
-            String permission = mPermissions.keyAt(i);
-            if (userId == UserHandle.USER_ALL) {
-                if (hasInstallPermission(permission)) {
-                    permissions.add(permission);
-                }
-            } else {
-                if (hasInstallPermission(permission)) {
-                    permissions.add(permission);
-                } else if (hasRuntimePermission(permission, userId)) {
-                    permissions.add(permission);
-                }
-            }
-        }
-
-        return  permissions;
+        return getPermissionsInternal(FLAG_INSTALL_PERMISSIONS | FLAG_RUNTIME_PERMISSIONS, userId);
     }
 
     /**
@@ -307,7 +286,7 @@ public final class PermissionsState {
      * @return The permissions or an empty set.
      */
     public Set<String> getRuntimePermissions(int userId) {
-        return getPermissions(userId);
+        return getPermissionsInternal(FLAG_RUNTIME_PERMISSIONS, userId);
     }
 
     /**
@@ -316,7 +295,7 @@ public final class PermissionsState {
      * @return The permissions or an empty set.
      */
     public Set<String> getInstallPermissions() {
-        return getPermissions(UserHandle.USER_ALL);
+        return getPermissionsInternal(FLAG_INSTALL_PERMISSIONS, UserHandle.USER_ALL);
     }
 
     /**
@@ -373,6 +352,38 @@ public final class PermissionsState {
     public void reset() {
         mGlobalGids = NO_GIDS;
         mPermissions = null;
+    }
+
+    private Set<String> getPermissionsInternal(int flags, int userId) {
+        enforceValidUserId(userId);
+
+        if (mPermissions == null) {
+            return Collections.emptySet();
+        }
+
+        if (userId == UserHandle.USER_ALL) {
+            flags = FLAG_INSTALL_PERMISSIONS;
+        }
+
+        Set<String> permissions = new ArraySet<>();
+
+        final int permissionCount = mPermissions.size();
+        for (int i = 0; i < permissionCount; i++) {
+            String permission = mPermissions.keyAt(i);
+
+            if ((flags & FLAG_INSTALL_PERMISSIONS) != 0) {
+                if (hasInstallPermission(permission)) {
+                    permissions.add(permission);
+                }
+            }
+            if ((flags & FLAG_RUNTIME_PERMISSIONS) != 0) {
+                if (hasRuntimePermission(permission, userId)) {
+                    permissions.add(permission);
+                }
+            }
+        }
+
+        return  permissions;
     }
 
     private int grantPermission(BasePermission permission, int userId) {
