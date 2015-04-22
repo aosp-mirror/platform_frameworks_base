@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -938,7 +949,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/NodeApi.GetConnectedNodesResult.html#getNodes()">getNodes</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Returns a list of connected nodes.
+          Returns a list of connected nodes, either directly or indirectly via a directly
+ connected node.
           
     
 
@@ -994,6 +1006,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Result.html#getStatus()">getStatus</a></span>()</nobr>
         
+        <div class="jd-descrdiv">
+          Returns the status of this result.
+
+
+
+        </div>
+
   </td></tr>
 
 
@@ -1071,7 +1090,8 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a list of connected nodes. This list doesn't include the local node. </p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a list of connected nodes, either directly or indirectly via a directly
+ connected node. This list doesn't include the local node. </p></div>
 
     </div>
 </div>

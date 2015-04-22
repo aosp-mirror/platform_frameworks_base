@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1077,10 +1088,10 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#REGISTRATION_ID">REGISTRATION_ID</a></td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#MESSAGE_TYPE_SEND_EVENT">MESSAGE_TYPE_SEND_EVENT</a></td>
         <td class="jd-descrcol" width="100%">
-          Extra that contains the registration ID associated with a subscription
-
+          Returned by <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getMessageType(android.content.Intent)">getMessageType(Intent)</a></code> to indicate a sent message has been received by the GCM
+ server.
 
 
 
@@ -1754,7 +1765,7 @@ From class
 
 
 
-<A NAME="REGISTRATION_ID"></A>
+<A NAME="MESSAGE_TYPE_SEND_EVENT"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1764,7 +1775,7 @@ From class
         final
         String
       </span>
-        REGISTRATION_ID
+        MESSAGE_TYPE_SEND_EVENT
     </h4>
       <div class="api-level">
 
@@ -1777,7 +1788,8 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>Extra that contains the registration ID associated with a subscription
+  <div class="jd-tagdata jd-tagdescr"><p>Returned by <code><a href="/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html#getMessageType(android.content.Intent)">getMessageType(Intent)</a></code> to indicate a sent message has been received by the GCM
+ server. The intent includes the message ID of the message.
 </p></div>
 
 
@@ -1785,7 +1797,7 @@ From class
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
 
-                "registration_id"
+                "send_event"
 
         </span>
         </div>

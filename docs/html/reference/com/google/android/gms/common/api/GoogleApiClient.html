@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1134,6 +1145,30 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+            <a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#getConnectionResult(com.google.android.gms.common.api.Api<?>)">getConnectionResult</a></span>(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;?&gt; api)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code> for the GoogleApiClient's connection to the
+ specified API.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1142,6 +1177,29 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <div class="jd-descrdiv">
           Returns a unique session id for this GoogleApiClient instance, which should remain the same
  even if the current connection state changes.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#hasConnectedApi(com.google.android.gms.common.api.Api<?>)">hasConnectedApi</a></span>(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;?&gt; api)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns whether or not this GoogleApiClient has the specified API in a connected state.
 
 
 
@@ -1702,6 +1760,59 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </div>
 
 
+<A NAME="getConnectionResult(com.google.android.gms.common.api.Api<?>)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a>
+      </span>
+      <span class="sympad">getConnectionResult</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;?&gt; api)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code> for the GoogleApiClient's connection to the
+ specified API. This method must only be called after <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> has
+ been called and before <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code> is called.
+ <p>
+ This method may return stale results if the GoogleApiClient is reconnecting due to a lost
+ network connection. It is guaranteed to return the most recent ConnectionResult from
+ attempting to connect the given API, but will throw an IllegalStateException if called before
+ calling connect or after calling disconnect. This method can be used to easily determine why
+ an API failed to connect if it was not available. To determine whether a given API is
+ currently connected (without potential stale results) see
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#hasConnectedApi(com.google.android.gms.common.api.Api<?>)">hasConnectedApi(Api<?>)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>api</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code> to retrieve the ConnectionResult of. Passing an API that was not
+            registered with the GoogleApiClient results in an IllegalArgumentException.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="getSessionId()"></A>
 
 <div class="jd-details api apilevel-">
@@ -1731,6 +1842,48 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <div class="jd-tagdata jd-tagdescr"><p>Returns a unique session id for this GoogleApiClient instance, which should remain the same
  even if the current connection state changes.
 </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="hasConnectedApi(com.google.android.gms.common.api.Api<?>)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        boolean
+      </span>
+      <span class="sympad">hasConnectedApi</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;?&gt; api)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns whether or not this GoogleApiClient has the specified API in a connected state.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>api</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code> to test the connection of.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

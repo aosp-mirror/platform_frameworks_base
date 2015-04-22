@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1293,7 +1304,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  Finally, the Intent's type will be set to
  <a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#MIME_TYPE_PREFIX">MIME_TYPE_PREFIX</a></a> followed by the name of the activity
  associated with this session, and can be computed by
- <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getMimeType(java.lang.String)">getMimeType(String)</a></code>.</p></div>
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getMimeType(java.lang.String)">getMimeType(String)</a></code>.
+ <p>
+ Any previously registered sessions that have the same PendingIntent
+ (as defined by <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code>) will be replaced by this session.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1466,6 +1480,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>client</td>
           <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
+        </tr>
+        <tr>
+          <th>intent</td>
+          <td>the PendingIntent that was used in the
+     <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#registerForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">registerForSessions</a></code>
+     call or is equal as defined by <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code>.</td>
         </tr>
       </table>
   </div>

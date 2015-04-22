@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -811,7 +822,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
+
+
+
+
+
+
+
+
+
+
   
+
+
+
+
   
 
   
@@ -832,6 +857,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
    
   
   
+
+
   
   
 
@@ -922,6 +949,10 @@ Summary:
       
         <a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html">NodeApi.NodeListener</a> 
       
+        <a href="/reference/com/google/android/gms/wearable/CapabilityApi.CapabilityListener.html">CapabilityApi.CapabilityListener</a>
+
+        <a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html">ChannelApi.ChannelListener</a>
+
   
   
 
@@ -2203,6 +2234,88 @@ android.content.ComponentCallbacks2
 
 
 
+
+<tr class="api apilevel-" >
+<td colspan="12">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.wearable.ChannelApi.ChannelListener" class="jd-expando-trigger closed"
+          ><img id="inherited-constants-com.google.android.gms.wearable.ChannelApi.ChannelListener-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>From interface
+<a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html">com.google.android.gms.wearable.ChannelApi.ChannelListener</a>
+<div id="inherited-constants-com.google.android.gms.wearable.ChannelApi.ChannelListener">
+  <div id="inherited-constants-com.google.android.gms.wearable.ChannelApi.ChannelListener-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-constants-com.google.android.gms.wearable.ChannelApi.ChannelListener-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_DISCONNECTED">CLOSE_REASON_DISCONNECTED</a></td>
+        <td class="jd-descrcol" width="100%">
+          Value passed to <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onChannelClosed(com.google.android.gms.wearable.Channel, int, int)">onChannelClosed(Channel, int, int)</a></code>, <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onInputClosed(com.google.android.gms.wearable.Channel, int, int)">onInputClosed(Channel, int, int)</a></code> and
+ <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onOutputClosed(com.google.android.gms.wearable.Channel, int, int)">onOutputClosed(Channel, int, int)</a></code> when the closing is due to a remote node being disconnected.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_LOCAL_CLOSE">CLOSE_REASON_LOCAL_CLOSE</a></td>
+        <td class="jd-descrcol" width="100%">
+          Value passed to <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onChannelClosed(com.google.android.gms.wearable.Channel, int, int)">onChannelClosed(Channel, int, int)</a></code>, <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onInputClosed(com.google.android.gms.wearable.Channel, int, int)">onInputClosed(Channel, int, int)</a></code> and
+ <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onOutputClosed(com.google.android.gms.wearable.Channel, int, int)">onOutputClosed(Channel, int, int)</a></code> when the stream is closed due to the local node calling
+ <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient)">close(GoogleApiClient)</a></code> or <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient, int)">close(GoogleApiClient, int)</a></code>.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_NORMAL">CLOSE_REASON_NORMAL</a></td>
+        <td class="jd-descrcol" width="100%">
+          Value passed to <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onInputClosed(com.google.android.gms.wearable.Channel, int, int)">onInputClosed(Channel, int, int)</a></code> or <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onOutputClosed(com.google.android.gms.wearable.Channel, int, int)">onOutputClosed(Channel, int, int)</a></code> (but not
+ <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onChannelClosed(com.google.android.gms.wearable.Channel, int, int)">onChannelClosed(Channel, int, int)</a></code>), when the stream was closed under normal conditions, e.g the
+ whole file was read, or the <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> on the remote node was closed
+ normally.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_REMOTE_CLOSE">CLOSE_REASON_REMOTE_CLOSE</a></td>
+        <td class="jd-descrcol" width="100%">
+          Value passed to <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onChannelClosed(com.google.android.gms.wearable.Channel, int, int)">onChannelClosed(Channel, int, int)</a></code>, <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onInputClosed(com.google.android.gms.wearable.Channel, int, int)">onInputClosed(Channel, int, int)</a></code> and
+ <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onOutputClosed(com.google.android.gms.wearable.Channel, int, int)">onOutputClosed(Channel, int, int)</a></code> when the stream is closed due to the remote node calling
+ <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient)">close(GoogleApiClient)</a></code> or <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient, int)">close(GoogleApiClient, int)</a></code>.
+
+
+
+        </td>
+    </tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+
 </table>
 
 
@@ -2274,6 +2387,84 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onCapabilityChanged(com.google.android.gms.wearable.CapabilityInfo)">onCapabilityChanged</a></span>(<a href="/reference/com/google/android/gms/wearable/CapabilityInfo.html">CapabilityInfo</a> capabilityInfo)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onChannelClosed(com.google.android.gms.wearable.Channel, int, int)">onChannelClosed</a></span>(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when a channel is closed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onChannelOpened(com.google.android.gms.wearable.Channel)">onChannelOpened</a></span>(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when a new channel is opened by a remote node.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onConnectedNodes(java.util.List<com.google.android.gms.wearable.Node>)">onConnectedNodes</a></span>(List&lt;<a href="/reference/com/google/android/gms/wearable/Node.html">Node</a>&gt; connectedNodes)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onCreate()">onCreate</a></span>()</nobr>
         
   </td></tr>
@@ -2329,6 +2520,29 @@ android.content.ComponentCallbacks2
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onInputClosed(com.google.android.gms.wearable.Channel, int, int)">onInputClosed</a></span>(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when the input side of a channel is closed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onMessageReceived(com.google.android.gms.wearable.MessageEvent)">onMessageReceived</a></span>(<a href="/reference/com/google/android/gms/wearable/MessageEvent.html">MessageEvent</a> messageEvent)</nobr>
         
         <div class="jd-descrdiv">
@@ -2342,6 +2556,29 @@ android.content.ComponentCallbacks2
 
 
 	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onOutputClosed(com.google.android.gms.wearable.Channel, int, int)">onOutputClosed</a></span>(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when the output side of a channel is closed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -2355,7 +2592,7 @@ android.content.ComponentCallbacks2
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onPeerConnected(com.google.android.gms.wearable.Node)">onPeerConnected</a></span>(<a href="/reference/com/google/android/gms/wearable/Node.html">Node</a> peer)</nobr>
         
         <div class="jd-descrdiv">
-          Receives peer connected events.
+          Notification that a peer is now reachable by this node.
           
     
 
@@ -2378,7 +2615,8 @@ android.content.ComponentCallbacks2
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onPeerDisconnected(com.google.android.gms.wearable.Node)">onPeerDisconnected</a></span>(<a href="/reference/com/google/android/gms/wearable/Node.html">Node</a> peer)</nobr>
         
         <div class="jd-descrdiv">
-          Receives peer disconnected events.
+          Notification that a peer has been disconnected from this node or is no longer reachable
+ by this node.
           
     
 
@@ -6263,7 +6501,7 @@ From interface
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html#onPeerConnected(com.google.android.gms.wearable.Node)">onPeerConnected</a></span>(<a href="/reference/com/google/android/gms/wearable/Node.html">Node</a> peer)</nobr>
         
         <div class="jd-descrdiv">
-          Notification that a peer has been connected.
+          Notification that a peer is now reachable by this node.
           
     
 
@@ -6286,12 +6524,173 @@ From interface
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html#onPeerDisconnected(com.google.android.gms.wearable.Node)">onPeerDisconnected</a></span>(<a href="/reference/com/google/android/gms/wearable/Node.html">Node</a> peer)</nobr>
         
         <div class="jd-descrdiv">
-          Notification that a peer has been disconnected.
+          Notification that a peer has been disconnected from this node or is no longer reachable
+ by this node.
           
     
 
         </div>
   
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.wearable.CapabilityApi.CapabilityListener" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.wearable.CapabilityApi.CapabilityListener-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/wearable/CapabilityApi.CapabilityListener.html">com.google.android.gms.wearable.CapabilityApi.CapabilityListener</a>
+
+<div id="inherited-methods-com.google.android.gms.wearable.CapabilityApi.CapabilityListener">
+  <div id="inherited-methods-com.google.android.gms.wearable.CapabilityApi.CapabilityListener-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.wearable.CapabilityApi.CapabilityListener-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/CapabilityApi.CapabilityListener.html#onCapabilityChanged(com.google.android.gms.wearable.CapabilityInfo)">onCapabilityChanged</a></span>(<a href="/reference/com/google/android/gms/wearable/CapabilityInfo.html">CapabilityInfo</a> capabilityInfo)</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.wearable.ChannelApi.ChannelListener" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.wearable.ChannelApi.ChannelListener-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html">com.google.android.gms.wearable.ChannelApi.ChannelListener</a>
+
+<div id="inherited-methods-com.google.android.gms.wearable.ChannelApi.ChannelListener">
+  <div id="inherited-methods-com.google.android.gms.wearable.ChannelApi.ChannelListener-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.wearable.ChannelApi.ChannelListener-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onChannelClosed(com.google.android.gms.wearable.Channel, int, int)">onChannelClosed</a></span>(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when a channel is closed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onChannelOpened(com.google.android.gms.wearable.Channel)">onChannelOpened</a></span>(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when a new channel is opened by a remote node.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onInputClosed(com.google.android.gms.wearable.Channel, int, int)">onInputClosed</a></span>(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when the input side of a channel is closed.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#onOutputClosed(com.google.android.gms.wearable.Channel, int, int)">onOutputClosed</a></span>(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</nobr>
+
+        <div class="jd-descrdiv">
+          Called when the output side of a channel is closed.
+
+
+
+        </div>
+
   </td></tr>
 
 
@@ -6472,6 +6871,153 @@ From interface
 </div>
 
 
+<A NAME="onCapabilityChanged(com.google.android.gms.wearable.CapabilityInfo)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onCapabilityChanged</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/wearable/CapabilityInfo.html">CapabilityInfo</a> capabilityInfo)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onChannelClosed(com.google.android.gms.wearable.Channel, int, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onChannelClosed</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a channel is closed. This can happen through an explicit call to
+ <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient)">close(GoogleApiClient)</a></code> or <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient, int)">close(GoogleApiClient, int)</a></code> on
+ either side of the connection, or due to disconnecting from the remote node.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>closeReason</td>
+          <td>the reason for the channel closing. One of
+         <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_DISCONNECTED">CLOSE_REASON_DISCONNECTED</a></code>, <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_REMOTE_CLOSE">CLOSE_REASON_REMOTE_CLOSE</a></code>,
+         or <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_LOCAL_CLOSE">CLOSE_REASON_LOCAL_CLOSE</a></code>.</td>
+        </tr>
+        <tr>
+          <th>appSpecificErrorCode</td>
+          <td>the error code specified on <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient)">close(GoogleApiClient)</a></code>,
+         or 0 if <code>closeReason</code> is <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_DISCONNECTED">CLOSE_REASON_DISCONNECTED</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="onChannelOpened(com.google.android.gms.wearable.Channel)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onChannelOpened</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a new channel is opened by a remote node. </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onConnectedNodes(java.util.List<com.google.android.gms.wearable.Node>)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onConnectedNodes</span>
+      <span class="normal">(List&lt;<a href="/reference/com/google/android/gms/wearable/Node.html">Node</a>&gt; connectedNodes)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 <A NAME="onCreate()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -6541,7 +7087,6 @@ From interface
  <p>
  Applications needing to track the of all its data items, may use
  <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient)">getDataItems(GoogleApiClient)</a></code> on boot to retrieve all existing data items.
- <p>
 </p></div>
 
     </div>
@@ -6580,6 +7125,56 @@ From interface
 </div>
 
 
+<A NAME="onInputClosed(com.google.android.gms.wearable.Channel, int, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onInputClosed</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the input side of a channel is closed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>closeReason</td>
+          <td>the reason for the input closing. One of
+         <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_DISCONNECTED">CLOSE_REASON_DISCONNECTED</a></code>, <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_REMOTE_CLOSE">CLOSE_REASON_REMOTE_CLOSE</a></code>,
+         <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_LOCAL_CLOSE">CLOSE_REASON_LOCAL_CLOSE</a></code>, or <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_NORMAL">CLOSE_REASON_NORMAL</a></code></td>
+        </tr>
+        <tr>
+          <th>appSpecificErrorCode</td>
+          <td>the error code specified on <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient)">close(GoogleApiClient)</a></code>,
+         or 0 if <code>closeReason</code> is <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_DISCONNECTED">CLOSE_REASON_DISCONNECTED</a></code>
+         or <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_NORMAL">CLOSE_REASON_NORMAL</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="onMessageReceived(com.google.android.gms.wearable.MessageEvent)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -6613,6 +7208,56 @@ From interface
 </div>
 
 
+<A NAME="onOutputClosed(com.google.android.gms.wearable.Channel, int, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">onOutputClosed</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/wearable/Channel.html">Channel</a> channel, int closeReason, int appSpecificErrorCode)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the output side of a channel is closed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>closeReason</td>
+          <td>the reason for the output closing. One of
+         <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_DISCONNECTED">CLOSE_REASON_DISCONNECTED</a></code>, <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_REMOTE_CLOSE">CLOSE_REASON_REMOTE_CLOSE</a></code>,
+         <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_LOCAL_CLOSE">CLOSE_REASON_LOCAL_CLOSE</a></code>, or <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_NORMAL">CLOSE_REASON_NORMAL</a></code></td>
+        </tr>
+        <tr>
+          <th>appSpecificErrorCode</td>
+          <td>the error code specified on <code><a href="/reference/com/google/android/gms/wearable/Channel.html#close(com.google.android.gms.common.api.GoogleApiClient)">close(GoogleApiClient)</a></code>,
+         or 0 if <code>closeReason</code> is <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_DISCONNECTED">CLOSE_REASON_DISCONNECTED</a></code>
+         or <code><a href="/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html#CLOSE_REASON_NORMAL">CLOSE_REASON_NORMAL</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="onPeerConnected(com.google.android.gms.wearable.Node)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -6639,11 +7284,14 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Receives peer connected events.
- <p>
- Node events are determined by the connectivity between two Android Wear devices. For
- example, a wearable turned on will connect to a phone and trigger a <code><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onPeerConnected(com.google.android.gms.wearable.Node)">onPeerConnected(Node)</a></code>
- event.
+  <div class="jd-tagdata jd-tagdescr"><p>Notification that a peer is now reachable by this node. It may be directly connected
+ to this node or it may be reachable only via a directly connected node.
+
+ <p>Changes to a node's hop count or nearby status alone will not trigger an
+ <code><a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html#onPeerConnected(com.google.android.gms.wearable.Node)">onPeerConnected(Node)</a></code> event as long as the node was already connected.
+
+ <p>Since multiple nodes can be connected to a network at the same time,
+ peer connected and disconnected events can come in any order.
 </p></div>
 
     </div>
@@ -6676,11 +7324,11 @@ From interface
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Receives peer disconnected events.
- <p>
- Node events are determined by the connectivity between two Android Wear devices. For
- example, a wearable moving out of range of a phone will trigger a
- <code><a href="/reference/com/google/android/gms/wearable/WearableListenerService.html#onPeerDisconnected(com.google.android.gms.wearable.Node)">onPeerDisconnected(Node)</a></code> event.
+  <div class="jd-tagdata jd-tagdescr"><p>Notification that a peer has been disconnected from this node or is no longer reachable
+ by this node.
+
+ <p>Since multiple nodes can be connected to a network at the same time,
+ peer connected and disconnected events can come in any order.
 </p></div>
 
     </div>
