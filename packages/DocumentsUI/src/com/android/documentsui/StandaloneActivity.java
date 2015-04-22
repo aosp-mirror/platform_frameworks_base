@@ -63,7 +63,6 @@ public class StandaloneActivity extends BaseActivity {
     private Spinner mToolbarStack;
     private Toolbar mRootsToolbar;
     private DirectoryContainerView mDirectoryContainer;
-    private SearchManager mSearchManager;
     private State mState;
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
@@ -96,7 +95,6 @@ public class StandaloneActivity extends BaseActivity {
             ? icicle.<State>getParcelable(EXTRA_STATE)
             : buildDefaultState();
 
-        mSearchManager = new SearchManager();
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitleTextAppearance(context,
                 android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
@@ -186,12 +184,8 @@ public class StandaloneActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean showMenu = super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.activity, menu);
 
         expandMenus(menu);
-
-        this.mSearchManager.install(menu.findItem(R.id.menu_search));
-
         return showMenu;
     }
 
@@ -215,6 +209,7 @@ public class StandaloneActivity extends BaseActivity {
         list.setVisible(mState.derivedMode != State.MODE_LIST);
 
         mSearchManager.update(root);
+
         sort.setVisible(cwd != null && !mSearchManager.isSearching());
 
         // Only sort by size when visible
