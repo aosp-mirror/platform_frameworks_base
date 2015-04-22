@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioTrack;
+import android.media.PlaybackSettings;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -282,60 +283,58 @@ final public class MediaSync {
     public native final Surface createInputSurface();
 
     /**
-     * Specifies resampling as audio mode for variable rate playback, i.e.,
-     * resample the waveform based on the requested playback rate to get
+     * Resample audio data when changing playback speed.
+     * <p>
+     * Resample the waveform based on the requested playback rate to get
      * a new waveform, and play back the new waveform at the original sampling
      * frequency.
-     * When rate is larger than 1.0, pitch becomes higher.
-     * When rate is smaller than 1.0, pitch becomes lower.
+     * <p><ul>
+     * <li>When rate is larger than 1.0, pitch becomes higher.
+     * <li>When rate is smaller than 1.0, pitch becomes lower.
+     * </ul>
      */
-    public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 0;
+    public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 2;
 
     /**
-     * Specifies time stretching as audio mode for variable rate playback.
+     * Time stretch audio when changing playback speed.
+     * <p>
      * Time stretching changes the duration of the audio samples without
-     * affecting its pitch.
-     * FIXME: implement time strectching.
-     * @hide
+     * affecting their pitch. This is only supported for a limited range
+     * of playback speeds, e.g. from 1/2x to 2x. If the rate is adjusted
+     * beyond this limit, the rate change will fail.
      */
     public static final int PLAYBACK_RATE_AUDIO_MODE_STRETCH = 1;
+
+    /**
+     * Time stretch audio when changing playback speed, and may mute if
+     * stretching is no longer supported.
+     * <p>
+     * Time stretching changes the duration of the audio samples without
+     * affecting their pitch. This is only supported for a limited range
+     * of playback speeds, e.g. from 1/2x to 2x. When it is no longer
+     * supported, the audio may be muted.  Using this mode will not fail
+     * for non-negative playback rates.
+     */
+    public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0;
 
     /** @hide */
     @IntDef(
         value = {
+            PLAYBACK_RATE_AUDIO_MODE_DEFAULT,
+            PLAYBACK_RATE_AUDIO_MODE_STRETCH,
             PLAYBACK_RATE_AUDIO_MODE_RESAMPLE,
-            PLAYBACK_RATE_AUDIO_MODE_STRETCH })
+        })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlaybackRateAudioMode {}
 
     /**
-     * Sets playback rate. It does same as {@link #setPlaybackRate(float, int)},
-     * except that it always uses {@link #PLAYBACK_RATE_AUDIO_MODE_STRETCH} for audioMode.
-     *
-     * @param rate the ratio between desired playback rate and normal one. 1.0 means normal
-     *     playback speed. 0.0 means stop or pause. Value larger than 1.0 means faster playback,
-     *     while value between 0.0 and 1.0 for slower playback.
-     *
-     * @throws IllegalStateException if the internal sync engine or the audio track has not
-     *     been initialized.
-     * TODO: unhide when PLAYBACK_RATE_AUDIO_MODE_STRETCH is supported.
-     * @hide
-     */
-    public void setPlaybackRate(float rate) {
-        setPlaybackRate(rate, PLAYBACK_RATE_AUDIO_MODE_STRETCH);
-    }
-
-    /**
      * Sets playback rate and audio mode.
      *
-     * <p> The supported audio modes are:
-     * <ul>
-     * <li> {@link #PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
-     * </ul>
-     *
      * @param rate the ratio between desired playback rate and normal one. 1.0 means normal
-     *     playback speed. 0.0 means stop or pause. Value larger than 1.0 means faster playback,
-     *     while value between 0.0 and 1.0 for slower playback.
+     *     playback speed. 0.0 means pause. Value larger than 1.0 means faster playback,
+     *     while value between 0.0 and 1.0 for slower playback. <b>Note:</b> the normal rate
+     *     does not change as a result of this call. To restore the original rate at any time,
+     *     use 1.0.
      * @param audioMode audio playback mode. Must be one of the supported
      *     audio modes.
      *
@@ -344,51 +343,103 @@ final public class MediaSync {
      * @throws IllegalArgumentException if audioMode is not supported.
      */
     public void setPlaybackRate(float rate, @PlaybackRateAudioMode int audioMode) {
-        if (!isAudioPlaybackModeSupported(audioMode)) {
-            final String msg = "Audio playback mode " + audioMode + " is not supported";
-            throw new IllegalArgumentException(msg);
-        }
-
-        int status = AudioTrack.SUCCESS;
-        if (mAudioTrack != null) {
-            int nativeSampleRateInHz = mAudioTrack.getSampleRate();
-            int playbackSampleRate = (int)(rate * nativeSampleRateInHz + 0.5);
-            rate = playbackSampleRate / (float)nativeSampleRateInHz;
-
-            try {
-                if (rate == 0.0) {
-                    mAudioTrack.pause();
-                } else {
-                    status = mAudioTrack.setPlaybackRate(playbackSampleRate);
-                    mAudioTrack.play();
-                }
-            } catch (IllegalStateException e) {
-                throw e;
+        PlaybackSettings rateSettings = new PlaybackSettings();
+        rateSettings.allowDefaults();
+        switch (audioMode) {
+            case PLAYBACK_RATE_AUDIO_MODE_DEFAULT:
+                rateSettings.setSpeed(rate).setPitch(1.0f);
+                break;
+            case PLAYBACK_RATE_AUDIO_MODE_STRETCH:
+                rateSettings.setSpeed(rate).setPitch(1.0f)
+                        .setAudioFallbackMode(rateSettings.AUDIO_FALLBACK_MODE_FAIL);
+                break;
+            case PLAYBACK_RATE_AUDIO_MODE_RESAMPLE:
+                rateSettings.setSpeed(rate).setPitch(rate);
+                break;
+            default:
+            {
+                final String msg = "Audio playback mode " + audioMode + " is not supported";
+                throw new IllegalArgumentException(msg);
             }
         }
+        setPlaybackSettings(rateSettings);
+    }
 
-        if (status != AudioTrack.SUCCESS) {
-            throw new IllegalArgumentException("Fail to set playback rate in audio track");
-        }
+    /**
+     * Sets playback rate using {@link PlaybackSettings}.
+     * <p>
+     * When using MediaSync with {@link AudioTrack}, set playback settings using this
+     * call instead of calling it directly on the track, so that the sync is aware of
+     * the settings change.
+     * <p>
+     * This call also works if there is no audio track.
+     *
+     * @param settings the playback settings to use. {@link PlaybackSettings#getSpeed
+     *     Speed} is the ratio between desired playback rate and normal one. 1.0 means
+     *     normal playback speed. 0.0 means pause. Value larger than 1.0 means faster playback,
+     *     while value between 0.0 and 1.0 for slower playback. <b>Note:</b> the normal rate
+     *     does not change as a result of this call. To restore the original rate at any time,
+     *     use speed of 1.0.
+     *
+     * @throws IllegalStateException if the internal sync engine or the audio track has not
+     *     been initialized.
+     * @throws IllegalArgumentException if the settings are not supported.
+     */
+    public void setPlaybackSettings(@NonNull PlaybackSettings settings) {
+        float rate;
+        try {
+            rate = settings.getSpeed();
 
-        synchronized(mAudioLock) {
-            mPlaybackRate = rate;
+            // rate is specified
+            if (mAudioTrack != null) {
+                try {
+                    if (rate == 0.0) {
+                        mAudioTrack.pause();
+                    } else {
+                        mAudioTrack.setPlaybackSettings(settings);
+                        mAudioTrack.play();
+                    }
+                } catch (IllegalStateException e) {
+                    throw e;
+                }
+            }
+
+            synchronized(mAudioLock) {
+                mPlaybackRate = rate;
+            }
+            if (mPlaybackRate != 0.0 && mAudioThread != null) {
+                postRenderAudio(0);
+            }
+            native_setPlaybackRate(mPlaybackRate);
+        } catch (IllegalStateException e) {
+            // rate is not specified; still, propagate settings to audio track
+            if (mAudioTrack != null) {
+                mAudioTrack.setPlaybackSettings(settings);
+            }
         }
-        if (mPlaybackRate != 0.0 && mAudioThread != null) {
-            postRenderAudio(0);
+    }
+
+    /**
+     * Gets the playback rate using {@link PlaybackSettings}.
+     *
+     * @return the playback rate being used.
+     *
+     * @throws IllegalStateException if the internal sync engine or the audio track has not
+     *     been initialized.
+     */
+    @NonNull
+    public PlaybackSettings getPlaybackSettings() {
+        if (mAudioTrack != null) {
+            return mAudioTrack.getPlaybackSettings();
+        } else {
+            PlaybackSettings settings = new PlaybackSettings();
+            settings.allowDefaults();
+            settings.setSpeed(mPlaybackRate);
+            return settings;
         }
-        native_setPlaybackRate(mPlaybackRate);
     }
 
     private native final void native_setPlaybackRate(float rate);
-
-    /*
-     * Test whether a given audio playback mode is supported.
-     * TODO query supported AudioPlaybackMode from audio track.
-     */
-    private boolean isAudioPlaybackModeSupported(int mode) {
-        return (mode == PLAYBACK_RATE_AUDIO_MODE_RESAMPLE);
-    }
 
    /**
     * Get current playback position.

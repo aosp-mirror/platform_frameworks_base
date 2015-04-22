@@ -17201,6 +17201,7 @@ package android.media {
     method public int getAudioSessionId();
     method public int getCurrentPosition();
     method public int getDuration();
+    method public android.media.PlaybackSettings getPlaybackSettings();
     method public int getSelectedTrack(int) throws java.lang.IllegalStateException;
     method public android.media.MediaPlayer.TrackInfo[] getTrackInfo() throws java.lang.IllegalStateException;
     method public int getVideoHeight();
@@ -17237,6 +17238,7 @@ package android.media {
     method public void setOnTimedTextListener(android.media.MediaPlayer.OnTimedTextListener);
     method public void setOnVideoSizeChangedListener(android.media.MediaPlayer.OnVideoSizeChangedListener);
     method public void setPlaybackRate(float, int);
+    method public void setPlaybackSettings(android.media.PlaybackSettings);
     method public void setScreenOnWhilePlaying(boolean);
     method public void setSurface(android.view.Surface);
     method public void setVideoScalingMode(int);
@@ -17262,7 +17264,9 @@ package android.media {
     field public static final int MEDIA_INFO_VIDEO_RENDERING_START = 3; // 0x3
     field public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700; // 0x2bc
     field public static final java.lang.String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
-    field public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 0; // 0x0
+    field public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0; // 0x0
+    field public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 2; // 0x2
+    field public static final int PLAYBACK_RATE_AUDIO_MODE_STRETCH = 1; // 0x1
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1; // 0x1
     field public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2; // 0x2
   }
@@ -17557,12 +17561,16 @@ package android.media {
     method public void configureAudioTrack(android.media.AudioTrack);
     method public void configureSurface(android.view.Surface);
     method public final android.view.Surface createInputSurface();
+    method public android.media.PlaybackSettings getPlaybackSettings();
     method public boolean getTimestamp(android.media.MediaTimestamp);
     method public void queueAudio(java.nio.ByteBuffer, int, int, long);
     method public final void release();
     method public void setCallback(android.media.MediaSync.Callback, android.os.Handler);
     method public void setPlaybackRate(float, int);
-    field public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 0; // 0x0
+    method public void setPlaybackSettings(android.media.PlaybackSettings);
+    field public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0; // 0x0
+    field public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 2; // 0x2
+    field public static final int PLAYBACK_RATE_AUDIO_MODE_STRETCH = 1; // 0x1
   }
 
   public static abstract class MediaSync.Callback {
