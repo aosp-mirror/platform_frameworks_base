@@ -16207,6 +16207,7 @@ package android.media {
     method public int getPlayState();
     method public int getPlaybackHeadPosition();
     method public int getPlaybackRate();
+    method public android.media.PlaybackSettings getPlaybackSettings();
     method public int getPositionNotificationPeriod();
     method public android.media.AudioDeviceInfo getPreferredOutputDevice();
     method public int getSampleRate();
@@ -16224,6 +16225,7 @@ package android.media {
     method public void setPlaybackPositionUpdateListener(android.media.AudioTrack.OnPlaybackPositionUpdateListener);
     method public void setPlaybackPositionUpdateListener(android.media.AudioTrack.OnPlaybackPositionUpdateListener, android.os.Handler);
     method public int setPlaybackRate(int);
+    method public void setPlaybackSettings(android.media.PlaybackSettings);
     method public int setPositionNotificationPeriod(int);
     method public boolean setPreferredOutputDevice(android.media.AudioDeviceInfo);
     method protected deprecated void setState(int);
@@ -17588,6 +17590,24 @@ package android.media {
 
   public abstract interface OnAudioDeviceConnectionListener {
     method public abstract void onAudioDeviceConnection();
+  }
+
+  public final class PlaybackSettings {
+    ctor public PlaybackSettings();
+    method public android.media.PlaybackSettings allowDefaults();
+    method public int getAudioFallbackMode();
+    method public int getAudioStretchMode();
+    method public float getPitch();
+    method public float getSpeed();
+    method public android.media.PlaybackSettings setAudioFallbackMode(int);
+    method public android.media.PlaybackSettings setAudioStretchMode(int);
+    method public android.media.PlaybackSettings setPitch(float);
+    method public android.media.PlaybackSettings setSpeed(float);
+    field public static final int AUDIO_FALLBACK_MODE_DEFAULT = 0; // 0x0
+    field public static final int AUDIO_FALLBACK_MODE_FAIL = 2; // 0x2
+    field public static final int AUDIO_FALLBACK_MODE_MUTE = 1; // 0x1
+    field public static final int AUDIO_STRETCH_MODE_DEFAULT = 0; // 0x0
+    field public static final int AUDIO_STRETCH_MODE_VOICE = 1; // 0x1
   }
 
   public final class Rating implements android.os.Parcelable {

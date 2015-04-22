@@ -946,10 +946,27 @@ public class AudioTrack
     }
 
     /**
-     * Returns the current playback rate in Hz.
+     * Returns the current playback sample rate rate in Hz.
      */
     public int getPlaybackRate() {
         return native_get_playback_rate();
+    }
+
+    /**
+     * Returns the current playback settings.
+     * See {@link #setPlaybackSettings(PlaybackSettings)} to set playback settings
+     * @return current {@link PlaybackSettings}.
+     * @throws IllegalStateException if track is not initialized.
+     */
+    public @NonNull PlaybackSettings getPlaybackSettings() {
+        float[] floatArray = new float[2];
+        int[] intArray = new int[2];
+        native_get_playback_settings(floatArray, intArray);
+        return new PlaybackSettings()
+                .setSpeed(floatArray[0])
+                .setPitch(floatArray[1])
+                .setAudioFallbackMode(intArray[0])
+                .setAudioStretchMode(intArray[1]);
     }
 
     /**
@@ -1307,6 +1324,7 @@ public class AudioTrack
      * playback to last twice as long, but will also result in a pitch shift down by one octave.
      * The valid sample rate range is from 1 Hz to twice the value returned by
      * {@link #getNativeOutputSampleRate(int)}.
+     * Use {@link #setPlaybackSettings(PlaybackSettings)} for speed control.
      * @param sampleRateInHz the sample rate expressed in Hz
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
@@ -1319,6 +1337,42 @@ public class AudioTrack
             return ERROR_BAD_VALUE;
         }
         return native_set_playback_rate(sampleRateInHz);
+    }
+
+
+    /**
+     * Sets the playback settings.
+     * This method returns failure if it cannot apply the playback settings.
+     * One possible cause is that the parameters for speed or pitch are out of range.
+     * Another possible cause is that the <code>AudioTrack</code> is streaming
+     * (see {@link #MODE_STREAM}) and the
+     * buffer size is too small. For speeds greater than 1.0f, the <code>AudioTrack</code> buffer
+     * on configuration must be larger than the speed multiplied by the minimum size
+     * {@link #getMinBufferSize(int, int, int)}) to allow proper playback.
+     * @param settings see {@link PlaybackSettings}. In particular,
+     * speed, pitch, and audio mode should be set.
+     * @throws IllegalArgumentException if the settings are invalid or not accepted.
+     * @throws IllegalStateException if track is not initialized.
+     */
+    public void setPlaybackSettings(@NonNull PlaybackSettings settings) {
+        if (settings == null) {
+            throw new IllegalArgumentException("settings is null");
+        }
+        float[] floatArray;
+        int[] intArray;
+        try {
+            floatArray = new float[] {
+                    settings.getSpeed(),
+                    settings.getPitch(),
+            };
+            intArray = new int[] {
+                    settings.getAudioFallbackMode(),
+                    settings.getAudioStretchMode(),
+            };
+        } catch (IllegalStateException e) {
+            throw new IllegalArgumentException(e);
+        }
+        native_set_playback_settings(floatArray, intArray);
     }
 
 
@@ -2206,6 +2260,15 @@ public class AudioTrack
 
     private native final int native_set_playback_rate(int sampleRateInHz);
     private native final int native_get_playback_rate();
+
+    // floatArray must be a non-null array of length >= 2
+    // [0] is speed
+    // [1] is pitch
+    // intArray must be a non-null array of length >= 2
+    // [0] is audio fallback mode
+    // [1] is audio stretch mode
+    private native final void native_set_playback_settings(float[] floatArray, int[] intArray);
+    private native final void native_get_playback_settings(float[] floatArray, int[] intArray);
 
     private native final int native_set_marker_pos(int marker);
     private native final int native_get_marker_pos();
