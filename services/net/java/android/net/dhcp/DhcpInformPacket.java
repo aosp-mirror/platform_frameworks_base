@@ -53,12 +53,9 @@ class DhcpInformPacket extends DhcpPacket {
      * Adds additional parameters to the INFORM packet.
      */
     void finishPacket(ByteBuffer buffer) {
-        byte[] clientId = new byte[7];
-
-        clientId[0] = CLIENT_ID_ETHER;
-        System.arraycopy(mClientMac, 0, clientId, 1, 6);
-
-        addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_REQUEST);
+        addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_INFORM);
+        addTlv(buffer, DHCP_CLIENT_IDENTIFIER, getClientId());
+        addCommonClientTlvs(buffer);
         addTlv(buffer, DHCP_PARAMETER_LIST, mRequestedParams);
         addTlvEnd(buffer);
     }

@@ -56,20 +56,14 @@ class DhcpRequestPacket extends DhcpPacket {
      * Adds the optional parameters to the client-generated REQUEST packet.
      */
     void finishPacket(ByteBuffer buffer) {
-        byte[] clientId = new byte[7];
-
-        // assemble client identifier
-        clientId[0] = CLIENT_ID_ETHER;
-        System.arraycopy(mClientMac, 0, clientId, 1, 6);
-
         addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_REQUEST);
+        addTlv(buffer, DHCP_CLIENT_IDENTIFIER, getClientId());
         if (!INADDR_ANY.equals(mRequestedIp)) {
             addTlv(buffer, DHCP_REQUESTED_IP, mRequestedIp);
         }
         if (!INADDR_ANY.equals(mServerIdentifier)) {
             addTlv(buffer, DHCP_SERVER_IDENTIFIER, mServerIdentifier);
         }
-        addTlv(buffer, DHCP_CLIENT_IDENTIFIER, clientId);
         addCommonClientTlvs(buffer);
         addTlv(buffer, DHCP_PARAMETER_LIST, mRequestedParams);
         addTlvEnd(buffer);
