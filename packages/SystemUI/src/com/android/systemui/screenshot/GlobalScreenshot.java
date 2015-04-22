@@ -25,6 +25,7 @@ import android.app.Notification;
 import android.app.Notification.BigPictureStyle;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -242,7 +243,12 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
-            Intent chooserIntent = Intent.createChooser(sharingIntent, null);
+            final PendingIntent callback = PendingIntent.getBroadcast(context, 0,
+                    new Intent(context, GlobalScreenshot.TargetChosenReceiver.class)
+                            .putExtra(GlobalScreenshot.CANCEL_ID, mNotificationId),
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+            Intent chooserIntent = Intent.createChooser(sharingIntent, null,
+                    callback.getIntentSender());
             chooserIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -340,6 +346,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
  */
 class GlobalScreenshot {
     private static final String TAG = "GlobalScreenshot";
+
+    static final String CANCEL_ID = "android:cancel_id";
 
     private static final int SCREENSHOT_FLASH_TO_PEAK_DURATION = 130;
     private static final int SCREENSHOT_DROP_IN_DURATION = 430;
@@ -731,5 +739,23 @@ class GlobalScreenshot {
                 .bigText(r.getString(R.string.screenshot_failed_text))
                 .build();
         nManager.notify(R.id.notification_screenshot, n);
+    }
+
+    /**
+     * Removes the notification for a screenshot after a share target is chosen.
+     */
+    public static class TargetChosenReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!intent.hasExtra(CANCEL_ID)) {
+                return;
+            }
+
+            final NotificationManager nm =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            final int id = intent.getIntExtra(CANCEL_ID, 0);
+            nm.cancel(id);
+        }
     }
 }
