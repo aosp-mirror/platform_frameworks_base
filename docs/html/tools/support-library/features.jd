@@ -205,9 +205,12 @@ com.android.support:multidex:1.0.0
       information on using the Action Bar, see the
       <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.
   </li>
-  <li>{@link android.support.v7.app.ActionBarActivity} - Adds an application activity class that
-      must be used as a base class for activities that uses the Support Library action bar
-      implementation.
+  <li>{@link android.support.v7.app.AppCompatActivity} - Adds an application activity class that can
+       be used as a base class for activities that use the Support Library action bar
+       implementation.
+  </li>
+  <li>{@link android.support.v7.app.AppCompatDialog} - Adds a dialog class that can be used as a base
+      class for AppCompat themed dialogs.
   </li>
   <li>{@link android.support.v7.widget.ShareActionProvider} - Adds support for a standardized
     sharing action (such as email or posting to social applications) that can be included in an
