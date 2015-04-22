@@ -433,7 +433,7 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Barmoq izini saqlab bo‘lmadi. Mavjud barmoq izlaridan birini o‘chirib tashlang."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Barmoq izini aniqlash vaqti tugab qoldi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Barmoq izi tekshiruvi bekor qilindi."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Juda ko‘p noto‘g‘ri urinishlar bo‘ldi. Keyinroq yana urinib ko‘ring."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Urinishlar soni ko‘payib ketdi. Keyinroq qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Qayta urinib ko‘ring."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ilovaga DRM sertifikatlarini o‘chirib tashlash uchun ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"aloqa operatorining xabar almashinuv xizmatiga bog‘lanish"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Egasiga aloqa operatorining xabar almashinuv xizmatining yuqori darajali interfeysiga bog‘lanish uchun ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"tarmoq operatori sozlamalari xizmatiga biriktirish"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Egasiga tarmoq operatori sozlamalari xizmatiga biriktirish imkoniyatini beradi. Oddiy ilovalarda hech qachon kerak bo‘lmaydi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekranni qulfdan chiqarish urinishlarini nazorat qilish"</string>
@@ -1064,17 +1062,17 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"nomzodlar"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> tayyorlanmoqda"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Xatolarni tekshirish"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Yangi <xliff:g id="NAME">%s</xliff:g> aniqlandi"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Rasmlar va media fayllarni uzatish uchun"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"Buzilgan <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> buzilgan; qayta formatlab ko‘ring"</string>
-    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> kutilmaganda chiqarilgan"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Ma’lumotlar yo‘qolishining oldini  olish uchun <xliff:g id="NAME">%s</xliff:g>ni chiqarishdan oldin uni uzing"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Olingan <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> chiqarilgan; yangisini kiriting"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g>} hali ham chiqarilmoqda…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Olmang"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Xatolar tekshirilmoqda"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Yangi <xliff:g id="NAME">%s</xliff:g> kartasi aniqlandi"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Rasm va boshqa fayllarni o‘tkazish uchun"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"“<xliff:g id="NAME">%s</xliff:g>” kartasi shikastlangan"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"“<xliff:g id="NAME">%s</xliff:g>” kartasi shikastlangan; qayta formatlab ko‘ring"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> kutilmaganda chiqarib olindi"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Ma’lumotlar yo‘qolishining oldini  olish uchun <xliff:g id="NAME">%s</xliff:g> kartasini chiqarishdan oldin u bilan ulanishni uzing"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"“<xliff:g id="NAME">%s</xliff:g>” kartasi chiqarib olingan"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> chiqarib olingan; yangisini kiriting"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"“<xliff:g id="NAME">%s</xliff:g>” kartasi chiqarilmoqda…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Chiqara ko‘rmang"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"Sozlash"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Chiqarish"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"O‘rganish"</string>
@@ -1207,9 +1205,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Ichki xotira"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD xotira kartasi"</string>
-    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD karta"</string>
-    <string name="storage_usb_drive" msgid="6261899683292244209">"USB qurilma"</string>
-    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB qurilma"</string>
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD kartasi"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB xotira"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB xotira qurilmasi"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB xotira"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Tahrirlash"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Ma’lumotlardan foydalanish ogohlantirilishi"</string>

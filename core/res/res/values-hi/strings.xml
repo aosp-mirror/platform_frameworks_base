@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"एप्‍लिकेशन को DRM प्रमाणपत्रों को निकालने देता है. सामान्य ऐप्स के लिए कभी भी आवश्यकता नहीं होनी चाहिए."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"किसी वाहक संदेश सेवा से आबद्ध करें"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"धारक को किसी वाहक संदेश सेवा के शीर्ष-स्‍तरीय इंटरफ़ेस से आबद्ध होने देती है. सामान्‍य ऐप्‍स के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"वाहक कॉन्फ़िगर सेवा से आबद्ध करें"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"धारक को वाहक कॉन्फ़िगर सेवा से आबद्ध रहने देती है. सामान्य ऐप्स के लिए कभी भी आवश्यक नहीं होना चाहिए."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करें"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्‍क्रीन लॉक पासवर्ड तथा पिन की लंबाई और उसमें अनुमत वर्णों को नियंत्रित करें."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्‍क्रीन-अनलॉक के प्रयासों पर निगरानी रखें"</string>

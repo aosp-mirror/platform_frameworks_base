@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रहरू हटाउन अनुप्रयोगलाई अनुमति दिन्छ। सामान्य अनुप्रयोगहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"वाहक मेसेजिङ सेवामा आबद्ध हुनुहोस्"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"धारकलाई वाहक मेसेजिङ सेवाको उच्च-स्तरको इन्टरफेसमा आबद्ध हुन अनुमति दिनुहोस्। सामान्य एपहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"एक वाहक कन्फिग सेवामा बाँध्नुहोस्"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"होल्डरलाई एक वाहक कन्फिग सेवा बाँध्न अनुमति दिन्छ। सामान्य अनुप्रयोगहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"मोनिटर स्क्रिन-अनलक प्रयत्नहरू"</string>
@@ -1213,12 +1211,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"आन्तरिक भण्डारण"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD कार्ड"</string>
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD कार्ड"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB ड्राइभ"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ड्राइभ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB भण्डारण"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"सम्पादन गर्नुहोस्"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"डेटा प्रयोग चेतावनी"</string>

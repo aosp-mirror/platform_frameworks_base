@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"애플리케이션이 DRM 인증서를 삭제하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"이동통신사 메시지 서비스에 고정"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"이동통신사 설정 서비스 사용"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"권한을 가진 프로그램이 이동통신사 설정 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>

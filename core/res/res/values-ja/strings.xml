@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM証明書の削除をアプリに許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"携帯通信会社のSMSサービスへのバインド"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"携帯通信会社の設定サービスへのバインド"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"携帯通信会社の設定サービスにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>
@@ -632,7 +630,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"アシスタント"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"兄弟"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"子ども"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"パートナー（国内）"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"同棲相手"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"父"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"友だち"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"上司"</string>

@@ -503,10 +503,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏للسماح لأحد التطبيقات بإزالة شهادات DRM. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"الالتزام بخدمة المراسلة التابعة لمشغل شبكة الجوّال"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"يسمح لحامله بالالتزام بواجهة المستوى العالي لخدمة المراسلة التابعة لمشغل شبكة الجوَّال. ومن المفترض عدم الحاجة إليه مع التطبيقات العادية."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"الربط بخدمة تهيئة أحد مشغِّلي شبكة الجوّال"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"للسماح لحامل البطاقة بالربط مع خدمة تهيئة لدى أحد مشغِّلي شبكة الجوّال. ولن تحتاج إليه أبدًا مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"للتحكم في الطول والأحرف المسموح بها في كلمات المرور وأرقام التعريف الشخصي في قفل الشاشة."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"مراقبة محاولات إلغاء قفل الشاشة"</string>

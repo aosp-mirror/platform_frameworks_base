@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"አንድ መተግበሪያ የDRM እውቅና ማረጋገጫዎችን እንዲያስወግድ ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ወደሞባይል አገልግሎት ሰጪ የመልዕክት አገልግሎት አያይዝ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ያዢው በሞባይል አገልግሎት ሰጪ የመልዕክት አላላክ አገልግሎት ላይ ከፍተኛውን ደረጃ በይነ ገጽ እንዲይዝ ይፈቅድለታል። ለመደበኛ መተግበሪያ በጭራሽ አያስፈልግም።"</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"ከአገልግሎት ማዋቀር አገልግሎት ጋር ያስተሳስራል"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"ያዢው ከአገልግሎት ማዋቀር አገልግሎት ጋር እንዲተሳሰር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"በማያ ገጽ መቆለፊያ የይለፍ ቃሎች እና ፒኖች ውስጥ የሚፈቀዱ ቁምፊዎችን እና ርዝመታቸውን ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"የማሳያ-ክፈት ሙከራዎችን አሳይ"</string>
@@ -1075,7 +1073,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ተወግዷል፤ አዲስ ያስገቡ"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"አሁንም <xliff:g id="NAME">%s</xliff:g>ን በማስወጣት ላይ…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"አያስወግዱ"</string>
-    <string name="ext_media_init_action" msgid="8317198948634872507">"ማዘጋጀት"</string>
+    <string name="ext_media_init_action" msgid="8317198948634872507">"አዋቅር"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"አስወጣ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ያስሱ"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ምንም ተመሳሳይ እንቅስቃሴዎች አልተገኙም።"</string>
@@ -1207,12 +1205,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s፣ %2$s፣ %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"ውስጣዊ ማከማቻ"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD ካርድ"</string>
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> ኤስዲ ካርድ"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"የዩኤስቢ አንጻፊ"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"የ<xliff:g id="MANUFACTURER">%s</xliff:g> ዩኤስቢ አንጻፊ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"የUSB  ማከማቻ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"አርትዕ"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"የውሂብ አጠቃቀም ማስጠንቀቂየ"</string>

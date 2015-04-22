@@ -433,7 +433,7 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"വിരലടയാളം സംഭരിക്കാനാവില്ല. നിലവിലുള്ള വിരലടയാളം നീക്കംചെയ്യുക."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"നിരവധി ശ്രമങ്ങൾ. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"വീണ്ടും ശ്രമിക്കൂ."</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM സർട്ടിഫിക്കറ്റുകൾ നീക്കംചെയ്യുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ഒരു കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"കാരിയർ കോൺഫിഗറേഷൻ സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"ഒരു കാരിയർ കോൺഫിഗറേഷൻ സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുന്നതിന് ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>

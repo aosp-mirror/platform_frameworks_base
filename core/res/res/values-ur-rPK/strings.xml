@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏ایک ایپلیکیشن کو DRM سرٹیفکیٹس کو ہٹانے کی اجازت دیتا ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہونی چاہیے۔"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ایک کیریئر پیغام رسانی سروس کا پابند بنیں"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"حامل کو ایک کیریئر پیغام رسانی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتی ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہونی چاہیے۔"</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"ایک کیریئر کنفیگ سروس کا پابند کریں"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"حامل کو کیریئر کنفیگ سروس کا پابند کرنے کی اجازت دیتا ہے۔ معمول کی ایپس کیلئے کبھی درکار نہیں ہونا چاہئے۔"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"پاس ورڈ کے اصول سیٹ کریں"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"‏اسکرین لاک پاس ورڈز اور PINs میں اجازت یافتہ لمبائی اور حروف کو کنٹرول کریں۔"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"اسکرین غیر مقفل کرنے کی کوششیں مانیٹر کریں"</string>
@@ -1207,12 +1205,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"داخلی اسٹوریج"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"‏SD کارڈ"</string>
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"‏<xliff:g id="MANUFACTURER">%s</xliff:g> SD کارڈ"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"‏USB ڈرائیو"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"‏<xliff:g id="MANUFACTURER">%s</xliff:g> USB ڈرائیو"</string>
     <string name="storage_usb" msgid="3017954059538517278">"‏USB اسٹوریج"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ترمیم کریں"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"ڈیٹا کے استعمال کی وارننگ"</string>

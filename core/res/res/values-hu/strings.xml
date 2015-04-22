@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Lehetővé teszi, hogy az alkalmazás eltávolítsa a DRM-tanúsítványokat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"kapcsolódás egy üzenetszolgáltatáshoz"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Lehetővé teszi, hogy a tulajdonos kapcsolódjon egy üzenetszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"csatlakozás szolgáltatóbeállító szolgáltatáshoz"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Lehetővé teszi a tulajdonos számára egy szolgáltatóbeállító szolgáltatáshoz való kapcsolódást. A normál alkalmazások esetében erre nincs szükség."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"A képernyőzár jelszavaiban és PIN kódjaiban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Képernyőzár-feloldási kísérletek figyelése"</string>
@@ -1207,12 +1205,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Belső tárhely"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-kártya"</string>
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD-kártya"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB-meghajtó"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-meghajtó"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-tár"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Szerkesztés"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Adathasználati figyelmeztetés"</string>

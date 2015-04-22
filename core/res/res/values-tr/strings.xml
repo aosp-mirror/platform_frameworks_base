@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Uygulamaya, DRM sertifikalarını kaldırma izin verir. Normal uygulamalar için asla gerekmemelidir."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"operatör mesajlaşma hizmetine bağlan"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"İzin sahibinin, operatör mesajlaşma hizmetinin üst düzey arayüzüne bağlanmasına olanak verir. Normal uygulamalarda hiçbir zaman gerekmez."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"operatör yapılandırma hizmetine bağlan"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Kullanıcının bir operatör yapılandırma hizmetine bağlanmasına olanak verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetleyin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
@@ -1069,12 +1067,12 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotoğraf ve medya aktarmak için"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> zarar görmüş"</string>
     <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> zarar görmüş, tekrar biçimlendirmeyi deneyin"</string>
-    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> beklenmedik şekilde çıkartıldı"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Veri kaybı olmaması için <xliff:g id="NAME">%s</xliff:g> birimini kaldırmadan önce bağlantısını kesin"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> kaldırıldı"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> kaldırıldı; yeni bir tane takın"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> beklenmedik şekilde çıkarıldı"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Veri kaybı olmaması için <xliff:g id="NAME">%s</xliff:g> birimini çıkarmadan önce bağlantısını kesin"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> çıkarıldı"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> çıkarıldı; yeni bir tane takın"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> çıkarma işlemi devam ediyor…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Kaldırma"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Çıkarmayın"</string>
     <string name="ext_media_init_action" msgid="8317198948634872507">"Kurulum"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Çıkar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Keşfedin"</string>
@@ -1207,12 +1205,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Dahili depolama birimi"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD kart"</string>
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD kartı"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB sürücü"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB sürücüsü"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB bellek"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Düzenle"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Veri kullanım uyarısı"</string>

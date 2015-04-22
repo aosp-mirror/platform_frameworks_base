@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ermöglicht einer App das Entfernen von DRM-Zertifikaten. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-SMS/MMS-Dienst binden"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-SMS/MMS-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"Bindung an einen Konfigurationsdienst für Mobilfunkanbieter"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Ermöglicht dem Inhaber die Bindung an einen Konfigurationsdienst für Mobilfunkanbieter. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Zulässige Länge und Zeichen für Passwörter für die Displaysperre festlegen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>
@@ -1207,12 +1205,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s. %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Interner Speicher"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-Karte"</string>
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"SD-Karte von <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB-Speichergerät"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"USB-Speichergerät von <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-Speicher"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Bearbeiten"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Warnung zum Datenverbrauch"</string>
@@ -1476,7 +1471,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minimieren"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nicht stören"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Inaktivität"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Ruhezeit"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Wochentags abends"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Wochenende"</string>
     <string name="muted_by" msgid="6147073845094180001">"Stummgeschaltet durch <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
