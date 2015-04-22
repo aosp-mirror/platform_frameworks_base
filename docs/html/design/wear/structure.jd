@@ -22,14 +22,24 @@ margin: 0 10px 20px 20px;
 <ul>
   <li><strong>Contextual card in the stream</strong>:
   <ul>
-    <li><a href="#Bridged"><strong>Bridged notifications</strong></a>, such as new message notifications, are pushed to the wearable from the connected handheld using standard Android notifications. They require very little or no Wear-specific code.
-    <li><a href="#Contextual"><strong>Contextual notifications</strong></a>, such as an exercise card that appears when you begin running, are generated locally on the wearable and appear at contextually relevant moments. You can do more with this kind of card than with a notification bridged from the handheld.
+    <li><a href="#Bridged"><strong>Bridged notifications</strong></a>, such as new message
+    notifications, are pushed to the wearable from the connected handheld using standard Android
+    notifications. They require very little or no Wear-specific code.</li>
+    <li><a href="#Contextual"><strong>Contextual notifications</strong></a>, such as an exercise
+    card that appears when you begin running, are generated locally on the wearable and appear at
+    contextually relevant moments. You can do more with this kind of card than with a notification
+    bridged from the handheld.</li>
   </ul>
   </li>
   <li><strong>Full screen UI app</strong>:
   <ul>
-    <li><a href="#2DPicker"><strong>2D Picker</strong></a> is design pattern that allows the user to select from a set of items, such as to select an artist then an album. We recommend using this pre-built component from the SDK whenever relevant.
-    <li><a href="#Custom"><strong>Custom layouts</strong></a> are also possible where apps need to extend beyond the basic card/stream metaphor, such as to present a graph or map.</li>
+    <li><a href="#2DPicker"><strong>2D Picker</strong></a> is a design pattern that allows the user
+    to select from a set of items, such as to select an artist then an album. We recommend using
+    this pre-built component from the SDK whenever relevant.</li>
+    <li><a href="#Custom"><strong>Custom layouts</strong></a> are also possible where apps need to
+    extend beyond the basic card/stream metaphor, such as to present a graph or map.</li>
+    <li><a href="#AlwaysOn"><strong>Keep your app always-on</strong></a> if you have information
+    that refreshes or stays relevant, without draining the battery.</li>
   </ul>
   </li>
 </ul>
@@ -160,7 +170,77 @@ href="#2DPicker">2D picker</a> is always available.</p>
 
 <h3>Manually exiting</h3>
 
-<p>Even with logical exit points like these, some cases may exist where the user may want to immediately exit. This may be common in apps that are used for a longer while. In all cases, you should treat long-press as the user's intent to exit, using
+<p>Even with logical exit points like these, some cases may exist where the user may want to
+immediately exit. This may be common in apps that are used for a longer while. In all cases, you
+should treat long-press as the user's intent to exit, using
 <a href="{@docRoot}training/wearables/ui/exit.html"><code>DismissOverlayView</code></a>.</p>
 
 
+<h2 id="AlwaysOn">Keeping the app always-on</h2>
+
+<a class="notice-developers" href="{@docRoot}training/wearables/apps/alwayson.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Keeping Your App Always-On</p>
+  </div>
+</a>
+
+<p>An Android Wear device has two modes:</p>
+
+<dl>
+<dt><strong>Interactive mode</strong></dt>
+<dd>A full-color mode where the user can interact with your app.</dd>
+<dt><strong>Ambient mode</strong></dt>
+<dd>A low-power mode where the screen is rendered in black and white, with
+minimal grayscale graphics.</dd>
+</dl>
+
+<p>Interactive activities provide real-time information and feedback to the user, but it can quickly
+drain the device's battery. To reduce battery usage and still present useful information, apps can
+transition into an ambient mode called <i>always-on</i>.
+</p>
+
+<p>Your app can display dynamic data on the device, even when the app is in ambient mode. This
+approach is useful if your app displays information that is continuously updated, like a running
+tracker app, or when it presents information the user needs for reference, like a grocery app.</p>
+
+<p>Typical user experiences with apps that switch into ambient mode on Android Wear look like
+this:</p>
+
+<img src="{@docRoot}design/media/wear/interactive_run.png" height="147" width="147"
+     srcset="{@docRoot}design/media/wear/interactive_run@2x.png 2x" style="float:left;margin:0 0 20px 40px" alt="">
+<img src="{@docRoot}design/media/wear/ambient_run.png" height="147" width="147"
+     srcset="{@docRoot}design/media/wear/ambient_run@2x.png 2x" style="float:left;margin:0 0 20px 40px" alt="">
+<img src="{@docRoot}design/media/wear/interactive_list.png" height="147" width="147"
+     srcset="{@docRoot}design/media/wear/interactive_list@2x.png 2x" style="float:left;margin:0 0 20px 40px" alt="">
+<img src="{@docRoot}design/media/wear/ambient_list.png" height="147" width="147"
+     srcset="{@docRoot}design/media/wear/ambient_list@2x.png 2x" style="float:left;margin:0 0 20px 40px" alt="">
+<p class="img-caption">When the app switches to ambient mode, remove all elements that invite
+touch or indicate the elements are disabled. In addition, consider showing the current time.</p>
+
+<h3>Update frequency</h3>
+
+<p>You should only update the display once per minute, to preserve battery life of the wearable
+device. You can update the display every 10 seconds, but make sure you only update when absolutely
+necessary. Every update depletes the device's battery.
+</p>
+
+<h3>Interactive elements</h3>
+
+<p>Don’t present any buttons or other interactive elements when the app is in ambient mode. This
+approach could mislead the user into thinking the app is in interactive mode.</p>
+
+<h3>Colors and brightness</h3>
+
+<p>Use grayscale colors to help signal that the user must wake up the device before they can
+interact with it. Also note that any pixel that is not black will be noticeably bright for users in
+dimly lit rooms. We strongly recommend keeping the background black whenever possible.</p>
+
+<h3>Privacy</h3>
+
+<p>Consider the user’s privacy when designing and developing an app that displays data in ambient
+mode. For example, while keeping a messaging app on the screen could be convenient for a user who is
+in an ongoing conversation, displaying personal messages on the screen for an extended period of
+time while the app is in ambient mode may bother some users. Consider removing potentially private
+data after a short period of inactivity or refrain from showing sensitive data in ambient mode.
+</p>
