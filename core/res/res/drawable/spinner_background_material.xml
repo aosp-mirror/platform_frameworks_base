@@ -15,21 +15,24 @@
 -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
-            android:paddingMode="stack">
-    <item android:drawable="@drawable/item_background_borderless_material"
-          android:gravity="end|center_vertical"
-          android:width="24dp"
-          android:height="24dp" />
-    <item android:gravity="end|center_vertical">
-        <vector android:width="24dp"
-                android:height="24dp"
-                android:viewportWidth="24.0"
-                android:viewportHeight="24.0"
-                android:tint="?attr/colorControlNormal">
-            <path android:pathData="M7,10l5,5,5-5z"
-                  android:fillColor="@color/white"/>
-        </vector>
+            android:paddingMode="stack"
+            android:paddingStart="0dp"
+            android:paddingEnd="48dp"
+            android:paddingLeft="0dp"
+            android:paddingRight="0dp">
+    <item
+        android:gravity="end|center_vertical"
+        android:width="48dp"
+        android:height="48dp">
+        <ripple
+            android:color="?attr/colorControlHighlight"
+            android:radius="24dp" />
     </item>
-    <item android:end="48dp"
-          android:drawable="@color/transparent" />
+
+    <item
+        android:drawable="@drawable/ic_spinner_caret"
+        android:gravity="end|center_vertical"
+        android:width="24dp"
+        android:height="24dp"
+        android:end="12dp" />
 </layer-list>
