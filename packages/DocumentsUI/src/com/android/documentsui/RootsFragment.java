@@ -174,11 +174,12 @@ public class RootsFragment extends Fragment {
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final BaseActivity activity = BaseActivity.get(RootsFragment.this);
-            final Item item = mAdapter.getItem(position);
+            Item item = mAdapter.getItem(position);
             if (item instanceof RootItem) {
-                activity.onRootPicked(((RootItem) item).root, true);
+                BaseActivity activity = BaseActivity.get(RootsFragment.this);
+                activity.onRootPicked(((RootItem) item).root);
             } else if (item instanceof AppItem) {
+                DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
                 activity.onAppPicked(((AppItem) item).info);
             } else {
                 throw new IllegalStateException("Unknown root: " + item);

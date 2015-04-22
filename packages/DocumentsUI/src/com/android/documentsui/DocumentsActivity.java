@@ -21,16 +21,17 @@ import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
 import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_COPY_DESTINATION;
-import static com.android.documentsui.BaseActivity.State.MODE_GRID;
-import static com.android.documentsui.BaseActivity.State.MODE_LIST;
+import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
-import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 
+import java.util.Arrays;
+import java.util.List;
+
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -42,7 +43,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -54,50 +54,26 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.SearchView;
-import android.widget.SearchView.OnQueryTextListener;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
-
-import libcore.io.IoUtils;
 
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.model.DocumentInfo;
-import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Executor;
-
 public class DocumentsActivity extends BaseActivity {
+    private static final int CODE_FORWARD = 42;
     public static final String TAG = "Documents";
 
-    private static final String EXTRA_STATE = "state";
-
-    private static final int CODE_FORWARD = 42;
-
     private boolean mShowAsDialog;
-
-    private SearchView mSearchView;
 
     private Toolbar mToolbar;
     private Spinner mToolbarStack;
@@ -110,20 +86,19 @@ public class DocumentsActivity extends BaseActivity {
 
     private DirectoryContainerView mDirectoryContainer;
 
-    private boolean mIgnoreNextNavigation;
-    private boolean mIgnoreNextClose;
-    private boolean mIgnoreNextCollapse;
-
-    private boolean mSearchExpanded;
-
-    private RootsCache mRoots;
     private State mState;
+
+    private SearchManager mSearchManager;
+    private ItemSelectedListener mStackListener;
+    private BaseAdapter mStackAdapter;
+
+    public DocumentsActivity() {
+        super(TAG);
+    }
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-
-        mRoots = DocumentsApplication.getRootsCache(this);
 
         setResult(Activity.RESULT_CANCELED);
         setContentView(R.layout.activity);
@@ -157,16 +132,16 @@ public class DocumentsActivity extends BaseActivity {
 
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
-        if (icicle != null) {
-            mState = icicle.getParcelable(EXTRA_STATE);
-        } else {
-            buildDefaultState();
-        }
+        mState = (icicle != null)
+                ? icicle.<State>getParcelable(EXTRA_STATE)
+                : buildDefaultState();
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitleTextAppearance(context,
                 android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
 
+        mStackAdapter = new StackAdapter();
+        mStackListener = new ItemSelectedListener();
         mToolbarStack = (Spinner) findViewById(R.id.stack);
         mToolbarStack.setOnItemSelectedListener(mStackListener);
 
@@ -176,6 +151,7 @@ public class DocumentsActivity extends BaseActivity {
                     android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
         }
 
+        mSearchManager = new SearchManager();
         setActionBar(mToolbar);
 
         // Hide roots when we're managing a specific root
@@ -220,55 +196,57 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
-    private void buildDefaultState() {
-        mState = new State();
+    private State buildDefaultState() {
+        State state = new State();
 
         final Intent intent = getIntent();
         final String action = intent.getAction();
         if (Intent.ACTION_OPEN_DOCUMENT.equals(action)) {
-            mState.action = ACTION_OPEN;
+            state.action = ACTION_OPEN;
         } else if (Intent.ACTION_CREATE_DOCUMENT.equals(action)) {
-            mState.action = ACTION_CREATE;
+            state.action = ACTION_CREATE;
         } else if (Intent.ACTION_GET_CONTENT.equals(action)) {
-            mState.action = ACTION_GET_CONTENT;
+            state.action = ACTION_GET_CONTENT;
         } else if (Intent.ACTION_OPEN_DOCUMENT_TREE.equals(action)) {
-            mState.action = ACTION_OPEN_TREE;
+            state.action = ACTION_OPEN_TREE;
         } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
-            mState.action = ACTION_MANAGE;
+            state.action = ACTION_MANAGE;
         } else if (DocumentsContract.ACTION_BROWSE_DOCUMENT_ROOT.equals(action)) {
-            mState.action = ACTION_BROWSE;
+            state.action = ACTION_BROWSE;
         } else if (DocumentsIntent.ACTION_OPEN_COPY_DESTINATION.equals(action)) {
-            mState.action = ACTION_OPEN_COPY_DESTINATION;
+            state.action = ACTION_OPEN_COPY_DESTINATION;
         }
 
-        if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
-            mState.allowMultiple = intent.getBooleanExtra(
+        if (state.action == ACTION_OPEN || state.action == ACTION_GET_CONTENT) {
+            state.allowMultiple = intent.getBooleanExtra(
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
         }
 
-        if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
-            mState.acceptMimes = new String[] { "*/*" };
-            mState.allowMultiple = true;
+        if (state.action == ACTION_MANAGE || state.action == ACTION_BROWSE) {
+            state.acceptMimes = new String[] { "*/*" };
+            state.allowMultiple = true;
         } else if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
-            mState.acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
+            state.acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
         } else {
-            mState.acceptMimes = new String[] { intent.getType() };
+            state.acceptMimes = new String[] { intent.getType() };
         }
 
-        mState.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
-        mState.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
-        mState.showAdvanced = mState.forceAdvanced
+        state.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
+        state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+        state.showAdvanced = state.forceAdvanced
                 | LocalPreferences.getDisplayAdvancedDevices(this);
 
-        if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
-            mState.showSize = true;
+        if (state.action == ACTION_MANAGE || state.action == ACTION_BROWSE) {
+            state.showSize = true;
         } else {
-            mState.showSize = LocalPreferences.getDisplayFileSize(this);
+            state.showSize = LocalPreferences.getDisplayFileSize(this);
         }
-        if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
-            mState.directoryCopy = intent.getBooleanExtra(
+        if (state.action == ACTION_OPEN_COPY_DESTINATION) {
+            state.directoryCopy = intent.getBooleanExtra(
                     BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, false);
         }
+
+        return state;
     }
 
     private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
@@ -290,7 +268,7 @@ public class DocumentsActivity extends BaseActivity {
             mState.restored = true;
 
             if (root != null) {
-                onRootPicked(root, true);
+                onRootPicked(root);
             } else {
                 Log.w(TAG, "Failed to find root: " + mRootUri);
                 finish();
@@ -298,71 +276,55 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
-    private class RestoreStackTask extends AsyncTask<Void, Void, Void> {
-        private volatile boolean mRestoredStack;
-        private volatile boolean mExternal;
+    @Override
+    void onStackRestored(boolean restored, boolean external) {
+        // Show drawer when no stack restored, but only when requesting
+        // non-visual content. However, if we last used an external app,
+        // drawer is always shown.
 
-        @Override
-        protected Void doInBackground(Void... params) {
-            // Restore last stack for calling package
-            final String packageName = getCallingPackageMaybeExtra();
-            final Cursor cursor = getContentResolver()
-                    .query(RecentsProvider.buildResume(packageName), null, null, null, null);
-            try {
-                if (cursor.moveToFirst()) {
-                    mExternal = cursor.getInt(cursor.getColumnIndex(ResumeColumns.EXTERNAL)) != 0;
-                    final byte[] rawStack = cursor.getBlob(
-                            cursor.getColumnIndex(ResumeColumns.STACK));
-                    DurableUtils.readFromArray(rawStack, mState.stack);
-                    mRestoredStack = true;
-                }
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to resume: " + e);
-            } finally {
-                IoUtils.closeQuietly(cursor);
-            }
-
-            if (mRestoredStack) {
-                // Update the restored stack to ensure we have freshest data
-                final Collection<RootInfo> matchingRoots = mRoots.getMatchingRootsBlocking(mState);
-                try {
-                    mState.stack.updateRoot(matchingRoots);
-                    mState.stack.updateDocuments(getContentResolver());
-                } catch (FileNotFoundException e) {
-                    Log.w(TAG, "Failed to restore stack: " + e);
-                    mState.stack.reset();
-                    mRestoredStack = false;
-                }
-            }
-
-            return null;
+        boolean showDrawer = false;
+        if (!restored) {
+            showDrawer = true;
+        }
+        if (MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
+            showDrawer = false;
+        }
+        if (external && mState.action == ACTION_GET_CONTENT) {
+            showDrawer = true;
         }
 
-        @Override
-        protected void onPostExecute(Void result) {
-            if (isDestroyed()) return;
-            mState.restored = true;
+        if (showDrawer) {
+            setRootsDrawerOpen(true);
+        }
+    }
 
-            // Show drawer when no stack restored, but only when requesting
-            // non-visual content. However, if we last used an external app,
-            // drawer is always shown.
+    public void onAppPicked(ResolveInfo info) {
+        final Intent intent = new Intent(getIntent());
+        intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        intent.setComponent(new ComponentName(
+                info.activityInfo.applicationInfo.packageName, info.activityInfo.name));
+        startActivityForResult(intent, CODE_FORWARD);
+    }
 
-            boolean showDrawer = false;
-            if (!mRestoredStack) {
-                showDrawer = true;
-            }
-            if (MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
-                showDrawer = false;
-            }
-            if (mExternal && mState.action == ACTION_GET_CONTENT) {
-                showDrawer = true;
-            }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult() code=" + resultCode);
 
-            if (showDrawer) {
-                setRootsDrawerOpen(true);
-            }
+        // Only relay back results when not canceled; otherwise stick around to
+        // let the user pick another app/backend.
+        if (requestCode == CODE_FORWARD && resultCode != RESULT_CANCELED) {
 
-            onCurrentDirectoryChanged(ANIM_NONE);
+            // Remember that we last picked via external app
+            final String packageName = getCallingPackageMaybeExtra();
+            final ContentValues values = new ContentValues();
+            values.put(ResumeColumns.EXTERNAL, 1);
+            getContentResolver().insert(RecentsProvider.buildResume(packageName), values);
+
+            // Pass back result to original caller
+            setResult(resultCode, data);
+            finish();
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -397,7 +359,6 @@ public class DocumentsActivity extends BaseActivity {
         updateActionBar();
     }
 
-    @Override
     public void setRootsDrawerOpen(boolean open) {
         if (!mShowAsDialog) {
             if (open) {
@@ -416,6 +377,7 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
+    @Override
     public void updateActionBar() {
         if (mRootsToolbar != null) {
             if (mState.action == ACTION_OPEN ||
@@ -447,7 +409,7 @@ public class DocumentsActivity extends BaseActivity {
             });
         }
 
-        if (mSearchExpanded) {
+        if (mSearchManager.isExpanded()) {
             mToolbar.setTitle(null);
             mToolbarStack.setVisibility(View.GONE);
             mToolbarStack.setAdapter(null);
@@ -461,7 +423,7 @@ public class DocumentsActivity extends BaseActivity {
                 mToolbarStack.setVisibility(View.VISIBLE);
                 mToolbarStack.setAdapter(mStackAdapter);
 
-                mIgnoreNextNavigation = true;
+                mStackListener.mIgnoreNextNavigation = true;
                 mToolbarStack.setSelection(mStackAdapter.getCount() - 1);
             }
         }
@@ -469,79 +431,18 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
+        boolean showMenu = super.onCreateOptionsMenu(menu);
+
         getMenuInflater().inflate(R.menu.activity, menu);
 
         // Most actions are visible when showing as dialog
         if (mShowAsDialog) {
-            for (int i = 0; i < menu.size(); i++) {
-                final MenuItem item = menu.getItem(i);
-                switch (item.getItemId()) {
-                    case R.id.menu_advanced:
-                    case R.id.menu_file_size:
-                        break;
-                    default:
-                        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                }
-            }
+            expandMenus(menu);
         }
 
-        final MenuItem searchMenu = menu.findItem(R.id.menu_search);
-        mSearchView = (SearchView) searchMenu.getActionView();
-        mSearchView.setOnQueryTextListener(new OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                mSearchExpanded = true;
-                mState.currentSearch = query;
-                mSearchView.clearFocus();
-                onCurrentDirectoryChanged(ANIM_NONE);
-                return true;
-            }
+        this.mSearchManager.install(menu.findItem(R.id.menu_search));
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
-
-        searchMenu.setOnActionExpandListener(new OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                mSearchExpanded = true;
-                updateActionBar();
-                return true;
-            }
-
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                mSearchExpanded = false;
-                if (mIgnoreNextCollapse) {
-                    mIgnoreNextCollapse = false;
-                    return true;
-                }
-
-                mState.currentSearch = null;
-                onCurrentDirectoryChanged(ANIM_NONE);
-                return true;
-            }
-        });
-
-        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                mSearchExpanded = false;
-                if (mIgnoreNextClose) {
-                    mIgnoreNextClose = false;
-                    return false;
-                }
-
-                mState.currentSearch = null;
-                onCurrentDirectoryChanged(ANIM_NONE);
-                return false;
-            }
-        });
-
-        return true;
+        return showMenu;
     }
 
     @Override
@@ -554,7 +455,6 @@ public class DocumentsActivity extends BaseActivity {
         final DocumentInfo cwd = getCurrentDirectory();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem search = menu.findItem(R.id.menu_search);
         final MenuItem sort = menu.findItem(R.id.menu_sort);
         final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
@@ -564,36 +464,23 @@ public class DocumentsActivity extends BaseActivity {
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         sort.setVisible(cwd != null);
-        grid.setVisible(mState.derivedMode != MODE_GRID);
-        list.setVisible(mState.derivedMode != MODE_LIST);
+        grid.setVisible(mState.derivedMode != State.MODE_GRID);
+        list.setVisible(mState.derivedMode != State.MODE_LIST);
 
-        if (mState.currentSearch != null) {
-            // Search uses backend ranking; no sorting
-            sort.setVisible(false);
 
-            search.expandActionView();
+        mSearchManager.update(root);
 
-            mSearchView.setIconified(false);
-            mSearchView.clearFocus();
-            mSearchView.setQuery(mState.currentSearch, false);
-        } else {
-            mIgnoreNextClose = true;
-            mSearchView.setIconified(true);
-            mSearchView.clearFocus();
-
-            mIgnoreNextCollapse = true;
-            search.collapseActionView();
-        }
+        // Search uses backend ranking; no sorting
+        sort.setVisible(mSearchManager.isSearching());
 
         // Only sort by size when visible
         sortSize.setVisible(mState.showSize);
 
-        boolean searchVisible;
         boolean fileSizeVisible = !(mState.action == ACTION_MANAGE
                 || mState.action == ACTION_BROWSE);
         if (mState.action == ACTION_CREATE || mState.action == ACTION_OPEN_TREE) {
             createDir.setVisible(cwd != null && cwd.isCreateSupported());
-            searchVisible = false;
+            mSearchManager.showMenu(false);
 
             // No display options in recent directories
             if (cwd == null) {
@@ -607,13 +494,7 @@ public class DocumentsActivity extends BaseActivity {
             }
         } else {
             createDir.setVisible(false);
-
-            searchVisible = root != null
-                    && ((root.flags & Root.FLAG_SUPPORTS_SEARCH) != 0);
         }
-
-        // TODO: close any search in-progress when hiding
-        search.setVisible(searchVisible);
 
         advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
                 ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
@@ -634,90 +515,7 @@ public class DocumentsActivity extends BaseActivity {
         if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
-        final int id = item.getItemId();
-        if (id == android.R.id.home) {
-            onBackPressed();
-            return true;
-        } else if (id == R.id.menu_create_dir) {
-            CreateDirectoryFragment.show(getFragmentManager());
-            return true;
-        } else if (id == R.id.menu_search) {
-            return false;
-        } else if (id == R.id.menu_sort_name) {
-            setUserSortOrder(State.SORT_ORDER_DISPLAY_NAME);
-            return true;
-        } else if (id == R.id.menu_sort_date) {
-            setUserSortOrder(State.SORT_ORDER_LAST_MODIFIED);
-            return true;
-        } else if (id == R.id.menu_sort_size) {
-            setUserSortOrder(State.SORT_ORDER_SIZE);
-            return true;
-        } else if (id == R.id.menu_grid) {
-            setUserMode(State.MODE_GRID);
-            return true;
-        } else if (id == R.id.menu_list) {
-            setUserMode(State.MODE_LIST);
-            return true;
-        } else if (id == R.id.menu_advanced) {
-            setDisplayAdvancedDevices(!LocalPreferences.getDisplayAdvancedDevices(this));
-            return true;
-        } else if (id == R.id.menu_file_size) {
-            setDisplayFileSize(!LocalPreferences.getDisplayFileSize(this));
-            return true;
-        } else if (id == R.id.menu_settings) {
-            final RootInfo root = getCurrentRoot();
-            final Intent intent = new Intent(DocumentsContract.ACTION_DOCUMENT_ROOT_SETTINGS);
-            intent.setDataAndType(DocumentsContract.buildRootUri(root.authority, root.rootId),
-                    DocumentsContract.Root.MIME_TYPE_ITEM);
-            startActivity(intent);
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void setDisplayAdvancedDevices(boolean display) {
-        LocalPreferences.setDisplayAdvancedDevices(this, display);
-        mState.showAdvanced = mState.forceAdvanced | display;
-        RootsFragment.get(getFragmentManager()).onDisplayStateChanged();
-        invalidateOptionsMenu();
-    }
-
-    private void setDisplayFileSize(boolean display) {
-        LocalPreferences.setDisplayFileSize(this, display);
-        mState.showSize = display;
-        DirectoryFragment.get(getFragmentManager()).onDisplayStateChanged();
-        invalidateOptionsMenu();
-    }
-
-    @Override
-    public void onStateChanged() {
-        invalidateOptionsMenu();
-    }
-
-    /**
-     * Set state sort order based on explicit user action.
-     */
-    private void setUserSortOrder(int sortOrder) {
-        mState.userSortOrder = sortOrder;
-        DirectoryFragment.get(getFragmentManager()).onUserSortOrderChanged();
-    }
-
-    /**
-     * Set state mode based on explicit user action.
-     */
-    private void setUserMode(int mode) {
-        mState.userMode = mode;
-        DirectoryFragment.get(getFragmentManager()).onUserModeChanged();
-    }
-
-    @Override
-    public void setPending(boolean pending) {
-        final SaveFragment save = SaveFragment.get(getFragmentManager());
-        if (save != null) {
-            save.setPending(pending);
-        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -740,131 +538,12 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle state) {
-        super.onSaveInstanceState(state);
-        state.putParcelable(EXTRA_STATE, mState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle state) {
-        super.onRestoreInstanceState(state);
-    }
-
-    private BaseAdapter mStackAdapter = new BaseAdapter() {
-        @Override
-        public int getCount() {
-            return mState.stack.size();
-        }
-
-        @Override
-        public DocumentInfo getItem(int position) {
-            return mState.stack.get(mState.stack.size() - position - 1);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_subdir_title, parent, false);
-            }
-
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final DocumentInfo doc = getItem(position);
-
-            if (position == 0) {
-                final RootInfo root = getCurrentRoot();
-                title.setText(root.title);
-            } else {
-                title.setText(doc.displayName);
-            }
-
-            return convertView;
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_subdir, parent, false);
-            }
-
-            final ImageView subdir = (ImageView) convertView.findViewById(R.id.subdir);
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final DocumentInfo doc = getItem(position);
-
-            if (position == 0) {
-                final RootInfo root = getCurrentRoot();
-                title.setText(root.title);
-                subdir.setVisibility(View.GONE);
-            } else {
-                title.setText(doc.displayName);
-                subdir.setVisibility(View.VISIBLE);
-            }
-
-            return convertView;
-        }
-    };
-
-    private OnItemSelectedListener mStackListener = new OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            if (mIgnoreNextNavigation) {
-                mIgnoreNextNavigation = false;
-                return;
-            }
-
-            while (mState.stack.size() > position + 1) {
-                mState.stackTouched = true;
-                mState.stack.pop();
-            }
-            onCurrentDirectoryChanged(ANIM_UP);
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-            // Ignored
-        }
-    };
-
-    @Override
-    public RootInfo getCurrentRoot() {
-        if (mState.stack.root != null) {
-            return mState.stack.root;
-        } else {
-            return mRoots.getRecentsRoot();
-        }
-    }
-
-    @Override
-    public DocumentInfo getCurrentDirectory() {
-        return mState.stack.peek();
-    }
-
-    private String getCallingPackageMaybeExtra() {
-        final String extra = getIntent().getStringExtra(DocumentsContract.EXTRA_PACKAGE_NAME);
-        return (extra != null) ? extra : getCallingPackage();
-    }
-
-    public Executor getCurrentExecutor() {
-        final DocumentInfo cwd = getCurrentDirectory();
-        if (cwd != null && cwd.authority != null) {
-            return ProviderExecutor.forAuthority(cwd.authority);
-        } else {
-            return AsyncTask.THREAD_POOL_EXECUTOR;
-        }
-    }
-
-    @Override
     public State getDisplayState() {
         return mState;
     }
 
-    private void onCurrentDirectoryChanged(int anim) {
+    @Override
+    void onDirectoryChanged(int anim) {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
@@ -883,7 +562,7 @@ public class DocumentsActivity extends BaseActivity {
                 // Start recents in grid when requesting visual things
                 final boolean visualMimes = MimePredicate.mimeMatches(
                         MimePredicate.VISUAL_MIMES, mState.acceptMimes);
-                mState.userMode = visualMimes ? MODE_GRID : MODE_LIST;
+                mState.userMode = visualMimes ? State.MODE_GRID : State.MODE_LIST;
                 mState.derivedMode = mState.userMode;
             }
         } else {
@@ -913,108 +592,20 @@ public class DocumentsActivity extends BaseActivity {
                 pick.setPickTarget(mState.action, cwd, displayName);
             }
         }
+    }
 
-        final RootsFragment roots = RootsFragment.get(fm);
-        if (roots != null) {
-            roots.onCurrentRootChanged();
-        }
+    void onSaveRequested(DocumentInfo replaceTarget) {
+        new ExistingFinishTask(replaceTarget.derivedUri).executeOnExecutor(getCurrentExecutor());
+    }
 
-        updateActionBar();
-        invalidateOptionsMenu();
-        dumpStack();
+    void onSaveRequested(String mimeType, String displayName) {
+        new CreateFinishTask(mimeType, displayName).executeOnExecutor(getCurrentExecutor());
     }
 
     @Override
-    public void onStackPicked(DocumentStack stack) {
-        try {
-            // Update the restored stack to ensure we have freshest data
-            stack.updateDocuments(getContentResolver());
-
-            mState.stack = stack;
-            mState.stackTouched = true;
-            onCurrentDirectoryChanged(ANIM_SIDE);
-
-        } catch (FileNotFoundException e) {
-            Log.w(TAG, "Failed to restore stack: " + e);
-        }
-    }
-
-    @Override
-    public void onRootPicked(RootInfo root, boolean closeDrawer) {
-        // Clear entire backstack and start in new root
-        mState.stack.root = root;
-        mState.stack.clear();
-        mState.stackTouched = true;
-
-        if (!mRoots.isRecentsRoot(root)) {
-            new PickRootTask(root).executeOnExecutor(getCurrentExecutor());
-        } else {
-            onCurrentDirectoryChanged(ANIM_SIDE);
-        }
-
-        if (closeDrawer) {
-            setRootsDrawerOpen(false);
-        }
-    }
-
-    private class PickRootTask extends AsyncTask<Void, Void, DocumentInfo> {
-        private RootInfo mRoot;
-
-        public PickRootTask(RootInfo root) {
-            mRoot = root;
-        }
-
-        @Override
-        protected DocumentInfo doInBackground(Void... params) {
-            try {
-                final Uri uri = DocumentsContract.buildDocumentUri(
-                        mRoot.authority, mRoot.documentId);
-                return DocumentInfo.fromUri(getContentResolver(), uri);
-            } catch (FileNotFoundException e) {
-                Log.w(TAG, "Failed to find root", e);
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(DocumentInfo result) {
-            if (result != null) {
-                mState.stack.push(result);
-                mState.stackTouched = true;
-                onCurrentDirectoryChanged(ANIM_SIDE);
-            }
-        }
-    }
-
-    @Override
-    public void onAppPicked(ResolveInfo info) {
-        final Intent intent = new Intent(getIntent());
-        intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_FORWARD_RESULT);
-        intent.setComponent(new ComponentName(
-                info.activityInfo.applicationInfo.packageName, info.activityInfo.name));
-        startActivityForResult(intent, CODE_FORWARD);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult() code=" + resultCode);
-
-        // Only relay back results when not canceled; otherwise stick around to
-        // let the user pick another app/backend.
-        if (requestCode == CODE_FORWARD && resultCode != RESULT_CANCELED) {
-
-            // Remember that we last picked via external app
-            final String packageName = getCallingPackageMaybeExtra();
-            final ContentValues values = new ContentValues();
-            values.put(ResumeColumns.EXTERNAL, 1);
-            getContentResolver().insert(RecentsProvider.buildResume(packageName), values);
-
-            // Pass back result to original caller
-            setResult(resultCode, data);
-            finish();
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
+    void onRootPicked(RootInfo root) {
+        super.onRootPicked(root);
+        setRootsDrawerOpen(false);
     }
 
     @Override
@@ -1076,17 +667,6 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
-    @Override
-    public void onSaveRequested(DocumentInfo replaceTarget) {
-        new ExistingFinishTask(replaceTarget.derivedUri).executeOnExecutor(getCurrentExecutor());
-    }
-
-    @Override
-    public void onSaveRequested(String mimeType, String displayName) {
-        new CreateFinishTask(mimeType, displayName).executeOnExecutor(getCurrentExecutor());
-    }
-
-    @Override
     public void onPickRequested(DocumentInfo pickTarget) {
         Uri result;
         if (mState.action == ACTION_OPEN_TREE) {
@@ -1101,7 +681,8 @@ public class DocumentsActivity extends BaseActivity {
         new PickFinishTask(result).executeOnExecutor(getCurrentExecutor());
     }
 
-    private void saveStackBlocking() {
+    @Override
+    void saveStackBlocking() {
         final ContentResolver resolver = getContentResolver();
         final ContentValues values = new ContentValues();
 
@@ -1124,7 +705,8 @@ public class DocumentsActivity extends BaseActivity {
         resolver.insert(RecentsProvider.buildResume(packageName), values);
     }
 
-    private void onFinished(Uri... uris) {
+    @Override
+    void onTaskFinished(Uri... uris) {
         Log.d(TAG, "onFinished() " + Arrays.toString(uris));
 
         final Intent intent = new Intent();
@@ -1159,7 +741,52 @@ public class DocumentsActivity extends BaseActivity {
         finish();
     }
 
-    private class CreateFinishTask extends AsyncTask<Void, Void, Uri> {
+    public static DocumentsActivity get(Fragment fragment) {
+        return (DocumentsActivity) fragment.getActivity();
+    }
+
+    private final class PickFinishTask extends AsyncTask<Void, Void, Void> {
+        private final Uri mUri;
+
+        public PickFinishTask(Uri uri) {
+            mUri = uri;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            saveStackBlocking();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            onTaskFinished(mUri);
+        }
+    }
+
+    final class ExistingFinishTask extends AsyncTask<Void, Void, Void> {
+        private final Uri[] mUris;
+
+        public ExistingFinishTask(Uri... uris) {
+            mUris = uris;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            saveStackBlocking();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            onTaskFinished(mUris);
+        }
+    }
+
+    /**
+     * Task that creates a new document in the background.
+     */
+    final class CreateFinishTask extends AsyncTask<Void, Void, Uri> {
         private final String mMimeType;
         private final String mDisplayName;
 
@@ -1201,59 +828,13 @@ public class DocumentsActivity extends BaseActivity {
         @Override
         protected void onPostExecute(Uri result) {
             if (result != null) {
-                onFinished(result);
+                onTaskFinished(result);
             } else {
                 Toast.makeText(DocumentsActivity.this, R.string.save_error, Toast.LENGTH_SHORT)
                         .show();
             }
 
             setPending(false);
-        }
-    }
-
-    private class ExistingFinishTask extends AsyncTask<Void, Void, Void> {
-        private final Uri[] mUris;
-
-        public ExistingFinishTask(Uri... uris) {
-            mUris = uris;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            saveStackBlocking();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            onFinished(mUris);
-        }
-    }
-
-    private class PickFinishTask extends AsyncTask<Void, Void, Void> {
-        private final Uri mUri;
-
-        public PickFinishTask(Uri uri) {
-            mUri = uri;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            saveStackBlocking();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            onFinished(mUri);
-        }
-    }
-
-    private void dumpStack() {
-        Log.d(TAG, "Current stack: ");
-        Log.d(TAG, " * " + mState.stack.root);
-        for (DocumentInfo doc : mState.stack) {
-            Log.d(TAG, " +-- " + doc);
         }
     }
 }
