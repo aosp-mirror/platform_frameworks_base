@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"પૂર્ણ બેકઅપ"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"સંપૂર્ણ પુનર્સ્થાપના"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"કનેક્ટ કરેલા ડેસ્કટૉપ કમ્પ્યુટર પર તમામ ડેટાના એક સંપૂર્ણ બેકઅપની વિનંતી કરવામાં આવી છે. શું તમે આ થવા દેવા માંગો છો?\n\nજો તમે પોતે બેકઅપની વિનંતી કરી નહોતી, તો ક્રિયાને આગળ વધવાની મંજૂરી આપશો નહીં."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"મારા ડેટાનો બેક અપ લો"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"બેક અપ લેશો નહીં"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"કનેક્ટ કરેલા ડેસ્કટૉપ કમ્પ્યુટર પરથી તમામ ડેટાના એક સંપૂર્ણ પુનર્સ્થાપનાની વિનંતી કરવામાં આવી છે. શું તમે આ થવા દેવા માંગો છો?\n\nજો તમે પોતે પુનર્સ્થાપનાની વિનંતી કરી નહોતી, તો ક્રિયાને આગળ વધવાની મંજૂરી આપશો નહીં. આ ઉપકરણ પરના હાલના કોઈપણ ડેટાને બદલશે"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"મારો ડેટા પુનર્સ્થાપિત કરો"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"પુનઃસ્થાપિત કરશો નહીં"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"કૃપા કરીને તમારો વર્તમાન બેકઅપ પાસવર્ડ નીચે દાખલ કરો:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"કૃપા કરીને તમારો ઉપકરણ એન્ક્રિપ્શન પાસવર્ડ નીચે દાખલ કરો:"</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"કૃપા કરીને તમારો ઉપકરણ એન્ક્રિપ્શન પાસવર્ડ નીચે દાખલ કરો. આનો ઉપયોગ બેકઅપ સંગ્રહને એન્ક્રિપ્ટ કરવા માટે પણ થશે."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"કૃપા કરીને પૂર્ણ બેકઅપ ડેટાને એન્ક્રિપ્ટ કરવા, ઉપયોગમાં લેવા માટેનો એક પાસવર્ડ દાખલ કરો. જો આ ખાલી છોડવામાં આવે, તો તમારો વર્તમાન બેકઅપ પાસવર્ડ ઉપયોગમાં લેવાશે:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"જો તમે પૂર્ણ બેકઅપ ડેટાને એન્ક્રિપ્ટ કરવા ઇચ્છો, તો નીચે એક પાસવર્ડ દાખલ કરો:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"તમારું ઉપકરણ એન્ક્રિપ્ટ કરેલું હોવાથી, તમારે તમારા બેકઅપને એન્ક્રિપ્ટ કરવાની જરૂર છે. કૃપા કરીને નીચે એક પાસવર્ડ દાખલ કરો:"</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"જો પુનર્સ્થાપિત ડેટા એન્ક્રિપ્ટ કરેલ છે, તો કૃપા કરીને નીચે પાસવર્ડ દાખલ કરો:"</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"બેકઅપ પ્રારંભ કરી રહ્યું છે..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"બેકઅપ સમાપ્ત થયું"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"પુનઃસ્થાપિત શરૂ થઈ રહ્યું છે..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"પુનઃસ્થાપિત સમાપ્ત થયો"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"ક્રિયાનો સમય સમાપ્ત"</string>
+</resources>
