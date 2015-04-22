@@ -1,0 +1,31 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.1.0+'
+
+    }
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "22.0.0"
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+
+    sourceSets {
+	main {
+	    manifest.srcFile 'AndroidManifest.xml'
+	    java.srcDirs = ['src']
+	    res.srcDirs = ['res']
+	}
+    }
+}
