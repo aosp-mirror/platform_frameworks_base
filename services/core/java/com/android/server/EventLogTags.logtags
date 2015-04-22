@@ -173,6 +173,13 @@ option java_package com.android.server
 # ---------------------------
 33000 wp_wallpaper_crashed (component|3)
 
+# ---------------------------
+# Device idle
+# ---------------------------
+34000 device_idle (state|1|5), (reason|3)
+34001 device_idle_step
+34002 device_idle_wake_from_idle (is_idle|1|5), (reason|3)
+
 
 # ---------------------------
 # ConnectivityService.java
