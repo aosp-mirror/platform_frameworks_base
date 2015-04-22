@@ -62,6 +62,211 @@ page.title=Support Library
 <div class="toggle-content opened">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22.1.0</a> <em>(April 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+
+          <li>Added the {@link android.support.v4.graphics.ColorUtils ColorUtils} class
+            to provide a set of color-related utility methods.
+          </li>
+          <li>Added the {@link android.support.v4.graphics.drawable.DrawableCompat#unwrap unwrap()} and
+            {@link android.support.v4.graphics.drawable.DrawableCompat#wrap wrap()} methods to the
+            {@link android.support.v4.graphics.drawable.DrawableCompat} class , allowing you to use
+            {@link android.support.v4.graphics.drawable.DrawableCompat#setTint setTint()},
+            {@link android.support.v4.graphics.drawable.DrawableCompat#setTintList setTintList()},
+            and {@link android.support.v4.graphics.drawable.DrawableCompat#setTintMode setTintMode()}
+            on all API level 4 or higher devices.
+          </li>
+          <li>Added the {@link android.support.v4.os.TraceCompat} class to
+            write trace events to the system trace buffer, which can then be collected and
+            visualized using the <a href="{@docRoot}tools/help/systrace.html">Systrace</a> tool.
+          </li>
+          <li>Added the {@link android.support.v4.util.CircularIntArray} class
+            to create circular integer array data structures.
+          </li>
+          <li>Added the {@link android.support.v4.util.CircularArray#clear clear()},
+            {@link android.support.v4.util.CircularArray#removeFromStart removeFromStart()},
+            and {@link android.support.v4.util.CircularArray#removeFromEnd removeFromEnd()}
+            methods to the {@link android.support.v4.util.CircularArray} class. Also, changed the
+            existing methods in this class to be non-final.
+          </li>
+          <li>Added the {@link android.support.v4.view.InputDeviceCompat}
+            as a helper class to access data in the
+            {@link android.support.v4.view.InputDeviceCompat} class.
+          </li>
+          <li>Added the {@link android.support.v4.view.LayoutInflaterCompat}
+            class as a helper class to access data in the
+            {@link android.support.v4.view.LayoutInflaterCompat} class
+            and added the {@link android.support.v4.view.LayoutInflaterFactory} interface.
+          </li>
+          <li>Added classes, methods, and interfaces to support nested scrolling.
+             <ul>
+               <li>Added the {@link android.support.v4.view.NestedScrollingChildHelper}
+               and {@link android.support.v4.view.NestedScrollingParentHelper}
+               helper classes for implementing nested scrolling parent and child views.</li>
+               <li>Added the {@link android.support.v4.view.NestedScrollingChild}
+               interface to be implemented by {@link android.view.View} subclasses.</li>
+               <li>Added the {@link android.support.v4.view.NestedScrollingParent}
+               and {@link android.support.v4.view.ScrollingView} interfaces to support
+               scrolling operations and provide scroll related APIs.</li>
+               <li>Added the
+                {@link android.support.v4.view.ViewGroupCompat#getNestedScrollAxes
+                getNestedScrollAxes()} method to the {@link android.support.v4.view.ViewGroupCompat}
+                class.</li>
+               <li>Added methods to the {@link android.support.v4.view.ViewParentCompat} class to
+                support nested scrolling.
+               </li>
+               <li>Added the {@link android.support.v4.widget.NestedScrollView}
+                 class to support nested scrolling parent and child on both new and old versions of
+                 Android.
+               </li>
+              </ul>
+          </li>
+          <li>Added methods and constants to the {@link android.support.v4.view.MotionEventCompat}
+            class for getting axis values and event source.
+         </li>
+         <li>Updated the {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
+          class to add methods for errors, content invalidation and labels.
+         </li>
+         <li>Added the following interpolation classses for animation:
+           {@link android.support.v4.view.animation.FastOutLinearInInterpolator},
+           {@link android.support.v4.view.animation.FastOutSlowInInterpolator},
+           {@link android.support.v4.view.animation.LinearOutSlowInInterpolator},
+           {@link android.support.v4.view.animation.LinearOutSlowInInterpolator}, and
+           {@link android.support.v4.view.animation.PathInterpolatorCompat}.
+         </li>
+         <li>Added the {@link android.support.v4.widget.Space} class to create gaps between
+           components in general purpose layouts. This class is deprecated in the gridlayout library.
+         </li>
+         <li>Added the {@link android.support.v4.widget.TextViewCompat} class for accessing
+           features in a {@link android.widget.TextView}.
+         </li>
+         <li>Added a displacement parameter to the
+           {@link android.support.v4.widget.EdgeEffectCompat#onPull onPull()} method in the
+           {@link android.support.v4.widget.EdgeEffectCompat} class.
+         </li>
+
+       </ul>
+      </dd>
+
+
+  <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added tint support to appcompat widgets, including
+            {@link android.support.v7.widget.AppCompatAutoCompleteTextView},
+            {@link android.support.v7.widget.AppCompatButton},
+            {@link android.support.v7.widget.AppCompatCheckBox},
+            {@link android.support.v7.widget.AppCompatCheckedTextView},
+            {@link android.support.v7.widget.AppCompatEditText},
+            {@link android.support.v7.widget.AppCompatMultiAutoCompleteTextView},
+            {@link android.support.v7.widget.AppCompatRadioButton},
+            {@link android.support.v7.widget.AppCompatRatingBar},
+            {@link android.support.v7.widget.AppCompatSpinner}, and
+            {@link android.support.v7.widget.AppCompatTextView}.
+          </li>
+          <li>Updated the {@link android.support.v7.app.AppCompatActivity} as the base
+            class for activities that use the support library action bar features. This class
+            replaces the deprecated {@link android.support.v7.app.ActionBarActivity}.
+          </li>
+          <li>Added the
+            {@link android.support.v7.app.AppCompatCallback} interface
+            to be implemented for AppCompat to be able to perform callbacks.
+          </li>
+            <li>Added the
+            {@link android.support.v7.app.AppCompatDelegate} abstract class
+            as a delegate you can use to extend AppCompat's support to any activity.
+          </li>
+          <li>Added the
+            {@link android.support.v7.app.AppCompatDialog} class
+            as the base class for AppCompat themed dialogs.
+          </li>
+          <li>Added the spinner style
+            {@link android.support.v7.app.AlertDialog} and
+            {@link android.support.v7.app.AlertDialog.Builder} classes to provide an AppCompat
+            themed {@link android.app.AlertDialog}.
+          </li>
+          <li>Added the {@link android.support.v7.graphics.Palette.Builder} class
+            for generating {@link android.support.v7.graphics.Palette} instances.
+            <ul>
+              <li>Added the
+                {@link android.support.v7.graphics.Palette#from}
+                method to the {@link android.support.v7.graphics.Palette} class to
+                start generating a Palette with the returned
+                {@link android.support.v7.graphics.Palette.Builder} instance.
+              </li>
+              <li>Deprecated the {@link android.support.v7.graphics.Palette#generate generate()} and
+                {@link android.support.v7.graphics.Palette#generateAsync generateAsync()} methods.
+              </li>
+             </ul>
+           </li>
+
+           <li>Added the
+             {@link android.support.v7.widget.GridLayout.Spec#getAbsoluteAlignment
+             getAbsoluteAlignment()} method to the {@link android.support.v7.widget.GridLayout.Spec}
+             class.
+           </li>
+           <li>Deprecated use of <code>app:theme</code> for styling
+             {@link android.support.v7.widget.Toolbar}. You can now use
+             <code>android:theme</code> for toolbars on all API level 7 and higher devices and
+             <code>android:theme</code> support for all widgets on API level 11 and higher devices.
+           </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v17-leanback">v17 leanback library</a>:</dt>
+      <dd>
+        <ul>
+          <li> Added {@link android.support.v17.leanback.app.GuidedStepFragment},
+            {@link android.support.v17.leanback.widget.GuidanceStylist} and
+            {@link android.support.v17.leanback.widget.GuidedActionsStylist} to support
+            custom styling.
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview library</a>:</dt>
+      <dd>
+        <ul>
+           <li>Added {@link android.support.v7.util.SortedList} classes to display items in
+             a list order and provide notification of changes to the list.
+           </li>
+           <li>Added the {@link android.support.v7.widget.util.SortedListAdapterCallback} class
+             that can bind a sorted list to a
+             {@link android.support.v7.widget.RecyclerView.Adapter} class.
+           </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for v8 renderscript library:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v8.renderscript.ScriptIntrinsicHistogram} class for
+            use as a histogram filter.</li>
+          <li>Added the {@link android.support.v8.renderscript.ScriptIntrinsicResize} class for
+            performing a resize of a 2D allocation.
+          </li>
+        </ul>
+      </dd>
+
+    </dl>
+
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 22</a> <em>(March 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -158,6 +363,10 @@ page.title=Support Library
             {@link android.support.v7.widget.RecyclerView.LayoutParams} class. </li>
         </ul>
       </dd>
+
+  </div>
+</div>
+
 
 
 
@@ -1113,4 +1322,3 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
       <p>Initial release with the v4 library.</p>
   </div>
 </div>
-
