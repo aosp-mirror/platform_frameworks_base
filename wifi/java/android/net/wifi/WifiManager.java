@@ -2063,7 +2063,11 @@ public class WifiManager {
                         .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                         .build();
                 mNetworkCallback = new PinningNetworkCallback();
-                sCM.registerNetworkCallback(request, mNetworkCallback);
+                try {
+                    sCM.registerNetworkCallback(request, mNetworkCallback);
+                } catch (SecurityException e) {
+                    Log.d(TAG, "Failed to register network callback", e);
+                }
             }
         }
     }
@@ -2072,7 +2076,11 @@ public class WifiManager {
         initConnectivityManager();
         synchronized (sCM) {
             if (mNetworkCallback != null) {
-                sCM.unregisterNetworkCallback(mNetworkCallback);
+                try {
+                    sCM.unregisterNetworkCallback(mNetworkCallback);
+                } catch (SecurityException e) {
+                    Log.d(TAG, "Failed to unregister network callback", e);
+                }
                 mNetworkCallback = null;
             }
         }
