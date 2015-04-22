@@ -2567,7 +2567,12 @@ public class ConnectivityManager {
         if (NetworkUtils.bindProcessToNetwork(netId)) {
             // Set HTTP proxy system properties to match network.
             // TODO: Deprecate this static method and replace it with a non-static version.
-            Proxy.setHttpProxySystemProperty(getInstance().getDefaultProxy());
+            try {
+                Proxy.setHttpProxySystemProperty(getInstance().getDefaultProxy());
+            } catch (SecurityException e) {
+                // The process doesn't have ACCESS_NETWORK_STATE, so we can't fetch the proxy.
+                Log.e(TAG, "Can't set proxy properties", e);
+            }
             // Must flush DNS cache as new network may have different DNS resolutions.
             InetAddress.clearDnsCache();
             // Must flush socket pool as idle sockets will be bound to previous network and may
