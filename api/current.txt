@@ -505,6 +505,7 @@ package android {
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
     field public static final int durationScaleHint = 16844014; // 0x10104ee
+    field public static final int dynamicResources = 16844019; // 0x10104f3
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -19752,9 +19753,12 @@ package android.nfc.cardemulation {
     method public boolean supportsAidPrefixRegistration();
     method public boolean unsetPreferredService(android.app.Activity);
     field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
+    field public static final java.lang.String ACTION_REQUEST_SERVICE_RESOURCES = "android.nfc.cardemulation.action.REQUEST_SERVICE_RESOURCES";
     field public static final java.lang.String CATEGORY_OTHER = "other";
     field public static final java.lang.String CATEGORY_PAYMENT = "payment";
+    field public static final java.lang.String EXTRA_BANNER_RES_ID = "android.nfc.cardemulation.extra.BANNER_RES_ID";
     field public static final java.lang.String EXTRA_CATEGORY = "category";
+    field public static final java.lang.String EXTRA_DESCRIPTION = "android.nfc.cardemulation.extra.DESCRIPTION";
     field public static final java.lang.String EXTRA_SERVICE_COMPONENT = "component";
     field public static final int SELECTION_MODE_ALWAYS_ASK = 1; // 0x1
     field public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2; // 0x2

@@ -3191,6 +3191,11 @@
         <!-- A drawable that can be rendered in Android's system UI for representing
              the service. -->
         <attr name="apduServiceBanner" format="reference"/>
+        <!-- Allows the app to update the description and service banner at run-time -->
+        <attr name="dynamicResources" format="boolean"/>
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity"/>
     </declare-styleable>
 
     <!-- Use <code>offhost-apdu-service</code> as the root tag of the XML resource that
@@ -3204,6 +3209,11 @@
         <!-- A drawable that can be rendered in Android's system UI for representing
              the service. -->
         <attr name="apduServiceBanner"/>
+        <!-- Allows the app to update the description and service banner at run-time -->
+        <attr name="dynamicResources"/>
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a
