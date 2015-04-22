@@ -29988,12 +29988,19 @@ package android.renderscript {
   }
 
   public final class ScriptGroup extends android.renderscript.BaseObj {
-    method public void execute();
-    method public void setInput(android.renderscript.Script.KernelID, android.renderscript.Allocation);
-    method public void setOutput(android.renderscript.Script.KernelID, android.renderscript.Allocation);
+    method public java.lang.Object[] execute(java.lang.Object...);
+    method public deprecated void execute();
+    method public deprecated void setInput(android.renderscript.Script.KernelID, android.renderscript.Allocation);
+    method public deprecated void setOutput(android.renderscript.Script.KernelID, android.renderscript.Allocation);
   }
 
-  public static final class ScriptGroup.Builder {
+  public static final class ScriptGroup.Binding {
+    ctor public ScriptGroup.Binding(android.renderscript.Script.FieldID, java.lang.Object);
+    method public android.renderscript.Script.FieldID getField();
+    method public java.lang.Object getValue();
+  }
+
+  public static final deprecated class ScriptGroup.Builder {
     ctor public ScriptGroup.Builder(android.renderscript.RenderScript);
     method public android.renderscript.ScriptGroup.Builder addConnection(android.renderscript.Type, android.renderscript.Script.KernelID, android.renderscript.Script.FieldID);
     method public android.renderscript.ScriptGroup.Builder addConnection(android.renderscript.Type, android.renderscript.Script.KernelID, android.renderscript.Script.KernelID);
@@ -30001,39 +30008,23 @@ package android.renderscript {
     method public android.renderscript.ScriptGroup create();
   }
 
-  public class ScriptGroup2 extends android.renderscript.BaseObj {
-    ctor public ScriptGroup2(long, android.renderscript.RenderScript);
-    method public java.lang.Object[] execute(java.lang.Object...);
+  public static final class ScriptGroup.Builder2 {
+    ctor public ScriptGroup.Builder2(android.renderscript.RenderScript);
+    method public android.renderscript.ScriptGroup.Input addInput();
+    method public android.renderscript.ScriptGroup.Closure addInvoke(android.renderscript.Script.InvokeID, java.lang.Object...);
+    method public android.renderscript.ScriptGroup.Closure addKernel(android.renderscript.Script.KernelID, android.renderscript.Type, java.lang.Object...);
+    method public android.renderscript.ScriptGroup create(java.lang.String, android.renderscript.ScriptGroup.Future...);
   }
 
-  public static final class ScriptGroup2.Binding {
-    ctor public ScriptGroup2.Binding(android.renderscript.Script.FieldID, java.lang.Object);
-    method public android.renderscript.Script.FieldID getField();
-    method public java.lang.Object getValue();
+  public static final class ScriptGroup.Closure extends android.renderscript.BaseObj {
+    method public android.renderscript.ScriptGroup.Future getGlobal(android.renderscript.Script.FieldID);
+    method public android.renderscript.ScriptGroup.Future getReturn();
   }
 
-  public static final class ScriptGroup2.Builder {
-    ctor public ScriptGroup2.Builder(android.renderscript.RenderScript);
-    method public android.renderscript.ScriptGroup2.UnboundValue addInput();
-    method public android.renderscript.ScriptGroup2.Closure addInvoke(android.renderscript.Script.InvokeID, java.lang.Object[], java.util.Map<android.renderscript.Script.FieldID, java.lang.Object>);
-    method public android.renderscript.ScriptGroup2.Closure addInvoke(android.renderscript.Script.InvokeID, java.lang.Object...);
-    method public android.renderscript.ScriptGroup2.Closure addKernel(android.renderscript.Script.KernelID, android.renderscript.Type, java.lang.Object[], java.util.Map<android.renderscript.Script.FieldID, java.lang.Object>);
-    method public android.renderscript.ScriptGroup2.Closure addKernel(android.renderscript.Script.KernelID, android.renderscript.Type, java.lang.Object...);
-    method public android.renderscript.ScriptGroup2 create(java.lang.String, android.renderscript.ScriptGroup2.Future...);
+  public static final class ScriptGroup.Future {
   }
 
-  public static class ScriptGroup2.Closure extends android.renderscript.BaseObj {
-    ctor public ScriptGroup2.Closure(long, android.renderscript.RenderScript);
-    ctor public ScriptGroup2.Closure(android.renderscript.RenderScript, android.renderscript.Script.KernelID, android.renderscript.Type, java.lang.Object[], java.util.Map<android.renderscript.Script.FieldID, java.lang.Object>);
-    ctor public ScriptGroup2.Closure(android.renderscript.RenderScript, android.renderscript.Script.InvokeID, java.lang.Object[], java.util.Map<android.renderscript.Script.FieldID, java.lang.Object>);
-    method public android.renderscript.ScriptGroup2.Future getGlobal(android.renderscript.Script.FieldID);
-    method public android.renderscript.ScriptGroup2.Future getReturn();
-  }
-
-  public static class ScriptGroup2.Future {
-  }
-
-  public static class ScriptGroup2.UnboundValue {
+  public static final class ScriptGroup.Input {
   }
 
   public abstract class ScriptIntrinsic extends android.renderscript.Script {
