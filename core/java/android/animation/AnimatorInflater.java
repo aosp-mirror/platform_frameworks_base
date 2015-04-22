@@ -790,6 +790,31 @@ public class AnimatorInflater {
         return valuesArray;
     }
 
+    // When no value type is provided in keyframe, we need to infer the type from the value. i.e.
+    // if value is defined in the style of a color value, then the color type is returned.
+    // Otherwise, default float type is returned.
+    private static int inferValueTypeOfKeyframe(Resources res, Theme theme, AttributeSet attrs) {
+        int valueType;
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.Keyframe, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, R.styleable.Keyframe);
+        }
+
+        TypedValue keyframeValue = a.peekValue(R.styleable.Keyframe_value);
+        boolean hasValue = (keyframeValue != null);
+        // When no value type is provided, check whether it's a color type first.
+        // If not, fall back to default value type (i.e. float type).
+        if (hasValue && isColorType(keyframeValue.type)) {
+            valueType = VALUE_TYPE_COLOR;
+        } else {
+            valueType = VALUE_TYPE_FLOAT;
+        }
+        a.recycle();
+        return valueType;
+    }
+
     private static void dumpKeyframes(Object[] keyframes, String header) {
         if (keyframes == null || keyframes.length == 0) {
             return;
@@ -817,6 +842,9 @@ public class AnimatorInflater {
                 type != XmlPullParser.END_DOCUMENT) {
             String name = parser.getName();
             if (name.equals("keyframe")) {
+                if (valueType == VALUE_TYPE_UNDEFINED) {
+                    valueType = inferValueTypeOfKeyframe(res, theme, Xml.asAttributeSet(parser));
+                }
                 Keyframe keyframe = loadKeyframe(res, theme, Xml.asAttributeSet(parser), valueType);
                 if (keyframe != null) {
                     if (keyframes == null) {
