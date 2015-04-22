@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM ప్రమాణపత్రాలను తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"క్యారియర్ సందేశ సేవకు అనుబంధించడం"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"క్యారియర్ సందేశ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"క్యారియర్ కాన్ఫిగరేషన్ సేవకు అనుబంధించడం"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"క్యారియర్ కాన్ఫిగరేషన్ సేవకు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"స్క్రీన్-అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>

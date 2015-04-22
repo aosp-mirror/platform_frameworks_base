@@ -499,10 +499,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Nagbibigay-daan sa isang application na alisin ang mga DRM certficate. Hindi dapat kailanman kailanganin para sa karaniwang apps."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"sumailalim sa isang serbisyo ng pagmemensahe ng carrier"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Binibigyang-daan ang may-ari na sumailalim sa interface sa nangungunang antas ng isang serbisyo ng pagmemensahe ng carrier. Hindi kailanman dapat kailanganin para sa mga normal na app."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"i-bind sa isang carrier config service"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Pinapayagan ang may-hawak na mag-bind sa isang carrier config service. Hindi dapat kailanganin para sa mga normal na app."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa lock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>

@@ -501,10 +501,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Aplikaciji omogoča odstranjevanje potrdil za upravljanje digitalnih pravic. Tega ni treba nikoli uporabiti za navadne aplikacije."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"povezovanje z operaterjevo sporočilno storitvijo"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Imetniku omogoča povezovanje z vmesnikom operaterjeve sporočilne storitve najvišje ravni. To naj ne bi bilo nikoli potrebno za navadne aplikacije."</string>
-    <!-- no translation found for permlab_bindCarrierConfigService (4110548389449423386) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierConfigService (1096888107671817447) -->
-    <skip />
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"povezovanje z operaterjevo storitvijo konfiguriranja"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Imetniku omogoča povezovanje z operaterjevo storitvijo konfiguriranja. Tega ni treba nikoli uporabiti za navadne operacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih in kodah PIN za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"nadzor nad poskusi odklepanja zaslona"</string>
