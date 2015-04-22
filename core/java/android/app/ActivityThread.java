@@ -2541,11 +2541,16 @@ public final class ActivityThread {
             if (cmd.requestType == ActivityManager.ASSIST_CONTEXT_FULL) {
                 data.putParcelable(AssistStructure.ASSIST_KEY, new AssistStructure(r.activity));
                 AssistContent content = new AssistContent();
-                Intent intent = new Intent(r.activity.getIntent());
-                intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
-                intent.removeUnsafeExtras();
-                content.setIntent(intent);
+                Intent activityIntent = r.activity.getIntent();
+                if (activityIntent != null) {
+                    Intent intent = new Intent(activityIntent);
+                    intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                            | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION));
+                    intent.removeUnsafeExtras();
+                    content.setIntent(intent);
+                } else {
+                    content.setIntent(new Intent());
+                }
                 r.activity.onProvideAssistContent(content);
                 data.putParcelable(AssistContent.ASSIST_KEY, content);
             }
