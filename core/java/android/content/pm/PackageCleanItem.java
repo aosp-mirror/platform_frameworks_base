@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /** @hide */
-public class PackageCleanItem {
+public class PackageCleanItem implements Parcelable {
     public final int userId;
     public final String packageName;
     public final boolean andCode;

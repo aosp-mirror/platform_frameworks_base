@@ -55,6 +55,7 @@ public class ParceledListSlice<T extends Parcelable> implements Parcelable {
         mList = list;
     }
 
+    @SuppressWarnings("unchecked")
     private ParceledListSlice(Parcel p, ClassLoader loader) {
         final int N = p.readInt();
         mList = new ArrayList<T>(N);
@@ -63,7 +64,7 @@ public class ParceledListSlice<T extends Parcelable> implements Parcelable {
             return;
         }
 
-        Parcelable.Creator<T> creator = p.readParcelableCreator(loader);
+        Parcelable.Creator<?> creator = p.readParcelableCreator(loader);
         Class<?> listElementClass = null;
 
         int i = 0;
