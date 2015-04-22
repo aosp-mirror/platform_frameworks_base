@@ -166,6 +166,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int LOCK_TASK_END_MSG = FIRST_SUPERVISOR_STACK_MSG + 10;
     static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
+    static final int SHOW_LOCK_TASK_ESCAPE_MESSAGE_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
 
     private final static String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -3652,6 +3653,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mLockTaskNotify.showToast(mLockTaskModeState);
     }
 
+    void showLockTaskEscapeMessageLocked(TaskRecord task) {
+        if (mLockTaskModeTasks.contains(task)) {
+            mHandler.sendEmptyMessage(SHOW_LOCK_TASK_ESCAPE_MESSAGE_MSG);
+        }
+    }
+
     void setLockTaskModeLocked(TaskRecord task, int lockTaskModeState, String reason) {
         if (task == null) {
             // Take out of lock task mode if necessary
@@ -3896,6 +3903,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     } finally {
                         mLockTaskModeState = LOCK_TASK_MODE_NONE;
                     }
+                } break;
+                case SHOW_LOCK_TASK_ESCAPE_MESSAGE_MSG: {
+                    if (mLockTaskNotify == null) {
+                        mLockTaskNotify = new LockTaskNotify(mService.mContext);
+                    }
+                    mLockTaskNotify.showToast(LOCK_TASK_MODE_PINNED);
                 } break;
                 case CONTAINER_CALLBACK_TASK_LIST_EMPTY: {
                     final ActivityContainer container = (ActivityContainer) msg.obj;

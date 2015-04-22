@@ -6483,6 +6483,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Shows the user the system defined message for telling the user how to exit
+     * lock task mode. The task containing this activity must be in lock task mode at the time
+     * of this call for the message to be displayed.
+     */
+    public void showLockTaskEscapeMessage() {
+        try {
+            ActivityManagerNative.getDefault().showLockTaskEscapeMessage(mToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Interface for informing a translucent {@link Activity} once all visible activities below it
      * have completed drawing. This is necessary only after an {@link Activity} has been made
      * opaque using {@link Activity#convertFromTranslucent()} and before it has been drawn

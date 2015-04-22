@@ -22,4 +22,5 @@
     <string name="try_lock">Call startLockMode()</string>
     <string name="try_unlock">Call stopLockMode()</string>
 
+    <string name="toast_pinned">Show pinned toast message</string>
 </resources>
