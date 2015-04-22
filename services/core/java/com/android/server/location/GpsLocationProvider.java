@@ -550,14 +550,19 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
         }
 
-        try {
-            // Convert properties to string contents and send it to HAL.
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
-            properties.store(baos, null);
-            native_configuration_update(baos.toString());
-            Log.d(TAG, "final config = " + baos.toString());
-        } catch (IOException ex) {
-            Log.w(TAG, "failed to dump properties contents");
+        if (native_is_gnss_configuration_supported()) {
+            try {
+                // Convert properties to string contents and send it to HAL.
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
+                properties.store(baos, null);
+                native_configuration_update(baos.toString());
+                Log.d(TAG, "final config = " + baos.toString());
+            } catch (IOException ex) {
+                Log.w(TAG, "failed to dump properties contents");
+            }
+        } else if (DEBUG) {
+            Log.d(TAG, "Skipped configuration update because GNSS configuration in GPS HAL is not"
+                    + " supported");
         }
 
         // SUPL_ES configuration.
@@ -732,16 +737,21 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (info != null) {
-            boolean dataEnabled = TelephonyManager.getDefault().getDataEnabled();
-            boolean networkAvailable = info.isAvailable() && dataEnabled;
-            String defaultApn = getSelectedApn();
-            if (defaultApn == null) {
-                defaultApn = "dummy-apn";
-            }
+            if (native_is_agps_ril_supported()) {
+                boolean dataEnabled = TelephonyManager.getDefault().getDataEnabled();
+                boolean networkAvailable = info.isAvailable() && dataEnabled;
+                String defaultApn = getSelectedApn();
+                if (defaultApn == null) {
+                    defaultApn = "dummy-apn";
+                }
 
-            native_update_network_state(info.isConnected(), info.getType(),
-                                        info.isRoaming(), networkAvailable,
-                                        info.getExtraInfo(), defaultApn);
+                native_update_network_state(info.isConnected(), info.getType(),
+                        info.isRoaming(), networkAvailable,
+                        info.getExtraInfo(), defaultApn);
+            } else if (DEBUG) {
+                Log.d(TAG, "Skipped network state update because AGPS-RIL in GPS HAL is not"
+                        + " supported");
+            }
         }
 
         if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE_SUPL
@@ -1752,7 +1762,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // NI Client support
     //=============================================================
     private final INetInitiatedListener mNetInitiatedListener = new INetInitiatedListener.Stub() {
-        // Sends a response for an NI reqeust to HAL.
+        // Sends a response for an NI request to HAL.
         @Override
         public boolean sendNiResponse(int notificationId, int userResponse)
         {
@@ -1843,7 +1853,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void requestSetID(int flags) {
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        int    type = AGPS_SETID_TYPE_NONE;
+        int type = AGPS_SETID_TYPE_NONE;
         String data = "";
 
         if ((flags & AGPS_RIL_REQUEST_SETID_IMSI) == AGPS_RIL_REQUEST_SETID_IMSI) {
@@ -1994,20 +2004,26 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     .addOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
 
             // listen for events
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
-            intentFilter.addDataScheme("sms");
-            intentFilter.addDataAuthority("localhost","7275");
-            mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
+            IntentFilter intentFilter;
+            if (native_is_agps_ril_supported()) {
+                intentFilter = new IntentFilter();
+                intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
+                intentFilter.addDataScheme("sms");
+                intentFilter.addDataAuthority("localhost", "7275");
+                mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
 
-            intentFilter = new IntentFilter();
-            intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
-            try {
-                intentFilter.addDataType("application/vnd.omaloc-supl-init");
-            } catch (IntentFilter.MalformedMimeTypeException e) {
-                Log.w(TAG, "Malformed SUPL init mime type");
+                intentFilter = new IntentFilter();
+                intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
+                try {
+                    intentFilter.addDataType("application/vnd.omaloc-supl-init");
+                } catch (IntentFilter.MalformedMimeTypeException e) {
+                    Log.w(TAG, "Malformed SUPL init mime type");
+                }
+                mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
+            } else if (DEBUG) {
+                Log.d(TAG, "Skipped registration for SMS/WAP-PUSH messages because AGPS Ril in GPS"
+                        + " HAL is not supported");
             }
-            mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
 
             intentFilter = new IntentFilter();
             intentFilter.addAction(ALARM_WAKEUP);
@@ -2187,6 +2203,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     static { class_init_native(); }
     private static native void class_init_native();
     private static native boolean native_is_supported();
+    private static native boolean native_is_agps_ril_supported();
+    private static native boolean native_is_gnss_configuration_supported();
 
     private native boolean native_init();
     private native void native_cleanup();

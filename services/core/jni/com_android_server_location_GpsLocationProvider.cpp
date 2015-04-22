@@ -509,13 +509,22 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
     }
 }
 
-static jboolean android_location_GpsLocationProvider_is_supported(JNIEnv* /* env */,
-                                                                  jclass /* clazz */) {
-    if (sGpsInterface != NULL) {
-        return JNI_TRUE;
-    } else {
-        return JNI_FALSE;
-    }
+static jboolean android_location_GpsLocationProvider_is_supported(
+        JNIEnv* /* env */, jclass /* clazz */)
+{
+    return (sGpsInterface != NULL) ?  JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean android_location_GpsLocationProvider_is_agps_ril_supported(
+        JNIEnv* /* env */, jclass /* clazz */)
+{
+    return (sAGpsRilInterface != NULL) ? JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean android_location_gpsLocationProvider_is_gnss_configuration_supported(
+        JNIEnv* /* env */, jclass /* jclazz */)
+{
+    return (sGnssConfigurationInterface != NULL) ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject obj)
@@ -715,14 +724,10 @@ static void android_location_GpsLocationProvider_inject_location(JNIEnv* /* env 
         sGpsInterface->inject_location(latitude, longitude, accuracy);
 }
 
-static jboolean android_location_GpsLocationProvider_supports_xtra(JNIEnv* /* env */,
-                                                                   jobject /* obj */)
+static jboolean android_location_GpsLocationProvider_supports_xtra(
+        JNIEnv* /* env */, jobject /* obj */)
 {
-    if (sGpsXtraInterface != NULL) {
-        return JNI_TRUE;
-    } else {
-        return JNI_FALSE;
-    }
+    return (sGpsXtraInterface != NULL) ? JNI_TRUE : JNI_FALSE;
 }
 
 static void android_location_GpsLocationProvider_inject_xtra_data(JNIEnv* env, jobject /* obj */,
@@ -844,13 +849,10 @@ static void android_location_GpsLocationProvider_update_network_state(JNIEnv* en
     }
 }
 
-static jboolean android_location_GpsLocationProvider_is_geofence_supported(JNIEnv* /* env */,
-                                                                           jobject /* obj */)
+static jboolean android_location_GpsLocationProvider_is_geofence_supported(
+        JNIEnv* /* env */, jobject /* obj */)
 {
-    if (sGpsGeofencingInterface != NULL) {
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
+    return (sGpsGeofencingInterface != NULL) ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean android_location_GpsLocationProvider_add_geofence(JNIEnv* /* env */,
@@ -1436,6 +1438,10 @@ static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"class_init_native", "()V", (void *)android_location_GpsLocationProvider_class_init_native},
     {"native_is_supported", "()Z", (void*)android_location_GpsLocationProvider_is_supported},
+    {"native_is_agps_ril_supported", "()Z",
+            (void*)android_location_GpsLocationProvider_is_agps_ril_supported},
+    {"native_is_gnss_configuration_supported", "()Z",
+            (void*)android_location_gpsLocationProvider_is_gnss_configuration_supported},
     {"native_init", "()Z", (void*)android_location_GpsLocationProvider_init},
     {"native_cleanup", "()V", (void*)android_location_GpsLocationProvider_cleanup},
     {"native_set_position_mode",
