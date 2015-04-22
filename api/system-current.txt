@@ -16946,7 +16946,7 @@ package android.media {
     method public final void release();
     method public void seekTo(long, int);
     method public void selectTrack(int);
-    method public final void setDataSource(android.media.MediaDataSource) throws java.io.IOException, java.lang.IllegalArgumentException;
+    method public final void setDataSource(android.media.MediaDataSource) throws java.io.IOException;
     method public final void setDataSource(android.content.Context, android.net.Uri, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
     method public final void setDataSource(java.lang.String, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
     method public final void setDataSource(java.lang.String) throws java.io.IOException;
