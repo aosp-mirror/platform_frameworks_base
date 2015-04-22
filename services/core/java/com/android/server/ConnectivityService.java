@@ -3518,10 +3518,34 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 getCallingUid(), 0, operation));
     }
 
+    // In order to implement the compatibility measure for pre-M apps that call
+    // WifiManager.enableNetwork(..., true) without also binding to that network explicitly,
+    // WifiManager registers a network listen for the purpose of calling setProcessDefaultNetwork.
+    // This ensures it has permission to do so.
+    private boolean hasWifiNetworkListenPermission(NetworkCapabilities nc) {
+        if (nc == null) {
+            return false;
+        }
+        int[] transportTypes = nc.getTransportTypes();
+        if (transportTypes.length != 1 || transportTypes[0] != NetworkCapabilities.TRANSPORT_WIFI) {
+            return false;
+        }
+        try {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_WIFI_STATE,
+                    "ConnectivityService");
+        } catch (SecurityException e) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public NetworkRequest listenForNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, IBinder binder) {
-        enforceAccessPermission();
+        if (!hasWifiNetworkListenPermission(networkCapabilities)) {
+            enforceAccessPermission();
+        }
 
         NetworkRequest networkRequest = new NetworkRequest(new NetworkCapabilities(
                 networkCapabilities), TYPE_NONE, nextNetworkRequestId());
