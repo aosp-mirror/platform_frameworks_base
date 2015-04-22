@@ -503,7 +503,8 @@ public class DirectoryFragment extends Fragment {
             open.setVisible(!manageOrBrowse);
             share.setVisible(manageOrBrowse);
             delete.setVisible(manageOrBrowse);
-            copy.setVisible(manageOrBrowse);
+            // Disable copying from the Recents view.
+            copy.setVisible(manageOrBrowse && mType != TYPE_RECENT_OPEN);
 
             return true;
         }
