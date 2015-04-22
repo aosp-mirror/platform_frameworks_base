@@ -9311,6 +9311,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_APP_WIDGETS = "android.software.app_widgets";
     field public static final java.lang.String FEATURE_AUDIO_LOW_LATENCY = "android.hardware.audio.low_latency";
     field public static final java.lang.String FEATURE_AUDIO_OUTPUT = "android.hardware.audio.output";
+    field public static final java.lang.String FEATURE_AUTOMOTIVE = "android.hardware.type.automotive";
     field public static final java.lang.String FEATURE_BACKUP = "android.software.backup";
     field public static final java.lang.String FEATURE_BLUETOOTH = "android.hardware.bluetooth";
     field public static final java.lang.String FEATURE_BLUETOOTH_LE = "android.hardware.bluetooth_le";
