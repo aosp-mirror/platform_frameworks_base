@@ -4269,9 +4269,11 @@ final class Settings {
                 serializer.endTag(null, TAG_RUNTIME_PERMISSIONS);
                 serializer.endDocument();
                 destination.finishWrite(out);
-            } catch (IOException e) {
+
+                // Any error while writing is fatal.
+            } catch (Throwable t) {
                 Slog.wtf(PackageManagerService.TAG,
-                        "Failed to write settings, restoring backup", e);
+                        "Failed to write settings, restoring backup", t);
                 destination.failWrite(out);
             } finally {
                 IoUtils.closeQuietly(out);
@@ -4319,9 +4321,11 @@ final class Settings {
                 XmlPullParser parser = Xml.newPullParser();
                 parser.setInput(in, null);
                 parseRuntimePermissionsLPr(parser, userId);
-            } catch (XmlPullParserException | IOException ise) {
+
+                // Any error while parsing is fatal.
+            } catch (Throwable t) {
                 throw new IllegalStateException("Failed parsing permissions file: "
-                        + permissionsFile , ise);
+                        + permissionsFile , t);
             } finally {
                 IoUtils.closeQuietly(in);
             }
