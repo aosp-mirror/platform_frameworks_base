@@ -21,6 +21,7 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 import android.content.Context;
+import android.provider.DocumentsContract.Document;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
@@ -43,6 +44,8 @@ public class FileUtilsTest extends AndroidTestCase {
     private File mDir;
     private File mTestFile;
     private File mCopyFile;
+    private File mTarget;
+
 
     @Override
     protected void setUp() throws Exception {
@@ -50,11 +53,15 @@ public class FileUtilsTest extends AndroidTestCase {
         mDir = getContext().getDir("testing", Context.MODE_PRIVATE);
         mTestFile = new File(mDir, "test.file");
         mCopyFile = new File(mDir, "copy.file");
+
+        mTarget = getContext().getFilesDir();
+        FileUtils.deleteContents(mTarget);
     }
 
     @Override
     protected void tearDown() throws Exception {
         IoUtils.deleteContents(mDir);
+        FileUtils.deleteContents(mTarget);
     }
 
     // TODO: test setPermissions(), getPermissions()
@@ -223,6 +230,63 @@ public class FileUtilsTest extends AndroidTestCase {
         assertEquals(".foo", FileUtils.buildValidFatFilename(".foo"));
         assertEquals("foo.bar", FileUtils.buildValidFatFilename("foo.bar"));
         assertEquals("foo_bar__baz", FileUtils.buildValidFatFilename("foo?bar**baz"));
+    }
+
+    public void testBuildUniqueFile_normal() throws Exception {
+        assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test"));
+        assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
+        assertNameEquals("test.jpeg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpeg"));
+        assertNameEquals("TEst.JPeg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "TEst.JPeg"));
+        assertNameEquals("test.png.jpg",
+                FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.png.jpg"));
+        assertNameEquals("test.png.jpg",
+                FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.png"));
+
+        assertNameEquals("test.flac", FileUtils.buildUniqueFile(mTarget, "audio/flac", "test"));
+        assertNameEquals("test.flac", FileUtils.buildUniqueFile(mTarget, "audio/flac", "test.flac"));
+        assertNameEquals("test.flac",
+                FileUtils.buildUniqueFile(mTarget, "application/x-flac", "test"));
+        assertNameEquals("test.flac",
+                FileUtils.buildUniqueFile(mTarget, "application/x-flac", "test.flac"));
+    }
+
+    public void testBuildUniqueFile_unknown() throws Exception {
+        assertNameEquals("test",
+                FileUtils.buildUniqueFile(mTarget, "application/octet-stream", "test"));
+        assertNameEquals("test.jpg",
+                FileUtils.buildUniqueFile(mTarget, "application/octet-stream", "test.jpg"));
+        assertNameEquals(".test",
+                FileUtils.buildUniqueFile(mTarget, "application/octet-stream", ".test"));
+
+        assertNameEquals("test", FileUtils.buildUniqueFile(mTarget, "lolz/lolz", "test"));
+        assertNameEquals("test.lolz", FileUtils.buildUniqueFile(mTarget, "lolz/lolz", "test.lolz"));
+    }
+
+    public void testBuildUniqueFile_dir() throws Exception {
+        assertNameEquals("test", FileUtils.buildUniqueFile(mTarget, Document.MIME_TYPE_DIR, "test"));
+        new File(mTarget, "test").mkdir();
+        assertNameEquals("test (1)",
+                FileUtils.buildUniqueFile(mTarget, Document.MIME_TYPE_DIR, "test"));
+
+        assertNameEquals("test.jpg",
+                FileUtils.buildUniqueFile(mTarget, Document.MIME_TYPE_DIR, "test.jpg"));
+        new File(mTarget, "test.jpg").mkdir();
+        assertNameEquals("test.jpg (1)",
+                FileUtils.buildUniqueFile(mTarget, Document.MIME_TYPE_DIR, "test.jpg"));
+    }
+
+    public void testBuildUniqueFile_increment() throws Exception {
+        assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
+        new File(mTarget, "test.jpg").createNewFile();
+        assertNameEquals("test (1).jpg",
+                FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
+        new File(mTarget, "test (1).jpg").createNewFile();
+        assertNameEquals("test (2).jpg",
+                FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
+    }
+
+    private static void assertNameEquals(String expected, File actual) {
+        assertEquals(expected, actual.getName());
     }
 
     private void touch(String name, long age) throws Exception {
