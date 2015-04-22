@@ -346,6 +346,17 @@ public final class FloatingToolbar {
         };
 
         private final Region mTouchableRegion = new Region();
+        private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer =
+                new ViewTreeObserver.OnComputeInternalInsetsListener() {
+                    public void onComputeInternalInsets(
+                            ViewTreeObserver.InternalInsetsInfo info) {
+                        info.contentInsets.setEmpty();
+                        info.visibleInsets.setEmpty();
+                        info.touchableRegion.set(mTouchableRegion);
+                        info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo
+                                .TOUCHABLE_INSETS_REGION);
+                    }
+                };
 
         private boolean mDismissed = true; // tracks whether this popup is dismissed or dismissing.
         private boolean mHidden; // tracks whether this popup is hidden or hiding.
@@ -382,21 +393,6 @@ public final class FloatingToolbar {
                             mPopupWindow.dismiss();
                         }
                     });
-            // Make the touchable area of this popup be the area specified by mTouchableRegion.
-            mPopupWindow.getContentView()
-                    .getRootView()
-                    .getViewTreeObserver()
-                    .addOnComputeInternalInsetsListener(
-                            new ViewTreeObserver.OnComputeInternalInsetsListener() {
-                                public void onComputeInternalInsets(
-                                        ViewTreeObserver.InternalInsetsInfo info) {
-                                    info.contentInsets.setEmpty();
-                                    info.visibleInsets.setEmpty();
-                                    info.touchableRegion.set(mTouchableRegion);
-                                    info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo
-                                            .TOUCHABLE_INSETS_REGION);
-                                }
-                            });
             mMarginHorizontal = parent.getResources()
                     .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
             mMarginVertical = parent.getResources()
@@ -447,6 +443,7 @@ public final class FloatingToolbar {
             // The "show" animation will make this visible.
             mContentContainer.setAlpha(0);
             mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, x, y);
+            setTouchableSurfaceInsetsComputer();
             runShowAnimation();
         }
 
@@ -803,6 +800,19 @@ public final class FloatingToolbar {
                     (int) mContentContainer.getY(),
                     (int) mContentContainer.getX() + width,
                     (int) mContentContainer.getY() + height);
+        }
+
+        /**
+         * Make the touchable area of this popup be the area specified by mTouchableRegion.
+         * This should be called after the popup window has been dismissed (dismiss/hide)
+         * and is probably being re-shown with a new content root view.
+         */
+        private void setTouchableSurfaceInsetsComputer() {
+            ViewTreeObserver viewTreeObserver = mPopupWindow.getContentView()
+                    .getRootView()
+                    .getViewTreeObserver();
+            viewTreeObserver.removeOnComputeInternalInsetsListener(mInsetsComputer);
+            viewTreeObserver.addOnComputeInternalInsetsListener(mInsetsComputer);
         }
     }
 
