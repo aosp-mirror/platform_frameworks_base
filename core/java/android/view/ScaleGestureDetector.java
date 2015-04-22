@@ -212,8 +212,13 @@ public class ScaleGestureDetector {
         mMinSpan = res.getDimensionPixelSize(com.android.internal.R.dimen.config_minScalingSpan);
         mHandler = handler;
         // Quick scale is enabled by default after JB_MR2
-        if (context.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion > Build.VERSION_CODES.JELLY_BEAN_MR2) {
             setQuickScaleEnabled(true);
+        }
+        // Stylus scale is enabled by default after LOLLIPOP_MR1
+        if (targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            setStylusScaleEnabled(true);
         }
     }
 
