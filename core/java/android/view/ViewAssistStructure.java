@@ -32,6 +32,8 @@ public abstract class ViewAssistStructure {
 
     public abstract void setVisibility(int visibility);
 
+    public abstract void setAssistBlocked(boolean state);
+
     public abstract void setEnabled(boolean state);
 
     public abstract void setClickable(boolean state);

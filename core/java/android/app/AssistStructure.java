@@ -218,6 +218,7 @@ final public class AssistStructure implements Parcelable {
         static final int FLAGS_FOCUSED = 0x00000020;
         static final int FLAGS_ACCESSIBILITY_FOCUSED = 0x04000000;
         static final int FLAGS_SELECTED = 0x00000040;
+        static final int FLAGS_ASSIST_BLOCKED = 0x00000080;
         static final int FLAGS_ACTIVATED = 0x40000000;
         static final int FLAGS_CHECKABLE = 0x00000100;
         static final int FLAGS_CHECKED = 0x00000200;
@@ -356,6 +357,10 @@ final public class AssistStructure implements Parcelable {
             return mFlags&ViewNode.FLAGS_VISIBILITY_MASK;
         }
 
+        public boolean isAssistBlocked() {
+            return (mFlags&ViewNode.FLAGS_ASSIST_BLOCKED) == 0;
+        }
+
         public boolean isEnabled() {
             return (mFlags&ViewNode.FLAGS_DISABLED) == 0;
         }
@@ -481,6 +486,12 @@ final public class AssistStructure implements Parcelable {
         @Override
         public void setVisibility(int visibility) {
             mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_VISIBILITY_MASK) | visibility;
+        }
+
+        @Override
+        public void setAssistBlocked(boolean state) {
+            mNode.mFlags = (mNode.mFlags&~ViewNode.FLAGS_ASSIST_BLOCKED)
+                    | (state ? 0 : ViewNode.FLAGS_ASSIST_BLOCKED);
         }
 
         @Override

@@ -631,6 +631,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </p>
  *
  * @attr ref android.R.styleable#View_alpha
+ * @attr ref android.R.styleable#View_assistBlocked
  * @attr ref android.R.styleable#View_background
  * @attr ref android.R.styleable#View_clickable
  * @attr ref android.R.styleable#View_contentDescription
@@ -2324,6 +2325,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                               1   PFLAG3_IS_LAID_OUT
      *                              1    PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT
      *                             1     PFLAG3_CALLED_SUPER
+     *                            1      PFLAG3_APPLYING_INSETS
+     *                           1       PFLAG3_FITTING_SYSTEM_WINDOWS
+     *                          1        PFLAG3_NESTED_SCROLLING_ENABLED
+     *                         1         PFLAG3_ASSIST_BLOCKED
      * |-------|-------|-------|-------|
      */
 
@@ -2379,6 +2384,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
+
+    /**
+     * <p>Indicates that we are allowing {@link android.view.ViewAssistStructure} to traverse
+     * into this view.<p>
+     */
+    static final int PFLAG3_ASSIST_BLOCKED = 0x100;
 
     /**
      * Always allow a user to over-scroll this view, provided it is a
@@ -3867,6 +3878,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (!a.getBoolean(attr, true)) {
                         viewFlagValues |= SAVE_DISABLED;
                         viewFlagMasks |= SAVE_DISABLED_MASK;
+                    }
+                    break;
+                case com.android.internal.R.styleable.View_assistBlocked:
+                    if (a.getBoolean(attr, false)) {
+                        mPrivateFlags3 |= PFLAG3_ASSIST_BLOCKED;
                     }
                     break;
                 case com.android.internal.R.styleable.View_duplicateParentState:
@@ -5775,7 +5791,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             structure.setId(id, null, null, null);
         }
-        structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight-mLeft, mBottom-mTop);
+        structure.setDimens(mLeft, mTop, mScrollX, mScrollY, mRight - mLeft, mBottom - mTop);
         structure.setVisibility(getVisibility());
         structure.setEnabled(isEnabled());
         if (isClickable()) {
@@ -5890,8 +5906,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #onProvideVirtualAssistStructure}.
      */
     public void dispatchProvideAssistStructure(ViewAssistStructure structure) {
-        onProvideAssistStructure(structure);
-        onProvideVirtualAssistStructure(structure);
+        if (!isAssistBlocked()) {
+            onProvideAssistStructure(structure);
+            onProvideVirtualAssistStructure(structure);
+        } else {
+            structure.setClassName(getAccessibilityClassName().toString());
+            structure.setAssistBlocked(true);
+        }
     }
 
     /**
@@ -7455,6 +7476,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty
     public boolean isPressed() {
         return (mPrivateFlags & PFLAG_PRESSED) == PFLAG_PRESSED;
+    }
+
+    /**
+     * Indicates whether this view will participate in data collection through
+     * {@link android.view.ViewAssistStructure}.  If true, it will not provide any data
+     * for itself or its children.  If false, the normal data collection will be allowed.
+     *
+     * @return Returns false if assist data collection is not blocked, else true.
+     *
+     * @see #setAssistBlocked(boolean)
+     * @attr ref android.R.styleable#View_assistBlocked
+     */
+    public boolean isAssistBlocked() {
+        return (mPrivateFlags3 & PFLAG3_ASSIST_BLOCKED) != 0;
+    }
+
+    /**
+     * Controls whether assist data collection from this view and its children is enabled
+     * (that is, whether {@link #onProvideAssistStructure} and
+     * {@link #onProvideVirtualAssistStructure} will be called).  The default value is false,
+     * allowing normal assist collection.  Setting this to false will disable assist collection.
+     *
+     * @param enabled Set to true to <em>disable</em> assist data collection, or false
+     * (the default) to allow it.
+     *
+     * @see #isAssistBlocked()
+     * @see #onProvideAssistStructure
+     * @see #onProvideVirtualAssistStructure
+     * @attr ref android.R.styleable#View_assistBlocked
+     */
+    public void setAssistBlocked(boolean enabled) {
+        if (enabled) {
+            mPrivateFlags3 |= PFLAG3_ASSIST_BLOCKED;
+        } else {
+            mPrivateFlags3 &= ~PFLAG3_ASSIST_BLOCKED;
+        }
     }
 
     /**

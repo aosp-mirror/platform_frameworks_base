@@ -20,4 +20,5 @@
 <voice-interaction-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:sessionService="com.android.test.voiceinteraction.MainInteractionSessionService"
     android:recognitionService="com.android.test.voiceinteraction.MainRecognitionService"
-    android:settingsActivity="com.android.test.voiceinteraction.SettingsActivity" />
+    android:settingsActivity="com.android.test.voiceinteraction.SettingsActivity"
+    android:supportsAssistGesture="true" />
