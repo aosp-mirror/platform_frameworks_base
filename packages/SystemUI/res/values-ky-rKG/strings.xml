@@ -171,8 +171,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM карта жок."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth аркылуу интернет бөлүшүү."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Учак тартиби."</string>
-    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
-    <skip />
+    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Оператор тармагы өзгөртүлүүдө."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батарея <xliff:g id="NUMBER">%d</xliff:g> пайыз."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Система тууралоолору."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Эскертмелер."</string>
@@ -388,17 +387,20 @@
     <string name="monitoring_title" msgid="169206259253048106">"Тармакка көз салуу"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN\'ди өчүрүү"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN\'ди ажыратуу"</string>
-    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"Бул түзмөк төмөнкү тарабынан башкарылат:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдминистраторуңуз түзмөгүңүздү жана тармактагы аракетиңизди, анын ичинде email-дер, колдонмолор жана коопсуз вебсайттарды көзөмөлдөй алат.\n\nКөбүрөөк маалымат үчүн администраторуңузга кайрылыңыз."</string>
-    <string name="monitoring_description_vpn" msgid="7288268682714305659">"\"<xliff:g id="APPLICATION">%1$s</xliff:g>\" VPN туташуу орнотуусуна уруксат бердиңиз.\n\nБул колдонмо түзмөгүңүздү жана тармактагы аракетиңизди, анын ичинде email-дер, колдонмолор жана коопсуз вебсайттарды көзөмөлдөй алат."</string>
-    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Сиз VPN-ге туташкансыз (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\").\n\nVPN кызмат камсыздоочуңуз түзмөгүңүздү жана тармактагы аракетиңизди, анын ичинде email-дер, колдонмолор жана коопсуз вебсайттарды көзөмөлдөй алат."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Бул түзмөк төмөнкүчө башкарылат:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдминистратор электрондук почталар, колдонмолор жана коопсуз вебсайттар сыяктуу тармактгы аракеттрге көз салып турт. Көбүрөөк билүү үчн, администратрго кайрылңз.\n\nОшондой эле \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" VPN туташуусн орнотууга урукст бердиңз. Бул колдонмо тармактгы аракеттерңзге дагы көз салат."</string>
-    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Бул түзмөк төмөнкүчө башкарылат:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдминистратор электрондук почта, колдонмолор жана коопсуз вебсайттар сыяктуу тармактагы аракеттериңизге көз салып турат. Көбүрөөк билүү үчүн, администраторго кайрылыңыз.\n\nОшондой эле VPN\'ге туташып турасыз. (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\"). VPN кызмат көрсөтүүчү тармактагы аракетиңизге көз салат."</string>
-    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"Бул профилди төмөнкү башкарат:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдминистраторңуз түзмөгүңүз жана тармактагы аракетиңизди, анын ичинде email-дер, колдонмолор жана коопсуз вебсайттарды, көзөмөлдөй алат.\n\nДагы маалымат үчүн, администраторуңузга кайрылыңыз."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"Бул түзмөктү төмөнкү башкарат:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nПрофилиңизди төмөнкү башкарат:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nАдминистраторуңуз түзмөгүңүз жана тармактагы аракетиңизди, анын ичинде email-дер, колдонмолор жана коопсуз вебсайттарды, көзөмөлдөй алат.\n\nДагы маалымат үчүн, администраторуңузга кайрылыңыз."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"Бул профилди төмөнкү башкарат:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдмин-ңуздун тармак ар-ңизди, анын ичинде email-дер, колд-лор жана коопсуз вебсайттарды, көзөмөлдөө мүмкүнчүлүгү бар. Дагы маалымат үчүн, админ-ңузга кайрылыңыз.\n\n\"<xliff:g id="APPLICATION">%2$s</xliff:g>\" VPN туташуусун орнотуусуна да уруксат бердиңиз. Бул колдонмо тармак аракетин да көзөмөлдөй алат."</string>
-    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"Бул профилди төмөнкү башкарат:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nАдмин-ңуздун тармак ар-ңизди, анын ичинде email-дер, колд-лор жана коопсуз вебсайттарды, көзөмөлдөө мүмкүнчүлүгү бар. Дагы маалымат үчүн, админ-ңузга кайрылыңыз.\n\nСиз VPN-ге (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") да туташкансыз. VPN тейлөөчүңүз да тармак аракетин көзөмөлдөй алат."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Бул түзмөктү төмөнкү башк-т:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nПрофилиңизди төмөнкү башк-т:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nАдмин-ңуздун тармак ар-ңизди, анын ичинде email-дер, колд-лор жана коопсуз вебс-ды, көз-дөө мүмк-гү бар. Дагы маалымат үчүн, админ-ңузга кайр-з.\n\n\"<xliff:g id="APPLICATION">%3$s</xliff:g>\" VPN туташуусун орнотуусуна да уруксат бердиңиз. Бул колдонмо тармак аракетин да көзөмөлдөй алат."</string>
-    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Түзмөктү тө-кү башк-т:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nПрофилди тө-кү башк-т:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nАдмин-ңуздун тармак ар-ңизди, анын ичинде email-дер, колд-лор жана коопсуз вебс-ды, көзөмөлдөө мүмкүнчүлүгү бар. Дагы маалымат үчүн, админ-ңузга кайрылыңыз.\n\nСиз VPN-ге (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") да туташкансыз. VPN тейлөөчүңүз да тармак аракетин көзөмөлдөй алат."</string>
+    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
+    <skip />
+    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
+    <skip />
+    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Түзмөктүн кулпусу кол менен ачылмайынча кулпуланган бойдон алат"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Эскертмелерди тезирээк алуу"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Аларды кулпудан чыгараардан мурун көрүңүз"</string>

@@ -146,8 +146,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM kart yok."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Uçak modu."</string>
-    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
-    <skip />
+    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Operatör şebekesi değişiyor."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Pil yüzdesi: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistem ayarları."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Bildirimler."</string>
@@ -363,17 +362,20 @@
     <string name="monitoring_title" msgid="169206259253048106">"Ağ izleme"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN\'yi devre dışı bırak"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN bağlantısını kes"</string>
-    <string name="monitoring_description_device_owned" msgid="7512371572956715493">"Bu cihazı yöneten kuruluş:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYöneticiniz e-postalar, uygulamalar ve güvenli web siteleri dahil olmak üzere ağ etkinliğinizi izleyebilir.\n\nDaha fazla bilgi edinmek için yöneticinizle iletişim kurun."</string>
-    <string name="monitoring_description_vpn" msgid="7288268682714305659">"\"<xliff:g id="APPLICATION">%1$s</xliff:g>\" uygulamasına bir VPN bağlantısı kurma izni verdiniz.\n\nBu uygulama e-postalar, uygulamalar ve güvenli web siteleri dahil olmak üzere ağ etkinliğinizi izleyebilir."</string>
-    <string name="monitoring_description_legacy_vpn" msgid="4740349017929725435">"Bir VPN\'ye (\"<xliff:g id="APPLICATION">%1$s</xliff:g>\") bağlısınız.\n\nVPN servis sağlayıcınız e-postalar, uygulamalar ve güvenli web siteleri dahil olmak üzere ağ etkinliğinizi izleyebilir."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="696121105616356493">"Bu cihazı yöneten kuruluş:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYöneticiniz e-postalar, uygulamalar ve güvenli web siteleri dahil olmak üzere ağ etkinliğinizi izleyebilir.\n\nAyrıca \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" uygulamasına VPN bağlantısı kurma izni de verdiniz. Bu uygulama da ağ etkinliğini izleyebilir."</string>
-    <string name="monitoring_description_legacy_vpn_device_owned" msgid="649791650224064248">"Bu cihazı yöneten kuruluş:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\n.Yöneticiniz e-postalar, uygulamalar ve güvenli web siteleri dahil olmak üzere ağ etkinliğinizi izleyebilir. Daha fazla bilgi için yöneticinizle iletişim kurun.\n\n Ayrıca bir VPN\'ye de (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") bağlısınız. VPN servis sağlayıcınız da ağ etkinliğini izleyebilir."</string>
-    <string name="monitoring_description_profile_owned" msgid="2370062794285691713">"Bu profili yöneten kuruluş:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYöneticiniz; e-postalar, uygulamalar ve güvenli web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilir.\n\nDaha fazla bilgi için yöneticinize başvurun."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="8685301493845456293">"Bu cihazı yöneten kuruluş:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfilinizi yöneten kuruluş:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nYöneticiniz; e-postalar, uygulamalar ve güvenli web siteleri de dahil olmak üzere cihazınızı ve ağ etkinliğinizi izleyebilir.\n\nDaha fazla bilgi için yöneticinize başvurun."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="847491346263295767">"Bu profili yöneten kuruluş:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYöneticiniz e-postalar, uygulamalar ve güvenli web siteleri dahil olmak üzere ağ etkinliğinizi izleyebilir.\n\nAyrıca \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" uygulamasına VPN bağlantısı kurma izni de verdiniz. Bu uygulama da ağ etkinliğini izleyebilir."</string>
-    <string name="monitoring_description_legacy_vpn_profile_owned" msgid="4095516964132237051">"Bu profili yöneten kuruluş:\n<xliff:g id="ORGANIZATION">%1$s</xliff:g>\n\nYöneticiniz; e-postalar, uygulamalar ve güvenli web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilir. Daha fazla bilgi için yöneticinize başvurun.\n\nAyrıca, bir VPN\'ye (\"<xliff:g id="APPLICATION">%2$s</xliff:g>\") bağlısınız. VPN hizmet sağlayıcınız da ağ etkinliğini izleyebilir."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="9193588924767232909">"Bu cihazı yöneten kuruluş:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfilinizi yöneten kuruluş:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nYöneticiniz; e-postalar, uygulamalar ve güvenli web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilir. Daha fazla bilgi için yöneticinize başvurun.\n\nAyrıca \"<xliff:g id="APPLICATION">%3$s</xliff:g>\" uygulamasına VPN kurma izni verdiniz. Bu uygulama da ağ etkinliğini izleyebilir."</string>
-    <string name="monitoring_description_legacy_vpn_device_and_profile_owned" msgid="6935475023447698473">"Bu cihazı yöneten kuruluş:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nProfilinizi yöneten kuruluş:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nYöneticiniz; e-postalar, uygulamalar ve güvenli web siteleri de dahil olmak üzere ağ etkinliğinizi izleyebilir. Daha fazla bilgi için yöneticinize başvurun.\n\nAyrıca, bir VPN\'ye (\"<xliff:g id="APPLICATION">%3$s</xliff:g>\") bağlısınız. VPN hizmet sağlayıcınız da ağ etkinliğini izleyebilir."</string>
+    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
+    <skip />
+    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
+    <skip />
+    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Cihazınızın kilidini manuel olarak açmadıkça cihaz kilitli kalacak"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Bildirimleri daha hızlı alın"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Kilidi açmadan bildirimleri görün"</string>
