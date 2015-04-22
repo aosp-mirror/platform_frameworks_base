@@ -11067,7 +11067,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean onExternal = (((installFlags & PackageManager.INSTALL_EXTERNAL) != 0)
                 || (args.volumeUuid != null));
         boolean replace = false;
-        final int scanFlags = SCAN_NEW_INSTALL | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE;
+        int scanFlags = SCAN_NEW_INSTALL | SCAN_FORCE_DEX | SCAN_UPDATE_SIGNATURE;
         // Result object to be returned
         res.returnCode = PackageManager.INSTALL_SUCCEEDED;
 
@@ -11234,13 +11234,18 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        // Run dexopt before old package gets removed, to minimize time when app is not available
-        int result = mPackageDexOptimizer
-                .performDexOpt(pkg, null /* instruction sets */, true /* forceDex */,
-                        false /* defer */, false /* inclDependencies */);
-        if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
-            res.setError(INSTALL_FAILED_DEXOPT, "Dexopt failed for " + pkg.codePath);
-            return;
+        // If app directory is not writable, dexopt will be called after the rename
+        if (!forwardLocked && !pkg.applicationInfo.isExternalAsec()) {
+            // Enable SCAN_NO_DEX flag to skip dexopt at a later stage
+            scanFlags |= SCAN_NO_DEX;
+            // Run dexopt before old package gets removed, to minimize time when app is unavailable
+            int result = mPackageDexOptimizer
+                    .performDexOpt(pkg, null /* instruction sets */, true /* forceDex */,
+                            false /* defer */, false /* inclDependencies */);
+            if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
+                res.setError(INSTALL_FAILED_DEXOPT, "Dexopt failed for " + pkg.codePath);
+                return;
+            }
         }
 
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
@@ -11250,13 +11255,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         startIntentFilterVerifications(args.user.getIdentifier(), pkg);
 
-        // Call with SCAN_NO_DEX, since dexopt has already been made
         if (replace) {
-            replacePackageLI(pkg, parseFlags, scanFlags | SCAN_REPLACING | SCAN_NO_DEX, args.user,
+            replacePackageLI(pkg, parseFlags, scanFlags | SCAN_REPLACING, args.user,
                     installerPackageName, volumeUuid, res);
         } else {
-            installNewPackageLI(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES
-                    | SCAN_NO_DEX, args.user, installerPackageName, volumeUuid, res);
+            installNewPackageLI(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
+                    args.user, installerPackageName, volumeUuid, res);
         }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
