@@ -95,7 +95,7 @@ public class NotificationContentView extends FrameLayout {
         if (mContractedChild != null) {
             int size = Math.min(maxSize, mSmallHeight);
             mContractedChild.measure(widthMeasureSpec,
-                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST));
+                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY));
             maxChildHeight = Math.max(maxChildHeight, mContractedChild.getMeasuredHeight());
         }
         if (mExpandedChild != null) {
