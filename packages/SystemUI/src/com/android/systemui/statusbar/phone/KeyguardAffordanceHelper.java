@@ -39,7 +39,7 @@ public class KeyguardAffordanceHelper {
     public static final float SWIPE_RESTING_ALPHA_AMOUNT = 0.5f;
     public static final long HINT_PHASE1_DURATION = 200;
     private static final long HINT_PHASE2_DURATION = 350;
-    private static final float BACKGROUND_RADIUS_SCALE_FACTOR = 0.15f;
+    private static final float BACKGROUND_RADIUS_SCALE_FACTOR = 0.25f;
     private static final int HINT_CIRCLE_OPEN_DURATION = 500;
 
     private final Context mContext;
@@ -63,13 +63,30 @@ public class KeyguardAffordanceHelper {
     private Interpolator mDisappearInterpolator;
     private Animator mSwipeAnimator;
     private int mMinBackgroundRadius;
-    private boolean mMotionPerformedByUser;
     private boolean mMotionCancelled;
+    private int mTouchTargetSize;
+    private View mTargetedView;
+    private boolean mTouchSlopExeeded;
     private AnimatorListenerAdapter mFlingEndListener = new AnimatorListenerAdapter() {
+        public boolean mCancelled;
+
         @Override
         public void onAnimationEnd(Animator animation) {
             mSwipeAnimator = null;
             mSwipingInProgress = false;
+            if (!mCancelled) {
+                mTargetedView = null;
+            }
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mCancelled = true;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            mCancelled = false;
         }
     };
     private Runnable mAnimationEndRunnable = new Runnable() {
@@ -97,6 +114,8 @@ public class KeyguardAffordanceHelper {
                 R.dimen.keyguard_min_swipe_amount);
         mMinBackgroundRadius = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_affordance_min_background_radius);
+        mTouchTargetSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.keyguard_affordance_touch_target_size);
         mHintGrowAmount =
                 mContext.getResources().getDimensionPixelSize(R.dimen.hint_grow_amount_sideways);
         mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.4f);
@@ -118,9 +137,7 @@ public class KeyguardAffordanceHelper {
 
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
-        if (mMotionCancelled && action != MotionEvent.ACTION_DOWN
-                && action != MotionEvent.ACTION_UP
-                && action != MotionEvent.ACTION_CANCEL) {
+        if (mMotionCancelled && action != MotionEvent.ACTION_DOWN) {
             return false;
         }
         final float y = event.getY();
@@ -129,53 +146,86 @@ public class KeyguardAffordanceHelper {
         boolean isUp = false;
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                if (mSwipingInProgress) {
-                    cancelAnimation();
+                View targetView = getIconAtPosition(x, y);
+                if (targetView == null || (mTargetedView != null && mTargetedView != targetView)) {
+                    mMotionCancelled = true;
+                    return false;
                 }
-                mInitialTouchY = y;
+                if (mTargetedView != null) {
+                    cancelAnimation();
+                } else {
+                    mTouchSlopExeeded = false;
+                }
+                mCallback.onSwipingStarted(targetView == mLeftIcon);
+                mSwipingInProgress = true;
+                mTargetedView = targetView;
                 mInitialTouchX = x;
+                mInitialTouchY = y;
                 mTranslationOnDown = mTranslation;
                 initVelocityTracker();
                 trackMovement(event);
-                mMotionPerformedByUser = false;
                 mMotionCancelled = false;
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 mMotionCancelled = true;
-                endMotion(event, true /* forceSnapBack */);
+                endMotion(true /* forceSnapBack */, x, y);
                 break;
             case MotionEvent.ACTION_MOVE:
-                final float w = x - mInitialTouchX;
                 trackMovement(event);
-                if (((leftSwipePossible() && w > mTouchSlop)
-                        || (rightSwipePossible() && w < -mTouchSlop))
-                        && Math.abs(w) > Math.abs(y - mInitialTouchY)
-                        && !mSwipingInProgress) {
-                    cancelAnimation();
-                    mInitialTouchY = y;
-                    mInitialTouchX = x;
-                    mTranslationOnDown = mTranslation;
-                    mSwipingInProgress = true;
-                    mCallback.onSwipingStarted(w < -mTouchSlop);
+                float xDist = x - mInitialTouchX;
+                float yDist = y - mInitialTouchY;
+                float distance = (float) Math.hypot(xDist, yDist);
+                if (!mTouchSlopExeeded && distance > mTouchSlop) {
+                    mTouchSlopExeeded = true;
                 }
                 if (mSwipingInProgress) {
-                    setTranslation(mTranslationOnDown + x - mInitialTouchX, false, false);
+                    if (mTargetedView == mRightIcon) {
+                        distance = mTranslationOnDown - distance;
+                        distance = Math.min(0, distance);
+                    } else {
+                        distance = mTranslationOnDown + distance;
+                        distance = Math.max(0, distance);
+                    }
+                    setTranslation(distance, false /* isReset */, false /* animateReset */);
                 }
                 break;
 
             case MotionEvent.ACTION_UP:
                 isUp = true;
             case MotionEvent.ACTION_CANCEL:
+                boolean hintOnTheRight = mTargetedView == mRightIcon;
                 trackMovement(event);
-                endMotion(event, !isUp);
+                endMotion(!isUp, x, y);
+                if (!mTouchSlopExeeded && isUp) {
+                    mCallback.onIconClicked(hintOnTheRight);
+                }
                 break;
         }
         return true;
     }
 
-    private void endMotion(MotionEvent event, boolean forceSnapBack) {
+    private View getIconAtPosition(float x, float y) {
+        if (leftSwipePossible() && isOnIcon(mLeftIcon, x, y)) {
+            return mLeftIcon;
+        }
+        if (rightSwipePossible() && isOnIcon(mRightIcon, x, y)) {
+            return mRightIcon;
+        }
+        return null;
+    }
+
+    private boolean isOnIcon(View icon, float x, float y) {
+        float iconX = icon.getX() + icon.getWidth() / 2.0f;
+        float iconY = icon.getY() + icon.getHeight() / 2.0f;
+        double distance = Math.hypot(x - iconX, y - iconY);
+        return distance <= mTouchTargetSize / 2;
+    }
+
+    private void endMotion(boolean forceSnapBack, float lastX, float lastY) {
         if (mSwipingInProgress) {
-            flingWithCurrentVelocity(forceSnapBack);
+            flingWithCurrentVelocity(forceSnapBack, lastX, lastY);
+        } else {
+            mTargetedView = null;
         }
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
@@ -195,8 +245,9 @@ public class KeyguardAffordanceHelper {
         return false;
     }
 
-    public void startHintAnimation(boolean right, Runnable onFinishedListener) {
-
+    public void startHintAnimation(boolean right,
+            Runnable onFinishedListener) {
+        cancelAnimation();
         startHintAnimationPhase1(right, onFinishedListener);
     }
 
@@ -216,6 +267,7 @@ public class KeyguardAffordanceHelper {
             public void onAnimationEnd(Animator animation) {
                 if (mCancelled) {
                     mSwipeAnimator = null;
+                    mTargetedView = null;
                     onFinishedListener.run();
                     targetView.showArrow(false);
                 } else {
@@ -227,6 +279,7 @@ public class KeyguardAffordanceHelper {
         animator.setDuration(HINT_PHASE1_DURATION);
         animator.start();
         mSwipeAnimator = animator;
+        mTargetedView = targetView;
     }
 
     /**
@@ -239,6 +292,7 @@ public class KeyguardAffordanceHelper {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mSwipeAnimator = null;
+                mTargetedView = null;
                 targetView.showArrow(false);
                 onFinishedListener.run();
             }
@@ -265,7 +319,7 @@ public class KeyguardAffordanceHelper {
                 targetView.setCircleRadiusWithoutAnimation(newRadius);
                 float translation = getTranslationFromRadius(newRadius);
                 mTranslation = right ? -translation : translation;
-                updateIconsFromRadius(targetView, newRadius);
+                updateIconsFromTranslation(targetView);
             }
         });
         return animator;
@@ -277,8 +331,8 @@ public class KeyguardAffordanceHelper {
         }
     }
 
-    private void flingWithCurrentVelocity(boolean forceSnapBack) {
-        float vel = getCurrentVelocity();
+    private void flingWithCurrentVelocity(boolean forceSnapBack, float lastX, float lastY) {
+        float vel = getCurrentVelocity(lastX, lastY);
 
         // We snap back if the current translation is not far enough
         boolean snapBack = isBelowFalsingThreshold();
@@ -300,7 +354,9 @@ public class KeyguardAffordanceHelper {
     }
 
     private void fling(float vel, final boolean snapBack) {
-        float target = mTranslation < 0 ? -mCallback.getPageWidth() : mCallback.getPageWidth();
+        float target = mTranslation < 0
+                ? -mCallback.getMaxTranslationDistance()
+                : mCallback.getMaxTranslationDistance();
         target = snapBack ? 0 : target;
 
         ValueAnimator animator = ValueAnimator.ofFloat(mTranslation, target);
@@ -334,10 +390,6 @@ public class KeyguardAffordanceHelper {
         translation = rightSwipePossible() ? translation : Math.max(0, translation);
         translation = leftSwipePossible() ? translation : Math.min(0, translation);
         float absTranslation = Math.abs(translation);
-        if (absTranslation > Math.abs(mTranslationOnDown) + getMinTranslationAmount() ||
-                mMotionPerformedByUser) {
-            mMotionPerformedByUser = true;
-        }
         if (translation != mTranslation || isReset) {
             KeyguardAffordanceView targetView = translation > 0 ? mLeftIcon : mRightIcon;
             KeyguardAffordanceView otherView = translation > 0 ? mRightIcon : mLeftIcon;
@@ -345,7 +397,7 @@ public class KeyguardAffordanceHelper {
 
             // We interpolate the alpha of the other icons to 0
             float fadeOutAlpha = 1.0f - alpha;
-            fadeOutAlpha = Math.min(1.0f, Math.max(0.0f, fadeOutAlpha));
+            fadeOutAlpha = Math.max(fadeOutAlpha, 0.0f);
 
             boolean animateIcons = isReset && animateReset;
             float radius = getRadiusFromTranslation(absTranslation);
@@ -366,8 +418,9 @@ public class KeyguardAffordanceHelper {
         }
     }
 
-    private void updateIconsFromRadius(KeyguardAffordanceView targetView, float newRadius) {
-        float alpha = newRadius / mMinBackgroundRadius;
+    private void updateIconsFromTranslation(KeyguardAffordanceView targetView) {
+        float absTranslation = Math.abs(mTranslation);
+        float alpha = absTranslation / getMinTranslationAmount();
 
         // We interpolate the alpha of the other icons to 0
         float fadeOutAlpha =  1.0f - alpha;
@@ -381,15 +434,20 @@ public class KeyguardAffordanceHelper {
     }
 
     private float getTranslationFromRadius(float circleSize) {
-        float translation = (circleSize - mMinBackgroundRadius) / BACKGROUND_RADIUS_SCALE_FACTOR;
-        return Math.max(0, translation);
+        float translation = (circleSize - mMinBackgroundRadius)
+                / BACKGROUND_RADIUS_SCALE_FACTOR;
+        return translation > 0.0f ? translation + mTouchSlop : 0.0f;
     }
 
     private float getRadiusFromTranslation(float translation) {
-        return translation * BACKGROUND_RADIUS_SCALE_FACTOR + mMinBackgroundRadius;
+        if (translation <= mTouchSlop) {
+            return 0.0f;
+        }
+        return (translation - mTouchSlop)  * BACKGROUND_RADIUS_SCALE_FACTOR + mMinBackgroundRadius;
     }
 
     public void animateHideLeftRightIcon() {
+        cancelAnimation();
         updateIcon(mRightIcon, 0f, 0f, true, false);
         updateIcon(mLeftIcon, 0f, 0f, true, false);
     }
@@ -429,12 +487,22 @@ public class KeyguardAffordanceHelper {
         mVelocityTracker = VelocityTracker.obtain();
     }
 
-    private float getCurrentVelocity() {
+    private float getCurrentVelocity(float lastX, float lastY) {
         if (mVelocityTracker == null) {
             return 0;
         }
         mVelocityTracker.computeCurrentVelocity(1000);
-        return mVelocityTracker.getXVelocity();
+        float aX = mVelocityTracker.getXVelocity();
+        float aY = mVelocityTracker.getYVelocity();
+        float bX = lastX - mInitialTouchX;
+        float bY = lastY - mInitialTouchY;
+        float bLen = (float) Math.hypot(bX, bY);
+        // Project the velocity onto the distance vector: a * b / |b|
+        float projectedVelocity = (aX * bX + aY * bY) / bLen;
+        if (mTargetedView == mRightIcon) {
+            projectedVelocity = -projectedVelocity;
+        }
+        return projectedVelocity;
     }
 
     public void onConfigurationChanged() {
@@ -472,11 +540,13 @@ public class KeyguardAffordanceHelper {
          */
         void onAnimationToSideEnded();
 
-        float getPageWidth();
+        float getMaxTranslationDistance();
 
         void onSwipingStarted(boolean isRightwardMotion);
 
         void onSwipingAborted();
+
+        void onIconClicked(boolean rightIcon);
 
         KeyguardAffordanceView getLeftIcon();
 
