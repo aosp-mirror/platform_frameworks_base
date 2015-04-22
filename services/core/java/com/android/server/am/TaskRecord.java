@@ -385,10 +385,8 @@ final class TaskRecord {
     }
 
     void setTaskToReturnTo(int taskToReturnTo) {
-        if (IGNORE_RETURN_TO_RECENTS && taskToReturnTo == RECENTS_ACTIVITY_TYPE) {
-            taskToReturnTo = HOME_ACTIVITY_TYPE;
-        }
-        mTaskToReturnTo = taskToReturnTo;
+        mTaskToReturnTo = (IGNORE_RETURN_TO_RECENTS && taskToReturnTo == RECENTS_ACTIVITY_TYPE)
+            ? HOME_ACTIVITY_TYPE : taskToReturnTo;
     }
 
     int getTaskToReturnTo() {
