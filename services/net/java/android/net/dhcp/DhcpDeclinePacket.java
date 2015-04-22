@@ -53,6 +53,9 @@ class DhcpDeclinePacket extends DhcpPacket {
      * Adds optional parameters to the DECLINE packet.
      */
     void finishPacket(ByteBuffer buffer) {
-        // None needed
+        addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_DECLINE);
+        addTlv(buffer, DHCP_CLIENT_IDENTIFIER, getClientId());
+        // RFC 2131 says we MUST NOT include our common client TLVs or the parameter request list.
+        addTlvEnd(buffer);
     }
 }

@@ -52,6 +52,7 @@ class DhcpDiscoverPacket extends DhcpPacket {
      */
     void finishPacket(ByteBuffer buffer) {
         addTlv(buffer, DHCP_MESSAGE_TYPE, DHCP_MESSAGE_TYPE_DISCOVER);
+        addTlv(buffer, DHCP_CLIENT_IDENTIFIER, getClientId());
         addCommonClientTlvs(buffer);
         addTlv(buffer, DHCP_PARAMETER_LIST, mRequestedParams);
         addTlvEnd(buffer);

@@ -285,6 +285,16 @@ abstract class DhcpPacket {
     }
 
     /**
+     * Returns the client ID. This follows RFC 2132 and is based on the hardware address.
+     */
+    public byte[] getClientId() {
+        byte[] clientId = new byte[mClientMac.length + 1];
+        clientId[0] = CLIENT_ID_ETHER;
+        System.arraycopy(mClientMac, 0, clientId, 1, mClientMac.length);
+        return clientId;
+    }
+
+    /**
      * Creates a new L3 packet (including IP header) containing the
      * DHCP udp packet.  This method relies upon the delegated method
      * finishPacket() to insert the per-packet contents.
