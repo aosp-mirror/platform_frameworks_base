@@ -30888,6 +30888,7 @@ package android.telephony {
     method public int getEvdoSnr();
     method public int getGsmBitErrorRate();
     method public int getGsmSignalStrength();
+    method public int getLevel();
     method public boolean isGsm();
     method public void writeToParcel(android.os.Parcel, int);
   }
