@@ -7991,6 +7991,7 @@ package android.content {
     field public static final java.lang.String MEDIA_PROJECTION_SERVICE = "media_projection";
     field public static final java.lang.String MEDIA_ROUTER_SERVICE = "media_router";
     field public static final java.lang.String MEDIA_SESSION_SERVICE = "media_session";
+    field public static final java.lang.String MIDI_SERVICE = "midi";
     field public static final int MODE_APPEND = 32768; // 0x8000
     field public static final int MODE_ENABLE_WRITE_AHEAD_LOGGING = 8; // 0x8
     field public static final int MODE_MULTI_PROCESS = 4; // 0x4

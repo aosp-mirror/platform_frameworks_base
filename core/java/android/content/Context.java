@@ -3098,7 +3098,6 @@ public abstract class Context {
      * {@link android.media.midi.MidiManager} for accessing the MIDI service.
      *
      * @see #getSystemService
-     * @hide
      */
     public static final String MIDI_SERVICE = "midi";
 
