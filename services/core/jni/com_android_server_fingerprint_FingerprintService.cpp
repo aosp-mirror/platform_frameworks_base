@@ -177,6 +177,10 @@ static jint nativeRemove(JNIEnv* env, jobject clazz, jint fingerId, jint groupId
     return reinterpret_cast<jint>(ret);
 }
 
+static jlong nativeGetAuthenticatorId(JNIEnv *, jobject clazz) {
+    return gContext.device->get_authenticator_id(gContext.device);
+}
+
 static jint nativeOpenHal(JNIEnv* env, jobject clazz) {
     ALOG(LOG_VERBOSE, LOG_TAG, "nativeOpenHal()\n");
     int err;
@@ -229,6 +233,7 @@ static jint nativeCloseHal(JNIEnv* env, jobject clazz) {
     return -ENOSYS; // TODO
 }
 
+
 // ----------------------------------------------------------------------------
 
 
@@ -240,6 +245,7 @@ static const JNINativeMethod g_methods[] = {
     { "nativePreEnroll", "()J", (void*)nativePreEnroll },
     { "nativeStopEnrollment", "()I", (void*)nativeStopEnrollment },
     { "nativeRemove", "(II)I", (void*)nativeRemove },
+    { "nativeGetAuthenticatorId", "()J", (void*)nativeGetAuthenticatorId },
     { "nativeOpenHal", "()I", (void*)nativeOpenHal },
     { "nativeCloseHal", "()I", (void*)nativeCloseHal },
     { "nativeInit","(Landroid/os/MessageQueue;"

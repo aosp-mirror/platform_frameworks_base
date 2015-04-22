@@ -63,4 +63,6 @@ interface IFingerprintService {
     // Gets the unique device id for hardware enumerated at i
     // long getHardwareDevice(int i);
 
+    // Gets the authenticator ID for fingerprint
+    long getAuthenticatorId();
 }

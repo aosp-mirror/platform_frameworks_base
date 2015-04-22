@@ -111,6 +111,7 @@ public class FingerprintService extends SystemService {
     static native int nativeOpenHal();
     static native int nativeCloseHal();
     static native void nativeInit(MessageQueue queue, FingerprintService service);
+    static native long nativeGetAuthenticatorId();
 
     static final class FpHalMsg {
         int type; // Type of the message. One of the constants in fingerprint.h
@@ -594,6 +595,12 @@ public class FingerprintService extends SystemService {
         public boolean hasEnrolledFingerprints(int groupId) {
             checkPermission(USE_FINGERPRINT);
             return FingerprintService.this.hasEnrolledFingerprints(groupId);
+        }
+
+        @Override
+        public long getAuthenticatorId() {
+            checkPermission(USE_FINGERPRINT);
+            return nativeGetAuthenticatorId();
         }
     }
 

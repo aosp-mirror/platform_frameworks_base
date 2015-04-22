@@ -587,6 +587,25 @@ public class FingerprintManager {
         return false;
     }
 
+    /**
+     * Retrieves the authenticator token for binding keys to the lifecycle
+     * of the current set of fingerprints. Used only by internal clients.
+     *
+     * @hide
+     */
+    public long getAuthenticatorId() {
+        if (mService != null) {
+            try {
+                return mService.getAuthenticatorId();
+            } catch (RemoteException e) {
+                Log.v(TAG, "Remote exception in getAuthenticatorId(): ", e);
+            }
+        } else {
+            Log.w(TAG, "getAuthenticatorId(): Service not connected!");
+        }
+        return 0;
+    }
+
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch(msg.what) {
@@ -793,3 +812,4 @@ public class FingerprintManager {
     };
 
 }
+
