@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1055,6 +1066,52 @@ Summary:
             
             
             
+            &lt;O&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.HasOptions.html">Api.ApiOptions.HasOptions</a>&gt;
+            <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApiIfAvailable(com.google.android.gms.common.api.Api<O>, O, com.google.android.gms.common.api.Scope...)">addApiIfAvailable</a></span>(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;O&gt; api, O options, <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope...</a> scopes)</nobr>
+
+        <div class="jd-descrdiv">
+          Specify which Apis should attempt to connect, but are not strictly required for your app.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApiIfAvailable(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>, com.google.android.gms.common.api.Scope...)">addApiIfAvailable</a></span>(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;?&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NotRequiredOptions.html">Api.ApiOptions.NotRequiredOptions</a>&gt; api, <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope...</a> scopes)</nobr>
+
+        <div class="jd-descrdiv">
+          Specify which Apis should attempt to connect, but are not strictly required for your app.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
             
             <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
         </td>
@@ -1761,6 +1818,112 @@ From class
 </div>
 
 
+<A NAME="addApiIfAvailable(com.google.android.gms.common.api.Api<O>, O, com.google.android.gms.common.api.Scope...)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a>
+      </span>
+      <span class="sympad">addApiIfAvailable</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;O&gt; api, O options, <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope...</a> scopes)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Specify which Apis should attempt to connect, but are not strictly required for your app.
+ The GoogleApiClient will try to connect to these Apis, but will not necessarily fail if
+ there are only errors when connecting to an unavailable Api added with this method.
+ See <code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code> for more information.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>api</td>
+          <td>The Api requested by your app.</td>
+        </tr>
+        <tr>
+          <th>scopes</td>
+          <td>Scopes required by this API.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="addApiIfAvailable(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>, com.google.android.gms.common.api.Scope...)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a>
+      </span>
+      <span class="sympad">addApiIfAvailable</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;?&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NotRequiredOptions.html">Api.ApiOptions.NotRequiredOptions</a>&gt; api, <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope...</a> scopes)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Specify which Apis should attempt to connect, but are not strictly required for your app.
+ The GoogleApiClient will try to connect to these Apis, but will not necessarily fail if
+ there are only errors when connecting to an unavailable Api added with this method.
+ See <code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code> for more information.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>api</td>
+          <td>The Api requested by your app.</td>
+        </tr>
+        <tr>
+          <th>scopes</td>
+          <td>Scopes required by this API.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code></li>
+      </ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="addConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1978,7 +2141,7 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Enables automatic lifecycle management in a support library <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code> that
  connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.
  <p/>
- It handles user recoverable errors appropriately and fires  if the <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code> has no resolution.
+ It handles user recoverable errors appropriately and calls  if the <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code> has no resolution.
  This eliminates most of the boiler plate associated with using <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.
  <p/>
  When using this option, <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#build()">build()</a></code> must be called from the main thread.</p></div>
@@ -1997,9 +2160,11 @@ From class
         </tr>
         <tr>
           <th>unresolvedConnectionFailedListener</td>
-          <td>Fires if the connection failed and and there was no resolution or the user chose
-         not to complete the provided resolution. If this listener is fired, the client
-         will no longer be auto-managed, and a new instance must be built.</td>
+          <td>Called if the connection failed and there was no resolution or the user chose
+         not to complete the provided resolution. If this listener is called, the client
+         will no longer be auto-managed, and a new instance must be built. In the event
+         that the user chooses not to complete a resolution, the <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code>
+         will have a status code of <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html#CANCELED">CANCELED</a></code>.</td>
         </tr>
       </table>
   </div>
