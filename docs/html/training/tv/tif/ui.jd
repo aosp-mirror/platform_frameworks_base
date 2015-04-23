@@ -1,0 +1,304 @@
+page.title=Managing User Interaction
+page.tags=tv, tif
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#surface">Integrate Player with Surface</a></li>
+    <li><a href="#overlay">Use an Overlay</a></li>
+    <li><a href="#control">Control Content</a></li>
+    <li><a href="#track">Handle Track Selection</a></li>
+  </ol>
+  <h2>Try It Out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-sample-inputs">
+      TV Input Service sample app</a></li>
+  </ul>
+</div>
+</div>
+
+<p>In the live TV experience the user changes channels and is presented with
+channel and program information briefly before the information disappears. Other types of information,
+such as messages ("DO NOT ATTEMPT AT HOME"), subtitles, or ads may need to persist. As with any TV
+app, such information should not interfere with the program content playing on the screen.</p>
+
+<img src="{@docRoot}images/tv/do-not-attempt.png" id="figure1">
+<p class="img-caption">
+  <strong>Figure 1.</strong> An overlay message in a live TV app.
+</p>
+
+<p>Also consider whether certain program content should be presented, given the
+content's rating and parental control settings, and how your app behaves and informs the user when
+content is blocked or unavailable. This lesson describes how to develop your TV input's user
+experience for these considerations.</p>
+
+<h2 id="surface">Integrate Player with Surface</h2>
+
+<p>Your TV input must render video onto a {@link android.view.Surface} object, which is passed by
+the {@link android.media.tv.TvInputService.Session#onSetSurface(android.view.Surface) TvInputService.Session.onSetSurface()}
+method. Here's an example of how to use a {@link android.media.MediaPlayer} instance for playing
+content in the {@link android.view.Surface} object:</p>
+
+<pre>
+&#64;Override
+public boolean onSetSurface(Surface surface) {
+    if (mPlayer != null) {
+        mPlayer.setSurface(surface);
+    }
+    mSurface = surface;
+    return true;
+}
+
+&#64;Override
+public void onSetStreamVolume(float volume) {
+    if (mPlayer != null) {
+        mPlayer.setVolume(volume, volume);
+    }
+    mVolume = volume;
+}
+</pre>
+
+<p>Similarly, here's how to do it using <a href="{@docRoot}guide/topics/media/exoplayer.html">
+ExoPlayer</a>:</p>
+
+<pre>
+&#64;Override
+public boolean onSetSurface(Surface surface) {
+    if (mPlayer != null) {
+        mPlayer.sendMessage(mVideoRenderer,
+                MediaCodecVideoTrackRenderer.MSG_SET_SURFACE,
+                surface);
+    }
+    mSurface = surface;
+    return true;
+}
+
+&#64;Override
+public void onSetStreamVolume(float volume) {
+    if (mPlayer != null) {
+        mPlayer.sendMessage(mAudioRenderer,
+                MediaCodecAudioTrackRenderer.MSG_SET_VOLUME,
+                volume);
+    }
+    mVolume = volume;
+}
+</pre>
+
+<h2 id="overlay">Use an Overlay</h2>
+
+<p>Use an overlay to display subtitles, messages, ads or MHEG-5 data broadcasts. By default, the
+overlay is disabled. You can enable it when you create the session by calling
+{@link android.media.tv.TvInputService.Session#setOverlayViewEnabled(boolean) TvInputService.Session.setOverlayViewEnabled(true)},
+as in the following example:</p>
+
+<pre>
+&#64;Override
+public final Session onCreateSession(String inputId) {
+    BaseTvInputSessionImpl session = onCreateSessionInternal(inputId);
+    session.setOverlayViewEnabled(true);
+    mSessions.add(session);
+    return session;
+}
+</pre>
+
+<p>Use a {@link android.view.View} object for the overlay, returned from {@link android.media.tv.TvInputService.Session#onCreateOverlayView() TvInputService.Session.onCreateOverlayView()}, as shown here:</p>
+
+<pre>
+&#64;Override
+public View onCreateOverlayView() {
+    LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+    View view = inflater.inflate(R.layout.overlayview, null);
+    mSubtitleView = (SubtitleView) view.findViewById(R.id.subtitles);
+
+    // Configure the subtitle view.
+    CaptionStyleCompat captionStyle;
+    float captionTextSize = getCaptionFontSize();
+    captionStyle = CaptionStyleCompat.createFromCaptionStyle(
+            mCaptioningManager.getUserStyle());
+    captionTextSize *= mCaptioningManager.getFontScale();
+    mSubtitleView.setStyle(captionStyle);
+    mSubtitleView.setTextSize(captionTextSize);
+    return view;
+}
+</pre>
+
+<p>The layout definition for the overlay might look something like this:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;com.google.android.exoplayer.text.SubtitleView
+        android:id="@+id/subtitles"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="32dp"
+        android:visibility="invisible"/&gt;
+&lt;/FrameLayout&gt;
+</pre>
+
+<h2 id="control">Control Content</h2>
+
+<p>When the user selects a channel, your TV input handles the {@link android.media.tv.TvInputService.Session#onTune(android.net.Uri)
+onTune()} callback in the {@link android.media.tv.TvInputService.Session} object. The system TV
+app's parental controls determine what content displays, given the content rating.
+The following sections describe how to manage channel and program selection using the
+{@link android.media.tv.TvInputService.Session} <code>notify</code> methods that
+communicate with the system TV app.</p>
+
+<h3 id="unavailable">Make Video Unavailable</h3>
+
+<p>When the user changes the channel, you want to make sure the screen doesn't display any stray
+video artifacts before your TV input renders the content. When you call {@link android.media.tv.TvInputService.Session#onTune(android.net.Uri) TvInputService.Session.onTune()},
+you can prevent the video from being presented by calling {@link android.media.tv.TvInputService.Session#notifyVideoUnavailable(int) TvInputService.Session.notifyVideoUnavailable()}
+and passing the {@link android.media.tv.TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING} constant, as
+shown in the following example.</p>
+
+<pre>
+&#64;Override
+public boolean onTune(Uri channelUri) {
+    if (mSubtitleView != null) {
+        mSubtitleView.setVisibility(View.INVISIBLE);
+    }
+    notifyVideoUnavailable(TvInputManager.VIDEO_UNAVAILABLE_REASON_TUNING);
+    mUnblockedRatingSet.clear();
+
+    mDbHandler.removeCallbacks(mPlayCurrentProgramRunnable);
+    mPlayCurrentProgramRunnable = new PlayCurrentProgramRunnable(channelUri);
+    mDbHandler.post(mPlayCurrentProgramRunnable);
+    return true;
+}
+</pre>
+
+<p>Then, when the content is rendered to the {@link android.view.Surface}, you call
+{@link android.media.tv.TvInputService.Session#notifyVideoAvailable() TvInputService.Session.notifyVideoAvailable()}
+to allow the video to display, like so:</p>
+
+<pre>
+&#64;Override
+public void onDrawnToSurface(Surface surface) {
+    mFirstFrameDrawn = true;
+    notifyVideoAvailable();
+}
+</pre>
+
+<p>This transition lasts only for fractions of a second, but presenting a blank screen is
+visually better than allowing the picture to flash odd blips and jitters.</p>
+
+<p>See also, <a href="#surface">Integrate Player with Surface</a> for more information about working
+with {@link android.view.Surface} to render video.</p>
+
+<h3 id="parental">Provide Parental Control</h3>
+
+<p>To determine if a given content is blocked by parental controls and content rating, you check the
+{@link android.media.tv.TvInputManager} class methods, {@link android.media.tv.TvInputManager#isParentalControlsEnabled()}
+and {@link android.media.tv.TvInputManager#isRatingBlocked(android.media.tv.TvContentRating)}. You
+might also want to make sure the content's {@link android.media.tv.TvContentRating} is included in a
+set of currently allowed content ratings. These considerations are shown in the following sample.</p>
+
+<pre>
+private void checkContentBlockNeeded() {
+    if (mCurrentContentRating == null || !mTvInputManager.isParentalControlsEnabled()
+            || !mTvInputManager.isRatingBlocked(mCurrentContentRating)
+            || mUnblockedRatingSet.contains(mCurrentContentRating)) {
+        // Content rating is changed so we don't need to block anymore.
+        // Unblock content here explicitly to resume playback.
+        unblockContent(null);
+        return;
+    }
+
+    mLastBlockedRating = mCurrentContentRating;
+    if (mPlayer != null) {
+        // Children restricted content might be blocked by TV app as well,
+        // but TIF should do its best not to show any single frame of blocked content.
+        releasePlayer();
+    }
+
+    notifyContentBlocked(mCurrentContentRating);
+}
+</pre>
+
+<p>Once you have determined if the content should or should not be blocked, notify the system TV
+app by calling the
+{@link android.media.tv.TvInputService.Session} method {@link android.media.tv.TvInputService.Session#notifyContentAllowed() notifyContentAllowed()}
+or
+{@link android.media.tv.TvInputService.Session#notifyContentBlocked(android.media.tv.TvContentRating) notifyContentBlocked()}
+, as shown in the previous example.</p>
+
+<p>Use the {@link android.media.tv.TvContentRating} class to generate the system-defined string for
+the {@link android.media.tv.TvContract.Programs#COLUMN_CONTENT_RATING} with the
+<code><a href="{@docRoot}reference/android/media/tv/TvContentRating.html#createRating(java.lang.String, java.lang.String, java.lang.String, java.lang.String...)">TvContentRating.createRating()</a></code>
+method, as shown here:</p>
+
+<pre>
+TvContentRating rating = TvContentRating.createRating(
+    "com.android.tv",
+    "US_TV",
+    "US_TV_PG",
+    "US_TV_D", "US_TV_L");
+</pre>
+
+<h2 id="track">Handle Track Selection</h2>
+
+<p>The {@link android.media.tv.TvTrackInfo} class holds information about media tracks such
+as the track type (video, audio, or subtitle) and so forth. </p>
+
+<p>The first time your TV input session is able to get track information, it should call
+<code><a href="{@docRoot}reference/android/media/tv/TvInputService.Session.html#notifyTracksChanged(java.util.List<android.media.tv.TvTrackInfo>)">TvInputService.Session.notifyTracksChanged()</a></code> with a list of all tracks to update the system TV app.  When there
+is a change in track information, call
+<code><a href="{@docRoot}reference/android/media/tv/TvInputService.Session.html#notifyTracksChanged(java.util.List<android.media.tv.TvTrackInfo>)">notifyTracksChanged()</a></code>
+again to update the system.
+
+</p>
+
+<p>The system TV app provides an interface for the user to select a specific track if more than one
+track is available for a given track type; for example, subtitles in different languages. Your TV
+input responds to the
+{@link android.media.tv.TvInputService.Session#onSelectTrack(int, java.lang.String) onSelectTrack()}
+call from the system TV app by calling
+{@link android.media.tv.TvInputService.Session#notifyTrackSelected(int, java.lang.String) notifyTrackSelected()}
+, as shown in the following example. Note that when <code>null</code>
+is passed as the track ID, this <em>deselects</em> the track.</p>
+
+<pre>
+&#64;Override
+public boolean onSelectTrack(int type, String trackId) {
+    if (mPlayer != null) {
+        if (type == TvTrackInfo.TYPE_SUBTITLE) {
+            if (!mCaptionEnabled && trackId != null) {
+                return false;
+            }
+            mSelectedSubtitleTrackId = trackId;
+            if (trackId == null) {
+                mSubtitleView.setVisibility(View.INVISIBLE);
+            }
+        }
+        if (mPlayer.selectTrack(type, trackId)) {
+            notifyTrackSelected(type, trackId);
+            return true;
+        }
+    }
+    return false;
+}
+</pre>
+
+
+
+
+
+
+

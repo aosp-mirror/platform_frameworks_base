@@ -1,0 +1,239 @@
+page.title=Working with Channel Data
+page.tags=tv, tif
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#permission">Get Permission</a></li>
+    <li><a href="#register">Register Channels in the Database</a></li>
+    <li><a href="#update">Update Channel Data</a></li>
+  </ol>
+  <h2>Try It Out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-sample-inputs">
+      TV Input Service sample app</a></li>
+  </ul>
+</div>
+</div>
+
+<p>Your TV input must provide Electronic Program Guide (EPG) data for at least one channel in its
+setup activity. You should also periodically update that data, with consideration for the size of
+the update and the processing thread that handles it. This lesson discusses creating and updating
+channel and program data on the system database with these considerations in mind.</p>
+
+<p>&nbsp;</p>
+
+<h2 id="permission">Get Permission</h2>
+
+<p>In order for your TV input to work with EPG data, it must declare the
+read and write permissions in its Android manifest file as follows:</p>
+
+<pre>
+&lt;uses-permission android:name="com.android.providers.tv.permission.READ_EPG_DATA" /&gt;
+&lt;uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" /&gt;
+</pre>
+
+<h2 id="register">Register Channels in the Database</h2>
+
+<p>The Android TV system database maintains records of channel data for TV inputs. In your setup
+activity, for each of your channels, you must map your channel data to the following fields of the
+{@link android.media.tv.TvContract.Channels} class:</p>
+
+<ul>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_DISPLAY_NAME} - the displayed name of the
+  channel</li>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_DISPLAY_NUMBER} - the displayed channel
+  number</li>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_INPUT_ID} - the ID of the TV input service</li>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_SERVICE_TYPE} - the channel's service type</li>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_TYPE} - the channel's broadcast standard
+  type</li>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_VIDEO_FORMAT} - the default video format
+  for the channel</li>
+</ul>
+
+<p>Although the TV input framework is generic enough to handle both traditional broadcast and
+over-the-top (OTT) content without any distinction, you may want to define the following columns in
+addition to those above to better identify traditional broadcast channels:</p>
+
+<ul>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_ORIGINAL_NETWORK_ID} - the television
+  network ID</li>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_SERVICE_ID} - the service ID</li>
+  <li>{@link android.media.tv.TvContract.Channels#COLUMN_TRANSPORT_STREAM_ID} - the transport stream
+  ID</li>
+</ul>
+
+<p>For internet streaming based TV inputs, assign your own values to the above accordingly so that
+each channel can be identified uniquely.</p>
+
+<p>Pull your channel metadata (in XML, JSON, or whatever) from your backend server, and in your setup
+activity map the values to the system database as follows:</p>
+
+<pre>
+ContentValues values = new ContentValues();
+
+values.put(Channels.COLUMN_DISPLAY_NUMBER, channel.mNumber);
+values.put(Channels.COLUMN_DISPLAY_NAME, channel.mName);
+values.put(Channels.COLUMN_ORIGINAL_NETWORK_ID, channel.mOriginalNetworkId);
+values.put(Channels.COLUMN_TRANSPORT_STREAM_ID, channel.mTransportStreamId);
+values.put(Channels.COLUMN_SERVICE_ID, channel.mServiceId);
+values.put(Channels.COLUMN_VIDEO_FORMAT, channel.mVideoFormat);
+
+Uri uri = context.getContentResolver().insert(TvContract.Channels.CONTENT_URI, values);
+</pre>
+
+<p>In the example above, <code>channel</code> is an object which holds channel metadata from the
+backend server.</p>
+
+<h3 id="art">Present Channel and Program Information</h2>
+
+<p>The system TV app presents channel and program information to users as they flip through channels,
+as shown in figure 1. To make sure the channel and program information works with the system TV app's
+channel and program information presenter, follow the guidelines below.</p>
+
+<ol>
+<li><strong>Channel number</strong> ({@link android.media.tv.TvContract.Channels#COLUMN_DISPLAY_NUMBER})
+<li><strong>Icon</strong>
+(<a href="guide/topics/manifest/application-element.html#icon"><code>android:icon</code></a> in the
+TV input's manifest)</li>
+<li><strong>Program description</strong> ({@link android.media.tv.TvContract.Programs#COLUMN_SHORT_DESCRIPTION})
+<li><strong>Program title</strong> ({@link android.media.tv.TvContract.Programs#COLUMN_TITLE})</li>
+<li><strong>Channel logo</strong> ({@link android.media.tv.TvContract.Channels.Logo})
+  <ul>
+    <li>Use the color #EEEEEE to match the surrounding text</li>
+    <li>Don't include padding
+  </ul></li>
+<li><strong>Poster art</strong> ({@link android.media.tv.TvContract.Programs#COLUMN_POSTER_ART_URI})
+  <ul>
+    <li>Aspect ratio between 16:9 and 4:3</li>
+  </ul>
+</ol>
+
+<img src="{@docRoot}images/tv/channel-info.png" id="figure1">
+<p class="img-caption">
+  <strong>Figure 1.</strong> The system TV app channel and program information presenter.
+</p>
+
+<p>The system TV app provides the same information through the program guide, including poster art,
+as shown in figure 2.</p>
+
+<img src="{@docRoot}images/tv/prog-guide.png" id="figure2">
+<p class="img-caption">
+  <strong>Figure 2.</strong> The system TV app program guide.
+</p>
+
+<h2 id="update">Update Channel Data</h2>
+
+<p>When updating existing channel data, use the
+{@link android.content.ContentProvider#update(android.net.Uri, android.content.ContentValues,
+java.lang.String, java.lang.String[]) update()}
+method instead of deleting and re-adding the data. You can identify the current version of the data
+by using {@link android.media.tv.TvContract.Channels#COLUMN_VERSION_NUMBER Channels.COLUMN_VERSION_NUMBER}
+and {@link android.media.tv.TvContract.Programs#COLUMN_VERSION_NUMBER Programs.COLUMN_VERSION_NUMBER}
+when choosing the records to update.</p>
+
+<p class="note"><strong>Note:</strong> Adding channel data to the {@link android.content.ContentProvider}
+can take time. Only add current programs (those within two hours of the current time) when you update,
+and use a <a href="{@docRoot}training/sync-adapters/creating-sync-adapter.html">Sync Adapter</a> to
+update the rest of the channel data in the background. See the <a class="external-link" href="https://github.com/googlesamples/androidtv-sample-inputs/blob/master/app/src/main/java/com/example/android/sampletvinput/syncadapter/SyncAdapter.java">
+Android TV Live TV Sample App</a> for an example.</p>
+
+<h3 id="batch">Batch Loading Channel Data</h3>
+
+<p>When updating the system database with a large amount of channel data, use the {@link android.content.ContentResolver}
+{@link android.content.ContentResolver#applyBatch applyBatch()}
+or
+{@link android.content.ContentResolver#bulkInsert(android.net.Uri, android.content.ContentValues[]) bulkInsert()}
+method. Here's an example using {@link android.content.ContentResolver#applyBatch applyBatch()}:<p>
+
+<pre>
+ArrayList&lt;ContentProviderOperation&gt; ops = new ArrayList&lt;&gt;();
+int programsCount = mChannelInfo.mPrograms.size();
+for (int j = 0; j &lt; programsCount; ++j) {
+    ProgramInfo program = mChannelInfo.mPrograms.get(j);
+    ops.add(ContentProviderOperation.newInsert(
+            TvContract.Programs.CONTENT_URI)
+            .withValues(programs.get(j))
+            .withValue(Programs.COLUMN_START_TIME_UTC_MILLIS,
+                    programStartSec * 1000)
+            .withValue(Programs.COLUMN_END_TIME_UTC_MILLIS,
+                    (programStartSec + program.mDurationSec) * 1000)
+            .build());
+    programStartSec = programStartSec + program.mDurationSec;
+    if (j % 100 == 99 || j == programsCount - 1) {
+        try {
+            <strong>getContentResolver().applyBatch(TvContract.AUTHORITY, ops);</strong>
+        } catch (RemoteException | OperationApplicationException e) {
+            Log.e(TAG, "Failed to insert programs.", e);
+            return;
+        }
+        ops.clear();
+    }
+}
+</pre>
+
+<h3 id="async">Processing Channel Data Asynchronously</h3>
+
+<p>Data manipulation, such as fetching a stream from the server or accessing the database, should
+not block the UI thread. Using an {@link android.os.AsyncTask} is one
+way to perform updates asynchronously.  For example, when loading channel info from a backend server,
+you can use {@link android.os.AsyncTask} as follows:</p>
+
+<pre>
+private static class LoadTvInputTask extends AsyncTask&lt;Uri, Void, Void>&gt; {
+
+    private Context mContext;
+
+    public LoadTvInputTask(Context context) {
+        mContext = context;
+    }
+
+    &#64;Override
+    protected Void doInBackground(Uri... uris) {
+        try {
+            fetchUri(uris[0]);
+        } catch (IOException e) {
+          Log.d(“LoadTvInputTask”, “fetchUri error”);
+        }
+        return null;
+    }
+
+    private void fetchUri(Uri videoUri) throws IOException {
+        InputStream inputStream = null;
+        try {
+            inputStream = mContext.getContentResolver().openInputStream(videoUri);
+            XmlPullParser parser = Xml.newPullParser();
+            try {
+                parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+                parser.setInput(inputStream, null);
+                sTvInput = ChannelXMLParser.parseTvInput(parser);
+                sSampleChannels = ChannelXMLParser.parseChannelXML(parser);
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
+    }
+}
+</pre>
+
+<p>If you need to update EPG data on a regular basis, consider using
+a <a href="{@docRoot}training/sync-adapters/creating-sync-adapter.html">
+Sync Adapter</a> or {@link android.app.job.JobScheduler} to run the update process during idle time,
+such as every day at 3:00 a.m. See the <a class="external-link" href="https://github.com/googlesamples/androidtv-sample-inputs/blob/master/app/src/main/java/com/example/android/sampletvinput/syncadapter/SyncAdapter.java">
+Android TV live TV sample app</a> for an example.</p>
+
+<p>Other techniques to separate the data update tasks from the UI thread include using the
+{@link android.os.HandlerThread} class, or you may implement your own using {@link android.os.Looper}
+and {@link android.os.Handler} classes.  See <a href="{@docRoot}guide/components/processes-and-threads.html">
+Processes and Threads</a> for more information.</p>
