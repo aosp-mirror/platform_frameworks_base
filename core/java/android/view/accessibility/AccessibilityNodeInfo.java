@@ -721,7 +721,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return Whether the refresh succeeded.
      */
     public boolean refresh() {
-        return refresh(false);
+        return refresh(true);
     }
 
     /**
