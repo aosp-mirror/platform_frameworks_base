@@ -181,7 +181,7 @@ public class ImageFormat {
     public static final int JPEG = 0x100;
 
     /**
-     * <p>Multi-plane Android YUV format</p>
+     * <p>Multi-plane Android YUV 420 format</p>
      *
      * <p>This format is a generic YCbCr format, capable of describing any 4:2:0
      * chroma-subsampled planar or semiplanar buffer (but not fully interleaved),
@@ -217,6 +217,135 @@ public class ImageFormat {
      * @see android.hardware.camera2.CameraDevice
      */
     public static final int YUV_420_888 = 0x23;
+
+    /**
+     * <p>Multi-plane Android YUV 422 format</p>
+     *
+     * <p>This format is a generic YCbCr format, capable of describing any 4:2:2
+     * chroma-subsampled (planar, semiplanar or interleaved) format,
+     * with 8 bits per color sample.</p>
+     *
+     * <p>Images in this format are always represented by three separate buffers
+     * of data, one for each color plane. Additional information always
+     * accompanies the buffers, describing the row stride and the pixel stride
+     * for each plane.</p>
+     *
+     * <p>The order of planes in the array returned by
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} is guaranteed such that
+     * plane #0 is always Y, plane #1 is always U (Cb), and plane #2 is always V (Cr).</p>
+     *
+     * <p>In contrast to the {@link #YUV_420_888} format, the Y-plane may have a pixel
+     * stride greater than 1 in
+     * {@link android.media.Image.Plane#getPixelStride() yPlane.getPixelStride()}.</p>
+     *
+     * <p>The U/V planes are guaranteed to have the same row stride and pixel stride
+     * (in particular,
+     * {@link android.media.Image.Plane#getRowStride() uPlane.getRowStride()}
+     * == {@link android.media.Image.Plane#getRowStride() vPlane.getRowStride()} and
+     * {@link android.media.Image.Plane#getPixelStride() uPlane.getPixelStride()}
+     * == {@link android.media.Image.Plane#getPixelStride() vPlane.getPixelStride()};
+     * ).</p>
+     *
+     * <p>For example, the {@link android.media.Image} object can provide data
+     * in this format from a {@link android.media.MediaCodec}
+     * through {@link android.media.MediaCodec#getOutputImage} object.</p>
+     *
+     * @see android.media.Image
+     * @see android.media.MediaCodec
+     */
+    public static final int YUV_422_888 = 0x27;
+
+    /**
+     * <p>Multi-plane Android YUV 444 format</p>
+     *
+     * <p>This format is a generic YCbCr format, capable of describing any 4:4:4
+     * (planar, semiplanar or interleaved) format,
+     * with 8 bits per color sample.</p>
+     *
+     * <p>Images in this format are always represented by three separate buffers
+     * of data, one for each color plane. Additional information always
+     * accompanies the buffers, describing the row stride and the pixel stride
+     * for each plane.</p>
+     *
+     * <p>The order of planes in the array returned by
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} is guaranteed such that
+     * plane #0 is always Y, plane #1 is always U (Cb), and plane #2 is always V (Cr).</p>
+     *
+     * <p>In contrast to the {@link #YUV_420_888} format, the Y-plane may have a pixel
+     * stride greater than 1 in
+     * {@link android.media.Image.Plane#getPixelStride() yPlane.getPixelStride()}.</p>
+     *
+     * <p>The U/V planes are guaranteed to have the same row stride and pixel stride
+     * (in particular,
+     * {@link android.media.Image.Plane#getRowStride() uPlane.getRowStride()}
+     * == {@link android.media.Image.Plane#getRowStride() vPlane.getRowStride()} and
+     * {@link android.media.Image.Plane#getPixelStride() uPlane.getPixelStride()}
+     * == {@link android.media.Image.Plane#getPixelStride() vPlane.getPixelStride()};
+     * ).</p>
+     *
+     * <p>For example, the {@link android.media.Image} object can provide data
+     * in this format from a {@link android.media.MediaCodec}
+     * through {@link android.media.MediaCodec#getOutputImage} object.</p>
+     *
+     * @see android.media.Image
+     * @see android.media.MediaCodec
+     */
+    public static final int YUV_444_888 = 0x28;
+
+    /**
+     * <p>Multi-plane Android RGB format</p>
+     *
+     * <p>This format is a generic RGB format, capable of describing most RGB formats,
+     * with 8 bits per color sample.</p>
+     *
+     * <p>Images in this format are always represented by three separate buffers
+     * of data, one for each color plane. Additional information always
+     * accompanies the buffers, describing the row stride and the pixel stride
+     * for each plane.</p>
+     *
+     * <p>The order of planes in the array returned by
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} is guaranteed such that
+     * plane #0 is always R (red), plane #1 is always G (green), and plane #2 is always B
+     * (blue).</p>
+     *
+     * <p>All three planes are guaranteed to have the same row strides and pixel strides.</p>
+     *
+     * <p>For example, the {@link android.media.Image} object can provide data
+     * in this format from a {@link android.media.MediaCodec}
+     * through {@link android.media.MediaCodec#getOutputImage} object.</p>
+     *
+     * @see android.media.Image
+     * @see android.media.MediaCodec
+     */
+    public static final int FLEX_RGB_888 = 0x29;
+
+    /**
+     * <p>Multi-plane Android RGBA format</p>
+     *
+     * <p>This format is a generic RGBA format, capable of describing most RGBA formats,
+     * with 8 bits per color sample.</p>
+     *
+     * <p>Images in this format are always represented by four separate buffers
+     * of data, one for each color plane. Additional information always
+     * accompanies the buffers, describing the row stride and the pixel stride
+     * for each plane.</p>
+     *
+     * <p>The order of planes in the array returned by
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} is guaranteed such that
+     * plane #0 is always R (red), plane #1 is always G (green), plane #2 is always B (blue),
+     * and plane #3 is always A (alpha). This format may represent pre-multiplied or
+     * non-premultiplied alpha.</p>
+     *
+     * <p>All four planes are guaranteed to have the same row strides and pixel strides.</p>
+     *
+     * <p>For example, the {@link android.media.Image} object can provide data
+     * in this format from a {@link android.media.MediaCodec}
+     * through {@link android.media.MediaCodec#getOutputImage} object.</p>
+     *
+     * @see android.media.Image
+     * @see android.media.MediaCodec
+     */
+    public static final int FLEX_RGBA_8888 = 0x2A;
 
     /**
      * <p>General raw camera sensor image format, usually representing a
@@ -543,6 +672,14 @@ public class ImageFormat {
                 return 12;
             case YUV_420_888:
                 return 12;
+            case YUV_422_888:
+                return 16;
+            case YUV_444_888:
+                return 24;
+            case FLEX_RGB_888:
+                return 24;
+            case FLEX_RGBA_8888:
+                return 32;
             case RAW_SENSOR:
                 return 16;
             case RAW10:
@@ -574,6 +711,10 @@ public class ImageFormat {
             case JPEG:
             case NV21:
             case YUV_420_888:
+            case YUV_422_888:
+            case YUV_444_888:
+            case FLEX_RGB_888:
+            case FLEX_RGBA_8888:
             case RAW_SENSOR:
             case RAW10:
             case RAW12:

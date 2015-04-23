@@ -86,6 +86,38 @@ public abstract class Image implements AutoCloseable {
      *     Each plane has its own row stride and pixel stride.</td>
      * </tr>
      * <tr>
+     *   <td>{@link android.graphics.ImageFormat#YUV_422_888 YUV_422_888}</td>
+     *   <td>3</td>
+     *   <td>A luminance plane followed by the Cb and Cr chroma planes.
+     *     The chroma planes have half the width and the full height of the luminance
+     *     plane (4:2:2 subsampling). Each pixel sample in each plane has 8 bits.
+     *     Each plane has its own row stride and pixel stride.</td>
+     * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#YUV_444_888 YUV_444_888}</td>
+     *   <td>3</td>
+     *   <td>A luminance plane followed by the Cb and Cr chroma planes.
+     *     The chroma planes have the same width and height as that of the luminance
+     *     plane (4:4:4 subsampling). Each pixel sample in each plane has 8 bits.
+     *     Each plane has its own row stride and pixel stride.</td>
+     * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#FLEX_RGB_888 FLEX_RGB_888}</td>
+     *   <td>3</td>
+     *   <td>A R (red) plane followed by the G (green) and B (blue) planes.
+     *     All planes have the same widths and heights.
+     *     Each pixel sample in each plane has 8 bits.
+     *     Each plane has its own row stride and pixel stride.</td>
+     * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#FLEX_RGBA_8888 FLEX_RGBA_8888}</td>
+     *   <td>4</td>
+     *   <td>A R (red) plane followed by the G (green), B (blue), and
+     *     A (alpha) planes. All planes have the same widths and heights.
+     *     Each pixel sample in each plane has 8 bits.
+     *     Each plane has its own row stride and pixel stride.</td>
+     * </tr>
+     * <tr>
      *   <td>{@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}</td>
      *   <td>1</td>
      *   <td>A single plane of raw sensor image data, with 16 bits per color
