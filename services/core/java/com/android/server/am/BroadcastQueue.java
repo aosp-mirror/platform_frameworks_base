@@ -18,7 +18,9 @@ package com.android.server.am;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -95,14 +97,27 @@ public final class BroadcastQueue {
     final ArrayList<BroadcastRecord> mOrderedBroadcasts = new ArrayList<BroadcastRecord>();
 
     /**
-     * Historical data of past broadcasts, for debugging.
+     * Historical data of past broadcasts, for debugging.  This is a ring buffer
+     * whose last element is at mHistoryNext.
      */
     final BroadcastRecord[] mBroadcastHistory = new BroadcastRecord[MAX_BROADCAST_HISTORY];
+    int mHistoryNext = 0;
 
     /**
-     * Summary of historical data of past broadcasts, for debugging.
+     * Summary of historical data of past broadcasts, for debugging.  This is a
+     * ring buffer whose last element is at mSummaryHistoryNext.
      */
     final Intent[] mBroadcastSummaryHistory = new Intent[MAX_BROADCAST_SUMMARY_HISTORY];
+    int mSummaryHistoryNext = 0;
+
+    /**
+     * Various milestone timestamps of entries in the mBroadcastSummaryHistory ring
+     * buffer, also tracked via the mSummaryHistoryNext index.  These are all in wall
+     * clock time, not elapsed.
+     */
+    final long[] mSummaryHistoryEnqueueTime = new  long[MAX_BROADCAST_SUMMARY_HISTORY];
+    final long[] mSummaryHistoryDispatchTime = new  long[MAX_BROADCAST_SUMMARY_HISTORY];
+    final long[] mSummaryHistoryFinishTime = new  long[MAX_BROADCAST_SUMMARY_HISTORY];
 
     /**
      * Set when we current have a BROADCAST_INTENT_MSG in flight.
@@ -1060,18 +1075,28 @@ public final class BroadcastQueue {
         }
     }
 
+    private final int ringAdvance(int x, final int increment, final int ringSize) {
+        x += increment;
+        if (x < 0) return (ringSize - 1);
+        else if (x >= ringSize) return 0;
+        else return x;
+    }
+
     private final void addBroadcastToHistoryLocked(BroadcastRecord r) {
         if (r.callingUid < 0) {
             // This was from a registerReceiver() call; ignore it.
             return;
         }
-        System.arraycopy(mBroadcastHistory, 0, mBroadcastHistory, 1,
-                MAX_BROADCAST_HISTORY-1);
         r.finishTime = SystemClock.uptimeMillis();
-        mBroadcastHistory[0] = r;
-        System.arraycopy(mBroadcastSummaryHistory, 0, mBroadcastSummaryHistory, 1,
-                MAX_BROADCAST_SUMMARY_HISTORY-1);
-        mBroadcastSummaryHistory[0] = r.intent;
+
+        mBroadcastHistory[mHistoryNext] = r;
+        mHistoryNext = ringAdvance(mHistoryNext, 1, MAX_BROADCAST_HISTORY);
+
+        mBroadcastSummaryHistory[mSummaryHistoryNext] = r.intent;
+        mSummaryHistoryEnqueueTime[mSummaryHistoryNext] = r.enqueueClockTime;
+        mSummaryHistoryDispatchTime[mSummaryHistoryNext] = r.dispatchClockTime;
+        mSummaryHistoryFinishTime[mSummaryHistoryNext] = System.currentTimeMillis();
+        mSummaryHistoryNext = ringAdvance(mSummaryHistoryNext, 1, MAX_BROADCAST_SUMMARY_HISTORY);
     }
 
     final void logBroadcastReceiverDiscardLocked(BroadcastRecord r) {
@@ -1158,11 +1183,20 @@ public final class BroadcastQueue {
 
         int i;
         boolean printed = false;
-        for (i=0; i<MAX_BROADCAST_HISTORY; i++) {
-            BroadcastRecord r = mBroadcastHistory[i];
+
+        i = -1;
+        int lastIndex = mHistoryNext;
+        int ringIndex = lastIndex;
+        do {
+            // increasing index = more recent entry, and we want to print the most
+            // recent first and work backwards, so we roll through the ring backwards.
+            ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_HISTORY);
+            BroadcastRecord r = mBroadcastHistory[ringIndex];
             if (r == null) {
-                break;
+                continue;
             }
+
+            i++; // genuine record of some sort even if we're filtering it out
             if (dumpPackage != null && !dumpPackage.equals(r.callerPackage)) {
                 continue;
             }
@@ -1190,17 +1224,33 @@ public final class BroadcastQueue {
                     pw.print("    extras: "); pw.println(bundle.toString());
                 }
             }
-        }
+        } while (ringIndex != lastIndex);
 
         if (dumpPackage == null) {
+            lastIndex = ringIndex = mSummaryHistoryNext;
             if (dumpAll) {
-                i = 0;
                 printed = false;
+                i = -1;
+            } else {
+                // roll over the 'i' full dumps that have already been issued
+                for (int j = i;
+                        j > 0 && ringIndex != lastIndex;) {
+                    ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_SUMMARY_HISTORY);
+                    BroadcastRecord r = mBroadcastHistory[ringIndex];
+                    if (r == null) {
+                        continue;
+                    }
+                    j--;
+                }
             }
-            for (; i<MAX_BROADCAST_SUMMARY_HISTORY; i++) {
-                Intent intent = mBroadcastSummaryHistory[i];
+            // done skipping; dump the remainder of the ring. 'i' is still the ordinal within
+            // the overall broadcast history.
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            do {
+                ringIndex = ringAdvance(ringIndex, -1, MAX_BROADCAST_SUMMARY_HISTORY);
+                Intent intent = mBroadcastSummaryHistory[ringIndex];
                 if (intent == null) {
-                    break;
+                    continue;
                 }
                 if (!printed) {
                     if (needSep) {
@@ -1214,13 +1264,17 @@ public final class BroadcastQueue {
                     pw.println("  ...");
                     break;
                 }
+                i++;
                 pw.print("  #"); pw.print(i); pw.print(": ");
                 pw.println(intent.toShortString(false, true, true, false));
+                pw.print("    enq="); pw.print(sdf.format(new Date(mSummaryHistoryEnqueueTime[ringIndex])));
+                pw.print(" disp="); pw.print(sdf.format(new Date(mSummaryHistoryDispatchTime[ringIndex])));
+                pw.print(" fin="); pw.println(sdf.format(new Date(mSummaryHistoryFinishTime[ringIndex])));
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
                     pw.print("    extras: "); pw.println(bundle.toString());
                 }
-            }
+            } while (ringIndex != lastIndex);
         }
 
         return needSep;
