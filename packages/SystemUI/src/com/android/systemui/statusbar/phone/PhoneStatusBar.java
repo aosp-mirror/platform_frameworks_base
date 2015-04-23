@@ -3249,6 +3249,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardFadingAway = false;
     }
 
+    public void stopWaitingForKeyguardExit() {
+        mWaitingForKeyguardExit = false;
+    }
+
     private void updatePublicMode() {
         setLockscreenPublicMode(
                 mStatusBarKeyguardViewManager.isShowing() && mStatusBarKeyguardViewManager

@@ -145,6 +145,7 @@ public class StatusBarKeyguardViewManager {
         if (mShowing) {
             if (mOccluded) {
                 mPhoneStatusBar.hideKeyguard();
+                mPhoneStatusBar.stopWaitingForKeyguardExit();
                 mBouncer.hide(false /* destroyView */);
             } else {
                 showBouncerOrKeyguard();
