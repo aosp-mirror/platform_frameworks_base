@@ -1635,6 +1635,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.println();
             pw.print(prefix); pw.print("mSystemDecorRect="); mSystemDecorRect.printShortString(pw);
                     pw.print(" last="); mLastSystemDecorRect.printShortString(pw);
+                    if (mWinAnimator.mHasClipRect) {
+                        pw.print(" mLastClipRect=");
+                        mWinAnimator.mLastClipRect.printShortString(pw);
+                    }
                     pw.println();
         }
         if (mEnforceSizeCompat) {

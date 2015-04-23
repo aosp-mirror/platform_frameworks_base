@@ -3412,6 +3412,7 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState win = atoken.findMainWindow();
             Rect containingFrame = new Rect(0, 0, width, height);
             Rect contentInsets = new Rect();
+            Rect appFrame = new Rect(0, 0, width, height);
             boolean isFullScreen = true;
             if (win != null) {
                 if (win.mContainingFrame != null) {
@@ -3419,6 +3420,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (win.mContentInsets != null) {
                     contentInsets.set(win.mContentInsets);
+                }
+                if (win.mFrame != null) {
+                    appFrame.set(win.mFrame);
                 }
                 isFullScreen =
                         ((win.mSystemUiVisibility & SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN) ==
@@ -3433,8 +3437,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 enter = false;
             }
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height,
-                    mCurConfiguration.orientation, containingFrame, contentInsets, isFullScreen,
-                    isVoiceInteraction);
+                    mCurConfiguration.orientation, containingFrame, contentInsets, appFrame,
+                    isFullScreen, isVoiceInteraction);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;

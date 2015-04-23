@@ -501,11 +501,14 @@ public class AppTransition implements Dump {
         return a;
     }
 
-    private Animation createClipRevealAnimationLocked(int transit, boolean enter,
-                                                      int appWidth, int appHeight) {
+    private Animation createClipRevealAnimationLocked(int transit, boolean enter, Rect appFrame) {
         final Animation anim;
         if (enter) {
             // Reveal will expand and move faster in horizontal direction
+
+            // Start from upper left of start and move to final position
+            final int appWidth = appFrame.width();
+            final int appHeight = appFrame.height();
 
             // Start from size of launch icon, expand to full width/height
             Animation clipAnimLR = new ClipRectLRAnimation(
@@ -521,9 +524,9 @@ public class AppTransition implements Dump {
 
             // Start from middle of launch icon area, move to 0, 0
             int startMiddleX = mNextAppTransitionStartX +
-                    (mNextAppTransitionStartWidth - appWidth) / 2;
+                    (mNextAppTransitionStartWidth - appWidth) / 2 - appFrame.left;
             int startMiddleY = mNextAppTransitionStartY +
-                    (mNextAppTransitionStartHeight - appHeight) / 2;
+                    (mNextAppTransitionStartHeight - appHeight) / 2 - appFrame.top;
 
             TranslateXAnimation translateX = new TranslateXAnimation(
                     Animation.ABSOLUTE, startMiddleX, Animation.ABSOLUTE, 0);
@@ -940,7 +943,7 @@ public class AppTransition implements Dump {
 
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
             int appWidth, int appHeight, int orientation, Rect containingFrame, Rect contentInsets,
-            boolean isFullScreen, boolean isVoiceInteraction) {
+            Rect appFrame, boolean isFullScreen, boolean isVoiceInteraction) {
         Animation a;
         if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_OPEN
                 || transit == TRANSIT_TASK_OPEN
@@ -977,9 +980,7 @@ public class AppTransition implements Dump {
                             + " anim=" + a + " nextAppTransition=ANIM_CUSTOM_IN_PLACE"
                             + " transit=" + transit + " Callers=" + Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL) {
-            a = createClipRevealAnimationLocked(transit, enter,
-                    containingFrame.right - containingFrame.left,
-                    containingFrame.bottom - containingFrame.top);
+            a = createClipRevealAnimationLocked(transit, enter, appFrame);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                             + " anim=" + a + " nextAppTransition=ANIM_CLIP_REVEAL"
