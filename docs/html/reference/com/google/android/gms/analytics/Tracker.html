@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -874,81 +885,69 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Class to send tracking hits to Google Analytics. You can get an instance of this class
- by calling <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#newTracker(int)">newTracker(int)</a></code>. A Tracker must be initialized with a tracking id
- of an app profile before you can send any hits. You can change the id to send hits to
- a different profile. Use this class to set values for measurement protocol parameters using the
- setXYZ() methods. A param value set using <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#set(java.lang.String, java.lang.String)">set(String, String)</a></code> method is sent with
- all subsequent hits until you overwrite it with another value or clear it by setting it
- to <code>null</code>. You can also override it by specifying a different value in a
- <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map<String, String>)</a></code> call. The values passed in the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map<String, String>)</a></code> are sent only with that hit.
- The following example uses the <code><a href="/reference/com/google/android/gms/analytics/HitBuilders.EventBuilder.html">HitBuilders.EventBuilder</a></code> helper class to build a param map
- to pass to the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map<String, String>)</a></code> method.
- <p>
+<p itemprop="articleBody">Composes and sends hits to Google Analytics. You can get an instance of this class by calling
+ <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#newTracker(int)">newTracker(int)</a></code>. A Tracker must be initialized with a tracking id of an app
+ profile before you can send any hits. Use this class to set values for measurement protocol
+ parameters using the provided set methods. A param value set using <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#set(java.lang.String, java.lang.String)">set(String, String)</a></code> method is sent
+ with all subsequent hits until you overwrite it with another value or clear it by setting it to
+ <code>null</code>. You can also override it by specifying a different value in a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map<String, String>)</a></code> call.
+ The values passed in the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map<String, String>)</a></code> are sent only with that hit. The following example uses
+ the <code><a href="/reference/com/google/android/gms/analytics/HitBuilders.EventBuilder.html">HitBuilders.EventBuilder</a></code> helper class to build a param map to pass to the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map<String, String>)</a></code> method. <p>
  <pre>
- Tracker t = GoogleAnalytics.getInstance(context).newTracker(trackingId);
- t.setScreenName(screenName);
- t.send(new HitBuilders.EventBuilder()
+ GoogleAnalytics analytics = GoogleAnalytics.getInstance(context);
+ Tracker tracker = analytics.newTracker("UA-000-1"); // Send hits to tracker id UA-000-1
+
+ // All subsequent hits will be send with screen name = "main screen"
+ tracker.setScreenName("main screen");
+
+ tracker.send(new HitBuilders.EventBuilder()
          .setCategory("UX")
          .setAction("click")
-         .setLabel("someButtonName")
+         .setLabel("submit")
          .build());
- t.send(new HitBuilders.EventBuilder()
+
+ // Builder parameters can overwrite the screen name set on the tracker
+ tracker.send(new HitBuilders.EventBuilder()
          .setCategory("UX")
          .setAction("click")
-         .setLabel("somePopupAction")
-         .setScreenName("popupDialogName")
-         .build());
- </pre>
- A <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> can also be initialized with configuration values from an XML
- resource file like this:
- <p>
+         .setLabel("help popup")
+         .setScreenName("help popup dialog")
+         .build());</pre>
+ A <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> can also be initialized with configuration values from an XML resource file
+ like this:
  <pre>
- Tracker t = GoogleAnalytics.getInstance(ctx).newTracker(R.xml.tracker_config);</pre>
- Where R.xml.tracker_config is the resource id for an XML configuration file. The file
- should be stored in the app's res/values/xml/ directory and look like this:
- <p>
+ Tracker tracker = analytics.newTracker(R.xml.tracker_config);</pre>
+ Where R.xml.tracker_config is the resource id for an XML configuration file. The file should be
+ stored in the app's res/xml/ directory and look like this: <p>
  <pre>
  &lt;?xml version="1.0" encoding="utf-8" ?&gt;
  &lt;resources&gt;
-     &lt;screenName name="com.google.foo.FirstActivity"&gt;
-         First Activity
-     &lt;/screenName&gt;
-     &lt;screenName name="com.google.foo.AnotherActivity"&gt;
-         Another Activity
-     &lt;/screenName&gt;
-     &lt;string name="ga_trackingId"&gt;UA-XXXX-Y&lt;/string&gt;
-     &lt;string name="ga_sampleFrequency"&gt;99.8&lt;/string&gt;
-     &lt;integer name="ga_sessionTimeout"&gt;2000&lt;/integer&gt;
+     &lt;string name="ga_trackingId"&gt;UA-0000-1&lt;/string&gt;
+     &lt;string name="ga_sampleFrequency"&gt;100.0&lt;/string&gt;
+     &lt;integer name="ga_sessionTimeout"&gt;1800&lt;/integer&gt;
      &lt;bool name="ga_autoActivityTracking"&gt;true&lt;/bool&gt;
-     &lt;bool name="ga_anonymizeIp"&gt;true&lt;/bool&gt;
+     &lt;bool name="ga_anonymizeIp"&gt;false&lt;/bool&gt;
      &lt;bool name="ga_reportUncaughtExceptions"&gt;true&lt;/bool&gt;
+
+     &lt;screenName name="com.example.MainActivity"&gt;Home Screen&lt;/screenName&gt;
+     &lt;screenName name="com.example.SecondActivity"&gt;Second Screen&lt;/screenName&gt;
  &lt;/resources&gt;</pre>
- Here is a complete list of tracker scoped configuration values that can be specified:
- <ul>
-   <li>ga_trackingId(string) - tracking Id to report against. Required</li>
-   <li>ga_sampleFrequency(string) - sample rate to use. Default is 100.0.  It
-       can be any value between 0.0 and 100.0</li>
-   <li>ga_autoActivityTracking(bool) - if true, views (Activities) will be
-       tracked. Default is false.</li>
-   <li>ga_anonymizeIp(bool) - if true, anonymizeIp will be set for each hit.
-       Default is false.</li>
-   <li>ga_reportUncaughtExceptions(bool) - if true, uncaught exceptions will
-       be tracked. Default is false. NOTE: This value can only be set to true
-       for a single Tracker. If specified for multiple Trackers, then the last
-       one to be initialized will be used.</li>
-   <li>ga_sessionTimeout(int) - time (in seconds) an app can stay in the
-       background before a new session is started.  Setting this to a negative
-       number will result in a new session never being started.  Default is 30
-       seconds.</li>
- </ul>
- <p>
- If ga_autoActivityTracking is enabled, an alternate screen name can be specified to substitute
- for the full length canonical <code><a href="/reference/android/app/Activity.html">Activity</a></code> name in screen view hit. In order to
- specify an alternate screen name use an &lt;screenName&gt; element, with
- the name attribute specifying the canonical name, and the value the alias to use instead.
+ The following tracker configuration values can be specified: <ul> <li>ga_trackingId(string) -
+ tracking id to send the reports to. Required.</li> <li>ga_sampleFrequency(string) - sampling rate
+ in percents. Default is 100.0.  It can be any value between 0.0 and 100.0.</li>
+ <li>ga_autoActivityTracking(bool) - if true, views (Activities) will be tracked. Default is
+ false.</li> <li>ga_anonymizeIp(bool) - if true, anonymizeIp will be set for each hit. Default is
+ false.</li> <li>ga_reportUncaughtExceptions(bool) - if true, uncaught exceptions will be tracked.
+ Default is false. NOTE: This value can only be set to true for a single Tracker. If specified for
+ multiple Trackers, then the last one to be initialized will be used.</li>
+ <li>ga_sessionTimeout(int) - time (in seconds) an app can stay in the background before a new
+ session is started.  Setting this to a negative number will result in a new session never being
+ started.  Default is 1800 seconds (30 minutes).</li> </ul> <p> If ga_autoActivityTracking is
+ enabled, an alternate screen name can be specified to substitute for the full canonical <code><a href="/reference/android/app/Activity.html">Activity</a></code> class name. In order to specify an alternate screen name use an &lt;screenName&gt;
+ element, with the name attribute specifying the full class name, and the screen name as element
+ content.
  <pre>
- &lt;screenName name="com.google.foo.SampleActivity"&gt;Sample Activity&lt;/screenName&gt;</pre>
+ &lt;screenName name="com.example.MainActivity"&gt;Home Screen&lt;/screenName&gt;</pre>
 </p>
 
 
@@ -1022,8 +1021,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAdvertisingIdCollection(boolean)">enableAdvertisingIdCollection</a></span>(boolean enabled)</nobr>
         
         <div class="jd-descrdiv">
-          Sets whether the advertising id and ad targeting preference should be collected while
- sending hits to GA servers.
+          Sets whether the advertising id and ad targeting preference should be collected while sending
+ hits to GA servers.
           
     
 
@@ -1046,8 +1045,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAutoActivityTracking(boolean)">enableAutoActivityTracking</a></span>(boolean enabled)</nobr>
         
         <div class="jd-descrdiv">
-          Specify whether <code><a href="/reference/android/app/Activity.html">Activity</a></code> starts should automatically generate
- screen views from this <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>.
+          Specify whether <code><a href="/reference/android/app/Activity.html">Activity</a></code> starts should automatically generate screen
+ views from this <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>.
           
     
 
@@ -1505,8 +1504,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setSessionTimeout(long)">setSessionTimeout</a></span>(long sessionTimeout)</nobr>
         
         <div class="jd-descrdiv">
-          Specify the time (in seconds) an app can stay in the background before a
- new session is started.
+          Specify the time (in seconds) an app can stay in the background before a new session is
+ started.
           
     
 
@@ -1854,9 +1853,9 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets whether the advertising id and ad targeting preference should be collected while
- sending hits to GA servers. The collection of advertising id and the ad targeting preference
- is disabled by default and needs to be turned on for mobile audience features and any other
+  <div class="jd-tagdata jd-tagdescr"><p>Sets whether the advertising id and ad targeting preference should be collected while sending
+ hits to GA servers. The collection of advertising id and the ad targeting preference is
+ disabled by default and needs to be turned on for mobile audience features and any other
  features that require advertising id.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1899,8 +1898,8 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specify whether <code><a href="/reference/android/app/Activity.html">Activity</a></code> starts should automatically generate
- screen views from this <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify whether <code><a href="/reference/android/app/Activity.html">Activity</a></code> starts should automatically generate screen
+ views from this <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1942,10 +1941,10 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Enables or disables uncaught exception reporting for a given tracker.
- This method is equivalent to using 'ga_reportUncaughtExceptions' in the tracker configuration
- file. Note that as with the configuration setting, only the uncaught exceptions are reported
- using this method.
+  <div class="jd-tagdata jd-tagdescr"><p>Enables or disables uncaught exception reporting for a given tracker. This method is
+ equivalent to using 'ga_reportUncaughtExceptions' in the tracker configuration file. Note
+ that as with the configuration setting, only the uncaught exceptions are reported using this
+ method.
 </p></div>
 
     </div>
@@ -2021,9 +2020,9 @@ From class
         <tr>
           <th>params</td>
           <td>map of hit data to values which are merged with the existing values which are
-    already set (using <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#set(java.lang.String, java.lang.String)">set(String, String)</a></code>). Values in this map will override the values set earlier.
-    The values in this map will not be reused for the subsequent hits. If you need to send a
-    value in multiple hits, you can use the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#set(java.lang.String, java.lang.String)">set(String, String)</a></code> method.
+               already set (using <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#set(java.lang.String, java.lang.String)">set(String, String)</a></code>). Values in this map will override the values
+               set earlier. The values in this map will not be reused for the subsequent hits.
+               If you need to send a value in multiple hits, you can use the <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#set(java.lang.String, java.lang.String)">set(String, String)</a></code> method.
 </td>
         </tr>
       </table>
@@ -2067,12 +2066,13 @@ From class
         <tr>
           <th>key</td>
           <td>The key of the field that needs to be set. It starts with "&" followed by the
- parameter name. The complete list of fields can be found at http://goo.gl/M6dK2U.</td>
+              parameter name. The complete list of fields can be found at
+              http://goo.gl/M6dK2U.</td>
         </tr>
         <tr>
           <th>value</td>
           <td>A string value to be sent to Google servers. A null value denotes that the value
- should not be sent over wire.
+              should not be sent over wire.
 </td>
         </tr>
       </table>
@@ -2313,34 +2313,24 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Includes the campaign parameters contained in the URI referrer in the next hit.
- If there is no referrer, or the referrer does not contain campaign parameters,
- this method does not add anything to the next hit.
+  <div class="jd-tagdata jd-tagdescr"><p>Includes the campaign parameters contained in the URI referrer in the next hit. If there is
+ no referrer, or the referrer does not contain campaign parameters, this method does not add
+ anything to the next hit.
 
  <p>Use this method to track in-app events driven by advertising with deep linking
  campaigns.</p>
 
- <p>Valid campaign parameters are:
- <ul>
- <li>utm_id</li>
- <li>utm_campaign</li>
- <li>utm_content</li>
- <li>utm_medium</li>
- <li>utm_source</li>
- <li>utm_term</li>
- <li>dclid</li>
- <li>gclid</li>
- </ul>
- <p>
- Example:
- http://my.site.com/index.html?referrer=utm_source%3Dsource%26utm_campaign%3Dwow</p></div>
+ <p>Valid campaign parameters are: <ul> <li>utm_id</li> <li>utm_campaign</li>
+ <li>utm_content</li> <li>utm_medium</li> <li>utm_source</li> <li>utm_term</li> <li>dclid</li>
+ <li>gclid</li> </ul> <p>
+
+ Example: http://my.site.com/index.html?referrer=utm_source%3Dsource%26utm_campaign%3Dwow</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>uri</td>
           <td>the uri containing the referrer
-
 </td>
         </tr>
       </table>
@@ -2376,9 +2366,9 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets a particular client Id for the device. This Id should be a valid UUID (version 4)
- string as described in http://goo.gl/0dlrGx. If not specified, the SDK automatically
- generates one for you and sets it.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a particular client Id for the device. This Id should be a valid UUID (version 4) string
+ as described in http://goo.gl/0dlrGx. If not specified, the SDK automatically generates one
+ for you and sets it.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -2624,15 +2614,15 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Set the sample rate for all hits generated by the app. The sampling is done at app level.
- The default value is 100. To enable sampling, the minimum rate required is 0.01%.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Set the sample rate for all hits generated by the app. The sampling is done at app level. The
+ default value is 100. To enable sampling, the minimum rate required is 0.01%.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>sampleRate</td>
-          <td>A value between 0 and 100, specifying the
- percentage of devices that should send hits.
+          <td>A value between 0 and 100, specifying the percentage of devices that should
+                   send hits.
 </td>
         </tr>
       </table>
@@ -2780,9 +2770,9 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Specify the time (in seconds) an app can stay in the background before a
- new session is started.  Setting this to a negative number will result in
- a new session never being started.  Default is 30 seconds.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the time (in seconds) an app can stay in the background before a new session is
+ started.  Setting this to a negative number will result in a new session never being started.
+ Default is 30 seconds.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">

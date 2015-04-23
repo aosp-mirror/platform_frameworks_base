@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -967,6 +978,52 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             
             
             
+            <a href="/reference/com/google/android/gms/location/LocationAvailability.html">LocationAvailability</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#getLocationAvailability(com.google.android.gms.common.api.GoogleApiClient)">getLocationAvailability</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the availability of location data.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#removeLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationCallback)">removeLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationCallback.html">LocationCallback</a> callback)</nobr>
+
+        <div class="jd-descrdiv">
+          Removes all location updates for the given location result listener.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1016,7 +1073,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener, android.os.Looper)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, Looper looper)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationCallback, android.os.Looper)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationCallback.html">LocationCallback</a> callback, Looper looper)</nobr>
         
         <div class="jd-descrdiv">
           Requests location updates with a callback on the specified Looper thread.
@@ -1039,6 +1096,29 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener, android.os.Looper)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, Looper looper)</nobr>
+
+        <div class="jd-descrdiv">
+          Requests location updates with a callback on the specified Looper thread.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener)</nobr>
         
         <div class="jd-descrdiv">
@@ -1052,7 +1132,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1075,7 +1155,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1098,7 +1178,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1309,6 +1389,108 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </div>
 
 
+<A NAME="getLocationAvailability(com.google.android.gms.common.api.GoogleApiClient)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/location/LocationAvailability.html">LocationAvailability</a>
+      </span>
+      <span class="sympad">getLocationAvailability</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the availability of location data.
+ When <code><a href="/reference/com/google/android/gms/location/LocationAvailability.html#isLocationAvailable()">isLocationAvailable()</a></code>
+ returns true, then the location returned by <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#getLastLocation(com.google.android.gms.common.api.GoogleApiClient)">getLastLocation(GoogleApiClient)</a></code> will be reasonably
+ up to date within the hints specified by the active <code><a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a></code>s.
+ <p>
+ If the client isn't connected to Google Play services and the request times out,
+ null is returned.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>An existing GoogleApiClient.  If not connected null will be returned.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="removeLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationCallback)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+      </span>
+      <span class="sympad">removeLocationUpdates</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationCallback.html">LocationCallback</a> callback)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Removes all location updates for the given location result listener.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>An existing GoogleApiClient.  It must be connected at the time of this call,
+               which is normally achieved by calling <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> and
+               waiting for <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
+               to be called.</td>
+        </tr>
+        <tr>
+          <th>callback</td>
+          <td>The callback to remove.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a PendingResult for the call, check <code><a href="/reference/com/google/android/gms/common/api/Status.html#isSuccess()">isSuccess()</a></code> to determine if it was
+         successful.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="removeLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationListener)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1404,7 +1586,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </tr>
         <tr>
           <th>callbackIntent</td>
-          <td>The callback intent to remove.</td>
+          <td>The PendingIntent that was used in
+        <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, android.app.PendingIntent)">requestLocationUpdates(GoogleApiClient, LocationRequest, PendingIntent)</a></code>
+        or is equal as defined by <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code>.</td>
         </tr>
       </table>
   </div>
@@ -1413,6 +1597,89 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <ul class="nolist"><li>a PendingResult for the call, check <code><a href="/reference/com/google/android/gms/common/api/Status.html#isSuccess()">isSuccess()</a></code> to determine if it was
          successful.
 </li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationCallback, android.os.Looper)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+      </span>
+      <span class="sympad">requestLocationUpdates</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationCallback.html">LocationCallback</a> callback, Looper looper)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Requests location updates with a callback on the specified Looper thread.
+ <p>
+ This method is suited for the foreground use cases,more specifically
+ for requesting locations while being connected to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>. For
+ background use cases, the <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> version of the method is recommended, see
+ <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, android.app.PendingIntent)">requestLocationUpdates(GoogleApiClient, LocationRequest, PendingIntent)</a></code>.
+ <p>
+ Any previous LocationRequests registered on this LocationListener will be replaced.
+ <p>
+ Callbacks for <code><a href="/reference/com/google/android/gms/location/LocationCallback.html">LocationCallback</a></code> will be made on the specified thread, which must
+ already be a prepared looper thread.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>An existing GoogleApiClient.  It must be connected at the time of this call,
+               which is normally achieved by calling <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> and
+               waiting for <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
+               to be called.</td>
+        </tr>
+        <tr>
+          <th>request</td>
+          <td>The location request for the updates.</td>
+        </tr>
+        <tr>
+          <th>callback</td>
+          <td>The callback for the location updates.</td>
+        </tr>
+        <tr>
+          <th>looper</td>
+          <td>The Looper object whose message queue will be used to implement the callback
+   mechanism, or null to make callbacks on the calling thread.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a PendingResult for the call, check <code><a href="/reference/com/google/android/gms/common/api/Status.html#isSuccess()">isSuccess()</a></code> to determine if it was
+         successful.</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalStateException</td>
+            <td>If looper is null and this method is executed in a
+                               thread that has not called Looper.prepare().
+</td>
+        </tr>
+      </table>
   </div>
 
     </div>
@@ -1485,8 +1752,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>a PendingResult for the call, check <code><a href="/reference/com/google/android/gms/common/api/Status.html#isSuccess()">isSuccess()</a></code> to determine if it was
-         successful.
-</li></ul>
+         successful.</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalStateException</td>
+            <td>If looper is null and this method is executed in a
+                               thread that has not called Looper.prepare().
+</td>
+        </tr>
+      </table>
   </div>
 
     </div>
@@ -1557,8 +1834,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>a PendingResult for the call, check <code><a href="/reference/com/google/android/gms/common/api/Status.html#isSuccess()">isSuccess()</a></code> to determine if it was
-         successful.
-</li></ul>
+         successful.</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalStateException</td>
+            <td>If this method is executed in a thread that has not called
+                               Looper.prepare().
+</td>
+        </tr>
+      </table>
   </div>
 
     </div>
@@ -1599,7 +1886,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  <code><a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a></code> version of the method is recommended, see
  <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener)">requestLocationUpdates(GoogleApiClient, LocationRequest, LocationListener)</a></code>.
  <p>
- Any previous LocationRequests registered on this PendingIntent will be replaced.
+ Any previously registered requests that have the same PendingIntent
+ (as defined by <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code>) will be replaced by this request.
  <p>
  Location updates are sent with a key of <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#KEY_LOCATION_CHANGED">KEY_LOCATION_CHANGED</a></code>
  and a <code><a href="/reference/android/location/Location.html">Location</a></code> value on the intent.</p></div>

@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -918,7 +929,7 @@ Summary:
 <h2>Class Overview</h2>
 <p itemprop="articleBody">A data buffer that points to Metadata entries. Objects of this class are returned in responses to
  list requests (such as <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#query(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.query.Query)">query(GoogleApiClient, Query)</a></code>). This object behaves as an <code><a href="/reference/java/lang/Iterable.html">Iterable</a></code>, as
- well as allowing indexed access to its entries. Be sure to call <code><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#release()">release()</a></code> on any buffers
+ well as allowing indexed access to its entries. Be sure to call <code><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html#release()">release()</a></code> on any buffers
  when you are done with them.
 </p>
 
@@ -1020,6 +1031,29 @@ Summary:
       This method is deprecated.
     Paging is not supported, so this always returns null.
 </em>
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html#release()">release</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Releases resources used by the buffer.
 
 
 
@@ -1813,6 +1847,39 @@ From interface
 
   </p>
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="release()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        void
+      </span>
+      <span class="sympad">release</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Releases resources used by the buffer. This method is idempotent.
+</p></div>
 
     </div>
 </div>

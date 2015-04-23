@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -945,7 +956,10 @@ Summary:
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GOOGLE_PLAY_SERVICES_PACKAGE">GOOGLE_PLAY_SERVICES_PACKAGE</a></td>
         <td class="jd-descrcol" width="100%">
-          Package name for Google Play services.
+          <em>
+      This constant is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#GOOGLE_PLAY_SERVICES_PACKAGE">GOOGLE_PLAY_SERVICES_PACKAGE</a></code> instead.
+</em>
           
     
 
@@ -957,8 +971,10 @@ Summary:
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GOOGLE_PLAY_SERVICES_VERSION_CODE">GOOGLE_PLAY_SERVICES_VERSION_CODE</a></td>
         <td class="jd-descrcol" width="100%">
-          Google Play services client library version (declared in library's
- AndroidManifest.xml android:versionCode).
+          <em>
+      This constant is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#GOOGLE_PLAY_SERVICES_VERSION_CODE">GOOGLE_PLAY_SERVICES_VERSION_CODE</a></code> instead.
+</em>
           
     
 
@@ -970,7 +986,7 @@ Summary:
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#GOOGLE_PLAY_STORE_PACKAGE">GOOGLE_PLAY_STORE_PACKAGE</a></td>
         <td class="jd-descrcol" width="100%">
-          Package name for Google Play services.
+          Package name for Google Play Store.
           
     
 
@@ -1015,7 +1031,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog</a></span>(int errorCode, Activity activity, int requestCode)</nobr>
         
         <div class="jd-descrdiv">
-          Returns a dialog to address the provided errorCode.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#getErrorDialog(android.app.Activity, int, int)">getErrorDialog(Activity, int, int)</a></code> instead.
+</em>
           
     
 
@@ -1038,7 +1057,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int, android.content.DialogInterface.OnCancelListener)">getErrorDialog</a></span>(int errorCode, Activity activity, int requestCode, DialogInterface.OnCancelListener cancelListener)</nobr>
         
         <div class="jd-descrdiv">
-          Returns a dialog to address the provided errorCode.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html">#getErrorDialog(Activity, int, int, OnCancelListener)</a></code> instead.
+</em>
           
     
 
@@ -1061,7 +1083,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorPendingIntent(int, android.content.Context, int)">getErrorPendingIntent</a></span>(int errorCode, Context context, int requestCode)</nobr>
         
         <div class="jd-descrdiv">
-          Returns a PendingIntent to address the provided errorCode.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#getErrorResolutionPendingIntent(android.content.Context, int, int)">getErrorResolutionPendingIntent(Context, int, int)</a></code> instead.
+</em>
           
     
 
@@ -1084,8 +1109,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorString(int)">getErrorString</a></span>(int errorCode)</nobr>
         
         <div class="jd-descrdiv">
-          Returns a human-readable string of the error code returned from
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#getErrorString(int)">getErrorString(int)</a></code> instead.
+</em>
           
     
 
@@ -1108,8 +1135,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getOpenSourceSoftwareLicenseInfo(android.content.Context)">getOpenSourceSoftwareLicenseInfo</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">
-          Returns the open source software license information for the Google Play services
- application, or null if Google Play services is not available on this device.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#getOpenSourceSoftwareLicenseInfo(android.content.Context)">getOpenSourceSoftwareLicenseInfo(Context)</a></code> instead.
+</em>
           
     
 
@@ -1178,8 +1207,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">
-          Verifies that Google Play services is installed and enabled on this device, and that the
- version installed on this device is no older than the one required by this client.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code> instead.
+</em>
           
     
 
@@ -1202,7 +1233,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isUserRecoverableError(int)">isUserRecoverableError</a></span>(int errorCode)</nobr>
         
         <div class="jd-descrdiv">
-          Determines whether an error is user-recoverable.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#isUserResolvableError(int)">isUserResolvableError(int)</a></code> instead.
+</em>
           
     
 
@@ -1225,8 +1259,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#showErrorDialogFragment(int, android.app.Activity, int)">showErrorDialogFragment</a></span>(int errorCode, Activity activity, int requestCode)</nobr>
         
         <div class="jd-descrdiv">
-          Display a DialogFragment for an error code returned by
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html">#showErrorDialogFragment(Activity, int, int)</a></code> instead.
+</em>
           
     
 
@@ -1265,8 +1301,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#showErrorDialogFragment(int, android.app.Activity, int, android.content.DialogInterface.OnCancelListener)">showErrorDialogFragment</a></span>(int errorCode, Activity activity, int requestCode, DialogInterface.OnCancelListener cancelListener)</nobr>
         
         <div class="jd-descrdiv">
-          Display a DialogFragment for an error code returned by
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html">#showErrorDialogFragment(Activity, int, int, OnCancelListener)</a></code> instead.
+</em>
           
     
 
@@ -1289,7 +1327,10 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#showErrorNotification(int, android.content.Context)">showErrorNotification</a></span>(int errorCode, Context context)</nobr>
         
         <div class="jd-descrdiv">
-          Displays a notification relevant to the provided error code.
+          <em>
+      This method is deprecated.
+    Use {GoogleApiAvailability#showErrorNotification(Context, int)} instead.
+</em>
           
     
 
@@ -1630,9 +1671,13 @@ From class
       
     
 
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Package name for Google Play services.
-</p></div>
+      <p>
+  <p class="caution"><strong>
+      This constant is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#GOOGLE_PLAY_SERVICES_PACKAGE">GOOGLE_PLAY_SERVICES_PACKAGE</a></code> instead.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Package name for Google Play services.</p></div>
 
     
         <div class="jd-tagdata">
@@ -1671,18 +1716,22 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This constant is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#GOOGLE_PLAY_SERVICES_VERSION_CODE">GOOGLE_PLAY_SERVICES_VERSION_CODE</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Google Play services client library version (declared in library's
- AndroidManifest.xml android:versionCode).
-</p></div>
+ AndroidManifest.xml android:versionCode).</p></div>
 
     
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
             
-                7095000
-                (0x006c42d8)
+                7329000
+                (0x006fd4e8)
             
         </span>
         </div>
@@ -1715,7 +1764,7 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Package name for Google Play services.
+  <div class="jd-tagdata jd-tagdescr"><p>Package name for Google Play Store.
 </p></div>
 
     
@@ -1778,7 +1827,12 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#getErrorDialog(android.app.Activity, int, int)">getErrorDialog(Activity, int, int)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Returns a dialog to address the provided errorCode. The returned dialog displays a localized
  message about the error and upon user confirmation (by tapping on dialog) will direct them to
  the Play Store if Google Play services is out of date or missing, or to system settings if
@@ -1798,8 +1852,7 @@ From class
         </tr>
         <tr>
           <th>requestCode</td>
-          <td>The requestCode given when calling startActivityForResult.
-</td>
+          <td>The requestCode given when calling startActivityForResult.</td>
         </tr>
       </table>
   </div>
@@ -1833,7 +1886,12 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html">#getErrorDialog(Activity, int, int, OnCancelListener)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Returns a dialog to address the provided errorCode. The returned dialog displays a localized
  message about the error and upon user confirmation (by tapping on dialog) will direct them to
  the Play Store if Google Play services is out of date or missing, or to system settings if
@@ -1858,8 +1916,7 @@ From class
         <tr>
           <th>cancelListener</td>
           <td>The <code><a href="/reference/android/content/DialogInterface.OnCancelListener.html">DialogInterface.OnCancelListener</a></code> to invoke if the dialog is
-            canceled.
-</td>
+            canceled.</td>
         </tr>
       </table>
   </div>
@@ -1893,7 +1950,12 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#getErrorResolutionPendingIntent(android.content.Context, int, int)">getErrorResolutionPendingIntent(Context, int, int)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Returns a PendingIntent to address the provided errorCode. It will direct them to one of the
  following places to either the Play Store if Google Play services is out of date or missing,
  or system settings if Google Play services is disabled on the device.</p></div>
@@ -1911,8 +1973,7 @@ From class
         </tr>
         <tr>
           <th>requestCode</td>
-          <td>The requestCode given when calling startActivityForResult.
-</td>
+          <td>The requestCode given when calling startActivityForResult.</td>
         </tr>
       </table>
   </div>
@@ -1946,10 +2007,14 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#getErrorString(int)">getErrorString(int)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Returns a human-readable string of the error code returned from
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.
-</p></div>
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.</p></div>
 
     </div>
 </div>
@@ -1980,10 +2045,14 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#getOpenSourceSoftwareLicenseInfo(android.content.Context)">getOpenSourceSoftwareLicenseInfo(Context)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Returns the open source software license information for the Google Play services
- application, or null if Google Play services is not available on this device.
-</p></div>
+ application, or null if Google Play services is not available on this device.</p></div>
 
     </div>
 </div>
@@ -2092,15 +2161,19 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Verifies that Google Play services is installed and enabled on this device, and that the
  version installed on this device is no older than the one required by this client.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>status code indicating whether there was an error.  Can be one of following in
          <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code>: SUCCESS, SERVICE_MISSING,
-         SERVICE_VERSION_UPDATE_REQUIRED, SERVICE_DISABLED, SERVICE_INVALID
-</li></ul>
+         SERVICE_VERSION_UPDATE_REQUIRED, SERVICE_DISABLED, SERVICE_INVALID</li></ul>
   </div>
 
     </div>
@@ -2132,7 +2205,12 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html#isUserResolvableError(int)">isUserResolvableError(int)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Determines whether an error is user-recoverable. If true, proceed by calling
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> and showing the dialog.</p></div>
   <div class="jd-tagdata">
@@ -2149,8 +2227,7 @@ From class
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if the error is recoverable with
-         <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code>
-</li></ul>
+         <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code></li></ul>
   </div>
 
     </div>
@@ -2182,7 +2259,12 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html">#showErrorDialogFragment(Activity, int, int)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Display a DialogFragment for an error code returned by
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2288,7 +2370,12 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/common/GoogleApiAvailability.html">#showErrorDialogFragment(Activity, int, int, OnCancelListener)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Display a DialogFragment for an error code returned by
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#isGooglePlayServicesAvailable(android.content.Context)">isGooglePlayServicesAvailable(Context)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2367,7 +2454,12 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use {GoogleApiAvailability#showErrorNotification(Context, int)} instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Displays a notification relevant to the provided error code. This method is similar to
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, android.app.Activity, int)</a></code>, but is provided for background tasks
  that cannot or shouldn't display dialogs.</p></div>
@@ -2382,8 +2474,7 @@ From class
         <tr>
           <th>context</td>
           <td>used for identifying language to display dialog in as well as accessing the
-            <code><a href="/reference/android/app/NotificationManager.html">NotificationManager</a></code>.
-</td>
+            <code><a href="/reference/android/app/NotificationManager.html">NotificationManager</a></code>.</td>
         </tr>
       </table>
   </div>

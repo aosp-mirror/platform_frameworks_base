@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -989,6 +1000,47 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.html#FILTER_LITERAL">FILTER_LITERAL</a></td>
+        <td class="jd-descrcol" width="100%">
+          Filter type for
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">getDataItems(GoogleApiClient, Uri, int)</a></code>,
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">deleteDataItems(GoogleApiClient, Uri, int)</a></code>:
+ if this filter is set, the given URI will be taken as a literal path, and the operation
+ will apply to the matching item only.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.html#FILTER_PREFIX">FILTER_PREFIX</a></td>
+        <td class="jd-descrcol" width="100%">
+          Filter type for
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">getDataItems(GoogleApiClient, Uri, int)</a></code>,
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">deleteDataItems(GoogleApiClient, Uri, int)</a></code>:
+ if this filter is set, the given URI will be taken as a path prefix, and the operation
+ will apply to all matching items.
+
+
+
+        </td>
+    </tr>
+
+
+
+</table>
+
+
 
 
 
@@ -1042,7 +1094,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)">deleteDataItems</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">deleteDataItems</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri, int filterType)</nobr>
         
         <div class="jd-descrdiv">
           Removes all specified <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> from the Android Wear network.
@@ -1062,6 +1114,29 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             
             
             
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)">deleteDataItems</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri)</nobr>
+
+        <div class="jd-descrdiv">
+          Removes all specified <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> from the Android Wear network.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1078,7 +1153,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1101,6 +1176,30 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">getDataItems</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri, int filterType)</nobr>
+
+        <div class="jd-descrdiv">
+          Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> matching the provided URI and filter type, from
+ the Android Wear network.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
@@ -1246,6 +1345,105 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="FILTER_LITERAL"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        FILTER_LITERAL
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Filter type for
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">getDataItems(GoogleApiClient, Uri, int)</a></code>,
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">deleteDataItems(GoogleApiClient, Uri, int)</a></code>:
+ if this filter is set, the given URI will be taken as a literal path, and the operation
+ will apply to the matching item only.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                0
+                (0x00000000)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="FILTER_PREFIX"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        FILTER_PREFIX
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Filter type for
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">getDataItems(GoogleApiClient, Uri, int)</a></code>,
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)">deleteDataItems(GoogleApiClient, Uri, int)</a></code>:
+ if this filter is set, the given URI will be taken as a path prefix, and the operation
+ will apply to all matching items.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                1
+                (0x00000001)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -1296,6 +1494,48 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  leaking resources.
 
  <p>The listener will be notified of changes initiated by this node.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a>&gt;
+      </span>
+      <span class="sympad">deleteDataItems</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri, int filterType)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Removes all specified <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> from the Android Wear network.
+
+ <p>If <code>uri</code> is fully specified, this method will delete at
+ most one data item. If <code>uri</code> contains no host, multiple data items may be
+ deleted, since different nodes may create data items with the same path. See
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html">DataApi</a></code> for details of the URI format.
+
+ <p>The <code>filterType</code> parameter changes the interpretation of <code>uri</code>.
+ For example, if <code>uri</code> represents a path prefix, all items matching that
+ prefix will be deleted.
 </p></div>
 
     </div>
@@ -1406,6 +1646,52 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
  <p>Callers must call <code><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#release()">release()</a></code> on the returned buffer when finished
  processing results.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri, int)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a>&gt;
+      </span>
+      <span class="sympad">getDataItems</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri, int filterType)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> matching the provided URI and filter type, from
+ the Android Wear network.
+
+ <p>The URI must contain a path. If <code>uri</code> is fully specified, at most one data item
+ will be returned. If <code>uri</code> contains no host, multiple data items may be returned,
+ since different nodes may create data items with the same path. See <code><a href="/reference/com/google/android/gms/wearable/DataApi.html">DataApi</a></code> for
+ details of the URI format.
+
+ <p>Callers must call <code><a href="/reference/com/google/android/gms/common/data/AbstractDataBuffer.html#release()">release()</a></code> on the returned buffer when finished
+ processing results.
+
+ <p>The <code>filterType</code> parameter changes the interpretation of <code>uri</code>.
+ For example, if <code>uri</code> represents a path prefix, all items matching that prefix
+ will be returned.
 </p></div>
 
     </div>

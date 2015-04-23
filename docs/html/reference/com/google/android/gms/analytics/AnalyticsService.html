@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -822,13 +833,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
 
 Summary:
@@ -844,9 +848,9 @@ Summary:
 
 
 
-  &#124; <a href="#pubctors">Ctors</a>
 
 
+  &#124; <a href="#pubmethods">Methods</a>
 
 
 
@@ -890,11 +894,7 @@ Summary:
 
 
 
-
-
-
-
-    extends IntentService<br/>
+    extends Service<br/>
 
 
 
@@ -917,7 +917,7 @@ Summary:
 
     <tr>
 
-        <td colspan="6" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="5" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
 
 
@@ -925,7 +925,7 @@ Summary:
 
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
 
-        <td colspan="5" class="jd-inheritance-class-cell">android.content.Context</td>
+        <td colspan="4" class="jd-inheritance-class-cell">android.content.Context</td>
     </tr>
 
 
@@ -935,7 +935,7 @@ Summary:
 
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
 
-        <td colspan="4" class="jd-inheritance-class-cell">android.content.ContextWrapper</td>
+        <td colspan="3" class="jd-inheritance-class-cell">android.content.ContextWrapper</td>
     </tr>
 
 
@@ -947,27 +947,11 @@ Summary:
 
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
 
-        <td colspan="3" class="jd-inheritance-class-cell">android.app.Service</td>
+        <td colspan="2" class="jd-inheritance-class-cell">android.app.Service</td>
     </tr>
 
 
     <tr>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
-
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
-        <td colspan="2" class="jd-inheritance-class-cell">android.app.IntentService</td>
-    </tr>
-
-
-    <tr>
-
-            <td class="jd-inheritance-space">&nbsp;</td>
 
             <td class="jd-inheritance-space">&nbsp;</td>
 
@@ -993,11 +977,20 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">An <code><a href="/reference/android/app/IntentService.html">IntentService</a></code> used by Google Analytics.
- It will only be used if it is correctly declared in the manifest:
- <p>
- <pre>
- &lt;service android:name="com.google.android.gms.analytics.AnalyticsService" /&gt;</pre>
+<p itemprop="articleBody">An <code><a href="/reference/android/app/Service.html">Service</a></code> used by Google Analytics. It will only be used when the service
+ is correctly declared in the manifest: <p>
+ <pre><code>&lt;manifest&gt;
+   &lt;application&gt;
+     &lt;!-- ... --&gt;
+
+     &lt;service android:name="com.google.android.gms.analytics.AnalyticsService"
+         android:enabled="true"
+         android:exported="false"/&gt;
+
+     &lt;!-- ... --&gt;
+   &lt;/application&gt;
+ &lt;/manifest&gt;
+ </code></pre>
 </p>
 
 
@@ -1045,8 +1038,6 @@ Summary:
 <table id="inhconstants" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Constants</div></th></tr>
-
-
 
 
 <tr class="api apilevel-" >
@@ -2192,78 +2183,12 @@ android.content.ComponentCallbacks2
 
 
 
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
-
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/AnalyticsService.html#AnalyticsService()">AnalyticsService</a></span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            </nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/AnalyticsService.html#AnalyticsService(java.lang.String)">AnalyticsService</a></span>(String name)</nobr>
-
-  </td></tr>
-
-
-
-</table>
-
-
-
-
-
-
-
 
 
 
 
 <!-- ========== METHOD SUMMARY =========== -->
-<table id="inhmethods" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.app.IntentService" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.app.IntentService-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From class
-
-  android.app.IntentService
-
-<div id="inherited-methods-android.app.IntentService">
-  <div id="inherited-methods-android.app.IntentService-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.app.IntentService-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
 
 
 
@@ -2278,112 +2203,24 @@ From class
             IBinder</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onBind</span>(Intent arg0)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/AnalyticsService.html#onBind(android.content.Intent)">onBind</a></span>(Intent intent)</nobr>
 
   </td></tr>
 
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onCreate</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onDestroy</span>()</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onHandleIntent</span>(Intent arg0)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onStart</span>(Intent arg0, int arg1)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onStartCommand</span>(Intent arg0, int arg1, int arg2)</nobr>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setIntentRedelivery</span>(boolean arg0)</nobr>
-
-  </td></tr>
 
 
 </table>
-  </div>
-</div>
-</td></tr>
 
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
 
 
 <tr class="api apilevel-" >
@@ -6202,77 +6039,6 @@ From interface
 <!-- Public ctors -->
 
 
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
-
-
-
-<A NAME="AnalyticsService()"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-
-      </span>
-      <span class="sympad">AnalyticsService</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="AnalyticsService(java.lang.String)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-
-      </span>
-      <span class="sympad">AnalyticsService</span>
-      <span class="normal">(String name)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-
-
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
@@ -6281,6 +6047,43 @@ From interface
 
 <!-- ========= METHOD DETAIL ======== -->
 <!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="onBind(android.content.Intent)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        IBinder
+      </span>
+      <span class="sympad">onBind</span>
+      <span class="normal">(Intent intent)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 
 
 

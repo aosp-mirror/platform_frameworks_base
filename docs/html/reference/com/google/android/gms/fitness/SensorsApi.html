@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1133,8 +1144,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  extract the DataPoint from the intent.  See the documentation of
  <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> for more details.
  <p>
- This method can be called several times with the same intent to change the
- desired sampling rate.</p></div>
+ Any previously registered requests that have the same PendingIntent
+ (as defined by <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code>) will be replaced by this request.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1320,8 +1331,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </tr>
         <tr>
           <th>pendingIntent</td>
-          <td>the intent that was used in the
-     <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, android.app.PendingIntent)">add</a></code> request.</td>
+          <td>the PendingIntent that was used in the
+     <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, android.app.PendingIntent)">add</a></code> request or is
+     equal as defined by <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code>.</td>
         </tr>
       </table>
   </div>

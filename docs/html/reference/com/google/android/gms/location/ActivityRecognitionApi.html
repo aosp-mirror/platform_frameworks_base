@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1038,8 +1049,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </tr>
         <tr>
           <th>callbackIntent</td>
-          <td>pending intent object that no longer needs activity
-            detection updates</td>
+          <td>the PendingIntent that was used in
+        <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionApi.html#requestActivityUpdates(com.google.android.gms.common.api.GoogleApiClient, long, android.app.PendingIntent)">requestActivityUpdates(GoogleApiClient, long, PendingIntent)</a></code>
+        or is equal as defined by <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code>.</td>
         </tr>
       </table>
   </div>
@@ -1126,8 +1138,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  See the documentation of <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> for more
  details.
  <p>
- Applications can call this function several times in a row with the same
- callbackIntent to change the desired activity detection interval.
+ Any requests previously registered with <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionApi.html#requestActivityUpdates(com.google.android.gms.common.api.GoogleApiClient, long, android.app.PendingIntent)">requestActivityUpdates(GoogleApiClient, long, PendingIntent)</a></code> that have the same
+ PendingIntent (as defined by <code><a href="/reference/android/app/PendingIntent.html#equals(java.lang.Object)">equals(Object)</a></code>) will be replaced by this request.
  <p>
  Calling this function requires the
  com.google.android.gms.permission.ACTIVITY_RECOGNITION permission.</p></div>
