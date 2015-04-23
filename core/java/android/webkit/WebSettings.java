@@ -900,7 +900,9 @@ public abstract class WebSettings {
      * and therefore secure policy, this setting should be disabled.
      * Note that this setting affects only JavaScript access to file scheme
      * resources. Other access to such resources, for example, from image HTML
-     * elements, is unaffected.
+     * elements, is unaffected. To prevent possible violation of same domain policy
+     * on {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and earlier
+     * devices, you should explicitly set this value to {@code false}.
      * <p>
      * The default value is true for API level
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
@@ -920,7 +922,9 @@ public abstract class WebSettings {
      * the value of {@link #getAllowUniversalAccessFromFileURLs} is true.
      * Note too, that this setting affects only JavaScript access to file scheme
      * resources. Other access to such resources, for example, from image HTML
-     * elements, is unaffected.
+     * elements, is unaffected. To prevent possible violation of same domain policy
+     * on {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and earlier
+     * devices, you should explicitly set this value to {@code false}.
      * <p>
      * The default value is true for API level
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
