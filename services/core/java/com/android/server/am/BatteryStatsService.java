@@ -982,9 +982,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if (noOutput) {
             return;
         }
-        if (BatteryStatsHelper.checkWifiOnly(mContext)) {
-            flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
+
+        long ident = Binder.clearCallingIdentity();
+        try {
+            if (BatteryStatsHelper.checkWifiOnly(mContext)) {
+                flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
+            }
+            // Fetch data from external sources and update the BatteryStatsImpl object with them.
+            updateExternalStats("dump");
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
+
         if (reqUid >= 0) {
             // By default, if the caller is only interested in a specific package, then
             // we only dump the aggregated data since charged.
@@ -994,9 +1003,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 flags &= ~BatteryStats.DUMP_INCLUDE_HISTORY;
             }
         }
-
-        // Fetch data from external sources and update the BatteryStatsImpl object with them.
-        updateExternalStats("dump");
 
         if (useCheckinFormat) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);
