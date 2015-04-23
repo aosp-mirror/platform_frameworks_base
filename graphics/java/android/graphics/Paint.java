@@ -185,7 +185,9 @@ public class Paint {
     public static final int VERTICAL_TEXT_FLAG = 0x1000;
 
     // we use this when we first create a paint
-    static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG;
+    private static final int HIDDEN_DEFAULT_PAINT_FLAGS =
+            DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG;
+    private static final int DEFAULT_PAINT_FLAGS = ANTI_ALIAS_FLAG;
 
     /**
      * Font hinter option that disables font hinting.
@@ -415,9 +417,11 @@ public class Paint {
 
     /**
      * Create a new paint with default settings.
+     *
+     * As of {@link android.os.Build.VERSION_CODES#MNC}, sets {@link #ANTI_ALIAS_FLAG}.
      */
     public Paint() {
-        this(0);
+        this(DEFAULT_PAINT_FLAGS);
     }
 
     /**
@@ -428,7 +432,7 @@ public class Paint {
      */
     public Paint(int flags) {
         mNativePaint = native_init();
-        setFlags(flags | DEFAULT_PAINT_FLAGS);
+        setFlags(flags | HIDDEN_DEFAULT_PAINT_FLAGS);
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
@@ -452,7 +456,7 @@ public class Paint {
     /** Restores the paint to its default settings. */
     public void reset() {
         native_reset(mNativePaint);
-        setFlags(DEFAULT_PAINT_FLAGS);
+        setFlags(DEFAULT_PAINT_FLAGS | HIDDEN_DEFAULT_PAINT_FLAGS);
 
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning
@@ -1870,7 +1874,7 @@ public class Paint {
      * Convenience overload that takes a char array instead of a
      * String.
      *
-     * @see #getTextRunAdvances(String, int, int, int, int, int, float[], int)
+     * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
      * @hide
      */
     public float getTextRunAdvances(char[] chars, int index, int count,
@@ -1915,7 +1919,7 @@ public class Paint {
      * Convenience overload that takes a CharSequence instead of a
      * String.
      *
-     * @see #getTextRunAdvances(String, int, int, int, int, int, float[], int)
+     * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
      * @hide
      */
     public float getTextRunAdvances(CharSequence text, int start, int end,
