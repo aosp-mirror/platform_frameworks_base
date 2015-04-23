@@ -1136,6 +1136,27 @@ public final class MediaCodecInfo {
         }
 
         /**
+         * Returns the range of achievable video frame rates for a video size.
+         * May return {@code null}, if the codec did not publish any measurement
+         * data.
+         * <p>
+         * This is a performance estimate, based on full-speed decoding
+         * and encoding measurements of common video sizes supported by the codec.
+         *
+         * @param width the width of the video
+         * @param height the height of the video
+         *
+         * @throws IllegalArgumentException if the video size is not supported.
+         */
+        public Range<Double> getAchievableFrameRatesFor(int width, int height) {
+            if (!supports(width, height, null)) {
+                throw new IllegalArgumentException("unsupported size");
+            }
+            // TODO: get this data from the codec
+            return null;
+        }
+
+        /**
          * Returns whether a given video size ({@code width} and
          * {@code height}) and {@code frameRate} combination is supported.
          */

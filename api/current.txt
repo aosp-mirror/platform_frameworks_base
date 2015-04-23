@@ -15578,6 +15578,7 @@ package android.media {
 
   public static final class MediaCodecInfo.VideoCapabilities {
     method public boolean areSizeAndRateSupported(int, int, double);
+    method public android.util.Range<java.lang.Double> getAchievableFrameRatesFor(int, int);
     method public android.util.Range<java.lang.Integer> getBitrateRange();
     method public int getHeightAlignment();
     method public android.util.Range<java.lang.Integer> getSupportedFrameRates();
