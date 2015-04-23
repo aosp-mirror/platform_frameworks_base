@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import android.content.Context;
 import android.content.Intent;
@@ -141,7 +142,11 @@ public class CarrierText extends TextView {
                         plmn = i.getStringExtra(TelephonyIntents.EXTRA_PLMN);
                     }
                     if (DEBUG) Log.d(TAG, "Getting plmn/spn sticky brdcst " + plmn + "/" + spn);
-                    text = concatenate(plmn, spn);
+                    if (Objects.equals(plmn, spn)) {
+                        text = plmn;
+                    } else {
+                        text = concatenate(plmn, spn);
+                    }
                 }
                 displayText =  makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.keyguard_missing_sim_message_short), text);
@@ -293,11 +298,7 @@ public class CarrierText extends TextView {
         final boolean plmnValid = !TextUtils.isEmpty(plmn);
         final boolean spnValid = !TextUtils.isEmpty(spn);
         if (plmnValid && spnValid) {
-            if (plmn.equals(spn)) {
-                return plmn;
-            } else {
-                return new StringBuilder().append(plmn).append(mSeparator).append(spn).toString();
-            }
+            return new StringBuilder().append(plmn).append(mSeparator).append(spn).toString();
         } else if (plmnValid) {
             return plmn;
         } else if (spnValid) {
