@@ -387,6 +387,7 @@ final class SettingsState {
         } catch (Throwable t) {
             Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
             destination.failWrite(out);
+            throw new IllegalStateException("Failed to write settings, restoring backup", t);
         } finally {
             IoUtils.closeQuietly(out);
         }
@@ -408,10 +409,9 @@ final class SettingsState {
             parser.setInput(in, null);
             parseStateLocked(parser);
 
-            // Any error while parsing is fatal.
-        } catch (Throwable t) {
+        } catch (XmlPullParserException | IOException e) {
             throw new IllegalStateException("Failed parsing settings file: "
-                    + mStatePersistFile , t);
+                    + mStatePersistFile , e);
         } finally {
             IoUtils.closeQuietly(in);
         }

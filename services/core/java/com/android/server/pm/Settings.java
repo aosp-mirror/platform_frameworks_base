@@ -4275,6 +4275,8 @@ final class Settings {
                 Slog.wtf(PackageManagerService.TAG,
                         "Failed to write settings, restoring backup", t);
                 destination.failWrite(out);
+                throw new IllegalStateException("Failed to write runtime permissions,"
+                        + " restoring backup", t);
             } finally {
                 IoUtils.closeQuietly(out);
             }
@@ -4322,10 +4324,9 @@ final class Settings {
                 parser.setInput(in, null);
                 parseRuntimePermissionsLPr(parser, userId);
 
-                // Any error while parsing is fatal.
-            } catch (Throwable t) {
+            } catch (XmlPullParserException | IOException e) {
                 throw new IllegalStateException("Failed parsing permissions file: "
-                        + permissionsFile , t);
+                        + permissionsFile , e);
             } finally {
                 IoUtils.closeQuietly(in);
             }
