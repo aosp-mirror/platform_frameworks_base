@@ -129,7 +129,7 @@ are compiled into the following drawable resource subtypes:</p>
     <td><code>mipmap/</code></td>
     <td>Drawable files for different launcher icon densities. For more information on managing
     launcher icons with {@code mipmap/} folders, see
-    <a href="{@docRoot}tools/project/index.html#mipmap">Managing Projects Overview</a>.</td>
+    <a href="{@docRoot}tools/projects/index.html#mipmap">Managing Projects Overview</a>.</td>
   </tr>
 
   <tr>
