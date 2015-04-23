@@ -690,7 +690,7 @@ public final class UiAutomation {
      * potentially undesirable actions such as calling 911 or posting on public forums etc.
      *
      * @param enable whether to run in a "monkey" mode or not. Default is not.
-     * @see {@link android.app.ActivityManager#isUserAMonkey()}
+     * @see ActivityManager#isUserAMonkey()
      */
     public void setRunAsMonkey(boolean enable) {
         synchronized (mLock) {
