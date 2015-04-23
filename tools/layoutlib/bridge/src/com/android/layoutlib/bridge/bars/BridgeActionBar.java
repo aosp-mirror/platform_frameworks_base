@@ -51,7 +51,7 @@ public abstract class BridgeActionBar {
             @NonNull ViewGroup parentView) {
         mBridgeContext = context;
         mParams = params;
-        mCallback = params.getProjectCallback().getActionBarCallback();
+        mCallback = params.getLayoutlibCallback().getActionBarCallback();
         ResourceValue layoutName = getLayoutResource(context);
         if (layoutName == null) {
             throw new RuntimeException("Unable to find the layout for Action Bar.");
