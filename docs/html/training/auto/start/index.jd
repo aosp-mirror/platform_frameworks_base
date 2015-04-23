@@ -55,14 +55,6 @@ messaging services. </p>
 setting up your development environment and meeting the the minimum requirements
 to enable an app to communicate with Auto.</p>
 
-<p class="note"><strong>Important:</strong> If you are planning to develop
-apps for Auto, you are encouraged to begin enabling and testing your
-apps now. However, Auto-enabled apps cannot be published at this time.
-Join the
-<a href="http://g.co/AndroidAutoDev" class="external-link">Auto
-Developers Google+ community</a> for updates on when you will be able to submit
-your Auto-enabled apps.</p>
-
 <h2 id="dev-project">Set Up an Auto Project</h2>
 <p>This section describes how to create a new app or modify an existing app to
 communicate with Auto.</p>
