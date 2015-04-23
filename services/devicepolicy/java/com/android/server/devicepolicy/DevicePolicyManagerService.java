@@ -1672,7 +1672,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         IActivityManager am = ActivityManagerNative.getDefault();
         long ident = Binder.clearCallingIdentity();
         try {
-            am.updateDeviceOwner(mDeviceOwner.getDeviceOwnerPackageName());
+            am.updateDeviceOwner(getDeviceOwner());
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
