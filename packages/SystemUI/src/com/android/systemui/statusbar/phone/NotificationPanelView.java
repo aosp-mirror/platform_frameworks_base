@@ -187,6 +187,9 @@ public class NotificationPanelView extends PanelView implements
     private boolean mExpansionIsFromHeadsUp;
     private int mBottomBarHeight;
     private boolean mExpandingFromHeadsUp;
+    private int mPositionMinSideMargin;
+    private int mLastOrientation = -1;
+
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -236,6 +239,7 @@ public class NotificationPanelView extends PanelView implements
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
         mSecureCameraLaunchManager =
                 new SecureCameraLaunchManager(getContext(), mKeyguardBottomArea);
+        mLastOrientation = getResources().getConfiguration().orientation;
 
         // recompute internal state when qspanel height changes
         mQsContainer.addOnLayoutChangeListener(new OnLayoutChangeListener() {
@@ -268,6 +272,8 @@ public class NotificationPanelView extends PanelView implements
                 getResources().getDimensionPixelSize(R.dimen.notification_scrim_wait_distance);
         mQsFalsingThreshold = getResources().getDimensionPixelSize(
                 R.dimen.qs_falsing_threshold);
+        mPositionMinSideMargin = getResources().getDimensionPixelSize(
+                R.dimen.notification_panel_min_side_margin);
     }
 
     public void updateResources() {
@@ -692,6 +698,9 @@ public class NotificationPanelView extends PanelView implements
         if (!mHeadsUpTouchHelper.isTrackingHeadsUp() && handleQSTouch(event)) {
             return true;
         }
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
+            updateVerticalPanelPosition(event.getX());
+        }
         super.onTouchEvent(event);
         return true;
     }
@@ -740,7 +749,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean isInQsArea(float x, float y) {
-        return (x >= mScrollView.getLeft() && x <= mScrollView.getRight()) &&
+        return (x >= mScrollView.getX() && x <= mScrollView.getX() + mScrollView.getWidth()) &&
                 (y <= mNotificationStackScroller.getBottomMostNotificationBottom()
                 || y <= mQsContainer.getY() + mQsContainer.getHeight());
     }
@@ -939,7 +948,7 @@ public class NotificationPanelView extends PanelView implements
             mKeyguardStatusBar.setAlpha(1f);
             mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
         }
-
+        resetVerticalPanelPosition();
         updateQsState();
     }
 
@@ -1376,7 +1385,7 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         View header = mKeyguardShowing ? mKeyguardStatusBar : mHeader;
-        boolean onHeader = x >= header.getLeft() && x <= header.getRight()
+        boolean onHeader = x >= header.getX() && x <= header.getX() + header.getWidth()
                 && y >= header.getTop() && y <= header.getBottom();
         if (mQsExpanded) {
             return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0) && isInQsArea(x, y);
@@ -1771,6 +1780,10 @@ public class NotificationPanelView extends PanelView implements
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mAfforanceHelper.onConfigurationChanged();
+        if (newConfig.orientation != mLastOrientation) {
+            resetVerticalPanelPosition();
+        }
+        mLastOrientation = newConfig.orientation;
     }
 
     @Override
@@ -2184,5 +2197,43 @@ public class NotificationPanelView extends PanelView implements
             mNotificationStackScroller.setTrackingHeadsUp(true);
             mExpandingFromHeadsUp = true;
         }
+    }
+
+    @Override
+    protected void onClosingFinished() {
+        super.onClosingFinished();
+        resetVerticalPanelPosition();
+    }
+
+    /**
+     * Updates the vertical position of the panel so it is positioned closer to the touch
+     * responsible for opening the panel.
+     *
+     * @param x the x-coordinate the touch event
+     */
+    private void updateVerticalPanelPosition(float x) {
+        if (mNotificationStackScroller.getWidth() * 1.75f > getWidth()) {
+            resetVerticalPanelPosition();
+            return;
+        }
+        float leftMost = mPositionMinSideMargin + mNotificationStackScroller.getWidth() / 2;
+        float rightMost = getWidth() - mPositionMinSideMargin
+                - mNotificationStackScroller.getWidth() / 2;
+        if (Math.abs(x - getWidth() / 2) < mNotificationStackScroller.getWidth() / 4) {
+            x = getWidth() / 2;
+        }
+        x = Math.min(rightMost, Math.max(leftMost, x));
+        setVerticalPanelTranslation(x -
+                (mNotificationStackScroller.getLeft() + mNotificationStackScroller.getWidth()/2));
+     }
+
+    private void resetVerticalPanelPosition() {
+        setVerticalPanelTranslation(0f);
+    }
+
+    private void setVerticalPanelTranslation(float translation) {
+        mNotificationStackScroller.setTranslationX(translation);
+        mScrollView.setTranslationX(translation);
+        mHeader.setTranslationX(translation);
     }
 }
