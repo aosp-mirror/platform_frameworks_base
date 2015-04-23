@@ -61,7 +61,7 @@ public final class Utils {
      */
     public static final String ASSET_DESCRIPTOR_FIELD_RELATION = "relation";
     public static final String ASSET_DESCRIPTOR_FIELD_TARGET = "target";
-    public static final String DELEGATE_FIELD_DELEGATE = "delegate";
+    public static final String DELEGATE_FIELD_DELEGATE = "include";
 
     private static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
             'A', 'B', 'C', 'D', 'E', 'F' };

@@ -16,6 +16,8 @@
 
 package com.android.statementservice.retriever;
 
+import android.util.Log;
+
 import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
 import com.android.volley.toolbox.HttpHeaderParser;
@@ -39,6 +41,7 @@ import java.util.Map;
  * @hide
  */
 public class URLFetcher {
+    private static final String TAG = URLFetcher.class.getSimpleName();
 
     private static final long DO_NOT_CACHE_RESULT = 0L;
     private static final int INPUT_BUFFER_SIZE_IN_BYTES = 1024;
@@ -63,11 +66,17 @@ public class URLFetcher {
         connection.setConnectTimeout(connectionTimeoutMillis);
         connection.setReadTimeout(connectionTimeoutMillis);
         connection.setUseCaches(true);
+        connection.setInstanceFollowRedirects(false);
         connection.addRequestProperty("Cache-Control", "max-stale=60");
 
+        if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            Log.e(TAG, "The responses code is not 200 but "  + connection.getResponseCode());
+            return new WebContent("", DO_NOT_CACHE_RESULT);
+        }
+
         if (connection.getContentLength() > fileSizeLimit) {
-            throw new AssociationServiceException("The content size of the url is larger than "
-                    + fileSizeLimit);
+            Log.e(TAG, "The content size of the url is larger than "  + fileSizeLimit);
+            return new WebContent("", DO_NOT_CACHE_RESULT);
         }
 
         Long expireTimeMillis = getExpirationTimeMillisFromHTTPHeader(connection.getHeaderFields());

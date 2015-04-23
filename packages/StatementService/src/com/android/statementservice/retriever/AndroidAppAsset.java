@@ -99,6 +99,12 @@ import java.util.Locale;
         return getPackageName().hashCode();
     }
 
+    @Override
+    public boolean followInsecureInclude() {
+        // Non-HTTPS includes are not allowed in Android App assets.
+        return false;
+    }
+
     /**
      * Checks that the input is a valid Android app asset.
      *
