@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -42,7 +43,9 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Displays TV contents. The TvView class provides a high level interface for applications to show
@@ -83,8 +86,7 @@ public class TvView extends ViewGroup {
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
     private Float mStreamVolume;
     private Boolean mCaptionEnabled;
-    private String mAppPrivateCommandAction;
-    private Bundle mAppPrivateCommandData;
+    private final Queue<Pair<String, Bundle>> mPendingAppPrivateCommands = new ArrayDeque<>();
 
     private boolean mSurfaceChanged;
     private int mSurfaceFormat;
@@ -501,12 +503,9 @@ public class TvView extends ViewGroup {
         if (mSession != null) {
             mSession.sendAppPrivateCommand(action, data);
         } else {
-            Log.w(TAG, "sendAppPrivateCommand - session not created (action " + action + " cached)");
-            if (mAppPrivateCommandAction != null) {
-                Log.w(TAG, "previous cached action " + action + " removed");
-            }
-            mAppPrivateCommandAction = action;
-            mAppPrivateCommandData = data;
+            Log.w(TAG, "sendAppPrivateCommand - session not yet created (action \"" + action
+                    + "\" pending)");
+            mPendingAppPrivateCommands.add(Pair.create(action, data));
         }
     }
 
@@ -728,8 +727,7 @@ public class TvView extends ViewGroup {
     }
 
     private void release() {
-        mAppPrivateCommandAction = null;
-        mAppPrivateCommandData = null;
+        mPendingAppPrivateCommands.clear();
 
         setSessionSurface(null);
         removeSessionOverlayView();
@@ -1002,6 +1000,12 @@ public class TvView extends ViewGroup {
             }
             mSession = session;
             if (session != null) {
+                // Sends the pending app private commands first.
+                for (Pair<String, Bundle> command : mPendingAppPrivateCommands) {
+                    mSession.sendAppPrivateCommand(command.first, command.second);
+                }
+                mPendingAppPrivateCommands.clear();
+
                 synchronized (sMainTvViewLock) {
                     if (hasWindowFocus() && TvView.this == sMainTvView.get()) {
                         mSession.setMain();
@@ -1024,12 +1028,6 @@ public class TvView extends ViewGroup {
                     mSession.setCaptionEnabled(mCaptionEnabled);
                 }
                 mSession.tune(mChannelUri, mTuneParams);
-                if (mAppPrivateCommandAction != null) {
-                    mSession.sendAppPrivateCommand(
-                            mAppPrivateCommandAction, mAppPrivateCommandData);
-                    mAppPrivateCommandAction = null;
-                    mAppPrivateCommandData = null;
-                }
                 ensurePositionTracking();
             } else {
                 mSessionCallback = null;
