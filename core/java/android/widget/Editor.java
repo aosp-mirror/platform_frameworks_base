@@ -3088,10 +3088,12 @@ public class Editor {
                                 MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
             }
 
-            menu.add(0, TextView.ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
-                    setAlphabeticShortcut('a').
-                    setShowAsAction(
-                            MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+            if (canSelectText() && !hasPasswordTransformationMethod()) {
+                menu.add(0, TextView.ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
+                        setAlphabeticShortcut('a').
+                        setShowAsAction(
+                                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+            }
 
             updateReplaceItem(menu);
         }
