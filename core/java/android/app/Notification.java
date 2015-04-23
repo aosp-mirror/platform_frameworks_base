@@ -5648,13 +5648,6 @@ public class Notification implements Parcelable
 
         /**
          * Value to be used with {@link #setPricingInformation} to indicate that the content
-         * referred by the notification item is available currently as a pre-order, and the price
-         * value provided is the purchase price for the item.
-         */
-        public static final String CONTENT_PRICING_PREORDER = "android.contentPrice.preorder";
-
-        /**
-         * Value to be used with {@link #setPricingInformation} to indicate that the content
          * referred by the notification item is available as part of a subscription based service,
          * and the price value provided is the subscription price for the service.
          */
