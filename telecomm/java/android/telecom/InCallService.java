@@ -362,6 +362,9 @@ public abstract class InCallService extends Service {
      */
     public static abstract class VideoCall {
 
+        /** @hide */
+        public abstract void destroy();
+
         /**
          * Registers a callback to receive commands and state changes for video calls.
          *
@@ -370,9 +373,17 @@ public abstract class InCallService extends Service {
         public abstract void registerCallback(VideoCall.Callback callback);
 
         /**
+         * Registers a callback to receive commands and state changes for video calls.
+         *
+         * @param callback The video call callback.
+         * @param handler A handler which commands and status changes will be delivered to.
+         */
+        public abstract void registerCallback(VideoCall.Callback callback, Handler handler);
+
+        /**
          * Unregisters the callback set via {@link #registerCallback(Callback)}.
          */
-        public abstract void unregisterCallback();
+        public abstract void unregisterCallback(VideoCall.Callback callback);
 
         /**
          * Sets the camera to be used for video recording in a video call.
