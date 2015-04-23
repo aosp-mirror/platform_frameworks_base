@@ -30,15 +30,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>
  * The contract between the TV provider and applications. Contains definitions for the supported
  * URIs and columns.
- * </p>
  * <h3>Overview</h3>
- * <p>
- * TvContract defines a basic database of TV content metadata such as channel and program
+ *
+ * <p>TvContract defines a basic database of TV content metadata such as channel and program
  * information. The information is stored in {@link Channels} and {@link Programs} tables.
- * </p>
+ *
  * <ul>
  *     <li>A row in the {@link Channels} table represents information about a TV channel. The data
  *         format can vary greatly from standard to standard or according to service provider, thus
@@ -333,13 +331,12 @@ public final class TvContract {
     public interface BaseTvColumns extends BaseColumns {
         /**
          * The name of the package that owns a row in each table.
-         * <p>
-         * The TV provider fills it in with the name of the package that provides the initial data
+         *
+         * <p>The TV provider fills it in with the name of the package that provides the initial data
          * of that row. If the package is later uninstalled, the rows it owns are automatically
          * removed from the tables.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_PACKAGE_NAME = "package_name";
     }
@@ -515,175 +512,164 @@ public final class TvContract {
 
         /**
          * The ID of the TV input service that provides this TV channel.
-         * <p>
-         * Use {@link #buildInputId} to build the ID.
-         * </p><p>
-         * This is a required field.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Use {@link #buildInputId} to build the ID.
+         *
+         * <p>This is a required field.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_INPUT_ID = "input_id";
 
         /**
          * The predefined type of this TV channel.
-         * <p>
-         * This is primarily used to indicate which broadcast standard (e.g. ATSC, DVB or ISDB) the
-         * current channel conforms to. The value should match to one of the followings:
+         *
+         * <p>This is primarily used to indicate which broadcast standard (e.g. ATSC, DVB or ISDB)
+         * the current channel conforms to. The value should match to one of the followings:
          * {@link #TYPE_OTHER}, {@link #TYPE_DVB_T}, {@link #TYPE_DVB_T2}, {@link #TYPE_DVB_S},
          * {@link #TYPE_DVB_S2}, {@link #TYPE_DVB_C}, {@link #TYPE_DVB_C2}, {@link #TYPE_DVB_H},
          * {@link #TYPE_DVB_SH}, {@link #TYPE_ATSC_T}, {@link #TYPE_ATSC_C},
          * {@link #TYPE_ATSC_M_H}, {@link #TYPE_ISDB_T}, {@link #TYPE_ISDB_TB},
          * {@link #TYPE_ISDB_S}, {@link #TYPE_ISDB_C}, {@link #TYPE_1SEG}, {@link #TYPE_DTMB},
          * {@link #TYPE_CMMB}, {@link #TYPE_T_DMB}, {@link #TYPE_S_DMB}
-         * </p><p>
-         * This is a required field.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>This is a required field.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_TYPE = "type";
 
         /**
          * The predefined service type of this TV channel.
-         * <p>
-         * This is primarily used to indicate whether the current channel is a regular TV channel or
-         * a radio-like channel. Use the same coding for {@code service_type} in the underlying
+         *
+         * <p>This is primarily used to indicate whether the current channel is a regular TV channel
+         * or a radio-like channel. Use the same coding for {@code service_type} in the underlying
          * broadcast standard if it is defined there (e.g. ATSC A/53, ETSI EN 300 468 and ARIB
          * STD-B10). Otherwise use one of the followings: {@link #SERVICE_TYPE_OTHER},
          * {@link #SERVICE_TYPE_AUDIO_VIDEO}, {@link #SERVICE_TYPE_AUDIO}
-         * </p><p>
-         * This is a required field.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>This is a required field.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_SERVICE_TYPE = "service_type";
 
         /**
          * The original network ID of this TV channel.
-         * <p>
-         * This is used to identify the originating delivery system, if applicable. Use the same
+         *
+         * <p>This is used to identify the originating delivery system, if applicable. Use the same
          * coding for {@code original_network_id} in the underlying broadcast standard if it is
          * defined there (e.g. ETSI EN 300 468/TR 101 211 and ARIB STD-B10). If channels cannot be
          * globally identified by 2-tuple {{@link #COLUMN_TRANSPORT_STREAM_ID},
          * {@link #COLUMN_SERVICE_ID}}, one must carefully assign a value to this field to form a
          * unique 3-tuple identification {{@link #COLUMN_ORIGINAL_NETWORK_ID},
          * {@link #COLUMN_TRANSPORT_STREAM_ID}, {@link #COLUMN_SERVICE_ID}} for its channels.
-         * </p><p>
-         * This is a required field if the channel cannot be uniquely identified by a 2-tuple
+         *
+         * <p>This is a required field if the channel cannot be uniquely identified by a 2-tuple
          * {{@link #COLUMN_TRANSPORT_STREAM_ID}, {@link #COLUMN_SERVICE_ID}}.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_ORIGINAL_NETWORK_ID = "original_network_id";
 
         /**
          * The transport stream ID of this channel.
-         * <p>
-         * This is used to identify the Transport Stream that contains the current channel from any
-         * other multiplex within a network, if applicable. Use the same coding for
+         *
+         * <p>This is used to identify the Transport Stream that contains the current channel from
+         * any other multiplex within a network, if applicable. Use the same coding for
          * {@code transport_stream_id} defined in ISO/IEC 13818-1 if the channel is transmitted via
          * the MPEG Transport Stream as is the case for many digital broadcast standards.
-         * </p><p>
-         * This is a required field if the current channel is transmitted via the MPEG Transport
+         *
+         * <p>This is a required field if the current channel is transmitted via the MPEG Transport
          * Stream.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_TRANSPORT_STREAM_ID = "transport_stream_id";
 
         /**
          * The service ID of this channel.
-         * <p>
-         * This is used to identify the current service (roughly equivalent to channel) from any
+         *
+         * <p>This is used to identify the current service (roughly equivalent to channel) from any
          * other service within the Transport Stream, if applicable. Use the same coding for
          * {@code service_id} in the underlying broadcast standard if it is defined there (e.g. ETSI
          * EN 300 468 and ARIB STD-B10) or {@code program_number} (which usually has the same value
          * as {@code service_id}) in ISO/IEC 13818-1 if the channel is transmitted via the MPEG
          * Transport Stream.
-         * </p><p>
-         * This is a required field if the current channel is transmitted via the MPEG Transport
+         *
+         * <p>This is a required field if the current channel is transmitted via the MPEG Transport
          * Stream.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_SERVICE_ID = "service_id";
 
         /**
          * The channel number that is displayed to the user.
-         * <p>
-         * The format can vary depending on broadcast standard and product specification.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>The format can vary depending on broadcast standard and product specification.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_DISPLAY_NUMBER = "display_number";
 
         /**
          * The channel name that is displayed to the user.
-         * <p>
-         * A call sign is a good candidate to use for this purpose but any name that helps the user
-         * recognize the current channel will be enough. Can also be empty depending on broadcast
-         * standard.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>A call sign is a good candidate to use for this purpose but any name that helps the
+         * user recognize the current channel will be enough. Can also be empty depending on
+         * broadcast standard.
+         *
+         * <p> Type: TEXT
          */
         public static final String COLUMN_DISPLAY_NAME = "display_name";
 
         /**
          * The network affiliation for this TV channel.
-         * <p>
-         * This is used to identify a channel that is commonly called by its network affiliation
+         *
+         * <p>This is used to identify a channel that is commonly called by its network affiliation
          * instead of the display name. Examples include ABC for the channel KGO-HD, FOX for the
          * channel KTVU-HD and NBC for the channel KNTV-HD. Can be empty if not applicable.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_NETWORK_AFFILIATION = "network_affiliation";
 
         /**
          * The description of this TV channel.
-         * <p>
-         * Can be empty initially.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Can be empty initially.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_DESCRIPTION = "description";
 
         /**
          * The typical video format for programs from this TV channel.
-         * <p>
-         * This is primarily used to filter out channels based on video format by applications. The
-         * value should match one of the followings: {@link #VIDEO_FORMAT_240P},
+         *
+         * <p>This is primarily used to filter out channels based on video format by applications.
+         * The value should match one of the followings: {@link #VIDEO_FORMAT_240P},
          * {@link #VIDEO_FORMAT_360P}, {@link #VIDEO_FORMAT_480I}, {@link #VIDEO_FORMAT_480P},
          * {@link #VIDEO_FORMAT_576I}, {@link #VIDEO_FORMAT_576P}, {@link #VIDEO_FORMAT_720P},
          * {@link #VIDEO_FORMAT_1080I}, {@link #VIDEO_FORMAT_1080P}, {@link #VIDEO_FORMAT_2160P},
          * {@link #VIDEO_FORMAT_4320P}. Note that the actual video resolution of each program from a
          * given channel can vary thus one should use {@link Programs#COLUMN_VIDEO_WIDTH} and
          * {@link Programs#COLUMN_VIDEO_HEIGHT} to get more accurate video resolution.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
+         *
          * @see #getVideoResolution
          */
         public static final String COLUMN_VIDEO_FORMAT = "video_format";
 
         /**
          * The flag indicating whether this TV channel is browsable or not.
-         * <p>
-         * A value of 1 indicates the channel is included in the channel list that applications use
-         * to browse channels, a value of 0 indicates the channel is not included in the list. If
-         * not specified, this value is set to 0 (not browsable) by default.
-         * </p><p>
-         * Type: INTEGER (boolean)
-         * </p>
+         *
+         * <p>A value of 1 indicates the channel is included in the channel list that applications
+         * use to browse channels, a value of 0 indicates the channel is not included in the list.
+         * If not specified, this value is set to 0 (not browsable) by default.
+         *
+         * <p>Type: INTEGER (boolean)
          * @hide
          */
         @SystemApi
@@ -691,31 +677,29 @@ public final class TvContract {
 
         /**
          * The flag indicating whether this TV channel is searchable or not.
-         * <p>
-         * In some regions, it is not allowed to surface search results for a given channel without
-         * broadcaster's consent. This is used to impose such restriction. Channels marked with
-         * "not searchable" cannot be used by other services except for the system service that
+         *
+         * <p>In some regions, it is not allowed to surface search results for a given channel
+         * without broadcaster's consent. This is used to impose such restriction. Channels marked
+         * with "not searchable" cannot be used by other services except for the system service that
          * shows the TV content. A value of 1 indicates the channel is searchable and can be
          * included in search results, a value of 0 indicates the channel and its TV programs are
          * hidden from search. If not specified, this value is set to 1 (searchable) by default.
-         * </p><p>
-         * Type: INTEGER (boolean)
-         * </p>
+         *
+         * <p>Type: INTEGER (boolean)
          */
         public static final String COLUMN_SEARCHABLE = "searchable";
 
         /**
          * The flag indicating whether this TV channel is locked or not.
-         * <p>
-         * This is primarily used for alternative parental control to prevent unauthorized users
+         *
+         * <p>This is primarily used for alternative parental control to prevent unauthorized users
          * from watching the current channel regardless of the content rating. A value of 1
          * indicates the channel is locked and the user is required to enter passcode to unlock it
          * in order to watch the current program from the channel, a value of 0 indicates the
          * channel is not locked thus the user is not prompted to enter passcode If not specified,
          * this value is set to 0 (not locked) by default.
-         * </p><p>
-         * Type: INTEGER (boolean)
-         * </p>
+         *
+         * <p>Type: INTEGER (boolean)
          * @hide
          */
         @SystemApi
@@ -723,69 +707,63 @@ public final class TvContract {
 
         /**
          * Internal data used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: BLOB
-         * </p>
+         *
+         * <p>Type: BLOB
          */
         public static final String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
 
         /**
          * Internal integer flag used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_INTERNAL_PROVIDER_FLAG1 = "internal_provider_flag1";
 
         /**
          * Internal integer flag used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
 
         /**
          * Internal integer flag used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
 
         /**
          * Internal integer flag used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
 
         /**
          * The version number of this row entry used by TV input services.
-         * <p>
-         * This is best used by sync adapters to identify the rows to update. The number can be
+         *
+         * <p>This is best used by sync adapters to identify the rows to update. The number can be
          * defined by individual TV input services. One may assign the same value as
          * {@code version_number} that appears in ETSI EN 300 468 or ATSC A/65, if the data are
          * coming from a TV broadcast.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_VERSION_NUMBER = "version_number";
 
@@ -793,18 +771,18 @@ public final class TvContract {
 
         /**
          * A sub-directory of a single TV channel that represents its primary logo.
-         * <p>
-         * To access this directory, append {@link Channels.Logo#CONTENT_DIRECTORY} to the raw
+         *
+         * <p>To access this directory, append {@link Channels.Logo#CONTENT_DIRECTORY} to the raw
          * channel URI.  The resulting URI represents an image file, and should be interacted
          * using ContentResolver.openAssetFileDescriptor.
-         * </p><p>
-         * Note that this sub-directory also supports opening the logo as an asset file in write
+         *
+         * <p>Note that this sub-directory also supports opening the logo as an asset file in write
          * mode.  Callers can create or replace the primary logo associated with this channel by
          * opening the asset file and writing the full-size photo contents into it. (Make sure there
          * is no padding around the logo image.) When the file is closed, the image will be parsed,
          * sized down if necessary, and stored.
-         * </p><p>
-         * Usage example:
+         *
+         * <p>Usage example:
          * <pre>
          * public void writeChannelLogo(long channelId, byte[] logo) {
          *     Uri channelLogoUri = TvContract.buildChannelLogoUri(channelId);
@@ -820,7 +798,6 @@ public final class TvContract {
          *     }
          * }
          * </pre>
-         * </p>
          */
         public static final class Logo {
 
@@ -835,10 +812,9 @@ public final class TvContract {
 
     /**
      * Column definitions for the TV programs table.
-     * <p>
-     * By default, the query results will be sorted by {@link Programs#COLUMN_START_TIME_UTC_MILLIS}
-     * in ascending order.
-     * </p>
+     *
+     * <p>By default, the query results will be sorted by
+     * {@link Programs#COLUMN_START_TIME_UTC_MILLIS} in ascending order.
      */
     public static final class Programs implements BaseTvColumns {
 
@@ -854,166 +830,153 @@ public final class TvContract {
 
         /**
          * The ID of the TV channel that provides this TV program.
-         * <p>
-         * This is a part of the channel URI and matches to {@link BaseColumns#_ID}.
-         * </p><p>
-         * Type: INTEGER (long)
-         * </p>
+         *
+         * <p>This is a part of the channel URI and matches to {@link BaseColumns#_ID}.
+         *
+         * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_CHANNEL_ID = "channel_id";
 
         /**
          * The title of this TV program.
-         * <p>
-         * If this program is an episodic TV show, it is recommended that the title is the series
+         *
+         * <p>If this program is an episodic TV show, it is recommended that the title is the series
          * title and its related fields ({@link #COLUMN_SEASON_NUMBER},
          * {@link #COLUMN_EPISODE_NUMBER}, and {@link #COLUMN_EPISODE_TITLE}) are filled in.
-         * </p><p>
-         * Type: TEXT
-         * </p>
-         **/
+         *
+         * <p>Type: TEXT
+         */
         public static final String COLUMN_TITLE = "title";
 
         /**
          * The season number of this TV program for episodic TV shows.
-         * <p>
-         * Can be empty.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
-         **/
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         */
         public static final String COLUMN_SEASON_NUMBER = "season_number";
 
         /**
          * The episode number of this TV program for episodic TV shows.
-         * <p>
-         * Can be empty.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
-         **/
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         */
         public static final String COLUMN_EPISODE_NUMBER = "episode_number";
 
         /**
          * The episode title of this TV program for episodic TV shows.
-         * <p>
-         * Can be empty.
-         * </p><p>
-         * Type: TEXT
-         * </p>
-         **/
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
         public static final String COLUMN_EPISODE_TITLE = "episode_title";
 
         /**
          * The start time of this TV program, in milliseconds since the epoch.
-         * <p>
-         * The value should be equal to or larger than {@link #COLUMN_END_TIME_UTC_MILLIS} of the
+         *
+         * <p>The value should be equal to or larger than {@link #COLUMN_END_TIME_UTC_MILLIS} of the
          * previous program in the same channel.
-         * </p><p>
-         * Type: INTEGER (long)
-         * </p>
+         *
+         * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
 
         /**
          * The end time of this TV program, in milliseconds since the epoch.
-         * <p>
-         * The value should be equal to or less than {@link #COLUMN_START_TIME_UTC_MILLIS} of the
+         *
+         * <p>The value should be equal to or less than {@link #COLUMN_START_TIME_UTC_MILLIS} of the
          * next program in the same channel.
-         * </p><p>
-         * Type: INTEGER (long)
-         * </p>
+         *
+         * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
 
         /**
          * The comma-separated genre string of this TV program.
-         * <p>
-         * Use the same language appeared in the underlying broadcast standard, if applicable. (For
-         * example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
+         *
+         * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
+         * (For example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
          * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_BROADCAST_GENRE = "broadcast_genre";
 
         /**
          * The comma-separated canonical genre string of this TV program.
-         * <p>
-         * Canonical genres are defined in {@link Genres}. Use {@link Genres#encode Genres.encode()}
-         * to create a text that can be stored in this column. Use {@link Genres#decode
-         * Genres.decode()} to get the canonical genre strings from the text stored in this column.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Canonical genres are defined in {@link Genres}. Use
+         * {@link Genres#encode Genres.encode()} to create a text that can be stored in this column.
+         * Use {@link Genres#decode Genres.decode()} to get the canonical genre strings from the
+         * text stored in this column.
+         *
+         * <p>Type: TEXT
          * @see Genres
          */
         public static final String COLUMN_CANONICAL_GENRE = "canonical_genre";
 
         /**
          * The short description of this TV program that is displayed to the user by default.
-         * <p>
-         * It is recommended to limit the length of the descriptions to 256 characters.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>It is recommended to limit the length of the descriptions to 256 characters.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_SHORT_DESCRIPTION = "short_description";
 
         /**
          * The detailed, lengthy description of this TV program that is displayed only when the user
          * wants to see more information.
-         * <p>
-         * TV input services should leave this field empty if they have no additional details beyond
-         * {@link #COLUMN_SHORT_DESCRIPTION}.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>TV input services should leave this field empty if they have no additional details
+         * beyond {@link #COLUMN_SHORT_DESCRIPTION}.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_LONG_DESCRIPTION = "long_description";
 
         /**
          * The width of the video for this TV program, in the unit of pixels.
-         * <p>
-         * Together with {@link #COLUMN_VIDEO_HEIGHT} this is used to determine the video resolution
-         * of the current TV program. Can be empty if it is not known initially or the program does
-         * not convey any video such as the programs from type {@link Channels#SERVICE_TYPE_AUDIO}
-         * channels.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Together with {@link #COLUMN_VIDEO_HEIGHT} this is used to determine the video
+         * resolution of the current TV program. Can be empty if it is not known initially or the
+         * program does not convey any video such as the programs from type
+         * {@link Channels#SERVICE_TYPE_AUDIO} channels.
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_VIDEO_WIDTH = "video_width";
 
         /**
          * The height of the video for this TV program, in the unit of pixels.
-         * <p>
-         * Together with {@link #COLUMN_VIDEO_WIDTH} this is used to determine the video resolution
-         * of the current TV program. Can be empty if it is not known initially or the program does
-         * not convey any video such as the programs from type {@link Channels#SERVICE_TYPE_AUDIO}
-         * channels.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Together with {@link #COLUMN_VIDEO_WIDTH} this is used to determine the video
+         * resolution of the current TV program. Can be empty if it is not known initially or the
+         * program does not convey any video such as the programs from type
+         * {@link Channels#SERVICE_TYPE_AUDIO} channels.
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_VIDEO_HEIGHT = "video_height";
 
         /**
          * The comma-separated audio languages of this TV program.
-         * <p>
-         * This is used to describe available audio languages included in the program. Use either
+         *
+         * <p>This is used to describe available audio languages included in the program. Use either
          * ISO 639-1 or 639-2/T codes.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_AUDIO_LANGUAGE = "audio_language";
 
         /**
          * The comma-separated content ratings of this TV program.
-         * <p>
-         * This is used to describe the content rating(s) of this program. Each comma-separated
+         *
+         * <p>This is used to describe the content rating(s) of this program. Each comma-separated
          * content rating sub-string should be generated by calling
          * {@link TvContentRating#flattenToString}. Note that in most cases the program content is
          * rated by a single rating system, thus resulting in a corresponding single sub-string that
@@ -1022,97 +985,88 @@ public final class TvContract {
          * specified as "blocked rating" in the user's parental control settings, the TV input
          * service should block the current content and wait for the signal that it is okay to
          * unblock.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_CONTENT_RATING = "content_rating";
 
         /**
          * The URI for the poster art of this TV program.
-         * <p>
-         * Can be empty.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_POSTER_ART_URI = "poster_art_uri";
 
         /**
          * The URI for the thumbnail of this TV program.
-         * <p>
-         * Can be empty.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_THUMBNAIL_URI = "thumbnail_uri";
 
         /**
          * Internal data used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: BLOB
-         * </p>
+         *
+         * <p>Type: BLOB
          */
         public static final String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
 
         /**
          * Internal integer flag used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_INTERNAL_PROVIDER_FLAG1 = "internal_provider_flag1";
 
         /**
          * Internal integer flag used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
 
         /**
          * Internal integer flag used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
 
         /**
          * Internal integer flag used by individual TV input services.
-         * <p>
-         * This is internal to the provider that inserted it, and should not be decoded by other
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
          * apps.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
 
         /**
          * The version number of this row entry used by TV input services.
-         * <p>
-         * This is best used by sync adapters to identify the rows to update. The number can be
+         *
+         * <p>This is best used by sync adapters to identify the rows to update. The number can be
          * defined by individual TV input services. One may assign the same value as
          * {@code version_number} in ETSI EN 300 468 or ATSC A/65, if the data are coming from a TV
          * broadcast.
-         * </p><p>
-         * Type: INTEGER
-         * </p>
+         *
+         * <p>Type: INTEGER
          */
         public static final String COLUMN_VERSION_NUMBER = "version_number";
 
@@ -1239,10 +1193,9 @@ public final class TvContract {
     /**
      * Column definitions for the TV programs that the user watched. Applications do not have access
      * to this table.
-     * <p>
-     * By default, the query results will be sorted by
+     *
+     * <p>By default, the query results will be sorted by
      * {@link WatchedPrograms#COLUMN_WATCH_START_TIME_UTC_MILLIS} in descending order.
-     * </p>
      * @hide
      */
     @SystemApi
@@ -1261,9 +1214,8 @@ public final class TvContract {
         /**
          * The UTC time that the user started watching this TV program, in milliseconds since the
          * epoch.
-         * <p>
-         * Type: INTEGER (long)
-         * </p>
+         *
+         * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_WATCH_START_TIME_UTC_MILLIS =
                 "watch_start_time_utc_millis";
@@ -1271,49 +1223,43 @@ public final class TvContract {
         /**
          * The UTC time that the user stopped watching this TV program, in milliseconds since the
          * epoch.
-         * <p>
-         * Type: INTEGER (long)
-         * </p>
+         *
+         * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_WATCH_END_TIME_UTC_MILLIS = "watch_end_time_utc_millis";
 
         /**
          * The ID of the TV channel that provides this TV program.
-         * <p>
-         * Type: INTEGER (long)
-         * </p>
+         *
+         * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_CHANNEL_ID = "channel_id";
 
         /**
          * The title of this TV program.
-         * <p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_TITLE = "title";
 
         /**
          * The start time of this TV program, in milliseconds since the epoch.
-         * <p>
-         * Type: INTEGER (long)
-         * </p>
+         *
+         * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
 
         /**
          * The end time of this TV program, in milliseconds since the epoch.
-         * <p>
-         * Type: INTEGER (long)
-         * </p>
+         *
+         * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
 
         /**
          * The description of this TV program.
-         * <p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_DESCRIPTION = "description";
 
@@ -1321,25 +1267,23 @@ public final class TvContract {
          * Extra parameters given to {@link TvInputService.Session#tune(Uri, android.os.Bundle)
          * TvInputService.Session.tune(Uri, android.os.Bundle)} when tuning to the channel that
          * provides this TV program. (Used internally.)
-         * <p>
-         * This column contains an encoded string that represents comma-separated key-value pairs of
+         *
+         * <p>This column contains an encoded string that represents comma-separated key-value pairs of
          * the tune parameters. (Ex. "[key1]=[value1], [key2]=[value2]"). '%' is used as an escape
          * character for '%', '=', and ','.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_INTERNAL_TUNE_PARAMS = "tune_params";
 
         /**
          * The session token of this TV program. (Used internally.)
-         * <p>
-         * This contains a String representation of {@link IBinder} for
+         *
+         * <p>This contains a String representation of {@link IBinder} for
          * {@link TvInputService.Session} that provides the current TV program. It is used
          * internally to distinguish watched programs entries from different TV input sessions.
-         * </p><p>
-         * Type: TEXT
-         * </p>
+         *
+         * <p>Type: TEXT
          */
         public static final String COLUMN_INTERNAL_SESSION_TOKEN = "session_token";
 

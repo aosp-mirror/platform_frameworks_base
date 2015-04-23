@@ -295,18 +295,17 @@ public final class TvInputInfo implements Parcelable {
 
     /**
      * Returns the parent input ID.
-     * <p>
-     * A TV input may have a parent input if the TV input is actually a logical representation of
+     *
+     * <p>A TV input may have a parent input if the TV input is actually a logical representation of
      * a device behind the hardware port represented by the parent input.
      * For example, a HDMI CEC logical device, connected to a HDMI port, appears as another TV
      * input. In this case, the parent input of this logical device is the HDMI port.
-     * </p><p>
-     * Applications may group inputs by parent input ID to provide an easier access to inputs
+     *
+     * <p>Applications may group inputs by parent input ID to provide an easier access to inputs
      * sharing the same physical port. In the example of HDMI CEC, logical HDMI CEC devices behind
      * the same HDMI port have the same parent ID, which is the ID representing the port. Thus
      * applications can group the hardware HDMI port and the logical HDMI CEC devices behind it
      * together using this method.
-     * </p>
      *
      * @return the ID of the parent input, if exists. Returns {@code null} if the parent input is
      *         not specified.

@@ -350,12 +350,11 @@ public final class TvTrackInfo implements Parcelable {
         /**
          * Sets the pixel aspect ratio (the ratio of a pixel's width to its height) of the video.
          * Valid only for {@link #TYPE_VIDEO} tracks.
-         * <p>
-         * This is needed for applications to be able to scale the video properly for some video
+         *
+         * <p>This is needed for applications to be able to scale the video properly for some video
          * formats such as 720x576 4:3 and 720x576 16:9 where pixels are not square. By default,
          * applications assume the value of 1.0 (square pixels), so it is not necessary to set the
          * pixel aspect ratio for most video formats.
-         * </p>
          *
          * @param videoPixelAspectRatio The pixel aspect ratio of the video.
          */

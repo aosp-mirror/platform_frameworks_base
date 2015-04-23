@@ -149,15 +149,17 @@ public final class TvInputManager {
 
     /**
      * Broadcast intent action used to query available content rating systems.
-     * <p>
-     * The TV input manager service locates available content rating systems by querying broadcast
-     * receivers that are registered for this action. An application can offer additional content
-     * rating systems to the user by declaring a suitable broadcast receiver in its manifest.
-     * </p><p>
-     * Here is an example broadcast receiver declaration that an application might include in its
+     *
+     * <p>The TV input manager service locates available content rating systems by querying
+     * broadcast receivers that are registered for this action. An application can offer additional
+     * content rating systems to the user by declaring a suitable broadcast receiver in its
+     * manifest.
+     *
+     * <p>Here is an example broadcast receiver declaration that an application might include in its
      * AndroidManifest.xml to advertise custom content rating systems. The meta-data specifies a
      * resource that contains a description of each content rating system that is provided by the
      * application.
+     *
      * <p><pre class="prettyprint">
      * {@literal
      * <receiver android:name=".TvInputReceiver">
@@ -168,13 +170,13 @@ public final class TvInputManager {
      *     <meta-data
      *             android:name="android.media.tv.metadata.CONTENT_RATING_SYSTEMS"
      *             android:resource="@xml/tv_content_rating_systems" />
-     * </receiver>}</pre></p>
-     * In the above example, the <code>@xml/tv_content_rating_systems</code> resource refers to an
+     * </receiver>}</pre>
+     *
+     * <p>In the above example, the <code>@xml/tv_content_rating_systems</code> resource refers to an
      * XML resource whose root element is <code>&lt;rating-system-definitions&gt;</code> that
      * contains zero or more <code>&lt;rating-system-definition&gt;</code> elements. Each <code>
      * &lt;rating-system-definition&gt;</code> element specifies the ratings, sub-ratings and rating
      * orders of a particular content rating system.
-     * </p>
      *
      * @see TvContentRating
      */
@@ -183,10 +185,9 @@ public final class TvInputManager {
 
     /**
      * Content rating systems metadata associated with {@link #ACTION_QUERY_CONTENT_RATING_SYSTEMS}.
-     * <p>
-     * Specifies the resource ID of an XML resource that describes the content rating systems that
-     * are provided by the application.
-     * </p>
+     *
+     * <p>Specifies the resource ID of an XML resource that describes the content rating systems
+     * that are provided by the application.
      */
     public static final String META_DATA_CONTENT_RATING_SYSTEMS =
             "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
@@ -371,12 +372,11 @@ public final class TvInputManager {
 
         /**
          * This is called when the start playback position is changed.
-         * <p>
-         * The start playback position of the time shifted program should be adjusted when the TV
+         *
+         * <p>The start playback position of the time shifted program should be adjusted when the TV
          * input cannot retain the whole recorded program due to some reason (e.g. limitation on
          * storage space). This is necessary to prevent the application from allowing the user to
          * seek to a time position that is not reachable.
-         * </p>
          *
          * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param timeMs The start playback position of the time shifted program, in milliseconds
@@ -1130,10 +1130,9 @@ public final class TvInputManager {
 
     /**
      * Creates a {@link Session} for a given TV input.
-     * <p>
-     * The number of sessions that can be created at the same time is limited by the capability of
-     * the given TV input.
-     * </p>
+     *
+     * <p>The number of sessions that can be created at the same time is limited by the capability
+     * of the given TV input.
      *
      * @param inputId The id of the TV input.
      * @param callback A callback used to receive the created session.
@@ -1694,8 +1693,8 @@ public final class TvInputManager {
 
         /**
          * Seeks to a specified time position.
-         * <p>
-         * Normally, the position is given within range between the start and the current time,
+         *
+         * <p>Normally, the position is given within range between the start and the current time,
          * inclusively.
          *
          * @param timeMs The time position to seek to, in milliseconds since the epoch.
@@ -2113,7 +2112,7 @@ public final class TvInputManager {
     /**
      * The Hardware provides the per-hardware functionality of TV hardware.
      *
-     * TV hardware is physical hardware attached to the Android device; for example, HDMI ports,
+     * <p>TV hardware is physical hardware attached to the Android device; for example, HDMI ports,
      * Component/Composite ports, etc. Specifically, logical devices such as HDMI CEC logical
      * devices don't fall into this category.
      *
