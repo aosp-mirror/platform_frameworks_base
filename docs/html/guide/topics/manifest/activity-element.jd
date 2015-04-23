@@ -13,10 +13,11 @@ parent.link=manifest-intro.html
           android:<a href="#clear">clearTaskOnLaunch</a>=["true" | "false"]
           android:<a href="#config">configChanges</a>=["mcc", "mnc", "locale",
                                  "touchscreen", "keyboard", "keyboardHidden",
-                                 "navigation", "screenLayout", "fontScale", "uiMode",
-                                 "orientation", "screenSize", "smallestScreenSize"]
-          android:<a href="#dlmode">documentLaunchMode</a>=["intoExisting", "always",
-                                  "none", "never"]
+                                 "navigation", "screenLayout", "fontScale",
+                                 "uiMode", "orientation", "screenSize",
+                                 "smallestScreenSize"]
+          android:<a href="#dlmode">documentLaunchMode</a>=["intoExisting" | "always" |
+                                  "none" | "never"]
           android:<a href="#enabled">enabled</a>=["true" | "false"]
           android:<a href="#exclude">excludeFromRecents</a>=["true" | "false"]
           android:<a href="#exported">exported</a>=["true" | "false"]
