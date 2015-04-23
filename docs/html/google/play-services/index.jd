@@ -62,6 +62,105 @@ about your users' Android version.</p>
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
     class="toggle-content-img"
+      alt=""/>Google Play services, Version 7.3</a> <em>(April 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 7.3</dt>
+<dd>
+<p>For a summary of the feature highlights in Google Play services 7.3, see the
+announcement
+<a href="http://android-developers.blogspot.com/2015/04/theres-lot-to-explore-with-google-play.html"
+class="external-link">blog post</a>.</p>
+<ul>
+  <li><strong>Maps</strong> - This release makes the Google Maps Android API v2 available on
+<a href="https://developers.google.com/maps/documentation/android/wear" class="external-link">
+Android Wear</a>, so you can now create map-based apps that run directly on wearable devices. In
+addition, the Maps API now offers a new
+<a href="{@docRoot}reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaLongClickListener.html">
+{@code OnStreetViewPanoramaLongClickListener}</a> interface, similar to the existing
+<a href="{@docRoot}reference/com/google/android/gms/maps/GoogleMap.OnMapLongClickListener.html">
+{@code OnMapLongClickListener}</a> interface. These listeners are particularly helpful
+for wearable devices, so you can let users exit from the app by long-clicking on a map or panorama.
+On a wearable device, the swipe gesture is used to pan the map instead of exiting the app.
+    <ul>
+      <li><a href="https://developers.google.com/maps/documentation/android/wear"
+        class="external-link">Google Maps on Android Wear developer guide</a>
+      </li>
+      <li><a href="https://github.com/googlemaps/android-samples"
+        class="external-link">Google Maps on Android Wear sample</a>
+      </li>
+      <li><a href="https://developers.google.com/maps/documentation/android/releases"
+        class="external-link">Release notes</a>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <strong>Wear</strong> - In addition to Maps support, this release provides you with the ability
+to advertise and discover the capabilities of devices that are connected in a Wear network, through
+the new <a href="{@docRoot}reference/com/google/android/gms/wearable/CapabilityApi.html">
+{@code CapabilityApi}</a> class. The new
+<a href="{@docRoot}reference/com/google/android/gms/wearable/ChannelApi.html">{@code ChannelApi}</a>
+class lets you send and receive data bi-directionally from your wearable app on a device to another
+wearable node. Use the Channel API to send large files for offline access or to stream real-time
+binary data.
+    <ul>
+      <li><a href="{@docRoot}training/wearables/data-layer/messages.html">
+Sending and Receiving Messages</a></li>
+    </ul>
+  </li>
+  <li>
+    <strong>Fit</strong> - This release provides a new
+<a href="{@docRoot}reference/com/google/android/gms/fitness/HistoryApi.html#readDailyTotal(com.google.android.gms.common.api.GoogleApiClient,%20com.google.android.gms.fitness.data.DataType)">
+{@code HistoryApi.readDailyTotal()}</a> method for you to get aggregated daily data for a given
+data type.
+This release also introduces data types for recording granular nutrition information including
+protein, fat, cholesterol, and more.
+    <ul>
+      <li><a href="https://developers.google.com/fit/android/history#read_daily_total_data"
+        class="external-link">Read daily total API developer guide</a></li>
+      <li><a href="https://developers.google.com/fit/android/data-types#data_types_for_instantaneous_readings"
+        class="external-link">Nutrition data type developer guide</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/fitness/data/Field.html">
+        Nutrition data types API reference</a></li>
+      <li><a href="https://developers.google.com/fit/android/releases#april_2015"
+        class="external-link">Release notes</a></li>
+    </ul>
+  </li>
+  <li>
+    <strong>Location</strong> - This release adds a maximum wait time for location updates. By
+calling the new
+<a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setMaxWaitTime(long)">
+{@code setMaxWaitTime()}</a> method and passing in a value at least double the value requested with
+the
+<a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">
+{@code setInterval()}</a> method, the system can batch location updates together, reducing battery
+usage and, on some devices, improving location accuracy. In addition, you can use the new
+<a href="{@docRoot}reference/com/google/android/gms/location/LocationCallback.html">
+{@code LocationCallback}</a> class to be notified when the device location has changed or can no
+longer be determined.
+  </li>
+  <li>
+    <strong>Places</strong> - This release adds a
+<a href="{@docRoot}reference/com/google/android/gms/location/places/PlaceBuffer.html#getAttributions()">
+{@code PlaceBuffer.getAttributions()}</a> method for displaying third-party attributions.</a>
+    <ul>
+      <li><a href="https://developers.google.com/places/android/attributions"
+        class="external-link">Displaying attributions developer guide</a></li>
+      <li><a href="https://developers.google.com/places/android/releases">Release notes</a></li>
+    </ul>
+  </li>
+</ul>
+</dd>
+</dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+    class="toggle-content-img"
       alt=""/>Google Play services, Version 7.0</a> <em>(March 2015)</em>
   </p>
 
@@ -544,7 +643,7 @@ announcement <a href="http://android-developers.blogspot.com/2014/03/google-play
 <li><strong>Analytics</strong> - Google Analytics and Tag Manager are now part of Google Play services.
    <ul>
       <li><a href="http://developers.google.com/analytics/devguides/collection/android/v4/" class="external-link">Getting Started with the Analytics API in Android</a></li>
-      <li><a href="/reference/com/google/android/gms/analytics/package-summary.html">Analytics API reference</a></li>
+      <li><a href="{@docRoot}reference/com/google/android/gms/analytics/package-summary.html">Analytics API reference</a></li>
       <li><a href="http://developers.google.com/tag-manager/android/" class="external-link">Getting Started with the Tag Manager API in Android</a></li>
       <li><a href="{@docRoot}reference/com/google/android/gms/tagmanager/package-summary.html">Tag Manager API reference</a></li>
    </ul>
