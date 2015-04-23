@@ -14,7 +14,7 @@ startpage=true
 
         <ul>
           <li>
-            <a href="{@docRoot}/tools/testing-support-library/index.html">Testing Support Library</a>
+            <a href="{@docRoot}tools/testing-support-library/index.html">Testing Support Library</a>
           </li>
         </ul>
 </div>
@@ -59,10 +59,10 @@ such as UI Automator, allow you to create tests for such scenarios.</li>
 </ul>
 
 <p>The lessons in this class teach you how to use the tools and APIs in the
-<a href="{@docRoot}/tools/testing-support-library/index.html">Android Testing Support Library</a>
+<a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>
 to build these types of automated tests. Before you begin building tests using these
 APIs, you must install the Android Testing Support Library, as described in
-<a href="{@docRoot}/tools/testing-support-library/index.html#setup">Downloading the Android
+<a href="{@docRoot}tools/testing-support-library/index.html#setup">Downloading the Android
 Testing Support Library</a>.</p>
 
 <h2>Lessons</h2>

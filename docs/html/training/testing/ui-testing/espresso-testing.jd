@@ -60,8 +60,8 @@ trainingnavtop=true
     </div>
 
     <p>
-      UI tests that involve user interactions
-      within a single app help to ensure that users do not
+      Testing user interactions
+      within a single app helps to ensure that users do not
       encounter unexpected results or have a poor experience when interacting with your app.
       You should get into the habit of creating user interface (UI) tests if you need to verify
       that the UI of your app is functioning correctly.
