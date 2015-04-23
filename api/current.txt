@@ -14925,6 +14925,7 @@ package android.media {
     method public int getAudioSource();
     method public int getChannelConfiguration();
     method public int getChannelCount();
+    method public android.media.AudioFormat getFormat();
     method public static int getMinBufferSize(int, int, int);
     method public int getNativeFrameCount() throws java.lang.IllegalStateException;
     method public int getNotificationMarkerPosition();
@@ -14988,6 +14989,7 @@ package android.media {
     method public int getAudioSessionId();
     method public int getChannelConfiguration();
     method public int getChannelCount();
+    method public android.media.AudioFormat getFormat();
     method public static float getMaxVolume();
     method public static int getMinBufferSize(int, int, int);
     method public static float getMinVolume();
