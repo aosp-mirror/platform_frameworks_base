@@ -824,12 +824,16 @@ public class WindowAnimator {
         if (displayId < 0) {
             return 0;
         }
-        return mService.getDisplayContentLocked(displayId).pendingLayoutChanges;
+        DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+        return (displayContent != null) ? displayContent.pendingLayoutChanges : 0;
     }
 
     void setPendingLayoutChanges(final int displayId, final int changes) {
         if (displayId >= 0) {
-            mService.getDisplayContentLocked(displayId).pendingLayoutChanges |= changes;
+            DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+            if (displayContent != null) {
+                displayContent.pendingLayoutChanges |= changes;
+            }
         }
     }
 
