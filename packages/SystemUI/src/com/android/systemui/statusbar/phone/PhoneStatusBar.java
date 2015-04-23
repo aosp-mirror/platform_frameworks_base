@@ -305,7 +305,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
     // for disabling the status bar
-    int mDisabled = 0;
+    int mDisabled1 = 0;
+    int mDisabled2 = 0;
 
     // tracking calls to View.setSystemUiVisibility()
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
@@ -427,7 +428,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
-    private int mDisabledUnmodified;
+    private int mDisabledUnmodified1;
+    private int mDisabledUnmodified2;
 
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<String> mCurrentlyVisibleNotifications = new ArraySet<String>();
@@ -637,7 +639,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
-                mNavigationBarView.setDisabledFlags(mDisabled);
+                mNavigationBarView.setDisabledFlags(mDisabled1);
                 mNavigationBarView.setBar(this);
                 mNavigationBarView.setOnVerticalChangedListener(
                         new NavigationBarView.OnVerticalChangedListener() {
@@ -1691,84 +1693,91 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
      */
-    public void disable(int state, boolean animate) {
-        mDisabledUnmodified = state;
-        state = adjustDisableFlags(state);
-        final int old = mDisabled;
-        final int diff = state ^ old;
-        mDisabled = state;
+    public void disable(int state1, int state2, boolean animate) {
+        mDisabledUnmodified1 = state1;
+        mDisabledUnmodified2 = state2;
+        state1 = adjustDisableFlags(state1);
+        final int old1 = mDisabled1;
+        final int diff1 = state1 ^ old1;
+        mDisabled1 = state1;
+
+        final int old2 = mDisabled2;
+        final int diff2 = state2 ^ old2;
+        mDisabled2 = state2;
 
         if (DEBUG) {
-            Log.d(TAG, String.format("disable: 0x%08x -> 0x%08x (diff: 0x%08x)",
-                old, state, diff));
+            Log.d(TAG, String.format("disable1: 0x%08x -> 0x%08x (diff1: 0x%08x)",
+                old1, state1, diff1));
+            Log.d(TAG, String.format("disable2: 0x%08x -> 0x%08x (diff2: 0x%08x)",
+                old2, state2, diff2));
         }
 
         StringBuilder flagdbg = new StringBuilder();
         flagdbg.append("disable: < ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_EXPAND) != 0) ? "EXPAND" : "expand");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_EXPAND) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "ICONS" : "icons");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "ALERTS" : "alerts");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_BACK) != 0) ? "BACK" : "back");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_BACK) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_HOME) != 0) ? "HOME" : "home");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_HOME) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_RECENT) != 0) ? "RECENT" : "recent");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_RECENT) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_CLOCK) != 0) ? "CLOCK" : "clock");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
-        flagdbg.append(((state & StatusBarManager.DISABLE_SEARCH) != 0) ? "SEARCH" : "search");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_SEARCH) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_EXPAND) != 0) ? "EXPAND" : "expand");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_EXPAND) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "ICONS" : "icons");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "ALERTS" : "alerts");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_BACK) != 0) ? "BACK" : "back");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_BACK) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_HOME) != 0) ? "HOME" : "home");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_HOME) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_RECENT) != 0) ? "RECENT" : "recent");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_RECENT) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_CLOCK) != 0) ? "CLOCK" : "clock");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
+        flagdbg.append(((state1 & StatusBarManager.DISABLE_SEARCH) != 0) ? "SEARCH" : "search");
+        flagdbg.append(((diff1  & StatusBarManager.DISABLE_SEARCH) != 0) ? "* " : " ");
         flagdbg.append(">");
         Log.d(TAG, flagdbg.toString());
 
-        if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-            if ((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
+        if ((diff1 & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
+            if ((state1 & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
                 mIconController.hideSystemIconArea(animate);
             } else {
                 mIconController.showSystemIconArea(animate);
             }
         }
 
-        if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
-            boolean visible = (state & StatusBarManager.DISABLE_CLOCK) == 0;
+        if ((diff1 & StatusBarManager.DISABLE_CLOCK) != 0) {
+            boolean visible = (state1 & StatusBarManager.DISABLE_CLOCK) == 0;
             mIconController.setClockVisibility(visible);
         }
-        if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
-            if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
+        if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
+            if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {
                 animateCollapsePanels();
             }
         }
 
-        if ((diff & (StatusBarManager.DISABLE_HOME
+        if ((diff1 & (StatusBarManager.DISABLE_HOME
                         | StatusBarManager.DISABLE_RECENT
                         | StatusBarManager.DISABLE_BACK
                         | StatusBarManager.DISABLE_SEARCH)) != 0) {
             // the nav bar will take care of these
-            if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state);
+            if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state1);
 
-            if ((state & StatusBarManager.DISABLE_RECENT) != 0) {
+            if ((state1 & StatusBarManager.DISABLE_RECENT) != 0) {
                 // close recents if it's visible
                 mHandler.removeMessages(MSG_HIDE_RECENT_APPS);
                 mHandler.sendEmptyMessage(MSG_HIDE_RECENT_APPS);
             }
         }
 
-        if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-            if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+        if ((diff1 & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+            if ((state1 & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 mIconController.hideNotificationIconArea(animate);
             } else {
                 mIconController.showNotificationIconArea(animate);
             }
         }
 
-        if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) {
+        if ((diff1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) {
             mDisableNotificationAlerts =
-                    (state & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
+                    (state1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
             mHeadsUpObserver.onChange(true);
         }
     }
@@ -1941,7 +1950,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     boolean panelsEnabled() {
-        return (mDisabled & StatusBarManager.DISABLE_EXPAND) == 0;
+        return (mDisabled1 & StatusBarManager.DISABLE_EXPAND) == 0;
     }
 
     void makeExpandedVisible(boolean force) {
@@ -1961,7 +1970,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         visibilityChanged(true);
         mWaitingForKeyguardExit = false;
-        disable(mDisabledUnmodified, !force /* animate */);
+        disable(mDisabledUnmodified1, mDisabledUnmodified2, !force /* animate */);
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
@@ -2094,7 +2103,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         showBouncer();
-        disable(mDisabledUnmodified, true /* animate */);
+        disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
         // the bouncer appear animation.
@@ -2107,20 +2116,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (DEBUG_GESTURES) {
             if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_STATUSBAR_TOUCH,
-                        event.getActionMasked(), (int) event.getX(), (int) event.getY(), mDisabled);
+                        event.getActionMasked(), (int) event.getX(), (int) event.getY(),
+                        mDisabled1, mDisabled2);
             }
 
         }
 
         if (SPEW) {
-            Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
-                + mDisabled + " mTracking=" + mTracking);
+            Log.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled1="
+                + mDisabled1 + " mDisabled2=" + mDisabled2 + " mTracking=" + mTracking);
         } else if (CHATTY) {
             if (event.getAction() != MotionEvent.ACTION_MOVE) {
                 Log.d(TAG, String.format(
-                            "panel: %s at (%f, %f) mDisabled=0x%08x",
+                            "panel: %s at (%f, %f) mDisabled1=0x%08x mDisabled2=0x%08x",
                             MotionEvent.actionToString(event.getAction()),
-                            event.getRawX(), event.getRawY(), mDisabled));
+                            event.getRawX(), event.getRawY(), mDisabled1, mDisabled2));
             }
         }
 
@@ -2921,7 +2931,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public boolean shouldDisableNavbarGestures() {
         return !isDeviceProvisioned()
                 || mExpandedVisible
-                || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
+                || (mDisabled1 & StatusBarManager.DISABLE_SEARCH) != 0;
     }
 
     public void postStartSettingsActivity(final Intent intent, int delay) {
@@ -3235,7 +3245,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 startTime + fadeoutDuration
                         - StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION,
                 StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION);
-        disable(mDisabledUnmodified, true /* animate */);
+        disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
     }
 
     public boolean isKeyguardFadingAway() {
@@ -3547,7 +3557,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void setBouncerShowing(boolean bouncerShowing) {
         super.setBouncerShowing(bouncerShowing);
-        disable(mDisabledUnmodified, true /* animate */);
+        disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
     }
 
     public void onScreenTurnedOff() {
@@ -3591,7 +3601,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if ((time - mLastLockToAppLongPress) < LOCK_TO_APP_GESTURE_TOLERENCE) {
                     activityManager.stopLockTaskModeOnCurrent();
                     // When exiting refresh disabled flags.
-                    mNavigationBarView.setDisabledFlags(mDisabled, true);
+                    mNavigationBarView.setDisabledFlags(mDisabled1, true);
                 } else if ((v.getId() == R.id.back)
                         && !mNavigationBarView.getRecentsButton().isPressed()) {
                     // If we aren't pressing recents right now then they presses
@@ -3608,7 +3618,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     // should stop lock task.
                     activityManager.stopLockTaskModeOnCurrent();
                     // When exiting refresh disabled flags.
-                    mNavigationBarView.setDisabledFlags(mDisabled, true);
+                    mNavigationBarView.setDisabledFlags(mDisabled1, true);
                 }
             }
             if (sendBackLongPress) {

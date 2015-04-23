@@ -59,7 +59,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     // for disabling the status bar
     private final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
     private IBinder mSysUiVisToken = new Binder();
-    private int mDisabled = 0;
+    private int mDisabled1 = 0;
+    private int mDisabled2 = 0;
 
     private Object mLock = new Object();
     // encompasses lights-out mode and other flags defined on View
@@ -74,12 +75,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private class DisableRecord implements IBinder.DeathRecipient {
         int userId;
         String pkg;
-        int what;
+        int what1;
+        int what2;
         IBinder token;
 
         public void binderDied() {
             Slog.i(TAG, "binder died for pkg=" + pkg);
             disableForUser(0, token, pkg, userId);
+            disable2ForUser(0, token, pkg, userId);
             token.unlinkToDeath(this, 0);
         }
     }
@@ -202,29 +205,57 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         enforceStatusBar();
 
         synchronized (mLock) {
-            disableLocked(userId, what, token, pkg);
+            disableLocked(userId, what, token, pkg, 1);
         }
     }
 
-    private void disableLocked(int userId, int what, IBinder token, String pkg) {
+    /**
+     * Disable additional status bar features. Pass the bitwise-or of the DISABLE2_* flags.
+     * To re-enable everything, pass {@link #DISABLE_NONE}.
+     *
+     * Warning: Only pass DISABLE2_* flags into this function, do not use DISABLE_* flags.
+     */
+    @Override
+    public void disable2(int what, IBinder token, String pkg) {
+        disableForUser(what, token, pkg, mCurrentUserId);
+    }
+
+    /**
+     * Disable additional status bar features for a given user. Pass the bitwise-or of the
+     * DISABLE2_* flags. To re-enable everything, pass {@link #DISABLE_NONE}.
+     *
+     * Warning: Only pass DISABLE2_* flags into this function, do not use DISABLE_* flags.
+     */
+    @Override
+    public void disable2ForUser(int what, IBinder token, String pkg, int userId) {
+        enforceStatusBar();
+
+        synchronized (mLock) {
+            disableLocked(userId, what, token, pkg, 2);
+        }
+    }
+
+    private void disableLocked(int userId, int what, IBinder token, String pkg, int whichFlag) {
         // It's important that the the callback and the call to mBar get done
         // in the same order when multiple threads are calling this function
         // so they are paired correctly.  The messages on the handler will be
         // handled in the order they were enqueued, but will be outside the lock.
-        manageDisableListLocked(userId, what, token, pkg);
+        manageDisableListLocked(userId, what, token, pkg, whichFlag);
 
         // Ensure state for the current user is applied, even if passed a non-current user.
-        final int net = gatherDisableActionsLocked(mCurrentUserId);
-        if (net != mDisabled) {
-            mDisabled = net;
+        final int net1 = gatherDisableActionsLocked(mCurrentUserId, 1);
+        final int net2 = gatherDisableActionsLocked(mCurrentUserId, 2);
+        if (net1 != mDisabled1 || net2 != mDisabled2) {
+            mDisabled1 = net1;
+            mDisabled2 = net2;
             mHandler.post(new Runnable() {
                     public void run() {
-                        mNotificationDelegate.onSetDisabled(net);
+                        mNotificationDelegate.onSetDisabled(net1);
                     }
                 });
             if (mBar != null) {
                 try {
-                    mBar.disable(net);
+                    mBar.disable(net1, net2);
                 } catch (RemoteException ex) {
                 }
             }
@@ -375,7 +406,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                     mCurrentUserId,
                     vis & StatusBarManager.DISABLE_MASK,
                     mSysUiVisToken,
-                    cause);
+                    cause, 1);
         }
     }
 
@@ -513,12 +544,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             iconList.copyFrom(mIcons);
         }
         synchronized (mLock) {
-            switches[0] = gatherDisableActionsLocked(mCurrentUserId);
+            switches[0] = gatherDisableActionsLocked(mCurrentUserId, 1);
             switches[1] = mSystemUiVisibility;
             switches[2] = mMenuVisible ? 1 : 0;
             switches[3] = mImeWindowVis;
             switches[4] = mImeBackDisposition;
             switches[5] = mShowImeSwitcher ? 1 : 0;
+            switches[6] = gatherDisableActionsLocked(mCurrentUserId, 2);
             binders.add(mImeToken);
         }
     }
@@ -660,7 +692,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     // ================================================================================
 
     // lock on mDisableRecords
-    void manageDisableListLocked(int userId, int what, IBinder token, String pkg) {
+    void manageDisableListLocked(int userId, int what, IBinder token, String pkg, int which) {
         if (SPEW) {
             Slog.d(TAG, "manageDisableList userId=" + userId
                     + " what=0x" + Integer.toHexString(what) + " pkg=" + pkg);
@@ -693,21 +725,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 }
                 mDisableRecords.add(tok);
             }
-            tok.what = what;
+            if (which == 1) {
+                tok.what1 = what;
+            } else {
+                tok.what2 = what;
+            }
             tok.token = token;
             tok.pkg = pkg;
         }
     }
 
     // lock on mDisableRecords
-    int gatherDisableActionsLocked(int userId) {
+    int gatherDisableActionsLocked(int userId, int which) {
         final int N = mDisableRecords.size();
         // gather the new net flags
         int net = 0;
         for (int i=0; i<N; i++) {
             final DisableRecord rec = mDisableRecords.get(i);
             if (rec.userId == userId) {
-                net |= rec.what;
+                net |= (which == 1) ? rec.what1 : rec.what2;
             }
         }
         return net;
@@ -731,13 +767,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         synchronized (mLock) {
-            pw.println("  mDisabled=0x" + Integer.toHexString(mDisabled));
+            pw.println("  mDisabled1=0x" + Integer.toHexString(mDisabled1));
+            pw.println("  mDisabled2=0x" + Integer.toHexString(mDisabled2));
             final int N = mDisableRecords.size();
             pw.println("  mDisableRecords.size=" + N);
             for (int i=0; i<N; i++) {
                 DisableRecord tok = mDisableRecords.get(i);
                 pw.println("    [" + i + "] userId=" + tok.userId
-                                + " what=0x" + Integer.toHexString(tok.what)
+                                + " what1=0x" + Integer.toHexString(tok.what1)
+                                + " what2=0x" + Integer.toHexString(tok.what2)
                                 + " pkg=" + tok.pkg
                                 + " token=" + tok.token);
             }
