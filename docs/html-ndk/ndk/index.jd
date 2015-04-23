@@ -1,0 +1,15 @@
+fullpage=true
+page.viewport_width=970
+excludeFromSuggestions=true
+page.metaDescription=The official Android NDK developer web site.
+page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" />
+
+@jd:body
+
+
+<h1>SUPER FANCY NDK LANDING PAGE<h1>
+
+<p>Welcome to the placeholder text for the NDK. Here, you'll find all of the details you need to
+combine the power of native code with Android flexibility and compatibility. The documents here
+help you get started, introduce some key concepts that you should know when using the NDK, and then
+provide a variety of other information that you'll find helpful while developing your app.</p>
