@@ -220,6 +220,35 @@ public class LockSettingsService extends ILockSettings.Stub {
                 setString("migrated_biometric_weak", "true", 0);
                 Slog.i(TAG, "Migrated biometric weak to use the fallback instead");
             }
+
+            // Migrates lockscreen.disabled. Prior to M, the flag was ignored when more than one
+            // user was present on the system, so if we're upgrading to M and there is more than one
+            // user we disable the flag to remain consistent.
+            if (getString("migrated_lockscreen_disabled", null, 0) == null) {
+                final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+
+                final List<UserInfo> users = um.getUsers();
+                final int userCount = users.size();
+                int switchableUsers = 0;
+                for (int i = 0; i < userCount; i++) {
+                    if (users.get(i).supportsSwitchTo()) {
+                        switchableUsers++;
+                    }
+                }
+
+                if (switchableUsers > 1) {
+                    for (int i = 0; i < userCount; i++) {
+                        int id = users.get(i).id;
+
+                        if (getBoolean(LockPatternUtils.DISABLE_LOCKSCREEN_KEY, false, id)) {
+                            setBoolean(LockPatternUtils.DISABLE_LOCKSCREEN_KEY, false, id);
+                        }
+                    }
+                }
+
+                setString("migrated_lockscreen_disabled", "true", 0);
+                Slog.i(TAG, "Migrated lockscreen disabled flag");
+            }
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to migrate old data", re);
         }
