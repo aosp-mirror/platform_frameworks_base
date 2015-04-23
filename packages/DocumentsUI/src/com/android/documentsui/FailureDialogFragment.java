@@ -89,11 +89,9 @@ public class FailureDialogFragment extends DialogFragment
                 list.toString());
 
         return new AlertDialog.Builder(getActivity())
-            .setTitle(getString(R.string.copy_failure_alert_title))
             .setMessage(Html.fromHtml(message))
             .setPositiveButton(R.string.retry, this)
             .setNegativeButton(android.R.string.cancel, this)
-            .setIcon(android.R.drawable.ic_dialog_alert)
             .create();
     }
 }
