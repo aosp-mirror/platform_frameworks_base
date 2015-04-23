@@ -305,6 +305,9 @@ public class ConnectivityManager {
      * same network interface as {@link #TYPE_MOBILE} or it may use a different
      * one.  This is used by applications needing to talk to the carrier's
      * Multimedia Messaging Service servers.
+     *
+     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     *         provides the {@link NetworkCapabilities#NET_CAPABILITY_MMS} capability.
      */
     public static final int TYPE_MOBILE_MMS  = 2;
     /**
@@ -312,6 +315,9 @@ public class ConnectivityManager {
      * same network interface as {@link #TYPE_MOBILE} or it may use a different
      * one.  This is used by applications needing to talk to the carrier's
      * Secure User Plane Location servers for help locating the device.
+     *
+     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     *         provides the {@link NetworkCapabilities#NET_CAPABILITY_SUPL} capability.
      */
     public static final int TYPE_MOBILE_SUPL = 3;
     /**
@@ -324,9 +330,10 @@ public class ConnectivityManager {
     /**
      * A High Priority Mobile data connection.  This network type uses the
      * same network interface as {@link #TYPE_MOBILE} but the routing setup
-     * is different.  Only requesting processes will have access to the
-     * Mobile DNS servers and only IP's explicitly requested via {@link #requestRouteToHost}
-     * will route over this interface if no default route exists.
+     * is different.
+     *
+     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     *         uses the {@link NetworkCapabilities#TRANSPORT_CELLULAR} transport.
      */
     public static final int TYPE_MOBILE_HIPRI = 5;
     /**
@@ -386,7 +393,7 @@ public class ConnectivityManager {
      */
     public static final int TYPE_MOBILE_IA = 14;
 
-/**
+    /**
      * Emergency PDN connection for emergency calls
      * {@hide}
      */
@@ -736,7 +743,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Returns an array of of {@link NetworkCapabilities} objects, representing
+     * Returns an array of {@link android.net.NetworkCapabilities} objects, representing
      * the Networks that applications run by the given user will use by default.
      * @hide
      */
@@ -826,11 +833,11 @@ public class ConnectivityManager {
     }
 
     /**
-     * Get the {@link NetworkCapabilities} for the given {@link Network}.  This
+     * Get the {@link android.net.NetworkCapabilities} for the given {@link Network}.  This
      * will return {@code null} if the network is unknown.
      *
      * @param network The {@link Network} object identifying the network in question.
-     * @return The {@link NetworkCapabilities} for the network, or {@code null}.
+     * @return The {@link android.net.NetworkCapabilities} for the network, or {@code null}.
      */
     public NetworkCapabilities getNetworkCapabilities(Network network) {
         try {
@@ -854,6 +861,7 @@ public class ConnectivityManager {
      * always indicates failure.
      *
      * @deprecated Deprecated in favor of the cleaner {@link #requestNetwork} api.
+     * @removed
      */
     public int startUsingNetworkFeature(int networkType, String feature) {
         NetworkCapabilities netCap = networkCapabilitiesForFeature(networkType, feature);
@@ -901,6 +909,7 @@ public class ConnectivityManager {
      * always indicates failure.
      *
      * @deprecated Deprecated in favor of the cleaner {@link #requestNetwork} api.
+     * @removed
      */
     public int stopUsingNetworkFeature(int networkType, String feature) {
         NetworkCapabilities netCap = networkCapabilitiesForFeature(networkType, feature);
@@ -1179,6 +1188,7 @@ public class ConnectivityManager {
      *
      * @deprecated Deprecated in favor of the {@link #requestNetwork},
      *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} api.
+     * @removed
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
         return requestRouteToHostAddress(networkType, NetworkUtils.intToInetAddress(hostAddress));
@@ -1197,6 +1207,7 @@ public class ConnectivityManager {
      * @hide
      * @deprecated Deprecated in favor of the {@link #requestNetwork} and
      *             {@link #bindProcessToNetwork} api.
+     * @removed
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         try {
@@ -2057,7 +2068,7 @@ public class ConnectivityManager {
          * changes capabilities but still satisfies the stated need.
          *
          * @param network The {@link Network} whose capabilities have changed.
-         * @param networkCapabilities The new {@link NetworkCapabilities} for this network.
+         * @param networkCapabilities The new {@link android.net.NetworkCapabilities} for this network.
          */
         public void onCapabilitiesChanged(Network network,
                 NetworkCapabilities networkCapabilities) {}
@@ -2299,7 +2310,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request a network to satisfy a set of {@link NetworkCapabilities}.
+     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
      *
      * This {@link NetworkRequest} will live until released via
      * {@link #unregisterNetworkCallback} or the calling application exits.
@@ -2318,7 +2329,7 @@ public class ConnectivityManager {
     }
 
     /**
-     * Request a network to satisfy a set of {@link NetworkCapabilities}, limited
+     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}, limited
      * by a timeout.
      *
      * This function behaves identically to the non-timedout version, but if a suitable
@@ -2365,7 +2376,7 @@ public class ConnectivityManager {
 
 
     /**
-     * Request a network to satisfy a set of {@link NetworkCapabilities}.
+     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}.
      *
      * This function behaves identically to the version that takes a NetworkCallback, but instead
      * of {@link NetworkCallback} a {@link PendingIntent} is used.  This means

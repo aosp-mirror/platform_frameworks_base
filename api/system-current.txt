@@ -19729,11 +19729,8 @@ package android.net {
     method public void reportNetworkConnectivity(android.net.Network, boolean);
     method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public void requestNetwork(android.net.NetworkRequest, android.app.PendingIntent);
-    method public deprecated boolean requestRouteToHost(int, int);
     method public deprecated void setNetworkPreference(int);
     method public static deprecated boolean setProcessDefaultNetwork(android.net.Network);
-    method public deprecated int startUsingNetworkFeature(int, java.lang.String);
-    method public deprecated int stopUsingNetworkFeature(int, java.lang.String);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
@@ -19752,9 +19749,9 @@ package android.net {
     field public static final int TYPE_ETHERNET = 9; // 0x9
     field public static final int TYPE_MOBILE = 0; // 0x0
     field public static final int TYPE_MOBILE_DUN = 4; // 0x4
-    field public static final int TYPE_MOBILE_HIPRI = 5; // 0x5
-    field public static final int TYPE_MOBILE_MMS = 2; // 0x2
-    field public static final int TYPE_MOBILE_SUPL = 3; // 0x3
+    field public static final deprecated int TYPE_MOBILE_HIPRI = 5; // 0x5
+    field public static final deprecated int TYPE_MOBILE_MMS = 2; // 0x2
+    field public static final deprecated int TYPE_MOBILE_SUPL = 3; // 0x3
     field public static final int TYPE_VPN = 17; // 0x11
     field public static final int TYPE_WIFI = 1; // 0x1
     field public static final int TYPE_WIMAX = 6; // 0x6
