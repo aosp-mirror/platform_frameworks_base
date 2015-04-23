@@ -792,7 +792,6 @@ public final class BluetoothAdapter {
                 //          mService is null, handle that case
             }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        if (DBG) Log.d(TAG, "" + hashCode() + ": getState() :  mService = null. Returning STATE_OFF");
         return STATE_OFF;
     }
 
