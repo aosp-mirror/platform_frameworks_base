@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
@@ -1477,6 +1478,39 @@ public class MediaPlayer implements SubtitleController.Listener
      * initialized
      */
     public native void seekTo(int msec) throws IllegalStateException;
+
+    /**
+     * Get current playback position.
+     * <p>
+     * The MediaTimestamp represents how the media time correlates to the system time in
+     * a linear fashion. It contains the media time and system timestamp of an anchor frame
+     * ({@link MediaTimestamp#mediaTimeUs} and {@link MediaTimestamp#nanoTime})
+     * and the speed of the media clock ({@link MediaTimestamp#clockRate}).
+     * <p>
+     * During regular playback, the media time moves fairly constantly (though the
+     * anchor frame may be rebased to a current system time, the linear correlation stays
+     * steady). Therefore, this method does not need to be called often.
+     * <p>
+     * To help users to get current playback position, this method always returns the timestamp of
+     * just-rendered frame, i.e., {@link System#nanoTime} and its corresponding media time. They
+     * can be used as current playback position.
+     *
+     * @return a MediaTimestamp object if a timestamp is available, or {@code null} if no timestamp
+     *         is available, e.g. because the media player has not been initialized.
+     */
+    @Nullable
+    public MediaTimestamp getTimestamp()
+    {
+        try {
+            // TODO: get the timestamp from native side
+            return new MediaTimestamp(
+                    getCurrentPosition() * 1000L,
+                    System.nanoTime(),
+                    isPlaying() ? getPlaybackSettings().getSpeed() : 0.f);
+        } catch (IllegalStateException e) {
+            return null;
+        }
+    }
 
     /**
      * Gets the current playback position.
