@@ -137,6 +137,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -304,7 +305,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final ArrayList<ComponentName> mRemovingAdmins = new ArrayList<>();
 
         // This is the list of component allowed to start lock task mode.
-        final List<String> mLockTaskPackages = new ArrayList<>();
+        List<String> mLockTaskPackages = new ArrayList<>();
 
         boolean mStatusBarEnabledState = true;
 
@@ -1647,17 +1648,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         validatePasswordOwnerLocked(policy);
         syncDeviceCapabilitiesLocked(policy);
         updateMaximumTimeToLockLocked(policy);
-        updateLockTaskPackagesLocked(policy, userHandle);
+        addDeviceInitializerToLockTaskPackagesLocked(userHandle);
+        updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
         if (!policy.mStatusBarEnabledState) {
             setStatusBarEnabledStateInternal(policy.mStatusBarEnabledState, userHandle);
         }
     }
 
-    private void updateLockTaskPackagesLocked(DevicePolicyData policy, int userId) {
+    private void updateLockTaskPackagesLocked(List<String> packages, int userId) {
         IActivityManager am = ActivityManagerNative.getDefault();
         long ident = Binder.clearCallingIdentity();
         try {
-            am.updateLockTaskPackages(userId, policy.mLockTaskPackages.toArray(new String[0]));
+            am.updateLockTaskPackages(userId, packages.toArray(new String[packages.size()]));
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
@@ -4107,14 +4109,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Device owner state does not exist, create it.
                 mDeviceOwner = DeviceOwner.createWithDeviceInitializer(
                         initializer, ownerName);
-                mDeviceOwner.writeOwnerFile();
-                return true;
             } else {
                 // Device owner already exists, update it.
                 mDeviceOwner.setDeviceInitializer(initializer, ownerName);
-                mDeviceOwner.writeOwnerFile();
-                return true;
             }
+
+            addDeviceInitializerToLockTaskPackagesLocked(UserHandle.USER_OWNER);
+
+            mDeviceOwner.writeOwnerFile();
+            return true;
         }
     }
 
@@ -5095,20 +5098,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final IPackageManager ipm = AppGlobals.getPackageManager();
             IActivityManager activityManager = ActivityManagerNative.getDefault();
 
+            final int userHandle = user.getIdentifier();
             try {
                 // Install the profile owner if not present.
-                if (!ipm.isPackageAvailable(profileOwnerPkg, user.getIdentifier())) {
-                    ipm.installExistingPackageAsUser(profileOwnerPkg, user.getIdentifier());
+                if (!ipm.isPackageAvailable(profileOwnerPkg, userHandle)) {
+                    ipm.installExistingPackageAsUser(profileOwnerPkg, userHandle);
                 }
 
                 // Start user in background.
-                activityManager.startUserInBackground(user.getIdentifier());
+                activityManager.startUserInBackground(userHandle);
             } catch (RemoteException e) {
                 Slog.e(LOG_TAG, "Failed to make remote calls for configureUser", e);
             }
 
-            setActiveAdmin(profileOwnerComponent, true, user.getIdentifier(), adminExtras);
-            setProfileOwner(profileOwnerComponent, ownerName, user.getIdentifier());
+            setActiveAdmin(profileOwnerComponent, true, userHandle, adminExtras);
+            setProfileOwner(profileOwnerComponent, ownerName, userHandle);
             return user;
         } finally {
             restoreCallingIdentity(id);
@@ -5653,27 +5657,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * This function can only be called by the device owner.
      * @param packages The list of packages allowed to enter lock task mode.
      */
-    public void setLockTaskPackages(ComponentName who, String[] packages) throws SecurityException {
+    public void setLockTaskPackages(ComponentName who, String[] packages)
+            throws SecurityException {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
             int userHandle = Binder.getCallingUserHandle().getIdentifier();
-            DevicePolicyData policy = getUserData(userHandle);
-            policy.mLockTaskPackages.clear();
-            if (packages != null) {
-                for (int j = 0; j < packages.length; j++) {
-                    String pkg = packages[j];
-                    if (pkg != null) {
-                        policy.mLockTaskPackages.add(pkg);
-                    }
-                }
-            }
-
-            // Store the settings persistently.
-            saveSettingsLocked(userHandle);
-            updateLockTaskPackagesLocked(policy, userHandle);
+            setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
         }
+    }
+
+    private void setLockTaskPackagesLocked(int userHandle, List<String> packages) {
+        DevicePolicyData policy = getUserData(userHandle);
+        policy.mLockTaskPackages = packages;
+
+        // Store the settings persistently.
+        saveSettingsLocked(userHandle);
+        updateLockTaskPackagesLocked(packages, userHandle);
     }
 
     /**
@@ -5683,11 +5684,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-
             int userHandle = Binder.getCallingUserHandle().getIdentifier();
-            DevicePolicyData policy = getUserData(userHandle);
-            return policy.mLockTaskPackages.toArray(new String[policy.mLockTaskPackages.size()]);
+            final List<String> packages = getLockTaskPackagesLocked(userHandle);
+            return packages.toArray(new String[packages.size()]);
         }
+    }
+
+    private List<String> getLockTaskPackagesLocked(int userHandle) {
+        final DevicePolicyData policy = getUserData(userHandle);
+        return policy.mLockTaskPackages;
     }
 
     /**
@@ -5953,10 +5958,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (!policy.mUserSetupComplete) {
                     policy.mUserSetupComplete = true;
                     synchronized (this) {
+                        // The DeviceInitializer was whitelisted but now should be removed.
+                        removeDeviceInitializerFromLockTaskPackages(userHandle);
                         saveSettingsLocked(userHandle);
                     }
                 }
             }
+        }
+    }
+
+    private void addDeviceInitializerToLockTaskPackagesLocked(int userHandle) {
+        if (hasUserSetupCompleted(userHandle)) {
+            return;
+        }
+
+        final String deviceInitializerPackage = getDeviceInitializer();
+        if (deviceInitializerPackage == null) {
+            return;
+        }
+
+        final List<String> packages = getLockTaskPackagesLocked(userHandle);
+        if (!packages.contains(deviceInitializerPackage)) {
+            packages.add(deviceInitializerPackage);
+            setLockTaskPackagesLocked(userHandle, packages);
+        }
+    }
+
+    private void removeDeviceInitializerFromLockTaskPackages(int userHandle) {
+        final String deviceInitializerPackage = getDeviceInitializer();
+        if (deviceInitializerPackage == null) {
+            return;
+        }
+
+        List<String> packages = getLockTaskPackagesLocked(userHandle);
+        if (packages.remove(deviceInitializerPackage)) {
+            setLockTaskPackagesLocked(userHandle, packages);
         }
     }
 
