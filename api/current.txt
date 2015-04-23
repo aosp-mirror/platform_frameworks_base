@@ -17828,6 +17828,7 @@ package android.media.tv {
 
   public static abstract class TvInputService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInputService.Session(android.content.Context);
+    method public void layoutSurface(int, int, int, int);
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
     method public void notifyContentBlocked(android.media.tv.TvContentRating);
@@ -17842,6 +17843,7 @@ package android.media.tv {
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public void onOverlayViewSizeChanged(int, int);
     method public abstract void onRelease();
     method public boolean onSelectTrack(int, java.lang.String);
     method public abstract void onSetCaptionEnabled(boolean);
