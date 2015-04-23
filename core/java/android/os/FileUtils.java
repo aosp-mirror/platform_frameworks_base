@@ -16,11 +16,13 @@
 
 package android.os;
 
+import android.provider.DocumentsContract.Document;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.webkit.MimeTypeMap;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
@@ -532,5 +535,77 @@ public class FileUtils {
             return new File(afterDir, splice);
         }
         return null;
+    }
+
+    /**
+     * Generates a unique file name under the given parent directory. If the display name doesn't
+     * have an extension that matches the requested MIME type, the default extension for that MIME
+     * type is appended. If a file already exists, the name is appended with a numerical value to
+     * make it unique.
+     *
+     * For example, the display name 'example' with 'text/plain' MIME might produce
+     * 'example.txt' or 'example (1).txt', etc.
+     *
+     * @throws FileNotFoundException
+     */
+    public static File buildUniqueFile(File parent, String mimeType, String displayName)
+            throws FileNotFoundException {
+        String name;
+        String ext;
+
+        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+            name = displayName;
+            ext = null;
+        } else {
+            String mimeTypeFromExt;
+
+            // Extract requested extension from display name
+            final int lastDot = displayName.lastIndexOf('.');
+            if (lastDot >= 0) {
+                name = displayName.substring(0, lastDot);
+                ext = displayName.substring(lastDot + 1);
+                mimeTypeFromExt = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        ext.toLowerCase());
+            } else {
+                name = displayName;
+                ext = null;
+                mimeTypeFromExt = null;
+            }
+
+            if (mimeTypeFromExt == null) {
+                mimeTypeFromExt = "application/octet-stream";
+            }
+
+            final String extFromMimeType = MimeTypeMap.getSingleton().getExtensionFromMimeType(
+                    mimeType);
+            if (Objects.equals(mimeType, mimeTypeFromExt) || Objects.equals(ext, extFromMimeType)) {
+                // Extension maps back to requested MIME type; allow it
+            } else {
+                // No match; insist that create file matches requested MIME
+                name = displayName;
+                ext = extFromMimeType;
+            }
+        }
+
+        File file = buildFile(parent, name, ext);
+
+        // If conflicting file, try adding counter suffix
+        int n = 0;
+        while (file.exists()) {
+            if (n++ >= 32) {
+                throw new FileNotFoundException("Failed to create unique file");
+            }
+            file = buildFile(parent, name + " (" + n + ")", ext);
+        }
+
+        return file;
+    }
+
+    private static File buildFile(File parent, String name, String ext) {
+        if (TextUtils.isEmpty(ext)) {
+            return new File(parent, name);
+        } else {
+            return new File(parent, name + "." + ext);
+        }
     }
 }

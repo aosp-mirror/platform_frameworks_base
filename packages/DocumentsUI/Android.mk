@@ -11,3 +11,5 @@ LOCAL_PACKAGE_NAME := DocumentsUI
 LOCAL_CERTIFICATE := platform
 
 include $(BUILD_PACKAGE)
+
+include $(LOCAL_PATH)/tests/Android.mk
