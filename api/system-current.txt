@@ -16489,6 +16489,7 @@ package android.media {
     method public static android.media.MediaCodec createDecoderByType(java.lang.String) throws java.io.IOException;
     method public static android.media.MediaCodec createEncoderByType(java.lang.String) throws java.io.IOException;
     method public final android.view.Surface createInputSurface();
+    method public static android.view.Surface createPersistentInputSurface();
     method public final int dequeueInputBuffer(long);
     method public final int dequeueOutputBuffer(android.media.MediaCodec.BufferInfo, long);
     method public final void flush();
@@ -16513,10 +16514,12 @@ package android.media {
     method public void setCallback(android.media.MediaCodec.Callback);
     method public void setOnFrameRenderedListener(android.media.MediaCodec.OnFrameRenderedListener, android.os.Handler);
     method public final void setParameters(android.os.Bundle);
+    method public void setSurface(android.view.Surface);
     method public final void setVideoScalingMode(int);
     method public final void signalEndOfInputStream();
     method public final void start();
     method public final void stop();
+    method public void usePersistentInputSurface(android.view.Surface);
     field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
     field public static final int BUFFER_FLAG_END_OF_STREAM = 4; // 0x4
     field public static final int BUFFER_FLAG_KEY_FRAME = 1; // 0x1
@@ -17367,6 +17370,7 @@ package android.media {
     method public void setVideoSource(int) throws java.lang.IllegalStateException;
     method public void start() throws java.lang.IllegalStateException;
     method public void stop() throws java.lang.IllegalStateException;
+    method public void usePersistentSurface(android.view.Surface);
     field public static final int MEDIA_ERROR_SERVER_DIED = 100; // 0x64
     field public static final int MEDIA_RECORDER_ERROR_UNKNOWN = 1; // 0x1
     field public static final int MEDIA_RECORDER_INFO_MAX_DURATION_REACHED = 800; // 0x320
