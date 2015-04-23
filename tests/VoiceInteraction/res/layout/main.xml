@@ -34,6 +34,12 @@
             android:text="@string/asyncStructure"
             />
 
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:assistBlocked="true"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="This won't be included in assist."
+        />
+
 </LinearLayout>
 
 

@@ -372,6 +372,7 @@ package android {
     field public static final int anyDensity = 16843372; // 0x101026c
     field public static final int apduServiceBanner = 16843757; // 0x10103ed
     field public static final int apiKey = 16843281; // 0x1010211
+    field public static final int assistBlocked = 16844020; // 0x10104f4
     field public static final int author = 16843444; // 0x10102b4
     field public static final int authorities = 16842776; // 0x1010018
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
@@ -4162,6 +4163,7 @@ package android.app {
     method public int getWidth();
     method public boolean isAccessibilityFocused();
     method public boolean isActivated();
+    method public boolean isAssistBlocked();
     method public boolean isCheckable();
     method public boolean isChecked();
     method public boolean isClickable();
@@ -38251,6 +38253,7 @@ package android.view {
     method public void invalidateOutline();
     method public boolean isAccessibilityFocused();
     method public boolean isActivated();
+    method public boolean isAssistBlocked();
     method public boolean isAttachedToWindow();
     method public boolean isClickable();
     method public boolean isDirty();
@@ -38393,6 +38396,7 @@ package android.view {
     method public void setActivated(boolean);
     method public void setAlpha(float);
     method public void setAnimation(android.view.animation.Animation);
+    method public void setAssistBlocked(boolean);
     method public void setBackground(android.graphics.drawable.Drawable);
     method public void setBackgroundColor(int);
     method public deprecated void setBackgroundDrawable(android.graphics.drawable.Drawable);
@@ -38755,6 +38759,7 @@ package android.view {
     method public abstract android.view.ViewAssistStructure newChild(int);
     method public abstract void setAccessibilityFocused(boolean);
     method public abstract void setActivated(boolean);
+    method public abstract void setAssistBlocked(boolean);
     method public abstract void setCheckable(boolean);
     method public abstract void setChecked(boolean);
     method public abstract void setChildCount(int);
