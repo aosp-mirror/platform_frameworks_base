@@ -71,6 +71,11 @@ public class CarrierConfigManager {
     public static final String BOOL_SHOW_APN_SETTING_CDMA = "bool_show_apn_setting_cdma";
 
     /**
+     * Control whether users can edit APNs in Settings.
+     */
+    public static final String BOOL_APN_EXPAND = "bool_apn_expand";
+
+    /**
      * If Voice Radio Technology is RIL_RADIO_TECHNOLOGY_LTE:14 or RIL_RADIO_TECHNOLOGY_UNKNOWN:0
      * this is the value that should be used instead. A configuration value of
      * RIL_RADIO_TECHNOLOGY_UNKNOWN:0 means there is no replacement value and that the default
@@ -121,6 +126,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(BOOL_CARRIER_VOLTE_PROVISIONED, false);
         sDefaults.putBoolean(BOOL_CARRIER_VOLTE_TTY_SUPPORTED, true);
         sDefaults.putBoolean(BOOL_SHOW_APN_SETTING_CDMA, false);
+        sDefaults.putBoolean(BOOL_APN_EXPAND, true);
 
         sDefaults.putInt(INT_VOLTE_REPLACEMENT_RAT, 0);
 

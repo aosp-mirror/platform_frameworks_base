@@ -30657,6 +30657,7 @@ package android.telephony {
     method public android.os.Bundle getConfigForSubId(int);
     method public void reloadCarrierConfigForSubId(int);
     field public static final java.lang.String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
+    field public static final java.lang.String BOOL_APN_EXPAND = "bool_apn_expand";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_AVAILABLE = "bool_carrier_volte_available";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_PROVISIONED = "bool_carrier_volte_provisioned";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_TTY_SUPPORTED = "bool_carrier_volte_tty_supported";
