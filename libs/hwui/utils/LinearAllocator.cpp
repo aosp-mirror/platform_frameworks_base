@@ -81,6 +81,10 @@ static void _addAllocation(size_t size) {
 
 #define min(x,y) (((x) < (y)) ? (x) : (y))
 
+void* operator new(std::size_t size, android::uirenderer::LinearAllocator& la) {
+    return la.alloc(size);
+}
+
 namespace android {
 namespace uirenderer {
 
@@ -120,6 +124,11 @@ LinearAllocator::LinearAllocator()
     , mDedicatedPageCount(0) {}
 
 LinearAllocator::~LinearAllocator(void) {
+    while (mDtorList) {
+        auto node = mDtorList;
+        mDtorList = node->next;
+        node->dtor(node->addr);
+    }
     Page* p = mPages;
     while (p) {
         Page* next = p->next();
@@ -181,12 +190,46 @@ void* LinearAllocator::alloc(size_t size) {
     return ptr;
 }
 
+void LinearAllocator::addToDestructionList(Destructor dtor, void* addr) {
+    static_assert(std::is_standard_layout<DestructorNode>::value,
+                  "DestructorNode must have standard layout");
+    static_assert(std::is_trivially_destructible<DestructorNode>::value,
+                  "DestructorNode must be trivially destructable");
+    auto node = new (*this) DestructorNode();
+    node->dtor = dtor;
+    node->addr = addr;
+    node->next = mDtorList;
+    mDtorList = node;
+}
+
+void LinearAllocator::runDestructorFor(void* addr) {
+    auto node = mDtorList;
+    DestructorNode* previous = nullptr;
+    while (node) {
+        if (node->addr == addr) {
+            if (previous) {
+                previous->next = node->next;
+            } else {
+                mDtorList = node->next;
+            }
+            node->dtor(node->addr);
+            rewindIfLastAlloc(node, sizeof(DestructorNode));
+            break;
+        }
+        previous = node;
+        node = node->next;
+    }
+}
+
 void LinearAllocator::rewindIfLastAlloc(void* ptr, size_t allocSize) {
+    // First run the destructor as running the destructor will
+    // also rewind for the DestructorNode allocation which will
+    // have been allocated after this void* if it has a destructor
+    runDestructorFor(ptr);
     // Don't bother rewinding across pages
     allocSize = ALIGN(allocSize);
     if (ptr >= start(mCurrentPage) && ptr < end(mCurrentPage)
             && ptr == ((char*)mNext - allocSize)) {
-        mTotalAllocated -= allocSize;
         mWastedSpace += allocSize;
         mNext = ptr;
     }
