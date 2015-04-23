@@ -693,6 +693,12 @@ public final class TvContentRating {
     private final int mHashCode;
 
     /**
+     * Rating constant denoting unrated content.
+     */
+    public static final TvContentRating UNRATED = new TvContentRating("com.android.tv", "",
+            "UNRATED", null);
+
+    /**
      * Creates a {@code TvContentRating} object with predefined content rating strings.
      *
      * @param domain The domain string. For example, "com.android.tv".

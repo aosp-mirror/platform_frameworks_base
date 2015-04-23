@@ -19104,6 +19104,7 @@ package android.media.tv {
     method public java.lang.String getRatingSystem();
     method public java.util.List<java.lang.String> getSubRatings();
     method public static android.media.tv.TvContentRating unflattenFromString(java.lang.String);
+    field public static final android.media.tv.TvContentRating UNRATED;
   }
 
   public final class TvContentRatingSystemInfo implements android.os.Parcelable {
