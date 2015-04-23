@@ -566,13 +566,22 @@ class AlarmManagerService extends SystemService {
     }
 
     void restorePendingWhileIdleAlarmsLocked() {
+        // Bring pending alarms back into the main list.
         final long nowElapsed = SystemClock.elapsedRealtime();
-        for (int i=mPendingWhileIdleAlarms.size() - 1; i >= 0 && mPendingIdleUntil != null; i --) {
+        for (int i=mPendingWhileIdleAlarms.size() - 1; i >= 0 && mPendingIdleUntil == null; i--) {
             Alarm a = mPendingWhileIdleAlarms.remove(i);
             reAddAlarmLocked(a, nowElapsed, false);
         }
+
+        // Reschedule everything.
         rescheduleKernelAlarmsLocked();
         updateNextAlarmClockLocked();
+
+        // And send a TIME_TICK right now, since it is important to get the UI updated.
+        try {
+            mTimeTickSender.send();
+        } catch (PendingIntent.CanceledException e) {
+        }
     }
 
     static final class InFlight extends Intent {
