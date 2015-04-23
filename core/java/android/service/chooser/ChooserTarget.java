@@ -78,7 +78,8 @@ public final class ChooserTarget implements Parcelable {
      * <p>The creator of a target may supply a ranking score. This score is assumed to be relative
      * to the other targets supplied by the same
      * {@link ChooserTargetService#onGetChooserTargets(ComponentName, IntentFilter) query}.
-     * Scores should be in the range from 0.0f (unlikely match) to 1.0f (very relevant match).</p>
+     * Scores should be in the range from 0.0f (unlikely match) to 1.0f (very relevant match).
+     * Scores for a set of targets do not need to sum to 1.</p>
      *
      * <p>Before being sent, the PendingIntent supplied will be
      * {@link Intent#fillIn(Intent, int) filled in} by the Intent originally supplied
@@ -113,7 +114,8 @@ public final class ChooserTarget implements Parcelable {
      * <p>The creator of a target may supply a ranking score. This score is assumed to be relative
      * to the other targets supplied by the same
      * {@link ChooserTargetService#onGetChooserTargets(ComponentName, IntentFilter) query}.
-     * Scores should be in the range from 0.0f (unlikely match) to 1.0f (very relevant match).</p>
+     * Scores should be in the range from 0.0f (unlikely match) to 1.0f (very relevant match).
+     * Scores for a set of targets do not need to sum to 1.</p>
      *
      * <p>Before being sent, the IntentSender supplied will be
      * {@link Intent#fillIn(Intent, int) filled in} by the Intent originally supplied
@@ -144,6 +146,32 @@ public final class ChooserTarget implements Parcelable {
         mIntentSender = intentSender;
     }
 
+    /**
+     * Construct a deep link target for presentation by a chooser UI.
+     *
+     * <p>A target is composed of a title and an icon for presentation to the user.
+     * The UI presenting this target may truncate the title if it is too long to be presented
+     * in the available space, as well as crop, resize or overlay the supplied icon.</p>
+     *
+     * <p>The creator of a target may supply a ranking score. This score is assumed to be relative
+     * to the other targets supplied by the same
+     * {@link ChooserTargetService#onGetChooserTargets(ComponentName, IntentFilter) query}.
+     * Scores should be in the range from 0.0f (unlikely match) to 1.0f (very relevant match).
+     * Scores for a set of targets do not need to sum to 1.</p>
+     *
+     * <p>Before being sent, the Intent supplied will be
+     * {@link Intent#fillIn(Intent, int) filled in} by the Intent originally supplied
+     * to the chooser.</p>
+     *
+     * <p>Take care not to place custom {@link android.os.Parcelable} types into
+     * the Intent as extras, as the system will not be able to unparcel it to merge
+     * additional extras.</p>
+     *
+     * @param title title of this target that will be shown to a user
+     * @param icon icon to represent this target
+     * @param score ranking score for this target between 0.0f and 1.0f, inclusive
+     * @param intent Intent to fill in and send if the user chooses this target
+     */
     public ChooserTarget(CharSequence title, Bitmap icon, float score, Intent intent) {
         mTitle = title;
         mIcon = icon;
@@ -358,6 +386,10 @@ public final class ChooserTarget implements Parcelable {
         }
         dest.writeFloat(mScore);
         IntentSender.writeIntentSenderOrNullToParcel(mIntentSender, dest);
+        dest.writeInt(mIntent != null ? 1 : 0);
+        if (mIntent != null) {
+            mIntent.writeToParcel(dest, 0);
+        }
     }
 
     public static final Creator<ChooserTarget> CREATOR

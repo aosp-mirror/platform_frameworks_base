@@ -401,6 +401,11 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
+        public boolean shouldGetResolvedFilter() {
+            return true;
+        }
+
+        @Override
         public int getCount() {
             int count = super.getCount();
             if (mServiceTargets != null) {

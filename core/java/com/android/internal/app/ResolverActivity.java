@@ -1062,7 +1062,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             } else {
                 currentResolveList = mOrigResolveList = mPm.queryIntentActivities(mIntent,
                         PackageManager.MATCH_DEFAULT_ONLY
-                        | (mFilterLastUsed ? PackageManager.GET_RESOLVED_FILTER : 0)
+                        | (shouldGetResolvedFilter() ? PackageManager.GET_RESOLVED_FILTER : 0)
                         | (shouldGetActivityMetadata() ? PackageManager.GET_META_DATA : 0)
                 );
                 // Filter out any activities that the launched uid does not
@@ -1186,6 +1186,10 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         public void onListRebuilt() {
             // This space for rent
+        }
+
+        public boolean shouldGetResolvedFilter() {
+            return mFilterLastUsed;
         }
 
         private void processGroup(List<ResolveInfo> rList, int start, int end, ResolveInfo ro,
