@@ -1630,20 +1630,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // sufficiently what is currently set.  Note that this is only
         // a sanity check in case the two get out of sync; this should
         // never normally happen.
-        LockPatternUtils utils = new LockPatternUtils(mContext);
-        if (utils.getActivePasswordQuality(userHandle) < policy.mActivePasswordQuality) {
-            Slog.w(LOG_TAG, "Active password quality 0x"
-                    + Integer.toHexString(policy.mActivePasswordQuality)
-                    + " does not match actual quality 0x"
-                    + Integer.toHexString(utils.getActivePasswordQuality(userHandle)));
-            policy.mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-            policy.mActivePasswordLength = 0;
-            policy.mActivePasswordUpperCase = 0;
-            policy.mActivePasswordLowerCase = 0;
-            policy.mActivePasswordLetters = 0;
-            policy.mActivePasswordNumeric = 0;
-            policy.mActivePasswordSymbols = 0;
-            policy.mActivePasswordNonLetter = 0;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            LockPatternUtils utils = new LockPatternUtils(mContext);
+            if (utils.getActivePasswordQuality(userHandle) < policy.mActivePasswordQuality) {
+                Slog.w(LOG_TAG, "Active password quality 0x"
+                        + Integer.toHexString(policy.mActivePasswordQuality)
+                        + " does not match actual quality 0x"
+                        + Integer.toHexString(utils.getActivePasswordQuality(userHandle)));
+                policy.mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+                policy.mActivePasswordLength = 0;
+                policy.mActivePasswordUpperCase = 0;
+                policy.mActivePasswordLowerCase = 0;
+                policy.mActivePasswordLetters = 0;
+                policy.mActivePasswordNumeric = 0;
+                policy.mActivePasswordSymbols = 0;
+                policy.mActivePasswordNonLetter = 0;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
 
         validatePasswordOwnerLocked(policy);
