@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -314,7 +315,7 @@ public abstract class TvInputService extends Service {
         @SystemApi
         public void notifySessionEvent(final String eventType, final Bundle eventArgs) {
             if (eventType == null) {
-                throw new IllegalArgumentException("eventType should not be null.");
+                throw new IllegalArgumentException("eventType cannot be null");
             }
             executeOrPostRunnable(new Runnable() {
                 @Override
@@ -544,7 +545,10 @@ public abstract class TvInputService extends Service {
          * @see #notifyContentAllowed
          * @see TvInputManager
          */
-        public void notifyContentBlocked(final TvContentRating rating) {
+        public void notifyContentBlocked(@NonNull final TvContentRating rating) {
+            if (rating == null) {
+                throw new IllegalArgumentException("rating cannot be null");
+            }
             executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
@@ -828,7 +832,7 @@ public abstract class TvInputService extends Service {
          * @hide
          */
         @SystemApi
-        public void onAppPrivateCommand(String action, Bundle data) {
+        public void onAppPrivateCommand(@NonNull String action, Bundle data) {
         }
 
         /**

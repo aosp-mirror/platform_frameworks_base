@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -424,7 +425,7 @@ public final class TvInputInfo implements Parcelable {
      * @return a CharSequence containing the TV input's label. If the TV input does not have
      *         a label, its name is returned.
      */
-    public CharSequence loadLabel(Context context) {
+    public CharSequence loadLabel(@NonNull Context context) {
         if (TextUtils.isEmpty(mLabel)) {
             return mService.loadLabel(context.getPackageManager());
         } else {
@@ -452,7 +453,7 @@ public final class TvInputInfo implements Parcelable {
      * @return a Drawable containing the TV input's icon. If the TV input does not have an icon,
      *         application's icon is returned. If it's unavailable too, {@code null} is returned.
      */
-    public Drawable loadIcon(Context context) {
+    public Drawable loadIcon(@NonNull Context context) {
         if (mIconUri == null) {
             return loadServiceIcon(context);
         }
@@ -506,7 +507,7 @@ public final class TvInputInfo implements Parcelable {
      * @param flags The flags used for parceling.
      */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeString(mParentId);
         mService.writeToParcel(dest, flags);

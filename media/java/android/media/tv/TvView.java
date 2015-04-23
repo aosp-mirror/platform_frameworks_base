@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -273,7 +274,7 @@ public class TvView extends ViewGroup {
      * @param inputId The ID of TV input which will play the given channel.
      * @param channelUri The URI of a channel.
      */
-    public void tune(String inputId, Uri channelUri) {
+    public void tune(@NonNull String inputId, Uri channelUri) {
         tune(inputId, channelUri, null);
     }
 
@@ -494,7 +495,7 @@ public class TvView extends ViewGroup {
      * @hide
      */
     @SystemApi
-    public void sendAppPrivateCommand(String action, Bundle data) {
+    public void sendAppPrivateCommand(@NonNull String action, Bundle data) {
         if (TextUtils.isEmpty(action)) {
             throw new IllegalArgumentException("action cannot be null or an empty string");
         }
