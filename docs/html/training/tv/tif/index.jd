@@ -1,16 +1,25 @@
 page.title=Building Live TV Apps
 page.tags=tv, tif
 helpoutsWidget=true
-page.article=true
+startpage=true
 
 @jd:body
 
 <div id="tb-wrapper">
 <div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+  <ul>
+    <li>Android 5.0 (API level 21) or higher</li>
+  </ul>
   <h2>You should also read</h2>
   <ul>
     <li><a href="{@docRoot}reference/android/media/tv/package-summary.html">
       android.media.tv</a></li>
+  </ul>
+  <h2>Try It Out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-sample-inputs">
+      TV Input Service sample app</a></li>
   </ul>
 </div>
 </div>
@@ -44,6 +53,17 @@ page.article=true
   Building a TV input service for your content can help make it more accessible on TV devices.
 </p>
 
-<p>For more information about TV Input Framework, see the
-<a href="{@docRoot}reference/android/media/tv/package-summary.html">android.media.tv</a>
-reference.</p>
+<h2>Topics</h2>
+
+<dl>
+  <dt><b><a href="tvinput.html">Developing a TV Input Service</a></b></dt>
+    <dd>Learn how to develop a TV input service, which works with the system TV app.</dd>
+
+  <dt><b><a href="channel.html">Working with Channel Data</a></b></dt>
+    <dd>Learn how to describe channel and program data for the system.</dd>
+
+  <dt><b><a href="ui.html">Managing User Interaction</a></b></dt>
+    <dd>Learn how to present overlays, manage content availability, and handle content selection.</dd>
+</dl>
+
+

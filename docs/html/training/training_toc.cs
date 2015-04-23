@@ -998,10 +998,25 @@ include the action bar on devices running Android 2.1 or higher."
            Building TV Games</a>
       </li>
 
-      <li>
-        <a href="<?cs var:toroot ?>training/tv/tif/index.html"
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/tv/tif/index.html"
            description="How to build Live TV apps.">
            Building Live TV Apps</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/tif/tvinput.html">
+              Developing a TV Input Service</a>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/tif/channel.html">
+              Working with Channel Data</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/tif/ui.html">
+              Managing User Interaction</a>
+          </li>
+        </ul>
       </li>
 
       <li>
