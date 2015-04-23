@@ -16346,8 +16346,6 @@ package android.media {
 
   public final class MediaSync {
     ctor public MediaSync();
-    method public void configureAudioTrack(android.media.AudioTrack);
-    method public void configureSurface(android.view.Surface);
     method public final android.view.Surface createInputSurface();
     method public void flush();
     method public android.media.PlaybackSettings getPlaybackSettings();
@@ -16355,9 +16353,11 @@ package android.media {
     method public android.media.MediaTimestamp getTimestamp();
     method public void queueAudio(java.nio.ByteBuffer, int, int, long);
     method public final void release();
+    method public void setAudioTrack(android.media.AudioTrack);
     method public void setCallback(android.media.MediaSync.Callback, android.os.Handler);
     method public void setPlaybackRate(float, int);
     method public void setPlaybackSettings(android.media.PlaybackSettings);
+    method public void setSurface(android.view.Surface);
     method public void setSyncSettings(android.media.SyncSettings);
     field public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0; // 0x0
     field public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 2; // 0x2

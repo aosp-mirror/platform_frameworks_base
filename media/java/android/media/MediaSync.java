@@ -39,13 +39,13 @@ import java.util.List;
  * <p>MediaSync is generally used like this:
  * <pre>
  * MediaSync sync = new MediaSync();
- * sync.configureSurface(surface);
+ * sync.setSurface(surface);
  * Surface inputSurface = sync.createInputSurface();
  * ...
  * // MediaCodec videoDecoder = ...;
  * videoDecoder.configure(format, inputSurface, ...);
  * ...
- * sync.configureAudioTrack(audioTrack);
+ * sync.setAudioTrack(audioTrack);
  * sync.setCallback(new MediaSync.Callback() {
  *     {@literal @Override}
  *     public void onReturnAudioBuffer(MediaSync sync, ByteBuffer audioBuffer, int bufferIndex) {
@@ -95,8 +95,8 @@ import java.util.List;
  *
  * </pre>
  *
- * The client needs to configure corresponding sink (i.e., Surface and AudioTrack) based on
- * the stream type it will play.
+ * The client needs to configure corresponding sink by setting the Surface and/or AudioTrack
+ * based on the stream type it will play.
  * <p>
  * For video, the client needs to call {@link #createInputSurface} to obtain a surface on
  * which it will render video frames.
@@ -234,29 +234,33 @@ final public class MediaSync {
     }
 
     /**
-     * Configures the output surface for MediaSync.
+     * Sets the output surface for MediaSync.
+     * <p>
+     * Currently, this is only supported in the Initialized state.
      *
      * @param surface Specify a surface on which to render the video data.
-     * @throws IllegalArgumentException if the surface has been released, or is invalid.
+     * @throws IllegalArgumentException if the surface has been released, is invalid,
      *     or can not be connected.
-     * @throws IllegalStateException if not in the Initialized state, or another surface
-     *     has already been configured.
+     * @throws IllegalStateException if setting the surface is not supported, e.g.
+     *     not in the Initialized state, or another surface has already been configured.
      */
-    public void configureSurface(@Nullable Surface surface) {
+    public void setSurface(@Nullable Surface surface) {
         native_configureSurface(surface);
     }
 
     private native final void native_configureSurface(@Nullable Surface surface);
 
     /**
-     * Configures the audio track for MediaSync.
+     * Sets the audio track for MediaSync.
+     * <p>
+     * Currently, this is only supported in the Initialized state.
      *
      * @param audioTrack Specify an AudioTrack through which to render the audio data.
      * @throws IllegalArgumentException if the audioTrack has been released, or is invalid.
-     * @throws IllegalStateException if not in the Initialized state, or another audio track
-     *     has already been configured.
+     * @throws IllegalStateException if setting the audio track is not supported, e.g.
+     *     not in the Initialized state, or another audio track has already been configured.
      */
-    public void configureAudioTrack(@Nullable AudioTrack audioTrack) {
+    public void setAudioTrack(@Nullable AudioTrack audioTrack) {
         // AudioTrack has sanity check for configured sample rate.
         int nativeSampleRateInHz = (audioTrack == null ? 0 : audioTrack.getSampleRate());
 
@@ -272,7 +276,7 @@ final public class MediaSync {
 
     /**
      * Requests a Surface to use as the input. This may only be called after
-     * {@link #configureSurface}.
+     * {@link #setSurface}.
      * <p>
      * The application is responsible for calling release() on the Surface when
      * done.
