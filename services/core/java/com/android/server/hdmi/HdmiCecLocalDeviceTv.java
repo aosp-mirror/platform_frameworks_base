@@ -905,10 +905,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     private void updateArcFeatureStatus(int portId, boolean isConnected) {
         assertRunOnServiceThread();
+        HdmiDeviceInfo avr = getAvrDeviceInfo();
+        if (avr == null) {
+            return;
+        }
         // HEAC 2.4, HEACT 5-15
         // Should not activate ARC if +5V status is false.
         HdmiPortInfo portInfo = mService.getPortInfo(portId);
-        if (portInfo.isArcSupported()) {
+        if (avr.getPortId() == portId && portInfo.isArcSupported()) {
             changeArcFeatureEnabled(portId, isConnected);
         }
     }
