@@ -2092,8 +2092,8 @@ public class AudioTrack
     /**
      * Specifies an audio device (via an {@link AudioDeviceInfo} object) to route
      * the output from this AudioTrack.
-     * @param deviceSpec The {@link AudioDeviceInfo} specifying the audio sink.
-     *  If deviceSpec is null, default routing is restored.
+     * @param deviceInfo The {@link AudioDeviceInfo} specifying the audio sink.
+     *  If deviceInfo is null, default routing is restored.
      * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
      * does not correspond to a valid audio output device.
      */
