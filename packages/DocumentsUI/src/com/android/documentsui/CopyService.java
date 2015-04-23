@@ -26,6 +26,7 @@ import android.app.PendingIntent;
 import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
@@ -37,12 +38,14 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 
 import libcore.io.IoUtils;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -70,7 +73,7 @@ public class CopyService extends IntentService {
     private volatile boolean mIsCancelled;
     // Parameters of the copy job. Requests to an IntentService are serialized so this code only
     // needs to deal with one job at a time.
-    private final ArrayList<Uri> mFailedFiles;
+    private final ArrayList<DocumentInfo> mFailedFiles;
     private long mBatchSize;
     private long mBytesCopied;
     private long mStartTime;
@@ -88,7 +91,27 @@ public class CopyService extends IntentService {
     public CopyService() {
         super("CopyService");
 
-        mFailedFiles = new ArrayList<Uri>();
+        mFailedFiles = new ArrayList<DocumentInfo>();
+    }
+
+    /**
+     * Starts the service for a copy operation.
+     *
+     * @param context Context for the intent.
+     * @param srcDocs A list of src files to copy.
+     * @param dstStack The copy destination stack.
+     */
+    public static void start(Context context, List<DocumentInfo> srcDocs, DocumentStack dstStack) {
+        final Resources res = context.getResources();
+        final Intent copyIntent = new Intent(context, CopyService.class);
+        copyIntent.putParcelableArrayListExtra(
+                EXTRA_SRC_LIST, new ArrayList<DocumentInfo>(srcDocs));
+        copyIntent.putExtra(EXTRA_STACK, (Parcelable) dstStack);
+
+        Toast.makeText(context,
+                res.getQuantityString(R.plurals.copy_begin, srcDocs.size(), srcDocs.size()),
+                Toast.LENGTH_SHORT).show();
+        context.startService(copyIntent);
     }
 
     @Override
@@ -360,7 +383,7 @@ public class CopyService extends IntentService {
         if (dstUri == null) {
             // If this is a directory, the entire subdir will not be copied over.
             Log.e(TAG, "Error while copying " + srcInfo.displayName);
-            mFailedFiles.add(srcInfo.derivedUri);
+            mFailedFiles.add(srcInfo);
             return;
         }
 
@@ -444,7 +467,12 @@ public class CopyService extends IntentService {
         } catch (IOException e) {
             errorOccurred = true;
             Log.e(TAG, "Error while copying " + srcUri.toString(), e);
-            mFailedFiles.add(srcUri);
+            try {
+                mFailedFiles.add(DocumentInfo.fromUri(getContentResolver(), srcUri));
+            } catch (FileNotFoundException ignore) {
+                Log.w(TAG, "Source file gone: " + srcUri, e);
+              // The source file is gone.
+            }
         } finally {
             // This also ensures the file descriptors are closed.
             IoUtils.closeQuietly(src);

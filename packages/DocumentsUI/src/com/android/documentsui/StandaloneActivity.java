@@ -106,12 +106,15 @@ public class StandaloneActivity extends BaseActivity {
         RootsFragment.show(getFragmentManager(), null);
         if (!mState.restored) {
             new RestoreStackTask().execute();
+
+            // Show a failure dialog if there was a failed operation.
             final Intent intent = getIntent();
+            final DocumentStack dstStack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
             final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
             if (failure != 0) {
-                final ArrayList<Uri> failedSrcList = intent.getParcelableArrayListExtra(
-                        CopyService.EXTRA_SRC_LIST);
-                FailureDialogFragment.show(getFragmentManager(), failure, failedSrcList);
+                final ArrayList<DocumentInfo> failedSrcList =
+                        intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);
+                FailureDialogFragment.show(getFragmentManager(), failure, failedSrcList, dstStack);
             }
         } else {
             onCurrentDirectoryChanged(ANIM_NONE);

@@ -82,6 +82,7 @@ import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Lists;
 
@@ -341,9 +342,6 @@ public class DirectoryFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        final Context context = getActivity();
-        final Resources res = context.getResources();
-
         // There's only one request code right now. Replace this with a switch statement or
         // something more scalable when more codes are added.
         if (requestCode != REQUEST_COPY_DESTINATION) {
@@ -355,15 +353,8 @@ public class DirectoryFragment extends Fragment {
             return;
         }
 
-        final List<DocumentInfo> docs = getDisplayState(this).selectedDocumentsForCopy;
-        final Intent copyIntent = new Intent(context, CopyService.class);
-        copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST, new ArrayList<DocumentInfo>(docs));
-        copyIntent.putExtra(CopyService.EXTRA_STACK, data.getParcelableExtra(CopyService.EXTRA_STACK));
-
-        Toast.makeText(context,
-                res.getQuantityString(R.plurals.copy_begin, docs.size(), docs.size()),
-                Toast.LENGTH_SHORT).show();
-        context.startService(copyIntent);
+        CopyService.start(getActivity(), getDisplayState(this).selectedDocumentsForCopy,
+                (DocumentStack) data.getParcelableExtra(CopyService.EXTRA_STACK));
     }
 
     @Override
