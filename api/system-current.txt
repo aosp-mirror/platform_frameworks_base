@@ -32159,8 +32159,9 @@ package android.telecom {
     field public static final int STATE_DISCONNECTING = 10; // 0xa
     field public static final int STATE_HOLDING = 3; // 0x3
     field public static final int STATE_NEW = 0; // 0x0
-    field public static final int STATE_PRE_DIAL_WAIT = 8; // 0x8
+    field public static final deprecated int STATE_PRE_DIAL_WAIT = 8; // 0x8
     field public static final int STATE_RINGING = 2; // 0x2
+    field public static final int STATE_SELECT_PHONE_ACCOUNT = 8; // 0x8
   }
 
   public static abstract class Call.Callback {
@@ -32222,20 +32223,6 @@ package android.telecom {
   public class CallProperties {
     ctor public CallProperties();
     field public static final int CONFERENCE = 1; // 0x1
-  }
-
-  public final class CallState {
-    method public static java.lang.String toString(int);
-    field public static final int ABORTED = 8; // 0x8
-    field public static final int ACTIVE = 5; // 0x5
-    field public static final int CONNECTING = 1; // 0x1
-    field public static final int DIALING = 3; // 0x3
-    field public static final int DISCONNECTED = 7; // 0x7
-    field public static final int DISCONNECTING = 9; // 0x9
-    field public static final int NEW = 0; // 0x0
-    field public static final int ON_HOLD = 6; // 0x6
-    field public static final int PRE_DIAL_WAIT = 2; // 0x2
-    field public static final int RINGING = 4; // 0x4
   }
 
   public final class CameraCapabilities implements android.os.Parcelable {
