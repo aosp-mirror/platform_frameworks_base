@@ -4301,4 +4301,24 @@ public class DevicePolicyManager {
             Log.w(TAG, "Failed talking with device policy service", re);
         }
     }
+
+    /**
+     * Callable by the system update service to notify device owners about pending updates.
+     * The caller must hold {@link android.Manifest.permission#NOTIFY_PENDING_SYSTEM_UPDATE}
+     * permission.
+     *
+     * @param updateReceivedTime The time as given by {@link System#currentTimeMillis()} indicating
+     *        when the current pending update was first available. -1 if no update is available.
+     * @hide
+     */
+    @SystemApi
+    public void notifyPendingSystemUpdate(long updateReceivedTime) {
+        if (mService != null) {
+            try {
+                mService.notifyPendingSystemUpdate(updateReceivedTime);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Could not notify device owner about pending system update", re);
+            }
+        }
+    }
 }

@@ -225,4 +225,6 @@ interface IDevicePolicyManager {
     boolean setKeyguardEnabledState(in ComponentName admin, boolean enabled);
     void setStatusBarEnabledState(in ComponentName who, boolean enabled);
     boolean getDoNotAskCredentialsOnBoot();
+
+    void notifyPendingSystemUpdate(in long updateReceivedTime);
 }

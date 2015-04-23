@@ -264,6 +264,20 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final String EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE = "android.app.extra.CHOOSE_PRIVATE_KEY_RESPONSE";
 
     /**
+     * Broadcast action: notify device owner that there is a pending system update.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NOTIFY_PENDING_SYSTEM_UPDATE = "android.app.action.NOTIFY_PENDING_SYSTEM_UPDATE";
+
+    /**
+     * A long type extra for {@link #onSystemUpdatePending} recording the system time as given by
+     * {@link System#currentTimeMillis()} when the current pending system update is first available.
+     * @hide
+     */
+    public static final String EXTRA_SYSTEM_UPDATE_RECEIVED_TIME = "android.app.extra.SYSTEM_UPDATE_RECEIVED_TIME";
+
+    /**
      * Name under which a DevicePolicy component publishes information
      * about itself.  This meta-data must reference an XML resource containing
      * a device-admin tag.
@@ -486,6 +500,22 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Allows the receiver to be notified when information about a pending system update is
+     * available from the system update service. The same pending system update can trigger multiple
+     * calls to this method, so it is necessary to examine the incoming parameters for details about
+     * the update.
+     * <p>
+     * This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param receivedTime The time as given by {@link System#currentTimeMillis()} indicating when
+     *        the current pending update was first available. -1 if no pending update is available.
+     */
+    public void onSystemUpdatePending(Context context, Intent intent, long receivedTime) {
+    }
+
+    /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
      * convenience callbacks for each action.
@@ -530,6 +560,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onLockTaskModeExiting(context, intent);
         } else if (ACTION_READY_FOR_USER_INITIALIZATION.equals(action)) {
             onReadyForUserInitialization(context, intent);
+        } else if (ACTION_NOTIFY_PENDING_SYSTEM_UPDATE.equals(action)) {
+            long receivedTime = intent.getLongExtra(EXTRA_SYSTEM_UPDATE_RECEIVED_TIME, -1);
+            onSystemUpdatePending(context, intent, receivedTime);
         }
     }
 }

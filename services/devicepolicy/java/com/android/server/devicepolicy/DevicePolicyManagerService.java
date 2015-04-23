@@ -22,6 +22,7 @@ import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.GET_UNINSTALLED_PACKAGES;
 
+import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -45,6 +46,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -6087,5 +6089,43 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return false;
+    }
+
+    @Override
+    public void notifyPendingSystemUpdate(long updateReceivedTime) {
+        mContext.enforceCallingOrSelfPermission(permission.NOTIFY_PENDING_SYSTEM_UPDATE,
+                "Only the system update service can broadcast update information");
+
+        if (UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
+            Slog.w(LOG_TAG, "Only the system update service in the primary user" +
+                    "can broadcast update information.");
+            return;
+        }
+        Intent intent = new Intent(DeviceAdminReceiver.ACTION_NOTIFY_PENDING_SYSTEM_UPDATE);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_SYSTEM_UPDATE_RECEIVED_TIME,
+                updateReceivedTime);
+
+        synchronized (this) {
+            String deviceOwnerPackage = getDeviceOwner();
+            if (deviceOwnerPackage == null) {
+                return;
+            }
+
+            try {
+                ActivityInfo[] receivers  = mContext.getPackageManager().getPackageInfo(
+                        deviceOwnerPackage, PackageManager.GET_RECEIVERS).receivers;
+                if (receivers != null) {
+                    for (int i = 0; i < receivers.length; i++) {
+                        if (permission.BIND_DEVICE_ADMIN.equals(receivers[i].permission)) {
+                            intent.setComponent(new ComponentName(deviceOwnerPackage,
+                                    receivers[i].name));
+                            mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
+                        }
+                    }
+                }
+            } catch (NameNotFoundException e) {
+                Log.e(LOG_TAG, "Cannot find device owner package", e);
+            }
+        }
     }
 }
