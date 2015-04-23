@@ -610,6 +610,61 @@ final public class MediaCodec {
         native_configure(keys, values, surface, crypto, flags);
     }
 
+    /**
+     *  Dynamically sets the output surface of a codec.
+     *  <p>
+     *  This can only be used if the codec was configured with an output surface.  The
+     *  new output surface should have a compatible usage type to the original output surface.
+     *  E.g. codecs may not support switching from a SurfaceTexture (GPU readable) output
+     *  to ImageReader (software readable) output.
+     *  @param surface the output surface to use. It must not be {@code null}.
+     *  @throws IllegalStateException if the codec does not support setting the output
+     *            surface in the current state.
+     *  @throws IllegalArgumentException if the new surface is not of a suitable type for the codec.
+     */
+    public void setSurface(@NonNull Surface surface) {
+        if (!mHasSurface) {
+            throw new IllegalStateException("codec was not configured for an output surface");
+        }
+
+        // TODO implement this
+        throw new IllegalArgumentException("codec does not support this surface");
+    }
+
+    /**
+     * Create a persistent input surface that can be used with codecs that normally have an input
+     * surface, such as video encoders. A persistent input can be reused by subsequent
+     * {@link MediaCodec} or {@link MediaRecorder} instances, but can only be used by at
+     * most one codec or recorder instance concurrently.
+     * <p>
+     * The application is responsible for calling release() on the Surface when done.
+     *
+     * @return an input surface that can be used with {@link #usePersistentInputSurface}.
+     */
+    @NonNull
+    public static Surface createPersistentInputSurface() {
+        // TODO implement this
+        return new PersistentSurface();
+    }
+
+    static class PersistentSurface extends Surface {
+        PersistentSurface() {}
+    };
+
+    /**
+     * Configures the codec (e.g. encoder) to use a persistent input surface in place of input
+     * buffers.  This may only be called after {@link #configure} and before {@link #start}, in
+     * lieu of {@link #createInputSurface}.
+     * @param surface a persistent input surface created by {@link #createPersistentInputSurface}
+     * @throws IllegalStateException if not in the Configured state or does not require an input
+     *           surface.
+     * @throws IllegalArgumentException if the surface was not created by
+     *           {@link #createPersistentInputSurface}.
+     */
+    public void usePersistentInputSurface(@NonNull Surface surface) {
+        throw new IllegalArgumentException("not implemented");
+    }
+
     private native final void native_setCallback(@Nullable Callback cb);
 
     private native final void native_configure(

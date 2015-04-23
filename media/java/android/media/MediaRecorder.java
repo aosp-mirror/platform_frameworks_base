@@ -140,6 +140,24 @@ public class MediaRecorder
     public native Surface getSurface();
 
     /**
+     * Configures the recorder to use a persistent surface when using SURFACE video source.
+     * <p> May only be called after {@link #prepare} in lieu of {@link #getSurface}.
+     * Frames rendered to the Surface before {@link #start} will be discarded.</p>
+
+     * @param surface a persistent input surface created by
+     *           {@link MediaCodec#createPersistentInputSurface}
+     * @throws IllegalStateException if it is called before {@link #prepare}, after
+     * {@link #stop}, or is called when VideoSource is not set to SURFACE.
+     * @throws IllegalArgumentException if the surface was not created by
+     *           {@link MediaCodec#createPersistentInputSurface}.
+     * @see MediaCodec#createPersistentInputSurface
+     * @see MediaRecorder.VideoSource
+     */
+    public void usePersistentSurface(Surface surface) {
+        throw new IllegalArgumentException("not implemented");
+    }
+
+    /**
      * Sets a Surface to show a preview of recorded media (video). Calls this
      * before prepare() to make sure that the desirable preview display is
      * set. If {@link #setCamera(Camera)} is used and the surface has been
