@@ -17,6 +17,7 @@ package android.telecom;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -1053,6 +1054,39 @@ public class TelecomManager {
                 service.showInCallScreen(showDialpad, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#showCallScreen", e);
+            }
+        }
+    }
+
+    /**
+     * Places a new outgoing call to the provided address using the system telecom service with
+     * the specified extras.
+     *
+     * This method is equivalent to placing an outgoing call using {@link Intent#ACTION_CALL},
+     * except that the outgoing call will always be sent via the system telecom service. If
+     * method-caller is either the user selected default dialer app or preloaded system dialer
+     * app, then emergency calls will also be allowed.
+     *
+     * Requires permission: {@link android.Manifest.permission#CALL_PHONE}
+     *
+     * Usage example:
+     * <pre>
+     * Uri uri = Uri.fromParts("tel", "12345", null);
+     * Bundle extras = new Bundle();
+     * extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true);
+     * telecomManager.placeCall(uri, extras);
+     * </pre>
+     *
+     * @param address The address to make the call to.
+     * @param extras Bundle of extras to use with the call.
+     */
+    public void placeCall(Uri address, Bundle extras) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                service.placeCall(address, extras, mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecomService#placeCall", e);
             }
         }
     }

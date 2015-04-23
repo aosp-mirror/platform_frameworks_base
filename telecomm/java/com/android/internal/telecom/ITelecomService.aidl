@@ -210,4 +210,9 @@ interface ITelecomService {
      * @see TelecomServiceImpl#addNewUnknownCall
      */
     void addNewUnknownCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
+
+    /**
+     * @see TelecomServiceImpl#placeCall
+     */
+    void placeCall(in Uri handle, in Bundle extras, String callingPackage);
 }
