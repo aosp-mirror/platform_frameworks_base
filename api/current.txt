@@ -15991,6 +15991,7 @@ package android.media {
     method public android.media.PlaybackSettings getPlaybackSettings();
     method public int getSelectedTrack(int) throws java.lang.IllegalStateException;
     method public android.media.SyncSettings getSyncSettings();
+    method public android.media.MediaTimestamp getTimestamp();
     method public android.media.MediaPlayer.TrackInfo[] getTrackInfo() throws java.lang.IllegalStateException;
     method public int getVideoHeight();
     method public int getVideoWidth();
@@ -16351,7 +16352,7 @@ package android.media {
     method public void flush();
     method public android.media.PlaybackSettings getPlaybackSettings();
     method public android.media.SyncSettings getSyncSettings();
-    method public boolean getTimestamp(android.media.MediaTimestamp);
+    method public android.media.MediaTimestamp getTimestamp();
     method public void queueAudio(java.nio.ByteBuffer, int, int, long);
     method public final void release();
     method public void setCallback(android.media.MediaSync.Callback, android.os.Handler);
@@ -16378,10 +16379,9 @@ package android.media {
   }
 
   public final class MediaTimestamp {
-    ctor public MediaTimestamp();
-    field public float clockRate;
-    field public long mediaTimeUs;
-    field public long nanoTime;
+    field public final float clockRate;
+    field public final long mediaTimeUs;
+    field public final long nanoTime;
   }
 
   public final class NotProvisionedException extends android.media.MediaDrmException {

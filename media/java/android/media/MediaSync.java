@@ -482,30 +482,36 @@ final public class MediaSync {
    /**
     * Get current playback position.
     * <p>
-    * The MediaTimestamp represents a clock ticking during media playback. It's represented
-    * by an anchor frame ({@link MediaTimestamp#mediaTimeUs} and {@link MediaTimestamp#nanoTime})
-    * and clock speed ({@link MediaTimestamp#clockRate}). For continous playback with
-    * constant speed, its anchor frame doesn't change that often. Thereafter, it's recommended
-    * to not call this method often.
+    * The MediaTimestamp represents how the media time correlates to the system time in
+    * a linear fashion. It contains the media time and system timestamp of an anchor frame
+    * ({@link MediaTimestamp#mediaTimeUs} and {@link MediaTimestamp#nanoTime})
+    * and the speed of the media clock ({@link MediaTimestamp#clockRate}).
+    * <p>
+    * During regular playback, the media time moves fairly constantly (though the
+    * anchor frame may be rebased to a current system time, the linear correlation stays
+    * steady). Therefore, this method does not need to be called often.
     * <p>
     * To help users to get current playback position, this method always returns the timestamp of
     * just-rendered frame, i.e., {@link System#nanoTime} and its corresponding media time. They
     * can be used as current playback position.
     *
-    * @param timestamp a reference to a non-null MediaTimestamp instance allocated
-    *         and owned by caller.
-    * @return true if a timestamp is available, or false if no timestamp is available.
-    *         If a timestamp if available, the MediaTimestamp instance is filled in with
-    *         playback rate, together with the current media timestamp and the system nanoTime
-    *         corresponding to the measured media timestamp.
-    *         In the case that no timestamp is available, any supplied instance is left unaltered.
+    * @return a MediaTimestamp object if a timestamp is available, or {@code null} if no timestamp
+    *         is available, e.g. because the media sync has not been initialized.
     */
-    public boolean getTimestamp(@NonNull MediaTimestamp timestamp)
+    @Nullable
+    public MediaTimestamp getTimestamp()
     {
-        if (timestamp == null) {
-            throw new IllegalArgumentException();
+        try {
+            // TODO: create the timestamp in native
+            MediaTimestamp timestamp = new MediaTimestamp();
+            if (native_getTimestamp(timestamp)) {
+                return timestamp;
+            } else {
+                return null;
+            }
+        } catch (IllegalStateException e) {
+            return null;
         }
-        return native_getTimestamp(timestamp);
     }
 
     private native final boolean native_getTimestamp(@NonNull MediaTimestamp timestamp);

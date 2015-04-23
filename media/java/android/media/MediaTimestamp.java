@@ -17,36 +17,55 @@
 package android.media;
 
 /**
- * Structure that groups clock rate of the stream playback, together with the media timestamp
+ * An immutable object that represents the linear correlation between the media time
+ * and the system time. It contains the media clock rate, together with the media timestamp
  * of an anchor frame and the system time when that frame was presented or is committed
  * to be presented.
- * The "present" means that audio/video produced on device is detectable by an external
+ * <p>
+ * The phrase "present" means that audio/video produced on device is detectable by an external
  * observer off device.
  * The time is based on the implementation's best effort, using whatever knowledge
  * is available to the system, but cannot account for any delay unknown to the implementation.
- * The anchor frame could be any frame, including just-rendered frame, dependent on how
- * it's selected. When the anchor frame is the just-rendered one, the media time stands for
- * current position of the playback.
+ * The anchor frame could be any frame, including a just-rendered frame, or even a theoretical
+ * or in-between frame, based on the source of the MediaTimestamp.
+ * When the anchor frame is a just-rendered one, the media time stands for
+ * current position of the playback or recording.
  *
  * @see MediaSync#getTimestamp
+ * @see MediaPlayer#getTimestamp
  */
 public final class MediaTimestamp
 {
     /**
-     * Media timestamp in microseconds.
+     * Media time in microseconds.
      */
-    public long mediaTimeUs;
+    public final long mediaTimeUs;
 
     /**
-     * The {@link java.lang.System#nanoTime} corresponding to the media timestamp.
+     * The {@link java.lang.System#nanoTime system time} corresponding to the media time
+     * in nanoseconds.
      */
-    public long nanoTime;
+    public final long nanoTime;
 
     /**
-     * Media clock rate.
-     * It is 1.0 if media clock is in sync with the system clock;
+     * The rate of the media clock in relation to the system time.
+     * It is 1.0 if media clock advances in sync with the system clock;
      * greater than 1.0 if media clock is faster than the system clock;
      * less than 1.0 if media clock is slower than the system clock.
      */
-    public float clockRate;
+    public final float clockRate;
+
+    /** @hide */
+    MediaTimestamp(long mediaUs, long systemNs, float rate) {
+        mediaTimeUs = mediaUs;
+        nanoTime = systemNs;
+        clockRate = rate;
+    }
+
+    /** @hide */
+    MediaTimestamp() {
+        mediaTimeUs = 0;
+        nanoTime = 0;
+        clockRate = 1.0f;
+    }
 }
