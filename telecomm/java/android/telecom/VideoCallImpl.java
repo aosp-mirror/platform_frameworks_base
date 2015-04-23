@@ -176,7 +176,7 @@ public class VideoCallImpl extends VideoCall {
 
     /** {@inheritDoc} */
     public void removeVideoCallListener() {
-        mVideoCallListener = null;
+        mCallback = null;
         try {
             mVideoProvider.removeVideoCallback(mBinder);
         } catch (RemoteException e) {
