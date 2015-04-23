@@ -5102,6 +5102,7 @@ package android.app {
     field public static final java.lang.String CONTENT_MATURITY_LOW = "android.contentMaturity.low";
     field public static final java.lang.String CONTENT_MATURITY_MEDIUM = "android.contentMaturity.medium";
     field public static final java.lang.String CONTENT_PRICING_FREE = "android.contentPrice.free";
+    field public static final java.lang.String CONTENT_PRICING_PREORDER = "android.contentPrice.preorder";
     field public static final java.lang.String CONTENT_PRICING_PURCHASE = "android.contentPrice.purchase";
     field public static final java.lang.String CONTENT_PRICING_RENTAL = "android.contentPrice.rental";
     field public static final java.lang.String CONTENT_PRICING_SUBSCRIPTION = "android.contentPrice.subscription";
