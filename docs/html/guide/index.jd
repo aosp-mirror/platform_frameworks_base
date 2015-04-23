@@ -30,7 +30,7 @@ screen for a user interface, and a <em>service</em> independently performs
 work in the background.</p>
 
 <p>From one component you can start another component using an <em>intent</em>. You can even start
-a component in a different app, such an activity in a maps app to show an address. This model
+a component in a different app, such as an activity in a maps app to show an address. This model
 provides multiple entry points for a single app and allows any app to behave as a user's "default"
 for an action that other apps may invoke.</p>
 
