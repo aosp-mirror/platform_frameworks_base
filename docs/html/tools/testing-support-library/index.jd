@@ -391,7 +391,9 @@ onView(withId(R.id.changeTextBt)).perform(click());</pre>
 
   <p>
     To learn more about using Espresso, see the
-    <a href="{@docRoot}reference/android/support/test/package-summary.html">API reference</a>.
+    <a href="{@docRoot}reference/android/support/test/package-summary.html">API reference</a> and
+    <a href="{@docRoot}training/testing/ui-testing/espresso-testing.html">
+      Testing UI for a Single App</a> training.
   </p>
 
   <h3 id="UIAutomator">
@@ -531,7 +533,9 @@ allAppsButton.clickAndWaitForNewWindow();</pre>
 
   <p>
     To learn more about using UI Automator, see the
-    <a href="{@docRoot}reference/android/support/test/package-summary.html">API reference</a>.
+    <a href="{@docRoot}reference/android/support/test/package-summary.html">API reference</a> and
+    <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">
+      Testing UI for Multiple Apps</a> training.
   </p>
 
   <h2 id="setup">

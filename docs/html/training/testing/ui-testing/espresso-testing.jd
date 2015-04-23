@@ -1,0 +1,579 @@
+page.title=Testing UI for a Single App
+page.tags=testing,espresso
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+
+        <ul>
+          <li>Android 2.2 (API level 8) or higher
+          </li>
+
+          <li>
+            <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support
+            Library</a>
+          </li>
+        </ul>
+
+        <h2>
+          This lesson teaches you to
+        </h2>
+
+        <ol>
+          <li>
+            <a href="#setup">Set Up Espresso</a>
+          </li>
+
+          <li>
+            <a href="#build">Create an Espresso Test Class</a>
+          </li>
+
+          <li>
+            <a href="#run">Run Espresso Tests on a Device or Emulator</a>
+          </li>
+        </ol>
+
+        <h2>
+          You should also read
+        </h2>
+
+        <ul>
+           <li><a href="{@docRoot}reference/android/support/test/package-summary.html">
+              Espresso API Reference</a></li>
+        </ul>
+
+        <h2>
+          Try it out
+        </h2>
+
+        <ul>
+          <li>
+            <a href="https://github.com/googlesamples/android-testing"
+            class="external-link">Espresso Code Samples</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <p>
+      UI tests that involve user interactions
+      within a single app help to ensure that users do not
+      encounter unexpected results or have a poor experience when interacting with your app.
+      You should get into the habit of creating user interface (UI) tests if you need to verify
+      that the UI of your app is functioning correctly.
+    </p>
+
+    <p>
+      The Espresso testing framework, provided by the
+      <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>,
+      provides APIs for writing UI tests to simulate user interactions within a
+      single target app. Espresso tests can run on devices running Android 2.2 (API level 8) and
+      higher. A key benefit of using Espresso is that it provides automatic synchronization of test
+      actions with the UI of the app you are testing. Espresso detects when the main thread is idle,
+      so it is able to run your test commands at the appropriate time, improving the reliability of
+      your tests. This capability also relieves you from having to adding any timing workarounds,
+      such as a sleep period, in your test code.
+    </p>
+
+    <p>
+      The Espresso testing framework is an instrumentation-based API and works
+      with the
+      <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code
+      AndroidJUnitRunner}</a> test runner.
+    </p>
+
+    <h2 id="setup">
+      Set Up Espresso
+    </h2>
+
+    <p>
+      Before you begin using Espresso, you must:
+    </p>
+
+    <ul>
+      <li>
+        <strong>Install the Android Testing Support Library</strong>. The Espresso API is
+        located under the {@code com.android.support.test.espresso} package. These classes allow
+        you to create tests that use the Espresso testing framework. To learn how to install the
+        library, see <a href="{@docRoot}tools/testing-support-library/index.html#setup">
+        Testing Support Library Setup</a>.
+      </li>
+
+      <li>
+        <strong>Set up your project structure.</strong> In your Gradle project, the source code for
+        the target app that you want to test is typically placed under the {@code app/src/main}
+        folder. The source code for instrumentation tests, including
+        your Espresso tests, must be placed under the <code>app/src/androidTest</code> folder. To
+        learn more about setting up your project directory, see
+        <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.
+      </li>
+
+      <li>
+        <strong>Specify your Android testing dependencies</strong>. In order for the
+        <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for Gradle</a> to
+        correctly build and run your Espresso tests, you must specify the following libraries in
+        the {@code build.gradle} file of your Android app module:
+
+        <pre>
+dependencies {
+    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
+}
+</pre>
+      </li>
+
+      <li>
+        <strong>Turn off animations on your test device.</strong> Leaving system animations turned
+        on in the test device might cause unexpected results or may lead your test to fail. Turn
+        off animations from <em>Settings</em> by opening <em>Developing Options</em> and
+        turning all the following options off:
+        <ul>
+          <li>
+            <em>Window animation scale</em>
+          </li>
+
+          <li>
+            <em>Transition animation scale</em>
+          </li>
+
+          <li>
+            <em>Animator duration scale</em>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2 id="build">
+      Create an Espresso Test Class
+    </h2>
+
+    <p>
+      To create an Espresso test, create a Java class or an
+      {@link android.test.ActivityInstrumentationTestCase2}
+      subclass that follows this programming model:
+    </p>
+
+    <ol>
+      <li>Find the UI component you want to test in an {@link android.app.Activity} (for example, a
+      sign-in button in the app) by calling the
+      <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">
+        {@code onView()}</a> method, or the
+      <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onData(org.hamcrest.Matcher<java.lang.Object>)">
+      {@code onData()}</a> method for {@link android.widget.AdapterView} controls.
+      </li>
+
+      <li>Simulate a specific user interaction to perform on that UI component, by calling the
+      <a href="{@docRoot}reference/android/support/test/espresso/ViewInteraction.html#perform(android.support.test.espresso.ViewAction...)">{@code ViewInteraction.perform()}</a>
+      or
+      <a href="{@docRoot}reference/android/support/test/espresso/DataInteraction.html#perform(android.support.test.espresso.ViewAction...)">{@code DataInteraction.perform()}</a>
+      method and passing in the user action (for example, click on the sign-in button). To sequence
+      multiple actions on the same UI component, chain them using a comma-separated list in your
+      method argument.
+      </li>
+
+      <li>Repeat the steps above as necessary, to simulate a user flow across multiple
+      activities in the target app.
+      </li>
+
+      <li>Use the
+    <a href="{@docRoot}reference/android/support/test/espresso/assertion/ViewAssertions.html">{@code ViewAssertions}</a>
+        methods to check that the UI reflects the expected
+      state or behavior, after these user interactions are performed.
+      </li>
+    </ol>
+
+    <p>
+      These steps are covered in more detail in the sections below.
+    </p>
+
+    <p>
+      The following code snippet shows how your test class might invoke this basic workflow:
+    </p>
+
+<pre>
+onView(withId(R.id.my_view))            // withId(R.id.my_view) is a ViewMatcher
+        .perform(click())               // click() is a ViewAction
+        .check(matches(isDisplayed())); // matches(isDisplayed()) is a ViewAssertion
+</pre>
+
+    <h3 id="espresso-aitc2">
+      Using Espresso with ActivityInstrumentationTestCase2
+    </h3>
+
+    <p>
+      If you are subclassing {@link android.test.ActivityInstrumentationTestCase2}
+      to create your Espresso test class, you must inject an
+      {@link android.app.Instrumentation} instance into your test class. This step is required in
+      order for your Espresso test to run with the
+      <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
+      test runner.
+    </p>
+
+    <p>
+      To do this, call the
+      {@link android.test.InstrumentationTestCase#injectInstrumentation(android.app.Instrumentation) injectInstrumentation()}
+      method and pass in the result of
+      <a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html#getInstrumentation()">
+      {@code InstrumentationRegistry.getInstrumentation()}</a>, as shown in the following code
+      example:
+    </p>
+
+<pre>
+import android.support.test.InstrumentationRegistry;
+
+public class MyEspressoTest
+        extends ActivityInstrumentationTestCase2&lt;MyActivity&gt; {
+
+    private MyActivity mActivity;
+
+    public MyEspressoTest() {
+        super(MyActivity.class);
+    }
+
+    &#64;Before
+    public void setUp() throws Exception {
+        super.setUp();
+        injectInstrumentation(InstrumentationRegistry.getInstrumentation());
+        mActivity = getActivity();
+    }
+
+   ...
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Previously, {@link android.test.InstrumentationTestRunner}
+would inject the {@link android.app.Instrumentation} instance, but this test runner is being
+deprecated.</p>
+
+    <h3 id="accessing-ui-components">
+      Accessing UI Components
+    </h3>
+
+    <p>
+      Before Espresso can interact with the app under test, you must first specify the UI component
+      or <em>view</em>. Espresso supports the use of
+<a href="http://hamcrest.org/" class="external-link">Hamcrest matchers</a>
+      for specifying views and adapters in your app.
+    </p>
+
+    <p>
+      To find the view, call the <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">
+      {@code onView()}</a>
+      method and pass in a view matcher that specifies the view that you are targeting. This is
+      described in more detail in <a href="#specifying-view-matcher">Specifying a View Matcher</a>.
+      The <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">
+      {@code onView()}</a> method returns a
+      <a href="{@docRoot}reference/android/support/test/espresso/ViewInteraction.html">
+      {@code ViewInteraction}</a>
+      object that allows your test to interact with the view.
+      However, calling  the <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">
+      {@code onView()}</a> method may not work if you want to locate a view in
+      an {@link android.widget.AdapterView} layout. In this case, follow the instructions in
+      <a href="#locating-adpeterview-view">Locating a view in an AdapterView</a> instead.
+    </p>
+
+    <p class="note">
+      <strong>Note</strong>: The <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">
+      {@code onView()}</a> method does not check if the view you specified is
+      valid. Instead, Espresso searches only the current view hierarchy, using the matcher provided.
+      If no match is found, the method throws a
+      <a href="{@docRoot}reference/android/support/test/espresso/NoMatchingViewException.html">
+      {@code NoMatchingViewException}</a>.
+    </p>
+
+    <p>
+      The following code snippet shows how you might write a test that accesses an
+      {@link android.widget.EditText} field, enters a string of text, closes the virtual keyboard,
+      and then performs a button click.
+    </p>
+
+<pre>
+public void testChangeText_sameActivity() {
+    // Type text and then press the button.
+    onView(withId(R.id.editTextUserInput))
+            .perform(typeText(STRING_TO_BE_TYPED), closeSoftKeyboard());
+    onView(withId(R.id.changeTextButton)).perform(click());
+
+    // Check that the text was changed.
+    ...
+}
+</pre>
+
+    <h4 id="specifying-view-matcher">
+      Specifying a View Matcher
+    </h4>
+
+    <p>
+      You can specify a view matcher by using these approaches:
+    </p>
+
+    <ul>
+      <li>Calling methods in the
+        <a href="{@docRoot}reference/android/support/test/espresso/matcher/ViewMatchers.html">
+        {@code ViewMatchers}</a> class. For example, to find a view by looking for a text string it
+        displays, you can call a method like this:
+        <pre>
+onView(withText("Sign-in"));
+</pre>
+
+<p>Similarly you can call
+<a href="{@docRoot}reference/android/support/test/espresso/matcher/ViewMatchers.html#withId(int)">
+{@code withId()}</a> and providing the resource ID ({@code R.id}) of the view, as shown in the
+following example:</p>
+
+<pre>
+onView(withId(R.id.button_signin));
+</pre>
+
+    <p>
+      Android resource IDs are not guaranteed to be unique. If your test attempts to match to a
+      resource ID used by more than one view, Espresso throws an
+<a href="{@docRoot}reference/android/support/test/espresso/AmbiguousViewMatcherException.html">
+  {@code AmbiguousViewMatcherException}</a>.
+    </p>
+      </li>
+      <li>Using the Hamcrest
+      <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matchers.html"
+         class="external-link">{@code Matchers}</a> class. You can use the
+      {@code allOf()} methods to combine multiple matchers, such as
+      {@code containsString()} and {@code instanceOf()}. This approach allows you to
+      filter the match results more narrowly, as shown in the following example:
+<pre>
+onView(allOf(withId(R.id.button_signin), withText("Sign-in")));
+</pre>
+<p>You can use the {@code not} keyword to filter for views that don't correspond to the matcher, as
+shown in the following example:</p>
+<pre>
+onView(allOf(withId(R.id.button_signin), not(withText("Sign-out"))));
+</pre>
+<p>To use these methods in your test, import the {@code org.hamcrest.Matchers} package. To
+learn more about Hamcrest matching, see the
+<a href="http://hamcrest.org/" class="external-link">Hamcrest site</a>.
+</p>
+      </li>
+    </ul>
+
+    <p>
+      To improve the performance of your Espresso tests, specify the minimum matching information
+      needed to find your target view. For example, if a view is uniquely identifiable by its
+      descriptive text, you do not need to specify that it is also assignable from the
+      {@link android.widget.TextView} instance.
+    </p>
+
+    <h4 id="#locating-adpeterview-view">
+      Locating a view in an AdapterView
+    </h4>
+
+    <p>
+      In an {@link android.widget.AdapterView} widget, the view is dynamically populated with child
+      views at runtime. If the target view you want to test is inside an
+      {@link android.widget.AdapterView}
+      (such as a {@link android.widget.ListView}, {@link android.widget.GridView}, or
+      {@link android.widget.Spinner}), the
+<a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">
+  {@code onView()}</a> method might not work because only a
+      subset of the views may be loaded in the current view hierarchy.
+    </p>
+
+    <p>
+      Instead, call the <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onData(org.hamcrest.Matcher<java.lang.Object>)">{@code onData()}</a>
+      method to obtain a
+      <a href="{@docRoot}reference/android/support/test/espresso/DataInteraction.html">
+      {@code DataInteraction}</a>
+      object to access the target view element. Espresso handles loading the target view element
+      into the current view hierarchy. Espresso also takes care of scrolling to the target element,
+      and putting the element into focus.
+    </p>
+
+    <p class="note">
+      <strong>Note</strong>: The
+  <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onData(org.hamcrest.Matcher<java.lang.Object>)">{@code onData()}</a>
+      method does not check if if the item you specified corresponds with a view. Espresso searches
+      only the current view hierarchy. If no match is found, the method throws a
+      <a href="{@docRoot}reference/android/support/test/espresso/NoMatchingViewException.html">
+        {@code NoMatchingViewException}</a>.
+    </p>
+
+    <p>
+      The following code snippet shows how you can use the
+      <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onData(org.hamcrest.Matcher<java.lang.Object>)">{@code onData()}</a>
+      method together
+      with Hamcrest matching to search for a specific row in a list that contains a given string.
+      In this example, the {@code LongListActivity} class contains a list of strings exposed
+      through a {@link android.widget.SimpleAdapter}.
+    </p>
+
+<pre>
+onData(allOf(is(instanceOf(Map.class)),
+        hasEntry(equalTo(LongListActivity.ROW_TEXT), is(str))));
+</pre>
+
+    <h3 id="perform-actions">
+      Performing Actions
+    </h3>
+
+    <p>
+      Call the <a href="{@docRoot}reference/android/support/test/espresso/ViewInteraction.html#perform(android.support.test.espresso.ViewAction...)">{@code ViewInteraction.perform()}</a>
+      or
+      <a href="{@docRoot}reference/android/support/test/espresso/DataInteraction.html#perform(android.support.test.espresso.ViewAction...)">{@code DataInteraction.perform()}</a>
+      methods to
+      simulate user interactions on the UI component. You must pass in one or more
+      <a href="{@docRoot}reference/android/support/test/espresso/ViewAction.html">{@code ViewAction}</a>
+      objects as arguments. Espresso fires each action in sequence according to
+      the given order, and executes them in the main thread.
+    </p>
+
+    <p>
+      The
+      <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html">{@code ViewActions}</a>
+      class provides a list of helper methods for specifying common actions.
+      You can use these methods as convenient shortcuts instead of creating and configuring
+      individual <a href="{@docRoot}reference/android/support/test/espresso/ViewAction.html">{@code ViewAction}</a>
+      objects. You can specify such actions as:
+    </p>
+
+    <ul>
+      <li>
+       <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html#click()">{@code ViewActions.click()}</a>:
+       Clicks on the view.
+      </li>
+
+      <li>
+       <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html#typeText(java.lang.String)">{@code ViewActions.typeText()}</a>:
+       Clicks on a view and enters a specified string.
+      </li>
+
+      <li>
+       <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html#scrollTo()">{@code ViewActions.scrollTo()}</a>:
+       Scrolls to the view. The
+        target view must be subclassed from {@link android.widget.ScrollView}
+        and the value of its
+        <a href="http://developer.android.com/reference/android/view/View.html#attr_android:visibility">{@code android:visibility}</a>
+        property must be {@link android.view.View#VISIBLE}. For views that extend
+        {@link android.widget.AdapterView} (for example,
+        {@link android.widget.ListView}),
+        the
+        <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onData(org.hamcrest.Matcher<java.lang.Object>)">{@code onData()}</a>
+        method takes care of scrolling for you.
+      </li>
+
+      <li>
+       <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html#pressKey(int)">{@code ViewActions.pressKey()}</a>:
+       Performs a key press using a specified keycode.
+      </li>
+
+      <li>
+      <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html#clearText()">{@code ViewActions.clearText()}</a>:
+      Clears the text in the target view.
+      </li>
+    </ul>
+
+    <p>
+      If the target view is inside a {@link android.widget.ScrollView}, perform the
+      <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html#scrollTo()">{@code ViewActions.scrollTo()}</a>
+      action first to display the view in the screen before other proceeding
+      with other actions. The
+      <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html#scrollTo()">{@code ViewActions.scrollTo()}</a>
+      action will have no effect if the view is already displayed.
+    </p>
+
+    <h3 id="verify-results">
+      Verifying Results
+    </h3>
+
+    <p>
+      Call the
+      <a href="{@docRoot}reference/android/support/test/espresso/ViewInteraction.html#check(android.support.test.espresso.ViewAssertion)">{@code ViewInteraction.check()}</a>
+      or
+      <a href="{@docRoot}reference/android/support/test/espresso/DataInteraction.html#check(android.support.test.espresso.ViewAssertion)">{@code DataInteraction.check()}</a>
+      method to assert
+      that the view in the UI matches some expected state. You must pass in a
+      <a href="{@docRoot}reference/android/support/test/espresso/ViewAssertion.html">
+      {@code ViewAssertion}</a> object as the argument. If the assertion fails, Espresso throws
+      an {@link junit.framework.AssertionFailedError}.
+    </p>
+
+    <p>
+      The
+  <a href="{@docRoot}reference/android/support/test/espresso/assertion/ViewAssertions.html">{@code ViewAssertions}</a>
+      class provides a list of helper methods for specifying common
+      assertions. The assertions you can use include:
+    </p>
+
+    <ul>
+      <li>
+        <a href="{@docRoot}reference/android/support/test/espresso/assertion/ViewAssertions.html#doesNotExist()">{@code doesNotExist}</a>:
+Asserts that there is no view matching the specified criteria in the current view hierarchy.
+      </li>
+
+      <li>
+        <a href="{@docRoot}reference/android/support/test/espresso/assertion/ViewAssertions.html#matches(org.hamcrest.Matcher&lt;? super android.view.View&gt;)">{@code matches}</a>:
+        Asserts that the specified view exists in the current view hierarchy
+        and its state matches some given Hamcrest matcher.
+      </li>
+
+      <li>
+       <a href="{@docRoot}reference/android/support/test/espresso/assertion/ViewAssertions.html#selectedDescendantsMatch(org.hamcrest.Matcher&lt;android.view.View&gt;, org.hamcrest.Matcher&lt;android.view.View&gt;)">{@code selectedDescendentsMatch}</a>
+       : Asserts that the specified children views for a
+        parent view exist, and their state matches some given Hamcrest matcher.
+      </li>
+    </ul>
+
+    <p>
+      The following code snippet shows how you might check that the text displayed in the UI has
+      the same value as the text previously entered in the
+      {@link android.widget.EditText} field.
+    </p>
+<pre>
+public void testChangeText_sameActivity() {
+    // Type text and then press the button.
+    ...
+
+    // Check that the text was changed.
+    onView(withId(R.id.textToBeChanged))
+            .check(matches(withText(STRING_TO_BE_TYPED)));
+}
+</pre>
+
+<h2 id="run">Run Espresso Tests on a Device or Emulator</h2>
+
+    <p>
+      To run Espresso tests, you must use the
+      <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
+      class provided in the
+      <a href="{@docRoot}tools/testing-support-library/index.html">
+      Android Testing Support Library</a> as your default test runner. The
+      <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for
+      Gradle</a> provides a default directory ({@code src/androidTest/java}) for you to store the
+      instrumented test classes and test suites that you want to run on a device. The
+      plug-in compiles the test code in that directory and then executes the test app using
+      the configured test runner class.
+    </p>
+
+    <p>
+      To run Espresso tests in your Gradle project:
+    </p>
+
+    <ol>
+      <li>Specify
+        <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
+        as the default test instrumentation runner in
+      your {@code build.gradle} file:
+
+  <pre>
+android {
+    defaultConfig {
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+}</pre>
+      </li>
+      <li>Run your tests from the command-line by calling the the {@code connectedCheck}
+        (or {@code cC}) task:
+  <pre>
+./gradlew cC</pre>
+      </li>
+    </ol>
