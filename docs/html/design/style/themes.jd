@@ -17,6 +17,16 @@ page.title=Themes
   </div>
   <div class="layout-content-col span-7">
 
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/color.html#color-themes">
+  <div>
+    <h3>Material Design</h3>
+    <p>Color Themes<p>
+  </div>
+</a>
+
+
 <p>Themes are Android's mechanism for applying a consistent style to an app or activity.
 The style specifies the visual properties of the elements that make up your user interface,
 such as color, height, padding and font size. To promote greater cohesion between all apps
@@ -34,7 +44,7 @@ of which you can selectively implement your own visual stylings.</p>
 
 <div class="note develop">
 <p><strong>Developer Guide</strong></p>
-  <p>For information about how to apply themes such as Holo Light and Dark, and 
+  <p>For information about how to apply themes such as Holo Light and Dark, and
   how to build your own themes, see the
   <a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a> API guide.</p>
 </div>
