@@ -68,9 +68,18 @@ public final class Call {
     public static final int STATE_DISCONNECTED = 7;
 
     /**
-     * The state of an outgoing {@code Call}, but waiting for user input before proceeding.
+     * The state of an outgoing {@code Call} when waiting on user to select a
+     * {@link PhoneAccount} through which to place the call.
      */
-    public static final int STATE_PRE_DIAL_WAIT = 8;
+    public static final int STATE_SELECT_PHONE_ACCOUNT = 8;
+
+    /**
+     * @hide
+     * @deprecated use STATE_SELECT_PHONE_ACCOUNT.
+     */
+    @Deprecated
+    @SystemApi
+    public static final int STATE_PRE_DIAL_WAIT = STATE_SELECT_PHONE_ACCOUNT;
 
     /**
      * The initial state of an outgoing {@code Call}.
@@ -996,7 +1005,7 @@ public final class Call {
             mVideoCall = parcelableCall.getVideoCall(this);
         }
 
-        int state = stateFromParcelableCallState(parcelableCall.getState());
+        int state = parcelableCall.getState();
         boolean stateChanged = mState != state;
         if (stateChanged) {
             mState = state;
@@ -1192,34 +1201,6 @@ public final class Call {
                     callback.onConferenceableCallsChanged(call, mUnmodifiableConferenceableCalls);
                 }
             });
-        }
-    }
-
-    private int stateFromParcelableCallState(int parcelableCallState) {
-        switch (parcelableCallState) {
-            case CallState.NEW:
-                return STATE_NEW;
-            case CallState.CONNECTING:
-                return STATE_CONNECTING;
-            case CallState.PRE_DIAL_WAIT:
-                return STATE_PRE_DIAL_WAIT;
-            case CallState.DIALING:
-                return STATE_DIALING;
-            case CallState.RINGING:
-                return STATE_RINGING;
-            case CallState.ACTIVE:
-                return STATE_ACTIVE;
-            case CallState.ON_HOLD:
-                return STATE_HOLDING;
-            case CallState.DISCONNECTED:
-                return STATE_DISCONNECTED;
-            case CallState.ABORTED:
-                return STATE_DISCONNECTED;
-            case CallState.DISCONNECTING:
-                return STATE_DISCONNECTING;
-            default:
-                Log.wtf(this, "Unrecognized CallState %s", parcelableCallState);
-                return STATE_NEW;
         }
     }
 }
