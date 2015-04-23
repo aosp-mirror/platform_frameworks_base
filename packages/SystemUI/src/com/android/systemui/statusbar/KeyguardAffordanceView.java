@@ -204,7 +204,7 @@ public class KeyguardAffordanceView extends ImageView {
     private void updateCircleColor() {
         float fraction = 0.5f + 0.5f * Math.max(0.0f, Math.min(1.0f,
                 (mCircleRadius - mMinBackgroundRadius) / (0.5f * mMinBackgroundRadius)));
-        if (mPreviewView != null) {
+        if (mPreviewView != null && mPreviewView.getVisibility() == VISIBLE) {
             float finishingFraction = 1 - Math.max(0, mCircleRadius - mCircleStartRadius)
                     / (mMaxCircleSize - mCircleStartRadius);
             fraction *= finishingFraction;

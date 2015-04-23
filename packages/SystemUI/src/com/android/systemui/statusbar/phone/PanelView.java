@@ -972,17 +972,7 @@ public abstract class PanelView extends FrameLayout {
         if (mHintAnimationRunning) {
             return true;
         }
-        if (x < mEdgeTapAreaWidth
-                && mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
-            onEdgeClicked(false /* right */);
-            return true;
-        } else if (x > getWidth() - mEdgeTapAreaWidth
-                && mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
-            onEdgeClicked(true /* right */);
-            return true;
-        } else {
-            return onMiddleClicked();
-        }
+        return onMiddleClicked();
     }
 
     protected final Runnable mPostCollapseRunnable = new Runnable() {
@@ -993,8 +983,6 @@ public abstract class PanelView extends FrameLayout {
     };
 
     protected abstract boolean onMiddleClicked();
-
-    protected abstract void onEdgeClicked(boolean right);
 
     protected abstract boolean isDozing();
 
