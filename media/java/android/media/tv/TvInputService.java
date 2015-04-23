@@ -883,6 +883,10 @@ public abstract class TvInputService extends Service {
 
         /**
          * Called when the application sets playback rate and audio mode.
+         * <p>
+         * Once a playback rate is set, the implementation should honor the value until a new tune
+         * request. Pause/resume/seek request does not reset the playback rate previously set.
+         * </p>
          *
          * @param rate The ratio between desired playback rate and normal one.
          * @param audioMode Audio playback mode. Must be one of the supported audio modes:
