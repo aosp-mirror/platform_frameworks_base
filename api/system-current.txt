@@ -32758,6 +32758,7 @@ package android.telecom {
     method public boolean isRinging();
     method public boolean isTtySupported();
     method public boolean isVoiceMailNumber(android.telecom.PhoneAccountHandle, java.lang.String);
+    method public void placeCall(android.net.Uri, android.os.Bundle);
     method public void registerPhoneAccount(android.telecom.PhoneAccount);
     method public void showInCallScreen(boolean);
     method public void silenceRinger();
