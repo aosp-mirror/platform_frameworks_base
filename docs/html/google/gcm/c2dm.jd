@@ -33,8 +33,8 @@ page.title=Migration
 </div>
 </div>
 
-<p>Android Cloud to Device Messaging (C2DM) was officially deprecated on June 26, 2012, and has been
- shut down completely as of April 1, 2015.  <strong>C2DM developers are strongly encouraged to move
+<p>Android Cloud to Device Messaging (C2DM) was officially deprecated on June 26, 2012, and will be
+ shut down completely as of July 30, 2015.  <strong>C2DM developers are strongly encouraged to move
   to Google Cloud Messaging (GCM)</strong>. GCM is the next generation of C2DM.</p>
 
 <p>This document is addressed to  C2DM developers who are moving to GCM. It describes the differences between GCM and C2DM, and explains how to migrate existing C2DM apps to GCM.</p>
