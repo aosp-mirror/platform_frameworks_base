@@ -1,0 +1,129 @@
+page.title=Batterystats &amp; Battery Historian Walkthrough
+meta.tags="android, performance, profiling, tools, battery, batterystats, historian, batterydrain
+page.tags="android", "performance", "profiling", "tools", "battery", "batterystats", "historian", "batterydrain"
+page.metaDescription=Collect battery usage data from your device and display it graphically in your browser.
+page.image=tools/performance/thumbnails/tools_battery_historian.png
+page.article=true
+
+
+@jd:body
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/batterystats-battery-historian/charts.html">
+    Battery Historian Charts</a></li>
+  <li><a href="{@docRoot}tools/performance/systrace/index.html">
+    Systrace Walkthrough</a></li>
+</ul>
+
+</div>
+
+  <p>This walkthrough shows the basic usage and workflow for the Batterystats tool and the Battery
+  Historian script.</p>
+
+  <p>Batterystats collects battery data from your device, and Battery Historian converts that data
+  into an HTML visualization that you can view in your Browser. Batterystats is part of the Android
+  framework, and Battery Historian is open-sourced and available on GitHub at <a href=
+  "https://github.com/google/battery-historian">https://github.com/google/battery-historian</a>.</p>
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Showing you where and how processes are drawing current from the battery.</li>
+
+    <li>Identifying tasks in your app that could be deferred or even removed to improve battery
+    life.</li>
+  </ul>
+
+  <h2>Prerequisites</h2>
+
+  <ul>
+    <li>A mobile device with <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    enabled running Android 5.0 or higher.</li>
+  </ul>
+
+  <h2>Working with Batterystats &amp; Battery Historian</h2>
+
+  <div class="sidebox-wrapper" style="width:400px;">
+      <div class="sidebox" style="width:350px;">
+        <h2>Summary</h2>
+          <code>
+            <p><b>https://github.com/google/battery-historian</b></p>
+            <p>&gt; adb kill-server</p>
+            <p>&gt; adb devices</p>
+            <p>&gt; adb shell dumpsys batterystats --reset</p>
+            <p>&lt;disconnect and play with app&gt;...&lt;reconnect&gt;</p>
+            <p>&gt; adb devices</p>
+            <p>&gt;adb shell dumpsys batterystats &gt; batterystats.txt</p>
+            <p>&gt; python historian.py batterystats.txt &gt; batterystats.html</p>
+          </code>
+      </div>
+  </div>
+
+  <ol>
+
+    <li>Download the open-source Battery Historion Python script from GitHub (<a href=
+    "https://github.com/google/battery-historian">https://github.com/google/battery-historian</a>).
+    </li>
+
+    <li>Unzip the file to extract the Battery Historian folder. Inside the folder,
+      find the <code>historian.py</code> file
+      and move it to the Desktop or another <em>writable</em> directory.</li>
+
+    <li>Connect your mobile device to your computer.</li>
+
+    <li>On your computer, open a Terminal window.</li>
+
+    <li>Change to the directory where you've saved <code>historian.py</code>,
+      <br>for example:
+      <code>cd ~/Desktop</code></li>
+
+    <li>Shut down your running adb server.
+      <br><code>&gt; adb kill-server</code></li>
+
+    <li>Restart adb and check for connected devices.
+      <br><code>&gt; adb devices</code>
+      <br><img src="{@docRoot}images/tools/performance/batterystats-battery-historian/gettingstarted_image01.png">
+      <br>If you don't see any devices, make sure your phone is connected, and USB Debugging
+      is turned on, and then kill and restart adb.</li>
+
+    <li>Reset battery data gathering.
+      <br><code>&gt; adb shell dumpsys batterystats --reset</code>
+      <p>Resetting erases old battery collection data; otherewise, the output will be huge.</p>
+    </li>
+
+    <li>Disconnect your device from your computer so that you are only drawing current from the
+    device's battery.</li>
+
+    <li>Play with your app for a short time.</li>
+
+    <li>Reconnect your phone.</li>
+
+    <li>Make sure your phone is recognized: <code>&gt; adb devices</code></li>
+
+    <li>Dump all battery data. This can take a while:
+      <br><code>&gt; adb shell dumpsys batterystats &gt; batterystats.txt</code></li>
+
+    <li>Create a HTML version of the data dump for Battery Historian:
+       <br><code>&gt; python historian.py batterystats.txt &gt; batterystats.html</code></li>
+
+    <li>Open the <code>batterystats.htm</code> file in your browser.</li>
+
+    <li>Continue with <a href="{@docRoot}tools/performance/batterystats-battery-historian/charts.html">
+        Battery Historian Charts</a>.
+    </li>
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/batterystats-battery-historian/gettingstarted_image02.png"
+         alt=""
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Battery Historian output.
+      </p>
+    </div>
+  </ol>
+
+
+

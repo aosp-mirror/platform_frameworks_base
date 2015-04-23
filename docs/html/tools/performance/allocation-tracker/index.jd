@@ -1,0 +1,148 @@
+page.title=Allocation Tracker Walkthrough
+meta.tags="android, performance, profiling, tools, memoryleaks, memoryheap"
+page.tags="android", "performance", "profiling", "tools", "memoryleaks", "memoryheap"
+page.metaDescription=Record you app's memory allocations with their call stack to identify code that allocates and frees objects unnecessarily.
+page.image=tools/performance/thumbnails/tools_allocation_tracker.png
+page.article=true
+
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#WorkingWithAllocationTracker">Working with Allocation Tracker</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/heap-viewer/index.html">
+    Heap Viewer Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/memory-monitor/index.html">
+    Memory Monitor Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/comparison.html">
+    Comparison: Memory Monitor, Heap Viewer, Allocation Tracker</a>
+  <li><a href="{@docRoot}tools/performance/traceview/index.html">
+    Traceview Walkthrough</a></li>
+</ul>
+
+</div>
+
+
+  <p>This walkthrough shows the basic usage and workflow for the Allocation Tracker tool in Android
+  Studio. Allocation Tracker records an app's memory allocations and lists all
+  allocated objects for the profiling cycle with their call stack, size, and allocating code.</p>
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Identifying where many similar object types, from roughly the same call stack, are
+    allocated and deallocated over a very short period of time.</li>
+
+    <li>Finding the places in your code that may contribute to inefficient memory use.</li>
+  </ul>
+
+  <p>Before using Allocation Tracker, profile your code with the
+  <a href="{@docRoot}tools/performance/memory-monitor/index.html">Memory
+  Monitor Tool</a>. If you see many garbage collection events in a short amount of time, use
+  <a href="{@docRoot}tools/performance/heap-viewer/index.html">Heap
+  Viewer</a> to identify candidate object types, and Allocation Tracker to determine where this is
+  happening in your code.</p>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>A mobile device with <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    enabled.</li>
+
+    <li>Application code. Use your own code, or the <a href=
+    "https://github.com/udacity/Sunshine-Version-2">Sunshine</a> sample app from the <a href=
+    "https://www.udacity.com/course/ud853">Android Fundamentals Udacity course</a>.</li>
+  </ul>
+
+  <h2 id="WorkingWithAllocationTracker">Working with Allocation Tracker</h2>
+
+  <p>Allocation Tracker records each memory allocation that your app performs during the profiling
+  cycle. You tell Allocation Tracker to start recording and it logs allocations
+  until you tell it to stop.</p>
+
+<hr>
+<ul class="no-bullet">
+<!-- this also hides bullet, by default outside box -->
+ <li><div style="overflow:hidden">
+  <ol class="padded">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/allocation-tracker/gettingstarted_image01.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Steps for starting Allocation Tracker.
+      </p>
+    </div>
+
+    <li>Connect your mobile device to your computer.</li>
+
+    <li>Open your application in Android Studio, build the source, and run it on your device.</li>
+
+    <li>Click the <b>Android</b> button at the bottom of your Android Studio window.</li>
+
+    <li>Click the RECORD button
+        <img src="{@docRoot}images/tools/performance/allocation-tracker/gettingstarted_image02.png">
+        (Start Allocation Tracking tooltip).</li>
+
+    <li>Interact with your application.</li>
+
+    <li>Click the (same) STOP button (Stop Allocation Tracking tooltip).</li>
+  </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="7">
+
+  <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/allocation-tracker/gettingstarted_image03.png"
+         alt=""
+         width="440px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>Example of Allocation Tracker output.
+      </p>
+    </div>
+
+    <li>After a few seconds, a pane with your recorded data opens.
+
+    <p>Note that allocations are logged on
+      the device, and the data file is transferred to the host computer, parsed for information, and
+      displayed.</p></li>
+
+    <li>The pane populates with a table.
+
+    <ul>
+      <li>Each row represents a memory allocation event.</li>
+
+      <li>Each column represents information about the allocation, such as the object type,
+      the thread, and its size. </li>
+
+      <li>The columns are movable, resizable, and sortable.</li>
+    </ul>
+
+    <p>Use the Filter to show only allocations from your app.</li>
+
+    <li>Click on an object to see its full stack trace.</li>
+  </ol>
+</div></li>
+</ul>

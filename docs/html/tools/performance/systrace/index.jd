@@ -1,0 +1,182 @@
+page.title=Systrace Walkthrough
+meta.tags="android, performance, profiling, tools, compute, systrace"
+page.tags="android", "performance", "profiling", "tools", "compute", "systrace"
+page.metaDescription=Collect system and application process execution data to identify performance bottlenecks.
+page.image=tools/performance/thumbnails/tools_systrace.png
+page.article=true
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#WorkingWithSystrace">Working with Systrace</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/traceview/index.html">
+    Traceview Walkthrough</a></li>
+    <li><a href="{@docRoot}tools/performance/allocation-tracker/index.html">
+    Allocation Tracker Walkthrough</a></li>
+</ul>
+
+</div>
+
+  <p>This walkthrough shows the basic usage and workflow for the Systrace tool in the Android
+  Device Monitor.</p>
+
+  <p>Systrace collects system and application process execution data and generates detailed,
+  interactive reports from devices running Android 4.1 and higher.</p>
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Evaluating container performance.</li>
+
+    <li>Finding performance bottlenecks in the execution of your code.</li>
+  </ul>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>Android SDK Tools 20.</li>
+
+    <li><a href="http://www.python.org/">Python</a> installed and included in your development
+    computer's execution path.</li>
+
+    <li>A mobile device running at least Android 4.1 with <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    and USB Debugging enabled in Developer Options.</li>
+
+    <li>Application code. Use your own code, or the <a href=
+    "https://github.com/udacity/Sunshine-Version-2">Sunshine</a> sample app from the <a href=
+    "https://www.udacity.com/course/ud853">Android Fundamentals Udacity course</a>.</li>
+  </ul>
+
+  <h2 id="WorkingWithSystrace">Working with Systrace</h2>
+
+<ul class="no-bullet">
+<!-- this also hides bullet, by default outside box -->
+ <li><div style="overflow:hidden">
+  <ol class="padded">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/systrace/gettingstarted_image001.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Starting Android Device Monitor.
+      </p>
+    </div>
+
+    <li>Connect your mobile device to your computer.</li>
+
+    <li>Open your application in Android Studio, build the source, and run it on your device.</li>
+
+    <li>From Android Studio, start the Android Device Monitor: <b>Tools -&gt; Android -&gt; Android
+    Device</b> <b>Monitor</b>.
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="4">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/systrace/gettingstarted_image003.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>Steps for starting Systrace.
+      </p>
+    </div>
+
+    <li>Make sure your
+      device and the package for your application are showing in the Devices (DDMS mode) or
+      Windows (Hierarchy Viewer mode) tab.
+
+      <p>You can choose <b>Window &gt; Reset Perspective</b> to
+      get back to the default arrangement.</p>
+    </li>
+
+    <li>Click the <b>DDMS</b> button, because Systrace is one of the DDMS tools.</li>
+
+    <li>Click the <b>Systrace</b> button
+      <img src="{@docRoot}images/tools/performance/systrace/gettingstarted_image002.png">.</li>
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="7">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/systrace/gettingstarted_image004.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+       <strong>Figure 3. </strong>Steps for creating a trace.
+      </p>
+    </div>
+
+    <li>In the <b>Android System Trace</b> popup, choose your settings for the trace.
+
+      <ul>
+        <li><b>Destination File:</b> Where the trace is stored as an HTML file. Default is in
+        your home directory as <code>trace.html</code>.</li>
+
+        <li><b>Trace Duration:</b> Default is 5 seconds,
+          and 30 seconds is a good time to choose.</li>
+
+        <li><b>Trace Buffer size:</b> Default is unlimited.</li>
+
+        <li><b>Enable Application Traces from:</b> Make sure your app is selected.</li>
+
+        <li><b>Select tags to enable:</b> Choose at least one value to trace, for example Graphics
+        and View System.</li>
+      </ul>
+    </li>
+
+    <li>Click <b>OK</b> to start tracing.</li>
+
+    <li>Interact with your app.</li>
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="10">
+
+    <div class="figure" style="">
+      <img src="{@docRoot}images/tools/performance/systrace/gettingstarted_image005.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 4. </strong>Example systrace output in browser.
+      </p>
+    </div>
+
+    <li>When the trace is done, you are automatically returned to Android Device Monitor.</li>
+
+    <li>Go to your home directory, or the directory you chose as the file destination.</li>
+
+    <li>Open the <code>trace.html</code> file in your browser.</li>
+
+   </ol>
+</div></li>
+</ul>
+
+

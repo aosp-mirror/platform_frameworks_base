@@ -1,0 +1,172 @@
+page.title=Memory Monitor Walkthrough
+meta.tags="android, performance, profiling, tools, memory, memoryleaks, garbagecollection, memorymonitor"
+page.tags="android", "performance", "profiling", "tools", "memory", "memoryleaks", "garbagecollection", "memorymonitor"
+page.metaDescription=Graph memory usage and garbage collection events for your app in real-time.
+page.image=tools/performance/thumbnails/tools_memory_monitor.png
+page.article=true
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#WorkingWithMemoryMonitor">Working with Memory Monitor</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/heap-viewer/index.html">
+    Heap Viewer Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/allocation-tracker/index.html">
+    Allocation Tracker Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/comparison.html">
+    Comparison: Memory Monitor, Heap Viewer, Allocation Tracker</a>
+  <li><a href="{@docRoot}tools/performance/traceview/index.html">
+    Traceview Walkthrough</a></li>
+</ul>
+
+</div>
+
+
+  <p>This walkthrough shows the basic usage and workflow for the Memory Monitor tool in Android
+  Studio. Memory Monitor reports in real-time how your app allocates memory.</p>
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Showing available and used memory in a graph, and garbage collection events over time.</li>
+
+    <li>Quickly testing whether app slowness might be related
+    to excessive garbage collection events.</li>
+
+    <li>Quickly testing whether app crashes may be related to running out of
+    memory.</li>
+  </ul>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>A mobile device with <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    enabled.</li>
+
+    <li>An Application with USB Debugging enabled. Use your own, or the <a href=
+    "https://github.com/udacity/Sunshine-Version-2">Sunshine</a> sample app from the <a href=
+    "https://www.udacity.com/course/ud853">Android Fundamentals Udacity course</a>.</li>
+  </ul>
+
+  <h2 id="WorkingWithMemoryMonitor">Working with Memory Monitor</h2>
+
+ <ul class="no-bullet">
+<!-- this also hides bullet, by default outside box -->
+ <li><div style="overflow:hidden">
+  <ol class="padded">
+
+    <div class="figure" style="">
+  <img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image001.png"
+         alt=""
+         width="300px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Starting Memory Monitor.
+      </p>
+    </div>
+
+    <li>Connect your mobile device to your computer.</li>
+
+    <li>Open your application in Android Studio, build the source,
+      and run it on your device.</li></li>
+
+    <li>In Android Studio, choose <b>Tools &gt; Android &gt; Memory Monitor.</b></li>
+
+ </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="4">
+
+    <div class="figure" style="">
+  <img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image002.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>Choosing the device and Activity to monitor.
+      </p>
+    </div>
+
+    <li>This opens the Memory Monitor pane.</li>
+
+    <li>Choose your device from the drop-down menu at the top left of the pane.</li>
+
+    <li>Choose your Activity from the drop-down menu at the top right of the pane.</li>
+
+ </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="7">
+
+    <div class="figure" style="">
+  <img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image003.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 3. </strong>Allocated and free memory in Memory Monitor.
+      </p>
+    </div>
+
+    <li>Once Memory Monitor starts tracking your device, a stacked graph appears,
+      tracking memory usage over time.
+
+      <p>Dark blue: Amount of memory that your app
+      is currently using.</p>
+
+      <p>Light blue: Available, unallocated memory.</p>
+    </li>
+
+    <li>Over time, this graph updates, showing changes in memory usage.</li>
+
+    <li>As your app allocates and frees memory, the allocated amount shown in the
+      graph changes.</li>
+
+    <li>When you see the allocated memory drop by a large amount, a garbage
+      collection (GC) event has occurred.</li>
+
+ </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="11">
+
+    <div class="figure" style="">
+  <img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image005.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 4. </strong>Forcing a GC (Garbage Collection) event.
+      </p>
+    </div>
+
+    <li>You can force a garbage collection event by clicking on the garbage truck
+      icon
+<img src="{@docRoot}images/tools/performance/memory-monitor/gettingstarted_image004.png">.
+    </li>
+
+ </ol>
+</div></li>
+</ul>
+
+

@@ -1,0 +1,156 @@
+page.title=Debug GPU Overdraw Walkthrough
+meta.tags="android, performance, profiling, tools, rendering, overdraw"
+page.tags="android", "performance", "profiling", "tools",  "rendering", "overdraw"
+page.metaDescription=Use color-coding to show how many times each pixel is redrawn on the screen to reduce rendering overhead.
+page.image=tools/performance/thumbnails/tools_debug_gpu_overdraw.png
+page.article=true
+
+
+@jd:body
+
+<style>
+  .no-bullet {
+    list-style-type: none;
+  }
+  .padded {
+    padding-left: 10px;
+  }
+</style>
+
+<div id="tb" style="margin-left: 7px; margin-bottom: 5px;">
+
+<h2>In this document</h2>
+<ul>
+  <li><a href="#WhatYouNeed">Prerequisites</a></li>
+  <li><a href="#VisualizingOverdraw">Visualizing Overdraw</a></li>
+</ul>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/performance/profile-gpu-rendering/index.html">
+    Profile GPU Rendering Walkthrough</a></li>
+  <li><a href="{@docRoot}tools/performance/hierarchy-viewer/index.html">
+    Hierarchy Viewer Walkthrough</a></li>
+</ul>
+
+</div>
+
+  <p>This walkthrough shows how to visualize overdraw on your mobile device by color-coding
+  interface elements based on how often they are drawn underneath.</p>
+
+  <p>What it's good for:</p>
+
+  <ul>
+    <li>Showing where an app might be doing more rendering work than necessary.</li>
+
+    <li>Helping you see where you might be able to reduce rendering overhead.</li>
+  </ul>
+
+  <h2 id="WhatYouNeed">Prerequisites</h2>
+
+  <ul>
+    <li>A mobile device with <a href=
+    "http://developer.android.com/tools/device.html#developer-device-options">Developer Options</a>
+    enabled.</li>
+  </ul>
+
+
+  <h2 id="VisualizingOverdraw">Visualizing Overdraw on your Mobile Device</h2>
+
+  <ul class="no-bullet">
+  <!-- this also hides bullet, by default outside box -->
+  <li><div style="overflow:hidden">
+  <ol class="padded">
+
+    <div class="figure" style="">
+      <img
+    src="{@docRoot}images/tools/performance/debug-gpu-overdraw/gettingstarted_image01.png"
+         alt=""
+         width="400px" />
+      <p class="img-caption">
+        <strong>Figure 1. </strong>Steps for turning on Debug GPU Overdraw.
+      </p>
+    </div>
+
+    <li>On your mobile device, go to <b>Settings</b> and tap <b>Developer Options</b>.</li>
+
+    <li>In the <em>Hardware accelerated rendering</em> section,
+      select <b>Debug GPU Overdraw</b>.</li>
+
+    <li>In the <b>Debug GPU overdraw</b> popup, select <b>Show overdraw areas</b>.</li>
+ </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+  <ol class="padded" start="5">
+
+     <div class="figure" style="padding-right:100px">
+      <img
+    src="{@docRoot}images/tools/performance/debug-gpu-overdraw/gettingstarted_image02.png"
+         alt=""
+         width="180px" />
+      <p class="img-caption">
+        <strong>Figure 2. </strong>Example of<br>Debug GPU Overdraw output.
+      </p>
+    </div>
+
+    <li>Don't panic as your screen turns into a delirium of colors.
+      The coloring is provided to help you diagnose your app's display behavior.</li>
+
+  </ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+ <ol class="padded" start="6">
+
+     <div class="figure" style="">
+      <img
+    src="{@docRoot}images/tools/performance/debug-gpu-overdraw/gettingstarted_image03.png"
+         alt=""
+         width="300px" />
+      <p class="img-caption">
+        <strong>Figure 3. </strong>Color key for Debug GPU Overdraw output.
+      </p>
+    </div>
+
+    <br><br>
+    <li>The colors are hinting at the amount of overdraw on your screen for each pixel, as
+      follows:
+
+      <ul>
+        <li><b>True color:</b> No overdraw</li>
+        <li><b>Blue:</b> Overdrawn once</li>
+        <li><b>Green:</b> Overdrawn twice</li>
+        <li><b>Pink:</b> Overdrawn three times</li>
+        <li><b>Red:</b> Overdrawn four or more times</li>
+      </ul>
+    </li>
+
+</ol>
+</div></li>
+
+<li><div style="overflow:hidden">
+<hr>
+ <ol class="padded" start="7">
+
+    <div class="figure" style="">
+      <img
+    src="{@docRoot}images/tools/performance/debug-gpu-overdraw/gettingstarted_image04.png"
+         alt=""
+         width="300px" />
+      <p class="img-caption">
+        <strong>Figure 4. </strong>Examples of undesirable and desirable
+          <br>Debug GPU Overdraw output.
+      </p>
+    </div>
+
+    <br><br><br>
+    <li>Some overdraw is unavoidable. As you are tuning your app's
+      user interface, the goal is to arrive at a visualization that shows mostly true
+      colors and 1X overdraw in blue.</li>
+
+  </ol>
+</div></li>
+</ul>
