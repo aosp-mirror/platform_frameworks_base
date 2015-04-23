@@ -29,6 +29,7 @@ import android.view.Surface;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -586,8 +587,9 @@ final public class MediaSync {
 
                         audioBuffer.mSizeInBytes -= sizeWritten;
                     }
-                    // TODO: wait time depends on fullness of audio track.
-                    postRenderAudio(10);
+                    long pendingTimeMs = TimeUnit.MICROSECONDS.toMillis(
+                            native_getPlayTimeForPendingAudioFrames());
+                    postRenderAudio(pendingTimeMs / 2);
                 }
             }
         }, delayMillis);
@@ -595,6 +597,8 @@ final public class MediaSync {
 
     private native final void native_updateQueuedAudioData(
             int sizeInBytes, long presentationTimeUs);
+
+    private native final long native_getPlayTimeForPendingAudioFrames();
 
     private final void postReturnByteBuffer(@NonNull final AudioBuffer audioBuffer) {
         synchronized(mCallbackLock) {

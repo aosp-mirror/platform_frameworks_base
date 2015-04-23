@@ -41,6 +41,8 @@ struct JMediaSync : public RefBase {
 
     status_t setPlaybackRate(float rate);
 
+    status_t getPlayTimeForPendingAudioFrames(int64_t *outTimeUs);
+
     sp<const MediaClock> getMediaClock();
 
 protected:
