@@ -125,7 +125,7 @@ public final class Phone {
 
         InCallService.VideoCall videoCall = call.getVideoCall();
         if (videoCall != null) {
-            videoCall.unregisterCallback();
+            videoCall.destroy();
         }
         fireCallRemoved(call);
     }
@@ -174,7 +174,7 @@ public final class Phone {
         for (Call call : mCalls) {
             InCallService.VideoCall videoCall = call.getVideoCall();
             if (videoCall != null) {
-                videoCall.unregisterCallback();
+                videoCall.destroy();
             }
             if (call.getState() != Call.STATE_DISCONNECTED) {
                 call.internalSetDisconnected();
