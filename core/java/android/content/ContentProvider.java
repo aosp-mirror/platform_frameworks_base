@@ -26,6 +26,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -204,8 +205,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
-                return rejectQuery(uri, projection, selection, selectionArgs, sortOrder,
-                        CancellationSignal.fromTransport(cancellationSignal));
+                // The caller has no access to the data, so return an empty cursor with
+                // the columns in the requested order. The caller may ask for an invalid
+                // column and we would not catch that but this is not a problem in practice.
+                // We do not call ContentProvider#query with a modified where clause since
+                // the implementation is not guaranteed to be backed by a SQL database, hence
+                // it may not handle properly the tautology where clause we would have created.
+                return new MatrixCursor(projection, 0);
             }
             final String original = setCallingPackage(callingPkg);
             try {
@@ -814,31 +820,6 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     public void onTrimMemory(int level) {
-    }
-
-    /**
-     * @hide
-     * Implementation when a caller has performed a query on the content
-     * provider, but that call has been rejected for the operation given
-     * to {@link #setAppOps(int, int)}.  The default implementation
-     * rewrites the <var>selection</var> argument to include a condition
-     * that is never true (so will always result in an empty cursor)
-     * and calls through to {@link #query(android.net.Uri, String[], String, String[],
-     * String, android.os.CancellationSignal)} with that.
-     */
-    public Cursor rejectQuery(Uri uri, String[] projection,
-            String selection, String[] selectionArgs, String sortOrder,
-            CancellationSignal cancellationSignal) {
-        // The read is not allowed...  to fake it out, we replace the given
-        // selection statement with a dummy one that will always be false.
-        // This way we will get a cursor back that has the correct structure
-        // but contains no rows.
-        if (selection == null || selection.isEmpty()) {
-            selection = "'A' = 'B'";
-        } else {
-            selection = "'A' = 'B' AND (" + selection + ")";
-        }
-        return query(uri, projection, selection, selectionArgs, sortOrder, cancellationSignal);
     }
 
     /**
