@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -970,7 +981,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html#onPeerConnected(com.google.android.gms.wearable.Node)">onPeerConnected</a></span>(<a href="/reference/com/google/android/gms/wearable/Node.html">Node</a> peer)</nobr>
         
         <div class="jd-descrdiv">
-          Notification that a peer has been connected.
+          Notification that a peer is now reachable by this node.
           
     
 
@@ -993,7 +1004,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html#onPeerDisconnected(com.google.android.gms.wearable.Node)">onPeerDisconnected</a></span>(<a href="/reference/com/google/android/gms/wearable/Node.html">Node</a> peer)</nobr>
         
         <div class="jd-descrdiv">
-          Notification that a peer has been disconnected.
+          Notification that a peer has been disconnected from this node or is no longer reachable
+ by this node.
           
     
 
@@ -1076,7 +1088,14 @@ Summary:
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Notification that a peer has been connected.
+  <div class="jd-tagdata jd-tagdescr"><p>Notification that a peer is now reachable by this node. It may be directly connected
+ to this node or it may be reachable only via a directly connected node.
+
+ <p>Changes to a node's hop count or nearby status alone will not trigger an
+ <code><a href="/reference/com/google/android/gms/wearable/NodeApi.NodeListener.html#onPeerConnected(com.google.android.gms.wearable.Node)">onPeerConnected(Node)</a></code> event as long as the node was already connected.
+
+ <p>Since multiple nodes can be connected to a network at the same time,
+ peer connected and disconnected events can come in any order.
 </p></div>
 
     </div>
@@ -1109,7 +1128,11 @@ Summary:
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Notification that a peer has been disconnected.
+  <div class="jd-tagdata jd-tagdescr"><p>Notification that a peer has been disconnected from this node or is no longer reachable
+ by this node.
+
+ <p>Since multiple nodes can be connected to a network at the same time,
+ peer connected and disconnected events can come in any order.
 </p></div>
 
     </div>

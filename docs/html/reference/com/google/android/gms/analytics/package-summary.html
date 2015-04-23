@@ -563,7 +563,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -818,7 +829,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></td>
         <td class="jd-descrcol" width="100%">
-          Interface to be used for logging debug and informational messages from the SDK.&nbsp;
+          <em>
+      This interface is deprecated.
+    Logger interface is deprecated. Use <code>adb shell setprop log.tag.GAv4 DEBUG</code> to
+ enable debug logging for Google Analytics.
+</em>&nbsp;
           
     
 
@@ -853,7 +868,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/AnalyticsService.html">AnalyticsService</a></td>
         <td class="jd-descrcol" width="100%">
-          An <code><a href="/reference/android/app/IntentService.html">IntentService</a></code> used by Google Analytics.&nbsp;
+          An <code><a href="/reference/android/app/Service.html">Service</a></code> used by Google Analytics.&nbsp;
 
 
 
@@ -864,8 +879,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html">CampaignTrackingReceiver</a></td>
         <td class="jd-descrcol" width="100%">
-          The Google Play <code>com.android.vending.INSTALL_REFERRER</code> <code><a href="/reference/android/content/Intent.html">Intent</a></code> is broadcast when an
- app is installed from the Google Play Store and has campaign data available (i.e.&nbsp;
+          Google Analytics receiver for <code>com.android.vending.INSTALL_REFERRER</code>.&nbsp;
           
     
 
@@ -876,7 +890,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/CampaignTrackingService.html">CampaignTrackingService</a></td>
         <td class="jd-descrcol" width="100%">
-          IntentService for handling the Google Play Store's INSTALL_REFERRER intent.&nbsp;
+          Service for processing Google Play Store's INSTALL_REFERRER intent.&nbsp;
           
     
 
@@ -898,7 +912,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></td>
         <td class="jd-descrcol" width="100%">
-          This class is a singleton that provides methods for controlling global configuration
+          The top level Google Analytics singleton that provides methods for configuring Google Analytics
  and creating <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> objects.&nbsp;
           
     
@@ -1036,7 +1050,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html">Logger.LogLevel</a></td>
         <td class="jd-descrcol" width="100%">
-          Log level settings.&nbsp;
+          <em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>&nbsp;
           
     
 
@@ -1059,7 +1076,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></td>
         <td class="jd-descrcol" width="100%">
-          Class to send tracking hits to Google Analytics.&nbsp;
+          Composes and sends hits to Google Analytics.&nbsp;
           
     
 

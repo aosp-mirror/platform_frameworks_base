@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -788,6 +799,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
+
+
+
+
+
+
+
 <div class="sum-details-links">
 
 Summary:
@@ -804,9 +822,6 @@ Summary:
   
 
 
-
-  &#124; <a href="#pubmethods">Methods</a>
-  
 
 
 
@@ -841,7 +856,11 @@ Summary:
   
 
   
-    extends BroadcastReceiver<br/>
+
+
+
+
+    extends <a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html">CampaignTrackingReceiver</a><br/>
   
   
   
@@ -864,7 +883,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="3" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="4" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -872,7 +891,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="2" class="jd-inheritance-class-cell">android.content.BroadcastReceiver</td>
+        <td colspan="3" class="jd-inheritance-class-cell">android.content.BroadcastReceiver</td>
     </tr>
     
 
@@ -882,6 +901,18 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
+        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html">com.google.android.gms.analytics.CampaignTrackingReceiver</a></td>
+    </tr>
+
+
+    <tr>
+
+            <td class="jd-inheritance-space">&nbsp;</td>
+
+            <td class="jd-inheritance-space">&nbsp;</td>
+
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.tagmanager.InstallReferrerReceiver</td>
     </tr>
     
@@ -999,8 +1030,33 @@ Summary:
 
 
 
+
+
+
+
+
 <!-- ========== METHOD SUMMARY =========== -->
-<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.analytics.CampaignTrackingReceiver" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.analytics.CampaignTrackingReceiver-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  <a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html">com.google.android.gms.analytics.CampaignTrackingReceiver</a>
+
+<div id="inherited-methods-com.google.android.gms.analytics.CampaignTrackingReceiver">
+  <div id="inherited-methods-com.google.android.gms.analytics.CampaignTrackingReceiver-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.analytics.CampaignTrackingReceiver-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
 
 
 
@@ -1015,24 +1071,16 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/InstallReferrerReceiver.html#onReceive(android.content.Context, android.content.Intent)">onReceive</a></span>(Context context, Intent intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html#onReceive(android.content.Context, android.content.Intent)">onReceive</a></span>(Context context, Intent intent)</nobr>
         
   </td></tr>
 
 
-
 </table>
+  </div>
+</div>
+</td></tr>
 
-
-
-
-
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="inhmethods" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Methods</div></th></tr>
 
 
 <tr class="api apilevel-" >
@@ -1626,43 +1674,6 @@ From class
 
 <!-- ========= METHOD DETAIL ======== -->
 <!-- Public methdos -->
-
-<h2>Public Methods</h2>
-
-
-
-<A NAME="onReceive(android.content.Context, android.content.Intent)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">onReceive</span>
-      <span class="normal">(Context context, Intent intent)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
 
 
 
