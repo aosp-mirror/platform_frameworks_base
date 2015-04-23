@@ -88,7 +88,7 @@ On a wearable device, the swipe gesture is used to pan the map instead of exitin
       <li><a href="https://developers.google.com/maps/documentation/android/wear"
         class="external-link">Google Maps on Android Wear developer guide</a>
       </li>
-      <li><a href="https://github.com/googlemaps/android-samples"
+      <li><a href="https://github.com/googlemaps/android-samples/tree/master/BasicWearMap"
         class="external-link">Google Maps on Android Wear sample</a>
       </li>
       <li><a href="https://developers.google.com/maps/documentation/android/releases"
