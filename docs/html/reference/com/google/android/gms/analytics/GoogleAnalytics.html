@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -819,7 +830,7 @@ Summary:
 <div id="jd-header">
     public
      
-     
+    final
     
     class
 <h1 itemprop="name">GoogleAnalytics</h1>
@@ -874,42 +885,130 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">This class is a singleton that provides methods for controlling global configuration
+<p itemprop="articleBody">The top level Google Analytics singleton that provides methods for configuring Google Analytics
  and creating <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> objects.
- <p>
- Applications can get an instance of this class by calling <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getInstance(android.content.Context)">getInstance(Context)</a></code>.
 
- Applications can optionally provide a metadata reference to a global configuration
- XML resource file in the &lt;application&gt; element of their AndroidManifest.xml:
- <p>
+ <p> Applications can get an instance of this class by calling <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getInstance(android.content.Context)">getInstance(Context)</a></code>.
+ <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getInstance(android.content.Context)">getInstance(Context)</a></code> is thread safe and can be called from any thread. It is recommended that
+ Google Analytics be initialized early in the application lifecycle to correctly report unhandled
+ exceptions.
+ Application.<code><a href="/reference/android/app/Application.html#onCreate()">onCreate()</a></code> is the recommended place for configuring
+ Google Analytics.
+
+ <p>A basic configuration of Google Analytics look like this:
  <pre>
- &lt;meta-data
-     android:name="com.google.android.gms.analytics.globalConfigResource"
-     android:resource="@xml/analytics_global_config" /&gt;</pre>
- The configuration file should be stored in the applications res/values/xml directory
- and look like this:
- <p>
+ package com.example;
+
+ class MyApp extends Application {
+   public static GoogleAnalytics analytics;
+   public static Tracker tracker;
+
+   &#64;Overwrite
+   public void onCreate() {
+     analytics = GoogleAnalytics.getInstance(this);
+     analytics.setLocalDispatchPeriod(1800);
+
+     tracker = analytics.newTracker("UA-000-1"); // Replace with actual tracker id
+     tracker.enableExceptionReporting(true);
+     tracker.enableAdvertisingIdCollection(true);
+     tracker.enableAutoActivityTracking(true);
+   }
+ }
+ </pre>
+ Analytics requires INTERNET and ACCESS_NETWORK_STATE permissions. Optionally a WAKE_LOCK
+ permission can be requested to improve dispatching on non-Google Play devices.
+
+ To use a custom application class such as MyApp, it needs to be set in the AndroidManifest as
+ the application name attribute.
+
+ A snippet for common GoogleAnalytics configuration in ApplicationManifest.xml looks
+ like this:
+
+ <pre>
+ &lt;manifest&gt;
+   &lt;!-- Google Analytics required permissions --&gt;
+   &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+   &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
+
+   &lt;!-- Optional permission for reliable local dispatching on non-Google Play devices --&gt;
+   &lt;uses-permission android:name="android.permission.WAKE_LOCK" /&gt;
+
+   &lt;application
+     name="com.example.MyApp"&gt; &lt!-- Replace with the custom app class when applicable --&gt;
+
+     &lt;!-- Add the following meta-data for devices running Google Play service. --&gt;
+     &lt;meta-data
+       android:name="com.google.android.gms.version"
+       android:value="@integer/google_play_services_version" /&gt;
+
+     &lt;!-- Optionally, register AnalyticsReceiver and AnalyticsService to support background
+          dispatching on non-Google Play devices --&gt;
+     &lt;receiver android:name="com.google.android.gms.analytics.AnalyticsReceiver"
+         android:enabled="true"&gt;
+         &lt;intent-filter&gt;
+             &lt;action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" /&gt;
+         &lt;/intent-filter&gt;
+     &lt;/receiver&gt;
+     &lt;service android:name="com.google.android.gms.analytics.AnalyticsService"
+         android:enabled="true"
+         android:exported="false"/&gt;
+
+     &lt;!-- Optionally, register CampaignTrackingReceiver and CampaignTrackingService to enable
+          installation campaign reporting --&gt;
+     &lt;receiver android:name="com.google.android.gms.analytics.CampaignTrackingReceiver"
+         android:exported="true"&gt;
+         &lt;intent-filter&gt;
+             &lt;action android:name="com.android.vending.INSTALL_REFERRER" /&gt;
+         &lt;/intent-filter&gt;
+     &lt;/receiver&gt;
+     &lt;service android:name="com.google.android.gms.analytics.CampaignTrackingService" /&gt;
+
+     &lt;!-- ... --&gt;
+   &lt;/application&gt;
+ &lt;/manifest&gt;
+ </pre>
+
+ <p>Applications can optionally provide a metadata reference to a global configuration XML
+ resource file in the &lt;application&gt; element of their AndroidManifest.xml:
+
+ <pre>
+ &lt;manifest&gt;
+   &lt;application&gt;
+     &lt;!-- ... --&gt;
+
+     &lt;meta-data
+       android:name="com.google.android.gms.analytics.globalConfigResource"
+       android:resource="@xml/analytics_global_config" /&gt;
+
+     &lt;!-- ... --&gt;
+   &lt;/application&gt;
+ &lt;/manifest&gt;
+ </pre>
+
+ The configuration file should be stored in the applications res/xml directory and it
+ should look like this:
+
  <pre>
  &lt;?xml version="1.0" encoding="utf-8" ?&gt;
  &lt;resources&gt;
-     &lt;string name="ga_appName"&gt;TestAppName&lt;/string&gt;
-     &lt;string name="ga_appVersion"&gt;Version1.0&lt;/string&gt;
-     &lt;string name="ga_logLevel"&gt;verbose&lt;/string&gt;
-     &lt;integer name="ga_dispatchPeriod"&gt;1000&lt;/integer&gt;
-     &lt;bool name="ga_dryRun"&gt;true&lt;/bool&gt;
- &lt;/resources&gt;</pre>
+     &lt;!-- The application name. Defaults to name specified for the application label --&gt;
+     &lt;string name="ga_appName"&gt;My App&lt;/string&gt;
 
- Following is a complete list of globally scoped configuration values that can be specified:
- <ul>
-   <li>ga_appName(string) - name of application. Defaults to value found
-       in the package.</li>
-   <li>ga_appVersion(string) - version of application. Defaults to value
-       found in the package.</li>
-   <li>ga_dispatchPeriod(integer) - frequency of automatic dispatch (in
-       seconds). Default is 1800.</li>
-   <li>ga_dryRun(bool) - if true, enable dry run mode. Default is false.</li>
-   <li>ga_logLevel(string) - One of "verbose", "info", "warning", "error".</li>
- </ul></p>
+     &lt;!-- The application version. Defaults to android:versionName specified in the
+       AndroidManifest.xml --&gt;
+     &lt;string name="ga_appVersion"&gt;1.0&lt;/string&gt;
+
+     &lt;!-- The dispatching period in seconds when Google Play services is unavailable. The
+     default period is 1800 seconds or 30 minutes --&gt;
+     &lt;integer name="ga_dispatchPeriod"&gt;1800&lt;/integer&gt;
+
+     &lt;!-- Enable dry run mode. Default is false --&gt;
+     &lt;bool name="ga_dryRun"&gt;false&lt;/bool&gt;
+ &lt;/resources&gt;
+ </pre>
+
+ <p>ga_logLevel setting is deprecated. See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</p>
 
 
 
@@ -982,9 +1081,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#dispatchLocalHits()">dispatchLocalHits</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Dispatches queued hits (view, events, or transactions) to Google Analytics
- if a network connection is available, and the local dispatching service is
- in use.
+          Dispatches hits queued in the application store (views, events, or transactions) to Google
+ Analytics if a network connection is available.
           
     
 
@@ -1007,9 +1105,8 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#enableAutoActivityReports(android.app.Application)">enableAutoActivityReports</a></span>(Application application)</nobr>
         
         <div class="jd-descrdiv">
-          On devices running API level 14 (ICE_CREAM_SANDWICH) or above, applications can
- call this method in lieu of making explicit calls to <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code>
- and <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStop(android.app.Activity)">reportActivityStop(Activity)</a></code>.
+          On devices running API level 14 (ICE_CREAM_SANDWICH) or above, applications can call this
+ method in lieu of making explicit calls to <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code> and <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStop(android.app.Activity)">reportActivityStop(Activity)</a></code>.
           
     
 
@@ -1055,7 +1152,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getInstance(android.content.Context)">getInstance</a></span>(Context context)</nobr>
         
         <div class="jd-descrdiv">
-          Gets the instance of the <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></code>, creating it if necessary.
+          Gets the instance of the <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></code>, creating it when necessary.
           
     
 
@@ -1078,7 +1175,11 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#getLogger()">getLogger</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Return the current <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation in use.
+          <em>
+      This method is deprecated.
+    <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface is deprecated. See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for
+ details.
+</em>
           
     
 
@@ -1147,8 +1248,7 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#newTracker(int)">newTracker</a></span>(int configResId)</nobr>
         
         <div class="jd-descrdiv">
-          Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance preconfigured with the values specified in
- <code>configResId</code>.
+          Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance preconfigured with the values specified in <code>configResId</code>.
           
     
 
@@ -1172,9 +1272,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Report the start of an <code><a href="/reference/android/app/Activity.html">Activity</a></code>, so that it can be tracked by any <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>s
- that have enabled auto activity tracking (see
- <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAutoActivityTracking(boolean)">enableAutoActivityTracking(boolean)</a></code>.) This will also start a new session if
- necessary.
+ that have enabled auto activity tracking (see <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAutoActivityTracking(boolean)">enableAutoActivityTracking(boolean)</a></code>.)
+ This will also start a new session if necessary.
           
     
 
@@ -1289,7 +1388,11 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#setLogger(com.google.android.gms.analytics.Logger)">setLogger</a></span>(<a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a> logger)</nobr>
         
         <div class="jd-descrdiv">
-          Provide a custom implementation of <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> to use.
+          <em>
+      This method is deprecated.
+    <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface is deprecated. See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for
+ details.
+</em>
           
     
 
@@ -1582,11 +1685,10 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Dispatches queued hits (view, events, or transactions) to Google Analytics
- if a network connection is available, and the local dispatching service is
- in use. This method only works if local dispatching is in use. Local dispatching is only used
- in the absence of Google Play services on the device. In general, applications should not
- rely on the ability to dispatch hits manually.
+  <div class="jd-tagdata jd-tagdescr"><p>Dispatches hits queued in the application store (views, events, or transactions) to Google
+ Analytics if a network connection is available. This method only works when Google Play
+ service is not available on the device and local dispatching is used. In general,
+ applications should not rely on the ability to dispatch hits manually.
 </p></div>
 
     </div>
@@ -1619,17 +1721,16 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>On devices running API level 14 (ICE_CREAM_SANDWICH) or above, applications can
- call this method in lieu of making explicit calls to <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code>
- and <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStop(android.app.Activity)">reportActivityStop(Activity)</a></code>. This method is a noop if called on a device
- running API level less than 14.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>On devices running API level 14 (ICE_CREAM_SANDWICH) or above, applications can call this
+ method in lieu of making explicit calls to <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code> and <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStop(android.app.Activity)">reportActivityStop(Activity)</a></code>. This method is a noop if called on a device running API level
+ less than 14.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>application</td>
           <td>The <code><a href="/reference/android/app/Application.html">Application</a></code> whose activities starts and stops should be
- automatically reported.
+                    automatically reported.
 </td>
         </tr>
       </table>
@@ -1698,7 +1799,8 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the instance of the <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></code>, creating it if necessary.
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the instance of the <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></code>, creating it when necessary. It is safe to
+ call this method from any thread.
 </p></div>
 
     </div>
@@ -1730,11 +1832,16 @@ From class
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface is deprecated. See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for
+ details.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Return the current <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation in use.  If no <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> has been set,
  a default <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> is provided that logs to <code><a href="/reference/android/util/Log.html">android.util.Log</a></code>
- with <code><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html">Logger.LogLevel</a></code> set to <code><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html#WARNING">WARNING</a></code>.
-</p></div>
+ with <code><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html">Logger.LogLevel</a></code> set to <code><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html#WARNING">WARNING</a></code>.</p></div>
 
     </div>
 </div>
@@ -1799,18 +1906,17 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance with the given <code>trackingId</code>. If the given
- <code>trackingId</code> is not null or empty, it will be set on the tracker and it is ready to
- send hits. Calling newTracker() multiple times with the same <code>trackingId</code> will
- create multiple Tracker objects with the same <code>trackingId</code>.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance with the given <code>trackingId</code>. If the given <code>trackingId</code> is not null or empty, it will be set on the tracker and it is ready to send hits.
+ Calling newTracker() multiple times with the same <code>trackingId</code> will create multiple
+ Tracker objects with the same <code>trackingId</code>.
 
- If the <code>trackingId</code> is empty, you can still get a tracker, but you must
- set the tracking id before sending any hits. This is useful if you do not know the tracking
- id at the time of tracker creation, or if you want to use the same tracker instance to track
- multiple tracking ids. Using the same instance to track multiple tracking ids is not
- recommended since you need to be careful about not mixing the data you are sending to
- multiple profiles. It can be useful if you have a lot of tracking ids and you want to avoid
- object creation overhead involved in instantiating one tracker per tracking id.</p></div>
+ If the <code>trackingId</code> is empty, you can still get a tracker, but you must set the
+ tracking id before sending any hits. This is useful if you do not know the tracking id at the
+ time of tracker creation, or if you want to use the same tracker instance to track multiple
+ tracking ids. Using the same instance to track multiple tracking ids is not recommended since
+ you need to be careful about not mixing the data you are sending to multiple profiles. It can
+ be useful if you have a lot of tracking ids and you want to avoid object creation overhead
+ involved in instantiating one tracker per tracking id.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1852,24 +1958,24 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance preconfigured with the values specified in
- <code>configResId</code>. Calling newTracker() multiple times with the same
- <code>trackingId</code> will create multiple Tracker objects with the same configuration.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code> instance preconfigured with the values specified in <code>configResId</code>. Calling newTracker() multiple times with the same <code>trackingId</code> will
+ create multiple Tracker objects with the same configuration.
 
- If the <code>trackingId</code> is empty, you can still get a tracker, but you must
- set the tracking id before sending any hits. This is useful if you do not know the tracking
- id at the time of tracker creation, or if you want to use the same tracker instance to track
- multiple tracking ids. Using the same instance to track multiple tracking ids is not
- recommended since you need to be careful about not mixing the data you are sending to
- multiple profiles. It can be useful if you have a lot of tracking ids and you want to avoid
- object creation overhead involved in instantiating one tracker per tracking id.</p></div>
+ If the <code>trackingId</code> is empty, you can still get a tracker, but you must set the
+ tracking id before sending any hits. This is useful if you do not know the tracking id at the
+ time of tracker creation, or if you want to use the same tracker instance to track multiple
+ tracking ids. Using the same instance to track multiple tracking ids is not recommended since
+ you need to be careful about not mixing the data you are sending to multiple profiles. It can
+ be useful if you have a lot of tracking ids and you want to avoid object creation overhead
+ involved in instantiating one tracker per tracking id.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>configResId</td>
           <td>The resource id of your tracker configuration file. See <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>
- for more information about what configuration elements can be included in that file.
+                    for more information about what configuration elements can be included in
+                    that file.
 </td>
         </tr>
       </table>
@@ -1906,13 +2012,12 @@ From class
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Report the start of an <code><a href="/reference/android/app/Activity.html">Activity</a></code>, so that it can be tracked by any <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>s
- that have enabled auto activity tracking (see
- <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAutoActivityTracking(boolean)">enableAutoActivityTracking(boolean)</a></code>.) This will also start a new session if
- necessary. This method should be called from the <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> method in each
- <code><a href="/reference/android/app/Activity.html">Activity</a></code> in your application that you'd like to track.
+ that have enabled auto activity tracking (see <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAutoActivityTracking(boolean)">enableAutoActivityTracking(boolean)</a></code>.)
+ This will also start a new session if necessary. This method should be called from the <code><a href="/reference/android/app/Activity.html#onStart()">onStart()</a></code> method in each <code><a href="/reference/android/app/Activity.html">Activity</a></code> in your application that you'd like to
+ track.
 
- If auto activity reports are enabled (see <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#enableAutoActivityReports(android.app.Application)">enableAutoActivityReports(Application)</a></code>)
- on a device running API level 14 or above, this method will be a noop.</p></div>
+ If auto activity reports are enabled (see <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#enableAutoActivityReports(android.app.Application)">enableAutoActivityReports(Application)</a></code>) on
+ a device running API level 14 or above, this method will be a noop.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1954,13 +2059,11 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Report the end of an <code><a href="/reference/android/app/Activity.html">Activity</a></code>. Note that this method should be called
- from the <code><a href="/reference/android/app/Activity.html#onStop()">onStop()</a></code> method in each <code><a href="/reference/android/app/Activity.html">Activity</a></code> in your application
- that you'd like to track. For proper operation, this method must be called in all
- Activities where <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code> is called.
+  <div class="jd-tagdata jd-tagdescr"><p>Report the end of an <code><a href="/reference/android/app/Activity.html">Activity</a></code>. Note that this method should be called from the <code><a href="/reference/android/app/Activity.html#onStop()">onStop()</a></code> method in each <code><a href="/reference/android/app/Activity.html">Activity</a></code> in your application that you'd like to
+ track. For proper operation, this method must be called in all Activities where <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#reportActivityStart(android.app.Activity)">reportActivityStart(Activity)</a></code> is called.
 
- If auto activity reports are enabled (see <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#enableAutoActivityReports(android.app.Application)">enableAutoActivityReports(Application)</a></code>)
- on a device running API level 14 or above, this method will be a noop.</p></div>
+ If auto activity reports are enabled (see <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#enableAutoActivityReports(android.app.Application)">enableAutoActivityReports(Application)</a></code>) on
+ a device running API level 14 or above, this method will be a noop.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -2047,10 +2150,8 @@ From class
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Toggles dry run mode. In dry run mode, the normal code paths are executed locally, but hits
- are not sent to Google Analytics servers. This is useful for debugging calls to the
- Google Analytics SDK without polluting recorded data.
- <p>
- By default, this flag is disabled.
+ are not sent to Google Analytics servers. This is useful for debugging calls to the Google
+ Analytics SDK without polluting recorded data. <p> By default, this flag is disabled.
 </p></div>
 
     </div>
@@ -2083,10 +2184,9 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Sets dispatch period for the local dispatcher.
- The dispatcher will check for hits to dispatch every <code>dispatchPeriod</code>
- seconds. If zero or a negative dispatch period is given, automatic dispatch will
- not be enabled, and the application will need to dispatch events
+  <div class="jd-tagdata jd-tagdescr"><p>Sets dispatch period for the local dispatcher. The dispatcher will check for hits to dispatch
+ every <code>dispatchPeriod</code> seconds. If zero or a negative dispatch period is given,
+ automatic dispatch will be disabled, and the application will need to dispatch events
  manually using <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#dispatchLocalHits()">dispatchLocalHits()</a></code>.
 
  This method only works if local dispatching is in use. Local dispatching is only used in the
@@ -2097,7 +2197,7 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>dispatchPeriodInSeconds</td>
-          <td>the new dispatch period
+          <td>the new dispatch period in seconds
 </td>
         </tr>
       </table>
@@ -2132,16 +2232,22 @@ From class
       
     
 
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Provide a custom implementation of <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> to use. This custom <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code>
- will replace a default <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> that logs to <code><a href="/reference/android/util/Log.html">android.util.Log</a></code>.</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface is deprecated. See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for
+ details.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Return the current <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation in use.  If no <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> has been set,
+ a default <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> is provided that logs to <code><a href="/reference/android/util/Log.html">android.util.Log</a></code>
+ with <code><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html">Logger.LogLevel</a></code> set to <code><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html#WARNING">WARNING</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>logger</td>
-          <td>The <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation to use for logging.
-</td>
+          <td>The <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> implementation to use for logging.</td>
         </tr>
       </table>
   </div>

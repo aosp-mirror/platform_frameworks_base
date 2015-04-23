@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1125,6 +1136,29 @@ Summary:
         <td class="jd-typecol"><nobr>
             
             
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Batch.html#forceFailureUnlessReady(com.google.android.gms.common.api.Status)">forceFailureUnlessReady</a></span>(<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a> status)</nobr>
+
+        <div class="jd-descrdiv">
+          Forces the result of the API call a failure, unless a result has otherwise already been set.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
             
             
             
@@ -1135,8 +1169,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Indicates whether the pending result has been canceled either due to calling
- {GoogleApiClient#disconnect} or calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code> directly on the pending result or an
- enclosing <code><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></code>.
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code> or calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code> directly on the pending result
+ or an enclosing <code><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></code>.
           
     
 
@@ -1146,7 +1180,7 @@ Summary:
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1162,7 +1196,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1174,11 +1208,18 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Batch.html#setResult(R)">setResult</a></span>(R result)</nobr>
 
+        <div class="jd-descrdiv">
+          Sets the result of the API call.
+
+
+
+        </div>
+
   </td></tr>
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1202,7 +1243,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1594,8 +1635,8 @@ From interface
         
         <div class="jd-descrdiv">
           Indicates whether the pending result has been canceled either due to calling
- {GoogleApiClient#disconnect} or calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code> directly on the pending result or an
- enclosing <code><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></code>.
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code> or calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code> directly on the pending result
+ or an enclosing <code><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></code>.
           
     
 
@@ -1909,6 +1950,39 @@ From interface
 </div>
 
 
+<A NAME="forceFailureUnlessReady(com.google.android.gms.common.api.Status)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+        final
+
+
+        void
+      </span>
+      <span class="sympad">forceFailureUnlessReady</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a> status)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Forces the result of the API call a failure, unless a result has otherwise already been set.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="isCanceled()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1936,8 +2010,8 @@ From interface
 
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the pending result has been canceled either due to calling
- {GoogleApiClient#disconnect} or calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code> directly on the pending result or an
- enclosing <code><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></code>.
+ <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code> or calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code> directly on the pending result
+ or an enclosing <code><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></code>.
 </p></div>
 
     </div>
@@ -2002,7 +2076,12 @@ From interface
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the result of the API call. Assuming that a failure or cancelation has not already
+ been set, the result will be returned to the client via <code><a href="/reference/com/google/android/gms/common/api/Batch.html#await()">await()</a></code> or
+ <code><a href="/reference/com/google/android/gms/common/api/ResultCallback.html#onResult(R)">onResult(R)</a></code>.
+
+ <p>This method must called at most once.
+</p></div>
 
     </div>
 </div>

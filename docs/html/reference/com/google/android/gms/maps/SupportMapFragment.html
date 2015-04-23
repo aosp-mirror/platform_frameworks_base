@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -3262,6 +3273,8 @@ From interface
  <li>The callback will be executed in the main thread.
  <li>In the case where Google Play services is not installed on the user's device, the
  callback will not be triggered until the user installs it.
+ <li>In the rare case where the GoogleMap is destroyed immediately after creation, the
+ callback is not triggered.
  <li>The <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code> object provided by the callback is non-null.
  </ul></p></div>
   <div class="jd-tagdata">
