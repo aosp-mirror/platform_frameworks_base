@@ -87,15 +87,15 @@ public class DefaultDialerManager {
         }
 
         // No user-set dialer found, fallback to system dialer
-        ComponentName systemDialer = getTelecomManager(context).getDefaultPhoneApp();
+        String systemDialer = getTelecomManager(context).getSystemDialerPackage();
 
-        if (systemDialer == null) {
+        if (TextUtils.isEmpty(systemDialer)) {
             // No system dialer configured at build time
             return null;
         }
 
         // Verify that the system dialer has not been disabled.
-        return getComponentName(componentNames, systemDialer.getPackageName());
+        return getComponentName(componentNames, systemDialer);
     }
 
     /**

@@ -32730,8 +32730,9 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts();
     method public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
+    method public java.lang.String getDefaultDialerPackage();
     method public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
-    method public android.content.ComponentName getDefaultPhoneApp();
+    method public deprecated android.content.ComponentName getDefaultPhoneApp();
     method public java.lang.String getLine1Number(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
@@ -32750,6 +32751,7 @@ package android.telecom {
     method public void showInCallScreen(boolean);
     method public void silenceRinger();
     method public void unregisterPhoneAccount(android.telecom.PhoneAccountHandle);
+    field public static final java.lang.String ACTION_CHANGE_DEFAULT_DIALER = "android.telecom.action.CHANGE_DEFAULT_DIALER";
     field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
     field public static final java.lang.String ACTION_INCOMING_CALL = "android.telecom.action.INCOMING_CALL";
@@ -32762,6 +32764,7 @@ package android.telecom {
     field public static final java.lang.String EXTRA_CALL_BACK_NUMBER = "android.telecom.extra.CALL_BACK_NUMBER";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_CAUSE = "android.telecom.extra.CALL_DISCONNECT_CAUSE";
     field public static final java.lang.String EXTRA_CALL_DISCONNECT_MESSAGE = "android.telecom.extra.CALL_DISCONNECT_MESSAGE";
+    field public static final java.lang.String EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME = "android.telecom.extra.CHANGE_DEFAULT_DIALER_PACKAGE_NAME";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
     field public static final java.lang.String EXTRA_INCOMING_CALL_EXTRAS = "android.telecom.extra.INCOMING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_OUTGOING_CALL_EXTRAS = "android.telecom.extra.OUTGOING_CALL_EXTRAS";

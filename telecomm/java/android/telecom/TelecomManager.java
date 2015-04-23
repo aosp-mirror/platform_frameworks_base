@@ -110,6 +110,28 @@ public class TelecomManager {
             "android.telecom.action.PHONE_ACCOUNT_REGISTERED";
 
     /**
+     * Activity action: Shows a dialog asking the user whether or not they want to replace the
+     * current default Dialer with the one specified in
+     * {@link #EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME}.
+     *
+     * Usage example:
+     * <pre>
+     * Intent intent = new Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER);
+     * intent.putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME,
+     *         getActivity().getPackageName());
+     * startActivity(intent);
+     * </pre>
+     */
+    public static final String ACTION_CHANGE_DEFAULT_DIALER =
+            "android.telecom.action.CHANGE_DEFAULT_DIALER";
+
+    /**
+     * Extra value used to provide the package name for {@link #ACTION_CHANGE_DEFAULT_DIALER}.
+     */
+    public static final String EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME =
+            "android.telecom.extra.CHANGE_DEFAULT_DIALER_PACKAGE_NAME";
+
+    /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} containing a boolean that
      * determines whether the speakerphone should be automatically turned on for an outgoing call.
      */
@@ -689,7 +711,10 @@ public class TelecomManager {
         }
     }
 
+
     /**
+     * @deprecated - Use {@link TelecomManager#getDefaultDialerPackage} to directly access
+     *         the default dialer's package name instead.
      * @hide
      */
     @SystemApi
@@ -700,6 +725,40 @@ public class TelecomManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get the default phone app.", e);
+        }
+        return null;
+    }
+
+    /**
+     * Used to determine the currently selected default dialer package.
+     *
+     * @return package name for the default dialer package or null if no package has been
+     *         selected as the default dialer.
+     */
+    public String getDefaultDialerPackage() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getDefaultDialerPackage();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException attempting to get the default dialer package name.", e);
+        }
+        return null;
+    }
+
+    /**
+     * Used to determine the dialer package that is preloaded on the system partition.
+     *
+     * @return package name for the system dialer package or null if no system dialer is preloaded.
+     * @hide
+     */
+    public String getSystemDialerPackage() {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getSystemDialerPackage();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException attempting to get the system dialer package name.", e);
         }
         return null;
     }
