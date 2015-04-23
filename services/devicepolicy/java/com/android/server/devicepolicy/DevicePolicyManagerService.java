@@ -1106,6 +1106,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void loadDeviceOwner() {
         synchronized (this) {
             mDeviceOwner = DeviceOwner.load();
+            updateDeviceOwnerLocked();
         }
     }
 
@@ -1660,6 +1661,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             am.updateLockTaskPackages(userId, packages.toArray(new String[packages.size()]));
+        } catch (RemoteException e) {
+            // Not gonna happen.
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void updateDeviceOwnerLocked() {
+        IActivityManager am = ActivityManagerNative.getDefault();
+        long ident = Binder.clearCallingIdentity();
+        try {
+            am.updateDeviceOwner(mDeviceOwner.getDeviceOwnerPackageName());
         } catch (RemoteException e) {
             // Not gonna happen.
         } finally {
@@ -3990,14 +4003,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mDeviceOwner == null) {
                 // Device owner is not set and does not exist, set it.
                 mDeviceOwner = DeviceOwner.createWithDeviceOwner(packageName, ownerName);
-                mDeviceOwner.writeOwnerFile();
-                return true;
             } else {
                 // Device owner is not set but a profile owner exists, update Device owner state.
                 mDeviceOwner.setDeviceOwner(packageName, ownerName);
-                mDeviceOwner.writeOwnerFile();
-                return true;
             }
+            mDeviceOwner.writeOwnerFile();
+            updateDeviceOwnerLocked();
+            return true;
         }
     }
 
@@ -4079,6 +4091,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (mDeviceOwner != null) {
                     mDeviceOwner.clearDeviceOwner();
                     mDeviceOwner.writeOwnerFile();
+                    updateDeviceOwnerLocked();
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -4107,15 +4120,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             if (mDeviceOwner == null) {
                 // Device owner state does not exist, create it.
-                mDeviceOwner = DeviceOwner.createWithDeviceInitializer(
-                        initializer, ownerName);
+                mDeviceOwner = DeviceOwner.createWithDeviceInitializer(initializer, ownerName);
             } else {
                 // Device owner already exists, update it.
                 mDeviceOwner.setDeviceInitializer(initializer, ownerName);
             }
 
             addDeviceInitializerToLockTaskPackagesLocked(UserHandle.USER_OWNER);
-
             mDeviceOwner.writeOwnerFile();
             return true;
         }

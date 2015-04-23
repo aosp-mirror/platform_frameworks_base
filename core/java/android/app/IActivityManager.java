@@ -495,6 +495,7 @@ public interface IActivityManager extends IInterface {
     public void setVoiceKeepAwake(IVoiceInteractionSession session, boolean keepAwake)
             throws RemoteException;
     public void updateLockTaskPackages(int userId, String[] packages) throws RemoteException;
+    public void updateDeviceOwner(String packageName) throws RemoteException;
 
     public int getPackageProcessState(String packageName) throws RemoteException;
 
@@ -837,4 +838,5 @@ public interface IActivityManager extends IInterface {
     int NOTE_ALARM_FINISH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+292;
     int GET_PACKAGE_PROCESS_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+293;
     int SHOW_LOCK_TASK_ESCAPE_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+294;
+    int UPDATE_DEVICE_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+295;
 }

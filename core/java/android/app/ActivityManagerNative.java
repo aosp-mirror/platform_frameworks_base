@@ -2513,6 +2513,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case UPDATE_DEVICE_OWNER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String packageName = data.readString();
+            updateDeviceOwner(packageName);
+            reply.writeNoException();
+            return true;
+        }
+
         case GET_PACKAGE_PROCESS_STATE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String pkg = data.readString();
@@ -5795,6 +5803,18 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(userId);
         data.writeStringArray(packages);
         mRemote.transact(UPDATE_LOCK_TASK_PACKAGES_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void updateDeviceOwner(String packageName) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        mRemote.transact(UPDATE_DEVICE_OWNER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

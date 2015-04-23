@@ -437,6 +437,11 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     SparseArray<String[]> mLockTaskPackages = new SparseArray<>();
 
+    /**
+     * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
+     */
+    String mDeviceOwnerName;
+
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
         public final Bundle extras;
@@ -4831,6 +4836,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
+        if (packageName != null && packageName.equals(mDeviceOwnerName)) {
+            throw new SecurityException("Clearing DeviceOwner data is forbidden.");
+        }
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
         userId = handleIncomingUser(pid, uid,
@@ -8559,6 +8567,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         synchronized(this) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
+        }
+    }
+
+    @Override
+    public void updateDeviceOwner(String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("updateDeviceOwner called from non-system process");
+        }
+        synchronized (this) {
+            mDeviceOwnerName = packageName;
         }
     }
 
