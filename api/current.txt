@@ -26682,6 +26682,8 @@ package android.provider {
     field public static final java.lang.String EXTRA_DO_NOT_DISTURB_MODE_ENABLED = "android.settings.extra.do_not_disturb_mode_enabled";
     field public static final java.lang.String EXTRA_DO_NOT_DISTURB_MODE_MINUTES = "android.settings.extra.do_not_disturb_mode_minutes";
     field public static final java.lang.String EXTRA_INPUT_METHOD_ID = "input_method_id";
+    field public static final java.lang.String INTENT_CATEGORY_USAGE_ACCESS_CONFIG = "android.intent.category.USAGE_ACCESS_CONFIG";
+    field public static final java.lang.String METADATA_USAGE_ACCESS_REASON = "android.settings.metadata.USAGE_ACCESS_REASON";
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
