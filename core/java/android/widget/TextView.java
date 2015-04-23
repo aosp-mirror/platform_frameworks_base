@@ -8955,13 +8955,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static final int ID_CUT = android.R.id.cut;
     static final int ID_COPY = android.R.id.copy;
     static final int ID_PASTE = android.R.id.paste;
+    static final int ID_SHARE = android.R.id.shareText;
     static final int ID_PASTE_AS_PLAIN_TEXT = android.R.id.pasteAsPlainText;
     static final int ID_REPLACE = android.R.id.replaceText;
 
     /**
      * Called when a context menu option for the text view is selected.  Currently
      * this will be one of {@link android.R.id#selectAll}, {@link android.R.id#cut},
-     * {@link android.R.id#copy} or {@link android.R.id#paste}.
+     * {@link android.R.id#copy}, {@link android.R.id#paste} or {@link android.R.id#shareText}.
      *
      * @return true if the context menu item action was performed.
      */
@@ -9013,6 +9014,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case ID_COPY:
                 setPrimaryClip(ClipData.newPlainText(null, getTransformedText(min, max)));
                 stopSelectionActionMode();
+                return true;
+
+            case ID_SHARE:
+                shareSelectedText();
                 return true;
         }
         return false;
@@ -9091,15 +9096,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * If provided, this ActionMode.Callback will be used to create the ActionMode when text
      * selection is initiated in this View.
      *
-     * The standard implementation populates the menu with a subset of Select All, Cut, Copy and
-     * Paste actions, depending on what this View supports.
+     * The standard implementation populates the menu with a subset of Select All, Cut, Copy,
+     * Paste and Share actions, depending on what this View supports.
      *
      * A custom implementation can add new entries in the default menu in its
      * {@link android.view.ActionMode.Callback#onPrepareActionMode(ActionMode, Menu)} method. The
      * default actions can also be removed from the menu using
      * {@link android.view.Menu#removeItem(int)} and passing {@link android.R.id#selectAll},
-     * {@link android.R.id#cut}, {@link android.R.id#copy} or {@link android.R.id#paste} ids as
-     * parameters.
+     * {@link android.R.id#cut}, {@link android.R.id#copy}, {@link android.R.id#paste} or
+     * {@link android.R.id#shareText} ids as parameters.
      *
      * Returning false from
      * {@link android.view.ActionMode.Callback#onCreateActionMode(ActionMode, Menu)} will prevent
@@ -9166,6 +9171,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return false;
+    }
+
+    boolean canShare() {
+        return canCopy();
     }
 
     boolean canPaste() {
@@ -9238,6 +9247,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             stopSelectionActionMode();
             LAST_CUT_OR_COPY_TIME = 0;
+        }
+    }
+
+    private void shareSelectedText() {
+        String selectedText = getSelectedText();
+        if (selectedText != null && !selectedText.isEmpty()) {
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            sharingIntent.removeExtra(android.content.Intent.EXTRA_TEXT);
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, selectedText);
+            getContext().startActivity(Intent.createChooser(sharingIntent, null));
+            stopSelectionActionMode();
         }
     }
 
