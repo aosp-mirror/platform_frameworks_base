@@ -1,0 +1,114 @@
+page.title=Opt-In to Designed for Families
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=Join Designed for Families in just a few simple steps.
+
+@jd:body
+
+<p>
+  If you're building an app designed for kids and families, there are a few
+  things you need to do <em>before</em> you’ll be ready to opt-in to the Designed for
+  Families program:
+</p>
+
+<ul>
+  <li>Complete the content rating questionnaire for your app and meet an ESRB
+  rating of Everyone or Everyone 10+ rating
+  </li>
+
+  <li>Add a privacy policy link to your app’s <strong>Store Listing</strong>
+  page.
+  </li>
+
+  <li>Make sure your app meets all the <a href=
+  "https://support.google.com/googleplay/android-developer/answer/6184502">Designed
+  for Families program requirements.</a>
+  </li>
+</ul>
+
+<p>
+  Now that your app is ready to publish, you can opt-in to Designed for
+  Families directly from the <a href=
+  "https://play.google.com/apps/publish/">Developer Console</a>. Opt-in means
+  that you want your app to be made available on the new family-friendly
+  experience on Google Play in addition to the category you’ve selected on
+  the Google Play Store.
+</p>
+
+<p>
+  Opt-in also confirms that your app complies with <a href=
+  "http://play.google.com/about/developer-content-policy.html">Google Play
+  Developer Program Policies</a> and the <a href=
+  "http://play.google.com/about/developer-distribution-agreement.html">Developer
+  Distribution Agreement</a>, including the <a href=
+  "https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">
+  Designed for Families DDA Addendum</a>. If you are not familiar with these
+  policy documents or the Addendum, make sure to read them before opting-in.
+</p>
+
+<p>
+  Once you're ready, here's how to opt-in to Designed for Families for a specific app:
+</p>
+
+<ol>
+<li>In the Developer Console <strong>All Applications</strong> page, click the app you want to
+  opt-in. Under Pricing and Distribution, scroll down to find <strong>Designed for
+  Families</strong> and the opt-in checkbox.<img src="/images/gp-dff-optin.png" style=
+  "border:2px solid #ddd;margin:1em 0;">
+  </li>
+
+  <li>Start the opt-in flow and confirm that your app meets the eligibility
+  requirements.</li>
+  <li>If your app has ads, confirm that it meets the ads policy.
+  <img src="/images/gp-dff-appinfo.png"
+  style="border:2px solid #ddd;margin:1em 0;"></li>
+  <li>Choose your target age groups from: Ages 5 & Under, Ages 6 to 8, Ages 9
+  to 12, or General Audience (for apps which target children and older
+  audiences). If your app targets more than one age group, you can choose up to
+  two adjacent age groups. Apps with an ESRB 10+ rating can only choose an
+  age target of 9-12 or General Audience.
+  </li>
+
+  <li>Choose a category for your app for the new family-focused experience on
+  Google Play. Your app will also be discoverable in its existing category in
+  Google Play.</li>
+  <li>Review and agree to the linked documents and then click
+  <strong>Opt-In</strong>. Finally, click <strong>Submit update</strong> on the
+  Pricing & Distribution page to publish or update your app.
+  </li>
+</ol>
+
+<p>
+  Once you opt-in your app, it will be thoroughly reviewed before being
+  accepted into the Designed for Families program.
+</p>
+
+<p class="note">
+  <strong>Note</strong>: Published apps in the Designed for Families program
+  are also available to all users on Google Play. 
+</p>
+
+<p>
+  If you opt-in an app that you're publishing for the first time and it doesn't
+  meet the Designed for Families program requirements, it won't be made available
+  on Google Play until <strong>either</strong> you update the app to meet the
+  program requirements <strong>or</strong> you uncheck the opt-in box and pass
+  Google Play's standard review process.
+</p>
+
+<p>
+  If you opt-in an app that's already published on Google Play and it doesn't
+  meet the program requirements, it will remain available to all users but won't
+  be added to the new family experience until you update the app to meet the
+  program requirements.
+</p>
+
+<p>
+  If you publish an update to an app that's opted-in to Designed for Families,
+  the app update needs to pass the Designed for Families review before it will
+  become available to all users on Google Play.</p>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="{@docRoot}distribute/googleplay/families/faq.html" class=
+  "next-class-link">Next: Frequently Asked Questions</a>
+</div>

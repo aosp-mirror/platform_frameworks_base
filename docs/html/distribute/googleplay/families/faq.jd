@@ -1,0 +1,336 @@
+page.title=Frequently Asked Questions
+meta.tags="families", "guidelines", "quality"
+page.tags="families", "addendum"
+page.metaDescription=Questions and answers about Designed for Families
+
+@jd:body
+
+    <style>
+  dt {
+    font-weight:bold;
+  }
+  </style>
+  
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#review">App Review and Opt-In</a></li>
+  <li><a href="#monetization">Monetization</a></li>
+  <li><a href="#other">Other Questions</a></li>
+</ol>
+</div>
+
+<p>
+  The sections below provide more information about Designed for Families
+  and answer common questions that you might have about it.
+</p>
+
+
+<h2 id="review">App Review and Opt-In</h2>
+
+<dl>
+<dt>How do I opt-in my app(s)?</dt>
+
+<dl>
+  <dd>
+    You can opt-in to Designed for Families on the Pricing and Distribution tab
+    for your app on the Google Play Developer Console. Here's a <a href=
+    "{@docRoot}distribute/googleplay/families/start.html">step-by-step
+    walkthrough</a>.
+  </dd>
+
+  <dt>
+    Where do I disclose my app’s interactive features? Why are you collecting
+    this information?
+  </dt>
+
+  <dd>
+    Interactive feature disclosures are part of the content rating
+    questionnaire. You have an opportunity to review your disclosures as
+    part of the Designed for Families program opt-in flow. We collect this
+    information so that users can make informed choices when evaluating your
+    app.
+  </dd>
+
+  <dt>
+    What is COPPA?
+  </dt>
+
+  <dd>
+    COPPA is the Federal Trade Commission’s (FTC) Child Online Privacy
+    Protection Rule. More details are available on the <a
+    href="http://www.ftc.gov/tips-advice/business-center/guidance/complying-coppa-frequently-asked-questions">
+    FTC's FAQ about COPPA</a>. Note that Google Play cannot provide legal guidance to developers
+    on how to comply with COPPA or other child statutes.
+  </dd>
+
+  <dt>
+    Do I need to provide an up-to-date privacy policy and where do I do that?
+  </dt>
+
+  <dd>
+    Yes, you need to provide a link to a persistent privacy policy on your
+    app’s store listing and confirm your compliance with local privacy statutes
+    in the Developer Console. To add or review your privacy policy, choose your
+    app in the Developer Console and then scroll to the bottom of the
+    <strong>Store Listing</strong> section.
+  </dd>
+
+  <dt>
+    How many age groups can I select?
+  </dt>
+
+  <dd>
+    You can select up to two adjacent age groups. Age groups are: Ages 5 &
+    Under, Ages 6-8, and Ages 9-12. However, if your app targets audiences
+    comprised of children and older audiences, you must select the <em>General
+    Audience</em> category.
+  </dd>
+
+  <dt>
+    How many content categories can I select in the Designed for Families
+    program?
+  </dt>
+
+  <dd>
+    You can select one category as part of the Designed for Families program
+    and another category for the general Google Play store.
+  </dd>
+
+  <dt>
+    What are the Designed for Families categories?
+  </dt>
+
+<ul>
+<li><strong>Action & Adventure</strong>: These are action-oriented apps/games and include everything
+  from racing games, fairy tale adventures, and more.
+  </li>
+
+  <li style="list-style: none"><strong>Brain Games</strong>: This category includes games that
+  make the user think and includes puzzles, matching games, and similar
+  games.
+  </li>
+
+  <li><strong>Creativity</strong>: These are apps/games that spur creativity.
+  Example types of apps/games we expect in this category include drawing,
+  painting, and other games where you can build things.
+  </li>
+
+  <li><strong>Education</strong>: These are apps/games that have educational value and include
+  math, science, learning the alphabet, learning to count, and many more types of
+  educational content like geography and history.
+  </li>
+
+  <li><strong>Music and Video</strong>: These are apps/games that contain a musical element or
+  video component and include everything from playing the
+  piano to watching videos and more.
+  </li>
+
+  <li><strong>Pretend Play</strong>: These are apps/games where one can pretend to take on a
+  role, like pretending to be a cook or a doctor.
+  </li>
+</ul>
+
+<dl>
+  <dt>
+    Will it take longer for my app to get published if I opt-in to the Designed
+    for Families program?
+  </dt>
+
+  <dd>
+    When you opt-in to Designed for Families, Google Play reviews your app to
+    confirm that it is appropriate for families. Assuming your app complies with all program
+    requirements, we expect that publishing time should not take any longer
+    than normal; however, there may be a delay in publishing the app if it is
+    rejected during the Designed for Families review. 
+  </dd>
+
+  <dt>
+    What happens if my app is rejected from the Designed for Families program?
+  </dt>
+
+  <dd>
+    If your app is rejected from the Designed for Families program, we’ll
+    indicate why in the Developer Console and in a detailed email. You’ll have
+    an opportunity to correct the issues and resubmit your app to the program,
+    or change your opt-in response. Note that if you have an existing app that
+    is live on Google Play, only your app update will be rejected (your app
+    will remain live on the Play store). If you’ve submitted a new app to the
+    Designed for Families program that does not meet the requirements, your
+    entire app submission will be rejected and the app will not be published on
+    Play. You can then address the identified issue(s) and resubmit the app for
+    the Designed for Families program or opt-out of the program.
+  </dd>
+
+  <dt>
+    What happens if my app is found to be non-compliant with Designed for
+    Families program requirements after it has been published?
+  </dt>
+
+  <dd>
+    Your app may be removed or suspended from the Google Play Store, not only
+    the Designed for Families program. Removed apps can follow the same
+    remedies as rejected apps. Suspended apps can be appealed using the
+    developer appeal process.
+  </dd>
+
+  <dt>
+    If I opt-in to the Designed for Families program, can I opt-out later on?
+  </dt>
+
+  <dd>
+    Yes, you may opt-out of the program at any time. Please note that by opting
+    out you would lose your placement in the new family-friendly experience as
+    well as the other benefits of the program.
+  </dd>
+
+  <dt>
+    What happens when I update my app after it has been accepted into the
+    program?
+  </dt>
+
+  <dd>
+    Apps that are part of the Designed for Families program need to maintain
+    compliance with the eligibility requirements at all times. If you need to
+    edit the Designed for Families metadata associated with your app, please go
+    to the Pricing & Distribution section of the Google Play Developer Console
+    to edit this information. If updating your app results in you changing your
+    target audience, we recommend that you alert the users who already
+    have your app installed.
+  </dd>
+
+  <dt>
+    Can apps and games that use Google sign-in or Google Play Game
+    services opt-into the Designed for Families program?
+  </dt>
+
+  <dd>
+    Apps that participate in Designed for Families that are wholly
+    child-focused, i.e. that target the following age groups: Ages 5 & Under,
+    Ages 6 to 8, or Ages 9 to 12 <strong>may not</strong> use Google+ Sign-in
+    or Google Play Game services as the login experience for their
+    application.
+
+    <p>
+      Apps that participate in Designed for Families that target both children and
+      older audiences, can use Google+ Sign-in or Google Play Game services as an
+      <strong>optional</strong> feature. Child users must be able to access the app
+      or game in its entirety without signing into Google+ or Google Play Game services.
+    </p>
+  </dd>
+
+  <dt>
+    My app is opted-in to Google Play for Education and has Google sign-in integration
+    so that students can login with their school accounts. Do I need to change the way
+    Google sign-in works in my app?
+   </dt>
+
+  <dd>
+    Apps that participate in Google Play for Education may use Google sign-in for
+    student accounts as long as it is not a blocking requirement for all users of the app.
+  </dd>
+</dl>
+
+<h2 id="monetization">
+  Designed for Families Program Monetization
+</h2>
+
+<dl>
+  <dt>
+    Can you give me more details on the advertising policies for Designed for
+    Families?
+  </dt>
+
+  <dd>
+    Read the <a href=
+    "https://support.google.com/googleplay/android-developer/answer/6184502#ads">
+    ads policy for Designed for Families</a>.
+  </dd>
+
+  <dt>
+    Can my app serve interstitial advertisements?
+  </dt>
+
+  <dd>
+    Interstitial ads may be appropriate for some apps. However, a user must be
+    able to navigate to the main activity before any ads are served.
+  </dd>
+
+  <dt>
+    How do I know that my ad network complies with the advertising
+    policies for Designed for Families?
+  </dt>
+
+  <dd>
+    Please contact your advertising network to ask them about their content policies
+    and advertising practices. If you use AdMob, then please refer to the <a href=
+    "https://support.google.com/admob/answer/3248194">AdMob help center</a> for
+    details on how to tag your app or a specific ad unit for child-directed
+    treatment. It is the developer’s responsibility to ensure that the overall
+    user experience with in-app advertising meets the <a href=
+    "https://support.google.com/googleplay/android-developer/answer/6184502">Designed
+    for Families program requirements</a>.
+  </dd>
+
+  <dt>
+    Can I have in-app purchases in my app?
+  </dt>
+
+  <dd>
+    There are no specific restrictions relating to in-app purchases (IAP) in
+    apps participating in the Designed for Families program other than
+    compliance with the <a href=
+    "https://play.google.com/intl/ALL_us/about/families/developer-distribution-agreement-addendum.html">
+    Designed for Families DDA</a> and other applicable legal requirements, but
+    Play reserves the right to reject apps for overly aggressive commercial
+    tactics. Google Play will enforce IAP password protection on all apps
+    participating in the Designed for Families program that primarily target
+    child audiences to ensure that parents, not children, are approving
+    purchases. Please note that this treatment does not extend to apps
+    targeting general audiences.
+  </dd>
+</dl>
+
+<h2 id="other">
+  Other Questions
+</h2>
+
+<dl>
+  <dt>
+    Who is the intended target audience for participating Designed for Families
+    apps?
+  </dt>
+
+  <dd>
+    Our goal is to provide a great experience on the Google Play store for
+    parents and guardians to discover delightful apps designed for kids and
+    families from trusted brands and developers.
+  </dd>
+
+  <dt>
+    Is the Designed for Families Program only available to developers in
+    certain countries?
+  </dt>
+
+  <dd>
+    Designed for Families is a global program.
+  </dd>
+
+  <dt>
+    What happens to apps that are published in the current Family Games
+    category?
+  </dt>
+
+  <dd>
+    The current Family Games category will be deprecated in May 2015. Apps
+    currently in the Family Games category will have to select
+    a different category in the Play store. Apps that have not selected another
+    category will be assigned to the Casual Games category.
+  </dd>
+</dl>
+
+<div class="paging-links" style="padding-top:.75em;">
+  <a href="https://docs.google.com/forms/d/1EtvUWqlkxS6RxHJjeI-3-7uzdbIZx6n9Cocy2D369B8/viewform" class=
+  "next-class-link">Next: Stay in Touch</a>
+</div>
