@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -166,6 +167,7 @@ public abstract class TvInputService extends Service {
      * </p>
      * @param inputId The ID of the TV input associated with the session.
      */
+    @Nullable
     public abstract Session onCreateSession(String inputId);
 
     /**
@@ -176,6 +178,7 @@ public abstract class TvInputService extends Service {
      * @param hardwareInfo {@link TvInputHardwareInfo} object just added.
      * @hide
      */
+    @Nullable
     @SystemApi
     public TvInputInfo onHardwareAdded(TvInputHardwareInfo hardwareInfo) {
         return null;
@@ -189,6 +192,7 @@ public abstract class TvInputService extends Service {
      * @param hardwareInfo {@link TvInputHardwareInfo} object just removed.
      * @hide
      */
+    @Nullable
     @SystemApi
     public String onHardwareRemoved(TvInputHardwareInfo hardwareInfo) {
         return null;
@@ -202,6 +206,7 @@ public abstract class TvInputService extends Service {
      * @param deviceInfo {@link HdmiDeviceInfo} object just added.
      * @hide
      */
+    @Nullable
     @SystemApi
     public TvInputInfo onHdmiDeviceAdded(HdmiDeviceInfo deviceInfo) {
         return null;
@@ -215,6 +220,7 @@ public abstract class TvInputService extends Service {
      * @param deviceInfo {@link HdmiDeviceInfo} object just removed.
      * @hide
      */
+    @Nullable
     @SystemApi
     public String onHdmiDeviceRemoved(HdmiDeviceInfo deviceInfo) {
         return null;
@@ -707,7 +713,7 @@ public abstract class TvInputService extends Service {
          *            input session.
          * @return {@code true} if the surface was set, {@code false} otherwise.
          */
-        public abstract boolean onSetSurface(Surface surface);
+        public abstract boolean onSetSurface(@Nullable Surface surface);
 
         /**
          * Called after any structural changes (format or size) have been made to the
@@ -812,7 +818,7 @@ public abstract class TvInputService extends Service {
          * @return {@code true} if the track selection was successful, {@code false} otherwise.
          * @see #notifyTrackSelected
          */
-        public boolean onSelectTrack(int type, String trackId) {
+        public boolean onSelectTrack(int type, @Nullable String trackId) {
             return false;
         }
 

@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -174,7 +175,7 @@ public class TvView extends ViewGroup {
      * @param callback The callback to receive events. A value of {@code null} removes the existing
      *            callback.
      */
-    public void setCallback(TvInputCallback callback) {
+    public void setCallback(@Nullable TvInputCallback callback) {
         mCallback = callback;
     }
 
@@ -473,7 +474,7 @@ public class TvView extends ViewGroup {
      * @param callback The callback to receive time shift position changes. A value of {@code null}
      *            removes the existing callback.
      */
-    public void setTimeShiftPositionCallback(TimeShiftPositionCallback callback) {
+    public void setTimeShiftPositionCallback(@Nullable TimeShiftPositionCallback callback) {
         mTimeShiftPositionCallback = callback;
         ensurePositionTracking();
     }

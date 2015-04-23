@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -156,7 +157,7 @@ public final class TvContract {
      * @param inputId The ID of the TV input to build a channels URI for. If {@code null}, builds a
      *            URI for all the TV inputs.
      */
-    public static final Uri buildChannelsUriForInput(String inputId) {
+    public static final Uri buildChannelsUriForInput(@Nullable String inputId) {
         return buildChannelsUriForInput(inputId, false);
     }
 
@@ -171,7 +172,8 @@ public final class TvContract {
      * @hide
      */
     @SystemApi
-    public static final Uri buildChannelsUriForInput(String inputId, boolean browsableOnly) {
+    public static final Uri buildChannelsUriForInput(@Nullable String inputId,
+            boolean browsableOnly) {
         Uri.Builder builder = Channels.CONTENT_URI.buildUpon();
         if (inputId != null) {
             builder.appendQueryParameter(PARAM_INPUT, inputId);
@@ -193,8 +195,8 @@ public final class TvContract {
      * @hide
      */
     @SystemApi
-    public static final Uri buildChannelsUriForInput(String inputId, String genre,
-            boolean browsableOnly) {
+    public static final Uri buildChannelsUriForInput(@Nullable String inputId,
+            @Nullable String genre, boolean browsableOnly) {
         if (genre == null) {
             return buildChannelsUriForInput(inputId, browsableOnly);
         }
@@ -509,6 +511,7 @@ public final class TvContract {
          *         is not defined for the given video format.
          * @see #COLUMN_VIDEO_FORMAT
          */
+        @Nullable
         public static final String getVideoResolution(String videoFormat) {
             return VIDEO_FORMAT_TO_RESOLUTION_MAP.get(videoFormat);
         }
