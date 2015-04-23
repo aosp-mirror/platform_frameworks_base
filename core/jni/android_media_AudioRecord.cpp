@@ -584,6 +584,13 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     return frameCount * channelCount * audio_bytes_per_sample(format);
 }
 
+static jboolean android_media_AudioRecord_setInputDevice(
+        JNIEnv *env,  jobject thiz, jint device_id) {
+
+//    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
+//    return lpRecorder->setInputDevice(device_id) == NO_ERROR;
+    return false;
+}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -616,6 +623,7 @@ static JNINativeMethod gMethods[] = {
                              "()I",    (void *)android_media_AudioRecord_get_pos_update_period},
     {"native_get_min_buff_size",
                              "(III)I",   (void *)android_media_AudioRecord_get_min_buff_size},
+    {"native_setInputDevice", "(I)Z", (void *)android_media_AudioRecord_setInputDevice},
 };
 
 // field names found in android/media/AudioRecord.java

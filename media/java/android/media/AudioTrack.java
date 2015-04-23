@@ -2082,28 +2082,28 @@ public class AudioTrack
     private AudioDeviceInfo mPreferredDevice = null;
 
     /**
-     * Specifies an audio device (via and {@link AudioDeviceInfo} object) to route
+     * Specifies an audio device (via an {@link AudioDeviceInfo} object) to route
      * the output from this AudioTrack.
-     * @param deviceSpec The {@link AudioDeviceInfo} specifying the physical audio device.
+     * @param deviceSpec The {@link AudioDeviceInfo} specifying the audio sink.
      *  If deviceSpec is null, default routing is restored.
      * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
      * does not correspond to a valid audio output device.
      */
-    public boolean setPreferredOutputDevice(AudioDeviceInfo deviceSpec) {
+    public boolean setPreferredOutputDevice(AudioDeviceInfo deviceInfo) {
         // Do some validation....
-        if (deviceSpec != null && !deviceSpec.isSink()) {
+        if (deviceInfo != null && !deviceInfo.isSink()) {
             return false;
         }
 
-        mPreferredDevice = deviceSpec;
-        int routingDeviceId = mPreferredDevice != null ? deviceSpec.getId() : 0;
+        mPreferredDevice = deviceInfo;
+        int preferredDeviceId = mPreferredDevice != null ? deviceInfo.getId() : 0;
 
-        return native_setOutputDevice(routingDeviceId);
+        return native_setOutputDevice(preferredDeviceId);
     }
 
     /**
      * Returns the selected output specified by {@link #setPreferredOutputDevice}. Note that this
-     * is not guarenteed to correspond to the actual device being used for playback.
+     * is not guaranteed to correspond to the actual device being used for playback.
      */
     public AudioDeviceInfo getPreferredOutputDevice() {
         return mPreferredDevice;
