@@ -39,6 +39,7 @@
 #include "utils/String8.h"
 #include "android_media_MediaDataSource.h"
 #include "android_media_PlaybackSettings.h"
+#include "android_media_SyncSettings.h"
 #include "android_media_Utils.h"
 
 #include "android_os_Parcel.h"
@@ -69,6 +70,7 @@ struct fields_t {
 static fields_t fields;
 
 static PlaybackSettings::fields_t gPlaybackSettingsFields;
+static SyncSettings::fields_t gSyncSettingsFields;
 
 static Mutex sLock;
 
@@ -476,6 +478,56 @@ android_media_MediaPlayer_getPlaybackSettings(JNIEnv *env, jobject thiz)
 }
 
 static void
+android_media_MediaPlayer_setSyncSettings(JNIEnv *env, jobject thiz, jobject settings)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    SyncSettings scs;
+    scs.fillFromJobject(env, gSyncSettingsFields, settings);
+    ALOGV("setSyncSettings: %d:%d %d:%d %d:%f %d:%f",
+            scs.syncSourceSet, scs.syncSource,
+            scs.audioAdjustModeSet, scs.audioAdjustMode,
+            scs.toleranceSet, scs.tolerance,
+            scs.frameRateSet, scs.frameRate);
+
+    // TODO: pass sync settings to mediaplayer when it supports it
+    // process_media_player_call(env, thiz, mp->setSyncSettings(scs), NULL, NULL);
+}
+
+static jobject
+android_media_MediaPlayer_getSyncSettings(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    SyncSettings scs;
+    scs.syncSource = 0; // SYNC_SOURCE_DEFAULT
+    scs.audioAdjustMode = 0; // AUDIO_ADJUST_MODE_DEFAULT
+    scs.tolerance = 0.f;
+    scs.frameRate = 0.f;
+
+    // TODO: get this from mediaplayer when it supports it
+    // process_media_player_call(
+    //        env, thiz, mp->getSyncSettings(&scs), NULL, NULL);
+    ALOGV("getSyncSettings: %d %d %f %f",
+            scs.syncSource, scs.audioAdjustMode, scs.tolerance, scs.frameRate);
+
+    scs.syncSourceSet = true;
+    scs.audioAdjustModeSet = true;
+    scs.toleranceSet = true;
+    scs.frameRateSet = false;
+
+    return scs.asJobject(env, gSyncSettingsFields);
+}
+
+static void
 android_media_MediaPlayer_seekTo(JNIEnv *env, jobject thiz, jint msec)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -760,6 +812,7 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
     env->DeleteLocalRef(clazz);
 
     gPlaybackSettingsFields.init(env);
+    gSyncSettingsFields.init(env);
 }
 
 static void
@@ -950,6 +1003,8 @@ static JNINativeMethod gMethods[] = {
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer_getVideoHeight},
     {"setPlaybackSettings", "(Landroid/media/PlaybackSettings;)V", (void *)android_media_MediaPlayer_setPlaybackSettings},
     {"getPlaybackSettings", "()Landroid/media/PlaybackSettings;", (void *)android_media_MediaPlayer_getPlaybackSettings},
+    {"setSyncSettings",     "(Landroid/media/SyncSettings;)V",  (void *)android_media_MediaPlayer_setSyncSettings},
+    {"getSyncSettings",     "()Landroid/media/SyncSettings;",   (void *)android_media_MediaPlayer_getSyncSettings},
     {"seekTo",              "(I)V",                             (void *)android_media_MediaPlayer_seekTo},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer_isPlaying},

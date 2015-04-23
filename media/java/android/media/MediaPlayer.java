@@ -50,6 +50,7 @@ import android.media.SubtitleController;
 import android.media.SubtitleController.Anchor;
 import android.media.SubtitleData;
 import android.media.SubtitleTrack.RenderingWidget;
+import android.media.SyncSettings;
 
 import com.android.internal.app.IAppOpsService;
 
@@ -1445,6 +1446,28 @@ public class MediaPlayer implements SubtitleController.Listener
      */
     @NonNull
     public native PlaybackSettings getPlaybackSettings();
+
+    /**
+     * Sets A/V sync mode.
+     *
+     * @param settings the A/V sync settings to apply
+     *
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized.
+     * @throws IllegalArgumentException if settings are not supported.
+     */
+    public native void setSyncSettings(@NonNull SyncSettings settings);
+
+    /**
+     * Gets the A/V sync mode.
+     *
+     * @return the A/V sync settings
+     *
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized.
+     */
+    @NonNull
+    public native SyncSettings getSyncSettings();
 
     /**
      * Seeks to specified time position.
