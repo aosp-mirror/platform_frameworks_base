@@ -562,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -1114,7 +1125,11 @@ android.os.Parcelable
           <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_CALORIES_CONSUMED">AGGREGATE_CALORIES_CONSUMED</a></td>
           <td class="jd-descrcol" width="100%">
-            Aggregate calories consumed,in kcal, during a time interval.
+            <em>
+      This field is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_NUTRITION_SUMMARY">AGGREGATE_NUTRITION_SUMMARY</a></code> instead, which contains calories as
+ well as other nutrients.  This data type will be removed in a future release.
+</em>
 
 
 
@@ -1210,6 +1225,23 @@ android.os.Parcelable
           static
           final
           <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_NUTRITION_SUMMARY">AGGREGATE_NUTRITION_SUMMARY</a></td>
+          <td class="jd-descrcol" width="100%">
+            In the <code>com.google.nutrition.summary</code> data type, each data point represents the sum of
+ all nutrition entries over the time interval of the data point.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_POWER_SUMMARY">AGGREGATE_POWER_SUMMARY</a></td>
           <td class="jd-descrcol" width="100%">
             In the <code>com.google.power.summary</code> data type, each data point represents
@@ -1221,7 +1253,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1239,7 +1271,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1255,7 +1287,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1266,22 +1298,6 @@ android.os.Parcelable
             In the <code>com.google.weight.summary</code> data type, each data point represents the
  average, maximum and minimum weight, in kilograms, over the time interval of
  the data point.
-            
-    
-
-          </td>
-      </tr>
-      
-    
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          Creator&lt;<a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%">
-            
             
     
 
@@ -1366,8 +1382,11 @@ android.os.Parcelable
           <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">TYPE_CALORIES_CONSUMED</a></td>
           <td class="jd-descrcol" width="100%">
-            In the <code>com.google.calories.consumed</code> data type, each data point represents the number
- of calories consumed, in kcal, over the time interval of the data point.
+            <em>
+      This field is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_NUTRITION">TYPE_NUTRITION</a></code> instead which holds calories as well as other
+ nutrients.  This data type will be removed in a future release.
+</em>
             
     
 
@@ -1551,6 +1570,23 @@ android.os.Parcelable
           static
           final
           <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_NUTRITION">TYPE_NUTRITION</a></td>
+          <td class="jd-descrcol" width="100%">
+            In the <code>com.google.nutrition</code> data type, each data point represents the value of
+ all nutrients consumed as part of a meal or a food item.
+
+
+
+          </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_POWER_SAMPLE">TYPE_POWER_SAMPLE</a></td>
           <td class="jd-descrcol" width="100%">
             In the <code>com.google.power.sample</code> data type, each data point represents an
@@ -1562,7 +1598,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1579,7 +1615,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1596,7 +1632,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1613,7 +1649,7 @@ android.os.Parcelable
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -2344,11 +2380,16 @@ From interface
 
 
 
+      <p>
+  <p class="caution"><strong>
+      This field is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#AGGREGATE_NUTRITION_SUMMARY">AGGREGATE_NUTRITION_SUMMARY</a></code> instead, which contains calories as
+ well as other nutrients.  This data type will be removed in a future release.
 
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Aggregate calories consumed,in kcal, during a time interval. This data type is equivalent
  to the one used for non-aggregated data. The full definition can be found at
- <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">TYPE_CALORIES_CONSUMED</a></code>.
-</p></div>
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">TYPE_CALORIES_CONSUMED</a></code>.</p></div>
 
 
     </div>
@@ -2487,11 +2528,11 @@ From interface
  <ul>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity.segment</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_BODY_FAT_PERCENTAGE">body.fat.percentage</a></code>
-     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">calories.consumed</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_EXPENDED">calories.expended</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_DISTANCE_DELTA">distance.delta</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">location.sample</a></code>
+     <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_NUTRITION">nutrition</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_SPEED">speed</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.delta</a></code>
      <li/><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
@@ -2543,6 +2584,46 @@ From interface
       represented as a float, in degrees
  </ol>
  Because this is an aggregate data type, start and end times should be set.
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="AGGREGATE_NUTRITION_SUMMARY"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        AGGREGATE_NUTRITION_SUMMARY
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>In the <code>com.google.nutrition.summary</code> data type, each data point represents the sum of
+ all nutrition entries over the time interval of the data point.
+ <p>
+ In the nutrients field map, each value will represent the sum of the nutrient over all of
+ the entries in the interval.  If the nutrient was not present in any of the entries, it won't
+ be present on the aggregate map either.
+ <p>
+ If all of the original entries are for the same meal, the <code>meal_type</code> field will also
+ be set.
 </p></div>
 
     
@@ -2685,37 +2766,6 @@ From interface
  <p>
  Because this is an aggregate data type, the start and end times should be set.
 </p></div>
-
-    
-    </div>
-</div>
-
-
-
-<A NAME="CREATOR"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        Creator&lt;<a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>&gt;
-      </span>
-        CREATOR
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-    
-
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
     </div>
@@ -2898,14 +2948,19 @@ From interface
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This field is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_NUTRITION">TYPE_NUTRITION</a></code> instead which holds calories as well as other
+ nutrients.  This data type will be removed in a future release.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>In the <code>com.google.calories.consumed</code> data type, each data point represents the number
  of calories consumed, in kcal, over the time interval of the data point.  The field value
  is stored as a float.
  <p>
  Start and end times should be set to denote the duration over which the calories were
- consumed.
-</p></div>
+ consumed.</p></div>
 
     
     </div>
@@ -3302,6 +3357,86 @@ From interface
  <p>
  One use case of <code>location.track</code> is capturing the path of a user during an activity
  when the track for the path is known, but the exact time at each coordinate isn't.
+</p></div>
+
+
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_NUTRITION"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+        TYPE_NUTRITION
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>In the <code>com.google.nutrition</code> data type, each data point represents the value of
+ all nutrients consumed as part of a meal or a food item.
+ <p>
+ The data point contains several fields.  The nutrients field and either the meal type and/or
+ the food item field are required.
+ <ul>
+   <li><code>nutrients</code> contains all of the nutrient data for the entry
+   <li><code>meal_type</code> lists the type of meal, if known
+   <li><code>food_item</code> lists the particular food item for the entry, if known
+ </ul>
+ <p>
+ In case the meal time is known, it should be reflected in the timestamps.  Otherwise, start
+ and end times should be set to the range in which the meal occurred.
+ <p>
+ The <code>meal_type</code> field accepts the following values, which are defined as constants in
+ <code><a href="/reference/com/google/android/gms/fitness/data/Field.html">Field</a></code>:
+ <ul>
+   <li><code><a href="/reference/com/google/android/gms/fitness/data/Field.html#MEAL_TYPE_BREAKFAST">MEAL_TYPE_BREAKFAST</a></code>
+   <li><code><a href="/reference/com/google/android/gms/fitness/data/Field.html#MEAL_TYPE_LUNCH">MEAL_TYPE_LUNCH</a></code>
+   <li><code><a href="/reference/com/google/android/gms/fitness/data/Field.html#MEAL_TYPE_DINNER">MEAL_TYPE_DINNER</a></code>
+   <li><code><a href="/reference/com/google/android/gms/fitness/data/Field.html#MEAL_TYPE_SNACK">MEAL_TYPE_SNACK</a></code>
+   <li><code><a href="/reference/com/google/android/gms/fitness/data/Field.html#MEAL_TYPE_UNKNOWN">MEAL_TYPE_UNKNOWN</a></code>
+ </ul>
+ When the meal type isn't known, the field may be absent or set to "unknown".  Apps should
+ handle both cases accordingly.
+ <p>
+ The <code>nutrients</code> field is a map where the key holds the type of nutrient and the
+ value holds the amount of the nutrient for the entry.  Key values are represented by the
+ <code>NUTRIENT_XXX</code> constants in <code><a href="/reference/com/google/android/gms/fitness/data/Field.html">Field</a></code>.  In
+ case the amount of the nutrient for the entry is not known, no value for that nutrient should
+ be added to the map.  You may optionally use a value of zero when it is known that the
+ nutrient is not present in the entry.  Multiple nutrients can be added by calling
+ <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setKeyValue(java.lang.String, float)">setKeyValue(String, float)</a></code> repeatedly.
+ <p>
+ Here's an example of creating a DataPoint to represent the user eating a banana:
+ <pre>
+     DataSource nutritionSource = new DataSource.Builder()
+         .setDataType(TYPE_NUTRITION)
+         ...
+         .build();
+
+     DataPoint banana = DataPoint.create(nutritionSource);
+     banana.setTimestamp(now.getMillis(), MILLISECONDS);
+     banana.getValue(FIELD_FOOD_ITEM).setString("banana");
+     banana.getValue(FIELD_MEAL_TYPE).setInt(MEAL_TYPE_SNACK);
+     banana.getValue(FIELD_NUTRIENTS).setKeyValue(NUTRIENT_TOTAL_FAT, 0.4f);
+     banana.getValue(FIELD_NUTRIENTS).setKeyValue(NUTRIENT_SODIUM, 1f);
+     banana.getValue(FIELD_NUTRIENTS).setKeyValue(NUTRIENT_POTASSIUM, 422f);
+ </pre>
 </p></div>
 
 
