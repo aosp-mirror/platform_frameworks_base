@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
@@ -44,6 +45,7 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaFormat;
 import android.media.MediaTimeProvider;
+import android.media.PlaybackSettings;
 import android.media.SubtitleController;
 import android.media.SubtitleController.Anchor;
 import android.media.SubtitleData;
@@ -471,16 +473,21 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
- * <tr><td>setScreenOnWhilePlaying</></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state.  </p></td></tr>
  * <tr><td>setPlaybackRate</p></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
+ * <tr><td>setPlaybackSettings</p></td>
+ *     <td>any </p></td>
+ *     <td>{} </p></td>
+ *     <td>This method can be called in any state and calling it does not change
+ *         the object state. </p></td></tr>
+ * <tr><td>setScreenOnWhilePlaying</></td>
+ *     <td>any </p></td>
+ *     <td>{} </p></td>
+ *     <td>This method can be called in any state and calling it does not change
+ *         the object state.  </p></td></tr>
  * <tr><td>setVolume </p></td>
  *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *          PlaybackCompleted}</p></td>
@@ -1342,6 +1349,8 @@ public class MediaPlayer implements SubtitleController.Listener
     public native boolean isPlaying();
 
     /**
+     * Change playback speed of audio by resampling the audio.
+     * <p>
      * Specifies resampling as audio mode for variable rate playback, i.e.,
      * resample the waveform based on the requested playback rate to get
      * a new waveform, and play back the new waveform at the original sampling
@@ -1349,32 +1358,43 @@ public class MediaPlayer implements SubtitleController.Listener
      * When rate is larger than 1.0, pitch becomes higher.
      * When rate is smaller than 1.0, pitch becomes lower.
      */
-    public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 0;
+    public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 2;
 
     /**
+     * Change playback speed of audio without changing its pitch.
+     * <p>
      * Specifies time stretching as audio mode for variable rate playback.
      * Time stretching changes the duration of the audio samples without
      * affecting its pitch.
-     * FIXME: implement time strectching.
-     * @hide
+     * <p>
+     * This mode is only supported for a limited range of playback speed factors,
+     * e.g. between 1/2x and 2x.
      */
     public static final int PLAYBACK_RATE_AUDIO_MODE_STRETCH = 1;
+
+    /**
+     * Change playback speed of audio without changing its pitch, and
+     * possibly mute audio if time stretching is not supported for the playback
+     * speed.
+     * <p>
+     * Try to keep audio pitch when changing the playback rate, but allow the
+     * system to determine how to change audio playback if the rate is out
+     * of range.
+     */
+    public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0;
 
     /** @hide */
     @IntDef(
         value = {
+            PLAYBACK_RATE_AUDIO_MODE_DEFAULT,
+            PLAYBACK_RATE_AUDIO_MODE_STRETCH,
             PLAYBACK_RATE_AUDIO_MODE_RESAMPLE,
-            PLAYBACK_RATE_AUDIO_MODE_STRETCH })
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlaybackRateAudioMode {}
 
     /**
      * Sets playback rate and audio mode.
-     *
-     * <p> The supported audio modes are:
-     * <ul>
-     * <li> {@link #PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
-     * </ul>
      *
      * @param rate the ratio between desired playback rate and normal one.
      * @param audioMode audio playback mode. Must be one of the supported
@@ -1385,14 +1405,46 @@ public class MediaPlayer implements SubtitleController.Listener
      * @throws IllegalArgumentException if audioMode is not supported.
      */
     public void setPlaybackRate(float rate, @PlaybackRateAudioMode int audioMode) {
-        if (!isAudioPlaybackModeSupported(audioMode)) {
+        PlaybackSettings settings = new PlaybackSettings();
+        settings.allowDefaults();
+        switch (audioMode) {
+        case PLAYBACK_RATE_AUDIO_MODE_DEFAULT:
+            settings.setSpeed(rate).setPitch(1.0f);
+            break;
+        case PLAYBACK_RATE_AUDIO_MODE_STRETCH:
+            settings.setSpeed(rate).setPitch(1.0f)
+                    .setAudioFallbackMode(settings.AUDIO_FALLBACK_MODE_FAIL);
+            break;
+        case PLAYBACK_RATE_AUDIO_MODE_RESAMPLE:
+            settings.setSpeed(rate).setPitch(rate);
+            break;
+        default:
             final String msg = "Audio playback mode " + audioMode + " is not supported";
             throw new IllegalArgumentException(msg);
         }
-        _setPlaybackRate(rate);
+        setPlaybackSettings(settings);
     }
 
-    private native void _setPlaybackRate(float rate) throws IllegalStateException;
+    /**
+     * Sets playback rate using {@link PlaybackSettings}.
+     *
+     * @param settings the playback settings.
+     *
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized.
+     * @throws IllegalArgumentException if settings is not supported.
+     */
+    public native void setPlaybackSettings(@NonNull PlaybackSettings settings);
+
+    /**
+     * Gets the playback settings, containing the current playback rate.
+     *
+     * @return the playback settings.
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized.
+     */
+    @NonNull
+    public native PlaybackSettings getPlaybackSettings();
 
     /**
      * Seeks to specified time position.
@@ -3217,14 +3269,6 @@ public class MediaPlayer implements SubtitleController.Listener
     private boolean isVideoScalingModeSupported(int mode) {
         return (mode == VIDEO_SCALING_MODE_SCALE_TO_FIT ||
                 mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
-    }
-
-    /*
-     * Test whether a given audio playback mode is supported.
-     * TODO query supported AudioPlaybackMode from player.
-     */
-    private boolean isAudioPlaybackModeSupported(int mode) {
-        return (mode == PLAYBACK_RATE_AUDIO_MODE_RESAMPLE);
     }
 
     /** @hide */
