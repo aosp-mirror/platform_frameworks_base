@@ -438,6 +438,33 @@ public class SystemServicesProxy {
         return info.loadLabel(mPm).toString();
     }
 
+    /** Returns the application label */
+    public String getApplicationLabel(Intent baseIntent, int userId) {
+        if (mPm == null) return null;
+
+        // If we are mocking, then return a mock label
+        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
+            return "Recent Task";
+        }
+
+        ResolveInfo ri = mPm.resolveActivityAsUser(baseIntent, 0, userId);
+        CharSequence label = (ri != null) ? ri.loadLabel(mPm) : null;
+        return (label != null) ? label.toString() : null;
+    }
+
+    /** Returns the content description for a given task */
+    public String getContentDescription(Intent baseIntent, int userId, String activityLabel,
+            Resources res) {
+        String applicationLabel = getApplicationLabel(baseIntent, userId);
+        if (applicationLabel == null) {
+            return getBadgedLabel(activityLabel, userId);
+        }
+        String badgedApplicationLabel = getBadgedLabel(applicationLabel, userId);
+        return applicationLabel.equals(activityLabel) ? badgedApplicationLabel
+                : res.getString(R.string.accessibility_recents_task_header,
+                        badgedApplicationLabel, activityLabel);
+    }
+
     /**
      * Returns the activity icon for the ActivityInfo for a user, badging if
      * necessary.
@@ -462,6 +489,16 @@ public class SystemServicesProxy {
             icon = mPm.getUserBadgedIcon(icon, new UserHandle(userId));
         }
         return icon;
+    }
+
+    /**
+     * Returns the given label for a user, badging if necessary.
+     */
+    public String getBadgedLabel(String label, int userId) {
+        if (userId != UserHandle.myUserId()) {
+            label = mPm.getUserBadgedLabel(label, new UserHandle(userId)).toString();
+        }
+        return label;
     }
 
     /** Returns the package name of the home activity. */
