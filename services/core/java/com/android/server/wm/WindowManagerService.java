@@ -624,6 +624,12 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int WALLPAPER_DRAW_TIMEOUT = 2;
     int mWallpaperDrawState = WALLPAPER_DRAW_NORMAL;
 
+    // Set to the wallpaper window we would like to hide once the transition animations are done.
+    // This is useful in cases where we don't want the wallpaper to be hidden when the close app
+    // is a wallpaper target and is done animating out, but the opening app isn't a wallpaper
+    // target and isn't done animating in.
+    WindowState mDeferredHideWallpaper = null;
+
     AppWindowToken mFocusedApp = null;
 
     PowerManager mPowerManager;
@@ -1781,17 +1787,24 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void hideWallpapersLocked(final WindowState winGoingAway) {
-        if (mWallpaperTarget != null &&
-                (mWallpaperTarget != winGoingAway || mLowerWallpaperTarget != null)) {
+        if (mWallpaperTarget != null
+                && (mWallpaperTarget != winGoingAway || mLowerWallpaperTarget != null)) {
+            return;
+        }
+        if (mAppTransition.isRunning()) {
+            // Defer hiding the wallpaper when app transition is running until the animations
+            // are done.
+            mDeferredHideWallpaper = winGoingAway;
             return;
         }
 
+        final boolean wasDeferred = (mDeferredHideWallpaper == winGoingAway);
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WindowToken token = mWallpaperTokens.get(i);
             for (int j = token.windows.size() - 1; j >= 0; j--) {
                 final WindowState wallpaper = token.windows.get(j);
                 final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
-                if (!winAnimator.mLastHidden) {
+                if (!winAnimator.mLastHidden || wasDeferred) {
                     winAnimator.hide();
                     dispatchWallpaperVisibility(wallpaper, false);
                     final DisplayContent displayContent = wallpaper.getDisplayContent();
@@ -2270,12 +2283,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Check wallpaper for visiblity change and notify window if so.
+     * Check wallpaper for visibility change and notify window if so.
      * @param wallpaper The wallpaper to test and notify.
      * @param visible Current visibility.
      */
     void dispatchWallpaperVisibility(final WindowState wallpaper, final boolean visible) {
-        if (wallpaper.mWallpaperVisible != visible) {
+        // Only send notification if the visibility actually changed and we are not trying to hide
+        // the wallpaper when we are deferring hiding of the wallpaper.
+        if (wallpaper.mWallpaperVisible != visible
+                && (mDeferredHideWallpaper == null || visible)) {
             wallpaper.mWallpaperVisible = visible;
             try {
                 if (DEBUG_VISIBILITY || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
@@ -9527,6 +9543,12 @@ public class WindowManagerService extends IWindowManager.Stub
         int changes = 0;
 
         mAppTransition.setIdle();
+
+        if (mDeferredHideWallpaper != null) {
+            hideWallpapersLocked(mDeferredHideWallpaper);
+            mDeferredHideWallpaper = null;
+        }
+
         // Restore window app tokens to the ActivityManager views
         ArrayList<TaskStack> stacks = getDefaultDisplayContentLocked().getStacks();
         for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
