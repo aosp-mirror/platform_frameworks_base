@@ -300,6 +300,14 @@ final public class MediaCodec {
          */
         @BufferFlag
         public int flags;
+
+        /** @hide */
+        @NonNull
+        public BufferInfo dup() {
+            BufferInfo copy = new BufferInfo();
+            copy.set(offset, size, presentationTimeUs, flags);
+            return copy;
+        }
     };
 
     // The follow flag constants MUST stay in sync with their equivalents
@@ -343,11 +351,25 @@ final public class MediaCodec {
     @Retention(RetentionPolicy.SOURCE)
     public @interface BufferFlag {}
 
+    private static class FrameRenderedInfo {
+        public long mPresentationTimeUs;
+        public long mNanoTime;
+        public FrameRenderedInfo(long presentationTimeUs, long nanoTime) {
+            mPresentationTimeUs = presentationTimeUs;
+            mNanoTime = nanoTime;
+        }
+    }
+
     private EventHandler mEventHandler;
+    private EventHandler mOnFrameRenderedHandler;
+    private EventHandler mCallbackHandler;
     private Callback mCallback;
+    private OnFrameRenderedListener mOnFrameRenderedListener;
+    private Object mListenerLock = new Object();
 
     private static final int EVENT_CALLBACK = 1;
     private static final int EVENT_SET_CALLBACK = 2;
+    private static final int EVENT_FRAME_RENDERED = 3;
 
     private static final int CB_INPUT_AVAILABLE = 1;
     private static final int CB_OUTPUT_AVAILABLE = 2;
@@ -375,6 +397,15 @@ final public class MediaCodec {
                     mCallback = (MediaCodec.Callback) msg.obj;
                     break;
                 }
+                case EVENT_FRAME_RENDERED:
+                    synchronized (mListenerLock) {
+                        FrameRenderedInfo info = (FrameRenderedInfo)msg.obj;
+                        if (mOnFrameRenderedListener != null) {
+                            mOnFrameRenderedListener.onFrameRendered(
+                                    mCodec, info.mPresentationTimeUs, info.mNanoTime);
+                        }
+                        break;
+                    }
                 default:
                 {
                     break;
@@ -430,6 +461,8 @@ final public class MediaCodec {
             }
         }
     }
+
+    private boolean mHasSurface = false;
 
     /**
      * Instantiate a decoder supporting input data of the given mime type.
@@ -501,6 +534,9 @@ final public class MediaCodec {
         } else {
             mEventHandler = null;
         }
+        mCallbackHandler = mEventHandler;
+        mOnFrameRenderedHandler = mEventHandler;
+
         mBufferLock = new Object();
 
         native_setup(name, nameIsType, encoder);
@@ -607,6 +643,8 @@ final public class MediaCodec {
             }
         }
 
+        mHasSurface = surface != null;
+
         native_configure(keys, values, surface, crypto, flags);
     }
 
@@ -662,9 +700,14 @@ final public class MediaCodec {
         native_stop();
         freeAllTrackedBuffers();
 
-        if (mEventHandler != null) {
-            mEventHandler.removeMessages(EVENT_CALLBACK);
-            mEventHandler.removeMessages(EVENT_SET_CALLBACK);
+        synchronized (mListenerLock) {
+            if (mCallbackHandler != null) {
+                mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
+                mCallbackHandler.removeMessages(EVENT_CALLBACK);
+            }
+            if (mOnFrameRenderedHandler != null) {
+                mOnFrameRenderedHandler.removeMessages(EVENT_FRAME_RENDERED);
+            }
         }
     }
 
@@ -1124,6 +1167,9 @@ final public class MediaCodec {
                 cacheBuffers(false /* input */);
             } else if (res >= 0) {
                 validateOutputByteBuffer(mCachedOutputBuffers, res, info);
+                if (mHasSurface) {
+                    mDequeuedOutputInfos.put(res, info.dup());
+                }
             }
         }
         return res;
@@ -1150,11 +1196,32 @@ final public class MediaCodec {
      * @throws MediaCodec.CodecException upon codec error.
      */
     public final void releaseOutputBuffer(int index, boolean render) {
+        BufferInfo info = null;
         synchronized(mBufferLock) {
             invalidateByteBuffer(mCachedOutputBuffers, index);
             mDequeuedOutputBuffers.remove(index);
+            if (mHasSurface) {
+                info = mDequeuedOutputInfos.remove(index);
+            }
         }
+        // TODO
+        // until codec and libgui supports callback, assume frame is rendered within 50 ms
+        postRenderedCallback(render, info, 50 /* delayMs */);
         releaseOutputBuffer(index, render, false /* updatePTS */, 0 /* dummy */);
+    }
+
+    private void postRenderedCallback(boolean render, @Nullable BufferInfo info, long delayMs) {
+        if (render && info != null) {
+            synchronized (mListenerLock) {
+                 if (mOnFrameRenderedListener != null) {
+                     FrameRenderedInfo obj = new FrameRenderedInfo(
+                            info.presentationTimeUs, System.nanoTime() + delayMs * 1000000);
+                     Message msg = mOnFrameRenderedHandler.obtainMessage(
+                            EVENT_FRAME_RENDERED, obj);
+                     mOnFrameRenderedHandler.sendMessageDelayed(msg, delayMs);
+                 }
+            }
+        }
     }
 
     /**
@@ -1207,10 +1274,20 @@ final public class MediaCodec {
      * @throws MediaCodec.CodecException upon codec error.
      */
     public final void releaseOutputBuffer(int index, long renderTimestampNs) {
+        BufferInfo info = null;
         synchronized(mBufferLock) {
             invalidateByteBuffer(mCachedOutputBuffers, index);
             mDequeuedOutputBuffers.remove(index);
+            if (mHasSurface) {
+                info = mDequeuedOutputInfos.remove(index);
+            }
         }
+        // TODO
+        // until codec and libgui supports callback, assume frame is rendered at the
+        // render time or 16 ms from now, whichever is later.
+        postRenderedCallback(
+                true /* render */, info,
+                Math.max(renderTimestampNs - System.nanoTime(), 16666666) / 1000000);
         releaseOutputBuffer(
                 index, true /* render */, true /* updatePTS */, renderTimestampNs);
     }
@@ -1350,6 +1427,8 @@ final public class MediaCodec {
     private ByteBuffer[] mCachedOutputBuffers;
     private final BufferMap mDequeuedInputBuffers = new BufferMap();
     private final BufferMap mDequeuedOutputBuffers = new BufferMap();
+    private final Map<Integer, BufferInfo> mDequeuedOutputInfos =
+        new HashMap<Integer, BufferInfo>();
     final private Object mBufferLock;
 
     private final void invalidateByteBuffer(
@@ -1715,17 +1794,117 @@ final public class MediaCodec {
      * @param cb The callback that will run.  Use {@code null} to clear a previously
      *           set callback (before {@link #configure configure} is called and run
      *           in synchronous mode).
+     * @param handler Callbacks will happen on the handler's thread. If {@code null},
+     *           callbacks are done on the default thread (the caller's thread or the
+     *           main thread.)
      */
-    public void setCallback(@Nullable /* MediaCodec. */ Callback cb) {
-        if (mEventHandler != null) {
-            // set java callback on handler
-            Message msg = mEventHandler.obtainMessage(EVENT_SET_CALLBACK, 0, 0, cb);
-            mEventHandler.sendMessage(msg);
+    public void setCallback(@Nullable /* MediaCodec. */ Callback cb, @Nullable Handler handler) {
+        if (cb != null) {
+            synchronized (mListenerLock) {
+                EventHandler newHandler = getEventHandlerOn(handler, mCallbackHandler);
+                // NOTE: there are no callbacks on the handler at this time, but check anyways
+                // even if we were to extend this to be callable dynamically, it must
+                // be called when codec is flushed, so no messages are pending.
+                if (newHandler != mCallbackHandler) {
+                    mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
+                    mCallbackHandler.removeMessages(EVENT_CALLBACK);
+                    mCallbackHandler = newHandler;
+                }
+            }
+        } else if (mCallbackHandler != null) {
+            mCallbackHandler.removeMessages(EVENT_SET_CALLBACK);
+            mCallbackHandler.removeMessages(EVENT_CALLBACK);
+        }
+
+        if (mCallbackHandler != null) {
+            // set java callback on main handler
+            Message msg = mCallbackHandler.obtainMessage(EVENT_SET_CALLBACK, 0, 0, cb);
+            mCallbackHandler.sendMessage(msg);
 
             // set native handler here, don't post to handler because
-            // it may cause the callback to be delayed and set in a wrong state,
-            // and MediaCodec is already doing it on looper.
+            // it may cause the callback to be delayed and set in a wrong state.
+            // Note that native codec may start sending events to the callback
+            // handler after this returns.
             native_setCallback(cb);
+        }
+    }
+
+    /**
+     * Sets an asynchronous callback for actionable MediaCodec events on the default
+     * looper.
+     * <p>
+     * Same as {@link #setCallback(Callback, Handler)} with handler set to null.
+     * @param cb The callback that will run.  Use {@code null} to clear a previously
+     *           set callback (before {@link #configure configure} is called and run
+     *           in synchronous mode).
+     * @see #setCallback(Callback, Handler)
+     */
+    public void setCallback(@Nullable /* MediaCodec. */ Callback cb) {
+        setCallback(cb, null /* handler */);
+    }
+
+    /**
+     * Listener to be called when an output frame has rendered on the output surface
+     *
+     * @see MediaCodec#setOnFrameRenderedListener
+     */
+    public interface OnFrameRenderedListener {
+
+        /**
+         * Called when an output frame has rendered on the output surface.
+         *
+         * @param codec the MediaCodec instance
+         * @param presentationTimeUs the presentation time (media time) of the frame rendered.
+         *          This is usually the same as specified in {@link #queueInputBuffer}; however,
+         *          some codecs may alter the media time by applying some time-based transformation,
+         *          such as frame rate conversion. In that case, presentation time corresponds
+         *          to the actual output frame rendered.
+         * @param nanoTime The system time when the frame was rendered.
+         *
+         * @see System#nanoTime
+         */
+        public void onFrameRendered(
+                @NonNull MediaCodec codec, long presentationTimeUs, long nanoTime);
+    }
+
+    /**
+     * Register a callback to be invoked when an output frame is rendered on the output surface.
+     * <p>
+     * This method can be called in any codec state, but will only have an effect in the
+     * Executing state for codecs that render buffers to the output surface.
+     *
+     * @param listener the callback that will be run
+     * @param handler the callback will be run on the handler's thread. If {@code null},
+     *           the callback will be run on the default thread, which is the looper
+     *           from which the codec was created, or a new thread if there was none.
+     */
+    public void setOnFrameRenderedListener(
+            @Nullable OnFrameRenderedListener listener, @Nullable Handler handler) {
+        synchronized (mListenerLock) {
+            mOnFrameRenderedListener = listener;
+            if (listener != null) {
+                EventHandler newHandler = getEventHandlerOn(handler, mOnFrameRenderedHandler);
+                if (newHandler != mOnFrameRenderedHandler) {
+                    mOnFrameRenderedHandler.removeMessages(EVENT_FRAME_RENDERED);
+                }
+                mOnFrameRenderedHandler = newHandler;
+            } else if (mOnFrameRenderedHandler != null) {
+                mOnFrameRenderedHandler.removeMessages(EVENT_FRAME_RENDERED);
+            }
+        }
+    }
+
+    private EventHandler getEventHandlerOn(
+            @Nullable Handler handler, @NonNull EventHandler lastHandler) {
+        if (handler == null) {
+            return mEventHandler;
+        } else {
+            Looper looper = handler.getLooper();
+            if (lastHandler.getLooper() == looper) {
+                return lastHandler;
+            } else {
+                return new EventHandler(this, looper);
+            }
         }
     }
 
@@ -1772,9 +1951,17 @@ final public class MediaCodec {
 
     private void postEventFromNative(
             int what, int arg1, int arg2, @Nullable Object obj) {
-        if (mEventHandler != null) {
-            Message msg = mEventHandler.obtainMessage(what, arg1, arg2, obj);
-            mEventHandler.sendMessage(msg);
+        synchronized (mListenerLock) {
+            EventHandler handler = mEventHandler;
+            if (what == EVENT_CALLBACK) {
+                handler = mCallbackHandler;
+            } else if (what == EVENT_FRAME_RENDERED) {
+                handler = mOnFrameRenderedHandler;
+            }
+            if (handler != null) {
+                Message msg = handler.obtainMessage(what, arg1, arg2, obj);
+                handler.sendMessage(msg);
+            }
         }
     }
 

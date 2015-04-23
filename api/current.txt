@@ -15294,7 +15294,9 @@ package android.media {
     method public final void releaseOutputBuffer(int, boolean);
     method public final void releaseOutputBuffer(int, long);
     method public final void reset();
+    method public void setCallback(android.media.MediaCodec.Callback, android.os.Handler);
     method public void setCallback(android.media.MediaCodec.Callback);
+    method public void setOnFrameRenderedListener(android.media.MediaCodec.OnFrameRenderedListener, android.os.Handler);
     method public final void setParameters(android.os.Bundle);
     method public final void setVideoScalingMode(int);
     method public final void signalEndOfInputStream();
@@ -15361,6 +15363,10 @@ package android.media {
     field public int[] numBytesOfClearData;
     field public int[] numBytesOfEncryptedData;
     field public int numSubSamples;
+  }
+
+  public static abstract interface MediaCodec.OnFrameRenderedListener {
+    method public abstract void onFrameRendered(android.media.MediaCodec, long, long);
   }
 
   public final class MediaCodecInfo {
