@@ -1840,6 +1840,24 @@ results."
         </ul>
       </li>
     </ul>
+    <ul>
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/ui-testing/index.html"
+         description="How to automate your user interface tests for Android apps.">
+            Automating UI Tests
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/testing/ui-testing/espresso-testing.html">
+            <span class="en">Testing UI for a Single App</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/testing/ui-testing/uiautomator-testing.html">
+            <span class="en">Testing UI for Multiple Apps</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </li>
   <!-- End best Testing -->
 
