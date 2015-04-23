@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../../assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="../../../../../assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -126,7 +127,9 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="../../../../../assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -149,6 +152,52 @@ type="text/css">
 
 
 <a name="top"></a>
+
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
 
   <!-- Header -->
   <div id="header-wrapper">
@@ -346,6 +395,7 @@ type="text/css">
                 <li><a href="../../../../../distribute/users/index.html">Get Users</a></li>
                 <li><a href="../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="../../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../../distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="../../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="../../../../../distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -361,31 +411,7 @@ type="text/css">
         <div class="wrap" style="position:relative;z-index:1">
 
 
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
 
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
 
 
             <ul class="nav-x col-9 develop" style="width:100%">
@@ -482,6 +508,8 @@ type="text/css">
 
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/package-summary.html">android.support.test</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/annotation/package-summary.html">android.support.test.annotation</a></li>
     <li class="selected api apilevel-">
   <a href="../../../../../reference/android/support/test/espresso/package-summary.html">android.support.test.espresso</a></li>
     <li class="api apilevel-">
@@ -493,13 +521,23 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/espresso/contrib/package-summary.html">android.support.test.espresso.contrib</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/intent/package-summary.html">android.support.test.espresso.intent</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/intent/matcher/package-summary.html">android.support.test.espresso.intent.matcher</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/espresso/intent/rule/package-summary.html">android.support.test.espresso.intent.rule</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/espresso/matcher/package-summary.html">android.support.test.espresso.matcher</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/espresso/util/package-summary.html">android.support.test.espresso.util</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/filters/package-summary.html">android.support.test.filters</a></li>
     <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/rule/package-summary.html">android.support.test.rule</a></li>
+    <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/runner/package-summary.html">android.support.test.runner</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/test/runner/intent/package-summary.html">android.support.test.runner.intent</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/test/runner/lifecycle/package-summary.html">android.support.test.runner.lifecycle</a></li>
     <li class="api apilevel-">
@@ -808,7 +846,7 @@ Summary:
         <span class="sympad"><a href="../../../../../reference/android/support/test/espresso/IdlingPolicy.html#getIdleTimeoutUnit()">getIdleTimeoutUnit</a></span>()</nobr>
 
         <div class="jd-descrdiv">
-          The unit for {@linkgetIdleTimeout }.
+          The unit for <code><a href="../../../../../reference/android/support/test/espresso/IdlingPolicy.html#getIdleTimeout()">getIdleTimeout()</a></code>.
 
 
 
@@ -1157,7 +1195,7 @@ From class
 
 
 
-  <div class="jd-tagdata jd-tagdescr"><p>The unit for {@linkgetIdleTimeout }.
+  <div class="jd-tagdata jd-tagdescr"><p>The unit for <code><a href="../../../../../reference/android/support/test/espresso/IdlingPolicy.html#getIdleTimeout()">getIdleTimeout()</a></code>.
 </p></div>
 
     </div>
