@@ -91,6 +91,17 @@ devices. For instance, don't try to open low-level sockets to create a communica
 channel.
 </p>
 
+<p>Android Wear supports multiple wearables connected to a handheld device. For example, when the
+user saves a note on a handheld, it automatically appears on both of the user's Wear devices. To
+synchronize data between devices, Google’s servers host a cloud node in the network of devices. The
+system synchronizes data to directly connected devices, the cloud node, and to wearable devices
+connected to the cloud node via Wi-Fi.</p>
+
+<img src="{@docRoot}wear/images/wear_cloud_node.png" alt="" width="330" height="375"/>
+<p class="img-caption"><strong>Figure 1.</strong> A sample network of nodes with
+handheld and wearable devices.</p>
+
+
 <h2>Lessons</h2>
   <dl>
     <dt><a href="{@docRoot}training/wearables/data-layer/accessing.html">Accessing the Wearable Data Layer</a></dt>
