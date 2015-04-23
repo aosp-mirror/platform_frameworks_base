@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.CheckResult;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -389,6 +390,7 @@ public final class Rect implements Parcelable {
      *              (and this rectangle is then set to that intersection) else
      *              return false and do not change this rectangle.
      */
+    @CheckResult
     public boolean intersect(int left, int top, int right, int bottom) {
         if (this.left < right && left < this.right && this.top < bottom && top < this.bottom) {
             if (this.left < left) this.left = left;
@@ -411,6 +413,7 @@ public final class Rect implements Parcelable {
      *              (and this rectangle is then set to that intersection) else
      *              return false and do not change this rectangle.
      */
+    @CheckResult
     public boolean intersect(Rect r) {
         return intersect(r.left, r.top, r.right, r.bottom);
     }
@@ -427,6 +430,7 @@ public final class Rect implements Parcelable {
      *              this rectangle to that intersection. If they do not, return
      *              false and do not change this rectangle.
      */
+    @CheckResult
     public boolean setIntersect(Rect a, Rect b) {
         if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) {
             left = Math.max(a.left, b.left);
