@@ -67,8 +67,10 @@ abstract class BaseActivity extends Activity {
 
     static final String EXTRA_STATE = "state";
 
-    private final String mTag;
     RootsCache mRoots;
+    SearchManager mSearchManager;
+
+    private final String mTag;
 
     public abstract State getDisplayState();
     public abstract void onDocumentPicked(DocumentInfo doc);
@@ -86,6 +88,17 @@ abstract class BaseActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         mRoots = DocumentsApplication.getRootsCache(this);
+        mSearchManager = new SearchManager();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean showMenu = super.onCreateOptionsMenu(menu);
+
+        getMenuInflater().inflate(R.menu.activity, menu);
+        mSearchManager.install(menu.findItem(R.id.menu_search));
+
+        return showMenu;
     }
 
     void onStackRestored(boolean restored, boolean external) {}
@@ -98,10 +111,15 @@ abstract class BaseActivity extends Activity {
         state.stack.clear();
         state.stackTouched = true;
 
-        if (!mRoots.isRecentsRoot(root)) {
-            new PickRootTask(root).executeOnExecutor(getCurrentExecutor());
-        } else {
+        mSearchManager.update(root);
+
+        // Recents is always in memory, so we just load it directly.
+        // Otherwise we delegate loading data from disk to a task
+        // to ensure a responsive ui.
+        if (mRoots.isRecentsRoot(root)) {
             onCurrentDirectoryChanged(ANIM_SIDE);
+        } else {
+            new PickRootTask(root).executeOnExecutor(getCurrentExecutor());
         }
     }
 
@@ -576,9 +594,9 @@ abstract class BaseActivity extends Activity {
     final class SearchManager implements
             SearchView.OnCloseListener, OnActionExpandListener, OnQueryTextListener {
 
-        protected boolean mSearchExpanded;
-        protected boolean mIgnoreNextClose;
-        protected boolean mIgnoreNextCollapse;
+        private boolean mSearchExpanded;
+        private boolean mIgnoreNextClose;
+        private boolean mIgnoreNextCollapse;
 
         private MenuItem mMenu;
         private SearchView mView;
@@ -598,9 +616,10 @@ abstract class BaseActivity extends Activity {
          */
         void update(RootInfo root) {
             if (mMenu == null) {
-                Log.d(mTag, "showMenu called before Search MenuItem installed.");
+                Log.d(mTag, "update called before Search MenuItem installed.");
                 return;
             }
+
             State state = getDisplayState();
             if (state.currentSearch != null) {
                 mMenu.expandActionView();
@@ -609,12 +628,16 @@ abstract class BaseActivity extends Activity {
                 mView.clearFocus();
                 mView.setQuery(state.currentSearch, false);
             } else {
-                mIgnoreNextClose = true;
-                mView.setIconified(true);
                 mView.clearFocus();
+                if (!mView.isIconified()) {
+                    mIgnoreNextClose = true;
+                    mView.setIconified(true);
+                }
 
-                mIgnoreNextCollapse = true;
-                mMenu.collapseActionView();
+                if (mMenu.isActionViewExpanded()) {
+                    mIgnoreNextCollapse = true;
+                    mMenu.collapseActionView();
+                }
             }
 
             showMenu(root != null
@@ -626,7 +649,11 @@ abstract class BaseActivity extends Activity {
                 Log.d(mTag, "showMenu called before Search MenuItem installed.");
                 return;
             }
+
             mMenu.setVisible(visible);
+            if (!visible) {
+                getDisplayState().currentSearch = null;
+            }
         }
 
         boolean isSearching() {
@@ -649,6 +676,7 @@ abstract class BaseActivity extends Activity {
             onCurrentDirectoryChanged(ANIM_NONE);
             return false;
         }
+
         @Override
         public boolean onMenuItemActionExpand(MenuItem item) {
             mSearchExpanded = true;
@@ -668,6 +696,7 @@ abstract class BaseActivity extends Activity {
             onCurrentDirectoryChanged(ANIM_NONE);
             return true;
         }
+
         @Override
         public boolean onQueryTextSubmit(String query) {
             mSearchExpanded = true;

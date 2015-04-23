@@ -88,7 +88,6 @@ public class DocumentsActivity extends BaseActivity {
 
     private State mState;
 
-    private SearchManager mSearchManager;
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
 
@@ -151,7 +150,6 @@ public class DocumentsActivity extends BaseActivity {
                     android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
         }
 
-        mSearchManager = new SearchManager();
         setActionBar(mToolbar);
 
         // Hide roots when we're managing a specific root
@@ -433,15 +431,10 @@ public class DocumentsActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean showMenu = super.onCreateOptionsMenu(menu);
 
-        getMenuInflater().inflate(R.menu.activity, menu);
-
         // Most actions are visible when showing as dialog
         if (mShowAsDialog) {
             expandMenus(menu);
         }
-
-        this.mSearchManager.install(menu.findItem(R.id.menu_search));
-
         return showMenu;
     }
 
@@ -466,7 +459,6 @@ public class DocumentsActivity extends BaseActivity {
         sort.setVisible(cwd != null);
         grid.setVisible(mState.derivedMode != State.MODE_GRID);
         list.setVisible(mState.derivedMode != State.MODE_LIST);
-
 
         mSearchManager.update(root);
 
