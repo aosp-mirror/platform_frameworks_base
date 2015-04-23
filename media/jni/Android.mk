@@ -2,6 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
+    android_media_AmrInputStream.cpp \
     android_media_ImageWriter.cpp \
     android_media_ImageReader.cpp \
     android_media_MediaCrypto.cpp \
@@ -14,12 +15,12 @@ LOCAL_SRC_FILES:= \
     android_media_MediaMetadataRetriever.cpp \
     android_media_MediaMuxer.cpp \
     android_media_MediaPlayer.cpp \
+    android_media_MediaProfiles.cpp \
     android_media_MediaRecorder.cpp \
     android_media_MediaScanner.cpp \
     android_media_MediaSync.cpp \
     android_media_ResampleInputStream.cpp \
-    android_media_MediaProfiles.cpp \
-    android_media_AmrInputStream.cpp \
+    android_media_SyncSettings.cpp \
     android_media_Utils.cpp \
     android_mtp_MtpDatabase.cpp \
     android_mtp_MtpDevice.cpp \

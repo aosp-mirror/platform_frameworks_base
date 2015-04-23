@@ -441,6 +441,44 @@ final public class MediaSync {
 
     private native final void native_setPlaybackRate(float rate);
 
+    /**
+     * Sets A/V sync mode.
+     *
+     * @param settings the A/V sync settings to apply
+     *
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized.
+     * @throws IllegalArgumentException if settings are not supported.
+     */
+    public native void setSyncSettings(@NonNull SyncSettings settings);
+
+    /**
+     * Gets the A/V sync mode.
+     *
+     * @return the A/V sync settings
+     *
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized.
+     */
+    @NonNull
+    public native SyncSettings getSyncSettings();
+
+    /**
+     * Flushes all buffers from the sync object.
+     * <p>
+     * No callbacks are received for the flushed buffers.
+     *
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized.
+     */
+    public void flush() {
+        synchronized(mAudioLock) {
+            mAudioBuffers.clear();
+            mCallbackHandler.removeCallbacksAndMessages(null);
+        }
+        // TODO implement this for surface buffers.
+    }
+
    /**
     * Get current playback position.
     * <p>

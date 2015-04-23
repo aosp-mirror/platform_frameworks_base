@@ -21,6 +21,7 @@
 #include "android_media_MediaSync.h"
 
 #include "android_media_AudioTrack.h"
+#include "android_media_SyncSettings.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "jni.h"
@@ -46,6 +47,7 @@ struct fields_t {
 };
 
 static fields_t gFields;
+static SyncSettings::fields_t gSyncSettingsFields;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -266,6 +268,55 @@ static jboolean android_media_MediaSync_native_getTimestamp(
     return JNI_TRUE;
 }
 
+static void
+android_media_MediaSync_setSyncSettings(JNIEnv *env, jobject thiz, jobject settings)
+{
+    sp<JMediaSync> sync = getMediaSync(env, thiz);
+    if (sync == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    SyncSettings scs;
+    scs.fillFromJobject(env, gSyncSettingsFields, settings);
+    ALOGV("setSyncSettings: %d:%d %d:%d %d:%f %d:%f",
+            scs.syncSourceSet, scs.syncSource,
+            scs.audioAdjustModeSet, scs.audioAdjustMode,
+            scs.toleranceSet, scs.tolerance,
+            scs.frameRateSet, scs.frameRate);
+
+    // TODO: pass sync settings to mediasync when it supports it
+}
+
+static jobject
+android_media_MediaSync_getSyncSettings(JNIEnv *env, jobject thiz)
+{
+    sp<JMediaSync> sync = getMediaSync(env, thiz);
+    if (sync == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return NULL;
+    }
+
+    SyncSettings scs;
+    scs.syncSource = 0; // SYNC_SOURCE_DEFAULT
+    scs.audioAdjustMode = 0; // AUDIO_ADJUST_MODE_DEFAULT
+    scs.tolerance = 0.f;
+    scs.frameRate = 0.f;
+
+    // TODO: get this from mediaplayer when it supports it
+    // process_media_player_call(
+    //        env, thiz, mp->getSyncSettings(&scs), NULL, NULL);
+    ALOGV("getSyncSettings: %d %d %f %f",
+            scs.syncSource, scs.audioAdjustMode, scs.tolerance, scs.frameRate);
+
+    scs.syncSourceSet = true;
+    scs.audioAdjustModeSet = true;
+    scs.toleranceSet = true;
+    scs.frameRateSet = false;
+
+    return scs.asJobject(env, gSyncSettingsFields);
+}
+
 static void android_media_MediaSync_native_init(JNIEnv *env) {
     ScopedLocalRef<jclass> clazz(env, env->FindClass("android/media/MediaSync"));
     CHECK(clazz.get() != NULL);
@@ -287,6 +338,8 @@ static void android_media_MediaSync_native_init(JNIEnv *env) {
     gFields.mediaTimestampClockRateID =
         env->GetFieldID(clazz.get(), "clockRate", "F");
     CHECK(gFields.mediaTimestampClockRateID != NULL);
+
+    gSyncSettingsFields.init(env);
 }
 
 static void android_media_MediaSync_native_setup(JNIEnv *env, jobject thiz) {
@@ -341,6 +394,10 @@ static JNINativeMethod gMethods[] = {
     { "native_release", "()V", (void *)android_media_MediaSync_release },
 
     { "native_setPlaybackRate", "(F)V", (void *)android_media_MediaSync_native_setPlaybackRate },
+
+    { "setSyncSettings", "(Landroid/media/SyncSettings;)V", (void *)android_media_MediaSync_setSyncSettings},
+
+    { "getSyncSettings", "()Landroid/media/SyncSettings;", (void *)android_media_MediaSync_getSyncSettings},
 
     { "native_finalize", "()V", (void *)android_media_MediaSync_native_finalize },
 };
