@@ -403,7 +403,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
             // No longer care about configuration changes
             mContext.unregisterReceiver(mConfigurationChangedReceiver);
 
-            mWindowManager.removeView(mContainer);
+            mWindowManager.removeViewImmediate(mContainer);
             mHandler.removeCallbacks(mPostedVisibleInitializer);
 
             if (mCallback != null) {
@@ -490,7 +490,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
                     setVisible(false);
                     return true;
                 }
-                
+
             } else {
                 dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);
             }
