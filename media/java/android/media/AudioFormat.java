@@ -55,16 +55,16 @@ public class AudioFormat {
     public static final int ENCODING_DTS_HD = 8;
 
     /** Invalid audio channel configuration */
-    /** @deprecated use CHANNEL_INVALID instead  */
+    /** @deprecated Use {@link #CHANNEL_INVALID} instead.  */
     @Deprecated    public static final int CHANNEL_CONFIGURATION_INVALID   = 0;
     /** Default audio channel configuration */
-    /** @deprecated use CHANNEL_OUT_DEFAULT or CHANNEL_IN_DEFAULT instead  */
+    /** @deprecated Use {@link #CHANNEL_OUT_DEFAULT} or {@link #CHANNEL_IN_DEFAULT} instead.  */
     @Deprecated    public static final int CHANNEL_CONFIGURATION_DEFAULT   = 1;
     /** Mono audio configuration */
-    /** @deprecated use CHANNEL_OUT_MONO or CHANNEL_IN_MONO instead  */
+    /** @deprecated Use {@link #CHANNEL_OUT_MONO} or {@link #CHANNEL_IN_MONO} instead.  */
     @Deprecated    public static final int CHANNEL_CONFIGURATION_MONO      = 2;
     /** Stereo (2 channel) audio configuration */
-    /** @deprecated use CHANNEL_OUT_STEREO or CHANNEL_IN_STEREO instead  */
+    /** @deprecated Use {@link #CHANNEL_OUT_STEREO} or {@link #CHANNEL_IN_STEREO} instead.  */
     @Deprecated    public static final int CHANNEL_CONFIGURATION_STEREO    = 3;
 
     /** Invalid audio channel mask */
@@ -117,12 +117,11 @@ public class AudioFormat {
     public static final int CHANNEL_OUT_5POINT1_SIDE = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY |
             CHANNEL_OUT_SIDE_LEFT | CHANNEL_OUT_SIDE_RIGHT);
-    // TODO does this need an @deprecated ?
-    // different from AUDIO_CHANNEL_OUT_7POINT1
-    public static final int CHANNEL_OUT_7POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
+    // different from AUDIO_CHANNEL_OUT_7POINT1 used internally, and not accepted by AudioRecord.
+    /** @deprecated Not the typical 7.1 surround configuration. Use {@link #CHANNEL_OUT_7POINT1_SURROUND} instead. */
+    @Deprecated    public static final int CHANNEL_OUT_7POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
             CHANNEL_OUT_FRONT_LEFT_OF_CENTER | CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
-    /** @hide */
     // matches AUDIO_CHANNEL_OUT_7POINT1
     public static final int CHANNEL_OUT_7POINT1_SURROUND = (
             CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_FRONT_RIGHT |
