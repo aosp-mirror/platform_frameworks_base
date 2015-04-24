@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.content.Intent;
@@ -111,6 +113,7 @@ public class KeyguardManager {
          *
          * @see #reenableKeyguard()
          */
+        @RequiresPermission(Manifest.permission.DISABLE_KEYGUARD)
         public void disableKeyguard() {
             try {
                 mWM.disableKeyguard(mToken, mTag);
@@ -132,6 +135,7 @@ public class KeyguardManager {
          *
          * @see #disableKeyguard()
          */
+        @RequiresPermission(Manifest.permission.DISABLE_KEYGUARD)
         public void reenableKeyguard() {
             try {
                 mWM.reenableKeyguard(mToken);
@@ -302,6 +306,7 @@ public class KeyguardManager {
      *   once the user has gotten past the keyguard.
      */
     @Deprecated
+    @RequiresPermission(Manifest.permission.DISABLE_KEYGUARD)
     public void exitKeyguardSecurely(final OnKeyguardExitResult callback) {
         try {
             mWM.exitKeyguardSecurely(new IOnKeyguardExitResult.Stub() {
