@@ -2651,14 +2651,12 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Sets the given package as the device owner. The package must already be installed and there
-     * shouldn't be an existing device owner registered, for this call to succeed. Also, this
-     * method must be called before the device is provisioned.
+     * Sets the given package as the device owner.
+     * Same as {@link #setDeviceOwner(String, String)} but without setting a device owner name.
      * @param packageName the package name of the application to be registered as the device owner.
      * @return whether the package was successfully registered as the device owner.
      * @throws IllegalArgumentException if the package name is null or invalid
-     * @throws IllegalStateException if a device owner is already registered or the device has
-     *         already been provisioned.
+     * @throws IllegalStateException If the preconditions mentioned are not met.
      */
     public boolean setDeviceOwner(String packageName) throws IllegalArgumentException,
             IllegalStateException {
@@ -2667,15 +2665,17 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Sets the given package as the device owner. The package must already be installed and there
-     * shouldn't be an existing device owner registered, for this call to succeed. Also, this
-     * method must be called before the device is provisioned.
+     * Sets the given package as the device owner. The package must already be installed. There
+     * must not already be a device owner.
+     * Only apps with the MANAGE_PROFILE_AND_DEVICE_OWNERS permission and the shell uid can call
+     * this method.
+     * Calling this after the setup phase of the primary user has completed is allowed only if
+     * the caller is the shell uid, and there are no additional users and no accounts.
      * @param packageName the package name of the application to be registered as the device owner.
      * @param ownerName the human readable name of the institution that owns this device.
      * @return whether the package was successfully registered as the device owner.
      * @throws IllegalArgumentException if the package name is null or invalid
-     * @throws IllegalStateException if a device owner is already registered or the device has
-     *         already been provisioned.
+     * @throws IllegalStateException If the preconditions mentioned are not met.
      */
     public boolean setDeviceOwner(String packageName, String ownerName)
             throws IllegalArgumentException, IllegalStateException {
@@ -2961,14 +2961,18 @@ public class DevicePolicyManager {
     /**
      * @hide
      * Sets the given component as the profile owner of the given user profile. The package must
-     * already be installed and there shouldn't be an existing profile owner registered for this
-     * user. Only the system can call this API if the user has already completed setup.
+     * already be installed. There must not already be a profile owner for this user.
+     * Only apps with the MANAGE_PROFILE_AND_DEVICE_OWNERS permission and the shell uid can call
+     * this method.
+     * Calling this after the setup phase of the specified user has completed is allowed only if:
+     * - the caller is SYSTEM_UID.
+     * - or the caller is the shell uid, and there are no accounts on the specified user.
      * @param admin the component name to be registered as profile owner.
      * @param ownerName the human readable name of the organisation associated with this DPM.
      * @param userHandle the userId to set the profile owner for.
      * @return whether the component was successfully registered as the profile owner.
-     * @throws IllegalArgumentException if admin is null, the package isn't installed, or
-     *         the user has already been set up.
+     * @throws IllegalArgumentException if admin is null, the package isn't installed, or the
+     * preconditions mentioned are not met.
      */
     public boolean setProfileOwner(ComponentName admin, String ownerName, int userHandle)
             throws IllegalArgumentException {

@@ -699,6 +699,12 @@
        discover information about which applications are used on the device.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_manageProfileAndDeviceOwners">Manage profile and device owners</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to set the profile/device owners.
+     [CHAR LIMIT=NONE] -->
+    <string name="permdesc_manageProfileAndDeviceOwners">Allows apps to set the profile owners and the device owner.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_reorderTasks">reorder running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_reorderTasks">Allows the app to move tasks to the
