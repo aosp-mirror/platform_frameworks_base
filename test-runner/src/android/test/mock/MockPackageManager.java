@@ -16,7 +16,6 @@
 
 package android.test.mock;
 
-import android.annotation.NonNull;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -29,7 +28,6 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
-import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
@@ -46,11 +44,14 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
+import android.content.pm.PackageManager.MoveCallback;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 
@@ -487,33 +488,62 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    /** {@hide} */
-    @Override
-    public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** {@hide} */
-    @Override
-    public void movePackageAndData(String packageName, String volumeUuid,
-            IPackageMoveObserver observer) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** {@hide} */
-    @Override
-    public @NonNull VolumeInfo getApplicationCurrentVolume(ApplicationInfo app) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** {@hide} */
-    @Override
-    public @NonNull List<VolumeInfo> getApplicationCandidateVolumes(ApplicationInfo app) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public String getInstallerPackageName(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public int getMoveStatus(int moveId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public void registerMoveCallback(MoveCallback callback, Handler handler) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public void unregisterMoveCallback(MoveCallback callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public int movePackage(String packageName, VolumeInfo vol) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public VolumeInfo getPackageCurrentVolume(ApplicationInfo app) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public int movePrimaryStorage(VolumeInfo vol) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public VolumeInfo getPrimaryStorageCurrentVolume() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public List<VolumeInfo> getPrimaryStorageCandidateVolumes() {
         throw new UnsupportedOperationException();
     }
 

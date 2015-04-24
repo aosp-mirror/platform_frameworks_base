@@ -42,6 +42,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
@@ -875,7 +876,8 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public static final int MOVE_SUCCEEDED = 1;
+    public static final int MOVE_SUCCEEDED = -100;
+
     /**
      * Error code that is passed to the {@link IPackageMoveObserver} by
      * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
@@ -941,6 +943,7 @@ public abstract class PackageManager {
      * been installed on external media.
      * @hide
      */
+    @Deprecated
     public static final int MOVE_INTERNAL = 0x00000001;
 
     /**
@@ -948,7 +951,11 @@ public abstract class PackageManager {
      * the package should be moved to external media.
      * @hide
      */
+    @Deprecated
     public static final int MOVE_EXTERNAL_MEDIA = 0x00000002;
+
+    /** {@hide} */
+    public static final String EXTRA_MOVE_ID = "android.content.pm.extra.MOVE_ID";
 
     /**
      * Usable by the required verifier as the {@code verificationCode} argument
@@ -4183,17 +4190,42 @@ public abstract class PackageManager {
      * @hide
      */
     @Deprecated
-    public abstract void movePackage(String packageName, IPackageMoveObserver observer, int flags);
+    public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
+        throw new UnsupportedOperationException();
+    }
 
     /** {@hide} */
-    public abstract void movePackageAndData(String packageName, String volumeUuid,
-            IPackageMoveObserver observer);
+    public static boolean isMoveStatusFinished(int status) {
+        return (status < 0 || status > 100);
+    }
 
     /** {@hide} */
-    public abstract @Nullable VolumeInfo getApplicationCurrentVolume(ApplicationInfo app);
+    public static abstract class MoveCallback {
+        public abstract void onStarted(int moveId, String title);
+        public abstract void onStatusChanged(int moveId, int status, long estMillis);
+    }
 
     /** {@hide} */
-    public abstract @NonNull List<VolumeInfo> getApplicationCandidateVolumes(ApplicationInfo app);
+    public abstract int getMoveStatus(int moveId);
+
+    /** {@hide} */
+    public abstract void registerMoveCallback(MoveCallback callback, Handler handler);
+    /** {@hide} */
+    public abstract void unregisterMoveCallback(MoveCallback callback);
+
+    /** {@hide} */
+    public abstract int movePackage(String packageName, VolumeInfo vol);
+    /** {@hide} */
+    public abstract @Nullable VolumeInfo getPackageCurrentVolume(ApplicationInfo app);
+    /** {@hide} */
+    public abstract @NonNull List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app);
+
+    /** {@hide} */
+    public abstract int movePrimaryStorage(VolumeInfo vol);
+    /** {@hide} */
+    public abstract @Nullable VolumeInfo getPrimaryStorageCurrentVolume();
+    /** {@hide} */
+    public abstract @NonNull List<VolumeInfo> getPrimaryStorageCandidateVolumes();
 
     /**
      * Returns the device identity that verifiers can use to associate their scheme to a particular

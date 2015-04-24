@@ -98,10 +98,11 @@ public interface IMountServiceListener extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
-                case TRANSACTION_onDiskUnsupported: {
+                case TRANSACTION_onDiskScanned: {
                     data.enforceInterface(DESCRIPTOR);
                     final DiskInfo disk = (DiskInfo) data.readParcelable(null);
-                    onDiskUnsupported(disk);
+                    final int volumeCount = data.readInt();
+                    onDiskScanned(disk, volumeCount);
                     reply.writeNoException();
                     return true;
                 }
@@ -207,13 +208,14 @@ public interface IMountServiceListener extends IInterface {
             }
 
             @Override
-            public void onDiskUnsupported(DiskInfo disk) throws RemoteException {
+            public void onDiskScanned(DiskInfo disk, int volumeCount) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     _data.writeParcelable(disk, 0);
-                    mRemote.transact(Stub.TRANSACTION_onDiskUnsupported, _data, _reply,
+                    _data.writeInt(volumeCount);
+                    mRemote.transact(Stub.TRANSACTION_onDiskScanned, _data, _reply,
                             android.os.IBinder.FLAG_ONEWAY);
                     _reply.readException();
                 } finally {
@@ -224,12 +226,10 @@ public interface IMountServiceListener extends IInterface {
         }
 
         static final int TRANSACTION_onUsbMassStorageConnectionChanged = (IBinder.FIRST_CALL_TRANSACTION + 0);
-
         static final int TRANSACTION_onStorageStateChanged = (IBinder.FIRST_CALL_TRANSACTION + 1);
-
         static final int TRANSACTION_onVolumeStateChanged = (IBinder.FIRST_CALL_TRANSACTION + 2);
         static final int TRANSACTION_onVolumeMetadataChanged = (IBinder.FIRST_CALL_TRANSACTION + 3);
-        static final int TRANSACTION_onDiskUnsupported = (IBinder.FIRST_CALL_TRANSACTION + 4);
+        static final int TRANSACTION_onDiskScanned = (IBinder.FIRST_CALL_TRANSACTION + 4);
     }
 
     /**
@@ -255,5 +255,5 @@ public interface IMountServiceListener extends IInterface {
 
     public void onVolumeMetadataChanged(VolumeInfo vol) throws RemoteException;
 
-    public void onDiskUnsupported(DiskInfo disk) throws RemoteException;
+    public void onDiskScanned(DiskInfo disk, int volumeCount) throws RemoteException;
 }

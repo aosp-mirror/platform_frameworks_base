@@ -36,7 +36,10 @@ import java.util.Objects;
  * @hide
  */
 public class DiskInfo implements Parcelable {
-    public static final String EXTRA_DISK_ID = "android.os.storage.extra.DISK_ID";
+    public static final String ACTION_DISK_SCANNED =
+            "android.os.storage.action.DISK_SCANNED";
+    public static final String EXTRA_DISK_ID =
+            "android.os.storage.extra.DISK_ID";
 
     public static final int FLAG_ADOPTABLE = 1 << 0;
     public static final int FLAG_DEFAULT_PRIMARY = 1 << 1;
@@ -96,16 +99,20 @@ public class DiskInfo implements Parcelable {
         }
     }
 
+    public boolean isAdoptable() {
+        return (flags & FLAG_ADOPTABLE) != 0;
+    }
+
+    public boolean isDefaultPrimary() {
+        return (flags & FLAG_DEFAULT_PRIMARY) != 0;
+    }
+
     public boolean isSd() {
         return (flags & FLAG_SD) != 0;
     }
 
     public boolean isUsb() {
         return (flags & FLAG_USB) != 0;
-    }
-
-    public boolean isAdoptable() {
-        return (flags & FLAG_ADOPTABLE) != 0;
     }
 
     @Override

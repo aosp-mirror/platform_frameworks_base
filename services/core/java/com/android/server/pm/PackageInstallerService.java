@@ -717,7 +717,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
             if (vol != null && vol.type == VolumeInfo.TYPE_PRIVATE
-                    && vol.state == VolumeInfo.STATE_MOUNTED) {
+                    && vol.isMountedWritable()) {
                 return new File(vol.path, "app");
             } else {
                 throw new FileNotFoundException("Failed to find volume for UUID " + volumeUuid);

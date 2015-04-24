@@ -73,6 +73,11 @@ public class StorageManager {
     public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
 
     /** {@hide} */
+    public static final String UUID_PRIVATE_INTERNAL = null;
+    /** {@hide} */
+    public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
+
+    /** {@hide} */
     public static final int FLAG_ALL_METADATA = 1 << 0;
 
     private final Context mContext;
@@ -89,7 +94,7 @@ public class StorageManager {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
         private static final int MSG_VOLUME_METADATA_CHANGED = 3;
-        private static final int MSG_DISK_UNSUPPORTED = 4;
+        private static final int MSG_DISK_SCANNED = 4;
 
         final StorageEventListener mCallback;
         final Handler mHandler;
@@ -116,8 +121,8 @@ public class StorageManager {
                     mCallback.onVolumeMetadataChanged((VolumeInfo) args.arg1);
                     args.recycle();
                     return true;
-                case MSG_DISK_UNSUPPORTED:
-                    mCallback.onDiskUnsupported((DiskInfo) args.arg1);
+                case MSG_DISK_SCANNED:
+                    mCallback.onDiskScanned((DiskInfo) args.arg1, args.argi2);
                     args.recycle();
                     return true;
             }
@@ -156,10 +161,11 @@ public class StorageManager {
         }
 
         @Override
-        public void onDiskUnsupported(DiskInfo disk) {
+        public void onDiskScanned(DiskInfo disk, int volumeCount) {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = disk;
-            mHandler.obtainMessage(MSG_DISK_UNSUPPORTED, args).sendToTarget();
+            args.argi2 = volumeCount;
+            mHandler.obtainMessage(MSG_DISK_SCANNED, args).sendToTarget();
         }
     }
 
@@ -534,14 +540,23 @@ public class StorageManager {
     /** {@hide} */
     public @Nullable String getBestVolumeDescription(VolumeInfo vol) {
         String descrip = vol.getDescription();
-
         if (vol.disk != null) {
             if (TextUtils.isEmpty(descrip)) {
                 descrip = vol.disk.getDescription();
             }
         }
-
         return descrip;
+    }
+
+    /** {@hide} */
+    public @Nullable VolumeInfo getPrimaryPhysicalVolume() {
+        final List<VolumeInfo> vols = getVolumes();
+        for (VolumeInfo vol : vols) {
+            if (vol.isPrimaryPhysical()) {
+                return vol;
+            }
+        }
+        return null;
     }
 
     /** {@hide} */
@@ -622,6 +637,24 @@ public class StorageManager {
         try {
             mMountService.setVolumeUserFlags(volId, snoozed ? VolumeInfo.USER_FLAG_SNOOZED : 0,
                     VolumeInfo.USER_FLAG_SNOOZED);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public String getPrimaryStorageUuid() {
+        try {
+            return mMountService.getPrimaryStorageUuid();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void setPrimaryStorageUuid(String volumeUuid) {
+        try {
+            mMountService.setPrimaryStorageUuid(volumeUuid);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

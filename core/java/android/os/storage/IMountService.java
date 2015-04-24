@@ -1063,6 +1063,38 @@ public interface IMountService extends IInterface {
                     _data.recycle();
                 }
             }
+
+            @Override
+            public String getPrimaryStorageUuid() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                String _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_getPrimaryStorageUuid, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readString();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            @Override
+            public void setPrimaryStorageUuid(String volumeUuid) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(volumeUuid);
+                    mRemote.transact(Stub.TRANSACTION_setPrimaryStorageUuid, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -1168,6 +1200,9 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_setVolumeNickname = IBinder.FIRST_CALL_TRANSACTION + 52;
         static final int TRANSACTION_setVolumeUserFlags = IBinder.FIRST_CALL_TRANSACTION + 53;
+
+        static final int TRANSACTION_getPrimaryStorageUuid = IBinder.FIRST_CALL_TRANSACTION + 54;
+        static final int TRANSACTION_setPrimaryStorageUuid = IBinder.FIRST_CALL_TRANSACTION + 55;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1669,6 +1704,20 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_getPrimaryStorageUuid: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volumeUuid = getPrimaryStorageUuid();
+                    reply.writeNoException();
+                    reply.writeString(volumeUuid);
+                    return true;
+                }
+                case TRANSACTION_setPrimaryStorageUuid: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volumeUuid = data.readString();
+                    setPrimaryStorageUuid(volumeUuid);
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1969,4 +2018,7 @@ public interface IMountService extends IInterface {
 
     public void setVolumeNickname(String volId, String nickname) throws RemoteException;
     public void setVolumeUserFlags(String volId, int flags, int mask) throws RemoteException;
+
+    public String getPrimaryStorageUuid() throws RemoteException;
+    public void setPrimaryStorageUuid(String volumeUuid) throws RemoteException;
 }

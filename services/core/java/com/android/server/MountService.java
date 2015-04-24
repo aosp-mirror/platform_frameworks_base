@@ -232,7 +232,12 @@ class MountService extends IMountService.Stub
         public static final int FstrimCompleted                = 700;
     }
 
+    private static final int VERSION_INIT = 1;
+    private static final int VERSION_ADD_PRIMARY = 2;
+
     private static final String TAG_VOLUMES = "volumes";
+    private static final String ATTR_VERSION = "version";
+    private static final String ATTR_PRIMARY_STORAGE_UUID = "primaryStorageUuid";
     private static final String TAG_VOLUME = "volume";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_FS_UUID = "fsUuid";
@@ -302,6 +307,8 @@ class MountService extends IMountService.Stub
     /** Map from UUID to metadata */
     @GuardedBy("mLock")
     private ArrayMap<String, VolumeMetadata> mMetadata = new ArrayMap<>();
+    @GuardedBy("mLock")
+    private String mPrimaryStorageUuid;
 
     /** Map from disk ID to latches */
     @GuardedBy("mLock")
@@ -943,22 +950,25 @@ class MountService extends IMountService.Stub
     }
 
     private void onDiskScannedLocked(DiskInfo disk) {
+        final Intent intent = new Intent(DiskInfo.ACTION_DISK_SCANNED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                android.Manifest.permission.WRITE_MEDIA_STORAGE);
+
         final CountDownLatch latch = mDiskScanLatches.remove(disk.id);
         if (latch != null) {
             latch.countDown();
         }
 
-        boolean empty = true;
+        int volumeCount = 0;
         for (int i = 0; i < mVolumes.size(); i++) {
             final VolumeInfo vol = mVolumes.valueAt(i);
             if (Objects.equals(disk.id, vol.getDiskId())) {
-                empty = false;
+                volumeCount++;
             }
         }
 
-        if (empty) {
-            mCallbacks.notifyDiskUnsupported(disk);
-        }
+        mCallbacks.notifyDiskScanned(disk, volumeCount);
     }
 
     private void onVolumeCreatedLocked(VolumeInfo vol) {
@@ -1022,8 +1032,8 @@ class MountService extends IMountService.Stub
         if (isBroadcastWorthy(vol)) {
             final Intent intent = new Intent(VolumeInfo.ACTION_VOLUME_STATE_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            // TODO: require receiver to hold permission
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                    android.Manifest.permission.WRITE_MEDIA_STORAGE);
         }
 
         final String oldStateEnv = VolumeInfo.getEnvironmentForState(oldState);
@@ -1166,7 +1176,21 @@ class MountService extends IMountService.Stub
             while ((type = in.next()) != END_DOCUMENT) {
                 if (type == START_TAG) {
                     final String tag = in.getName();
-                    if (TAG_VOLUME.equals(tag)) {
+                    if (TAG_VOLUMES.equals(tag)) {
+                        final int version = readIntAttribute(in, ATTR_VERSION, VERSION_INIT);
+                        if (version >= VERSION_ADD_PRIMARY) {
+                            mPrimaryStorageUuid = readStringAttribute(in,
+                                    ATTR_PRIMARY_STORAGE_UUID);
+                        } else {
+                            if (SystemProperties.getBoolean(StorageManager.PROP_PRIMARY_PHYSICAL,
+                                    false)) {
+                                mPrimaryStorageUuid = StorageManager.UUID_PRIMARY_PHYSICAL;
+                            } else {
+                                mPrimaryStorageUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+                            }
+                        }
+
+                    } else if (TAG_VOLUME.equals(tag)) {
                         final VolumeMetadata meta = VolumeMetadata.read(in);
                         mMetadata.put(meta.fsUuid, meta);
                     }
@@ -1192,6 +1216,8 @@ class MountService extends IMountService.Stub
             out.setOutput(fos, "utf-8");
             out.startDocument(null, true);
             out.startTag(null, TAG_VOLUMES);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_ADD_PRIMARY);
+            writeStringAttribute(out, ATTR_PRIMARY_STORAGE_UUID, mPrimaryStorageUuid);
             final int size = mMetadata.size();
             for (int i = 0; i < size; i++) {
                 final VolumeMetadata meta = mMetadata.valueAt(i);
@@ -1394,6 +1420,24 @@ class MountService extends IMountService.Stub
             refreshMetadataLocked();
             writeMetadataLocked();
             mCallbacks.notifyVolumeMetadataChanged(vol.clone());
+        }
+    }
+
+    @Override
+    public String getPrimaryStorageUuid() throws RemoteException {
+        synchronized (mLock) {
+            return mPrimaryStorageUuid;
+        }
+    }
+
+    @Override
+    public void setPrimaryStorageUuid(String volumeUuid) throws RemoteException {
+        synchronized (mLock) {
+            Slog.d(TAG, "Changing primary storage UUID to " + volumeUuid);
+            mPrimaryStorageUuid = volumeUuid;
+            writeMetadataLocked();
+
+            // TODO: reevaluate all volumes we know about!
         }
     }
 
@@ -2700,7 +2744,7 @@ class MountService extends IMountService.Stub
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
         private static final int MSG_VOLUME_METADATA_CHANGED = 3;
-        private static final int MSG_DISK_UNSUPPORTED = 4;
+        private static final int MSG_DISK_SCANNED = 4;
 
         private final RemoteCallbackList<IMountServiceListener>
                 mCallbacks = new RemoteCallbackList<>();
@@ -2748,8 +2792,8 @@ class MountService extends IMountService.Stub
                     callback.onVolumeMetadataChanged((VolumeInfo) args.arg1);
                     break;
                 }
-                case MSG_DISK_UNSUPPORTED: {
-                    callback.onDiskUnsupported((DiskInfo) args.arg1);
+                case MSG_DISK_SCANNED: {
+                    callback.onDiskScanned((DiskInfo) args.arg1, args.argi2);
                     break;
                 }
             }
@@ -2777,10 +2821,11 @@ class MountService extends IMountService.Stub
             obtainMessage(MSG_VOLUME_METADATA_CHANGED, args).sendToTarget();
         }
 
-        private void notifyDiskUnsupported(DiskInfo disk) {
+        private void notifyDiskScanned(DiskInfo disk, int volumeCount) {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = disk;
-            obtainMessage(MSG_DISK_UNSUPPORTED, args).sendToTarget();
+            args.argi2 = volumeCount;
+            obtainMessage(MSG_DISK_SCANNED, args).sendToTarget();
         }
     }
 

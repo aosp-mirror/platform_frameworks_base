@@ -51,9 +51,11 @@ import android.os.Bundle;
 import android.os.IUserManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -1283,20 +1285,6 @@ public final class Pm {
         }
     }
 
-    class LocalPackageMoveObserver extends IPackageMoveObserver.Stub {
-        boolean finished;
-        int returnCode;
-
-        @Override
-        public void packageMoved(String packageName, int returnCode) throws RemoteException {
-            synchronized (this) {
-                this.finished = true;
-                this.returnCode = returnCode;
-                notifyAll();
-            }
-        }
-    }
-
     public int runMove() {
         final String packageName = nextArg();
         String volumeUuid = nextArg();
@@ -1304,24 +1292,21 @@ public final class Pm {
             volumeUuid = null;
         }
 
-        final LocalPackageMoveObserver obs = new LocalPackageMoveObserver();
         try {
-            mPm.movePackageAndData(packageName, volumeUuid, obs);
+            final int moveId = mPm.movePackage(packageName, volumeUuid);
 
-            synchronized (obs) {
-                while (!obs.finished) {
-                    try {
-                        obs.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-                if (obs.returnCode == PackageManager.MOVE_SUCCEEDED) {
-                    System.out.println("Success");
-                    return 0;
-                } else {
-                    System.err.println("Failure [" + obs.returnCode + "]");
-                    return 1;
-                }
+            int status = mPm.getMoveStatus(moveId);
+            while (!PackageManager.isMoveStatusFinished(status)) {
+                SystemClock.sleep(DateUtils.SECOND_IN_MILLIS);
+                status = mPm.getMoveStatus(moveId);
+            }
+
+            if (status == PackageManager.MOVE_SUCCEEDED) {
+                System.out.println("Success");
+                return 0;
+            } else {
+                System.err.println("Failure [" + status + "]");
+                return 1;
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();

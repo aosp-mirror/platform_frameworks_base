@@ -49,12 +49,10 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
-import static android.content.pm.PackageManager.MOVE_EXTERNAL_MEDIA;
 import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
-import static android.content.pm.PackageManager.MOVE_INTERNAL;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
@@ -144,6 +142,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
@@ -174,6 +173,7 @@ import android.util.PrintStreamPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.Xml;
 import android.view.Display;
 
@@ -189,11 +189,14 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.os.IParcelFileDescriptorFactory;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
+import com.android.server.FgThread;
 import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -237,6 +240,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -504,6 +508,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     final PackageInstallerService mInstallerService;
 
     private final PackageDexOptimizer mPackageDexOptimizer;
+
+    private AtomicInteger mNextMoveId = new AtomicInteger();
+    private final MoveCallbacks mMoveCallbacks;
+
     // Cache of users who need badging.
     SparseBooleanArray mUserNeedsBadging = new SparseBooleanArray();
 
@@ -1698,6 +1706,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         mInstaller = installer;
         mPackageDexOptimizer = new PackageDexOptimizer(this);
+        mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         getDefaultDisplayMetrics(context, mMetrics);
 
@@ -14137,49 +14146,25 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void movePackage(final String packageName, final IPackageMoveObserver observer,
-            final int flags) {
+    public int movePackage(final String packageName, final String volumeUuid) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
 
-        final int installFlags;
-        if ((flags & MOVE_INTERNAL) != 0) {
-            installFlags = INSTALL_INTERNAL;
-        } else if ((flags & MOVE_EXTERNAL_MEDIA) != 0) {
-            installFlags = INSTALL_EXTERNAL;
-        } else {
-            throw new IllegalArgumentException("Unsupported move flags " + flags);
-        }
-
+        final int moveId = mNextMoveId.getAndIncrement();
         try {
-            movePackageInternal(packageName, null, installFlags, false, observer);
+            movePackageInternal(packageName, volumeUuid, moveId);
         } catch (PackageManagerException e) {
             Slog.d(TAG, "Failed to move " + packageName, e);
-            try {
-                observer.packageMoved(packageName, e.error);
-            } catch (RemoteException ignored) {
-            }
+            mMoveCallbacks.notifyStatusChanged(moveId, PackageManager.MOVE_FAILED_INTERNAL_ERROR);
         }
+        return moveId;
     }
 
-    @Override
-    public void movePackageAndData(final String packageName, final String volumeUuid,
-            final IPackageMoveObserver observer) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
-        try {
-            movePackageInternal(packageName, volumeUuid, INSTALL_INTERNAL, true, observer);
-        } catch (PackageManagerException e) {
-            Slog.d(TAG, "Failed to move " + packageName, e);
-            try {
-                observer.packageMoved(packageName, e.error);
-            } catch (RemoteException ignored) {
-            }
-        }
-    }
-
-    private void movePackageInternal(final String packageName, String volumeUuid, int installFlags,
-            boolean andData, final IPackageMoveObserver observer) throws PackageManagerException {
+    private void movePackageInternal(final String packageName, final String volumeUuid,
+            final int moveId) throws PackageManagerException {
         final UserHandle user = new UserHandle(UserHandle.getCallingUserId());
+        final PackageManager pm = mContext.getPackageManager();
 
+        final boolean currentAsec;
         final String currentVolumeUuid;
         final File codeFile;
         final String installerPackageName;
@@ -14205,8 +14190,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // TODO: yell if already in desired location
 
+            mMoveCallbacks.notifyStarted(moveId,
+                    String.valueOf(pm.getApplicationLabel(pkg.applicationInfo)));
+
             pkg.mOperationPending = true;
 
+            currentAsec = pkg.applicationInfo.isForwardLocked()
+                    || pkg.applicationInfo.isExternalAsec();
             currentVolumeUuid = ps.volumeUuid;
             codeFile = new File(pkg.codePath);
             installerPackageName = ps.installerPackageName;
@@ -14215,10 +14205,36 @@ public class PackageManagerService extends IPackageManager.Stub {
             seinfo = pkg.applicationInfo.seinfo;
         }
 
-        if (andData) {
-            Slog.d(TAG, "Moving " + packageName + " private data from " + currentVolumeUuid + " to "
-                    + volumeUuid);
+        int installFlags;
+        final boolean moveData;
+
+        if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
+            installFlags = INSTALL_INTERNAL;
+            moveData = !currentAsec;
+        } else if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
+            installFlags = INSTALL_EXTERNAL;
+            moveData = false;
+        } else {
+            final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            final VolumeInfo volume = storage.findVolumeByUuid(volumeUuid);
+            if (volume == null || volume.getType() != VolumeInfo.TYPE_PRIVATE
+                    || !volume.isMountedWritable()) {
+                throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                        "Move location not mounted private volume");
+            }
+
+            Preconditions.checkState(!currentAsec);
+
+            installFlags = INSTALL_INTERNAL;
+            moveData = true;
+        }
+
+        Slog.d(TAG, "Moving " + packageName + " from " + currentVolumeUuid + " to " + volumeUuid);
+        mMoveCallbacks.notifyStatusChanged(moveId, 10, -1);
+
+        if (moveData) {
             synchronized (mInstallLock) {
+                // TODO: split this into separate copy and delete operations
                 if (mInstaller.moveUserDataDirs(currentVolumeUuid, volumeUuid, packageName, appId,
                         seinfo) != 0) {
                     synchronized (mPackages) {
@@ -14233,6 +14249,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
+
+        mMoveCallbacks.notifyStatusChanged(moveId, 50);
 
         final IPackageInstallObserver2 installObserver = new IPackageInstallObserver2.Stub() {
             @Override
@@ -14259,13 +14277,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int status = PackageManager.installStatusToPublicStatus(returnCode);
                 switch (status) {
                     case PackageInstaller.STATUS_SUCCESS:
-                        observer.packageMoved(packageName, PackageManager.MOVE_SUCCEEDED);
+                        mMoveCallbacks.notifyStatusChanged(moveId,
+                                PackageManager.MOVE_SUCCEEDED);
                         break;
                     case PackageInstaller.STATUS_FAILURE_STORAGE:
-                        observer.packageMoved(packageName, PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE);
+                        mMoveCallbacks.notifyStatusChanged(moveId,
+                                PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE);
                         break;
                     default:
-                        observer.packageMoved(packageName, PackageManager.MOVE_FAILED_INTERNAL_ERROR);
+                        mMoveCallbacks.notifyStatusChanged(moveId,
+                                PackageManager.MOVE_FAILED_INTERNAL_ERROR);
                         break;
                 }
             }
@@ -14280,6 +14301,39 @@ public class PackageManagerService extends IPackageManager.Stub {
         msg.obj = new InstallParams(origin, installObserver, installFlags,
                 installerPackageName, volumeUuid, null, user, packageAbiOverride);
         mHandler.sendMessage(msg);
+    }
+
+    @Override
+    public int movePrimaryStorage(String volumeUuid) throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
+
+        final int moveId = mNextMoveId.getAndIncrement();
+
+        // TODO: ask mountservice to take down both, connect over to DCS to
+        // migrate, and then bring up new storage
+
+        return moveId;
+    }
+
+    @Override
+    public int getMoveStatus(int moveId) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+        return mMoveCallbacks.mLastStatus.get(moveId);
+    }
+
+    @Override
+    public void registerMoveCallback(IPackageMoveObserver callback) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+        mMoveCallbacks.register(callback);
+    }
+
+    @Override
+    public void unregisterMoveCallback(IPackageMoveObserver callback) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+        mMoveCallbacks.unregister(callback);
     }
 
     @Override
@@ -14602,6 +14656,84 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private static class MoveCallbacks extends Handler {
+        private static final int MSG_STARTED = 1;
+        private static final int MSG_STATUS_CHANGED = 2;
+
+        private final RemoteCallbackList<IPackageMoveObserver>
+                mCallbacks = new RemoteCallbackList<>();
+
+        private final SparseIntArray mLastStatus = new SparseIntArray();
+
+        public MoveCallbacks(Looper looper) {
+            super(looper);
+        }
+
+        public void register(IPackageMoveObserver callback) {
+            mCallbacks.register(callback);
+        }
+
+        public void unregister(IPackageMoveObserver callback) {
+            mCallbacks.unregister(callback);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final SomeArgs args = (SomeArgs) msg.obj;
+            final int n = mCallbacks.beginBroadcast();
+            for (int i = 0; i < n; i++) {
+                final IPackageMoveObserver callback = mCallbacks.getBroadcastItem(i);
+                try {
+                    invokeCallback(callback, msg.what, args);
+                } catch (RemoteException ignored) {
+                }
+            }
+            mCallbacks.finishBroadcast();
+            args.recycle();
+        }
+
+        private void invokeCallback(IPackageMoveObserver callback, int what, SomeArgs args)
+                throws RemoteException {
+            switch (what) {
+                case MSG_STARTED: {
+                    callback.onStarted(args.argi1, (String) args.arg2);
+                    break;
+                }
+                case MSG_STATUS_CHANGED: {
+                    callback.onStatusChanged(args.argi1, args.argi2, (long) args.arg3);
+                    break;
+                }
+            }
+        }
+
+        private void notifyStarted(int moveId, String title) {
+            Slog.v(TAG, "Move " + moveId + " started with title " + title);
+
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = moveId;
+            args.arg2 = title;
+            obtainMessage(MSG_STARTED, args).sendToTarget();
+        }
+
+        private void notifyStatusChanged(int moveId, int status) {
+            notifyStatusChanged(moveId, status, -1);
+        }
+
+        private void notifyStatusChanged(int moveId, int status, long estMillis) {
+            Slog.v(TAG, "Move " + moveId + " status " + status);
+
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = moveId;
+            args.argi2 = status;
+            args.arg3 = estMillis;
+            obtainMessage(MSG_STATUS_CHANGED, args).sendToTarget();
+
+            synchronized (mLastStatus) {
+                mLastStatus.put(moveId, status);
             }
         }
     }
