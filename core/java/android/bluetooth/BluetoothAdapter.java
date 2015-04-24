@@ -17,6 +17,9 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -37,6 +40,8 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -132,6 +137,12 @@ public final class BluetoothAdapter {
      */
     public static final String EXTRA_PREVIOUS_STATE =
             "android.bluetooth.adapter.extra.PREVIOUS_STATE";
+
+    /** @hide */
+    @IntDef({STATE_OFF, STATE_TURNING_ON, STATE_ON, STATE_TURNING_OFF, STATE_BLE_TURNING_ON,
+            STATE_BLE_ON, STATE_BLE_TURNING_OFF})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AdapterState {}
 
     /**
      * Indicates the local Bluetooth adapter is off.
@@ -272,6 +283,11 @@ public final class BluetoothAdapter {
      */
     public static final String EXTRA_PREVIOUS_SCAN_MODE =
             "android.bluetooth.adapter.extra.PREVIOUS_SCAN_MODE";
+
+    /** @hide */
+    @IntDef({SCAN_MODE_NONE, SCAN_MODE_CONNECTABLE, SCAN_MODE_CONNECTABLE_DISCOVERABLE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScanMode {}
 
     /**
      * Indicates that both inquiry scan and page scan are disabled on the local
@@ -578,6 +594,7 @@ public final class BluetoothAdapter {
      *
      * @return true if the local adapter is turned on
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isEnabled() {
         try {
             synchronized(mManagerCallback) {
@@ -752,6 +769,8 @@ public final class BluetoothAdapter {
      *
      * @return current state of Bluetooth adapter
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @AdapterState
     public int getState() {
         try {
             synchronized(mManagerCallback) {
@@ -792,6 +811,8 @@ public final class BluetoothAdapter {
      * @return current state of Bluetooth adapter
      * @hide
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @AdapterState
     public int getLeState() {
         try {
             synchronized(mManagerCallback) {
@@ -845,6 +866,7 @@ public final class BluetoothAdapter {
      * @return true to indicate adapter startup has begun, or false on
      *         immediate error
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean enable() {
         int state = STATE_OFF;
         if (isEnabled() == true){
@@ -893,6 +915,7 @@ public final class BluetoothAdapter {
      * @return true to indicate adapter shutdown has begun, or false on
      *         immediate error
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean disable() {
         try {
             return mManagerService.disable(true);
@@ -925,6 +948,7 @@ public final class BluetoothAdapter {
      *
      * @return Bluetooth hardware address as string
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public String getAddress() {
         try {
             return mManagerService.getAddress();
@@ -998,6 +1022,7 @@ public final class BluetoothAdapter {
      * @param name a valid Bluetooth name
      * @return     true if the name was set, false otherwise
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean setName(String name) {
         if (getState() != STATE_ON) return false;
         try {
@@ -1024,6 +1049,8 @@ public final class BluetoothAdapter {
      *
      * @return scan mode
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @ScanMode
     public int getScanMode() {
         if (getState() != STATE_ON) return SCAN_MODE_NONE;
         try {
@@ -1062,7 +1089,7 @@ public final class BluetoothAdapter {
      * @return     true if the scan mode was set, false otherwise
      * @hide
      */
-    public boolean setScanMode(int mode, int duration) {
+    public boolean setScanMode(@ScanMode int mode, int duration) {
         if (getState() != STATE_ON) return false;
         try {
             synchronized(mManagerCallback) {
@@ -1130,6 +1157,7 @@ public final class BluetoothAdapter {
      *
      * @return true on success, false on error
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean startDiscovery() {
         if (getState() != STATE_ON) return false;
         try {
@@ -1157,6 +1185,7 @@ public final class BluetoothAdapter {
      *
      * @return true on success, false on error
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean cancelDiscovery() {
         if (getState() != STATE_ON) return false;
         try {
@@ -1186,6 +1215,7 @@ public final class BluetoothAdapter {
      *
      * @return true if discovering
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isDiscovering() {
         if (getState() != STATE_ON) return false;
         try {
@@ -1345,6 +1375,7 @@ public final class BluetoothAdapter {
      *
      * @return unmodifiable set of {@link BluetoothDevice}, or null on error
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public Set<BluetoothDevice> getBondedDevices() {
         if (getState() != STATE_ON) {
             return toDeviceSet(new BluetoothDevice[0]);
@@ -1396,6 +1427,7 @@ public final class BluetoothAdapter {
      * {@link BluetoothProfile#STATE_CONNECTED},
      * {@link BluetoothProfile#STATE_DISCONNECTING}
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getProfileConnectionState(int profile) {
         if (getState() != STATE_ON) return BluetoothProfile.STATE_DISCONNECTED;
         try {
@@ -1460,6 +1492,7 @@ public final class BluetoothAdapter {
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions, or channel in use.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothServerSocket listenUsingRfcommWithServiceRecord(String name, UUID uuid)
             throws IOException {
         return createNewRfcommSocketAndRecord(name, uuid, true, true);
@@ -1491,6 +1524,7 @@ public final class BluetoothAdapter {
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions, or channel in use.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothServerSocket listenUsingInsecureRfcommWithServiceRecord(String name, UUID uuid)
             throws IOException {
         return createNewRfcommSocketAndRecord(name, uuid, false, false);
@@ -2032,6 +2066,7 @@ public final class BluetoothAdapter {
      *             instead.
      */
     @Deprecated
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean startLeScan(LeScanCallback callback) {
         return startLeScan(null, callback);
     }
@@ -2052,6 +2087,7 @@ public final class BluetoothAdapter {
      *             instead.
      */
     @Deprecated
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean startLeScan(final UUID[] serviceUuids, final LeScanCallback callback) {
         if (DBG) Log.d(TAG, "startLeScan(): " + serviceUuids);
         if (callback == null) {
@@ -2138,6 +2174,7 @@ public final class BluetoothAdapter {
      * @deprecated Use {@link BluetoothLeScanner#stopScan(ScanCallback)} instead.
      */
     @Deprecated
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void stopLeScan(LeScanCallback callback) {
         if (DBG) Log.d(TAG, "stopLeScan()");
         BluetoothLeScanner scanner = getBluetoothLeScanner();
