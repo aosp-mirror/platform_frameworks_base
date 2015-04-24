@@ -129,8 +129,8 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@drawable/btn_radio_material_anim</item>
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check_material_anim</item>
 
-        <item name="listChoiceBackgroundIndicator">@drawable/list_highlight_material</item>
-        <item name="activatedBackgroundIndicator">@null</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/list_choice_background_material</item>
+        <item name="activatedBackgroundIndicator">@drawable/activated_background_material</item>
 
         <item name="listDividerAlertDialog">@null</item>
 
@@ -485,7 +485,7 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@drawable/btn_radio_material_anim</item>
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check_material_anim</item>
 
-        <item name="listChoiceBackgroundIndicator">?attr/selectableItemBackground</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/list_choice_background_material</item>
         <item name="activatedBackgroundIndicator">@drawable/activated_background_material</item>
 
         <item name="expandableListPreferredItemPaddingLeft">40dip</item>

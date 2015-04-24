@@ -614,7 +614,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.GestureOverlayView" parent="Widget.GestureOverlayView"/>
 
     <style name="Widget.Material.GridView" parent="Widget.GridView">
-        <item name="listSelector">?attr/selectableItemBackground</item>
+        <item name="listSelector">?attr/listChoiceBackgroundIndicator</item>
     </style>
 
     <style name="Widget.Material.CalendarView" parent="Widget.CalendarView">
