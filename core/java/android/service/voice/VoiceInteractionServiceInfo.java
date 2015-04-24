@@ -44,6 +44,7 @@ public class VoiceInteractionServiceInfo {
     private String mRecognitionService;
     private String mSettingsActivity;
     private boolean mSupportsAssist;
+    private boolean mSupportsLaunchFromKeyguard;
 
     public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp)
             throws PackageManager.NameNotFoundException {
@@ -98,6 +99,9 @@ public class VoiceInteractionServiceInfo {
             mSupportsAssist = array.getBoolean(
                     com.android.internal.R.styleable.VoiceInteractionService_supportsAssist,
                     false);
+            mSupportsLaunchFromKeyguard = array.getBoolean(com.android.internal.
+                    R.styleable.VoiceInteractionService_supportsLaunchVoiceAssistFromKeyguard,
+                    false);
             array.recycle();
             if (mSessionService == null) {
                 mParseError = "No sessionService specified";
@@ -147,5 +151,9 @@ public class VoiceInteractionServiceInfo {
 
     public boolean getSupportsAssist() {
         return mSupportsAssist;
+    }
+
+    public boolean getSupportsLaunchFromKeyguard() {
+        return mSupportsLaunchFromKeyguard;
     }
 }

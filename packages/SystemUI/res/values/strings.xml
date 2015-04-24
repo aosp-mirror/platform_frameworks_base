@@ -205,12 +205,16 @@
     <string name="accessibility_camera_button">Camera</string>
     <!-- Content description of the phone button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_phone_button">Phone</string>
+    <!-- Content description of the phone button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_voice_assist_button">Voice Assist</string>
     <!-- Content description of the unlock button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_unlock_button">Unlock</string>
     <!-- Click action label for accessibility for the unlock button. [CHAR LIMIT=NONE] -->
     <string name="unlock_label">unlock</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="phone_label">open phone</string>
+    <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
+    <string name="voice_assist_label">open voice assist</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="camera_label">open camera</string>
     <!-- Caption for "Recents resize" developer debug feature. [CHAR LIMIT=NONE] -->
@@ -753,11 +757,14 @@
     <!-- Shows when people have pressed the unlock icon to explain how to unlock. [CHAR LIMIT=60] -->
     <string name="keyguard_unlock">Swipe up to unlock</string>
 
-    <!-- Shows when people have clicked at the left edge of the screen to explain how to open the phone. In right-to-left languages, this is the opposite direction. [CHAR LIMIT=60] -->
-    <string name="phone_hint">Swipe right for phone</string>
+    <!-- Shows when people have clicked on the phone icon [CHAR LIMIT=60] -->
+    <string name="phone_hint">Swipe from icon for phone</string>
 
-    <!-- Shows when people have clicked at the right edge of the screen to explain how to open the phone. In right-to-left languages, this is the opposite direction. [CHAR LIMIT=60] -->
-    <string name="camera_hint">Swipe left for camera</string>
+    <!-- Shows when people have clicked on the voice assist icon [CHAR LIMIT=60] -->
+    <string name="voice_hint">Swipe from icon for voice assist</string>
+
+    <!-- Shows when people have clicked on the camera icon [CHAR LIMIT=60] -->
+    <string name="camera_hint">Swipe from icon for camera</string>
 
     <!-- Interruption level: None. [CHAR LIMIT=40] -->
     <string name="interruption_level_none">Total silence</string>

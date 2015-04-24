@@ -235,6 +235,18 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     }
 
+    public void launchVoiceAssistFromKeyguard() {
+        if (mService == null) {
+            Slog.w(TAG, "Not bound to voice interaction service " + mComponent);
+            return;
+        }
+        try {
+            mService.launchVoiceAssistFromKeyguard();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException while calling launchVoiceAssistFromKeyguard", e);
+        }
+    }
+
     void shutdownLocked() {
         try {
             if (mService != null) {
@@ -256,6 +268,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     void notifySoundModelsChangedLocked() {
         if (mService == null) {
             Slog.w(TAG, "Not bound to voice interaction service " + mComponent);
+            return;
         }
         try {
             mService.soundModelsChanged();

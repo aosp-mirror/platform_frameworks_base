@@ -98,6 +98,10 @@ public class VoiceInteractionService extends Service {
         @Override public void soundModelsChanged() {
             mHandler.sendEmptyMessage(MSG_SOUND_MODELS_CHANGED);
         }
+        @Override
+        public void launchVoiceAssistFromKeyguard() throws RemoteException {
+            mHandler.sendEmptyMessage(MSG_LAUNCH_VOICE_ASSIST_FROM_KEYGUARD);
+        }
     };
 
     MyHandler mHandler;
@@ -113,6 +117,7 @@ public class VoiceInteractionService extends Service {
     static final int MSG_READY = 1;
     static final int MSG_SHUTDOWN = 2;
     static final int MSG_SOUND_MODELS_CHANGED = 3;
+    static final int MSG_LAUNCH_VOICE_ASSIST_FROM_KEYGUARD = 4;
 
     class MyHandler extends Handler {
         @Override
@@ -127,10 +132,26 @@ public class VoiceInteractionService extends Service {
                 case MSG_SOUND_MODELS_CHANGED:
                     onSoundModelsChangedInternal();
                     break;
+                case MSG_LAUNCH_VOICE_ASSIST_FROM_KEYGUARD:
+                    onLaunchVoiceAssistFromKeyguard();
+                    break;
                 default:
                     super.handleMessage(msg);
             }
         }
+    }
+
+    /**
+     * Called when a user has activated an affordance to launch voice assist from the Keyguard.
+     *
+     * <p>This method will only be called if the VoiceInteractionService has set
+     * {@link android.R.attr#supportsLaunchVoiceAssistFromKeyguard} and the Keyguard is showing.</p>
+     *
+     * <p>A valid implementation must start a new activity that should use {@link
+     * android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED} to display
+     * on top of the lock screen.</p>
+     */
+    public void onLaunchVoiceAssistFromKeyguard() {
     }
 
     /**

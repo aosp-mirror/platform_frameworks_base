@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +51,15 @@ public class PreviewInflater {
 
     public View inflatePreview(Intent intent) {
         WidgetInfo info = getWidgetInfo(intent);
+        return inflatePreview(info);
+    }
+
+    public View inflatePreviewFromService(ComponentName componentName) {
+        WidgetInfo info = getWidgetInfoFromService(componentName);
+        return inflatePreview(info);
+    }
+
+    private KeyguardPreviewContainer inflatePreview(WidgetInfo info) {
         if (info == null) {
             return null;
         }
@@ -77,8 +87,36 @@ public class PreviewInflater {
         return widgetView;
     }
 
-    private WidgetInfo getWidgetInfo(Intent intent) {
+    private WidgetInfo getWidgetInfoFromService(ComponentName componentName) {
+        PackageManager packageManager = mContext.getPackageManager();
+        // Look for the preview specified in the service meta-data
+        try {
+            Bundle metaData = packageManager.getServiceInfo(
+                    componentName, PackageManager.GET_META_DATA).metaData;
+            return getWidgetInfoFromMetaData(componentName.getPackageName(), metaData);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Failed to load preview; " + componentName.flattenToShortString()
+                    + " not found", e);
+        }
+        return null;
+    }
+
+    private WidgetInfo getWidgetInfoFromMetaData(String contextPackage,
+            Bundle metaData) {
+        if (metaData == null) {
+            return null;
+        }
+        int layoutId = metaData.getInt(META_DATA_KEYGUARD_LAYOUT);
+        if (layoutId == 0) {
+            return null;
+        }
         WidgetInfo info = new WidgetInfo();
+        info.contextPackage = contextPackage;
+        info.layoutId = layoutId;
+        return info;
+    }
+
+    private WidgetInfo getWidgetInfo(Intent intent) {
         PackageManager packageManager = mContext.getPackageManager();
         final List<ResolveInfo> appList = packageManager.queryIntentActivitiesAsUser(
                 intent, PackageManager.MATCH_DEFAULT_ONLY, KeyguardUpdateMonitor.getCurrentUser());
@@ -94,16 +132,8 @@ public class PreviewInflater {
         if (resolved == null || resolved.activityInfo == null) {
             return null;
         }
-        if (resolved.activityInfo.metaData == null || resolved.activityInfo.metaData.isEmpty()) {
-            return null;
-        }
-        int layoutId = resolved.activityInfo.metaData.getInt(META_DATA_KEYGUARD_LAYOUT);
-        if (layoutId == 0) {
-            return null;
-        }
-        info.contextPackage = resolved.activityInfo.packageName;
-        info.layoutId = layoutId;
-        return info;
+        return getWidgetInfoFromMetaData(resolved.activityInfo.packageName,
+                resolved.activityInfo.metaData);
     }
 
     public static boolean wouldLaunchResolverActivity(Context ctx, Intent intent,
