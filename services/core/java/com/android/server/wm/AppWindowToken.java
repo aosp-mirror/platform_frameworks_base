@@ -281,7 +281,7 @@ class AppWindowToken extends WindowToken {
                 Slog.w(WindowManagerService.TAG, "removeAllWindows: removing win=" + win);
             }
 
-            service.removeWindowLocked(win.mSession, win);
+            service.removeWindowLocked(win);
         }
         allAppWindows.clear();
         windows.clear();
