@@ -111,7 +111,7 @@ public class SwipeDismissLayout extends FrameLayout {
     }
 
     private void init(Context context) {
-        ViewConfiguration vc = ViewConfiguration.get(getContext());
+        ViewConfiguration vc = ViewConfiguration.get(context);
         mSlop = vc.getScaledTouchSlop();
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
         mMaxFlingVelocity = vc.getScaledMaximumFlingVelocity();
@@ -290,7 +290,7 @@ public class SwipeDismissLayout extends FrameLayout {
             float deltaX = ev.getRawX() - mDownX;
             float deltaY = ev.getRawY() - mDownY;
             if ((deltaX * deltaX) + (deltaY * deltaY) > mSlop * mSlop) {
-                mSwiping = deltaX > mSlop * 2 && Math.abs(deltaY) < mSlop * 2;
+                mSwiping = deltaX > mSlop * 2 && Math.abs(deltaY) < Math.abs(deltaX);
             } else {
                 mSwiping = false;
             }
@@ -299,9 +299,9 @@ public class SwipeDismissLayout extends FrameLayout {
 
     private void updateDismiss(MotionEvent ev) {
         float deltaX = ev.getRawX() - mDownX;
+        mVelocityTracker.addMovement(ev);
+        mVelocityTracker.computeCurrentVelocity(1000);
         if (!mDismissed) {
-            mVelocityTracker.addMovement(ev);
-            mVelocityTracker.computeCurrentVelocity(1000);
 
             if (deltaX > (getWidth() * DISMISS_MIN_DRAG_WIDTH_RATIO) &&
                     ev.getRawX() >= mLastX) {
@@ -311,7 +311,9 @@ public class SwipeDismissLayout extends FrameLayout {
         // Check if the user tried to undo this.
         if (mDismissed && mSwiping) {
             // Check if the user's finger is actually back
-            if (deltaX < (getWidth() * DISMISS_MIN_DRAG_WIDTH_RATIO)) {
+            if (deltaX < (getWidth() * DISMISS_MIN_DRAG_WIDTH_RATIO) ||
+                    // or user is flinging back left
+                    mVelocityTracker.getXVelocity() < -mMinFlingVelocity) {
                 mDismissed = false;
             }
         }
