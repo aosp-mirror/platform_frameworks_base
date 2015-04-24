@@ -402,6 +402,7 @@ android.app.SharedPreferencesImpl$EditorImpl
 android.app.SharedPreferencesImpl$EditorImpl$1
 android.app.SharedPreferencesImpl$EditorImpl$2
 android.app.SharedPreferencesImpl$MemoryCommitResult
+android.app.SystemServiceRegistry
 android.app.admin.DevicePolicyManager
 android.app.admin.IDevicePolicyManager$Stub
 android.app.admin.IDevicePolicyManager$Stub$Proxy
