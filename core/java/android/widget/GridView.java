@@ -1854,20 +1854,19 @@ public class GridView extends AbsListView {
                     moved = true;
                 }
                 break;
-            case FOCUS_LEFT:
-                if (selectedPosition > startOfRowPos) {
-                    mLayoutMode = LAYOUT_MOVE_SELECTION;
-                    setSelectionInt(Math.max(0, selectedPosition - 1));
-                    moved = true;
-                }
-                break;
-            case FOCUS_RIGHT:
-                if (selectedPosition < endOfRowPos) {
-                    mLayoutMode = LAYOUT_MOVE_SELECTION;
-                    setSelectionInt(Math.min(selectedPosition + 1, mItemCount - 1));
-                    moved = true;
-                }
-                break;
+        }
+
+        final boolean isLayoutRtl = isLayoutRtl();
+        if (selectedPosition > startOfRowPos && ((direction == FOCUS_LEFT && !isLayoutRtl) ||
+                (direction == FOCUS_RIGHT && isLayoutRtl))) {
+            mLayoutMode = LAYOUT_MOVE_SELECTION;
+            setSelectionInt(Math.max(0, selectedPosition - 1));
+            moved = true;
+        } else if (selectedPosition < endOfRowPos && ((direction == FOCUS_LEFT && isLayoutRtl) ||
+                (direction == FOCUS_RIGHT && !isLayoutRtl))) {
+            mLayoutMode = LAYOUT_MOVE_SELECTION;
+            setSelectionInt(Math.min(selectedPosition + 1, mItemCount - 1));
+            moved = true;
         }
 
         if (moved) {
