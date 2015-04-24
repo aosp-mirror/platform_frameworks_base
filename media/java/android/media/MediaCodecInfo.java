@@ -160,21 +160,21 @@ public final class MediaCodecInfo {
         public CodecProfileLevel[] profileLevels;  // NOTE this array is modifiable by user
 
         // from OMX_COLOR_FORMATTYPE
-        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_FormatMonochrome              = 1;
-        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_Format8bitRGB332              = 2;
-        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_Format12bitRGB444             = 3;
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format16bitARGB4444           = 4;
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format16bitARGB1555           = 5;
 
         /**
          * 16 bits per pixel RGB color format, with 5-bit red & blue and 6-bit green component.
          * <p>
-         * Using LSB 16-bit byte ordering, colors stored as Red 15:11, Green 10:5, Blue 4:0.
+         * Using 16-bit little-endian representation, colors stored as Red 15:11, Green 10:5, Blue 4:0.
          * <pre>
          *            byte                   byte
          *  <--------- i --------> | <------ i + 1 ------>
@@ -184,64 +184,50 @@ public final class MediaCodecInfo {
          *  0           4  5     7   0     2  3           7
          * bit
          * </pre>
+         *
+         * This format corresponds to {@link android.graphics.PixelFormat#RGB_565} and
+         * {@link android.graphics.ImageFormat#RGB_565}.
          */
         public static final int COLOR_Format16bitRGB565             = 6;
         /** @deprecated Use {@link #COLOR_Format16bitRGB565}. */
         public static final int COLOR_Format16bitBGR565             = 7;
-        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_Format18bitRGB666             = 8;
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format18bitARGB1665           = 9;
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format19bitARGB1666           = 10;
+
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888} or {@link #COLOR_FormatRGBFlexible}. */
+        public static final int COLOR_Format24bitRGB888             = 11;
 
         /**
          * 24 bits per pixel RGB color format, with 8-bit red, green & blue components.
          * <p>
-         * Using LSB 24-bit byte ordering, colors stored as Red 23:16, Green 15:8, Blue 7:0.
+         * Using 24-bit little-endian representation, colors stored as Red 7:0, Green 15:8, Blue 23:16.
          * <pre>
          *         byte              byte             byte
          *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----->
          * +-----------------+-----------------+-----------------+
-         * |       BLUE      |      GREEN      |       RED       |
+         * |       RED       |      GREEN      |       BLUE      |
          * +-----------------+-----------------+-----------------+
          * </pre>
+         *
+         * This format corresponds to {@link android.graphics.PixelFormat#RGB_888}, and can also be
+         * represented as a flexible format by {@link #COLOR_FormatRGBFlexible}.
          */
-        public static final int COLOR_Format24bitRGB888             = 11;
-        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
         public static final int COLOR_Format24bitBGR888             = 12;
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24bitARGB1887           = 13;
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format25bitARGB1888           = 14;
 
         /**
-         * 32 bits per pixel ARGB color format, with 8-bit alpha, red, green & blue components.
-         * <p>
-         * Using LSB 32-bit byte ordering, colors stored as Alpha 31:24, Red 23:16, Green 15:8,
-         * Blue 7:0.
-         * <pre>
-         *         byte              byte             byte              byte
-         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
-         * +-----------------+-----------------+-----------------+-----------------+
-         * |       BLUE      |      GREEN      |       RED       |      ALPHA      |
-         * +-----------------+-----------------+-----------------+-----------------+
-         * </pre>
+         * @deprecated Use {@link #COLOR_Format32bitABGR8888} Or {@link #COLOR_FormatRGBAFlexible}.
          */
         public static final int COLOR_Format32bitBGRA8888           = 15;
-
         /**
-         * 32 bits per pixel ARGB color format, with 8-bit alpha, red, green & blue components.
-         * <p>
-         * Using LSB 32-bit byte ordering, colors stored as Alpha 31:24, Red 7:0, Green 15:8,
-         * Blue 23:16.
-         * <pre>
-         *         byte              byte             byte              byte
-         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
-         * +-----------------+-----------------+-----------------+-----------------+
-         * |       RED       |      GREEN      |       BLUE      |      ALPHA      |
-         * +-----------------+-----------------+-----------------+-----------------+
-         * </pre>
+         * @deprecated Use {@link #COLOR_Format32bitABGR8888} Or {@link #COLOR_FormatRGBAFlexible}.
          */
         public static final int COLOR_Format32bitARGB8888           = 16;
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
@@ -271,10 +257,24 @@ public final class MediaCodecInfo {
         /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatCrYCbY                  = 28;
 
+        /** @deprecated Use {@link #COLOR_FormatYUV444Flexible}. */
         public static final int COLOR_FormatYUV444Interleaved       = 29;
 
+        /**
+         * SMIA 8-bit Bayer format.
+         * Each byte represents the top 8-bits of a 10-bit signal.
+         */
         public static final int COLOR_FormatRawBayer8bit            = 30;
+        /**
+         * SMIA 10-bit Bayer format.
+         */
         public static final int COLOR_FormatRawBayer10bit           = 31;
+
+        /**
+         * SMIA 8-bit compressed Bayer format.
+         * Each byte represents a sample from the 10-bit signal that is compressed into 8-bits
+         * using DPCM/PCM compression, as defined by the SMIA Functional Specification.
+         */
         public static final int COLOR_FormatRawBayer8bitcompressed  = 32;
 
         /** @deprecated Use {@link #COLOR_FormatL8}. */
@@ -286,6 +286,7 @@ public final class MediaCodecInfo {
          * 8 bits per pixel Y color format.
          * <p>
          * Each byte contains a single pixel.
+         * This format corresponds to {@link android.graphics.PixelFormat#L_8}.
          */
         public static final int COLOR_FormatL8                      = 35;
 
@@ -303,7 +304,7 @@ public final class MediaCodecInfo {
          * </pre>
          */
         public static final int COLOR_FormatL16                     = 36;
-        /** @deprecated Use {@link #COLOR_FormatL32}. */
+        /** @deprecated Use {@link #COLOR_FormatL16}. */
         public static final int COLOR_FormatL24                     = 37;
 
         /**
@@ -318,6 +319,8 @@ public final class MediaCodecInfo {
          *  0               7 0               7 0               7 0               7
          * bit
          * </pre>
+         *
+         * @deprecated Use {@link #COLOR_FormatL16}.
          */
         public static final int COLOR_FormatL32                     = 38;
 
@@ -326,12 +329,12 @@ public final class MediaCodecInfo {
         /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422PackedSemiPlanar  = 40;
 
-        /** @deprecated Use {@link #COLOR_Format24bitRGB888}. */
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_Format18BitBGR666             = 41;
 
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24BitARGB6666           = 42;
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24BitABGR6666           = 43;
 
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
@@ -340,8 +343,22 @@ public final class MediaCodecInfo {
         // In OMX this is called OMX_COLOR_FormatAndroidOpaque.
         public static final int COLOR_FormatSurface                   = 0x7F000789;
 
-        /** @deprecated Use {@link #COLOR_Format32bitARGB8888}. */
-        public static final int COLOR_Format32BitRGBA8888             = 0x7F00A000;
+        /**
+         * 32 bits per pixel RGBA color format, with 8-bit red, green, blue, and alpha components.
+         * <p>
+         * Using 32-bit little-endian representation, colors stored as Red 7:0, Green 15:8,
+         * Blue 23:16, and Alpha 31:24.
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+-----------------+-----------------+-----------------+
+         * |       RED       |      GREEN      |       BLUE      |      ALPHA      |
+         * +-----------------+-----------------+-----------------+-----------------+
+         * </pre>
+         *
+         * This corresponds to {@link android.graphics.PixelFormat#RGBA_8888}.
+         */
+        public static final int COLOR_Format32bitABGR8888             = 0x7F00A000;
 
         /**
          * Flexible 12 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
@@ -349,23 +366,66 @@ public final class MediaCodecInfo {
          * <p>
          * Chroma planes are subsampled by 2 both horizontally and vertically.
          * Use this format with {@link Image}.
+         * This format corresponds to {@link android.graphics.ImageFormat#YUV_420_888},
+         * and can represent the {@link #COLOR_FormatYUV411Planar},
+         * {@link #COLOR_FormatYUV411PackedPlanar}, {@link #COLOR_FormatYUV420Planar},
+         * {@link #COLOR_FormatYUV420PackedPlanar}, {@link #COLOR_FormatYUV420SemiPlanar}
+         * and {@link #COLOR_FormatYUV420PackedSemiPlanar} formats.
          *
          * @see Image#getFormat
          */
-        // This corresponds to YUV_420_888 format
         public static final int COLOR_FormatYUV420Flexible            = 0x7F420888;
 
         /**
          * Flexible 16 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
          * components.
          * <p>
-         * Chroma planes are horizontally subsampled by 2.
-         * Use this format with {@link Image}.
+         * Chroma planes are horizontally subsampled by 2. Use this format with {@link Image}.
+         * This format corresponds to {@link android.graphics.ImageFormat#YUV_422_888},
+         * and can represent the {@link #COLOR_FormatYCbYCr}, {@link #COLOR_FormatYCrYCb},
+         * {@link #COLOR_FormatCbYCrY}, {@link #COLOR_FormatCrYCbY},
+         * {@link #COLOR_FormatYUV422Planar}, {@link #COLOR_FormatYUV422PackedPlanar},
+         * {@link #COLOR_FormatYUV422SemiPlanar} and {@link #COLOR_FormatYUV422PackedSemiPlanar}
+         * formats.
          *
          * @see Image#getFormat
          */
-        // This corresponds to YUV_422_888 format
         public static final int COLOR_FormatYUV422Flexible            = 0x7F422888;
+
+        /**
+         * Flexible 24 bits per pixel YUV color format with 8-bit chroma and luma
+         * components.
+         * <p>
+         * Chroma planes are not subsampled. Use this format with {@link Image}.
+         * This format corresponds to {@link android.graphics.ImageFormat#YUV_444_888},
+         * and can represent the {@link #COLOR_FormatYUV444Interleaved} format.
+         * @see Image#getFormat
+         */
+        public static final int COLOR_FormatYUV444Flexible            = 0x7F444888;
+
+        /**
+         * Flexible 24 bits per pixel RGB color format with 8-bit red, green and blue
+         * components.
+         * <p>
+         * Use this format with {@link Image}. This format corresponds to
+         * {@link android.graphics.ImageFormat#FLEX_RGB_888}, and can represent
+         * {@link #COLOR_Format24bitBGR888} and {@link #COLOR_Format24bitRGB888} formats.
+         * @see Image#getFormat.
+         */
+        public static final int COLOR_FormatRGBFlexible               = 0x7F36B888;
+
+        /**
+         * Flexible 32 bits per pixel RGBA color format with 8-bit red, green, blue, and alpha
+         * components.
+         * <p>
+         * Use this format with {@link Image}. This format corresponds to
+         * {@link android.graphics.ImageFormat#FLEX_RGBA_8888}, and can represent
+         * {@link #COLOR_Format32bitBGRA8888}, {@link #COLOR_Format32bitABGR8888} and
+         * {@link #COLOR_Format32bitARGB8888} formats.
+         *
+         * @see Image#getFormat
+         */
+        public static final int COLOR_FormatRGBAFlexible              = 0x7F36A888;
 
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00;
