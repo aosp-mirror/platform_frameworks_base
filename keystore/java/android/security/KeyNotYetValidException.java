@@ -16,11 +16,13 @@
 
 package android.security;
 
+import java.security.InvalidKeyException;
+
 /**
  * Indicates that a cryptographic operation failed because the employed key's validity start date
  * is in the future.
  */
-public class KeyNotYetValidException extends CryptoOperationException {
+public class KeyNotYetValidException extends InvalidKeyException {
 
     /**
      * Constructs a new {@code KeyNotYetValidException} without detail message and cause.

@@ -136,6 +136,14 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     private Long mOperationHandle;
     private KeyStoreCryptoOperationChunkedStreamer mMainDataStreamer;
 
+    /**
+     * Encountered exception which could not be immediately thrown because it was encountered inside
+     * a method that does not throw checked exception. This exception will be thrown from
+     * {@code engineDoFinal}. Once such an exception is encountered, {@code engineUpdate} and
+     * {@code engineDoFinal} start ignoring input data.
+     */
+    private Exception mCachedException;
+
     protected KeyStoreCipherSpi(
             int keymasterAlgorithm,
             int keymasterBlockMode,
@@ -158,7 +166,11 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         try {
             init(opmode, key, random);
             initAlgorithmSpecificParameters();
-            ensureKeystoreOperationInitialized();
+            try {
+                ensureKeystoreOperationInitialized();
+            } catch (InvalidAlgorithmParameterException e) {
+                throw new InvalidKeyException(e);
+            }
             success = true;
         } finally {
             if (!success) {
@@ -236,6 +248,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mOperationToken = null;
         mOperationHandle = null;
         mMainDataStreamer = null;
+        mCachedException = null;
     }
 
     private void resetWhilePreservingInitState() {
@@ -247,10 +260,15 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mOperationHandle = null;
         mMainDataStreamer = null;
         mAdditionalEntropyForBegin = null;
+        mCachedException = null;
     }
 
-    private void ensureKeystoreOperationInitialized() {
+    private void ensureKeystoreOperationInitialized() throws InvalidKeyException,
+            InvalidAlgorithmParameterException {
         if (mMainDataStreamer != null) {
+            return;
+        }
+        if (mCachedException != null) {
             return;
         }
         if (mKey == null) {
@@ -281,11 +299,15 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeyStore.getCryptoOperationException(opResult.resultCode);
+            switch (opResult.resultCode) {
+                case KeymasterDefs.KM_ERROR_INVALID_NONCE:
+                    throw new InvalidAlgorithmParameterException("Invalid IV");
+            }
+            throw KeyStore.getInvalidKeyException(opResult.resultCode);
         }
 
         if (opResult.token == null) {
-            throw new CryptoOperationException("Keystore returned null operation token");
+            throw new IllegalStateException("Keystore returned null operation token");
         }
         mOperationToken = opResult.token;
         mOperationHandle = opResult.operationHandle;
@@ -299,7 +321,15 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
 
     @Override
     protected byte[] engineUpdate(byte[] input, int inputOffset, int inputLen) {
-        ensureKeystoreOperationInitialized();
+        if (mCachedException != null) {
+            return null;
+        }
+        try {
+            ensureKeystoreOperationInitialized();
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+            mCachedException = e;
+            return null;
+        }
 
         if (inputLen == 0) {
             return null;
@@ -309,7 +339,8 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         try {
             output = mMainDataStreamer.update(input, inputOffset, inputLen);
         } catch (KeyStoreException e) {
-            throw KeyStore.getCryptoOperationException(e);
+            mCachedException = e;
+            return null;
         }
 
         if (output.length == 0) {
@@ -338,7 +369,16 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     @Override
     protected byte[] engineDoFinal(byte[] input, int inputOffset, int inputLen)
             throws IllegalBlockSizeException, BadPaddingException {
-        ensureKeystoreOperationInitialized();
+        if (mCachedException != null) {
+            throw (IllegalBlockSizeException)
+                    new IllegalBlockSizeException().initCause(mCachedException);
+        }
+
+        try {
+            ensureKeystoreOperationInitialized();
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+            throw (IllegalBlockSizeException) new IllegalBlockSizeException().initCause(e);
+        }
 
         byte[] output;
         try {
@@ -352,7 +392,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
                 case KeymasterDefs.KM_ERROR_VERIFICATION_FAILED:
                     throw new AEADBadTagException();
                 default:
-                    throw KeyStore.getCryptoOperationException(e);
+                    throw (IllegalBlockSizeException) new IllegalBlockSizeException().initCause(e);
             }
         }
 
@@ -613,11 +653,11 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
             if (mIv == null) {
                 mIv = returnedIv;
             } else if ((returnedIv != null) && (!Arrays.equals(returnedIv, mIv))) {
-                throw new CryptoOperationException("IV in use differs from provided IV");
+                throw new IllegalStateException("IV in use differs from provided IV");
             }
         } else {
             if (returnedIv != null) {
-                throw new CryptoOperationException(
+                throw new IllegalStateException(
                         "IV in use despite IV not being used by this transformation");
             }
         }

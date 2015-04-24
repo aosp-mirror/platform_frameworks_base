@@ -16,11 +16,13 @@
 
 package android.security;
 
+import java.security.InvalidKeyException;
+
 /**
  * Indicates that a cryptographic operation could not be performed because the user has not been
  * authenticated recently enough.
  */
-public class UserNotAuthenticatedException extends CryptoOperationException {
+public class UserNotAuthenticatedException extends InvalidKeyException {
 
     /**
      * Constructs a new {@code UserNotAuthenticatedException} without detail message and cause.

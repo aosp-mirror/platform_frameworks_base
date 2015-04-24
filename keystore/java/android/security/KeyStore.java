@@ -30,6 +30,7 @@ import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 import android.util.Log;
 
+import java.security.InvalidKeyException;
 import java.util.Locale;
 
 /**
@@ -508,7 +509,11 @@ public class KeyStore {
         }
     }
 
-    public static KeyStoreException getKeyStoreException(int errorCode) {
+    /**
+     * Returns a {@link KeyStoreException} corresponding to the provided keystore/keymaster error
+     * code.
+     */
+    static KeyStoreException getKeyStoreException(int errorCode) {
         if (errorCode > 0) {
             // KeyStore layer error
             switch (errorCode) {
@@ -544,7 +549,11 @@ public class KeyStore {
         }
     }
 
-    public static CryptoOperationException getCryptoOperationException(KeyStoreException e) {
+    /**
+     * Returns an {@link InvalidKeyException} corresponding to the provided
+     * {@link KeyStoreException}.
+     */
+    static InvalidKeyException getInvalidKeyException(KeyStoreException e) {
         switch (e.getErrorCode()) {
             case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
                 return new KeyExpiredException();
@@ -556,11 +565,15 @@ public class KeyStore {
             // case KeymasterDefs.KM_ERROR_TBD
             //     return new NewFingerprintEnrolledException();
             default:
-                return new CryptoOperationException("Crypto operation failed", e);
+                return new InvalidKeyException("Keystore operation failed", e);
         }
     }
 
-    public static CryptoOperationException getCryptoOperationException(int errorCode) {
-        return getCryptoOperationException(getKeyStoreException(errorCode));
+    /**
+     * Returns an {@link InvalidKeyException} corresponding to the provided keystore/keymaster error
+     * code.
+     */
+    static InvalidKeyException getInvalidKeyException(int errorCode) {
+        return getInvalidKeyException(getKeyStoreException(errorCode));
     }
 }

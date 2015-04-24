@@ -16,11 +16,13 @@
 
 package android.security;
 
+import java.security.InvalidKeyException;
+
 /**
  * Indicates that a cryptographic operation could not be performed because the key used by the
  * operation is permanently invalid because a new fingerprint was enrolled.
  */
-public class NewFingerprintEnrolledException extends CryptoOperationException {
+public class NewFingerprintEnrolledException extends InvalidKeyException {
 
     /**
      * Constructs a new {@code NewFingerprintEnrolledException} without detail message and cause.
