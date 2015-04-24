@@ -196,9 +196,23 @@ class DayPickerView extends ViewGroup {
     }
 
     @Override
+    public void onRtlPropertiesChanged(@ResolvedLayoutDir int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+
+        requestLayout();
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        final ImageButton leftButton = mPrevButton;
-        final ImageButton rightButton = mNextButton;
+        final ImageButton leftButton;
+        final ImageButton rightButton;
+        if (isLayoutRtl()) {
+            leftButton = mNextButton;
+            rightButton = mPrevButton;
+        } else {
+            leftButton = mPrevButton;
+            rightButton = mNextButton;
+        }
 
         final int width = right - left;
         final int height = bottom - top;

@@ -27,9 +27,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.FocusFinder;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -43,7 +43,6 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
-import android.view.accessibility.AccessibilityRecord;
 import android.view.animation.Interpolator;
 import android.widget.EdgeEffect;
 import android.widget.Scroller;
@@ -84,8 +83,9 @@ import java.util.Comparator;
  */
 public class ViewPager extends ViewGroup {
     private static final String TAG = "ViewPager";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
+    private static final int MAX_SCROLL_X = 2 << 23;
     private static final boolean USE_CACHE = false;
 
     private static final int DEFAULT_OFFSCREEN_PAGES = 1;
@@ -108,9 +108,13 @@ public class ViewPager extends ViewGroup {
 
     static class ItemInfo {
         Object object;
-        int position;
         boolean scrolling;
         float widthFactor;
+
+        /** Logical position of the item within the pager adapter. */
+        int position;
+
+        /** Offset between the starting edges of the item and its container. */
         float offset;
     }
 
@@ -145,6 +149,12 @@ public class ViewPager extends ViewGroup {
     private Drawable mMarginDrawable;
     private int mTopPageBounds;
     private int mBottomPageBounds;
+
+    /**
+     * The increment used to move in the "left" direction. Dependent on layout
+     * direction.
+     */
+    private int mLeftIncr = -1;
 
     // Offsets of the first and last items, if known.
     // Set during population, used to determine if we are at the beginning
@@ -198,14 +208,10 @@ public class ViewPager extends ViewGroup {
     // "catching" the flinging pager.
     private static final int CLOSE_ENOUGH = 2; // dp
 
-    private boolean mFakeDragging;
-    private long mFakeDragBeginTime;
-
     private final EdgeEffect mLeftEdge;
     private final EdgeEffect mRightEdge;
 
     private boolean mFirstLayout = true;
-    private boolean mNeedCalculatePageOffsets = false;
     private boolean mCalledSuper;
     private int mDecorChildCount;
 
@@ -473,7 +479,7 @@ public class ViewPager extends ViewGroup {
         mAdapterChangeListener = listener;
     }
 
-    private int getClientWidth() {
+    private int getPaddedWidth() {
         return getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
     }
 
@@ -504,36 +510,33 @@ public class ViewPager extends ViewGroup {
         return mCurItem;
     }
 
-    void setCurrentItemInternal(int item, boolean smoothScroll, boolean always) {
-        setCurrentItemInternal(item, smoothScroll, always, 0);
+    boolean setCurrentItemInternal(int item, boolean smoothScroll, boolean always) {
+        return setCurrentItemInternal(item, smoothScroll, always, 0);
     }
 
-    void setCurrentItemInternal(int item, boolean smoothScroll, boolean always, int velocity) {
+    boolean setCurrentItemInternal(int item, boolean smoothScroll, boolean always, int velocity) {
         if (mAdapter == null || mAdapter.getCount() <= 0) {
             setScrollingCacheEnabled(false);
-            return;
-        }
-        if (!always && mCurItem == item && mItems.size() != 0) {
-            setScrollingCacheEnabled(false);
-            return;
+            return false;
         }
 
-        if (item < 0) {
-            item = 0;
-        } else if (item >= mAdapter.getCount()) {
-            item = mAdapter.getCount() - 1;
+        item = MathUtils.constrain(item, 0, mAdapter.getCount() - 1);
+        if (!always && mCurItem == item && mItems.size() != 0) {
+            setScrollingCacheEnabled(false);
+            return false;
         }
+
         final int pageLimit = mOffscreenPageLimit;
         if (item > (mCurItem + pageLimit) || item < (mCurItem - pageLimit)) {
             // We are doing a jump by more than one page.  To avoid
             // glitches, we want to keep all current pages in the view
             // until the scroll ends.
-            for (int i=0; i<mItems.size(); i++) {
+            for (int i = 0; i < mItems.size(); i++) {
                 mItems.get(i).scrolling = true;
             }
         }
-        final boolean dispatchSelected = mCurItem != item;
 
+        final boolean dispatchSelected = mCurItem != item;
         if (mFirstLayout) {
             // We don't have any idea how big we are yet and shouldn't have any pages either.
             // Just set things up and let the pending layout handle things.
@@ -549,35 +552,52 @@ public class ViewPager extends ViewGroup {
             populate(item);
             scrollToItem(item, smoothScroll, velocity, dispatchSelected);
         }
+
+        return true;
     }
 
-    private void scrollToItem(int item, boolean smoothScroll, int velocity,
+    private void scrollToItem(int position, boolean smoothScroll, int velocity,
             boolean dispatchSelected) {
-        final ItemInfo curInfo = infoForPosition(item);
-        int destX = 0;
-        if (curInfo != null) {
-            final int width = getClientWidth();
-            destX = (int) (width * Math.max(mFirstOffset,
-                    Math.min(curInfo.offset, mLastOffset)));
-        }
+        final int destX = getLeftEdgeForItem(position);
+
         if (smoothScroll) {
             smoothScrollTo(destX, 0, velocity);
+
             if (dispatchSelected && mOnPageChangeListener != null) {
-                mOnPageChangeListener.onPageSelected(item);
+                mOnPageChangeListener.onPageSelected(position);
             }
             if (dispatchSelected && mInternalPageChangeListener != null) {
-                mInternalPageChangeListener.onPageSelected(item);
+                mInternalPageChangeListener.onPageSelected(position);
             }
         } else {
             if (dispatchSelected && mOnPageChangeListener != null) {
-                mOnPageChangeListener.onPageSelected(item);
+                mOnPageChangeListener.onPageSelected(position);
             }
             if (dispatchSelected && mInternalPageChangeListener != null) {
-                mInternalPageChangeListener.onPageSelected(item);
+                mInternalPageChangeListener.onPageSelected(position);
             }
+
             completeScroll(false);
             scrollTo(destX, 0);
             pageScrolled(destX);
+        }
+    }
+
+    private int getLeftEdgeForItem(int position) {
+        final ItemInfo info = infoForPosition(position);
+        if (info == null) {
+            return 0;
+        }
+
+        final int width = getPaddedWidth();
+        final int scaledOffset = (int) (width * MathUtils.constrain(
+                info.offset, mFirstOffset, mLastOffset));
+
+        if (isLayoutRtl()) {
+            final int itemWidth = (int) (width * info.widthFactor + 0.5f);
+            return MAX_SCROLL_X - itemWidth - scaledOffset;
+        } else {
+            return scaledOffset;
         }
     }
 
@@ -784,7 +804,7 @@ public class ViewPager extends ViewGroup {
         setScrollingCacheEnabled(true);
         setScrollState(SCROLL_STATE_SETTLING);
 
-        final int width = getClientWidth();
+        final int width = getPaddedWidth();
         final int halfWidth = width / 2;
         final float distanceRatio = Math.min(1f, 1.0f * Math.abs(dx) / width);
         final float distance = halfWidth + halfWidth *
@@ -968,7 +988,7 @@ public class ViewPager extends ViewGroup {
             float extraWidthLeft = 0.f;
             int itemIndex = curIndex - 1;
             ItemInfo ii = itemIndex >= 0 ? mItems.get(itemIndex) : null;
-            final int clientWidth = getClientWidth();
+            final int clientWidth = getPaddedWidth();
             final float leftWidthNeeded = clientWidth <= 0 ? 0 :
                     2.f - curItem.widthFactor + (float) getPaddingLeft() / (float) clientWidth;
             for (int pos = mCurItem - 1; pos >= 0; pos--) {
@@ -981,7 +1001,7 @@ public class ViewPager extends ViewGroup {
                         mAdapter.destroyItem(this, pos, ii.object);
                         if (DEBUG) {
                             Log.i(TAG, "populate() - destroyItem() with pos: " + pos +
-                                    " view: " + ((View) ii.object));
+                                    " view: " + ii.object);
                         }
                         itemIndex--;
                         curIndex--;
@@ -1015,7 +1035,7 @@ public class ViewPager extends ViewGroup {
                             mAdapter.destroyItem(this, pos, ii.object);
                             if (DEBUG) {
                                 Log.i(TAG, "populate() - destroyItem() with pos: " + pos +
-                                        " view: " + ((View) ii.object));
+                                        " view: " + ii.object);
                             }
                             ii = itemIndex < mItems.size() ? mItems.get(itemIndex) : null;
                         }
@@ -1099,49 +1119,51 @@ public class ViewPager extends ViewGroup {
 
     private void calculatePageOffsets(ItemInfo curItem, int curIndex, ItemInfo oldCurInfo) {
         final int N = mAdapter.getCount();
-        final int width = getClientWidth();
+        final int width = getPaddedWidth();
         final float marginOffset = width > 0 ? (float) mPageMargin / width : 0;
+
         // Fix up offsets for later layout.
         if (oldCurInfo != null) {
             final int oldCurPosition = oldCurInfo.position;
+
             // Base offsets off of oldCurInfo.
             if (oldCurPosition < curItem.position) {
                 int itemIndex = 0;
-                ItemInfo ii = null;
                 float offset = oldCurInfo.offset + oldCurInfo.widthFactor + marginOffset;
-                for (int pos = oldCurPosition + 1;
-                        pos <= curItem.position && itemIndex < mItems.size(); pos++) {
-                    ii = mItems.get(itemIndex);
+                for (int pos = oldCurPosition + 1; pos <= curItem.position && itemIndex < mItems.size(); pos++) {
+                    ItemInfo ii = mItems.get(itemIndex);
                     while (pos > ii.position && itemIndex < mItems.size() - 1) {
                         itemIndex++;
                         ii = mItems.get(itemIndex);
                     }
+
                     while (pos < ii.position) {
                         // We don't have an item populated for this,
                         // ask the adapter for an offset.
                         offset += mAdapter.getPageWidth(pos) + marginOffset;
                         pos++;
                     }
+
                     ii.offset = offset;
                     offset += ii.widthFactor + marginOffset;
                 }
             } else if (oldCurPosition > curItem.position) {
                 int itemIndex = mItems.size() - 1;
-                ItemInfo ii = null;
                 float offset = oldCurInfo.offset;
-                for (int pos = oldCurPosition - 1;
-                        pos >= curItem.position && itemIndex >= 0; pos--) {
-                    ii = mItems.get(itemIndex);
+                for (int pos = oldCurPosition - 1; pos >= curItem.position && itemIndex >= 0; pos--) {
+                    ItemInfo ii = mItems.get(itemIndex);
                     while (pos < ii.position && itemIndex > 0) {
                         itemIndex--;
                         ii = mItems.get(itemIndex);
                     }
+
                     while (pos > ii.position) {
                         // We don't have an item populated for this,
                         // ask the adapter for an offset.
                         offset -= mAdapter.getPageWidth(pos) + marginOffset;
                         pos--;
                     }
+
                     offset -= ii.widthFactor + marginOffset;
                     ii.offset = offset;
                 }
@@ -1155,6 +1177,7 @@ public class ViewPager extends ViewGroup {
         mFirstOffset = curItem.position == 0 ? curItem.offset : -Float.MAX_VALUE;
         mLastOffset = curItem.position == N - 1 ?
                 curItem.offset + curItem.widthFactor - 1 : Float.MAX_VALUE;
+
         // Previous pages
         for (int i = curIndex - 1; i >= 0; i--, pos--) {
             final ItemInfo ii = mItems.get(i);
@@ -1165,8 +1188,10 @@ public class ViewPager extends ViewGroup {
             ii.offset = offset;
             if (ii.position == 0) mFirstOffset = offset;
         }
+
         offset = curItem.offset + curItem.widthFactor + marginOffset;
         pos = curItem.position + 1;
+
         // Next pages
         for (int i = curIndex + 1; i < itemCount; i++, pos++) {
             final ItemInfo ii = mItems.get(i);
@@ -1179,8 +1204,6 @@ public class ViewPager extends ViewGroup {
             ii.offset = offset;
             offset += ii.widthFactor + marginOffset;
         }
-
-        mNeedCalculatePageOffsets = false;
     }
 
     /**
@@ -1546,34 +1569,47 @@ public class ViewPager extends ViewGroup {
         // Page views. Do this once we have the right padding offsets from above.
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
-                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                ItemInfo ii;
-                if (!lp.isDecor && (ii = infoForChild(child)) != null) {
-                    int loff = (int) (childWidth * ii.offset);
-                    int childLeft = paddingLeft + loff;
-                    int childTop = paddingTop;
-                    if (lp.needsMeasure) {
-                        // This was added during layout and needs measurement.
-                        // Do it now that we know what we're working with.
-                        lp.needsMeasure = false;
-                        final int widthSpec = MeasureSpec.makeMeasureSpec(
-                                (int) (childWidth * lp.widthFactor),
-                                MeasureSpec.EXACTLY);
-                        final int heightSpec = MeasureSpec.makeMeasureSpec(
-                                (int) (height - paddingTop - paddingBottom),
-                                MeasureSpec.EXACTLY);
-                        child.measure(widthSpec, heightSpec);
-                    }
-                    if (DEBUG) Log.v(TAG, "Positioning #" + i + " " + child + " f=" + ii.object
-                            + ":" + childLeft + "," + childTop + " " + child.getMeasuredWidth()
-                            + "x" + child.getMeasuredHeight());
-                    child.layout(childLeft, childTop,
-                            childLeft + child.getMeasuredWidth(),
-                            childTop + child.getMeasuredHeight());
-                }
+            if (child.getVisibility() == GONE) {
+                continue;
             }
+
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            if (lp.isDecor) {
+                continue;
+            }
+
+            final ItemInfo ii = infoForChild(child);
+            if (ii == null) {
+                continue;
+            }
+
+            if (lp.needsMeasure) {
+                // This was added during layout and needs measurement.
+                // Do it now that we know what we're working with.
+                lp.needsMeasure = false;
+                final int widthSpec = MeasureSpec.makeMeasureSpec(
+                        (int) (childWidth * lp.widthFactor),
+                        MeasureSpec.EXACTLY);
+                final int heightSpec = MeasureSpec.makeMeasureSpec(
+                        (int) (height - paddingTop - paddingBottom),
+                        MeasureSpec.EXACTLY);
+                child.measure(widthSpec, heightSpec);
+            }
+
+            final int childMeasuredWidth = child.getMeasuredWidth();
+            final int startOffset = (int) (childWidth * ii.offset);
+            final int childLeft;
+            if (isLayoutRtl()) {
+                childLeft = MAX_SCROLL_X - paddingRight - startOffset - childMeasuredWidth;
+            } else {
+                childLeft = paddingLeft + startOffset;
+            }
+
+            final int childTop = paddingTop;
+            child.layout(childLeft, childTop, childLeft + childMeasuredWidth,
+                    childTop + child.getMeasuredHeight());
         }
+
         mTopPageBounds = paddingTop;
         mBottomPageBounds = height - paddingBottom;
         mDecorChildCount = decorCount;
@@ -1587,13 +1623,14 @@ public class ViewPager extends ViewGroup {
     @Override
     public void computeScroll() {
         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
-            int oldX = getScrollX();
-            int oldY = getScrollY();
-            int x = mScroller.getCurrX();
-            int y = mScroller.getCurrY();
+            final int oldX = getScrollX();
+            final int oldY = getScrollY();
+            final int x = mScroller.getCurrX();
+            final int y = mScroller.getCurrY();
 
             if (oldX != x || oldY != y) {
                 scrollTo(x, y);
+
                 if (!pageScrolled(x)) {
                     mScroller.abortAnimation();
                     scrollTo(0, y);
@@ -1609,7 +1646,7 @@ public class ViewPager extends ViewGroup {
         completeScroll(true);
     }
 
-    private boolean pageScrolled(int xpos) {
+    private boolean pageScrolled(int scrollX) {
         if (mItems.size() == 0) {
             mCalledSuper = false;
             onPageScrolled(0, 0, 0);
@@ -1619,12 +1656,21 @@ public class ViewPager extends ViewGroup {
             }
             return false;
         }
-        final ItemInfo ii = infoForCurrentScrollPosition();
-        final int width = getClientWidth();
+
+        // Translate to scrollX to scrollStart for RTL.
+        final int scrollStart;
+        if (isLayoutRtl()) {
+            scrollStart = MAX_SCROLL_X - scrollX;
+        } else {
+            scrollStart = scrollX;
+        }
+
+        final ItemInfo ii = infoForFirstVisiblePage();
+        final int width = getPaddedWidth();
         final int widthWithMargin = width + mPageMargin;
         final float marginOffset = (float) mPageMargin / width;
         final int currentPage = ii.position;
-        final float pageOffset = (((float) xpos / width) - ii.offset) /
+        final float pageOffset = (((float) scrollStart / width) - ii.offset) /
                 (ii.widthFactor + marginOffset);
         final int offsetPixels = (int) (pageOffset * widthWithMargin);
 
@@ -1706,7 +1752,7 @@ public class ViewPager extends ViewGroup {
 
                 if (lp.isDecor) continue;
 
-                final float transformPos = (float) (child.getLeft() - scrollX) / getClientWidth();
+                final float transformPos = (float) (child.getLeft() - scrollX) / getPaddedWidth();
                 mPageTransformer.transformPage(child, transformPos);
             }
         }
@@ -1785,11 +1831,11 @@ public class ViewPager extends ViewGroup {
         // are dragging.
         if (action != MotionEvent.ACTION_DOWN) {
             if (mIsBeingDragged) {
-                if (DEBUG) Log.v(TAG, "Intercept returning true!");
+                if (DEBUG) Log.v(TAG, "Being dragged, intercept returning true!");
                 return true;
             }
             if (mIsUnableToDrag) {
-                if (DEBUG) Log.v(TAG, "Intercept returning false!");
+                if (DEBUG) Log.v(TAG, "Unable to drag, intercept returning false!");
                 return false;
             }
         }
@@ -1903,13 +1949,6 @@ public class ViewPager extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mFakeDragging) {
-            // A fake drag is in progress already, ignore this real one
-            // but still eat the touch events.
-            // (It is likely that the user is multi-touching the screen.)
-            return true;
-        }
-
         if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
             // Don't handle edge touches immediately -- they may actually belong to one of our
             // descendants.
@@ -1978,19 +2017,26 @@ public class ViewPager extends ViewGroup {
                 if (mIsBeingDragged) {
                     final VelocityTracker velocityTracker = mVelocityTracker;
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                    int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
+                    final int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
+
                     mPopulatePending = true;
-                    final int width = getClientWidth();
-                    final int scrollX = getScrollX();
-                    final ItemInfo ii = infoForCurrentScrollPosition();
+
+                    final float scrollStart = getScrollStart();
+                    final float scrolledPages = scrollStart / getPaddedWidth();
+                    final ItemInfo ii = infoForFirstVisiblePage();
                     final int currentPage = ii.position;
-                    final float pageOffset = (((float) scrollX / width) - ii.offset) / ii.widthFactor;
-                    final int activePointerIndex =
-                            ev.findPointerIndex(mActivePointerId);
+                    final float nextPageOffset;
+                    if (isLayoutRtl()) {
+                        nextPageOffset = (ii.offset - scrolledPages) / ii.widthFactor;
+                    }  else {
+                        nextPageOffset = (scrolledPages - ii.offset) / ii.widthFactor;
+                    }
+
+                    final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                     final float x = ev.getX(activePointerIndex);
                     final int totalDelta = (int) (x - mInitialMotionX);
-                    int nextPage = determineTargetPage(currentPage, pageOffset, initialVelocity,
-                            totalDelta);
+                    final int nextPage = determineTargetPage(
+                            currentPage, nextPageOffset, initialVelocity, totalDelta);
                     setCurrentItemInternal(nextPage, true, true, initialVelocity);
 
                     mActivePointerId = INVALID_POINTER;
@@ -2038,48 +2084,79 @@ public class ViewPager extends ViewGroup {
     private boolean performDrag(float x) {
         boolean needsInvalidate = false;
 
+        final int width = getPaddedWidth();
         final float deltaX = mLastMotionX - x;
         mLastMotionX = x;
 
-        float oldScrollX = getScrollX();
-        float scrollX = oldScrollX + deltaX;
-        final int width = getClientWidth();
-
-        float leftBound = width * mFirstOffset;
-        float rightBound = width * mLastOffset;
-        boolean leftAbsolute = true;
-        boolean rightAbsolute = true;
-
-        final ItemInfo firstItem = mItems.get(0);
-        final ItemInfo lastItem = mItems.get(mItems.size() - 1);
-        if (firstItem.position != 0) {
-            leftAbsolute = false;
-            leftBound = firstItem.offset * width;
-        }
-        if (lastItem.position != mAdapter.getCount() - 1) {
-            rightAbsolute = false;
-            rightBound = lastItem.offset * width;
+        final EdgeEffect startEdge;
+        final EdgeEffect endEdge;
+        if (isLayoutRtl()) {
+            startEdge = mRightEdge;
+            endEdge = mLeftEdge;
+        } else {
+            startEdge = mLeftEdge;
+            endEdge = mRightEdge;
         }
 
-        if (scrollX < leftBound) {
-            if (leftAbsolute) {
-                float over = leftBound - scrollX;
-                mLeftEdge.onPull(Math.abs(over) / width);
+        // Translate scroll to relative coordinates.
+        final float nextScrollX = getScrollX() + deltaX;
+        final float scrollStart;
+        if (isLayoutRtl()) {
+            scrollStart = MAX_SCROLL_X - nextScrollX;
+        } else {
+            scrollStart = nextScrollX;
+        }
+
+        final float startBound;
+        final ItemInfo startItem = mItems.get(0);
+        final boolean startAbsolute = startItem.position == 0;
+        if (startAbsolute) {
+            startBound = startItem.offset * width;
+        } else {
+            startBound = width * mFirstOffset;
+        }
+
+        final float endBound;
+        final ItemInfo endItem = mItems.get(mItems.size() - 1);
+        final boolean endAbsolute = endItem.position == mAdapter.getCount() - 1;
+        if (endAbsolute) {
+            endBound = endItem.offset * width;
+        } else {
+            endBound = width * mLastOffset;
+        }
+
+        final float clampedScrollStart;
+        if (scrollStart < startBound) {
+            if (startAbsolute) {
+                final float over = startBound - scrollStart;
+                startEdge.onPull(Math.abs(over) / width);
                 needsInvalidate = true;
             }
-            scrollX = leftBound;
-        } else if (scrollX > rightBound) {
-            if (rightAbsolute) {
-                float over = scrollX - rightBound;
-                mRightEdge.onPull(Math.abs(over) / width);
+            clampedScrollStart = startBound;
+        } else if (scrollStart > endBound) {
+            if (endAbsolute) {
+                final float over = scrollStart - endBound;
+                endEdge.onPull(Math.abs(over) / width);
                 needsInvalidate = true;
             }
-            scrollX = rightBound;
+            clampedScrollStart = endBound;
+        } else {
+            clampedScrollStart = scrollStart;
         }
-        // Don't lose the rounded component
-        mLastMotionX += scrollX - (int) scrollX;
-        scrollTo((int) scrollX, getScrollY());
-        pageScrolled((int) scrollX);
+
+        // Translate back to absolute coordinates.
+        final float targetScrollX;
+        if (isLayoutRtl()) {
+            targetScrollX = MAX_SCROLL_X - clampedScrollStart;
+        } else {
+            targetScrollX = clampedScrollStart;
+        }
+
+        // Don't lose the rounded component.
+        mLastMotionX += targetScrollX - (int) targetScrollX;
+
+        scrollTo((int) targetScrollX, getScrollY());
+        pageScrolled((int) targetScrollX);
 
         return needsInvalidate;
     }
@@ -2088,19 +2165,23 @@ public class ViewPager extends ViewGroup {
      * @return Info about the page at the current scroll position.
      *         This can be synthetic for a missing middle page; the 'object' field can be null.
      */
-    private ItemInfo infoForCurrentScrollPosition() {
-        final int width = getClientWidth();
-        final float scrollOffset = width > 0 ? (float) getScrollX() / width : 0;
+    private ItemInfo infoForFirstVisiblePage() {
+        final int startOffset = getScrollStart();
+        final int width = getPaddedWidth();
+        final float scrollOffset = width > 0 ? (float) startOffset / width : 0;
         final float marginOffset = width > 0 ? (float) mPageMargin / width : 0;
+
         int lastPos = -1;
         float lastOffset = 0.f;
         float lastWidth = 0.f;
         boolean first = true;
-
         ItemInfo lastItem = null;
-        for (int i = 0; i < mItems.size(); i++) {
+
+        final int N = mItems.size();
+        for (int i = 0; i < N; i++) {
             ItemInfo ii = mItems.get(i);
-            float offset;
+
+            // Seek to position.
             if (!first && ii.position != lastPos + 1) {
                 // Create a synthetic item for a missing page.
                 ii = mTempItem;
@@ -2109,17 +2190,18 @@ public class ViewPager extends ViewGroup {
                 ii.widthFactor = mAdapter.getPageWidth(ii.position);
                 i--;
             }
-            offset = ii.offset;
 
-            final float leftBound = offset;
-            final float rightBound = offset + ii.widthFactor + marginOffset;
-            if (first || scrollOffset >= leftBound) {
-                if (scrollOffset < rightBound || i == mItems.size() - 1) {
+            final float offset = ii.offset;
+            final float startBound = offset;
+            if (first || scrollOffset >= startBound) {
+                final float endBound = offset + ii.widthFactor + marginOffset;
+                if (scrollOffset < endBound || i == mItems.size() - 1) {
                     return ii;
                 }
             } else {
                 return lastItem;
             }
+
             first = false;
             lastPos = ii.position;
             lastOffset = offset;
@@ -2130,13 +2212,28 @@ public class ViewPager extends ViewGroup {
         return lastItem;
     }
 
+    private int getScrollStart() {
+        if (isLayoutRtl()) {
+            return MAX_SCROLL_X - getScrollX();
+        } else {
+            return getScrollX();
+        }
+    }
+
+    /**
+     * @param currentPage the position of the page with the first visible starting edge
+     * @param pageOffset the fraction of the right-hand page that's visible
+     * @param velocity the velocity of the touch event stream
+     * @param deltaX the distance of the touch event stream
+     * @return the position of the target page
+     */
     private int determineTargetPage(int currentPage, float pageOffset, int velocity, int deltaX) {
         int targetPage;
         if (Math.abs(deltaX) > mFlingDistance && Math.abs(velocity) > mMinimumVelocity) {
-            targetPage = velocity > 0 ? currentPage : currentPage + 1;
+            targetPage = currentPage - (velocity < 0 ? mLeftIncr : 0);
         } else {
             final float truncator = currentPage >= mCurItem ? 0.4f : 0.6f;
-            targetPage = (int) (currentPage + pageOffset + truncator);
+            targetPage = (int) (currentPage - mLeftIncr * (pageOffset + truncator));
         }
 
         if (mItems.size() > 0) {
@@ -2144,7 +2241,7 @@ public class ViewPager extends ViewGroup {
             final ItemInfo lastItem = mItems.get(mItems.size() - 1);
 
             // Only let the user target pages we have items for
-            targetPage = Math.max(firstItem.position, Math.min(targetPage, lastItem.position));
+            targetPage = MathUtils.constrain(targetPage, firstItem.position, lastItem.position);
         }
 
         return targetPage;
@@ -2205,6 +2302,7 @@ public class ViewPager extends ViewGroup {
             int itemIndex = 0;
             ItemInfo ii = mItems.get(0);
             float offset = ii.offset;
+
             final int itemCount = mItems.size();
             final int firstPos = ii.position;
             final int lastPos = mItems.get(itemCount - 1).position;
@@ -2213,154 +2311,37 @@ public class ViewPager extends ViewGroup {
                     ii = mItems.get(++itemIndex);
                 }
 
-                float drawAt;
+                final float itemOffset;
+                final float widthFactor;
                 if (pos == ii.position) {
-                    drawAt = (ii.offset + ii.widthFactor) * width;
-                    offset = ii.offset + ii.widthFactor + marginOffset;
+                    itemOffset = ii.offset;
+                    widthFactor = ii.widthFactor;
                 } else {
-                    float widthFactor = mAdapter.getPageWidth(pos);
-                    drawAt = (offset + widthFactor) * width;
-                    offset += widthFactor + marginOffset;
+                    itemOffset = offset;
+                    widthFactor = mAdapter.getPageWidth(pos);
                 }
 
-                if (drawAt + mPageMargin > scrollX) {
-                    mMarginDrawable.setBounds((int) drawAt, mTopPageBounds,
-                            (int) (drawAt + mPageMargin + 0.5f), mBottomPageBounds);
+                final float left;
+                final float scaledOffset = itemOffset * width;
+                if (isLayoutRtl()) {
+                    left = MAX_SCROLL_X - scaledOffset;
+                } else {
+                    left = scaledOffset + widthFactor * width;
+                }
+
+                offset = itemOffset + widthFactor + marginOffset;
+
+                if (left + mPageMargin > scrollX) {
+                    mMarginDrawable.setBounds((int) left, mTopPageBounds,
+                            (int) (left + mPageMargin + 0.5f), mBottomPageBounds);
                     mMarginDrawable.draw(canvas);
                 }
 
-                if (drawAt > scrollX + width) {
+                if (left > scrollX + width) {
                     break; // No more visible, no sense in continuing
                 }
             }
         }
-    }
-
-    /**
-     * Start a fake drag of the pager.
-     *
-     * <p>A fake drag can be useful if you want to synchronize the motion of the ViewPager
-     * with the touch scrolling of another view, while still letting the ViewPager
-     * control the snapping motion and fling behavior. (e.g. parallax-scrolling tabs.)
-     * Call {@link #fakeDragBy(float)} to simulate the actual drag motion. Call
-     * {@link #endFakeDrag()} to complete the fake drag and fling as necessary.
-     *
-     * <p>During a fake drag the ViewPager will ignore all touch events. If a real drag
-     * is already in progress, this method will return false.
-     *
-     * @return true if the fake drag began successfully, false if it could not be started.
-     *
-     * @see #fakeDragBy(float)
-     * @see #endFakeDrag()
-     */
-    public boolean beginFakeDrag() {
-        if (mIsBeingDragged) {
-            return false;
-        }
-        mFakeDragging = true;
-        setScrollState(SCROLL_STATE_DRAGGING);
-        mInitialMotionX = mLastMotionX = 0;
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        } else {
-            mVelocityTracker.clear();
-        }
-        final long time = SystemClock.uptimeMillis();
-        final MotionEvent ev = MotionEvent.obtain(time, time, MotionEvent.ACTION_DOWN, 0, 0, 0);
-        mVelocityTracker.addMovement(ev);
-        ev.recycle();
-        mFakeDragBeginTime = time;
-        return true;
-    }
-
-    /**
-     * End a fake drag of the pager.
-     *
-     * @see #beginFakeDrag()
-     * @see #fakeDragBy(float)
-     */
-    public void endFakeDrag() {
-        if (!mFakeDragging) {
-            throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
-        }
-
-        final VelocityTracker velocityTracker = mVelocityTracker;
-        velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-        int initialVelocity = (int) velocityTracker.getXVelocity(mActivePointerId);
-        mPopulatePending = true;
-        final int width = getClientWidth();
-        final int scrollX = getScrollX();
-        final ItemInfo ii = infoForCurrentScrollPosition();
-        final int currentPage = ii.position;
-        final float pageOffset = (((float) scrollX / width) - ii.offset) / ii.widthFactor;
-        final int totalDelta = (int) (mLastMotionX - mInitialMotionX);
-        int nextPage = determineTargetPage(currentPage, pageOffset, initialVelocity,
-                totalDelta);
-        setCurrentItemInternal(nextPage, true, true, initialVelocity);
-        endDrag();
-
-        mFakeDragging = false;
-    }
-
-    /**
-     * Fake drag by an offset in pixels. You must have called {@link #beginFakeDrag()} first.
-     *
-     * @param xOffset Offset in pixels to drag by.
-     * @see #beginFakeDrag()
-     * @see #endFakeDrag()
-     */
-    public void fakeDragBy(float xOffset) {
-        if (!mFakeDragging) {
-            throw new IllegalStateException("No fake drag in progress. Call beginFakeDrag first.");
-        }
-
-        mLastMotionX += xOffset;
-
-        float oldScrollX = getScrollX();
-        float scrollX = oldScrollX - xOffset;
-        final int width = getClientWidth();
-
-        float leftBound = width * mFirstOffset;
-        float rightBound = width * mLastOffset;
-
-        final ItemInfo firstItem = mItems.get(0);
-        final ItemInfo lastItem = mItems.get(mItems.size() - 1);
-        if (firstItem.position != 0) {
-            leftBound = firstItem.offset * width;
-        }
-        if (lastItem.position != mAdapter.getCount() - 1) {
-            rightBound = lastItem.offset * width;
-        }
-
-        if (scrollX < leftBound) {
-            scrollX = leftBound;
-        } else if (scrollX > rightBound) {
-            scrollX = rightBound;
-        }
-        // Don't lose the rounded component
-        mLastMotionX += scrollX - (int) scrollX;
-        scrollTo((int) scrollX, getScrollY());
-        pageScrolled((int) scrollX);
-
-        // Synthesize an event for the VelocityTracker.
-        final long time = SystemClock.uptimeMillis();
-        final MotionEvent ev = MotionEvent.obtain(mFakeDragBeginTime, time, MotionEvent.ACTION_MOVE,
-                mLastMotionX, 0, 0);
-        mVelocityTracker.addMovement(ev);
-        ev.recycle();
-    }
-
-    /**
-     * Returns true if a fake drag is in progress.
-     *
-     * @return true if currently in a fake drag, false otherwise.
-     *
-     * @see #beginFakeDrag()
-     * @see #fakeDragBy(float)
-     * @see #endFakeDrag()
-     */
-    public boolean isFakeDragging() {
-        return mFakeDragging;
     }
 
     private void onSecondaryPointerUp(MotionEvent ev) {
@@ -2408,7 +2389,7 @@ public class ViewPager extends ViewGroup {
             return false;
         }
 
-        final int width = getClientWidth();
+        final int width = getPaddedWidth();
         final int scrollX = getScrollX();
         if (direction < 0) {
             return (scrollX > (int) (width * mFirstOffset));
@@ -2438,12 +2419,11 @@ public class ViewPager extends ViewGroup {
             final int count = group.getChildCount();
             // Count backwards - let topmost views consume scroll distance first.
             for (int i = count - 1; i >= 0; i--) {
-                // TODO: Add versioned support here for transformed views.
-                // This will not work for transformed views in Honeycomb+
+                // TODO: Add support for transformed views.
                 final View child = group.getChildAt(i);
-                if (x + scrollX >= child.getLeft() && x + scrollX < child.getRight() &&
-                        y + scrollY >= child.getTop() && y + scrollY < child.getBottom() &&
-                        canScroll(child, true, dx, x + scrollX - child.getLeft(),
+                if (x + scrollX >= child.getLeft() && x + scrollX < child.getRight()
+                        && y + scrollY >= child.getTop() && y + scrollY < child.getBottom()
+                        && canScroll(child, true, dx, x + scrollX - child.getLeft(),
                                 y + scrollY - child.getTop())) {
                     return true;
                 }
@@ -2582,19 +2562,22 @@ public class ViewPager extends ViewGroup {
     }
 
     boolean pageLeft() {
-        if (mCurItem > 0) {
-            setCurrentItem(mCurItem-1, true);
-            return true;
-        }
-        return false;
+        return setCurrentItemInternal(mCurItem + mLeftIncr, true, false);
     }
 
     boolean pageRight() {
-        if (mAdapter != null && mCurItem < (mAdapter.getCount()-1)) {
-            setCurrentItem(mCurItem+1, true);
-            return true;
+        return setCurrentItemInternal(mCurItem - mLeftIncr, true, false);
+    }
+
+    @Override
+    public void onRtlPropertiesChanged(@ResolvedLayoutDir int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+
+        if (layoutDirection == LAYOUT_DIRECTION_LTR) {
+            mLeftIncr = -1;
+        } else {
+            mLeftIncr = 1;
         }
-        return false;
     }
 
     /**

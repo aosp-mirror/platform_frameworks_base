@@ -162,7 +162,6 @@ class SimpleMonthView extends View {
         mTitleFormatter = new SimpleDateFormat(titleFormat, locale);
         mDayOfWeekFormatter = new SimpleDateFormat(DAY_OF_WEEK_FORMAT, locale);
 
-        setClickable(true);
         initPaints(res);
     }
 
@@ -318,13 +317,18 @@ class SimpleMonthView extends View {
         final int x = (int) (event.getX() + 0.5f);
         final int y = (int) (event.getY() + 0.5f);
 
-        switch (event.getAction()) {
+        final int action = event.getAction();
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
                 final int touchedItem = getDayAtLocation(x, y);
                 if (mTouchedItem != touchedItem) {
                     mTouchedItem = touchedItem;
                     invalidate();
+                }
+                if (action == MotionEvent.ACTION_DOWN && touchedItem < 0) {
+                    // Touch something that's not an item, reject event.
+                    return false;
                 }
                 break;
 
@@ -376,9 +380,16 @@ class SimpleMonthView extends View {
 
         for (int col = 0; col < DAYS_IN_WEEK; col++) {
             final int colCenter = colWidth * col + colWidth / 2;
+            final int colCenterRtl;
+            if (isLayoutRtl()) {
+                colCenterRtl = mPaddedWidth - colCenter;
+            } else {
+                colCenterRtl = colCenter;
+            }
+
             final int dayOfWeek = (col + mWeekStart) % DAYS_IN_WEEK;
             final String label = getDayOfWeekLabel(dayOfWeek);
-            canvas.drawText(label, colCenter, rowCenter - halfLineHeight, p);
+            canvas.drawText(label, colCenterRtl, rowCenter - halfLineHeight, p);
         }
     }
 
@@ -402,6 +413,13 @@ class SimpleMonthView extends View {
 
         for (int day = 1, col = findDayOffset(); day <= mDaysInMonth; day++) {
             final int colCenter = colWidth * col + colWidth / 2;
+            final int colCenterRtl;
+            if (isLayoutRtl()) {
+                colCenterRtl = mPaddedWidth - colCenter;
+            } else {
+                colCenterRtl = colCenter;
+            }
+
             int stateMask = 0;
 
             if (day >= mEnabledDayStart && day <= mEnabledDayEnd) {
@@ -413,12 +431,12 @@ class SimpleMonthView extends View {
                 stateMask |= StateSet.VIEW_STATE_ACTIVATED;
 
                 // Adjust the circle to be centered on the row.
-                canvas.drawCircle(colCenter, rowCenter, mDaySelectorRadius, mDaySelectorPaint);
+                canvas.drawCircle(colCenterRtl, rowCenter, mDaySelectorRadius, mDaySelectorPaint);
             } else if (mTouchedItem == day) {
                 stateMask |= StateSet.VIEW_STATE_PRESSED;
 
                 // Adjust the circle to be centered on the row.
-                canvas.drawCircle(colCenter, rowCenter, mDaySelectorRadius, mDayHighlightPaint);
+                canvas.drawCircle(colCenterRtl, rowCenter, mDaySelectorRadius, mDayHighlightPaint);
             }
 
             final boolean isDayToday = mToday == day;
@@ -431,7 +449,7 @@ class SimpleMonthView extends View {
             }
             p.setColor(dayTextColor);
 
-            canvas.drawText(Integer.toString(day), colCenter, rowCenter - halfLineHeight, p);
+            canvas.drawText(Integer.toString(day), colCenterRtl, rowCenter - halfLineHeight, p);
 
             col++;
 
@@ -583,6 +601,13 @@ class SimpleMonthView extends View {
     }
 
     @Override
+    public void onRtlPropertiesChanged(@ResolvedLayoutDir int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+
+        requestLayout();
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (!changed) {
             return;
@@ -657,8 +682,16 @@ class SimpleMonthView extends View {
             return -1;
         }
 
+        // Adjust for RTL after applying padding.
+        final int paddedXRtl;
+        if (isLayoutRtl()) {
+            paddedXRtl = mPaddedWidth - paddedX;
+        } else {
+            paddedXRtl = paddedX;
+        }
+
         final int row = (paddedY - headerHeight) / mDayHeight;
-        final int col = (paddedX * DAYS_IN_WEEK) / mPaddedWidth;
+        final int col = (paddedXRtl * DAYS_IN_WEEK) / mPaddedWidth;
         final int index = col + row * DAYS_IN_WEEK;
         final int day = index + 1 - findDayOffset();
         if (day < 1 || day > mDaysInMonth) {
@@ -681,10 +714,15 @@ class SimpleMonthView extends View {
 
         final int index = id - 1 + findDayOffset();
 
-        // Compute left edge.
+        // Compute left edge, taking into account RTL.
         final int col = index % DAYS_IN_WEEK;
         final int colWidth = mCellWidth;
-        final int left = getPaddingLeft() + col * colWidth;
+        final int left;
+        if (isLayoutRtl()) {
+            left = getWidth() - getPaddingRight() - (col + 1) * colWidth;
+        } else {
+            left = getPaddingLeft() + col * colWidth;
+        }
 
         // Compute top edge.
         final int row = index / DAYS_IN_WEEK;
