@@ -27,6 +27,7 @@
 #define ANDROID_LINEARALLOCATOR_H
 
 #include <stddef.h>
+#include <type_traits>
 
 namespace android {
 namespace uirenderer {
@@ -53,10 +54,41 @@ public:
     void* alloc(size_t size);
 
     /**
+     * Allocates an instance of the template type with the default constructor
+     * and adds it to the automatic destruction list.
+     */
+    template<class T>
+    T* alloc() {
+        T* ret = new (*this) T;
+        autoDestroy(ret);
+        return ret;
+    }
+
+    /**
+     * Adds the pointer to the tracking list to have its destructor called
+     * when the LinearAllocator is destroyed.
+     */
+    template<class T>
+    void autoDestroy(T* addr) {
+        if (!std::is_trivially_destructible<T>::value) {
+            auto dtor = [](void* addr) { ((T*)addr)->~T(); };
+            addToDestructionList(dtor, addr);
+        }
+    }
+
+    /**
      * Attempt to deallocate the given buffer, with the LinearAllocator attempting to rewind its
-     * state if possible. No destructors are called.
+     * state if possible.
      */
     void rewindIfLastAlloc(void* ptr, size_t allocSize);
+
+    /**
+     * Same as rewindIfLastAlloc(void*, size_t)
+     */
+    template<class T>
+    void rewindIfLastAlloc(T* ptr) {
+        rewindIfLastAlloc((void*)ptr, sizeof(T));
+    }
 
     /**
      * Dump memory usage statistics to the log (allocated and wasted space)
@@ -73,7 +105,15 @@ private:
     LinearAllocator(const LinearAllocator& other);
 
     class Page;
+    typedef void (*Destructor)(void* addr);
+    struct DestructorNode {
+        Destructor dtor;
+        void* addr;
+        DestructorNode* next = nullptr;
+    };
 
+    void addToDestructionList(Destructor, void* addr);
+    void runDestructorFor(void* addr);
     Page* newPage(size_t pageSize);
     bool fitsInCurrentPage(size_t size);
     void ensureNext(size_t size);
@@ -85,6 +125,7 @@ private:
     void* mNext;
     Page* mCurrentPage;
     Page* mPages;
+    DestructorNode* mDtorList = nullptr;
 
     // Memory usage tracking
     size_t mTotalAllocated;
@@ -95,5 +136,7 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
+
+void* operator new(std::size_t size, android::uirenderer::LinearAllocator& la);
 
 #endif // ANDROID_LINEARALLOCATOR_H

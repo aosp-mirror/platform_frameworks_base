@@ -127,7 +127,7 @@ private:
     }
 
     void tryRecycleState(DeferredDisplayState* state) {
-        mAllocator.rewindIfLastAlloc(state, sizeof(DeferredDisplayState));
+        mAllocator.rewindIfLastAlloc(state);
     }
 
     /**

@@ -16,21 +16,19 @@
 
 local_target_dir := $(TARGET_OUT_DATA)/local/tmp
 LOCAL_PATH:= $(call my-dir)/..
+
 include $(CLEAR_VARS)
 
-LOCAL_MODULE_PATH := $(local_target_dir)
-LOCAL_MODULE:= hwuitest
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.common.mk
+LOCAL_MODULE := hwui_unit_tests
 LOCAL_MODULE_TAGS := tests
-LOCAL_MULTILIB := both
-LOCAL_MODULE_STEM_32 := hwuitest
-LOCAL_MODULE_STEM_64 := hwuitest64
-
-HWUI_NULL_GPU := false
 
 include $(LOCAL_PATH)/Android.common.mk
 
 LOCAL_SRC_FILES += \
-	tests/TestContext.cpp \
-	tests/main.cpp
+    unit_tests/ClipAreaTests.cpp \
+    unit_tests/LinearAllocatorTests.cpp \
+    unit_tests/main.cpp
 
-include $(BUILD_EXECUTABLE)
+
+include $(BUILD_NATIVE_TEST)
