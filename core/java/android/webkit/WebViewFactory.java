@@ -76,6 +76,18 @@ public final class WebViewFactory {
     private static boolean sAddressSpaceReserved = false;
     private static PackageInfo sPackageInfo;
 
+    // Error codes for loadWebViewNativeLibraryFromPackage
+    public static final int LIBLOAD_SUCCESS = 0;
+    public static final int LIBLOAD_WRONG_PACKAGE_NAME = 1;
+    public static final int LIBLOAD_ADDRESS_SPACE_NOT_RESERVED = 2;
+    public static final int LIBLOAD_FAILED_WAITING_FOR_RELRO = 3;
+    public static final int LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES = 4;
+
+    // native relro loading error codes
+    public static final int LIBLOAD_FAILED_TO_OPEN_RELRO_FILE = 5;
+    public static final int LIBLOAD_FAILED_TO_LOAD_LIBRARY = 6;
+    public static final int LIBLOAD_FAILED_JNI_CALL = 7;
+
     private static class MissingWebViewPackageException extends AndroidRuntimeException {
         public MissingWebViewPackageException(String message) { super(message); }
         public MissingWebViewPackageException(Exception e) { super(e); }
@@ -134,6 +146,18 @@ public final class WebViewFactory {
 
     public static PackageInfo getLoadedPackageInfo() {
         return sPackageInfo;
+    }
+
+    /**
+     * Load the native library for the given package name iff that package
+     * name is the same as the one providing the current webview.
+     */
+    public static int loadWebViewNativeLibraryFromPackage(String packageName) {
+        sPackageInfo = findPreferredWebViewPackage();
+        if (packageName != null && packageName.equals(sPackageInfo.packageName)) {
+            return loadNativeLibrary();
+        }
+        return LIBLOAD_WRONG_PACKAGE_NAME;
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -434,32 +458,34 @@ public final class WebViewFactory {
         }
     }
 
-    private static void loadNativeLibrary() {
+    private static int loadNativeLibrary() {
         if (!sAddressSpaceReserved) {
             Log.e(LOGTAG, "can't load with relro file; address space not reserved");
-            return;
+            return LIBLOAD_ADDRESS_SPACE_NOT_RESERVED;
         }
 
         try {
             getUpdateService().waitForRelroCreationCompleted(VMRuntime.getRuntime().is64Bit());
         } catch (RemoteException e) {
             Log.e(LOGTAG, "error waiting for relro creation, proceeding without", e);
-            return;
+            return LIBLOAD_FAILED_WAITING_FOR_RELRO;
         }
 
         try {
             String[] args = getWebViewNativeLibraryPaths();
-            boolean result = nativeLoadWithRelroFile(args[0] /* path32 */,
+            int result = nativeLoadWithRelroFile(args[0] /* path32 */,
                                                      args[1] /* path64 */,
                                                      CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
                                                      CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
-            if (!result) {
+            if (result != LIBLOAD_SUCCESS) {
                 Log.w(LOGTAG, "failed to load with relro file, proceeding without");
             } else if (DEBUG) {
                 Log.v(LOGTAG, "loaded with relro file");
             }
+            return result;
         } catch (MissingWebViewPackageException e) {
             Log.e(LOGTAG, "Failed to list WebView package libraries for loadNativeLibrary", e);
+            return LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES;
         }
     }
 
@@ -470,6 +496,6 @@ public final class WebViewFactory {
     private static native boolean nativeReserveAddressSpace(long addressSpaceToReserve);
     private static native boolean nativeCreateRelroFile(String lib32, String lib64,
                                                         String relro32, String relro64);
-    private static native boolean nativeLoadWithRelroFile(String lib32, String lib64,
+    private static native int nativeLoadWithRelroFile(String lib32, String lib64,
                                                           String relro32, String relro64);
 }
