@@ -585,8 +585,8 @@ public class CameraDeviceImpl extends CameraDevice {
                 return null;
             }
 
-            CaptureRequest.Builder builder =
-                    new CaptureRequest.Builder(templatedRequest, /*reprocess*/false);
+            CaptureRequest.Builder builder = new CaptureRequest.Builder(
+                    templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
 
             return builder;
         }
@@ -601,7 +601,8 @@ public class CameraDeviceImpl extends CameraDevice {
             CameraMetadataNative resultMetadata = new
                     CameraMetadataNative(inputResult.getNativeCopy());
 
-            return new CaptureRequest.Builder(resultMetadata, /*reprocess*/true);
+            return new CaptureRequest.Builder(resultMetadata, /*reprocess*/true,
+                    inputResult.getSessionId());
         }
     }
 
@@ -763,7 +764,7 @@ public class CameraDeviceImpl extends CameraDevice {
 
             if (callback != null) {
                 mCaptureCallbackMap.put(requestId, new CaptureCallbackHolder(callback,
-                        requestList, handler, repeating));
+                        requestList, handler, repeating, mNextSessionId - 1));
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "Listen for request " + requestId + " is null");
@@ -1095,9 +1096,10 @@ public class CameraDeviceImpl extends CameraDevice {
         private final CaptureCallback mCallback;
         private final List<CaptureRequest> mRequestList;
         private final Handler mHandler;
+        private final int mSessionId;
 
         CaptureCallbackHolder(CaptureCallback callback, List<CaptureRequest> requestList,
-                Handler handler, boolean repeating) {
+                Handler handler, boolean repeating, int sessionId) {
             if (callback == null || handler == null) {
                 throw new UnsupportedOperationException(
                     "Must have a valid handler and a valid callback");
@@ -1106,6 +1108,7 @@ public class CameraDeviceImpl extends CameraDevice {
             mHandler = handler;
             mRequestList = new ArrayList<CaptureRequest>(requestList);
             mCallback = callback;
+            mSessionId = sessionId;
         }
 
         public boolean isRepeating() {
@@ -1138,6 +1141,10 @@ public class CameraDeviceImpl extends CameraDevice {
 
         public Handler getHandler() {
             return mHandler;
+        }
+
+        public int getSessionId() {
+            return mSessionId;
         }
 
     }
@@ -1643,8 +1650,8 @@ public class CameraDeviceImpl extends CameraDevice {
                     List<CaptureResult> partialResults =
                             mFrameNumberTracker.popPartialResults(frameNumber);
 
-                    final TotalCaptureResult resultAsCapture =
-                            new TotalCaptureResult(result, request, resultExtras, partialResults);
+                    final TotalCaptureResult resultAsCapture = new TotalCaptureResult(result,
+                            request, resultExtras, partialResults, holder.getSessionId());
 
                     // Final capture result
                     resultDispatch = new Runnable() {
@@ -1665,7 +1672,8 @@ public class CameraDeviceImpl extends CameraDevice {
                 holder.getHandler().post(resultDispatch);
 
                 // Collect the partials for a total result; or mark the frame as totally completed
-                mFrameNumberTracker.updateTracker(frameNumber, finalResult, isPartialResult, isReprocess);
+                mFrameNumberTracker.updateTracker(frameNumber, finalResult, isPartialResult,
+                        isReprocess);
 
                 // Fire onCaptureSequenceCompleted
                 if (!isPartialResult) {

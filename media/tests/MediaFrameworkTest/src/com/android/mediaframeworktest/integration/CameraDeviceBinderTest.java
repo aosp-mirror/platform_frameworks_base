@@ -19,6 +19,7 @@ package com.android.mediaframeworktest.integration;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceCallbacks;
@@ -170,7 +171,8 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
         assertFalse(metadata.isEmpty());
 
-        CaptureRequest.Builder request = new CaptureRequest.Builder(metadata, /*reprocess*/false);
+        CaptureRequest.Builder request = new CaptureRequest.Builder(metadata, /*reprocess*/false,
+                CameraCaptureSession.SESSION_ID_NONE);
         assertFalse(request.isEmpty());
         assertFalse(metadata.isEmpty());
         if (needStream) {

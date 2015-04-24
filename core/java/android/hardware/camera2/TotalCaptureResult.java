@@ -50,6 +50,7 @@ import java.util.List;
 public final class TotalCaptureResult extends CaptureResult {
 
     private final List<CaptureResult> mPartialResults;
+    private final int mSessionId;
 
     /**
      * Takes ownership of the passed-in camera metadata and the partial results
@@ -58,7 +59,7 @@ public final class TotalCaptureResult extends CaptureResult {
      * @hide
      */
     public TotalCaptureResult(CameraMetadataNative results, CaptureRequest parent,
-            CaptureResultExtras extras, List<CaptureResult> partials) {
+            CaptureResultExtras extras, List<CaptureResult> partials, int sessionId) {
         super(results, parent, extras);
 
         if (partials == null) {
@@ -66,6 +67,8 @@ public final class TotalCaptureResult extends CaptureResult {
         } else {
             mPartialResults = partials;
         }
+
+        mSessionId = sessionId;
     }
 
     /**
@@ -78,6 +81,7 @@ public final class TotalCaptureResult extends CaptureResult {
         super(results, sequenceId);
 
         mPartialResults = new ArrayList<>();
+        mSessionId = CameraCaptureSession.SESSION_ID_NONE;
     }
 
     /**
@@ -94,5 +98,15 @@ public final class TotalCaptureResult extends CaptureResult {
      */
     public List<CaptureResult> getPartialResults() {
         return Collections.unmodifiableList(mPartialResults);
+    }
+
+    /**
+     * Get the ID of the session where the capture request of this result was submitted.
+     *
+     * @return The session ID
+     * @hide
+     */
+    public int getSessionId() {
+        return mSessionId;
     }
 }
