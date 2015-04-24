@@ -21,7 +21,7 @@ package android.security;
  *
  * @hide
  */
-public class KeyStoreConnectException extends CryptoOperationException {
+public class KeyStoreConnectException extends IllegalStateException {
     public KeyStoreConnectException() {
         super("Failed to communicate with keystore service");
     }

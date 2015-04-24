@@ -200,7 +200,8 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         int errorCode = mKeyStore.generateKey(
                 keyAliasInKeystore, args, additionalEntropy, flags, new KeyCharacteristics());
         if (errorCode != KeyStore.NO_ERROR) {
-            throw KeyStore.getCryptoOperationException(errorCode);
+            throw new IllegalStateException(
+                    "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
         }
         String keyAlgorithmJCA =
                 KeymasterUtils.getJcaSecretKeyAlgorithm(mKeymasterAlgorithm, mKeymasterDigest);
