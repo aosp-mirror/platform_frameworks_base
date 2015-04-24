@@ -17623,7 +17623,7 @@ package android.media {
 
   public static abstract class MediaSync.Callback {
     ctor public MediaSync.Callback();
-    method public abstract void onReturnAudioBuffer(android.media.MediaSync, java.nio.ByteBuffer, int);
+    method public abstract void onAudioBufferConsumed(android.media.MediaSync, java.nio.ByteBuffer, int);
   }
 
   public static abstract interface MediaSync.OnErrorListener {

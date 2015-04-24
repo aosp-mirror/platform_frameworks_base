@@ -49,7 +49,7 @@ import java.util.List;
  * sync.setAudioTrack(audioTrack);
  * sync.setCallback(new MediaSync.Callback() {
  *     {@literal @Override}
- *     public void onReturnAudioBuffer(MediaSync sync, ByteBuffer audioBuffer, int bufferIndex) {
+ *     public void onAudioBufferConsumed(MediaSync sync, ByteBuffer audioBuffer, int bufferIndex) {
  *         ...
  *     }
  * }, null);
@@ -88,7 +88,7 @@ import java.util.List;
  * }
  *
  * // This is the callback from MediaSync.
- * onReturnAudioBuffer(MediaSync sync, ByteBuffer buffer, int bufferIndex) {
+ * onAudioBufferConsumed(MediaSync sync, ByteBuffer buffer, int bufferIndex) {
  *     // ...
  *     audioDecoder.releaseBuffer(bufferIndex, false);
  *     // ...
@@ -104,7 +104,7 @@ import java.util.List;
  * <p>
  * For audio, the client needs to set up audio track correctly, e.g., using {@link
  * AudioTrack#MODE_STREAM}. The audio buffers are sent to MediaSync directly via {@link
- * #queueAudio}, and are returned to the client via {@link Callback#onReturnAudioBuffer}
+ * #queueAudio}, and are returned to the client via {@link Callback#onAudioBufferConsumed}
  * asynchronously. The client should not modify an audio buffer till it's returned.
  * <p>
  * The client can optionally pre-fill audio/video buffers by setting playback rate to 0.0,
@@ -125,7 +125,7 @@ final public class MediaSync {
          * @param audioBuffer The returned audio buffer.
          * @param bufferIndex The index associated with the audio buffer
          */
-        public abstract void onReturnAudioBuffer(
+        public abstract void onAudioBufferConsumed(
                 @NonNull MediaSync sync, @NonNull ByteBuffer audioBuffer, int bufferIndex);
     }
 
@@ -682,7 +682,7 @@ final public class MediaSync {
                                 return;
                             }
                             if (mCallback != null) {
-                                mCallback.onReturnAudioBuffer(sync, audioBuffer.mByteBuffer,
+                                mCallback.onAudioBufferConsumed(sync, audioBuffer.mByteBuffer,
                                         audioBuffer.mBufferIndex);
                             }
                         }
