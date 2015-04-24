@@ -307,7 +307,7 @@ public class ChooserActivity extends ResolverActivity {
     ResolveListAdapter createAdapter(Context context, Intent[] initialIntents,
             List<ResolveInfo> rList, int launchedFromUid, boolean filterLastUsed) {
         final ChooserListAdapter adapter = new ChooserListAdapter(context, initialIntents, rList,
-                launchedFromUid, filterLastUsed);
+                launchedFromUid, filterLastUsed, mCallerChooserTargets);
         if (DEBUG) Log.d(TAG, "Adapter created; querying services");
         queryTargetServices(adapter);
         return adapter;
@@ -315,45 +315,70 @@ public class ChooserActivity extends ResolverActivity {
 
     class ChooserTargetInfo implements TargetInfo {
         private final TargetInfo mSourceInfo;
+        private final ResolveInfo mBackupResolveInfo;
         private final ChooserTarget mChooserTarget;
         private final Drawable mDisplayIcon;
+
+        public ChooserTargetInfo(ChooserTarget target) {
+            this(null, target);
+        }
 
         public ChooserTargetInfo(TargetInfo sourceInfo, ChooserTarget chooserTarget) {
             mSourceInfo = sourceInfo;
             mChooserTarget = chooserTarget;
             mDisplayIcon = new BitmapDrawable(getResources(), chooserTarget.getIcon());
+
+            if (sourceInfo != null) {
+                mBackupResolveInfo = null;
+            } else {
+                mBackupResolveInfo = getPackageManager().resolveActivity(getResolvedIntent(), 0);
+            }
         }
 
         @Override
         public Intent getResolvedIntent() {
             final Intent targetIntent = mChooserTarget.getIntent();
-            return targetIntent != null ? targetIntent : mSourceInfo.getResolvedIntent();
+            if (targetIntent != null) {
+                return targetIntent;
+            } else if (mSourceInfo != null) {
+                return mSourceInfo.getResolvedIntent();
+            }
+            return getTargetIntent();
         }
 
         @Override
         public ComponentName getResolvedComponentName() {
-            return mSourceInfo.getResolvedComponentName();
+            if (mSourceInfo != null) {
+                return mSourceInfo.getResolvedComponentName();
+            } else if (mBackupResolveInfo != null) {
+                return new ComponentName(mBackupResolveInfo.activityInfo.packageName,
+                        mBackupResolveInfo.activityInfo.name);
+            }
+            return null;
+        }
+
+        private Intent getFillInIntent() {
+            return mSourceInfo != null ? mSourceInfo.getResolvedIntent() : getTargetIntent();
         }
 
         @Override
         public boolean start(Activity activity, Bundle options) {
-            return mChooserTarget.sendIntent(activity, mSourceInfo.getResolvedIntent());
+            return mChooserTarget.sendIntent(activity, getFillInIntent());
         }
 
         @Override
         public boolean startAsCaller(Activity activity, Bundle options, int userId) {
-            return mChooserTarget.sendIntentAsCaller(activity, mSourceInfo.getResolvedIntent(),
-                    userId);
+            return mChooserTarget.sendIntentAsCaller(activity, getFillInIntent(), userId);
         }
 
         @Override
         public boolean startAsUser(Activity activity, Bundle options, UserHandle user) {
-            return mChooserTarget.sendIntentAsUser(activity, mSourceInfo.getResolvedIntent(), user);
+            return mChooserTarget.sendIntentAsUser(activity, getFillInIntent(), user);
         }
 
         @Override
         public ResolveInfo getResolveInfo() {
-            return mSourceInfo.getResolveInfo();
+            return mSourceInfo != null ? mSourceInfo.getResolveInfo() : mBackupResolveInfo;
         }
 
         @Override
@@ -363,7 +388,7 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public CharSequence getExtendedInfo() {
-            return mSourceInfo.getExtendedInfo();
+            return mSourceInfo != null ? mSourceInfo.getExtendedInfo() : null;
         }
 
         @Override
@@ -374,10 +399,15 @@ public class ChooserActivity extends ResolverActivity {
 
     public class ChooserListAdapter extends ResolveListAdapter {
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
+        private final List<ChooserTargetInfo> mCallerTargets = new ArrayList<>();
 
         public ChooserListAdapter(Context context, Intent[] initialIntents, List<ResolveInfo> rList,
-                int launchedFromUid, boolean filterLastUsed) {
+                int launchedFromUid, boolean filterLastUsed, ChooserTarget[] callerChooserTargets) {
             super(context, initialIntents, rList, launchedFromUid, filterLastUsed);
+
+            for (ChooserTarget target : callerChooserTargets) {
+                mCallerTargets.add(new ChooserTargetInfo(target));
+            }
         }
 
         @Override
@@ -407,23 +437,25 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getCount() {
-            int count = super.getCount();
-            if (mServiceTargets != null) {
-                count += mServiceTargets.size();
-            }
-            return count;
+            return super.getCount() + mServiceTargets.size() + mCallerTargets.size();
         }
 
         @Override
         public TargetInfo getItem(int position) {
             int offset = 0;
-            if (mServiceTargets != null) {
-                final int serviceTargetCount = mServiceTargets.size();
-                if (position < serviceTargetCount) {
-                    return mServiceTargets.get(position);
-                }
-                offset += serviceTargetCount;
+
+            final int callerTargetCount = mCallerTargets.size();
+            if (position < callerTargetCount) {
+                return mCallerTargets.get(position);
             }
+            offset += callerTargetCount;
+
+            final int serviceTargetCount = mServiceTargets.size();
+            if (position - offset < serviceTargetCount) {
+                return mServiceTargets.get(position - offset);
+            }
+            offset += serviceTargetCount;
+
             return super.getItem(position - offset);
         }
 
