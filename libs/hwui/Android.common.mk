@@ -24,6 +24,7 @@ LOCAL_SRC_FILES := \
     thread/TaskManager.cpp \
     utils/Blur.cpp \
     utils/GLUtils.cpp \
+    utils/LinearAllocator.cpp \
     utils/SortedListImpl.cpp \
     AmbientShadow.cpp \
     AnimationContext.cpp \
