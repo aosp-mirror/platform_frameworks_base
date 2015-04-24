@@ -16,13 +16,15 @@
 
 package android.security;
 
+import java.security.InvalidKeyException;
+
 /**
  * Indicates that a cryptographic operation failed because the employed key's validity end date
  * is in the past.
  *
  * @hide
  */
-public class KeyExpiredException extends CryptoOperationException {
+public class KeyExpiredException extends InvalidKeyException {
 
     /**
      * Constructs a new {@code KeyExpiredException} without detail message and cause.
