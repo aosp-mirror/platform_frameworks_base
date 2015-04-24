@@ -505,7 +505,6 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
-    field public static final int durationScaleHint = 16844014; // 0x10104ee
     field public static final int dynamicResources = 16844019; // 0x10104f3
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
@@ -996,6 +995,7 @@ package android {
     field public static final int readPermission = 16842759; // 0x1010007
     field public static final int recognitionService = 16843932; // 0x101049c
     field public static final int relinquishTaskIdentity = 16843894; // 0x1010476
+    field public static final int removeBeforeMRelease = 16844014; // 0x10104ee
     field public static final int reparent = 16843964; // 0x10104bc
     field public static final int reparentWithOverlay = 16843965; // 0x10104bd
     field public static final int repeatCount = 16843199; // 0x10101bf
@@ -2868,7 +2868,6 @@ package android.animation {
     method public void cancel();
     method public android.animation.Animator clone();
     method public void end();
-    method public long getDistanceBasedDuration();
     method public abstract long getDuration();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.animation.Animator.AnimatorListener> getListeners();
@@ -2882,16 +2881,12 @@ package android.animation {
     method public void removePauseListener(android.animation.Animator.AnimatorPauseListener);
     method public void resume();
     method public abstract android.animation.Animator setDuration(long);
-    method public void setDurationScaleHint(int, android.content.res.Resources);
     method public abstract void setInterpolator(android.animation.TimeInterpolator);
     method public abstract void setStartDelay(long);
     method public void setTarget(java.lang.Object);
     method public void setupEndValues();
     method public void setupStartValues();
     method public void start();
-    field public static final int HINT_DISTANCE_DEFINED_IN_DP = 2; // 0x2
-    field public static final int HINT_DISTANCE_PROPORTIONAL_TO_SCREEN_SIZE = 1; // 0x1
-    field public static final int HINT_NO_SCALE = 0; // 0x0
   }
 
   public static abstract interface Animator.AnimatorListener {

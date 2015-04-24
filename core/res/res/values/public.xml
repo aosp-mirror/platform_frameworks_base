@@ -2664,8 +2664,8 @@
   <public type="attr" name="supportsAssistGesture" />
   <public type="attr" name="thumbPosition" />
 
-  <!-- Animation -->
-  <public type="attr" name="durationScaleHint" />
+  <!-- Placeholder for a removed attribute. Remove this before M release. -->
+  <public type="attr" name="removeBeforeMRelease" />
 
   <public type="attr" name="lockTaskMode" />
 
