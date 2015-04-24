@@ -30,4 +30,6 @@ interface IUsageStatsManager {
     ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
     UsageEvents queryEvents(long beginTime, long endTime, String callingPackage);
+    void setAppIdle(String packageName, boolean idle, int userId);
+    boolean isAppIdle(String packageName, int userId);
 }

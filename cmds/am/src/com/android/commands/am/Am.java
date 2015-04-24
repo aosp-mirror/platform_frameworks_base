@@ -142,6 +142,8 @@ public class Am extends BaseCommand {
                 "       am task resizeable <TASK_ID> [true|false]\n" +
                 "       am task resize <TASK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am get-config\n" +
+                "       am set-idle [--user <USER_ID>] <PACKAGE> true|false\n" +
+                "       am get-idle [--user <USER_ID>] <PACKAGE>\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -282,6 +284,11 @@ public class Am extends BaseCommand {
                 "am get-config: retrieve the configuration and any recent configurations\n" +
                 "  of the device\n" +
                 "\n" +
+                "am set-idle: sets the idle state of an app\n" +
+                "\n" +
+                "am get-idle: returns the idle state of an app\n" +
+                "\n" +
+                "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
                 "    [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
@@ -388,6 +395,10 @@ public class Am extends BaseCommand {
             runTask();
         } else if (op.equals("get-config")) {
             runGetConfig();
+        } else if (op.equals("set-idle")) {
+            runSetIdle();
+        } else if (op.equals("get-idle")) {
+            runGetIdle();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -2017,6 +2028,46 @@ public class Am extends BaseCommand {
 
         } catch (RemoteException e) {
         }
+    }
+
+    private void runSetIdle() throws Exception {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        String packageName = nextArgRequired();
+        String value = nextArgRequired();
+
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                Context.USAGE_STATS_SERVICE));
+        usm.setAppIdle(packageName, Boolean.parseBoolean(value), userId);
+    }
+
+    private void runGetIdle() throws Exception {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        String packageName = nextArgRequired();
+
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                Context.USAGE_STATS_SERVICE));
+        boolean isIdle = usm.isAppIdle(packageName, userId);
+        System.out.println("Idle=" + isIdle);
     }
 
     /**
