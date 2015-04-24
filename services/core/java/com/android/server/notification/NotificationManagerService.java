@@ -36,6 +36,9 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -97,6 +100,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
@@ -236,6 +240,7 @@ public class NotificationManagerService extends SystemService {
     ArrayList<String> mLights = new ArrayList<>();
 
     private AppOpsManager mAppOps;
+    private UsageStatsManagerInternal mAppUsageStats;
 
     private Archive mArchive;
 
@@ -871,6 +876,7 @@ public class NotificationManagerService extends SystemService {
         mAm = ActivityManagerNative.getDefault();
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+        mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
 
         mHandler = new WorkerHandler();
         mRankingThread.start();
@@ -1398,6 +1404,41 @@ public class NotificationManagerService extends SystemService {
                     } else {
                         cancelAllLocked(callingUid, callingPid, info.userid,
                                 REASON_LISTENER_CANCEL_ALL, info, info.supportsProfiles());
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setNotificationsShownFromListener(INotificationListener token, String[] keys) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationList) {
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    if (keys != null) {
+                        final int N = keys.length;
+                        for (int i = 0; i < N; i++) {
+                            NotificationRecord r = mNotificationsByKey.get(keys[i]);
+                            if (r == null) continue;
+                            final int userId = r.sbn.getUserId();
+                            if (userId != info.userid && userId != UserHandle.USER_ALL &&
+                                    !mUserProfiles.isCurrentProfile(userId)) {
+                                throw new SecurityException("Disallowed call from listener: "
+                                        + info.service);
+                            }
+                            if (!r.isSeen()) {
+                                if (DBG) Slog.d(TAG, "Marking notification as seen " + keys[i]);
+                                mAppUsageStats.reportEvent(r.sbn.getPackageName(),
+                                        userId == UserHandle.USER_ALL ? UserHandle.USER_OWNER
+                                                : userId,
+                                        UsageEvents.Event.INTERACTION);
+                                r.setSeen();
+                            }
+                        }
                     }
                 }
             } finally {

@@ -700,6 +700,26 @@ public abstract class BaseStatusBar extends SystemUI implements
         return isCurrentProfile(notificationUserId);
     }
 
+    protected void setNotificationShown(StatusBarNotification n) {
+        mNotificationListener.setNotificationsShown(new String[] { n.getKey() });
+    }
+
+    protected void setNotificationsShown(String[] keys) {
+        mNotificationListener.setNotificationsShown(keys);
+    }
+
+    protected void setNotificationsShownAll() {
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        final int N = activeNotifications.size();
+
+        String[] keys = new String[N];
+        for (int i = 0; i < N; i++) {
+            NotificationData.Entry entry = activeNotifications.get(i);
+            keys[i] = entry.key;
+        }
+        setNotificationsShown(keys);
+    }
+
     protected boolean isCurrentProfile(int userId) {
         synchronized (mCurrentProfiles) {
             return userId == UserHandle.USER_ALL || mCurrentProfiles.get(userId) != null;
@@ -1681,6 +1701,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 boolean clearNotificationEffects =
                         (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED);
                 mBarService.onPanelRevealed(clearNotificationEffects);
+                setNotificationsShownAll();
             } else {
                 mBarService.onPanelHidden();
             }

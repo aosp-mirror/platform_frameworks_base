@@ -30956,6 +30956,7 @@ package android.service.notification {
     method public void registerAsSystemService(android.content.Context, android.content.ComponentName, int) throws android.os.RemoteException;
     method public final void requestInterruptionFilter(int);
     method public final void requestListenerHints(int);
+    method public final void setNotificationsShown(java.lang.String[]);
     method public final void setOnNotificationPostedTrim(int);
     method public void unregisterAsSystemService() throws android.os.RemoteException;
     field public static final int HINT_HOST_DISABLE_EFFECTS = 1; // 0x1

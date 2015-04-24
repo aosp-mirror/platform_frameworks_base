@@ -50,6 +50,8 @@ public final class NotificationRecord {
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
     int score;
+    /** Whether the notification was seen by the user via one of the notification listeners. */
+    boolean mIsSeen;
 
     // These members are used by NotificationSignalExtractors
     // to communicate with the ranking module.
@@ -299,6 +301,16 @@ public final class NotificationRecord {
 
     public String getGlobalSortKey() {
         return mGlobalSortKey;
+    }
+
+    /** Check if any of the listeners have marked this notification as seen by the user. */
+    public boolean isSeen() {
+        return mIsSeen;
+    }
+
+    /** Mark the notification as seen by the user. */
+    public void setSeen() {
+        mIsSeen = true;
     }
 
     public void setAuthoritativeRank(int authoritativeRank) {

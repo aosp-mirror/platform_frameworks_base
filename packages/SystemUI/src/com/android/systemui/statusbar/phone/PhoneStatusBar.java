@@ -1119,6 +1119,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         boolean isHeadsUped = mUseHeadsUp && shouldInterrupt(notification);
         if (isHeadsUped) {
             mHeadsUpManager.showNotification(shadeEntry);
+            // Mark as seen immediately
+            setNotificationShown(notification);
         }
 
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
