@@ -488,7 +488,7 @@ public class KeySetManagerService {
     }
 
     public String encodePublicKey(PublicKey k) throws IOException {
-        return new String(Base64.encode(k.getEncoded(), 0));
+        return new String(Base64.encode(k.getEncoded(), Base64.NO_WRAP));
     }
 
     public void dumpLPr(PrintWriter pw, String packageName,
