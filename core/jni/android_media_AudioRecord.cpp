@@ -587,9 +587,8 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
 static jboolean android_media_AudioRecord_setInputDevice(
         JNIEnv *env,  jobject thiz, jint device_id) {
 
-//    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
-//    return lpRecorder->setInputDevice(device_id) == NO_ERROR;
-    return false;
+    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
+    return lpRecorder->setInputDevice(device_id) == NO_ERROR;
 }
 
 // ----------------------------------------------------------------------------
