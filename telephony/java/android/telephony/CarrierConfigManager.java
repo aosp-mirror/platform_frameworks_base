@@ -208,13 +208,13 @@ public class CarrierConfigManager {
     }
 
     /**
-     * Returns a bundle with the default value for every supported configuration variable.
+     * Returns a new bundle with the default value for every supported configuration variable.
      *
      * @hide
      */
     @SystemApi
     public static Bundle getDefaultConfig() {
-        return sDefaults;
+        return new Bundle(sDefaults);
     }
 
     /** @hide */
