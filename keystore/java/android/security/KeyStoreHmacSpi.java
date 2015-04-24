@@ -69,9 +69,10 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
     private final int mKeymasterDigest;
     private final int mMacSizeBytes;
 
-    private String mKeyAliasInKeyStore;
+    // Fields below are populated by engineInit and should be preserved after engineDoFinal.
+    private KeyStoreSecretKey mKey;
 
-    // The fields below are reset by the engineReset operation.
+    // Fields below are reset when engineDoFinal succeeds.
     private KeyStoreCryptoOperationChunkedStreamer mChunkedStreamer;
     private IBinder mOperationToken;
     private Long mOperationHandle;
@@ -89,28 +90,39 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
     @Override
     protected void engineInit(Key key, AlgorithmParameterSpec params) throws InvalidKeyException,
             InvalidAlgorithmParameterException {
+        resetAll();
+
+        boolean success = false;
+        try {
+            init(key, params);
+            ensureKeystoreOperationInitialized();
+            success = true;
+        } finally {
+            if (!success) {
+                resetAll();
+            }
+        }
+    }
+
+    private void init(Key key, AlgorithmParameterSpec params) throws InvalidKeyException,
+        InvalidAlgorithmParameterException {
         if (key == null) {
             throw new InvalidKeyException("key == null");
         } else if (!(key instanceof KeyStoreSecretKey)) {
             throw new InvalidKeyException(
                     "Only Android KeyStore secret keys supported. Key: " + key);
         }
+        mKey = (KeyStoreSecretKey) key;
 
         if (params != null) {
             throw new InvalidAlgorithmParameterException(
                     "Unsupported algorithm parameters: " + params);
         }
 
-        mKeyAliasInKeyStore = ((KeyStoreSecretKey) key).getAlias();
-        if (mKeyAliasInKeyStore == null) {
-            throw new InvalidKeyException("Key's KeyStore alias not known");
-        }
-        engineReset();
-        ensureKeystoreOperationInitialized();
     }
 
-    @Override
-    protected void engineReset() {
+    private void resetAll() {
+        mKey = null;
         IBinder operationToken = mOperationToken;
         if (operationToken != null) {
             mOperationToken = null;
@@ -120,11 +132,26 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         mChunkedStreamer = null;
     }
 
+    private void resetWhilePreservingInitState() {
+        IBinder operationToken = mOperationToken;
+        if (operationToken != null) {
+            mOperationToken = null;
+            mKeyStore.abort(operationToken);
+        }
+        mOperationHandle = null;
+        mChunkedStreamer = null;
+    }
+
+    @Override
+    protected void engineReset() {
+        resetWhilePreservingInitState();
+    }
+
     private void ensureKeystoreOperationInitialized() {
         if (mChunkedStreamer != null) {
             return;
         }
-        if (mKeyAliasInKeyStore == null) {
+        if (mKey == null) {
             throw new IllegalStateException("Not initialized");
         }
 
@@ -132,7 +159,8 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_HMAC);
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
 
-        OperationResult opResult = mKeyStore.begin(mKeyAliasInKeyStore,
+        OperationResult opResult = mKeyStore.begin(
+                mKey.getAlias(),
                 KeymasterDefs.KM_PURPOSE_SIGN,
                 true,
                 keymasterArgs,
@@ -184,7 +212,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
             throw KeyStore.getCryptoOperationException(e);
         }
 
-        engineReset();
+        resetWhilePreservingInitState();
         return result;
     }
 
