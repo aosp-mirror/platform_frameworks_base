@@ -2151,6 +2151,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             win.setType(
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
+
+            synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
+                // Assumes it's safe to show starting windows of launched apps while
+                // the keyguard is being hidden. This is okay because starting windows never show
+                // secret information.
+                if (mKeyguardHidden) {
+                    windowFlags |= FLAG_SHOW_WHEN_LOCKED;
+                }
+            }
+
             // Force the window flags: this is a fake window, so it is not really
             // touchable or focusable by the user.  We also add in the ALT_FOCUSABLE_IM
             // flag because we do know that the next window will take input
@@ -4131,6 +4141,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (attrs.type == TYPE_STATUS_BAR && (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
             mForceStatusBarFromKeyguard = true;
         }
+
+        boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
+                && attrs.type < FIRST_SYSTEM_WINDOW;
+        final boolean showWhenLocked = (fl & FLAG_SHOW_WHEN_LOCKED) != 0;
+        final boolean dismissKeyguard = (fl & FLAG_DISMISS_KEYGUARD) != 0;
+
         if (mTopFullscreenOpaqueWindowState == null &&
                 win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()) {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
@@ -4143,8 +4159,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if ((attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                 mShowingLockscreen = true;
             }
-            boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
-                    && attrs.type < FIRST_SYSTEM_WINDOW;
             if (attrs.type == TYPE_DREAM) {
                 // If the lockscreen was showing when the dream started then wait
                 // for the dream to draw before hiding the lockscreen.
@@ -4155,8 +4169,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
 
-            final boolean showWhenLocked = (fl & FLAG_SHOW_WHEN_LOCKED) != 0;
-            final boolean dismissKeyguard = (fl & FLAG_DISMISS_KEYGUARD) != 0;
             if (appWindow) {
                 final IApplicationToken appToken = win.getAppToken();
                 if (showWhenLocked) {
@@ -4210,9 +4222,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
 
                 if (mWinShowWhenLocked != null &&
-                        mWinShowWhenLocked.getAppToken() != win.getAppToken()) {
+                        mWinShowWhenLocked.getAppToken() != win.getAppToken() &&
+                        (attrs.flags & FLAG_SHOW_WHEN_LOCKED) == 0) {
                     win.hideLw(false);
                 }
+            }
+        } else if (mTopFullscreenOpaqueWindowState == null && mWinShowWhenLocked == null) {
+            // No TopFullscreenOpaqueWindow is showing, but we found a SHOW_WHEN_LOCKED window
+            // that is being hidden in an animation - keep the
+            // keyguard hidden until the new window shows up and
+            // we know whether to show the keyguard or not.
+            if (win.isAnimatingLw() && appWindow && showWhenLocked) {
+                mHideLockScreen = true;
+                mWinShowWhenLocked = win;
             }
         }
         if (mTopFullscreenOpaqueOrDimmingWindowState == null
