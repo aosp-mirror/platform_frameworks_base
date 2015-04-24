@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.RequiresPermission;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -32,6 +33,9 @@ import android.provider.BrowserContract.Searches;
 import android.util.Log;
 import android.webkit.WebIconDatabase;
 
+import static android.Manifest.permission.READ_HISTORY_BOOKMARKS;
+import static android.Manifest.permission.WRITE_HISTORY_BOOKMARKS;
+
 public class Browser {
     private static final String LOGTAG = "browser";
 
@@ -41,6 +45,8 @@ public class Browser {
      * {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS} permission and writing to it
      * requires the {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS} permission.
      */
+    @RequiresPermission.Read(@RequiresPermission(READ_HISTORY_BOOKMARKS))
+    @RequiresPermission.Write(@RequiresPermission(WRITE_HISTORY_BOOKMARKS))
     public static final Uri BOOKMARKS_URI = Uri.parse("content://browser/bookmarks");
 
     /**
@@ -122,6 +128,8 @@ public class Browser {
      * {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS} permission and writing to it
      * requires the {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS} permission.
      */
+    @RequiresPermission.Read(@RequiresPermission(READ_HISTORY_BOOKMARKS))
+    @RequiresPermission.Write(@RequiresPermission(WRITE_HISTORY_BOOKMARKS))
     public static final Uri SEARCHES_URI = Uri.parse("content://browser/searches");
 
     /**
@@ -233,6 +241,7 @@ public class Browser {
      *
      *  @param cr   The ContentResolver used to access the database.
      */
+    @RequiresPermission(READ_HISTORY_BOOKMARKS)
     public static final Cursor getAllBookmarks(ContentResolver cr) throws
             IllegalStateException {
         return cr.query(Bookmarks.CONTENT_URI,
@@ -248,6 +257,7 @@ public class Browser {
      *
      *  @param cr   The ContentResolver used to access the database.
      */
+    @RequiresPermission(READ_HISTORY_BOOKMARKS)
     public static final Cursor getAllVisitedUrls(ContentResolver cr) throws
             IllegalStateException {
         return cr.query(Combined.CONTENT_URI,
@@ -308,6 +318,7 @@ public class Browser {
      *  @param real If true, this is an actual visit, and should add to the
      *              number of visits.  If false, the user entered it manually.
      */
+    @RequiresPermission(allOf = {READ_HISTORY_BOOKMARKS, WRITE_HISTORY_BOOKMARKS})
     public static final void updateVisitedHistory(ContentResolver cr,
                                                   String url, boolean real) {
         long now = System.currentTimeMillis();
@@ -358,6 +369,7 @@ public class Browser {
      *  @param cr   The ContentResolver used to access the database.
      *  @hide pending API council approval
      */
+    @RequiresPermission(READ_HISTORY_BOOKMARKS)
     public static final String[] getVisitedHistory(ContentResolver cr) {
         Cursor c = null;
         String[] str = null;
@@ -393,6 +405,7 @@ public class Browser {
      *
      * @param cr The ContentResolver used to access the database.
      */
+    @RequiresPermission(allOf = {READ_HISTORY_BOOKMARKS, WRITE_HISTORY_BOOKMARKS})
     public static final void truncateHistory(ContentResolver cr) {
         // TODO make a single request to the provider to do this in a single transaction
         Cursor cursor = null;
@@ -424,6 +437,7 @@ public class Browser {
      * @param cr   The ContentResolver used to access the database.
      * @return boolean  True if the history can be cleared.
      */
+    @RequiresPermission(READ_HISTORY_BOOKMARKS)
     public static final boolean canClearHistory(ContentResolver cr) {
         Cursor cursor = null;
         boolean ret = false;
@@ -446,6 +460,7 @@ public class Browser {
      *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      *  @param cr   The ContentResolver used to access the database.
      */
+    @RequiresPermission(WRITE_HISTORY_BOOKMARKS)
     public static final void clearHistory(ContentResolver cr) {
         deleteHistoryWhere(cr, null);
     }
@@ -461,6 +476,7 @@ public class Browser {
      * @param whereClause   String to limit the items affected.
      *                      null means all items.
      */
+    @RequiresPermission(allOf = {READ_HISTORY_BOOKMARKS, WRITE_HISTORY_BOOKMARKS})
     private static final void deleteHistoryWhere(ContentResolver cr, String whereClause) {
         Cursor cursor = null;
         try {
@@ -486,6 +502,7 @@ public class Browser {
      * @param end   Last date to remove. If -1, all dates after begin.
      *              Non-inclusive.
      */
+    @RequiresPermission(WRITE_HISTORY_BOOKMARKS)
     public static final void deleteHistoryTimeFrame(ContentResolver cr,
             long begin, long end) {
         String whereClause;
@@ -511,6 +528,7 @@ public class Browser {
      * @param cr    The ContentResolver used to access the database.
      * @param url   url to remove.
      */
+    @RequiresPermission(WRITE_HISTORY_BOOKMARKS)
     public static final void deleteFromHistory(ContentResolver cr,
                                                String url) {
         cr.delete(History.CONTENT_URI, History.URL + "=?", new String[] { url });
@@ -523,6 +541,7 @@ public class Browser {
      * @param cr   The ContentResolver used to access the database.
      * @param search    The string to add to the searches database.
      */
+    @RequiresPermission(allOf = {READ_HISTORY_BOOKMARKS, WRITE_HISTORY_BOOKMARKS})
     public static final void addSearchUrl(ContentResolver cr, String search) {
         // The content provider will take care of updating existing searches instead of duplicating
         ContentValues values = new ContentValues();
@@ -536,6 +555,7 @@ public class Browser {
      *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      * @param cr   The ContentResolver used to access the database.
      */
+    @RequiresPermission(WRITE_HISTORY_BOOKMARKS)
     public static final void clearSearches(ContentResolver cr) {
         // FIXME: Should this clear the urls to which these searches lead?
         // (i.e. remove google.com/query= blah blah blah)
@@ -557,6 +577,7 @@ public class Browser {
      *  @param  listener IconListener that gets the icons once they are
      *          retrieved.
      */
+    @RequiresPermission(READ_HISTORY_BOOKMARKS)
     public static final void requestAllIcons(ContentResolver cr, String where,
             WebIconDatabase.IconListener listener) {
         // Do nothing: this is no longer used.
