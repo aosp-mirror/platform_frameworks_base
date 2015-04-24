@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.Rect;
@@ -932,7 +933,7 @@ public final class TvInputManager {
      * @return the {@link TvInputInfo} for a given TV input. {@code null} if not found.
      */
     @Nullable
-    public TvInputInfo getTvInputInfo(String inputId) {
+    public TvInputInfo getTvInputInfo(@NonNull String inputId) {
         if (inputId == null) {
             throw new IllegalArgumentException("inputId cannot be null");
         }
@@ -956,7 +957,7 @@ public final class TvInputManager {
      * @param inputId The id of the TV input.
      * @throws IllegalArgumentException if the argument is {@code null}.
      */
-    public int getInputState(String inputId) {
+    public int getInputState(@NonNull String inputId) {
         if (inputId == null) {
             throw new IllegalArgumentException("inputId cannot be null");
         }
@@ -977,7 +978,7 @@ public final class TvInputManager {
      * @param handler A {@link Handler} that the status change will be delivered to.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void registerCallback(TvInputCallback callback, Handler handler) {
+    public void registerCallback(@NonNull TvInputCallback callback, @NonNull Handler handler) {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
@@ -995,7 +996,7 @@ public final class TvInputManager {
      * @param callback The existing callback to remove.
      * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
-    public void unregisterCallback(final TvInputCallback callback) {
+    public void unregisterCallback(@NonNull final TvInputCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback cannot be null");
         }
@@ -1047,7 +1048,7 @@ public final class TvInputManager {
      * @param rating The TV content rating to check.
      * @return {@code true} if the given TV content rating is blocked, {@code false} otherwise.
      */
-    public boolean isRatingBlocked(TvContentRating rating) {
+    public boolean isRatingBlocked(@NonNull TvContentRating rating) {
         if (rating == null) {
             throw new IllegalArgumentException("rating cannot be null");
         }
