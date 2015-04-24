@@ -232,11 +232,22 @@ public final class MediaFormat {
     public static final String KEY_TEMPORAL_LAYERING = "ts-schema";
 
     /**
-     * @hide
+     * A key describing the stride of the video bytebuffer layout.
+     * Stride (or row increment) is the difference between the index of a pixel
+     * and that of the pixel directly underneath. For YUV 420 formats, the
+     * stride corresponds to the Y plane; the stride of the U and V planes can
+     * be calculated based on the color format.
+     * The associated value is an integer, representing number of bytes.
      */
     public static final String KEY_STRIDE = "stride";
+
     /**
-     * @hide
+     * A key describing the plane height of a multi-planar (YUV) video bytebuffer layout.
+     * Slice height (or plane height) is the number of rows that must be skipped to get
+     * from the top of the Y plane to the top of the U plane in the bytebuffer. In essence
+     * the offset of the U plane is sliceHeight * stride. The height of the U/V planes
+     * can be calculated based on the color format.
+     * The associated value is an integer, representing number of rows.
      */
     public static final String KEY_SLICE_HEIGHT = "slice-height";
 
@@ -456,12 +467,36 @@ public final class MediaFormat {
 
     /**
      * A key describing the desired profile to be used by an encoder.
+     * The associated value is an integer.
      * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
-     * This key is only supported for codecs that specify a profile.
+     * This key is used as a hint, and is only supported for codecs
+     * that specify a profile.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */
     public static final String KEY_PROFILE = "profile";
+
+    /**
+     * A key describing the desired profile to be used by an encoder.
+     * The associated value is an integer.
+     * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
+     * This key is used as a further hint when specifying a desired profile,
+     * and is only supported for codecs that specify a level.
+     * <p>
+     * This key is ignored if the {@link #KEY_PROFILE profile} is not specified.
+     *
+     * @see MediaCodecInfo.CodecCapabilities#profileLevels
+     */
+    public static final String KEY_LEVEL = "level";
+
+    /**
+     * A key describing the desired clockwise rotation on an output surface.
+     * This key is only used when the codec is configured using an output surface.
+     * The associated value is an integer, representing degrees.
+     *
+     * @see MediaCodecInfo.CodecCapabilities#profileLevels
+     */
+    public static final String KEY_ROTATION = "rotation-degrees";
 
     /**
      * A key describing the desired bitrate mode to be used by an encoder.

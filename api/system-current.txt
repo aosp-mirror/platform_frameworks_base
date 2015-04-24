@@ -17042,6 +17042,7 @@ package android.media {
     field public static final java.lang.String KEY_IS_FORCED_SUBTITLE = "is-forced-subtitle";
     field public static final java.lang.String KEY_I_FRAME_INTERVAL = "i-frame-interval";
     field public static final java.lang.String KEY_LANGUAGE = "language";
+    field public static final java.lang.String KEY_LEVEL = "level";
     field public static final java.lang.String KEY_MAX_HEIGHT = "max-height";
     field public static final java.lang.String KEY_MAX_INPUT_SIZE = "max-input-size";
     field public static final java.lang.String KEY_MAX_WIDTH = "max-width";
@@ -17051,7 +17052,10 @@ package android.media {
     field public static final java.lang.String KEY_PROFILE = "profile";
     field public static final java.lang.String KEY_PUSH_BLANK_BUFFERS_ON_STOP = "push-blank-buffers-on-shutdown";
     field public static final java.lang.String KEY_REPEAT_PREVIOUS_FRAME_AFTER = "repeat-previous-frame-after";
+    field public static final java.lang.String KEY_ROTATION = "rotation-degrees";
     field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";
+    field public static final java.lang.String KEY_SLICE_HEIGHT = "slice-height";
+    field public static final java.lang.String KEY_STRIDE = "stride";
     field public static final java.lang.String KEY_TEMPORAL_LAYERING = "ts-schema";
     field public static final java.lang.String KEY_WIDTH = "width";
     field public static final java.lang.String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
