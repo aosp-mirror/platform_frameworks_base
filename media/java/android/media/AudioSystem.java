@@ -19,6 +19,7 @@ package android.media;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiopolicy.AudioMix;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -32,6 +33,7 @@ import java.util.ArrayList;
  */
 public class AudioSystem
 {
+    private static final String TAG = "AudioSystem";
     /* These values must be kept in sync with system/audio.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
@@ -223,6 +225,48 @@ public class AudioSystem
             errorCallback.onError(error);
         }
     }
+
+    /**
+     * Handles events for the audio policy manager about dynamic audio policies
+     * @see android.media.audiopolicy.AudioPolicy
+     */
+    public interface DynamicPolicyCallback
+    {
+        void onDynamicPolicyMixStateUpdate(String regId, int state);
+    }
+
+    //keep in sync with include/media/AudioPolicy.h
+    private final static int DYNAMIC_POLICY_EVENT_MIX_STATE_UPDATE = 0;
+
+    private static DynamicPolicyCallback sDynPolicyCallback;
+
+    public static void setDynamicPolicyCallback(DynamicPolicyCallback cb)
+    {
+        synchronized (AudioSystem.class) {
+            sDynPolicyCallback = cb;
+            native_register_dynamic_policy_callback();
+        }
+    }
+
+    private static void dynamicPolicyCallbackFromNative(int event, String regId, int val)
+    {
+        DynamicPolicyCallback cb = null;
+        synchronized (AudioSystem.class) {
+            if (sDynPolicyCallback != null) {
+                cb = sDynPolicyCallback;
+            }
+        }
+        if (cb != null) {
+            switch(event) {
+                case DYNAMIC_POLICY_EVENT_MIX_STATE_UPDATE:
+                    cb.onDynamicPolicyMixStateUpdate(regId, val);
+                    break;
+                default:
+                    Log.e(TAG, "dynamicPolicyCallbackFromNative: unknown event " + event);
+            }
+        }
+    }
+
 
     /*
      * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
@@ -579,6 +623,9 @@ public class AudioSystem
     public static native int releaseAudioPatch(AudioPatch patch);
     public static native int listAudioPatches(ArrayList<AudioPatch> patches, int[] generation);
     public static native int setAudioPortConfig(AudioPortConfig config);
+
+    // declare this instance as having a dynamic policy callback handler
+    private static native final void native_register_dynamic_policy_callback();
 
     // must be kept in sync with value in include/system/audio.h
     public static final int AUDIO_HW_SYNC_INVALID = 0;

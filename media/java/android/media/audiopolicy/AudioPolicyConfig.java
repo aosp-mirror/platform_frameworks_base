@@ -59,6 +59,10 @@ public class AudioPolicyConfig implements Parcelable {
         mMixes.add(mix);
     }
 
+    public ArrayList<AudioMix> getMixes() {
+        return mMixes;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(mMixes);
@@ -75,6 +79,8 @@ public class AudioPolicyConfig implements Parcelable {
         for (AudioMix mix : mMixes) {
             // write mix route flags
             dest.writeInt(mix.getRouteFlags());
+            // write callback flags
+            dest.writeInt(mix.mCallbackFlags);
             // write mix format
             dest.writeInt(mix.getFormat().getSampleRate());
             dest.writeInt(mix.getFormat().getEncoding());
@@ -96,6 +102,8 @@ public class AudioPolicyConfig implements Parcelable {
             // read mix route flags
             int routeFlags = in.readInt();
             mixBuilder.setRouteFlags(routeFlags);
+            // read callback flags
+            mixBuilder.setCallbackFlags(in.readInt());
             // read mix format
             int sampleRate = in.readInt();
             int encoding = in.readInt();
