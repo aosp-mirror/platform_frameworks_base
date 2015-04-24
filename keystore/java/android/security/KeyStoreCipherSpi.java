@@ -152,29 +152,58 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
 
     @Override
     protected void engineInit(int opmode, Key key, SecureRandom random) throws InvalidKeyException {
-        init(opmode, key, random);
-        initAlgorithmSpecificParameters();
-        ensureKeystoreOperationInitialized();
+        resetAll();
+
+        boolean success = false;
+        try {
+            init(opmode, key, random);
+            initAlgorithmSpecificParameters();
+            ensureKeystoreOperationInitialized();
+            success = true;
+        } finally {
+            if (!success) {
+                resetAll();
+            }
+        }
     }
 
     @Override
     protected void engineInit(int opmode, Key key, AlgorithmParameters params, SecureRandom random)
             throws InvalidKeyException, InvalidAlgorithmParameterException {
-        init(opmode, key, random);
-        initAlgorithmSpecificParameters(params);
-        ensureKeystoreOperationInitialized();
+        resetAll();
+
+        boolean success = false;
+        try {
+            init(opmode, key, random);
+            initAlgorithmSpecificParameters(params);
+            ensureKeystoreOperationInitialized();
+            success = true;
+        } finally {
+            if (!success) {
+                resetAll();
+            }
+        }
     }
 
     @Override
     protected void engineInit(int opmode, Key key, AlgorithmParameterSpec params,
             SecureRandom random) throws InvalidKeyException, InvalidAlgorithmParameterException {
-        init(opmode, key, random);
-        initAlgorithmSpecificParameters(params);
-        ensureKeystoreOperationInitialized();
+        resetAll();
+
+        boolean success = false;
+        try {
+            init(opmode, key, random);
+            initAlgorithmSpecificParameters(params);
+            ensureKeystoreOperationInitialized();
+            success = true;
+        } finally {
+            if (!success) {
+                resetAll();
+            }
+        }
     }
 
     private void init(int opmode, Key key, SecureRandom random) throws InvalidKeyException {
-        resetAll();
         if (!(key instanceof KeyStoreSecretKey)) {
             throw new InvalidKeyException(
                     "Unsupported key: " + ((key != null) ? key.getClass().getName() : "null"));
