@@ -59,7 +59,7 @@ public class AudioRecord
     /** Minimum value for sample rate */
     private static final int SAMPLE_RATE_HZ_MIN = 4000;
     /** Maximum value for sample rate */
-    private static final int SAMPLE_RATE_HZ_MAX = 96000;
+    private static final int SAMPLE_RATE_HZ_MAX = 192000;
 
     /**
      *  indicates AudioRecord state is not successfully initialized.
