@@ -28441,13 +28441,6 @@ package android.sax {
 
 package android.security {
 
-  public class CryptoOperationException extends java.lang.RuntimeException {
-    ctor public CryptoOperationException();
-    ctor public CryptoOperationException(java.lang.String);
-    ctor public CryptoOperationException(java.lang.String, java.lang.Throwable);
-    ctor public CryptoOperationException(java.lang.Throwable);
-  }
-
   public class EcIesParameterSpec implements java.security.spec.AlgorithmParameterSpec {
     method public int getDemCipherKeySize();
     method public java.lang.String getDemCipherTransformation();
@@ -28504,7 +28497,7 @@ package android.security {
     ctor public KeyChainException(java.lang.Throwable);
   }
 
-  public class KeyExpiredException extends android.security.CryptoOperationException {
+  public class KeyExpiredException extends java.security.InvalidKeyException {
     ctor public KeyExpiredException();
     ctor public KeyExpiredException(java.lang.String);
     ctor public KeyExpiredException(java.lang.String, java.lang.Throwable);
@@ -28546,7 +28539,7 @@ package android.security {
     method public android.security.KeyGeneratorSpec.Builder setUserAuthenticators(int);
   }
 
-  public class KeyNotYetValidException extends android.security.CryptoOperationException {
+  public class KeyNotYetValidException extends java.security.InvalidKeyException {
     ctor public KeyNotYetValidException();
     ctor public KeyNotYetValidException(java.lang.String);
     ctor public KeyNotYetValidException(java.lang.String, java.lang.Throwable);
@@ -28694,12 +28687,12 @@ package android.security {
     method public boolean isCleartextTrafficPermitted();
   }
 
-  public class NewFingerprintEnrolledException extends android.security.CryptoOperationException {
+  public class NewFingerprintEnrolledException extends java.security.InvalidKeyException {
     ctor public NewFingerprintEnrolledException();
     ctor public NewFingerprintEnrolledException(java.lang.String);
   }
 
-  public class UserNotAuthenticatedException extends android.security.CryptoOperationException {
+  public class UserNotAuthenticatedException extends java.security.InvalidKeyException {
     ctor public UserNotAuthenticatedException();
     ctor public UserNotAuthenticatedException(java.lang.String);
     ctor public UserNotAuthenticatedException(java.lang.String, java.lang.Throwable);
