@@ -51,6 +51,7 @@ import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -313,10 +314,8 @@ public abstract class TvInputService extends Service {
          * @hide
          */
         @SystemApi
-        public void notifySessionEvent(final String eventType, final Bundle eventArgs) {
-            if (eventType == null) {
-                throw new IllegalArgumentException("eventType cannot be null");
-            }
+        public void notifySessionEvent(@NonNull final String eventType, final Bundle eventArgs) {
+            Preconditions.checkNotNull(eventType);
             executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
@@ -546,9 +545,7 @@ public abstract class TvInputService extends Service {
          * @see TvInputManager
          */
         public void notifyContentBlocked(@NonNull final TvContentRating rating) {
-            if (rating == null) {
-                throw new IllegalArgumentException("rating cannot be null");
-            }
+            Preconditions.checkNotNull(rating);
             executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {

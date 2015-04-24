@@ -16,8 +16,11 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.text.TextUtils;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -833,10 +836,8 @@ public final class TvContentRating {
      * @hide
      */
     @SystemApi
-    public final boolean contains(TvContentRating rating) {
-        if (rating == null) {
-            throw new IllegalArgumentException("rating cannot be null");
-        }
+    public final boolean contains(@NonNull TvContentRating rating) {
+        Preconditions.checkNotNull(rating);
         if (!rating.getMainRating().equals(mRating)) {
             return false;
         }

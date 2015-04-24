@@ -16,9 +16,12 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * Encapsulates the format of tracks played in {@link TvInputService}.
@@ -245,15 +248,13 @@ public final class TvTrackInfo implements Parcelable {
          * @param id The ID of the track that uniquely identifies the current track among all the
          *            other tracks in the same TV program.
          */
-        public Builder(int type, String id) {
+        public Builder(int type, @NonNull String id) {
             if (type != TYPE_AUDIO
                     && type != TYPE_VIDEO
                     && type != TYPE_SUBTITLE) {
                 throw new IllegalArgumentException("Unknown type: " + type);
             }
-            if (id == null) {
-                throw new IllegalArgumentException("id cannot be null");
-            }
+            Preconditions.checkNotNull(id);
             mType = type;
             mId = id;
         }
