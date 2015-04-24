@@ -103,8 +103,7 @@ public class ConnectivityManager {
      *
      * @deprecated Since {@link NetworkInfo} can vary based on UID, applications
      *             should always obtain network information through
-     *             {@link #getActiveNetworkInfo()} or
-     *             {@link #getAllNetworkInfo()}.
+     *             {@link #getActiveNetworkInfo()}.
      * @see #EXTRA_NETWORK_TYPE
      */
     @Deprecated
@@ -112,8 +111,6 @@ public class ConnectivityManager {
 
     /**
      * Network type which triggered a {@link #CONNECTIVITY_ACTION} broadcast.
-     * Can be used with {@link #getNetworkInfo(int)} to get {@link NetworkInfo}
-     * state based on the calling application.
      *
      * @see android.content.Intent#getIntExtra(String, int)
      */
@@ -660,6 +657,10 @@ public class ConnectivityManager {
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @deprecated This method does not support multiple connected networks
+     *             of the same type. Use {@link #getAllNetworks} and
+     *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     public NetworkInfo getNetworkInfo(int networkType) {
         try {
@@ -699,6 +700,10 @@ public class ConnectivityManager {
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @deprecated This method does not support multiple connected networks
+     *             of the same type. Use {@link #getAllNetworks} and
+     *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     public NetworkInfo[] getAllNetworkInfo() {
         try {
@@ -716,6 +721,9 @@ public class ConnectivityManager {
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @hide
+     * @deprecated This method does not support multiple connected networks
+     *             of the same type. Use {@link #getAllNetworks} and
+     *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     public Network getNetworkForType(int networkType) {
         try {
@@ -808,6 +816,10 @@ public class ConnectivityManager {
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
+     * @deprecated This method does not support multiple connected networks
+     *             of the same type. Use {@link #getAllNetworks},
+     *             {@link #getNetworkInfo(android.net.Network)}, and
+     *             {@link #getLinkProperties(android.net.Network)} instead.
      */
     public LinkProperties getLinkProperties(int networkType) {
         try {
@@ -1941,6 +1953,7 @@ public class ConnectivityManager {
      * @param networkType
      *
      * {@hide}
+     * @deprecated Doesn't properly deal with multiple connected networks of the same type.
      */
     public void setProvisioningNotificationVisible(boolean visible, int networkType,
             String action) {
