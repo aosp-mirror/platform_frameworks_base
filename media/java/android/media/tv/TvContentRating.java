@@ -32,11 +32,11 @@ import java.util.Objects;
  * To create a {@code TvContentRating} object, use the
  * {@link #createRating TvContentRating.createRating} method with valid rating system string
  * constants.
- * <p>
- * It is possible for an application to define its own content rating system by supplying a content
- * rating system definition XML resource (see example below) and declaring a broadcast receiver that
- * filters {@link TvInputManager#ACTION_QUERY_CONTENT_RATING_SYSTEMS} in its manifest.
- * </p>
+ *
+ * <p>It is possible for an application to define its own content rating system by supplying a
+ * content rating system definition XML resource (see example below) and declaring a broadcast
+ * receiver that filters {@link TvInputManager#ACTION_QUERY_CONTENT_RATING_SYSTEMS} in its manifest.
+ *
  * <h3> Example: Rating system definition for the TV Parental Guidelines</h3>
  * The following XML example shows how the TV Parental Guidelines in the United States can be
  * defined:
@@ -120,15 +120,16 @@ import java.util.Objects;
  *             <rating android:name="US_TV_MA" />
  *         </rating-order>
  *     </rating-system-definition>
- * </rating-system-definitions>}</pre></p>
+ * </rating-system-definitions>}</pre>
  *
  * <h3>System defined rating strings</h3>
  * The following strings are defined by the system to provide a standard way to create
  * {@code TvContentRating} objects.
+ *
  * <p>For example, to create an object that represents TV-PG rating with suggestive dialogue and
  * coarse language from the TV Parental Guidelines in the United States, one can use the following
  * code snippet:
- * </p>
+ *
  * <pre>
  * TvContentRating rating = TvContentRating.createRating(
  *         "com.android.tv",
@@ -823,10 +824,9 @@ public final class TvContentRating {
     /**
      * Returns {@code true} if this rating has the same main rating as the specified rating and when
      * this rating's sub-ratings contain the other's.
-     * <p>
-     * For example, a {@code TvContentRating} object that represents TV-PG with S(Sexual content)
-     * and V(Violence) contains TV-PG, TV-PG/S, TV-PG/V and itself.
-     * </p>
+     *
+     * <p>For example, a {@code TvContentRating} object that represents TV-PG with
+     * S(Sexual content) and V(Violence) contains TV-PG, TV-PG/S, TV-PG/V and itself.
      *
      * @param rating The {@link TvContentRating} to check.
      * @return {@code true} if this object contains {@code rating}, {@code false} otherwise.

@@ -53,14 +53,13 @@ import java.util.Queue;
  * TV programs from various TV sources that implement {@link TvInputService}. (Note that the list of
  * TV inputs available on the system can be obtained by calling
  * {@link TvInputManager#getTvInputList() TvInputManager.getTvInputList()}.)
- * <p>
- * Once the application supplies the URI for a specific TV channel to {@link #tune(String, Uri)}
+ *
+ * <p>Once the application supplies the URI for a specific TV channel to {@link #tune(String, Uri)}
  * method, it takes care of underlying service binding (and unbinding if the current TvView is
  * already bound to a service) and automatically allocates/deallocates resources needed. In addition
  * to a few essential methods to control how the contents are presented, it also provides a way to
  * dispatch input events to the connected TvInputService in order to enable custom key actions for
  * the TV input.
- * </p>
  */
 public class TvView extends ViewGroup {
     private static final String TAG = "TvView";
@@ -181,18 +180,17 @@ public class TvView extends ViewGroup {
 
     /**
      * Sets this as the main {@link TvView}.
-     * <p>
-     * The main {@link TvView} is a {@link TvView} whose corresponding TV input determines the
+     *
+     * <p>The main {@link TvView} is a {@link TvView} whose corresponding TV input determines the
      * HDMI-CEC active source device. For an HDMI port input, one of source devices that is
      * connected to that HDMI port becomes the active source. For an HDMI-CEC logical device input,
      * the corresponding HDMI-CEC logical device becomes the active source. For any non-HDMI input
      * (including the tuner, composite, S-Video, etc.), the internal device (= TV itself) becomes
      * the active source.
-     * </p><p>
-     * First tuned {@link TvView} becomes main automatically, and keeps to be main until either
+     *
+     * <p>First tuned {@link TvView} becomes main automatically, and keeps to be main until either
      * {@link #reset} is called for the main {@link TvView} or {@link #setMain} is called for other
      * {@link TvView}.
-     * </p>
      * @hide
      */
     @SystemApi
@@ -323,8 +321,8 @@ public class TvView extends ViewGroup {
 
     /**
      * Resets this TvView.
-     * <p>
-     * This method is primarily used to un-tune the current TvView.
+     *
+     * <p>This method is primarily used to un-tune the current TvView.
      */
     public void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
@@ -345,9 +343,8 @@ public class TvView extends ViewGroup {
 
     /**
      * Requests to unblock TV content according to the given rating.
-     * <p>
-     * This notifies TV input that blocked content is now OK to play.
-     * </p>
+     *
+     * <p>This notifies TV input that blocked content is now OK to play.
      *
      * @param unblockedRating A TvContentRating to unblock.
      * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
@@ -362,8 +359,8 @@ public class TvView extends ViewGroup {
 
     /**
      * Enables or disables the caption in this TvView.
-     * <p>
-     * Note that this method does not take any effect unless the current TvView is tuned.
+     *
+     * <p>Note that this method does not take any effect unless the current TvView is tuned.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
      */
@@ -512,8 +509,8 @@ public class TvView extends ViewGroup {
 
     /**
      * Dispatches an unhandled input event to the next receiver.
-     * <p>
-     * Except system keys, TvView always consumes input events in the normal flow. This is called
+     *
+     * <p>Except system keys, TvView always consumes input events in the normal flow. This is called
      * asynchronously from where the event is dispatched. It gives the host application a chance to
      * dispatch the unhandled input events.
      *
@@ -798,12 +795,11 @@ public class TvView extends ViewGroup {
 
         /**
          * This is called when the start playback position is changed.
-         * <p>
-         * The start playback position of the time shifted program can be adjusted by the TV input
-         * when it cannot retain the whole recorded program due to some reason (e.g. limitation on
-         * storage space). The application should not allow the user to seek to a position earlier
-         * than the start position.
-         * </p>
+         *
+         * <p>The start playback position of the time shifted program can be adjusted by the TV
+         * input when it cannot retain the whole recorded program due to some reason (e.g.
+         * limitation on storage space). The application should not allow the user to seek to a
+         * position earlier than the start position.
          *
          * @param inputId The ID of the TV input bound to this view.
          * @param timeMs The start playback position of the time shifted program, in milliseconds
@@ -964,8 +960,8 @@ public class TvView extends ViewGroup {
     public interface OnUnhandledInputEventListener {
         /**
          * Called when an input event was not handled by the bound TV input.
-         * <p>
-         * This is called asynchronously from where the event is dispatched. It gives the host
+         *
+         * <p>This is called asynchronously from where the event is dispatched. It gives the host
          * application a chance to handle the unhandled input events.
          *
          * @param event The input event.

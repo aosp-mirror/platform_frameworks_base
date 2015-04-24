@@ -59,15 +59,14 @@ import java.util.Set;
 /**
  * The TvInputService class represents a TV input or source such as HDMI or built-in tuner which
  * provides pass-through video or broadcast TV programs.
- * <p>
- * Applications will not normally use this service themselves, instead relying on the standard
+ *
+ * <p>Applications will not normally use this service themselves, instead relying on the standard
  * interaction provided by {@link TvView}. Those implementing TV input services should normally do
  * so by deriving from this class and providing their own session implementation based on
  * {@link TvInputService.Session}. All TV input services must require that clients hold the
  * {@link android.Manifest.permission#BIND_TV_INPUT} in order to interact with the service; if this
  * permission is not specified in the manifest, the system will refuse to bind to that TV input
  * service.
- * </p>
  */
 public abstract class TvInputService extends Service {
     private static final boolean DEBUG = false;
@@ -160,11 +159,11 @@ public abstract class TvInputService extends Service {
 
     /**
      * Returns a concrete implementation of {@link Session}.
-     * <p>
-     * May return {@code null} if this TV input service fails to create a session for some reason.
-     * If TV input represents an external device connected to a hardware TV input,
+     *
+     * <p>May return {@code null} if this TV input service fails to create a session for some
+     * reason. If TV input represents an external device connected to a hardware TV input,
      * {@link HardwareSession} should be returned.
-     * </p>
+     *
      * @param inputId The ID of the TV input associated with the session.
      */
     @Nullable
@@ -482,8 +481,8 @@ public abstract class TvInputService extends Service {
 
         /**
          * Informs the application that the user is allowed to watch the current program content.
-         * <p>
-         * Each TV input service is required to query the system whether the user is allowed to
+         *
+         * <p>Each TV input service is required to query the system whether the user is allowed to
          * watch the current program before showing it to the user if the parental controls is
          * enabled (i.e. {@link TvInputManager#isParentalControlsEnabled
          * TvInputManager.isParentalControlsEnabled()} returns {@code true}). Whether the TV input
@@ -494,13 +493,12 @@ public abstract class TvInputService extends Service {
          * result. If the rating in question turns out to be allowed by the user, the TV input
          * service must call this method to notify the application that is permitted to show the
          * content.
-         * </p><p>
-         * Each TV input service also needs to continuously listen to any changes made to the
+         *
+         * <p>Each TV input service also needs to continuously listen to any changes made to the
          * parental controls settings by registering a broadcast receiver to receive
          * {@link TvInputManager#ACTION_BLOCKED_RATINGS_CHANGED} and
          * {@link TvInputManager#ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED} and immediately
          * reevaluate the current program with the new parental controls settings.
-         * </p>
          *
          * @see #notifyContentBlocked
          * @see TvInputManager
@@ -523,8 +521,8 @@ public abstract class TvInputService extends Service {
 
         /**
          * Informs the application that the current program content is blocked by parent controls.
-         * <p>
-         * Each TV input service is required to query the system whether the user is allowed to
+         *
+         * <p>Each TV input service is required to query the system whether the user is allowed to
          * watch the current program before showing it to the user if the parental controls is
          * enabled (i.e. {@link TvInputManager#isParentalControlsEnabled
          * TvInputManager.isParentalControlsEnabled()} returns {@code true}). Whether the TV input
@@ -535,13 +533,12 @@ public abstract class TvInputService extends Service {
          * result. If the rating in question turns out to be blocked, the TV input service must
          * immediately block the content and call this method with the content rating of the current
          * program to prompt the PIN verification screen.
-         * </p><p>
-         * Each TV input service also needs to continuously listen to any changes made to the
+         *
+         * <p>Each TV input service also needs to continuously listen to any changes made to the
          * parental controls settings by registering a broadcast receiver to receive
          * {@link TvInputManager#ACTION_BLOCKED_RATINGS_CHANGED} and
          * {@link TvInputManager#ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED} and immediately
          * reevaluate the current program with the new parental controls settings.
-         * </p>
          *
          * @param rating The content rating for the current TV program.
          * @see #notifyContentAllowed
@@ -565,22 +562,21 @@ public abstract class TvInputService extends Service {
 
         /**
          * Informs the application that the time shift status is changed.
-         * <p>
-         * Prior to calling this method, the application assumes the status
+         *
+         * <p>Prior to calling this method, the application assumes the status
          * {@link TvInputManager#TIME_SHIFT_STATUS_UNKNOWN}. Right after the session is created, it
          * is important to invoke the method with the status
          * {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} if the implementation does support
          * time shifting, or {@link TvInputManager#TIME_SHIFT_STATUS_UNSUPPORTED} otherwise. Failure
          * to notifying the current status change immediately might result in an undesirable
          * behavior in the application such as hiding the play controls.
-         * </p><p>
-         * If the status {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} is reported, the
+         *
+         * <p>If the status {@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE} is reported, the
          * application assumes it can pause/resume playback, seek to a specified time position and
          * set playback rate and audio mode. The implementation should override
          * {@link #onTimeShiftPause}, {@link #onTimeShiftResume}, {@link #onTimeShiftSeekTo},
          * {@link #onTimeShiftGetStartPosition}, {@link #onTimeShiftGetCurrentPosition} and
          * {@link #onTimeShiftSetPlaybackRate}.
-         * </p>
          *
          * @param status The current time shift status. Should be one of the followings.
          * <ul>
@@ -678,21 +674,20 @@ public abstract class TvInputService extends Service {
         /**
          * Sets the current session as the main session. The main session is a session whose
          * corresponding TV input determines the HDMI-CEC active source device.
-         * <p>
-         * TV input service that manages HDMI-CEC logical device should implement {@link
+         *
+         * <p>TV input service that manages HDMI-CEC logical device should implement {@link
          * #onSetMain} to (1) select the corresponding HDMI logical device as the source device
          * when {@code isMain} is {@code true}, and to (2) select the internal device (= TV itself)
          * as the source device when {@code isMain} is {@code false} and the session is still main.
          * Also, if a surface is passed to a non-main session and active source is changed to
          * initiate the surface, the active source should be returned to the main session.
-         * </p><p>
-         * {@link TvView} guarantees that, when tuning involves a session transition, {@code
+         *
+         * <p>{@link TvView} guarantees that, when tuning involves a session transition, {@code
          * onSetMain(true)} for new session is called first, {@code onSetMain(false)} for old
          * session is called afterwards. This allows {@code onSetMain(false)} to be no-op when TV
          * input service knows that the next main session corresponds to another HDMI logical
          * device. Practically, this implies that one TV input service should handle all HDMI port
          * and HDMI-CEC logical devices for smooth active source transition.
-         * </p>
          *
          * @param isMain If true, session should become main.
          * @see TvView#setMain
@@ -705,9 +700,9 @@ public abstract class TvInputService extends Service {
         /**
          * Sets the {@link Surface} for the current input session on which the TV input renders
          * video.
-         * <p>
-         * When {@code setSurface(null)} is called, the implementation should stop using the Surface
-         * object previously given and release any references to it.
+         *
+         * <p>When {@code setSurface(null)} is called, the implementation should stop using the
+         * Surface object previously given and release any references to it.
          *
          * @param surface possibly {@code null} {@link Surface} the application passes to this TV
          *            input session.
@@ -778,8 +773,8 @@ public abstract class TvInputService extends Service {
 
         /**
          * Enables or disables the caption.
-         * <p>
-         * The locale for the user's preferred captioning language can be obtained by calling
+         *
+         * <p>The locale for the user's preferred captioning language can be obtained by calling
          * {@link CaptioningManager#getLocale CaptioningManager.getLocale()}.
          *
          * @param enabled {@code true} to enable, {@code false} to disable.
@@ -789,14 +784,13 @@ public abstract class TvInputService extends Service {
 
         /**
          * Requests to unblock the content according to the given rating.
-         * <p>
-         * The implementation should unblock the content.
+         *
+         * <p>The implementation should unblock the content.
          * TV input service has responsibility to decide when/how the unblock expires
          * while it can keep previously unblocked ratings in order not to ask a user
          * to unblock whenever a content rating is changed.
          * Therefore an unblocked rating can be valid for a channel, a program,
          * or certain amount of time depending on the implementation.
-         * </p>
          *
          * @param unblockedRating An unblocked content rating
          */
@@ -805,10 +799,10 @@ public abstract class TvInputService extends Service {
 
         /**
          * Selects a given track.
-         * <p>
-         * If this is done successfully, the implementation should call {@link #notifyTrackSelected}
-         * to help applications maintain the up-to-date list of the selected tracks.
-         * </p>
+         *
+         * <p>If this is done successfully, the implementation should call
+         * {@link #notifyTrackSelected} to help applications maintain the up-to-date list of the
+         * selected tracks.
          *
          * @param trackId The ID of the track to select. {@code null} means to unselect the current
          *            track for a given type.
@@ -889,10 +883,9 @@ public abstract class TvInputService extends Service {
 
         /**
          * Called when the application sets playback rate and audio mode.
-         * <p>
-         * Once a playback rate is set, the implementation should honor the value until a new tune
-         * request. Pause/resume/seek request does not reset the playback rate previously set.
-         * </p>
+         *
+         * <p>Once a playback rate is set, the implementation should honor the value until a new
+         * tune request. Pause/resume/seek request does not reset the playback rate previously set.
          *
          * @param rate The ratio between desired playback rate and normal one.
          * @param audioMode Audio playback mode. Must be one of the supported audio modes:
@@ -912,13 +905,12 @@ public abstract class TvInputService extends Service {
          * Returns the start playback position for time shifting, in milliseconds since the epoch.
          * Returns {@link TvInputManager#TIME_SHIFT_INVALID_TIME} if the position is unknown at the
          * moment.
-         * <p>
-         * The start playback position of the time shifted program should be adjusted when the
+         *
+         * <p>The start playback position of the time shifted program should be adjusted when the
          * implementation cannot retain the whole recorded program due to some reason (e.g.
          * limitation on storage space). It is the earliest possible time position that the user can
          * seek to, thus failure to notifying its change immediately might result in bad experience
          * where the application allows the user to seek to an invalid time position.
-         * </p>
          *
          * @see #onTimeShiftResume
          * @see #onTimeShiftPause
@@ -948,11 +940,11 @@ public abstract class TvInputService extends Service {
         /**
          * Default implementation of {@link android.view.KeyEvent.Callback#onKeyDown(int, KeyEvent)
          * KeyEvent.Callback.onKeyDown()}: always returns false (doesn't handle the event).
-         * <p>
-         * Override this to intercept key down events before they are processed by the application.
-         * If you return true, the application will not process the event itself. If you return
-         * false, the normal application processing will occur as if the TV input had not seen the
-         * event at all.
+         *
+         * <p>Override this to intercept key down events before they are processed by the
+         * application. If you return true, the application will not process the event itself. If
+         * you return false, the normal application processing will occur as if the TV input had not
+         * seen the event at all.
          *
          * @param keyCode The value in event.getKeyCode().
          * @param event Description of the key event.
@@ -968,8 +960,8 @@ public abstract class TvInputService extends Service {
          * Default implementation of
          * {@link android.view.KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
          * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle the event).
-         * <p>
-         * Override this to intercept key long press events before they are processed by the
+         *
+         * <p>Override this to intercept key long press events before they are processed by the
          * application. If you return true, the application will not process the event itself. If
          * you return false, the normal application processing will occur as if the TV input had not
          * seen the event at all.
@@ -988,11 +980,11 @@ public abstract class TvInputService extends Service {
          * Default implementation of
          * {@link android.view.KeyEvent.Callback#onKeyMultiple(int, int, KeyEvent)
          * KeyEvent.Callback.onKeyMultiple()}: always returns false (doesn't handle the event).
-         * <p>
-         * Override this to intercept special key multiple events before they are processed by the
-         * application. If you return true, the application will not itself process the event. If
-         * you return false, the normal application processing will occur as if the TV input had not
-         * seen the event at all.
+         *
+         * <p>Override this to intercept special key multiple events before they are processed by
+         * the application. If you return true, the application will not itself process the event.
+         * If you return false, the normal application processing will occur as if the TV input had
+         * not seen the event at all.
          *
          * @param keyCode The value in event.getKeyCode().
          * @param count The number of times the action was made.
@@ -1008,9 +1000,9 @@ public abstract class TvInputService extends Service {
         /**
          * Default implementation of {@link android.view.KeyEvent.Callback#onKeyUp(int, KeyEvent)
          * KeyEvent.Callback.onKeyUp()}: always returns false (doesn't handle the event).
-         * <p>
-         * Override this to intercept key up events before they are processed by the application. If
-         * you return true, the application will not itself process the event. If you return false,
+         *
+         * <p>Override this to intercept key up events before they are processed by the application.
+         * If you return true, the application will not itself process the event. If you return false,
          * the normal application processing will occur as if the TV input had not seen the event at
          * all.
          *
@@ -1433,8 +1425,8 @@ public abstract class TvInputService extends Service {
     /**
      * Base class for a TV input session which represents an external device connected to a
      * hardware TV input.
-     * <p>
-     * This class is for an input which provides channels for the external set-top box to the
+     *
+     * <p>This class is for an input which provides channels for the external set-top box to the
      * application. Once a TV input returns an implementation of this class on
      * {@link #onCreateSession(String)}, the framework will create a separate session for
      * a hardware TV Input (e.g. HDMI 1) and forward the application's surface to the session so
@@ -1442,9 +1434,10 @@ public abstract class TvInputService extends Service {
      * this TV input. The implementation of this class is expected to change the channel of the
      * external set-top box via a proprietary protocol when {@link HardwareSession#onTune(Uri)} is
      * requested by the application.
-     * </p><p>
-     * Note that this class is not for inputs for internal hardware like built-in tuner and HDMI 1.
-     * </p>
+     *
+     * <p>Note that this class is not for inputs for internal hardware like built-in tuner and HDMI
+     * 1.
+     *
      * @see #onCreateSession(String)
      */
     public abstract static class HardwareSession extends Session {
@@ -1465,12 +1458,11 @@ public abstract class TvInputService extends Service {
 
         /**
          * Returns the hardware TV input ID the external device is connected to.
-         * <p>
-         * TV input is expected to provide {@link android.R.attr#setupActivity} so that
+         *
+         * <p>TV input is expected to provide {@link android.R.attr#setupActivity} so that
          * the application can launch it before using this TV input. The setup activity may let
          * the user select the hardware TV input to which the external device is connected. The ID
          * of the selected one should be stored in the TV input so that it can be returned here.
-         * </p>
          */
         public abstract String getHardwareInputId();
 
