@@ -86,6 +86,10 @@ status_t JMediaSync::updateQueuedAudioData(
     return mSync->updateQueuedAudioData(sizeInBytes, presentationTimeUs);
 }
 
+status_t JMediaSync::getPlayTimeForPendingAudioFrames(int64_t *outTimeUs) {
+    return mSync->getPlayTimeForPendingAudioFrames(outTimeUs);
+}
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -268,6 +272,21 @@ static jboolean android_media_MediaSync_native_getTimestamp(
     return JNI_TRUE;
 }
 
+static jlong android_media_MediaSync_native_getPlayTimeForPendingAudioFrames(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaSync> sync = getMediaSync(env, thiz);
+    if (sync == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+    }
+
+    int64_t playTimeUs = 0;
+    status_t err = sync->getPlayTimeForPendingAudioFrames(&playTimeUs);
+    if (err != NO_ERROR) {
+        throwExceptionAsNecessary(env, err);
+    }
+    return (jlong)playTimeUs;
+}
+
 static void
 android_media_MediaSync_setSyncSettings(JNIEnv *env, jobject thiz, jobject settings)
 {
@@ -386,6 +405,10 @@ static JNINativeMethod gMethods[] = {
     { "native_getTimestamp",
       "(Landroid/media/MediaTimestamp;)Z",
       (void *)android_media_MediaSync_native_getTimestamp },
+
+    { "native_getPlayTimeForPendingAudioFrames",
+      "()J",
+      (void *)android_media_MediaSync_native_getPlayTimeForPendingAudioFrames },
 
     { "native_init", "()V", (void *)android_media_MediaSync_native_init },
 
