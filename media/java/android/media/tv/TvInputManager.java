@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
@@ -229,7 +230,7 @@ public final class TvInputManager {
          * @param session A {@link TvInputManager.Session} instance created. This can be
          *            {@code null} if the creation request failed.
          */
-        public void onSessionCreated(Session session) {
+        public void onSessionCreated(@Nullable Session session) {
         }
 
         /**
@@ -270,7 +271,7 @@ public final class TvInputManager {
          * @param trackId The ID of the selected track. When {@code null} the currently selected
          *            track for a given type should be unselected.
          */
-        public void onTrackSelected(Session session, int type, String trackId) {
+        public void onTrackSelected(Session session, int type, @Nullable String trackId) {
         }
 
         /**
@@ -930,6 +931,7 @@ public final class TvInputManager {
      * @param inputId The ID of the TV input.
      * @return the {@link TvInputInfo} for a given TV input. {@code null} if not found.
      */
+    @Nullable
     public TvInputInfo getTvInputInfo(String inputId) {
         if (inputId == null) {
             throw new IllegalArgumentException("inputId cannot be null");
@@ -1501,7 +1503,7 @@ public final class TvInputManager {
          *            track of the given type will be unselected.
          * @see #getTracks
          */
-        public void selectTrack(int type, String trackId) {
+        public void selectTrack(int type, @Nullable String trackId) {
             synchronized (mMetadataLock) {
                 if (type == TvTrackInfo.TYPE_AUDIO) {
                     if (trackId != null && !containsTrack(mAudioTracks, trackId)) {
@@ -1550,6 +1552,7 @@ public final class TvInputManager {
          *            {@link TvTrackInfo#TYPE_VIDEO} or {@link TvTrackInfo#TYPE_SUBTITLE}.
          * @return the list of tracks for the given type.
          */
+        @Nullable
         public List<TvTrackInfo> getTracks(int type) {
             synchronized (mMetadataLock) {
                 if (type == TvTrackInfo.TYPE_AUDIO) {
@@ -1579,6 +1582,7 @@ public final class TvInputManager {
          * @return the ID of the selected track.
          * @see #selectTrack
          */
+        @Nullable
         public String getSelectedTrack(int type) {
             synchronized (mMetadataLock) {
                 if (type == TvTrackInfo.TYPE_AUDIO) {
