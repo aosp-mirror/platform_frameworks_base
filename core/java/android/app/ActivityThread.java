@@ -257,21 +257,18 @@ public final class ActivityThread {
         }
     }
 
-    static final class AcquiringProviderRecord {
-        IActivityManager.ContentProviderHolder holder;
-        boolean acquiring = true;
-        int requests = 1;
-    }
-
     // The lock of mProviderMap protects the following variables.
-    final ArrayMap<ProviderKey, ProviderClientRecord> mProviderMap = new ArrayMap<>();
-    final ArrayMap<ProviderKey, AcquiringProviderRecord> mAcquiringProviderMap = new ArrayMap<>();
-    final ArrayMap<IBinder, ProviderRefCount> mProviderRefCountMap = new ArrayMap<>();
-    final ArrayMap<IBinder, ProviderClientRecord> mLocalProviders = new ArrayMap<>();
-    final ArrayMap<ComponentName, ProviderClientRecord> mLocalProvidersByName = new ArrayMap<>();
+    final ArrayMap<ProviderKey, ProviderClientRecord> mProviderMap
+        = new ArrayMap<ProviderKey, ProviderClientRecord>();
+    final ArrayMap<IBinder, ProviderRefCount> mProviderRefCountMap
+        = new ArrayMap<IBinder, ProviderRefCount>();
+    final ArrayMap<IBinder, ProviderClientRecord> mLocalProviders
+        = new ArrayMap<IBinder, ProviderClientRecord>();
+    final ArrayMap<ComponentName, ProviderClientRecord> mLocalProvidersByName
+            = new ArrayMap<ComponentName, ProviderClientRecord>();
 
     final ArrayMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
-            = new ArrayMap<>();
+        = new ArrayMap<Activity, ArrayList<OnActivityPausedListener>>();
 
     final GcIdler mGcIdler = new GcIdler();
     boolean mGcIdlerScheduled = false;
@@ -348,7 +345,7 @@ public final class ActivityThread {
         }
     }
 
-    static final class ProviderClientRecord {
+    final class ProviderClientRecord {
         final String[] mNames;
         final IContentProvider mProvider;
         final ContentProvider mLocalProvider;
@@ -4651,57 +4648,22 @@ public final class ActivityThread {
 
     public final IContentProvider acquireProvider(
             Context c, String auth, int userId, boolean stable) {
-        final ProviderKey key = new ProviderKey(auth, userId);
-        final IContentProvider provider = acquireExistingProvider(c, key, stable);
+        final IContentProvider provider = acquireExistingProvider(c, auth, userId, stable);
         if (provider != null) {
             return provider;
         }
-        AcquiringProviderRecord r;
-        boolean first = false;
-        synchronized (mAcquiringProviderMap) {
-            r = mAcquiringProviderMap.get(key);
-            if (r == null) {
-                r = new AcquiringProviderRecord();
-                mAcquiringProviderMap.put(key, r);
-                first = true;
-            } else {
-                r.requests++;
-            }
-        }
 
+        // There is a possible race here.  Another thread may try to acquire
+        // the same provider at the same time.  When this happens, we want to ensure
+        // that the first one wins.
+        // Note that we cannot hold the lock while acquiring and installing the
+        // provider since it might take a long time to run and it could also potentially
+        // be re-entrant in the case where the provider is in the same process.
         IActivityManager.ContentProviderHolder holder = null;
-        if (first) {
-            // Multiple threads may try to acquire the same provider at the same time.
-            // When this happens, we only let the first one really gets provider.
-            // Other threads just wait for its result.
-            // Note that we cannot hold the lock while acquiring and installing the
-            // provider since it might take a long time to run and it could also potentially
-            // be re-entrant in the case where the provider is in the same process.
-            try {
-                holder = ActivityManagerNative.getDefault().getContentProvider(
-                        getApplicationThread(), auth, userId, stable);
-            } catch (RemoteException ex) {
-            }
-            synchronized (r) {
-                r.holder = holder;
-                r.acquiring = false;
-                r.notifyAll();
-            }
-        } else {
-            synchronized (r) {
-                while (r.acquiring) {
-                    try {
-                        r.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-                holder = r.holder;
-            }
-        }
-        synchronized (mAcquiringProviderMap) {
-            if (--r.requests == 0) {
-                mAcquiringProviderMap.remove(key);
-            }
+        try {
+            holder = ActivityManagerNative.getDefault().getContentProvider(
+                    getApplicationThread(), auth, userId, stable);
+        } catch (RemoteException ex) {
         }
         if (holder == null) {
             Slog.e(TAG, "Failed to find provider info for " + auth);
@@ -4785,12 +4747,8 @@ public final class ActivityThread {
 
     public final IContentProvider acquireExistingProvider(
             Context c, String auth, int userId, boolean stable) {
-        return acquireExistingProvider(c, new ProviderKey(auth, userId), stable);
-    }
-
-    final IContentProvider acquireExistingProvider(
-            Context c, ProviderKey key, boolean stable) {
         synchronized (mProviderMap) {
+            final ProviderKey key = new ProviderKey(auth, userId);
             final ProviderClientRecord pr = mProviderMap.get(key);
             if (pr == null) {
                 return null;
@@ -4801,7 +4759,7 @@ public final class ActivityThread {
             if (!jBinder.isBinderAlive()) {
                 // The hosting process of the provider has died; we can't
                 // use this one.
-                Log.i(TAG, "Acquiring provider " + key.authority + " for user " +  key.userId
+                Log.i(TAG, "Acquiring provider " + auth + " for user " + userId
                         + ": existing object's process dead");
                 handleUnstableProviderDiedLocked(jBinder, true);
                 return null;
@@ -5123,12 +5081,18 @@ public final class ActivityThread {
                     if (DEBUG_PROVIDER) {
                         Slog.v(TAG, "installProvider: lost the race, updating ref count");
                     }
-                    // The provider has already been installed, so we need
-                    // to increase reference count to the existing one, but
-                    // only if release is needed (that is, it is not running
-                    // in the system process or local to the process).
+                    // We need to transfer our new reference to the existing
+                    // ref count, releasing the old one...  but only if
+                    // release is needed (that is, it is not running in the
+                    // system process).
                     if (!noReleaseNeeded) {
                         incProviderRefLocked(prc, stable);
+                        try {
+                            ActivityManagerNative.getDefault().removeContentProvider(
+                                    holder.connection, stable);
+                        } catch (RemoteException e) {
+                            //do nothing content provider object is dead any way
+                        }
                     }
                 } else {
                     ProviderClientRecord client = installProviderAuthoritiesLocked(
