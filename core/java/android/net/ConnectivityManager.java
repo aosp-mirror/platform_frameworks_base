@@ -2259,116 +2259,82 @@ public class ConnectivityManager {
         @Override
         public void handleMessage(Message message) {
             Log.d(TAG, "CM callback handler got msg " + message.what);
+            NetworkRequest request = (NetworkRequest) getObject(message, NetworkRequest.class);
+            Network network = (Network) getObject(message, Network.class);
             switch (message.what) {
                 case CALLBACK_PRECHECK: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        callbacks.onPreCheck((Network)getObject(message, Network.class));
-                    } else {
-                        Log.e(TAG, "callback not found for PRECHECK message");
+                    NetworkCallback callback = getCallback(request, "PRECHECK");
+                    if (callback != null) {
+                        callback.onPreCheck(network);
                     }
                     break;
                 }
                 case CALLBACK_AVAILABLE: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        callbacks.onAvailable((Network)getObject(message, Network.class));
-                    } else {
-                        Log.e(TAG, "callback not found for AVAILABLE message");
+                    NetworkCallback callback = getCallback(request, "AVAILABLE");
+                    if (callback != null) {
+                        callback.onAvailable(network);
                     }
                     break;
                 }
                 case CALLBACK_LOSING: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        callbacks.onLosing((Network)getObject(message, Network.class),
-                                message.arg1);
-                    } else {
-                        Log.e(TAG, "callback not found for LOSING message");
+                    NetworkCallback callback = getCallback(request, "LOSING");
+                    if (callback != null) {
+                        callback.onLosing(network, message.arg1);
                     }
                     break;
                 }
                 case CALLBACK_LOST: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        callbacks.onLost((Network)getObject(message, Network.class));
-                    } else {
-                        Log.e(TAG, "callback not found for LOST message");
+                    NetworkCallback callback = getCallback(request, "LOST");
+                    if (callback != null) {
+                        callback.onLost(network);
                     }
                     break;
                 }
                 case CALLBACK_UNAVAIL: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = null;
-                    synchronized(mCallbackMap) {
-                        callbacks = mCallbackMap.get(request);
-                    }
-                    if (callbacks != null) {
-                        callbacks.onUnavailable();
-                    } else {
-                        Log.e(TAG, "callback not found for UNAVAIL message");
+                    NetworkCallback callback = getCallback(request, "UNAVAIL");
+                    if (callback != null) {
+                        callback.onUnavailable();
                     }
                     break;
                 }
                 case CALLBACK_CAP_CHANGED: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        Network network = (Network)getObject(message, Network.class);
+                    NetworkCallback callback = getCallback(request, "CAP_CHANGED");
+                    if (callback != null) {
                         NetworkCapabilities cap = (NetworkCapabilities)getObject(message,
                                 NetworkCapabilities.class);
 
-                        callbacks.onCapabilitiesChanged(network, cap);
-                    } else {
-                        Log.e(TAG, "callback not found for CAP_CHANGED message");
+                        callback.onCapabilitiesChanged(network, cap);
                     }
                     break;
                 }
                 case CALLBACK_IP_CHANGED: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        Network network = (Network)getObject(message, Network.class);
+                    NetworkCallback callback = getCallback(request, "IP_CHANGED");
+                    if (callback != null) {
                         LinkProperties lp = (LinkProperties)getObject(message,
                                 LinkProperties.class);
 
-                        callbacks.onLinkPropertiesChanged(network, lp);
-                    } else {
-                        Log.e(TAG, "callback not found for IP_CHANGED message");
+                        callback.onLinkPropertiesChanged(network, lp);
                     }
                     break;
                 }
                 case CALLBACK_RELEASED: {
-                    NetworkRequest req = (NetworkRequest)getObject(message, NetworkRequest.class);
-                    NetworkCallback callbacks = null;
+                    NetworkCallback callback = null;
                     synchronized(mCallbackMap) {
-                        callbacks = mCallbackMap.remove(req);
+                        callback = mCallbackMap.remove(request);
                     }
-                    if (callbacks != null) {
+                    if (callback != null) {
                         synchronized(mRefCount) {
                             if (mRefCount.decrementAndGet() == 0) {
                                 getLooper().quit();
                             }
                         }
                     } else {
-                        Log.e(TAG, "callback not found for CANCELED message");
+                        Log.e(TAG, "callback not found for RELEASED message");
                     }
                     break;
                 }
                 case CALLBACK_EXIT: {
-                    Log.d(TAG, "Listener quiting");
+                    Log.d(TAG, "Listener quitting");
                     getLooper().quit();
                     break;
                 }
@@ -2382,10 +2348,16 @@ public class ConnectivityManager {
         private Object getObject(Message msg, Class c) {
             return msg.getData().getParcelable(c.getSimpleName());
         }
-        private NetworkCallback getCallbacks(NetworkRequest req) {
+
+        private NetworkCallback getCallback(NetworkRequest req, String name) {
+            NetworkCallback callback;
             synchronized(mCallbackMap) {
-                return mCallbackMap.get(req);
+                callback = mCallbackMap.get(req);
             }
+            if (callback == null) {
+                Log.e(TAG, "callback not found for " + name + " message");
+            }
+            return callback;
         }
     }
 
