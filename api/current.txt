@@ -14746,7 +14746,8 @@ package android.media {
     field public static final int CHANNEL_IN_Y_AXIS = 4096; // 0x1000
     field public static final int CHANNEL_IN_Z_AXIS = 8192; // 0x2000
     field public static final int CHANNEL_OUT_5POINT1 = 252; // 0xfc
-    field public static final int CHANNEL_OUT_7POINT1 = 1020; // 0x3fc
+    field public static final deprecated int CHANNEL_OUT_7POINT1 = 1020; // 0x3fc
+    field public static final int CHANNEL_OUT_7POINT1_SURROUND = 6396; // 0x18fc
     field public static final int CHANNEL_OUT_BACK_CENTER = 1024; // 0x400
     field public static final int CHANNEL_OUT_BACK_LEFT = 64; // 0x40
     field public static final int CHANNEL_OUT_BACK_RIGHT = 128; // 0x80
@@ -16429,6 +16430,14 @@ package android.media {
     method public abstract void onAudioDeviceConnection();
   }
 
+  public abstract interface OnAudioRecordRoutingListener {
+    method public abstract void onAudioRecordRouting(android.media.AudioRecord);
+  }
+
+  public abstract interface OnAudioTrackRoutingListener {
+    method public abstract void onAudioTrackRouting(android.media.AudioTrack);
+  }
+
   public final class PlaybackSettings {
     ctor public PlaybackSettings();
     method public android.media.PlaybackSettings allowDefaults();
@@ -16445,14 +16454,6 @@ package android.media {
     field public static final int AUDIO_FALLBACK_MODE_MUTE = 1; // 0x1
     field public static final int AUDIO_STRETCH_MODE_DEFAULT = 0; // 0x0
     field public static final int AUDIO_STRETCH_MODE_VOICE = 1; // 0x1
-  }
-
-  public abstract interface OnAudioRecordRoutingListener {
-    method public abstract void onAudioRecordRouting(android.media.AudioRecord);
-  }
-
-  public abstract interface OnAudioTrackRoutingListener {
-    method public abstract void onAudioTrackRouting(android.media.AudioTrack);
   }
 
   public final class Rating implements android.os.Parcelable {
