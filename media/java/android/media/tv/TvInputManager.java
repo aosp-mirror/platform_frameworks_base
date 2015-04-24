@@ -40,6 +40,8 @@ import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.View;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -934,9 +936,7 @@ public final class TvInputManager {
      */
     @Nullable
     public TvInputInfo getTvInputInfo(@NonNull String inputId) {
-        if (inputId == null) {
-            throw new IllegalArgumentException("inputId cannot be null");
-        }
+        Preconditions.checkNotNull(inputId);
         try {
             return mService.getTvInputInfo(inputId, mUserId);
         } catch (RemoteException e) {
@@ -958,9 +958,7 @@ public final class TvInputManager {
      * @throws IllegalArgumentException if the argument is {@code null}.
      */
     public int getInputState(@NonNull String inputId) {
-        if (inputId == null) {
-            throw new IllegalArgumentException("inputId cannot be null");
-        }
+        Preconditions.checkNotNull(inputId);
         synchronized (mLock) {
             Integer state = mStateMap.get(inputId);
             if (state == null) {
@@ -976,15 +974,10 @@ public final class TvInputManager {
      *
      * @param callback A callback used to monitor status of the TV inputs.
      * @param handler A {@link Handler} that the status change will be delivered to.
-     * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
     public void registerCallback(@NonNull TvInputCallback callback, @NonNull Handler handler) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback cannot be null");
-        }
-        if (handler == null) {
-            throw new IllegalArgumentException("handler cannot be null");
-        }
+        Preconditions.checkNotNull(callback);
+        Preconditions.checkNotNull(handler);
         synchronized (mLock) {
             mCallbackRecords.add(new TvInputCallbackRecord(callback, handler));
         }
@@ -994,12 +987,9 @@ public final class TvInputManager {
      * Unregisters the existing {@link TvInputCallback}.
      *
      * @param callback The existing callback to remove.
-     * @throws IllegalArgumentException if any of the arguments is {@code null}.
      */
     public void unregisterCallback(@NonNull final TvInputCallback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback cannot be null");
-        }
+        Preconditions.checkNotNull(callback);
         synchronized (mLock) {
             for (Iterator<TvInputCallbackRecord> it = mCallbackRecords.iterator();
                     it.hasNext(); ) {
@@ -1049,9 +1039,7 @@ public final class TvInputManager {
      * @return {@code true} if the given TV content rating is blocked, {@code false} otherwise.
      */
     public boolean isRatingBlocked(@NonNull TvContentRating rating) {
-        if (rating == null) {
-            throw new IllegalArgumentException("rating cannot be null");
-        }
+        Preconditions.checkNotNull(rating);
         try {
             return mService.isRatingBlocked(rating.flattenToString(), mUserId);
         } catch (RemoteException e) {
@@ -1087,10 +1075,8 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
-    public void addBlockedRating(TvContentRating rating) {
-        if (rating == null) {
-            throw new IllegalArgumentException("rating cannot be null");
-        }
+    public void addBlockedRating(@NonNull TvContentRating rating) {
+        Preconditions.checkNotNull(rating);
         try {
             mService.addBlockedRating(rating.flattenToString(), mUserId);
         } catch (RemoteException e) {
@@ -1107,10 +1093,8 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
-    public void removeBlockedRating(TvContentRating rating) {
-        if (rating == null) {
-            throw new IllegalArgumentException("rating cannot be null");
-        }
+    public void removeBlockedRating(@NonNull TvContentRating rating) {
+        Preconditions.checkNotNull(rating);
         try {
             mService.removeBlockedRating(rating.flattenToString(), mUserId);
         } catch (RemoteException e) {
@@ -1140,21 +1124,14 @@ public final class TvInputManager {
      * @param inputId The id of the TV input.
      * @param callback A callback used to receive the created session.
      * @param handler A {@link Handler} that the session creation will be delivered to.
-     * @throws IllegalArgumentException if any of the arguments is {@code null}.
      * @hide
      */
     @SystemApi
-    public void createSession(String inputId, final SessionCallback callback,
-            Handler handler) {
-        if (inputId == null) {
-            throw new IllegalArgumentException("id cannot be null");
-        }
-        if (callback == null) {
-            throw new IllegalArgumentException("callback cannot be null");
-        }
-        if (handler == null) {
-            throw new IllegalArgumentException("handler cannot be null");
-        }
+    public void createSession(@NonNull String inputId, @NonNull final SessionCallback callback,
+            @NonNull Handler handler) {
+        Preconditions.checkNotNull(inputId);
+        Preconditions.checkNotNull(callback);
+        Preconditions.checkNotNull(handler);
         SessionCallbackRecord record = new SessionCallbackRecord(callback, handler);
         synchronized (mSessionCallbackRecordMap) {
             int seq = mNextSeq++;
@@ -1436,7 +1413,6 @@ public final class TvInputManager {
          * Tunes to a given channel.
          *
          * @param channelUri The URI of a channel.
-         * @throws IllegalArgumentException if the argument is {@code null}.
          */
         public void tune(Uri channelUri) {
             tune(channelUri, null);
@@ -1447,14 +1423,11 @@ public final class TvInputManager {
          *
          * @param channelUri The URI of a channel.
          * @param params A set of extra parameters which might be handled with this tune event.
-         * @throws IllegalArgumentException if {@code channelUri} is {@code null}.
          * @hide
          */
         @SystemApi
-        public void tune(Uri channelUri, Bundle params) {
-            if (channelUri == null) {
-                throw new IllegalArgumentException("channelUri cannot be null");
-            }
+        public void tune(@NonNull Uri channelUri, Bundle params) {
+            Preconditions.checkNotNull(channelUri);
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
@@ -1790,16 +1763,11 @@ public final class TvInputManager {
          *
          * @param view A view playing TV.
          * @param frame A position of the overlay view.
-         * @throws IllegalArgumentException if any of the arguments is {@code null}.
          * @throws IllegalStateException if {@code view} is not attached to a window.
          */
-        void createOverlayView(View view, Rect frame) {
-            if (view == null) {
-                throw new IllegalArgumentException("view cannot be null");
-            }
-            if (frame == null) {
-                throw new IllegalArgumentException("frame cannot be null");
-            }
+        void createOverlayView(@NonNull View view, @NonNull Rect frame) {
+            Preconditions.checkNotNull(view);
+            Preconditions.checkNotNull(frame);
             if (view.getWindowToken() == null) {
                 throw new IllegalStateException("view must be attached to a window");
             }
@@ -1818,12 +1786,9 @@ public final class TvInputManager {
          * Relayouts the current overlay view.
          *
          * @param frame A new position of the overlay view.
-         * @throws IllegalArgumentException if the arguments is {@code null}.
          */
-        void relayoutOverlayView(Rect frame) {
-            if (frame == null) {
-                throw new IllegalArgumentException("frame cannot be null");
-            }
+        void relayoutOverlayView(@NonNull Rect frame) {
+            Preconditions.checkNotNull(frame);
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
@@ -1853,13 +1818,11 @@ public final class TvInputManager {
         /**
          * Requests to unblock content blocked by parental controls.
          */
-        void requestUnblockContent(TvContentRating unblockedRating) {
+        void requestUnblockContent(@NonNull TvContentRating unblockedRating) {
+            Preconditions.checkNotNull(unblockedRating);
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
-            }
-            if (unblockedRating == null) {
-                throw new IllegalArgumentException("unblockedRating cannot be null");
             }
             try {
                 mService.requestUnblockContent(mToken, unblockedRating.flattenToString(), mUserId);
@@ -1871,25 +1834,22 @@ public final class TvInputManager {
         /**
          * Dispatches an input event to this session.
          *
-         * @param event An {@link InputEvent} to dispatch.
+         * @param event An {@link InputEvent} to dispatch. Cannot be {@code null}.
          * @param token A token used to identify the input event later in the callback.
-         * @param callback A callback used to receive the dispatch result.
-         * @param handler A {@link Handler} that the dispatch result will be delivered to.
+         * @param callback A callback used to receive the dispatch result. Cannot be {@code null}.
+         * @param handler A {@link Handler} that the dispatch result will be delivered to. Cannot be
+         *            {@code null}.
          * @return Returns {@link #DISPATCH_HANDLED} if the event was handled. Returns
          *         {@link #DISPATCH_NOT_HANDLED} if the event was not handled. Returns
          *         {@link #DISPATCH_IN_PROGRESS} if the event is in progress and the callback will
          *         be invoked later.
-         * @throws IllegalArgumentException if any of the necessary arguments is {@code null}.
          * @hide
          */
-        public int dispatchInputEvent(InputEvent event, Object token,
-                FinishedInputEventCallback callback, Handler handler) {
-            if (event == null) {
-                throw new IllegalArgumentException("event cannot be null");
-            }
-            if (callback != null && handler == null) {
-                throw new IllegalArgumentException("handler cannot be null");
-            }
+        public int dispatchInputEvent(@NonNull InputEvent event, Object token,
+                @NonNull FinishedInputEventCallback callback, @NonNull Handler handler) {
+            Preconditions.checkNotNull(event);
+            Preconditions.checkNotNull(callback);
+            Preconditions.checkNotNull(handler);
             synchronized (mHandler) {
                 if (mChannel == null) {
                     return DISPATCH_NOT_HANDLED;
