@@ -370,6 +370,11 @@ public abstract class InCallService extends Service {
         public abstract void registerCallback(VideoCall.Callback callback);
 
         /**
+         * Clears the video call listener set via {@link #setVideoCallListener(Listener)}.
+         */
+        public abstract void removeVideoCallListener();
+
+        /**
          * Sets the camera to be used for video recording in a video call.
          *
          * @param cameraId The id of the camera.
