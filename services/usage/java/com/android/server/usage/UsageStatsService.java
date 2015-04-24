@@ -17,7 +17,10 @@
 package com.android.server.usage;
 
 import android.Manifest;
+import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
@@ -30,6 +33,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
@@ -82,6 +86,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_FLUSH_TO_DISK = 1;
     static final int MSG_REMOVE_USER = 2;
     static final int MSG_INFORM_LISTENERS = 3;
+    static final int MSG_RESET_LAST_TIMESTAMP = 4;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -279,6 +284,29 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
+     * Forces the app's timestamp to reflect idle or active. If idle, then it rolls back the
+     * last used timestamp to a point in time thats behind the threshold for idle.
+     */
+    void resetLastTimestamp(String packageName, int userId, boolean idle) {
+        synchronized (mLock) {
+            final long timeNow = checkAndGetTimeLocked();
+            final long lastTimestamp = timeNow - (idle ? mAppIdleDurationMillis : 0);
+
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+            final long lastUsed = service.getLastPackageAccessTime(packageName);
+            final boolean previouslyIdle = hasPassedIdleDuration(lastUsed);
+            service.setLastTimestamp(packageName, lastTimestamp);
+            // Inform listeners if necessary
+            if (previouslyIdle != idle) {
+                // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
+                        /* idle = */ idle ? 1 : 0, packageName));
+            }
+        }
+    }
+
+    /**
      * Called by the Binder stub.
      */
     void flushToDisk() {
@@ -384,11 +412,39 @@ public class UsageStatsService extends SystemService implements
     }
 
     boolean isAppIdle(String packageName, int userId) {
+        if (packageName == null) return false;
         if (SystemConfig.getInstance().getAllowInPowerSave().contains(packageName)) {
             return false;
         }
+        if (isActiveDeviceAdmin(packageName, userId)) {
+            return false;
+        }
+
         final long lastUsed = getLastPackageAccessTime(packageName, userId);
         return hasPassedIdleDuration(lastUsed);
+    }
+
+    void setAppIdle(String packageName, boolean idle, int userId) {
+        if (packageName == null) return;
+
+        mHandler.obtainMessage(MSG_RESET_LAST_TIMESTAMP, userId, idle ? 1 : 0, packageName)
+                .sendToTarget();
+    }
+
+    private boolean isActiveDeviceAdmin(String packageName, int userId) {
+        DevicePolicyManager dpm = getContext().getSystemService(DevicePolicyManager.class);
+        if (dpm == null) return false;
+        List<ComponentName> components = dpm.getActiveAdminsAsUser(userId);
+        if (components == null) {
+            return false;
+        }
+        final int size = components.size();
+        for (int i = 0; i < size; i++) {
+            if (components.get(i).getPackageName().equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void informListeners(String packageName, int userId, boolean isIdle) {
@@ -457,6 +513,10 @@ public class UsageStatsService extends SystemService implements
 
                 case MSG_INFORM_LISTENERS:
                     informListeners((String) msg.obj, msg.arg1, msg.arg2 == 1);
+                    break;
+
+                case MSG_RESET_LAST_TIMESTAMP:
+                    resetLastTimestamp((String) msg.obj, msg.arg1, msg.arg2 == 1);
                     break;
 
                 default:
@@ -560,6 +620,46 @@ public class UsageStatsService extends SystemService implements
             final long token = Binder.clearCallingIdentity();
             try {
                 return UsageStatsService.this.queryEvents(userId, beginTime, endTime);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean isAppIdle(String packageName, int userId) {
+            try {
+                userId = ActivityManagerNative.getDefault().handleIncomingUser(Binder.getCallingPid(),
+                        Binder.getCallingUid(), userId, false, true, "isAppIdle", null);
+            } catch (RemoteException re) {
+                return false;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return UsageStatsService.this.isAppIdle(packageName, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setAppIdle(String packageName, boolean idle, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            try {
+                userId = ActivityManagerNative.getDefault().handleIncomingUser(
+                        Binder.getCallingPid(), callingUid, userId, false, true,
+                        "setAppIdle", null);
+            } catch (RemoteException re) {
+                return;
+            }
+            getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
+                    "No permission to change app idle state");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                PackageInfo pi = AppGlobals.getPackageManager()
+                        .getPackageInfo(packageName, 0, userId);
+                if (pi == null) return;
+                UsageStatsService.this.setAppIdle(packageName, idle, userId);
+            } catch (RemoteException re) {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

@@ -211,6 +211,17 @@ class UserUsageStatsService {
         notifyStatsChanged();
     }
 
+    /**
+     * Sets the last timestamp for each of the intervals.
+     * @param lastTimestamp
+     */
+    void setLastTimestamp(String packageName, long lastTimestamp) {
+        for (IntervalStats stats : mCurrentStats) {
+            stats.update(packageName, lastTimestamp, UsageEvents.Event.NONE);
+        }
+        notifyStatsChanged();
+    }
+
     private static final StatCombiner<UsageStats> sUsageStatsCombiner =
             new StatCombiner<UsageStats>() {
                 @Override

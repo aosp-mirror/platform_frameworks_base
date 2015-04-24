@@ -19,6 +19,7 @@ package android.app.usage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 
 import java.util.Collections;
@@ -216,5 +217,21 @@ public final class UsageStatsManager {
             }
         }
         return aggregatedStats;
+    }
+
+    /**
+     * Returns whether the specified app is currently considered idle. This will be true if the
+     * app hasn't been used directly or indirectly for a period of time defined by the system. This
+     * could be of the order of several hours or days.
+     * @param packageName The package name of the app to query
+     * @return whether the app is currently considered idle
+     */
+    public boolean isAppIdle(String packageName) {
+        try {
+            return mService.isAppIdle(packageName, UserHandle.myUserId());
+        } catch (RemoteException e) {
+            // fall through and return default
+        }
+        return false;
     }
 }
