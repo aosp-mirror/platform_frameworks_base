@@ -3847,6 +3847,10 @@ public class Editor {
                                 startSelectionActionModeWithoutSelection();
                             }
                         }
+                    } else {
+                        if (mSelectionActionMode != null) {
+                            mSelectionActionMode.invalidateContentRect();
+                        }
                     }
                     hideAfterDelay();
                     break;
