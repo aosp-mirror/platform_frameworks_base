@@ -328,7 +328,7 @@ public class BatteryMeterView extends View implements DemoMode,
         int fillColor = getFillColor(darkIntensity);
         mIconTint = fillColor;
         mFramePaint.setColor(backgroundColor);
-        mBoltPaint.setColor(backgroundColor);
+        mBoltPaint.setColor(fillColor);
         mChargeColor = fillColor;
         invalidate();
     }
