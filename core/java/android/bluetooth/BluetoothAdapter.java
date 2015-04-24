@@ -1307,9 +1307,12 @@ public final class BluetoothAdapter {
     public boolean isHardwareTrackingFiltersAvailable() {
         if (getState() != STATE_ON) return false;
         try {
-            synchronized(mManagerCallback) {
-                if(mService != null) return (mService.numOfHwTrackFiltersAvailable() != 0);
+            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
+            if (iGatt == null) {
+                // BLE is not supported
+                return false;
             }
+            return (iGatt.numHwTrackFiltersAvailable() != 0);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
