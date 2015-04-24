@@ -1,0 +1,387 @@
+page.title=RenderScript Quaternion Functions
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> The following functions manipulate quaternions.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionAdd'>rsQuaternionAdd</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Add two quaternions
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionConjugate'>rsQuaternionConjugate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Conjugate a quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionDot'>rsQuaternionDot</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Dot product of two quaternions
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionGetMatrixUnit'>rsQuaternionGetMatrixUnit</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get a rotation matrix from a quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionLoadRotate'>rsQuaternionLoadRotate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Create a rotation quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionLoadRotateUnit'>rsQuaternionLoadRotateUnit</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Quaternion that represents a rotation about an arbitrary unit vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionMultiply'>rsQuaternionMultiply</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Multiply a quaternion by a scalar or another quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionNormalize'>rsQuaternionNormalize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Normalize a quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionSet'>rsQuaternionSet</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Create a quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionSlerp'>rsQuaternionSlerp</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Spherical linear interpolation between two quaternions
+    </td>
+  </tr>
+</tbody></table>
+<h2>Functions</h2>
+<a name='android_rs:rsQuaternionAdd'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionAdd</span>
+    <span class='normal'>: Add two quaternions</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionAdd(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q, const <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q</th><td>Destination quaternion to add to.</td></tr>
+    <tr><th>rhs</th><td>Quaternion to add.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Adds two quaternions, i.e. <code>*q += *rhs;</code>
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionConjugate'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionConjugate</span>
+    <span class='normal'>: Conjugate a quaternion</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionConjugate(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q</th><td>Quaternion to modify.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Conjugates the quaternion.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionDot'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionDot</span>
+    <span class='normal'>: Dot product of two quaternions</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float rsQuaternionDot(const <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q0, const <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q1);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q0</th><td>First quaternion.</td></tr>
+    <tr><th>q1</th><td>Second quaternion.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the dot product of two quaternions.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionGetMatrixUnit'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionGetMatrixUnit</span>
+    <span class='normal'>: Get a rotation matrix from a quaternion</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionGetMatrixUnit(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, const <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Resulting matrix.</td></tr>
+    <tr><th>q</th><td>Normalized quaternion.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Computes a rotation matrix from the normalized quaternion.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionLoadRotate'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionLoadRotate</span>
+    <span class='normal'>: Create a rotation quaternion</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionLoadRotate(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q, float rot, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q</th><td>Destination quaternion.</td></tr>
+    <tr><th>rot</th><td>Angle to rotate by.</td></tr>
+    <tr><th>x</th><td>X component of a vector.</td></tr>
+    <tr><th>y</th><td>Y component of a vector.</td></tr>
+    <tr><th>z</th><td>Z component of a vector.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Loads a quaternion that represents a rotation about an arbitrary vector
+(doesn't have to be unit)
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionLoadRotateUnit'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionLoadRotateUnit</span>
+    <span class='normal'>: Quaternion that represents a rotation about an arbitrary unit vector</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionLoadRotateUnit(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q, float rot, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q</th><td>Destination quaternion.</td></tr>
+    <tr><th>rot</th><td>Angle to rotate by, in radians.</td></tr>
+    <tr><th>x</th><td>X component of the vector.</td></tr>
+    <tr><th>y</th><td>Y component of the vector.</td></tr>
+    <tr><th>z</th><td>Z component of the vector.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Loads a quaternion that represents a rotation about an arbitrary unit vector.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionMultiply'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionMultiply</span>
+    <span class='normal'>: Multiply a quaternion by a scalar or another quaternion</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionMultiply(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q, const <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsQuaternionMultiply(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q, float scalar);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q</th><td>Destination quaternion.</td></tr>
+    <tr><th>scalar</th><td>Scalar to multiply the quaternion by.</td></tr>
+    <tr><th>rhs</th><td>Quaternion to multiply the destination quaternion by.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Multiplies a quaternion by a scalar or by another quaternion, e.g
+<code>*q = *q * scalar;</code> or <code>*q = *q * *rhs;</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionNormalize'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionNormalize</span>
+    <span class='normal'>: Normalize a quaternion</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionNormalize(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q</th><td>Quaternion to normalize.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Normalizes the quaternion.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionSet'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionSet</span>
+    <span class='normal'>: Create a quaternion</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionSet(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q, const <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsQuaternionSet(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q, float w, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q</th><td>Destination quaternion.</td></tr>
+    <tr><th>w</th><td>W component.</td></tr>
+    <tr><th>x</th><td>X component.</td></tr>
+    <tr><th>y</th><td>Y component.</td></tr>
+    <tr><th>z</th><td>Z component.</td></tr>
+    <tr><th>rhs</th><td>Source quaternion.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Creates a quaternion from its four components or from another quaternion.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsQuaternionSlerp'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsQuaternionSlerp</span>
+    <span class='normal'>: Spherical linear interpolation between two quaternions</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsQuaternionSlerp(<a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q, const <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q0, const <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>* q1, float t);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>q</th><td>Result quaternion from the interpolation.</td></tr>
+    <tr><th>q0</th><td>First input quaternion.</td></tr>
+    <tr><th>q1</th><td>Second input quaternion.</td></tr>
+    <tr><th>t</th><td>How much to interpolate by.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Performs spherical linear interpolation between two quaternions.
+</p>
+  </div>
+</div>
+
+</div>

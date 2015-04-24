@@ -1,0 +1,1059 @@
+page.title=RenderScript Matrix Functions
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> These functions let you manipulate square matrices of rank 2x2, 3x3, and 4x4.
+They are particularly useful for graphical transformations and are compatible
+with OpenGL.
+</p>
+
+<p> We use a zero-based index for rows and columns.  E.g. the last element of a
+<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a> is found at (3, 3).
+</p>
+
+<p> RenderScript uses column-major matrices and column-based vectors.  Transforming
+a vector is done by postmultiplying the vector, e.g. <code>(matrix * vector)</code>,
+as provided by <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+
+<p> To create a transformation matrix that performs two transformations at once,
+multiply the two source matrices, with the first transformation as the right
+argument.  E.g. to create a transformation matrix that applies the
+transformation s1 followed by s2, call <code>rsMatrixLoadMultiply(&amp;combined, &amp;s2, &amp;s1)</code>.
+This derives from <code>s2 * (s1 * v)</code>, which is <code>(s2 * s1) * v</code>.
+</p>
+
+<p> We have two style of functions to create transformation matrices:
+rsMatrixLoad<i>Transformation</i> and rsMatrix<i>Transformation</i>.  The former
+style simply stores the transformation matrix in the first argument.  The latter
+modifies a pre-existing transformation matrix so that the new transformation
+happens first.  E.g. if you call <a href='rs_matrix.html#android_rs:rsMatrixTranslate'>rsMatrixTranslate</a>() on a matrix that already
+does a scaling, the resulting matrix when applied to a vector will first do the
+translation then the scaling.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsExtractFrustumPlanes'>rsExtractFrustumPlanes</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Compute frustum planes
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsIsSphereInFrustum'>rsIsSphereInFrustum</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Checks if a sphere is within the frustum planes
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixGet'>rsMatrixGet</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get one element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixInverse'>rsMatrixInverse</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverts a matrix in place
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixInverseTranspose'>rsMatrixInverseTranspose</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverts and transpose a matrix in place
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoad'>rsMatrixLoad</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load or copy a matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadFrustum'>rsMatrixLoadFrustum</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a frustum projection matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadIdentity'>rsMatrixLoadIdentity</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load identity matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadMultiply'>rsMatrixLoadMultiply</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Multiply two matrices
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadOrtho'>rsMatrixLoadOrtho</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load an orthographic projection matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadPerspective'>rsMatrixLoadPerspective</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a perspective projection matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadRotate'>rsMatrixLoadRotate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a rotation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadScale'>rsMatrixLoadScale</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a scaling matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadTranslate'>rsMatrixLoadTranslate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a translation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Multiply a matrix by a vector or another matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixRotate'>rsMatrixRotate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Apply a rotation to a transformation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixScale'>rsMatrixScale</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Apply a scaling to a transformation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixSet'>rsMatrixSet</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Set one element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixTranslate'>rsMatrixTranslate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Apply a translation to a transformation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixTranspose'>rsMatrixTranspose</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Transpose a matrix place
+    </td>
+  </tr>
+</tbody></table>
+<h2>Functions</h2>
+<a name='android_rs:rsExtractFrustumPlanes'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsExtractFrustumPlanes</span>
+    <span class='normal'>: Compute frustum planes</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsExtractFrustumPlanes(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* viewProj, <a href='rs_value_types.html#android_rs:float4'>float4</a>* left, <a href='rs_value_types.html#android_rs:float4'>float4</a>* right, <a href='rs_value_types.html#android_rs:float4'>float4</a>* top, <a href='rs_value_types.html#android_rs:float4'>float4</a>* bottom, <a href='rs_value_types.html#android_rs:float4'>float4</a>* near, <a href='rs_value_types.html#android_rs:float4'>float4</a>* far);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>viewProj</th><td>Matrix to extract planes from.</td></tr>
+    <tr><th>left</th><td>Left plane.</td></tr>
+    <tr><th>right</th><td>Right plane.</td></tr>
+    <tr><th>top</th><td>Top plane.</td></tr>
+    <tr><th>bottom</th><td>Bottom plane.</td></tr>
+    <tr><th>near</th><td>Near plane.</td></tr>
+    <tr><th>far</th><td>Far plane.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Computes 6 frustum planes from the view projection matrix
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsIsSphereInFrustum'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsIsSphereInFrustum</span>
+    <span class='normal'>: Checks if a sphere is within the frustum planes</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsIsSphereInFrustum(<a href='rs_value_types.html#android_rs:float4'>float4</a>* sphere, <a href='rs_value_types.html#android_rs:float4'>float4</a>* left, <a href='rs_value_types.html#android_rs:float4'>float4</a>* right, <a href='rs_value_types.html#android_rs:float4'>float4</a>* top, <a href='rs_value_types.html#android_rs:float4'>float4</a>* bottom, <a href='rs_value_types.html#android_rs:float4'>float4</a>* near, <a href='rs_value_types.html#android_rs:float4'>float4</a>* far);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>sphere</th><td>float4 representing the sphere.</td></tr>
+    <tr><th>left</th><td>Left plane.</td></tr>
+    <tr><th>right</th><td>Right plane.</td></tr>
+    <tr><th>top</th><td>Top plane.</td></tr>
+    <tr><th>bottom</th><td>Bottom plane.</td></tr>
+    <tr><th>near</th><td>Near plane.</td></tr>
+    <tr><th>far</th><td>Far plane.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns true if the sphere is within the 6 frustum planes.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixGet'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixGet</span>
+    <span class='normal'>: Get one element</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float rsMatrixGet(const <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> col, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> row);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float rsMatrixGet(const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> col, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> row);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float rsMatrixGet(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> col, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> row);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to extract the element from.</td></tr>
+    <tr><th>col</th><td>Zero-based column of the element to be extracted.</td></tr>
+    <tr><th>row</th><td>Zero-based row of the element to extracted.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns one element of a matrix.
+</p>
+
+<p> <b>Warning:</b> The order of the column and row parameters may be unexpected.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixInverse'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixInverse</span>
+    <span class='normal'>: Inverts a matrix in place</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsMatrixInverse(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to invert.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns true if the matrix was successfully inverted.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixInverseTranspose'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixInverseTranspose</span>
+    <span class='normal'>: Inverts and transpose a matrix in place</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsMatrixInverseTranspose(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to modify.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> The matrix is first inverted then transposed. Returns true if the matrix was
+successfully inverted.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoad'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoad</span>
+    <span class='normal'>: Load or copy a matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoad(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* destination, const float* array);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoad(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* destination, const <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* source);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoad(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* destination, const float* array);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoad(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* destination, const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* source);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoad(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* destination, const float* array);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoad(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* destination, const <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* source);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoad(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* destination, const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* source);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoad(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* destination, const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* source);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>destination</th><td>Matrix to set.</td></tr>
+    <tr><th>array</th><td>Array of values to set the matrix to. These arrays should be 4, 9, or 16 floats long, depending on the matrix size.</td></tr>
+    <tr><th>source</th><td>Source matrix.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Set the elements of a matrix from an array of floats or from another matrix.
+</p>
+
+<p> If loading from an array, the floats should be in row-major order, i.e. the element a
+<code>row 0, column 0</code> should be first, followed by the element at
+<code>row 0, column 1</code>, etc.
+</p>
+
+<p> If loading from a matrix and the source is smaller than the destination, the rest
+of the destination is filled with elements of the identity matrix.  E.g.
+loading a rs_matrix2x2 into a rs_matrix4x4 will give:
+<table style="max-width:300px">
+<tr><td>m00</td> <td>m01</td> <td>0.0</td> <td>0.0</td></tr>
+<tr><td>m10</td> <td>m11</td> <td>0.0</td> <td>0.0</td></tr>
+<tr><td>0.0</td> <td>0.0</td> <td>1.0</td> <td>0.0</td></tr>
+<tr><td>0.0</td> <td>0.0</td> <td>0.0</td> <td>1.0</td></tr>
+</table>
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoadFrustum'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoadFrustum</span>
+    <span class='normal'>: Load a frustum projection matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoadFrustum(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float left, float right, float bottom, float top, float near, float far);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to set.</td></tr>
+    <tr><th>left</th><td></td></tr>
+    <tr><th>right</th><td></td></tr>
+    <tr><th>bottom</th><td></td></tr>
+    <tr><th>top</th><td></td></tr>
+    <tr><th>near</th><td></td></tr>
+    <tr><th>far</th><td></td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Constructs a frustum projection matrix, transforming the box identified by
+the six clipping planes <code>left, right, bottom, top, near, far</code>.
+</p>
+
+<p> To apply this projection to a vector, multiply the vector by the created
+matrix using <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoadIdentity'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoadIdentity</span>
+    <span class='normal'>: Load identity matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoadIdentity(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoadIdentity(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoadIdentity(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to set.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Set the elements of a matrix to the identity matrix.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoadMultiply'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoadMultiply</span>
+    <span class='normal'>: Multiply two matrices</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoadMultiply(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m, const <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* lhs, const <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoadMultiply(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* lhs, const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixLoadMultiply(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* lhs, const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to set.</td></tr>
+    <tr><th>lhs</th><td>Left matrix of the product.</td></tr>
+    <tr><th>rhs</th><td>Right matrix of the product.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Sets m to the matrix product of <code>lhs * rhs</code>.
+</p>
+
+<p> To combine two 4x4 transformaton matrices, multiply the second transformation matrix
+by the first transformation matrix.  E.g. to create a transformation matrix that applies
+the transformation s1 followed by s2, call <code>rsMatrixLoadMultiply(&amp;combined, &amp;s2, &amp;s1)</code>.
+</p>
+
+<p> <b>Warning:</b> Prior to version 21, storing the result back into right matrix is not supported and
+will result in undefined behavior.  Use rsMatrixMulitply instead.   E.g. instead of doing
+rsMatrixLoadMultiply (&amp;m2r, &amp;m2r, &amp;m2l), use rsMatrixMultiply (&amp;m2r, &amp;m2l).
+rsMatrixLoadMultiply (&amp;m2l, &amp;m2r, &amp;m2l) works as expected.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoadOrtho'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoadOrtho</span>
+    <span class='normal'>: Load an orthographic projection matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoadOrtho(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float left, float right, float bottom, float top, float near, float far);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to set.</td></tr>
+    <tr><th>left</th><td></td></tr>
+    <tr><th>right</th><td></td></tr>
+    <tr><th>bottom</th><td></td></tr>
+    <tr><th>top</th><td></td></tr>
+    <tr><th>near</th><td></td></tr>
+    <tr><th>far</th><td></td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Constructs an orthographic projection matrix, transforming the box identified by the
+six clipping planes <code>left, right, bottom, top, near, far</code> into a unit cube
+with a corner at <code>(-1, -1, -1)</code> and the opposite at <code>(1, 1, 1)</code>.
+</p>
+
+<p> To apply this projection to a vector, multiply the vector by the created matrix
+using <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+
+<p> See https://en.wikipedia.org/wiki/Orthographic_projection .
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoadPerspective'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoadPerspective</span>
+    <span class='normal'>: Load a perspective projection matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoadPerspective(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float fovy, float aspect, float near, float far);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to set.</td></tr>
+    <tr><th>fovy</th><td>Field of view, in degrees along the Y axis.</td></tr>
+    <tr><th>aspect</th><td>Ratio of x / y.</td></tr>
+    <tr><th>near</th><td>Near clipping plane.</td></tr>
+    <tr><th>far</th><td>Far clipping plane.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Constructs a perspective projection matrix, assuming a symmetrical field of view.
+</p>
+
+<p> To apply this projection to a vector, multiply the vector by the created matrix
+using <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoadRotate'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoadRotate</span>
+    <span class='normal'>: Load a rotation matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoadRotate(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float rot, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to set.</td></tr>
+    <tr><th>rot</th><td>How much rotation to do, in degrees.</td></tr>
+    <tr><th>x</th><td>X component of the vector that is the axis of rotation.</td></tr>
+    <tr><th>y</th><td>Y component of the vector that is the axis of rotation.</td></tr>
+    <tr><th>z</th><td>Z component of the vector that is the axis of rotation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> This function creates a rotation matrix.  The axis of rotation is the <code>(x, y, z)</code> vector.
+</p>
+
+<p> To rotate a vector, multiply the vector by the created matrix using <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+
+<p> See http://en.wikipedia.org/wiki/Rotation_matrix .
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoadScale'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoadScale</span>
+    <span class='normal'>: Load a scaling matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoadScale(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to set.</td></tr>
+    <tr><th>x</th><td>Multiple to scale the x components by.</td></tr>
+    <tr><th>y</th><td>Multiple to scale the y components by.</td></tr>
+    <tr><th>z</th><td>Multiple to scale the z components by.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> This function creates a scaling matrix, where each component of a vector is multiplied
+by a number.  This number can be negative.
+</p>
+
+<p> To scale a vector, multiply the vector by the created matrix using <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixLoadTranslate'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixLoadTranslate</span>
+    <span class='normal'>: Load a translation matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixLoadTranslate(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to set.</td></tr>
+    <tr><th>x</th><td>Number to add to each x component.</td></tr>
+    <tr><th>y</th><td>Number to add to each y component.</td></tr>
+    <tr><th>z</th><td>Number to add to each z component.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> This function creates a translation matrix, where a number is added to each element of
+a vector.
+</p>
+
+<p> To translate a vector, multiply the vector by the created matrix using
+<a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixMultiply'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixMultiply</span>
+    <span class='normal'>: Multiply a matrix by a vector or another matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> rsMatrixMultiply(const <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
+</td>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> rsMatrixMultiply(const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> rsMatrixMultiply(const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, <a href='rs_value_types.html#android_rs:float3'>float3</a> in);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
+</td>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, <a href='rs_value_types.html#android_rs:float3'>float3</a> in);
+</td>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float3'>float3</a> in);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float4'>float4</a> in);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float2'>float2</a> in);
+</td>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float3'>float3</a> in);
+</td>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:float4'>float4</a> in);
+</td>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m, const <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixMultiply(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* rhs);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Left matrix of the product and the matrix to be set.</td></tr>
+    <tr><th>rhs</th><td>Right matrix of the product.</td></tr>
+    <tr><th>in</th><td></td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> For the matrix by matrix variant, sets m to the matrix product <code>m * rhs</code>.
+</p>
+
+<p> When combining two 4x4 transformation matrices using this function, the resulting
+matrix will correspond to performing the rhs transformation first followed by
+the original m transformation.
+</p>
+
+<p> For the matrix by vector variant, returns the post-multiplication of the vector
+by the matrix, ie. <code>m * in</code>.
+</p>
+
+<p> When multiplying a float3 to a <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>, the vector is expanded with (1).
+</p>
+
+<p> When multiplying a float2 to a <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>, the vector is expanded with (0, 1).
+</p>
+
+<p> When multiplying a float2 to a <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>, the vector is expanded with (0).
+</p>
+
+<p> Starting with API 14, this function takes a const matrix as the first argument.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixRotate'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixRotate</span>
+    <span class='normal'>: Apply a rotation to a transformation matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixRotate(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float rot, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to modify.</td></tr>
+    <tr><th>rot</th><td>How much rotation to do, in degrees.</td></tr>
+    <tr><th>x</th><td>X component of the vector that is the axis of rotation.</td></tr>
+    <tr><th>y</th><td>Y component of the vector that is the axis of rotation.</td></tr>
+    <tr><th>z</th><td>Z component of the vector that is the axis of rotation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Multiply the matrix m with a rotation matrix.
+</p>
+
+<p> This function modifies a transformation matrix to first do a rotation.  The axis of
+rotation is the <code>(x, y, z)</code> vector.
+</p>
+
+<p> To apply this combined transformation to a vector, multiply the vector by the created
+matrix using <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixScale'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixScale</span>
+    <span class='normal'>: Apply a scaling to a transformation matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixScale(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to modify.</td></tr>
+    <tr><th>x</th><td>Multiple to scale the x components by.</td></tr>
+    <tr><th>y</th><td>Multiple to scale the y components by.</td></tr>
+    <tr><th>z</th><td>Multiple to scale the z components by.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Multiply the matrix m with a scaling matrix.
+</p>
+
+<p> This function modifies a transformation matrix to first do a scaling.   When scaling,
+each component of a vector is multiplied by a number.  This number can be negative.
+</p>
+
+<p> To apply this combined transformation to a vector, multiply the vector by the created
+matrix using <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixSet'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixSet</span>
+    <span class='normal'>: Set one element</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixSet(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> col, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> row, float v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixSet(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> col, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> row, float v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixSet(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> col, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> row, float v);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix that will be modified.</td></tr>
+    <tr><th>col</th><td>Zero-based column of the element to be set.</td></tr>
+    <tr><th>row</th><td>Zero-based row of the element to be set.</td></tr>
+    <tr><th>v</th><td>Value to set.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Set an element of a matrix.
+</p>
+
+<p> <b>Warning:</b> The order of the column and row parameters may be unexpected.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixTranslate'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixTranslate</span>
+    <span class='normal'>: Apply a translation to a transformation matrix</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixTranslate(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m, float x, float y, float z);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to modify.</td></tr>
+    <tr><th>x</th><td>Number to add to each x component.</td></tr>
+    <tr><th>y</th><td>Number to add to each y component.</td></tr>
+    <tr><th>z</th><td>Number to add to each z component.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Multiply the matrix m with a translation matrix.
+</p>
+
+<p> This function modifies a transformation matrix to first do a translation.  When
+translating, a number is added to each component of a vector.
+</p>
+
+<p> To apply this combined transformation to a vector, multiply the vector by the
+created matrix using <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsMatrixTranspose'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsMatrixTranspose</span>
+    <span class='normal'>: Transpose a matrix place</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsMatrixTranspose(<a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* m);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixTranspose(<a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* m);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsMatrixTranspose(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* m);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>Matrix to transpose.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Transpose the matrix m in place.
+</p>
+  </div>
+</div>
+
+</div>
