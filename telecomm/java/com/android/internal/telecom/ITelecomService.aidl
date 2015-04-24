@@ -137,6 +137,16 @@ interface ITelecomService {
      */
     ComponentName getDefaultPhoneApp();
 
+    /**
+     * @see TelecomServiceImpl#getDefaultDialerPackage
+     */
+    String getDefaultDialerPackage();
+
+    /**
+     * @see TelecomServiceImpl#getSystemDialerPackage
+     */
+    String getSystemDialerPackage();
+
     //
     // Internal system apis relating to call management.
     //
