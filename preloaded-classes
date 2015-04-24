@@ -828,6 +828,11 @@ android.hardware.soundtrigger.SoundTriggerModule
 android.hardware.usb.UsbDevice
 android.hardware.usb.UsbDeviceConnection
 android.hardware.usb.UsbRequest
+# Initializing android.icu.impl.ICUBinary loads the ICU data.
+# Opening the files in the Zygote avoids StrictMode violations.
+# It also ensures the ICU data files are mapped on boot and all
+# apps will be consistent (even if files are added to /data).
+android.icu.impl.ICUBinary
 android.inputmethodservice.ExtractEditText
 android.location.Location
 android.location.Location$1
