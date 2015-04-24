@@ -438,6 +438,9 @@ public final class FloatingToolbar {
             // Make sure a panel is set as the content.
             if (mContentContainer.getChildCount() == 0) {
                 setMainPanelAsContent();
+                // If we're yet to show the popup, set the container visibility to zero.
+                // The "show" animation will make this visible.
+                mContentContainer.setAlpha(0);
             }
             preparePopupContent();
             mPopupWindow.showAtLocation(mParent, Gravity.NO_GRAVITY, x, y);
@@ -478,7 +481,7 @@ public final class FloatingToolbar {
          * Returns {@code true} if this popup is currently showing. {@code false} otherwise.
          */
         public boolean isShowing() {
-            return mPopupWindow.isShowing() && !mDismissed && !mHidden;
+            return !mDismissed && !mHidden;
         }
 
         /**
@@ -494,7 +497,7 @@ public final class FloatingToolbar {
          * This is a no-op if this popup is not showing.
          */
         public void updateCoordinates(int x, int y) {
-            if (!isShowing()) {
+            if (!isShowing() || !mPopupWindow.isShowing()) {
                 return;
             }
 
