@@ -43,6 +43,9 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     private static final String TAG = "MediaHTTPConnection";
     private static final boolean VERBOSE = false;
 
+    // connection timeout - 30 sec
+    private static final int CONNECT_TIMEOUT_MS = 30 * 1000;
+
     private long mCurrentOffset = -1;
     private URL mURL = null;
     private Map<String, String> mHeaders = null;
@@ -182,6 +185,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
                 } else {
                     mConnection = (HttpURLConnection)url.openConnection();
                 }
+                mConnection.setConnectTimeout(CONNECT_TIMEOUT_MS);
 
                 // handle redirects ourselves if we do not allow cross-domain redirect
                 mConnection.setInstanceFollowRedirects(mAllowCrossDomainRedirect);
@@ -341,7 +345,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
         } catch (UnknownServiceException e) {
             Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
             return MEDIA_ERROR_UNSUPPORTED;
-        }catch (IOException e) {
+        } catch (IOException e) {
             if (VERBOSE) {
                 Log.d(TAG, "readAt " + offset + " / " + size + " => -1");
             }
