@@ -74,30 +74,8 @@ announcement
 <a href="http://android-developers.blogspot.com/2015/04/theres-lot-to-explore-with-google-play.html"
 class="external-link">blog post</a>.</p>
 <ul>
-  <li><strong>Maps</strong> - This release makes the Google Maps Android API v2 available on
-<a href="https://developers.google.com/maps/documentation/android/wear" class="external-link">
-Android Wear</a>, so you can now create map-based apps that run directly on wearable devices. In
-addition, the Maps API now offers a new
-<a href="{@docRoot}reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaLongClickListener.html">
-{@code OnStreetViewPanoramaLongClickListener}</a> interface, similar to the existing
-<a href="{@docRoot}reference/com/google/android/gms/maps/GoogleMap.OnMapLongClickListener.html">
-{@code OnMapLongClickListener}</a> interface. These listeners are particularly helpful
-for wearable devices, so you can let users exit from the app by long-clicking on a map or panorama.
-On a wearable device, the swipe gesture is used to pan the map instead of exiting the app.
-    <ul>
-      <li><a href="https://developers.google.com/maps/documentation/android/wear"
-        class="external-link">Google Maps on Android Wear developer guide</a>
-      </li>
-      <li><a href="https://github.com/googlemaps/android-samples/tree/master/BasicWearMap"
-        class="external-link">Google Maps on Android Wear sample</a>
-      </li>
-      <li><a href="https://developers.google.com/maps/documentation/android/releases"
-        class="external-link">Release notes</a>
-      </li>
-    </ul>
-  </li>
   <li>
-    <strong>Wear</strong> - In addition to Maps support, this release provides you with the ability
+    <strong>Wear</strong> - This release provides you with the ability
 to advertise and discover the capabilities of devices that are connected in a Wear network, through
 the new <a href="{@docRoot}reference/com/google/android/gms/wearable/CapabilityApi.html">
 {@code CapabilityApi}</a> class. The new
