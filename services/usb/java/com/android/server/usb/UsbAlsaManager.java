@@ -142,8 +142,10 @@ public final class UsbAlsaManager {
 
         // add existing alsa devices
         File[] files = new File(ALSA_DIRECTORY).listFiles();
-        for (int i = 0; i < files.length; i++) {
-            alsaFileAdded(files[i].getName());
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                alsaFileAdded(files[i].getName());
+            }
         }
     }
 
