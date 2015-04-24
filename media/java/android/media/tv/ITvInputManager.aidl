@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.media.tv.DvbDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
@@ -29,6 +30,7 @@ import android.media.tv.TvStreamConfig;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.view.Surface;
 
 /**
@@ -91,4 +93,8 @@ interface ITvInputManager {
     boolean captureFrame(in String inputId, in Surface surface, in TvStreamConfig config,
             int userId);
     boolean isSingleSessionActive(int userId);
+
+    // For DVB device binding
+    List<DvbDeviceInfo> getDvbDeviceList();
+    ParcelFileDescriptor openDvbDevice(in DvbDeviceInfo info, int device);
 }
