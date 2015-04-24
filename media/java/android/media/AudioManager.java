@@ -3147,6 +3147,20 @@ public class AudioManager {
             "android.media.property.OUTPUT_FRAMES_PER_BUFFER";
 
     /**
+     * Used as a key for {@link #getProperty} to determine if the default microphone audio source
+     * supports near-ultrasound frequencies (range of 18 - 21 kHz).
+     */
+    public static final String PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND =
+            "android.media.property.SUPPORT_MIC_NEAR_ULTRASOUND";
+
+    /**
+     * Used as a key for {@link #getProperty} to determine if the default speaker audio path
+     * supports near-ultrasound frequencies (range of 18 - 21 kHz).
+     */
+    public static final String PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND =
+            "android.media.property.SUPPORT_SPEAKER_NEAR_ULTRASOUND";
+
+    /**
      * Returns the value of the property with the specified key.
      * @param key One of the strings corresponding to a property key: either
      *            {@link #PROPERTY_OUTPUT_SAMPLE_RATE} or
