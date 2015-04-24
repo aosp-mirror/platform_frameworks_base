@@ -32,6 +32,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageVolume;
@@ -76,6 +77,9 @@ public class StorageMeasurement {
             Environment.DIRECTORY_DOWNLOADS, Environment.DIRECTORY_ANDROID);
 
     public static class MeasurementDetails {
+        public long totalSize;
+        public long availSize;
+
         /**
          * Total apps disk usage.
          * <p>
@@ -121,7 +125,7 @@ public class StorageMeasurement {
     }
 
     public interface MeasurementReceiver {
-        public void onDetailsChanged(MeasurementDetails details);
+        void onDetailsChanged(MeasurementDetails details);
     }
 
     private WeakReference<MeasurementReceiver> mReceiver;
@@ -369,6 +373,10 @@ public class StorageMeasurement {
                 }
             }
         }
+
+        final File file = mVolume.getPath();
+        details.totalSize = file.getTotalSpace();
+        details.availSize = file.getFreeSpace();
 
         // Measure all apps hosted on this volume for all users
         if (mVolume.getType() == VolumeInfo.TYPE_PRIVATE) {
