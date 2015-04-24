@@ -1549,6 +1549,7 @@ public class KeyguardViewMediator extends SystemUI {
             try {
                 callback.onSimSecureStateChanged(mUpdateMonitor.isSimPinSecure());
                 callback.onShowingStateChanged(mShowing);
+                callback.onInputRestrictedStateChanged(mInputRestricted);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to call onShowingStateChanged or onSimSecureStateChanged", e);
             }
