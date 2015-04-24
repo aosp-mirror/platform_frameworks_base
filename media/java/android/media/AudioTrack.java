@@ -1448,7 +1448,8 @@ public class AudioTrack
      * the position values have different meanings.
      * <br>
      * If looping is currently enabled and the new position is greater than or equal to the
-     * loop end marker, the behavior varies by API level: for API level 22 and above,
+     * loop end marker, the behavior varies by API level:
+     * as of {@link android.os.Build.VERSION_CODES#MNC},
      * the looping is first disabled and then the position is set.
      * For earlier API levels, the behavior is unspecified.
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
@@ -1485,7 +1486,7 @@ public class AudioTrack
      * {@link #ERROR_BAD_VALUE} is returned.
      * The loop range is the interval [startInFrames, endInFrames).
      * <br>
-     * For API level 22 and above, the position is left unchanged,
+     * As of {@link android.os.Build.VERSION_CODES#MNC}, the position is left unchanged,
      * unless it is greater than or equal to the loop end marker, in which case
      * it is forced to the loop start marker.
      * For earlier API levels, the effect on position is unspecified.
@@ -2032,12 +2033,12 @@ public class AudioTrack
      * The track must be stopped or paused, and
      * the track's creation mode must be {@link #MODE_STATIC}.
      * <p>
-     * For API level 22 and above, also resets the value returned by
+     * As of {@link android.os.Build.VERSION_CODES#MNC}, also resets the value returned by
      * {@link #getPlaybackHeadPosition()} to zero.
      * For earlier API levels, the reset behavior is unspecified.
      * <p>
-     * {@link #setPlaybackHeadPosition(int)} to zero
-     * is recommended instead when the reset of {@link #getPlaybackHeadPosition} is not needed.
+     * Use {@link #setPlaybackHeadPosition(int)} with a zero position
+     * if the reset of <code>getPlaybackHeadPosition()</code> is not needed.
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *  {@link #ERROR_INVALID_OPERATION}
      */
