@@ -22,6 +22,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.IPackageMoveObserver;
+import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -642,7 +644,12 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
+    /**
+     * This is not the API you're looking for.
+     *
+     * @see PackageManager#getPrimaryStorageCurrentVolume()
+     * @hide
+     */
     public String getPrimaryStorageUuid() {
         try {
             return mMountService.getPrimaryStorageUuid();
@@ -651,10 +658,15 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
-    public void setPrimaryStorageUuid(String volumeUuid) {
+    /**
+     * This is not the API you're looking for.
+     *
+     * @see PackageManager#movePrimaryStorage(VolumeInfo)
+     * @hide
+     */
+    public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback) {
         try {
-            mMountService.setPrimaryStorageUuid(volumeUuid);
+            mMountService.setPrimaryStorageUuid(volumeUuid, callback);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
