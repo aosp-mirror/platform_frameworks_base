@@ -18,7 +18,7 @@ package android.security;
 
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
 
-import com.android.org.conscrypt.NativeCrypto;
+import com.android.org.conscrypt.NativeConstants;
 import com.android.org.conscrypt.OpenSSLEngine;
 
 import android.test.AndroidTestCase;
@@ -768,7 +768,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         assertAliases(new String[] {});
 
         assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED,
+                KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED,
                 null));
 
         assertAliases(new String[] { TEST_ALIAS_1 });
@@ -797,7 +797,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         assertAliases(new String[] {});
 
         assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1,
-                KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED,
+                KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED,
                 null));
 
         assertTrue("Should contain generated private key", mKeyStore.containsAlias(TEST_ALIAS_1));
@@ -1963,7 +1963,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         {
             final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
             assertTrue(mAndroidKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF,
-                    NativeCrypto.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED, null));
+                    NativeConstants.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED, null));
 
             Key key = mKeyStore.getKey(TEST_ALIAS_1, null);
 
@@ -2019,7 +2019,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         {
             final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
             assertTrue(mAndroidKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF,
-                    NativeCrypto.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED, null));
+                    NativeConstants.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED, null));
 
             X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_1,
                     TEST_SERIAL_1, TEST_DN_1, NOW, NOW_PLUS_10_YEARS);
@@ -2032,7 +2032,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         {
             final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_2;
             assertTrue(mAndroidKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF,
-                    NativeCrypto.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED, null));
+                    NativeConstants.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED, null));
 
             X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_2,
                     TEST_SERIAL_2, TEST_DN_2, NOW, NOW_PLUS_10_YEARS);
@@ -2064,7 +2064,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         {
             final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
             assertTrue(mAndroidKeyStore.generate(privateKeyAlias,
-                    android.security.KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA, 1024,
+                    android.security.KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA, 1024,
                     android.security.KeyStore.FLAG_NONE, null));
 
             X509Certificate cert =
@@ -2116,7 +2116,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
         assertAliases(new String[] { TEST_ALIAS_1, TEST_ALIAS_2 });
 
         assertTrue(mAndroidKeyStore.generate(Credentials.USER_PRIVATE_KEY + TEST_ALIAS_3,
-                KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED,
+                KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA, 1024, KeyStore.FLAG_ENCRYPTED,
                 null));
 
         assertEquals("The keystore size should match expected", 3, mKeyStore.size());
@@ -2184,7 +2184,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
     private void setupKey() throws Exception {
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + TEST_ALIAS_1;
         assertTrue(mAndroidKeyStore
-                .generate(privateKeyAlias, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA, 1024,
+                .generate(privateKeyAlias, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA, 1024,
                         KeyStore.FLAG_ENCRYPTED, null));
 
         X509Certificate cert = generateCertificate(mAndroidKeyStore, TEST_ALIAS_1, TEST_SERIAL_1,
