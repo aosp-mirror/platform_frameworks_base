@@ -2144,14 +2144,22 @@ public class ConnectivityManager {
         public static final int CANCELED     = 8;
 
         /**
-         * @hide
-         * Called whenever the framework connects to a network that it may use to
-         * satisfy this request
+         * Called when the framework connects to a new network to evaluate whether it satisfies this
+         * request. If evaluation succeeds, this callback may be followed by an {@link #onAvailable}
+         * callback. There is no guarantee that this new network will satisfy any requests, or that
+         * the network will stay connected for longer than the time necessary to evaluate it.
+         * <p>
+         * Most applications <b>should not</b> act on this callback, and should instead use
+         * {@link #onAvailable}. This callback is intended for use by applications that can assist
+         * the framework in properly evaluating the network &mdash; for example, an application that
+         * can automatically log in to a captive portal without user intervention.
+         *
+         * @param network The {@link Network} of the network that is being evaluated.
          */
         public void onPreCheck(Network network) {}
 
         /**
-         * Called when the framework connects and has declared new network ready for use.
+         * Called when the framework connects and has declared a new network ready for use.
          * This callback may be called more than once if the {@link Network} that is
          * satisfying the request changes.
          *
