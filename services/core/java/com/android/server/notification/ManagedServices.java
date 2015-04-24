@@ -495,7 +495,7 @@ abstract public class ManagedServices {
                                 Slog.v(TAG, getCaption() + " connection lost: " + name);
                             }
                         },
-                        Context.BIND_AUTO_CREATE,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
                         new UserHandle(userid)))
                 {
                     mServicesBinding.remove(servicesBindingTag);

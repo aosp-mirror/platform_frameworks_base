@@ -2060,7 +2060,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             UserState userState = getUserStateLocked(mUserId);
             if (!mIsAutomation) {
                 if (mService == null && mContext.bindServiceAsUser(
-                        mIntent, this, Context.BIND_AUTO_CREATE, new UserHandle(mUserId))) {
+                        mIntent, this,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                        new UserHandle(mUserId))) {
                     userState.mBindingServices.add(mComponentName);
                 }
             } else {

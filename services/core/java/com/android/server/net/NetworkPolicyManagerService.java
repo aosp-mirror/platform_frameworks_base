@@ -2004,7 +2004,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // to have data access.  Otherwise, we restrict data access to only
         // the top apps.
         mCurForegroundState = (!mRestrictBackground && (mRestrictPower || mDeviceIdleMode))
-                ? ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                ? ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
                 : ActivityManager.PROCESS_STATE_TOP;
 
         // update rules for all installed applications

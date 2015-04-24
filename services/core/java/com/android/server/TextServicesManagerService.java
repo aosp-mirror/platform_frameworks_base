@@ -555,7 +555,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         if (DBG) {
             Slog.w(TAG, "bind service: " + info.getId());
         }
-        if (!bindCurrentSpellCheckerService(serviceIntent, connection, Context.BIND_AUTO_CREATE)) {
+        if (!bindCurrentSpellCheckerService(serviceIntent, connection,
+                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE)) {
             Slog.e(TAG, "Failed to get a spell checker service.");
             return;
         }

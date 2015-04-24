@@ -229,7 +229,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         Intent intent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
         intent.setComponent(mComponent);
         mBound = mContext.bindServiceAsUser(intent, mConnection,
-                Context.BIND_AUTO_CREATE, new UserHandle(mUser));
+                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE, new UserHandle(mUser));
         if (!mBound) {
             Slog.w(TAG, "Failed binding to voice interaction service " + mComponent);
         }

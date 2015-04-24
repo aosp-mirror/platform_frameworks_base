@@ -96,7 +96,8 @@ public class TelecomLoaderService extends SystemService {
         TelecomServiceConnection serviceConnection = new TelecomServiceConnection();
         Intent intent = new Intent(SERVICE_ACTION);
         intent.setComponent(SERVICE_COMPONENT);
-        int flags = Context.BIND_IMPORTANT | Context.BIND_AUTO_CREATE;
+        int flags = Context.BIND_IMPORTANT | Context.BIND_FOREGROUND_SERVICE
+                | Context.BIND_AUTO_CREATE;
 
         // Bind to Telecom and register the service
         if (mContext.bindServiceAsUser(intent, serviceConnection, flags, UserHandle.OWNER)) {
