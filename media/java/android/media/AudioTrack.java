@@ -978,8 +978,8 @@ public class AudioTrack
     }
 
     /**
-     * Returns the configured audio data format. See {@link AudioFormat#ENCODING_PCM_16BIT}
-     * and {@link AudioFormat#ENCODING_PCM_8BIT}.
+     * Returns the configured audio data encoding. See {@link AudioFormat#ENCODING_PCM_8BIT},
+     * {@link AudioFormat#ENCODING_PCM_16BIT}, and {@link AudioFormat#ENCODING_PCM_FLOAT}.
      */
     public int getAudioFormat() {
         return mAudioFormat;
@@ -998,11 +998,33 @@ public class AudioTrack
 
     /**
      * Returns the configured channel position mask.
-     * For example, refer to {@link AudioFormat#CHANNEL_OUT_MONO},
+     * <p> For example, refer to {@link AudioFormat#CHANNEL_OUT_MONO},
      * {@link AudioFormat#CHANNEL_OUT_STEREO}, {@link AudioFormat#CHANNEL_OUT_5POINT1}.
+     * This method may return {@link AudioFormat#CHANNEL_INVALID} if
+     * a channel index mask is used. Consider
+     * {@link #getFormat()} instead, to obtain an {@link AudioFormat},
+     * which contains both the channel position mask and the channel index mask.
      */
     public int getChannelConfiguration() {
         return mChannelConfiguration;
+    }
+
+    /**
+     * Returns the configured <code>AudioTrack</code> format.
+     * @return an {@link AudioFormat} containing the
+     * <code>AudioTrack</code> parameters at the time of configuration.
+     */
+    public @NonNull AudioFormat getFormat() {
+        AudioFormat.Builder builder = new AudioFormat.Builder()
+            .setSampleRate(mSampleRate)
+            .setEncoding(mAudioFormat);
+        if (mChannelConfiguration != AudioFormat.CHANNEL_INVALID) {
+            builder.setChannelMask(mChannelConfiguration);
+        }
+        if (mChannelIndexMask != AudioFormat.CHANNEL_INVALID /* 0 */) {
+            builder.setChannelIndexMask(mChannelIndexMask);
+        }
+        return builder.build();
     }
 
     /**

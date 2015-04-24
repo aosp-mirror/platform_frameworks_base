@@ -690,7 +690,7 @@ public class AudioRecord
     }
 
     /**
-     * Returns the configured audio data format. See {@link AudioFormat#ENCODING_PCM_8BIT},
+     * Returns the configured audio data encoding. See {@link AudioFormat#ENCODING_PCM_8BIT},
      * {@link AudioFormat#ENCODING_PCM_16BIT}, and {@link AudioFormat#ENCODING_PCM_FLOAT}.
      */
     public int getAudioFormat() {
@@ -698,12 +698,34 @@ public class AudioRecord
     }
 
     /**
-     * Returns the configured channel configuration.
-     * See {@link AudioFormat#CHANNEL_IN_MONO}
+     * Returns the configured channel position mask.
+     * <p> See {@link AudioFormat#CHANNEL_IN_MONO}
      * and {@link AudioFormat#CHANNEL_IN_STEREO}.
+     * This method may return {@link AudioFormat#CHANNEL_INVALID} if
+     * a channel index mask is used.
+     * Consider {@link #getFormat()} instead, to obtain an {@link AudioFormat},
+     * which contains both the channel position mask and the channel index mask.
      */
     public int getChannelConfiguration() {
         return mChannelMask;
+    }
+
+    /**
+     * Returns the configured <code>AudioRecord</code> format.
+     * @return an {@link AudioFormat} containing the
+     * <code>AudioRecord</code> parameters at the time of configuration.
+     */
+    public @NonNull AudioFormat getFormat() {
+        AudioFormat.Builder builder = new AudioFormat.Builder()
+            .setSampleRate(mSampleRate)
+            .setEncoding(mAudioFormat);
+        if (mChannelMask != AudioFormat.CHANNEL_INVALID) {
+            builder.setChannelMask(mChannelMask);
+        }
+        if (mChannelIndexMask != AudioFormat.CHANNEL_INVALID  /* 0 */) {
+            builder.setChannelIndexMask(mChannelIndexMask);
+        }
+        return builder.build();
     }
 
     /**
