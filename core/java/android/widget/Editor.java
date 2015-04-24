@@ -62,7 +62,6 @@ import android.text.TextUtils;
 import android.text.method.KeyListener;
 import android.text.method.MetaKeyKeyListener;
 import android.text.method.MovementMethod;
-import android.text.method.PasswordTransformationMethod;
 import android.text.method.WordIterator;
 import android.text.style.EasyEditSpan;
 import android.text.style.SuggestionRangeSpan;
@@ -682,34 +681,6 @@ public class Editor {
         }
     }
 
-    /**
-     * Unlike {@link TextView#textCanBeSelected()}, this method is based on the <i>current</i> state
-     * of the TextView. textCanBeSelected() has to be true (this is one of the conditions to have
-     * a selection controller (see {@link #prepareCursorControllers()}), but this is not sufficient.
-     */
-    private boolean canSelectText() {
-        return hasSelectionController() && mTextView.getText().length() != 0;
-    }
-
-    /**
-     * It would be better to rely on the input type for everything. A password inputType should have
-     * a password transformation. We should hence use isPasswordInputType instead of this method.
-     *
-     * We should:
-     * - Call setInputType in setKeyListener instead of changing the input type directly (which
-     * would install the correct transformation).
-     * - Refuse the installation of a non-password transformation in setTransformation if the input
-     * type is password.
-     *
-     * However, this is like this for legacy reasons and we cannot break existing apps. This method
-     * is useful since it matches what the user can see (obfuscated text or not).
-     *
-     * @return true if the current transformation method is of the password type.
-     */
-    private boolean hasPasswordTransformationMethod() {
-        return mTextView.getTransformationMethod() instanceof PasswordTransformationMethod;
-    }
-
     private int getWordStart(int offset) {
         // FIXME - For this and similar methods we're not doing anything to check if there's
         // a LocaleSpan in the text, this may be something we should try handling or checking for.
@@ -758,11 +729,11 @@ public class Editor {
      * successfully performed.
      */
     private boolean selectCurrentWord() {
-        if (!canSelectText()) {
+        if (!mTextView.canSelectText()) {
             return false;
         }
 
-        if (hasPasswordTransformationMethod()) {
+        if (mTextView.hasPasswordTransformationMethod()) {
             // Always select all on a password field.
             // Cut/copy menu entries are not available for passwords, but being able to select all
             // is however useful to delete or paste to replace the entire content.
@@ -1718,7 +1689,7 @@ public class Editor {
             return false;
         }
 
-        if (!canSelectText() || !mTextView.requestFocus()) {
+        if (!mTextView.canSelectText() || !mTextView.requestFocus()) {
             Log.w(TextView.LOG_TAG,
                     "TextView does not support text selection. Action mode cancelled.");
             return false;
@@ -3088,7 +3059,7 @@ public class Editor {
                                 MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
             }
 
-            if (canSelectText() && !hasPasswordTransformationMethod()) {
+            if (mTextView.canSelectAllText()) {
                 menu.add(0, TextView.ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
                         setAlphabeticShortcut('a').
                         setShowAsAction(
