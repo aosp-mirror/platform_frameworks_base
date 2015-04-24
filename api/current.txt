@@ -30429,6 +30429,7 @@ package android.telecom {
   public static abstract class InCallService.VideoCall {
     ctor public InCallService.VideoCall();
     method public abstract void registerCallback(android.telecom.InCallService.VideoCall.Callback);
+    method public abstract void unregisterCallback();
     method public abstract void requestCallDataUsage();
     method public abstract void requestCameraCapabilities();
     method public abstract void sendSessionModifyRequest(android.telecom.VideoProfile);
