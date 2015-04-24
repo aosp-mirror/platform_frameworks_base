@@ -1758,6 +1758,9 @@ class MountService extends IMountService.Stub
 
     @Override
     public void finishMediaUpdate() {
+        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException("no permission to call finishMediaUpdate()");
+        }
         if (mUnmountSignal != null) {
             mUnmountSignal.countDown();
         } else {
@@ -1791,7 +1794,7 @@ class MountService extends IMountService.Stub
         warnOnNotMounted();
 
         final ObbState state;
-        synchronized (mObbPathToStateMap) {
+        synchronized (mObbMounts) {
             state = mObbPathToStateMap.get(rawPath);
         }
         if (state == null) {
@@ -1843,7 +1846,7 @@ class MountService extends IMountService.Stub
         Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
 
         final ObbState existingState;
-        synchronized (mObbPathToStateMap) {
+        synchronized (mObbMounts) {
             existingState = mObbPathToStateMap.get(rawPath);
         }
 
@@ -2093,6 +2096,8 @@ class MountService extends IMountService.Stub
 
     @Override
     public String getPassword() throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE,
+                "only keyguard can retrieve password");
         if (!isReady()) {
             return new String();
         }
