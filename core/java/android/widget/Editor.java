@@ -813,7 +813,7 @@ public class Editor {
             if (selectionStart == BreakIterator.DONE || selectionEnd == BreakIterator.DONE ||
                     selectionStart == selectionEnd) {
                 // Possible when the word iterator does not properly handle the text's language
-                long range = getCharRange(minOffset);
+                long range = getCharClusterRange(minOffset);
                 selectionStart = TextUtils.unpackRangeStartFromLong(range);
                 selectionEnd = TextUtils.unpackRangeEndFromLong(range);
             }
@@ -856,29 +856,25 @@ public class Editor {
         return mWordIteratorWithText;
     }
 
-    private long getCharRange(int offset) {
+    private int getNextCursorOffset(int offset, boolean findAfterGivenOffset) {
+        final Layout layout = mTextView.getLayout();
+        if (layout == null) return offset;
+        final CharSequence text = mTextView.getText();
+        final int nextOffset = layout.getPaint().getTextRunCursor(text, 0, text.length(),
+                layout.isRtlCharAt(offset) ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR,
+                offset, findAfterGivenOffset ? Paint.CURSOR_AFTER : Paint.CURSOR_BEFORE);
+        return nextOffset == -1 ? offset : nextOffset;
+    }
+
+    private long getCharClusterRange(int offset) {
         final int textLength = mTextView.getText().length();
-        if (offset + 1 < textLength) {
-            final char currentChar = mTextView.getText().charAt(offset);
-            final char nextChar = mTextView.getText().charAt(offset + 1);
-            if (Character.isSurrogatePair(currentChar, nextChar)) {
-                return TextUtils.packRangeInLong(offset,  offset + 2);
-            }
-        }
         if (offset < textLength) {
-            return TextUtils.packRangeInLong(offset,  offset + 1);
-        }
-        if (offset - 2 >= 0) {
-            final char previousChar = mTextView.getText().charAt(offset - 1);
-            final char previousPreviousChar = mTextView.getText().charAt(offset - 2);
-            if (Character.isSurrogatePair(previousPreviousChar, previousChar)) {
-                return TextUtils.packRangeInLong(offset - 2,  offset);
-            }
+            return TextUtils.packRangeInLong(offset, getNextCursorOffset(offset, true));
         }
         if (offset - 1 >= 0) {
-            return TextUtils.packRangeInLong(offset - 1,  offset);
+            return TextUtils.packRangeInLong(getNextCursorOffset(offset, false), offset);
         }
-        return TextUtils.packRangeInLong(offset,  offset);
+        return TextUtils.packRangeInLong(offset, offset);
     }
 
     private boolean touchPositionIsInSelection() {
@@ -3972,7 +3968,7 @@ public class Editor {
                     int alteredOffset = mTextView.getOffsetAtCoordinate(mPrevLine, x);
                     if (alteredOffset >= selectionEnd) {
                         // Can't pass the other drag handle.
-                        offset = Math.max(0, selectionEnd - 1);
+                        offset = getNextCursorOffset(selectionEnd, false);
                     } else {
                         offset = alteredOffset;
                     }
@@ -4075,7 +4071,7 @@ public class Editor {
                     int length = mTextView.getText().length();
                     if (alteredOffset <= selectionStart) {
                         // Can't pass the other drag handle.
-                        offset = Math.min(selectionStart + 1, length);
+                        offset = getNextCursorOffset(selectionStart, true);
                     } else {
                         offset = Math.min(alteredOffset, length);
                     }
