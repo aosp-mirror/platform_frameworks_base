@@ -130,7 +130,7 @@ public class ImageReader implements AutoCloseable {
      * </p>
      * <p>
      * Opaque ImageReaders are more efficient to use when application access to
-     * image data is not necessary, comparing to ImageReaders using a non-opaque
+     * image data is not necessary, compared to ImageReaders using a non-opaque
      * format such as {@link ImageFormat#YUV_420_888 YUV_420_888}.
      * </p>
      *

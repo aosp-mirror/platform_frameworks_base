@@ -11337,6 +11337,8 @@ package android.graphics {
     method public static int getBitsPerPixel(int);
     field public static final int DEPTH16 = 1144402265; // 0x44363159
     field public static final int DEPTH_POINT_CLOUD = 257; // 0x101
+    field public static final int FLEX_RGBA_8888 = 42; // 0x2a
+    field public static final int FLEX_RGB_888 = 41; // 0x29
     field public static final int JPEG = 256; // 0x100
     field public static final int NV16 = 16; // 0x10
     field public static final int NV21 = 17; // 0x11
@@ -11347,6 +11349,8 @@ package android.graphics {
     field public static final int RGB_565 = 4; // 0x4
     field public static final int UNKNOWN = 0; // 0x0
     field public static final int YUV_420_888 = 35; // 0x23
+    field public static final int YUV_422_888 = 39; // 0x27
+    field public static final int YUV_444_888 = 40; // 0x28
     field public static final int YUY2 = 20; // 0x14
     field public static final int YV12 = 842094169; // 0x32315659
   }
