@@ -491,7 +491,7 @@ public class AudioTrack
         session[0] = sessionId;
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
-                mSampleRate, mChannels, mAudioFormat,
+                mSampleRate, mChannels, mChannelIndexMask, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode, session);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
@@ -701,48 +701,6 @@ public class AudioTrack
             AudioFormat.CHANNEL_OUT_SIDE_LEFT |
             AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
 
-    // Java channel mask definitions below match those
-    // in /system/core/include/system/audio.h in the JNI code of AudioTrack.
-
-    // internal maximum size for bits parameter, not part of public API
-    private static final int AUDIO_CHANNEL_BITS_LOG2 = 30;
-
-    // log(2) of maximum number of representations, not part of public API
-    private static final int AUDIO_CHANNEL_REPRESENTATION_LOG2 = 2;
-
-    // used to create a channel index mask or channel position mask
-    // with getChannelMaskFromRepresentationAndBits();
-    private static final int CHANNEL_OUT_REPRESENTATION_POSITION = 0;
-    private static final int CHANNEL_OUT_REPRESENTATION_INDEX = 2;
-
-    /**
-     * Return the channel mask from its representation and bits.
-     *
-     * This creates a channel mask for mChannels which combines a
-     * representation field and a bits field.  This is for internal
-     * communication to native code, not part of the public API.
-     *
-     * @param representation the type of channel mask,
-     *   either CHANNEL_OUT_REPRESENTATION_POSITION
-     *   or CHANNEL_OUT_REPRESENTATION_INDEX
-     * @param bits is the channel bits specifying occupancy
-     * @return the channel mask
-     * @throws java.lang.IllegalArgumentException if representation is not recognized or
-     *   the bits field is not acceptable for that representation
-     */
-    private static int getChannelMaskFromRepresentationAndBits(int representation, int bits) {
-        switch (representation) {
-        case CHANNEL_OUT_REPRESENTATION_POSITION:
-        case CHANNEL_OUT_REPRESENTATION_INDEX:
-            if ((bits & ~((1 << AUDIO_CHANNEL_BITS_LOG2) - 1)) != 0) {
-                throw new IllegalArgumentException("invalid bits " + bits);
-            }
-            return representation << AUDIO_CHANNEL_BITS_LOG2 | bits;
-        default:
-            throw new IllegalArgumentException("invalid representation " + representation);
-        }
-    }
-
     // Convenience method for the constructor's parameter checks.
     // This is where constructor IllegalArgumentException-s are thrown
     // postconditions:
@@ -804,11 +762,6 @@ public class AudioTrack
             } else if (mChannelCount != channelIndexCount) {
                 throw new IllegalArgumentException("Channel count must match");
             }
-
-            // AudioTrack prefers to use the channel index configuration
-            // over the channel position configuration if both are specified.
-            mChannels = getChannelMaskFromRepresentationAndBits(
-                    CHANNEL_OUT_REPRESENTATION_INDEX, mChannelIndexMask);
         }
 
         //--------------
@@ -2361,7 +2314,7 @@ public class AudioTrack
     //     AudioAttributes.USAGE_MEDIA will map to AudioManager.STREAM_MUSIC
     private native final int native_setup(Object /*WeakReference<AudioTrack>*/ audiotrack_this,
             Object /*AudioAttributes*/ attributes,
-            int sampleRate, int channelMask, int audioFormat,
+            int sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int mode, int[] sessionId);
 
     private native final void native_finalize();
