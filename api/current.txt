@@ -30796,6 +30796,7 @@ package android.telecom {
     method public static boolean isPaused(int);
     method public static boolean isReceptionEnabled(int);
     method public static boolean isTransmissionEnabled(int);
+    method public static java.lang.String videoStateToString(int);
     field public static final int AUDIO_ONLY = 0; // 0x0
     field public static final int BIDIRECTIONAL = 3; // 0x3
     field public static final int PAUSED = 4; // 0x4
