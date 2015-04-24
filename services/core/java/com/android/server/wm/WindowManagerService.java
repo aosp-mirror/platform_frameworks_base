@@ -2660,11 +2660,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win == null) {
                 return;
             }
-            removeWindowLocked(session, win);
+            removeWindowLocked(win);
         }
     }
 
-    public void removeWindowLocked(Session session, WindowState win) {
+    void removeWindowLocked(WindowState win) {
         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
             if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "Starting window removed " + win);
         }

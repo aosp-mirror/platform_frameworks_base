@@ -83,7 +83,7 @@ class WindowToken {
             WindowState win = windows.get(winNdx);
             if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) Slog.w(WindowManagerService.TAG,
                     "removeAllWindows: removing win=" + win);
-            win.mService.removeWindowLocked(win.mSession, win);
+            win.mService.removeWindowLocked(win);
         }
         windows.clear();
     }
