@@ -47,12 +47,22 @@ import android.graphics.Rect;
  * @see ImageReader
  */
 public abstract class Image implements AutoCloseable {
+    protected boolean mIsImageValid = false;
+
     /**
      * @hide
      */
     protected Image() {
     }
 
+    /**
+     * Throw IllegalStateException if the image is invalid (already closed).
+     */
+    protected void throwISEIfImageIsInvalid() {
+        if (!mIsImageValid) {
+            throw new IllegalStateException("Image is already closed");
+        }
+    }
     /**
      * Get the format for this image. This format determines the number of
      * ByteBuffers needed to represent the image, and the general layout of the
@@ -160,7 +170,7 @@ public abstract class Image implements AutoCloseable {
      * Set the timestamp associated with this frame.
      * <p>
      * The timestamp is measured in nanoseconds, and is normally monotonically
-     * increasing. However, However, the behavior of the timestamp depends on
+     * increasing. However, the behavior of the timestamp depends on
      * the destination of this image. See {@link android.hardware.Camera Camera}
      * , {@link android.hardware.camera2.CameraDevice CameraDevice},
      * {@link MediaPlayer} and {@link MediaCodec} for more details.
@@ -176,6 +186,7 @@ public abstract class Image implements AutoCloseable {
      * @param timestamp The timestamp to be set for this image.
      */
     public void setTimestamp(long timestamp) {
+        throwISEIfImageIsInvalid();
         return;
     }
 
@@ -187,6 +198,7 @@ public abstract class Image implements AutoCloseable {
      * </p>
      */
     public boolean isOpaque() {
+        throwISEIfImageIsInvalid();
         return false;
     }
 
@@ -199,6 +211,8 @@ public abstract class Image implements AutoCloseable {
      * using coordinates in the largest-resolution plane.
      */
     public Rect getCropRect() {
+        throwISEIfImageIsInvalid();
+
         if (mCropRect == null) {
             return new Rect(0, 0, getWidth(), getHeight());
         } else {
@@ -213,6 +227,8 @@ public abstract class Image implements AutoCloseable {
      * using coordinates in the largest-resolution plane.
      */
     public void setCropRect(Rect cropRect) {
+        throwISEIfImageIsInvalid();
+
         if (cropRect != null) {
             cropRect = new Rect(cropRect);  // make a copy
             cropRect.intersect(0, 0, getWidth(), getHeight());
@@ -260,6 +276,8 @@ public abstract class Image implements AutoCloseable {
      *         a new owner.
      */
     boolean isAttachable() {
+        throwISEIfImageIsInvalid();
+
         return false;
     }
 
@@ -279,6 +297,8 @@ public abstract class Image implements AutoCloseable {
      * @return The owner of the Image.
      */
     Object getOwner() {
+        throwISEIfImageIsInvalid();
+
         return null;
     }
 
@@ -294,6 +314,8 @@ public abstract class Image implements AutoCloseable {
      * @return native context associated with this Image.
      */
     long getNativeContext() {
+        throwISEIfImageIsInvalid();
+
         return 0;
     }
 

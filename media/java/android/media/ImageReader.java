@@ -368,7 +368,7 @@ public class ImageReader implements AutoCloseable {
         switch (status) {
             case ACQUIRE_SUCCESS:
                 si.createSurfacePlanes();
-                si.setImageValid(true);
+                si.mIsImageValid = true;
             case ACQUIRE_NO_BUFS:
             case ACQUIRE_MAX_IMAGES:
                 break;
@@ -444,7 +444,7 @@ public class ImageReader implements AutoCloseable {
 
         si.clearSurfacePlanes();
         nativeReleaseImage(i);
-        si.setImageValid(false);
+        si.mIsImageValid = false;
     }
 
     /**
@@ -686,7 +686,6 @@ public class ImageReader implements AutoCloseable {
 
     private class SurfaceImage extends android.media.Image {
         public SurfaceImage(int format) {
-            mIsImageValid = false;
             mFormat = format;
         }
 
@@ -784,16 +783,6 @@ public class ImageReader implements AutoCloseable {
             mIsDetached.getAndSet(detached);
         }
 
-        private void setImageValid(boolean isValid) {
-            mIsImageValid = isValid;
-        }
-
-        private void throwISEIfImageIsInvalid() {
-            if (!mIsImageValid) {
-                throw new IllegalStateException("Image is already closed");
-            }
-        }
-
         private void clearSurfacePlanes() {
             if (mIsImageValid) {
                 for (int i = 0; i < mPlanes.length; i++) {
@@ -877,7 +866,6 @@ public class ImageReader implements AutoCloseable {
         private long mTimestamp;
 
         private SurfacePlane[] mPlanes;
-        private boolean mIsImageValid;
         private int mHeight = -1;
         private int mWidth = -1;
         private int mFormat = ImageFormat.UNKNOWN;
