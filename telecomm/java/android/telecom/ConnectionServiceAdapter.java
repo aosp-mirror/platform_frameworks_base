@@ -203,6 +203,21 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     /**
+     * Indicates that the merge request on this call has failed.
+     *
+     * @param callId The unique ID of the call being conferenced.
+     */
+    void onConferenceMergeFailed(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                Log.d(this, "merge failed for call %s", callId);
+                adapter.setConferenceMergeFailed(callId);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
      * Indicates that the call no longer exists. Can be used with either a call or a conference
      * call.
      *

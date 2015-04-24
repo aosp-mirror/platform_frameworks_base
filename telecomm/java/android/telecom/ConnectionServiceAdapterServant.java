@@ -59,6 +59,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 20;
     private static final int MSG_ADD_EXISTING_CONNECTION = 21;
     private static final int MSG_ON_POST_DIAL_CHAR = 22;
+    private static final int MSG_SET_CONFERENCE_MERGE_FAILED = 23;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -220,6 +221,15 @@ final class ConnectionServiceAdapterServant {
                     }
                     break;
                 }
+                case MSG_SET_CONFERENCE_MERGE_FAILED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.setConferenceMergeFailed((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
             }
         }
     };
@@ -277,6 +287,13 @@ final class ConnectionServiceAdapterServant {
             mHandler.obtainMessage(
                     MSG_SET_CONNECTION_CAPABILITIES, connectionCapabilities, 0, connectionId)
                     .sendToTarget();
+        }
+
+        @Override
+        public void setConferenceMergeFailed(String callId) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            mHandler.obtainMessage(MSG_SET_CONFERENCE_MERGE_FAILED, args).sendToTarget();
         }
 
         @Override

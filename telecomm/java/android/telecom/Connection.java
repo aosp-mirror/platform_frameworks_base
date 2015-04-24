@@ -339,6 +339,7 @@ public abstract class Connection implements IConferenceable {
         public void onConferenceParticipantsChanged(Connection c,
                 List<ConferenceParticipant> participants) {}
         public void onConferenceStarted() {}
+        public void onConferenceMergeFailed(Connection c) {}
     }
 
     public static abstract class VideoProvider {
@@ -1544,6 +1545,17 @@ public abstract class Connection implements IConferenceable {
             }
         }
         mConferenceables.clear();
+    }
+
+    /**
+     * Notifies listeners that the merge request failed.
+     *
+     * @hide
+     */
+    protected final void notifyConferenceMergeFailed() {
+        for (Listener l : mListeners) {
+            l.onConferenceMergeFailed(this);
+        }
     }
 
     /**
