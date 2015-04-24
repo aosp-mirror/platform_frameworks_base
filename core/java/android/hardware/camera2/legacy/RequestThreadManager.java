@@ -326,6 +326,9 @@ public class RequestThreadManager {
         }
 
         try {
+            startPreview(); // If preview is not running (i.e. after a JPEG capture), we need to
+                            // explicitely start and stop preview before setting preview surface.
+                            // null.
             stopPreview();
         }  catch (RuntimeException e) {
             Log.e(TAG, "Received device exception in configure call: ", e);
