@@ -154,6 +154,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
     private byte[] mHwAddr;
     private PacketSocketAddress mInterfaceBroadcastAddr;
     private int mTransactionId;
+    private long mTransactionStartMillis;
     private DhcpResults mDhcpLease;
     private long mDhcpLeaseExpiry;
     private DhcpResults mOffer;
@@ -264,8 +265,9 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
     }
 
-    private void initTransactionId() {
+    private void startNewTransaction() {
         mTransactionId = mRandom.nextInt();
+        mTransactionStartMillis = SystemClock.elapsedRealtime();
     }
 
     private boolean initSockets() {
@@ -344,6 +346,10 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
     }
 
+    private short getSecs() {
+        return (short) ((SystemClock.elapsedRealtime() - mTransactionStartMillis) / 1000);
+    }
+
     private boolean transmitPacket(ByteBuffer buf, String description, Inet4Address to) {
         try {
             if (to.equals(INADDR_BROADCAST)) {
@@ -362,7 +368,8 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
     private boolean sendDiscoverPacket() {
         ByteBuffer packet = DhcpPacket.buildDiscoverPacket(
-                DhcpPacket.ENCAP_L2, mTransactionId, mHwAddr, DO_UNICAST, REQUESTED_PARAMS);
+                DhcpPacket.ENCAP_L2, mTransactionId, getSecs(), mHwAddr,
+                DO_UNICAST, REQUESTED_PARAMS);
         return transmitPacket(packet, "DHCPDISCOVER", INADDR_BROADCAST);
     }
 
@@ -373,7 +380,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         int encap = to.equals(INADDR_BROADCAST) ? DhcpPacket.ENCAP_L2 : DhcpPacket.ENCAP_BOOTP;
 
         ByteBuffer packet = DhcpPacket.buildRequestPacket(
-                encap, mTransactionId, clientAddress,
+                encap, mTransactionId, getSecs(), clientAddress,
                 DO_UNICAST, mHwAddr, requestedAddress,
                 serverAddress, REQUESTED_PARAMS, null);
         String description = "DHCPREQUEST ciaddr=" + clientAddress.getHostAddress() +
@@ -669,7 +676,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         @Override
         public void enter() {
             super.enter();
-            initTransactionId();
+            startNewTransaction();
         }
 
         protected boolean sendPacket() {
@@ -776,7 +783,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         @Override
         public void enter() {
             super.enter();
-            initTransactionId();
+            startNewTransaction();
         }
 
         protected boolean sendPacket() {

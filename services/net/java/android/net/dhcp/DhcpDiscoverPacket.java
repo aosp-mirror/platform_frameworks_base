@@ -26,8 +26,8 @@ class DhcpDiscoverPacket extends DhcpPacket {
     /**
      * Generates a DISCOVER packet with the specified parameters.
      */
-    DhcpDiscoverPacket(int transId, byte[] clientMac, boolean broadcast) {
-        super(transId, INADDR_ANY, INADDR_ANY, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
+    DhcpDiscoverPacket(int transId, short secs, byte[] clientMac, boolean broadcast) {
+        super(transId, secs, INADDR_ANY, INADDR_ANY, INADDR_ANY, INADDR_ANY, clientMac, broadcast);
     }
 
     public String toString() {

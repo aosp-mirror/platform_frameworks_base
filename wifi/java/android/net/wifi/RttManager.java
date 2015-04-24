@@ -883,9 +883,9 @@ public class RttManager {
             }
             index++;
         }
-
         validateChannel();
         ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
+        Log.i(TAG, "Send RTT request to RTT Service");
         sAsyncChannel.sendMessage(CMD_OP_START_RANGING,
                 0, putListener(listener), parcelableParams);
     }
@@ -1033,6 +1033,7 @@ public class RttManager {
         }
         @Override
         public void handleMessage(Message msg) {
+            Log.i(TAG, "RTT manager get message: " + msg.what);
             switch (msg.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                     if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
@@ -1058,10 +1059,10 @@ public class RttManager {
 
             Object listener = getListener(msg.arg2);
             if (listener == null) {
-                if (DBG) Log.d(TAG, "invalid listener key = " + msg.arg2);
+                Log.e(TAG, "invalid listener key = " + msg.arg2 );
                 return;
             } else {
-                if (DBG) Log.d(TAG, "listener key = " + msg.arg2);
+                Log.i(TAG, "listener key = " + msg.arg2);
             }
 
             switch (msg.what) {
