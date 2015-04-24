@@ -129,6 +129,37 @@ final public class MediaSync {
                 @NonNull MediaSync sync, @NonNull ByteBuffer audioBuffer, int bufferIndex);
     }
 
+    /** Audio track failed.
+     * @see android.media.MediaSync.OnErrorListener
+     */
+    public static final int MEDIASYNC_ERROR_AUDIOTRACK_FAIL = 1;
+
+    /** The surface failed to handle video buffers.
+     * @see android.media.MediaSync.OnErrorListener
+     */
+    public static final int MEDIASYNC_ERROR_SURFACE_FAIL = 2;
+
+    /**
+     * Interface definition of a callback to be invoked when there
+     * has been an error during an asynchronous operation (other errors
+     * will throw exceptions at method call time).
+     */
+    public interface OnErrorListener {
+        /**
+         * Called to indicate an error.
+         *
+         * @param sync The MediaSync the error pertains to
+         * @param what The type of error that has occurred:
+         * <ul>
+         * <li>{@link #MEDIASYNC_ERROR_AUDIOTRACK_FAIL}
+         * <li>{@link #MEDIASYNC_ERROR_SURFACE_FAIL}
+         * </ul>
+         * @param extra an extra code, specific to the error. Typically
+         * implementation dependent.
+         */
+        void onError(@NonNull MediaSync sync, int what, int extra);
+    }
+
     private static final String TAG = "MediaSync";
 
     private static final int EVENT_CALLBACK = 1;
@@ -154,6 +185,10 @@ final public class MediaSync {
     private final Object mCallbackLock = new Object();
     private Handler mCallbackHandler = null;
     private MediaSync.Callback mCallback = null;
+
+    private final Object mOnErrorListenerLock = new Object();
+    private Handler mOnErrorListenerHandler = null;
+    private MediaSync.OnErrorListener mOnErrorListener = null;
 
     private Thread mAudioThread = null;
     // Created on mAudioThread when mAudioThread is started. When used on user thread, they should
@@ -231,6 +266,39 @@ final public class MediaSync {
             }
 
             mCallback = cb;
+        }
+    }
+
+    /**
+     * Sets an asynchronous callback for error events.
+     * <p>
+     * This method can be called multiple times to update a previously set listener. If the
+     * handler is changed, undelivered notifications scheduled for the old handler may be dropped.
+     * <p>
+     * <b>Do not call this inside callback.</b>
+     *
+     * @param listener The callback that will run. Use {@code null} to stop receiving callbacks.
+     * @param handler The Handler that will run the callback. Use {@code null} to use MediaSync's
+     *     internal handler if it exists.
+     */
+    public void setOnErrorListener(@Nullable /* MediaSync. */ OnErrorListener listener,
+            @Nullable Handler handler) {
+        synchronized(mOnErrorListenerLock) {
+            if (handler != null) {
+                mOnErrorListenerHandler = handler;
+            } else {
+                Looper looper;
+                if ((looper = Looper.myLooper()) == null) {
+                    looper = Looper.getMainLooper();
+                }
+                if (looper == null) {
+                    mOnErrorListenerHandler = null;
+                } else {
+                    mOnErrorListenerHandler = new Handler(looper);
+                }
+            }
+
+            mOnErrorListener = listener;
         }
     }
 

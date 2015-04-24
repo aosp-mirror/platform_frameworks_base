@@ -17609,10 +17609,13 @@ package android.media {
     method public final void release();
     method public void setAudioTrack(android.media.AudioTrack);
     method public void setCallback(android.media.MediaSync.Callback, android.os.Handler);
+    method public void setOnErrorListener(android.media.MediaSync.OnErrorListener, android.os.Handler);
     method public void setPlaybackRate(float, int);
     method public void setPlaybackSettings(android.media.PlaybackSettings);
     method public void setSurface(android.view.Surface);
     method public void setSyncSettings(android.media.SyncSettings);
+    field public static final int MEDIASYNC_ERROR_AUDIOTRACK_FAIL = 1; // 0x1
+    field public static final int MEDIASYNC_ERROR_SURFACE_FAIL = 2; // 0x2
     field public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0; // 0x0
     field public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 2; // 0x2
     field public static final int PLAYBACK_RATE_AUDIO_MODE_STRETCH = 1; // 0x1
@@ -17621,6 +17624,10 @@ package android.media {
   public static abstract class MediaSync.Callback {
     ctor public MediaSync.Callback();
     method public abstract void onReturnAudioBuffer(android.media.MediaSync, java.nio.ByteBuffer, int);
+  }
+
+  public static abstract interface MediaSync.OnErrorListener {
+    method public abstract void onError(android.media.MediaSync, int, int);
   }
 
   public class MediaSyncEvent {
@@ -17646,6 +17653,14 @@ package android.media {
     method public abstract void onAudioDeviceConnection();
   }
 
+  public abstract interface OnAudioRecordRoutingListener {
+    method public abstract void onAudioRecordRouting(android.media.AudioRecord);
+  }
+
+  public abstract interface OnAudioTrackRoutingListener {
+    method public abstract void onAudioTrackRouting(android.media.AudioTrack);
+  }
+
   public final class PlaybackSettings {
     ctor public PlaybackSettings();
     method public android.media.PlaybackSettings allowDefaults();
@@ -17662,14 +17677,6 @@ package android.media {
     field public static final int AUDIO_FALLBACK_MODE_MUTE = 1; // 0x1
     field public static final int AUDIO_STRETCH_MODE_DEFAULT = 0; // 0x0
     field public static final int AUDIO_STRETCH_MODE_VOICE = 1; // 0x1
-  }
-
-  public abstract interface OnAudioRecordRoutingListener {
-    method public abstract void onAudioRecordRouting(android.media.AudioRecord);
-  }
-
-  public abstract interface OnAudioTrackRoutingListener {
-    method public abstract void onAudioTrackRouting(android.media.AudioTrack);
   }
 
   public final class Rating implements android.os.Parcelable {
