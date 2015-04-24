@@ -47,6 +47,9 @@ import android.graphics.Rect;
  * @see ImageReader
  */
 public abstract class Image implements AutoCloseable {
+    /**
+     * @hide
+     */
     protected boolean mIsImageValid = false;
 
     /**
@@ -57,6 +60,8 @@ public abstract class Image implements AutoCloseable {
 
     /**
      * Throw IllegalStateException if the image is invalid (already closed).
+     *
+     * @hide
      */
     protected void throwISEIfImageIsInvalid() {
         if (!mIsImageValid) {
