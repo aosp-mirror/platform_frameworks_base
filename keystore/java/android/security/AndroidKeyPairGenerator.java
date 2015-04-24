@@ -17,7 +17,7 @@
 package android.security;
 
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
-import com.android.org.conscrypt.NativeCrypto;
+import com.android.org.conscrypt.NativeConstants;
 import com.android.org.conscrypt.OpenSSLEngine;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -206,9 +206,9 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
     }
 
     private static int getDefaultKeySize(int keyType) {
-        if (keyType == NativeCrypto.EVP_PKEY_EC) {
+        if (keyType == NativeConstants.EVP_PKEY_EC) {
             return EC_DEFAULT_KEY_SIZE;
-        } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
+        } else if (keyType == NativeConstants.EVP_PKEY_RSA) {
             return RSA_DEFAULT_KEY_SIZE;
         }
         return -1;
@@ -216,12 +216,12 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
 
     private static void checkValidKeySize(String keyAlgorithm, int keyType, int keySize)
             throws InvalidAlgorithmParameterException {
-        if (keyType == NativeCrypto.EVP_PKEY_EC) {
+        if (keyType == NativeConstants.EVP_PKEY_EC) {
             if (keySize < EC_MIN_KEY_SIZE || keySize > EC_MAX_KEY_SIZE) {
                 throw new InvalidAlgorithmParameterException("EC keys must be >= "
                         + EC_MIN_KEY_SIZE + " and <= " + EC_MAX_KEY_SIZE);
             }
-        } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
+        } else if (keyType == NativeConstants.EVP_PKEY_RSA) {
             if (keySize < RSA_MIN_KEY_SIZE || keySize > RSA_MAX_KEY_SIZE) {
                 throw new InvalidAlgorithmParameterException("RSA keys must be >= "
                         + RSA_MIN_KEY_SIZE + " and <= " + RSA_MAX_KEY_SIZE);
@@ -234,7 +234,7 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
 
     private static void checkCorrectParametersSpec(int keyType, int keySize,
             AlgorithmParameterSpec spec) throws InvalidAlgorithmParameterException {
-        if (keyType == NativeCrypto.EVP_PKEY_RSA && spec != null) {
+        if (keyType == NativeConstants.EVP_PKEY_RSA && spec != null) {
             if (spec instanceof RSAKeyGenParameterSpec) {
                 RSAKeyGenParameterSpec rsaSpec = (RSAKeyGenParameterSpec) spec;
                 if (keySize != -1 && keySize != rsaSpec.getKeysize()) {
@@ -260,7 +260,7 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
 
     private static byte[][] getArgsForKeyType(int keyType, AlgorithmParameterSpec spec) {
         switch (keyType) {
-            case NativeCrypto.EVP_PKEY_RSA:
+            case NativeConstants.EVP_PKEY_RSA:
                 if (spec instanceof RSAKeyGenParameterSpec) {
                     RSAKeyGenParameterSpec rsaSpec = (RSAKeyGenParameterSpec) spec;
                     return new byte[][] { rsaSpec.getPublicExponent().toByteArray() };

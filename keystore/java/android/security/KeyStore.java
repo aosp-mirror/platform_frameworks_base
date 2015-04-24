@@ -16,7 +16,7 @@
 
 package android.security;
 
-import com.android.org.conscrypt.NativeCrypto;
+import com.android.org.conscrypt.NativeConstants;
 
 import android.os.Binder;
 import android.os.IBinder;
@@ -88,9 +88,9 @@ public class KeyStore {
 
     static int getKeyTypeForAlgorithm(String keyType) {
         if ("RSA".equalsIgnoreCase(keyType)) {
-            return NativeCrypto.EVP_PKEY_RSA;
+            return NativeConstants.EVP_PKEY_RSA;
         } else if ("EC".equalsIgnoreCase(keyType)) {
-            return NativeCrypto.EVP_PKEY_EC;
+            return NativeConstants.EVP_PKEY_EC;
         } else {
             return -1;
         }
