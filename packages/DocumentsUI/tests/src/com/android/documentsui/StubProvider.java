@@ -21,9 +21,10 @@ import android.content.SharedPreferences;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.database.MatrixCursor.RowBuilder;
 import android.database.MatrixCursor;
+import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.FileUtils;
@@ -32,15 +33,16 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.google.android.collect.Maps;
 
 import libcore.io.IoUtils;
 
-import java.io.FileOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -70,6 +72,7 @@ public class StubProvider extends DocumentsProvider {
     private String mAuthority;
     private SharedPreferences mPrefs;
     private Map<String, RootInfo> mRoots;
+    private boolean mSimulateReadErrors;
 
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
@@ -83,7 +86,8 @@ public class StubProvider extends DocumentsProvider {
         return true;
     }
 
-    private void clearCacheAndBuildRoots() {
+    @VisibleForTesting
+    public void clearCacheAndBuildRoots() {
         final File cacheDir = getContext().getCacheDir();
         removeRecursively(cacheDir);
         mStorage.clear();
@@ -164,7 +168,7 @@ public class StubProvider extends DocumentsProvider {
         } else {
             try {
                 if (!file.createNewFile()) {
-                    throw new FileNotFoundException();
+                    throw new IllegalStateException("The file " + file.getPath() + " already exists");
                 }
             } catch (IOException e) {
                 throw new FileNotFoundException();
@@ -173,6 +177,10 @@ public class StubProvider extends DocumentsProvider {
 
         final StubDocument document = new StubDocument(file, mimeType, parentDocument);
         notifyParentChanged(document.parentId);
+        getContext().getContentResolver().notifyChange(
+                DocumentsContract.buildDocumentUri(mAuthority, document.documentId),
+                null, false);
+
         return document.documentId;
     }
 
@@ -187,6 +195,9 @@ public class StubProvider extends DocumentsProvider {
             document.rootInfo.size -= fileSize;
         }
         notifyParentChanged(document.parentId);
+        getContext().getContentResolver().notifyChange(
+                DocumentsContract.buildDocumentUri(mAuthority, document.documentId),
+                null, false);
     }
 
     @Override
@@ -226,13 +237,28 @@ public class StubProvider extends DocumentsProvider {
             throw new FileNotFoundException();
 
         if ("r".equals(mode)) {
-            return ParcelFileDescriptor.open(document.file, ParcelFileDescriptor.MODE_READ_ONLY);
+            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(document.file,
+                    ParcelFileDescriptor.MODE_READ_ONLY);
+            if (mSimulateReadErrors) {
+                pfd = new ParcelFileDescriptor(pfd) {
+                    @Override
+                    public void checkError() throws IOException {
+                        throw new IOException("Test error");
+                    }
+                };
+            }
+            return pfd;
         }
         if ("w".equals(mode)) {
             return startWrite(document);
         }
 
         throw new FileNotFoundException();
+    }
+
+    @VisibleForTesting
+    public void simulateReadErrors(boolean b) {
+        mSimulateReadErrors = b;
     }
 
     @Override
@@ -281,11 +307,15 @@ public class StubProvider extends DocumentsProvider {
                         }
                     }
                 } catch (IOException e) {
+                    Log.e(TAG, "Error on close", e);
                     closePipeWithErrorSilently(readPipe, e.getMessage());
                 } finally {
                     IoUtils.closeQuietly(inputStream);
                     IoUtils.closeQuietly(outputStream);
                     notifyParentChanged(document.parentId);
+                    getContext().getContentResolver().notifyChange(
+                            DocumentsContract.buildDocumentUri(mAuthority, document.documentId),
+                            null, false);
                 }
             }
         }.start();
@@ -302,7 +332,6 @@ public class StubProvider extends DocumentsProvider {
 
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
-        Log.d(TAG, "call: " + method + arg);
         switch (method) {
             case "clear":
                 clearCacheAndBuildRoots();
@@ -376,30 +405,51 @@ public class StubProvider extends DocumentsProvider {
         }
     }
 
-    public File createFile(String rootId, File parent, String mimeType, String name)
-            throws IOException {
-        StubDocument parentDoc = null;
+    @VisibleForTesting
+    public Uri createFile(String rootId, String path, String mimeType, byte[] content)
+            throws FileNotFoundException, IOException {
+        StubDocument root = mRoots.get(rootId).rootDocument;
+        if (root == null) {
+            throw new FileNotFoundException("No roots with the ID " + rootId + " were found");
+        }
+        File file = new File(root.file, path.substring(1));
+        StubDocument parent = mStorage.get(getDocumentIdForFile(file.getParentFile()));
         if (parent == null) {
-            // Use the root dir as the parent, if one wasn't specified.
-            parentDoc = mRoots.get(rootId).rootDocument;
-        } else {
-            // Verify that the parent exists and is a directory.
-            parentDoc = mStorage.get(getDocumentIdForFile(parent));
-            if (parentDoc == null) {
-                throw new IllegalArgumentException("Parent file not found.");
-            }
-            if (!Document.MIME_TYPE_DIR.equals(parentDoc.mimeType)) {
-                throw new IllegalArgumentException("Parent file must be a directory.");
-            }
+            parent = mStorage.get(createFile(rootId, file.getParentFile().getPath(),
+                    DocumentsContract.Document.MIME_TYPE_DIR, null));
         }
-        File file = new File(parentDoc.file, name);
-        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-            file.mkdir();
+
+        if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mimeType)) {
+            if (!file.mkdirs()) {
+                throw new FileNotFoundException("Couldn't create directory " + file.getPath());
+            }
         } else {
-            file.createNewFile();
+            if (!file.createNewFile()) {
+                throw new FileNotFoundException("Couldn't create file " + file.getPath());
+            }
+            // Add content to the file.
+            FileOutputStream fout = new FileOutputStream(file);
+            fout.write(content);
+            fout.close();
         }
-        new StubDocument(file, mimeType, parentDoc);
-        return file;
+        final StubDocument document = new StubDocument(file, mimeType, parent);
+        return DocumentsContract.buildDocumentUri(mAuthority,  document.documentId);
+    }
+
+    @VisibleForTesting
+    public File getFile(String rootId, String path) throws FileNotFoundException {
+        StubDocument root = mRoots.get(rootId).rootDocument;
+        if (root == null) {
+            throw new FileNotFoundException("No roots with the ID " + rootId + " were found");
+        }
+        // Convert the path string into a path that's relative to the root.
+        File needle = new File(root.file, path.substring(1));
+
+        StubDocument found = mStorage.get(getDocumentIdForFile(needle));
+        if (found == null) {
+            return null;
+        }
+        return found.file;
     }
 
     final class RootInfo {
