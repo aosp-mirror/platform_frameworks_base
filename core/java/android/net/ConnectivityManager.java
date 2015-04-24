@@ -341,7 +341,8 @@ public class ConnectivityManager {
      * one.  This is used by applications needing to talk to the carrier's
      * Multimedia Messaging Service servers.
      *
-     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     * @deprecated Applications should instead use
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         provides the {@link NetworkCapabilities#NET_CAPABILITY_MMS} capability.
      */
     public static final int TYPE_MOBILE_MMS  = 2;
@@ -351,7 +352,8 @@ public class ConnectivityManager {
      * one.  This is used by applications needing to talk to the carrier's
      * Secure User Plane Location servers for help locating the device.
      *
-     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     * @deprecated Applications should instead use
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         provides the {@link NetworkCapabilities#NET_CAPABILITY_SUPL} capability.
      */
     public static final int TYPE_MOBILE_SUPL = 3;
@@ -367,7 +369,8 @@ public class ConnectivityManager {
      * same network interface as {@link #TYPE_MOBILE} but the routing setup
      * is different.
      *
-     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     * @deprecated Applications should instead use
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         uses the {@link NetworkCapabilities#TRANSPORT_CELLULAR} transport.
      */
     public static final int TYPE_MOBILE_HIPRI = 5;
@@ -910,7 +913,8 @@ public class ConnectivityManager {
      * implementation+feature combination, except that the value {@code -1}
      * always indicates failure.
      *
-     * @deprecated Deprecated in favor of the cleaner {@link #requestNetwork} api.
+     * @deprecated Deprecated in favor of the cleaner
+     *             {@link #requestNetwork(NetworkRequest, NetworkCallback)} API.
      * @removed
      */
     public int startUsingNetworkFeature(int networkType, String feature) {
@@ -958,7 +962,7 @@ public class ConnectivityManager {
      * implementation+feature combination, except that the value {@code -1}
      * always indicates failure.
      *
-     * @deprecated Deprecated in favor of the cleaner {@link #requestNetwork} api.
+     * @deprecated Deprecated in favor of the cleaner {@link unregisterNetworkCallback} API.
      * @removed
      */
     public int stopUsingNetworkFeature(int networkType, String feature) {
@@ -1236,8 +1240,9 @@ public class ConnectivityManager {
      * @param hostAddress the IP address of the host to which the route is desired
      * @return {@code true} on success, {@code false} on failure
      *
-     * @deprecated Deprecated in favor of the {@link #requestNetwork},
-     *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} api.
+     * @deprecated Deprecated in favor of the
+     *             {@link #requestNetwork(NetworkRequest, NetworkCallback)},
+     *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} API.
      * @removed
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
@@ -1256,7 +1261,7 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} on failure
      * @hide
      * @deprecated Deprecated in favor of the {@link #requestNetwork} and
-     *             {@link #bindProcessToNetwork} api.
+     *             {@link #bindProcessToNetwork} API.
      * @removed
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
@@ -2581,10 +2586,10 @@ public class ConnectivityManager {
 
     /**
      * Unregisters callbacks about and possibly releases networks originating from
-     * {@link #requestNetwork} and {@link #registerNetworkCallback} calls.  If the
-     * given {@code NetworkCallback} had previously been used with {@code #requestNetwork},
-     * any networks that had been connected to only to satisfy that request will be
-     * disconnected.
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback)} and {@link #registerNetworkCallback}
+     * calls.  If the given {@code NetworkCallback} had previously been used with
+     * {@code #requestNetwork}, any networks that had been connected to only to satisfy that request
+     * will be disconnected.
      *
      * @param networkCallback The {@link NetworkCallback} used when making the request.
      */
