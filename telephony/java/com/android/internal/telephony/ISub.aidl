@@ -171,4 +171,5 @@ interface ISub {
      */
     int getSimStateForSubscriber(int subId);
 
+    boolean isActiveSubId(int subId);
 }

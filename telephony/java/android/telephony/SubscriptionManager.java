@@ -1133,5 +1133,19 @@ public class SubscriptionManager {
         logd("getSimStateForSubscriber: simState=" + simState + " subId=" + subId);
         return simState;
     }
+
+    /**
+     * @return true if the sub ID is active. i.e. The sub ID corresponds to a known subscription
+     * and the SIM providing the subscription is present in a slot and in "LOADED" state.
+     * @hide
+     */
+    public boolean isActiveSubId(int subId) {
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            return iSub.isActiveSubId(subId);
+        } catch (RemoteException ex) {
+        }
+        return false;
+    }
 }
 
