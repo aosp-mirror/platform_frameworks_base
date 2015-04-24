@@ -1335,10 +1335,6 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // If we are not connected, queue up the notifyDataSetChanged to be handled when we do
         // connect
         if (!mServiceConnection.isConnected()) {
-            if (mNotifyDataSetChangedAfterOnServiceConnected) {
-                return;
-            }
-
             mNotifyDataSetChangedAfterOnServiceConnected = true;
             requestBindService();
             return;
