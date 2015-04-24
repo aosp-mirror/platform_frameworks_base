@@ -1587,91 +1587,13 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    private class PackageMoveObserver extends IPackageMoveObserver.Stub {
-        public int returnCode;
-
-        private boolean doneFlag = false;
-
-        public String packageName;
-
-        public PackageMoveObserver(String pkgName) {
-            packageName = pkgName;
-        }
-
-        public void packageMoved(String packageName, int returnCode) {
-            Log.i("DEBUG_MOVE::", "pkg = " + packageName + ", " + "ret = " + returnCode);
-            if (!packageName.equals(this.packageName)) {
-                return;
-            }
-            synchronized (this) {
-                this.returnCode = returnCode;
-                doneFlag = true;
-                notifyAll();
-            }
-        }
-
-        public boolean isDone() {
-            return doneFlag;
-        }
-    }
-
     public boolean invokeMovePackage(String pkgName, int flags, GenericReceiver receiver)
             throws Exception {
-        PackageMoveObserver observer = new PackageMoveObserver(pkgName);
-        final boolean received = false;
-        mContext.registerReceiver(receiver, receiver.filter);
-        try {
-            // Wait on observer
-            synchronized (observer) {
-                synchronized (receiver) {
-                    getPm().movePackage(pkgName, observer, flags);
-                    long waitTime = 0;
-                    while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                        observer.wait(WAIT_TIME_INCR);
-                        waitTime += WAIT_TIME_INCR;
-                    }
-                    if (!observer.isDone()) {
-                        throw new Exception("Timed out waiting for pkgmove callback");
-                    }
-                    if (observer.returnCode != PackageManager.MOVE_SUCCEEDED) {
-                        return false;
-                    }
-                    // Verify we received the broadcast
-                    waitTime = 0;
-                    while ((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                        receiver.wait(WAIT_TIME_INCR);
-                        waitTime += WAIT_TIME_INCR;
-                    }
-                    if (!receiver.isDone()) {
-                        throw new Exception("Timed out waiting for MOVE notifications");
-                    }
-                    return receiver.received;
-                }
-            }
-        } finally {
-            mContext.unregisterReceiver(receiver);
-        }
+        throw new UnsupportedOperationException();
     }
 
     private boolean invokeMovePackageFail(String pkgName, int flags, int errCode) throws Exception {
-        PackageMoveObserver observer = new PackageMoveObserver(pkgName);
-        try {
-            // Wait on observer
-            synchronized (observer) {
-                getPm().movePackage(pkgName, observer, flags);
-                long waitTime = 0;
-                while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                    observer.wait(WAIT_TIME_INCR);
-                    waitTime += WAIT_TIME_INCR;
-                }
-                if (!observer.isDone()) {
-                    throw new Exception("Timed out waiting for pkgmove callback");
-                }
-                assertEquals(errCode, observer.returnCode);
-            }
-        } finally {
-        }
-        return true;
+        throw new UnsupportedOperationException();
     }
 
     private int getDefaultInstallLoc() {

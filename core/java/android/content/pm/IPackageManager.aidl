@@ -50,7 +50,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.content.IntentSender;
-import com.android.internal.os.IResultReceiver;
 
 /**
  *  See {@link PackageManager} for documentation on most of the APIs
@@ -431,8 +430,13 @@ interface IPackageManager {
 
     PackageCleanItem nextPackageToClean(in PackageCleanItem lastPackage);
 
-    void movePackage(String packageName, IPackageMoveObserver observer, int flags);
-    void movePackageAndData(String packageName, String volumeUuid, IPackageMoveObserver observer);
+    int getMoveStatus(int moveId);
+
+    void registerMoveCallback(in IPackageMoveObserver callback);
+    void unregisterMoveCallback(in IPackageMoveObserver callback);
+
+    int movePackage(in String packageName, in String volumeUuid);
+    int movePrimaryStorage(in String volumeUuid);
 
     boolean addPermissionAsync(in PermissionInfo info);
 

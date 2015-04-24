@@ -24,6 +24,12 @@ import java.util.Collection;
  */
 public class Preconditions {
 
+    public static void checkArgument(boolean expression) {
+        if (!expression) {
+            throw new IllegalArgumentException();
+        }
+    }
+
     /**
      * Ensures that an object reference passed as a parameter to the calling
      * method is not null.

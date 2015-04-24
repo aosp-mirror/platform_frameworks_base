@@ -62,6 +62,9 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -81,7 +84,9 @@ import com.android.internal.util.UserIcons;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /*package*/
 final class ApplicationPackageManager extends PackageManager {
@@ -97,6 +102,9 @@ final class ApplicationPackageManager extends PackageManager {
     private UserManager mUserManager;
     @GuardedBy("mLock")
     private PackageInstaller mInstaller;
+
+    @GuardedBy("mDelegates")
+    private final ArrayList<MoveCallbackDelegate> mDelegates = new ArrayList<>();
 
     UserManager getUserManager() {
         synchronized (mLock) {
@@ -1410,57 +1418,100 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
+    public String getInstallerPackageName(String packageName) {
         try {
-            mPM.movePackage(packageName, observer, flags);
+            return mPM.getInstallerPackageName(packageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+        return null;
+    }
+
+    @Override
+    public int getMoveStatus(int moveId) {
+        try {
+            return mPM.getMoveStatus(moveId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     @Override
-    public void movePackageAndData(String packageName, String volumeUuid,
-            IPackageMoveObserver observer) {
-        try {
-            mPM.movePackageAndData(packageName, volumeUuid, observer);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+    public void registerMoveCallback(MoveCallback callback, Handler handler) {
+        synchronized (mDelegates) {
+            final MoveCallbackDelegate delegate = new MoveCallbackDelegate(callback,
+                    handler.getLooper());
+            try {
+                mPM.registerMoveCallback(delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+            mDelegates.add(delegate);
         }
     }
 
     @Override
-    public @NonNull VolumeInfo getApplicationCurrentVolume(ApplicationInfo app) {
-        final StorageManager storage = mContext.getSystemService(StorageManager.class);
-        if (app.isInternal()) {
-            return Preconditions.checkNotNull(
-                    storage.findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL));
-        } else if (app.isExternalAsec()) {
-            final List<VolumeInfo> vols = storage.getVolumes();
-            for (VolumeInfo vol : vols) {
-                if ((vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isPrimary()) {
-                    return vol;
+    public void unregisterMoveCallback(MoveCallback callback) {
+        synchronized (mDelegates) {
+            for (Iterator<MoveCallbackDelegate> i = mDelegates.iterator(); i.hasNext();) {
+                final MoveCallbackDelegate delegate = i.next();
+                if (delegate.mCallback == callback) {
+                    try {
+                        mPM.unregisterMoveCallback(delegate);
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                    i.remove();
                 }
             }
-            throw new IllegalStateException("Failed to find primary public volume");
-        } else {
-            return Preconditions.checkNotNull(storage.findVolumeByUuid(app.volumeUuid));
         }
     }
 
     @Override
-    public @NonNull List<VolumeInfo> getApplicationCandidateVolumes(ApplicationInfo app) {
+    public int movePackage(String packageName, VolumeInfo vol) {
+        try {
+            final String volumeUuid;
+            if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.id)) {
+                volumeUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+            } else if (vol.isPrimaryPhysical()) {
+                volumeUuid = StorageManager.UUID_PRIMARY_PHYSICAL;
+            } else {
+                volumeUuid = Preconditions.checkNotNull(vol.fsUuid);
+            }
+
+            return mPM.movePackage(packageName, volumeUuid);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public @Nullable VolumeInfo getPackageCurrentVolume(ApplicationInfo app) {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        if (app.isInternal()) {
+            return storage.findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL);
+        } else if (app.isExternalAsec()) {
+            return storage.getPrimaryPhysicalVolume();
+        } else {
+            return storage.findVolumeByUuid(app.volumeUuid);
+        }
+    }
+
+    @Override
+    public @NonNull List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final VolumeInfo currentVol = getPackageCurrentVolume(app);
         final List<VolumeInfo> vols = storage.getVolumes();
         final List<VolumeInfo> candidates = new ArrayList<>();
         for (VolumeInfo vol : vols) {
-            if (isCandidateVolume(app, vol)) {
+            if (Objects.equals(vol, currentVol) || isPackageCandidateVolume(app, vol)) {
                 candidates.add(vol);
             }
         }
         return candidates;
     }
 
-    private static boolean isCandidateVolume(ApplicationInfo app, VolumeInfo vol) {
+    private static boolean isPackageCandidateVolume(ApplicationInfo app, VolumeInfo vol) {
         // Private internal is always an option
         if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.getId())) {
             return true;
@@ -1473,10 +1524,14 @@ final class ApplicationPackageManager extends PackageManager {
             return false;
         }
 
-        // Moving into an ASEC on public primary is only an option when app is
-        // internal, or already in ASEC
-        if ((vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isPrimary()) {
-            return app.isInternal() || app.isExternalAsec();
+        // Gotta be able to write there
+        if (!vol.isMountedWritable()) {
+            return false;
+        }
+
+        // Moving into an ASEC on public primary is only option internal
+        if (vol.isPrimaryPhysical()) {
+            return app.isInternal();
         }
 
         // Otherwise we can move to any private volume
@@ -1484,13 +1539,66 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public String getInstallerPackageName(String packageName) {
+    public int movePrimaryStorage(VolumeInfo vol) {
         try {
-            return mPM.getInstallerPackageName(packageName);
+            final String volumeUuid;
+            if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.id)) {
+                volumeUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+            } else if (vol.isPrimaryPhysical()) {
+                volumeUuid = StorageManager.UUID_PRIMARY_PHYSICAL;
+            } else {
+                volumeUuid = Preconditions.checkNotNull(vol.fsUuid);
+            }
+
+            return mPM.movePrimaryStorage(volumeUuid);
         } catch (RemoteException e) {
-            // Should never happen!
+            throw e.rethrowAsRuntimeException();
         }
-        return null;
+    }
+
+    public @Nullable VolumeInfo getPrimaryStorageCurrentVolume() {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final String volumeUuid = storage.getPrimaryStorageUuid();
+        if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
+            return storage.findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL);
+        } else if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
+            return storage.getPrimaryPhysicalVolume();
+        } else {
+            return storage.findVolumeByUuid(volumeUuid);
+        }
+    }
+
+    public @NonNull List<VolumeInfo> getPrimaryStorageCandidateVolumes() {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final VolumeInfo currentVol = getPrimaryStorageCurrentVolume();
+        final List<VolumeInfo> vols = storage.getVolumes();
+        final List<VolumeInfo> candidates = new ArrayList<>();
+        for (VolumeInfo vol : vols) {
+            if (Objects.equals(vol, currentVol) || isPrimaryStorageCandidateVolume(vol)) {
+                candidates.add(vol);
+            }
+        }
+        return candidates;
+    }
+
+    private static boolean isPrimaryStorageCandidateVolume(VolumeInfo vol) {
+        // Private internal is always an option
+        if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.getId())) {
+            return true;
+        }
+
+        // Gotta be able to write there
+        if (!vol.isMountedWritable()) {
+            return false;
+        }
+
+        // We can move to public volumes on legacy devices
+        if ((vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.getDisk().isDefaultPrimary()) {
+            return true;
+        }
+
+        // Otherwise we can move to any private volume
+        return (vol.getType() == VolumeInfo.TYPE_PRIVATE);
     }
 
     @Override
@@ -1939,6 +2047,45 @@ final class ApplicationPackageManager extends PackageManager {
             }
         }
         return null;
+    }
+
+    /** {@hide} */
+    private static class MoveCallbackDelegate extends IPackageMoveObserver.Stub implements
+            Handler.Callback {
+        private static final int MSG_STARTED = 1;
+        private static final int MSG_STATUS_CHANGED = 2;
+
+        final MoveCallback mCallback;
+        final Handler mHandler;
+
+        public MoveCallbackDelegate(MoveCallback callback, Looper looper) {
+            mCallback = callback;
+            mHandler = new Handler(looper, this);
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            final int moveId = msg.arg1;
+            switch (msg.what) {
+                case MSG_STARTED:
+                    mCallback.onStarted(moveId, (String) msg.obj);
+                    return true;
+                case MSG_STATUS_CHANGED:
+                    mCallback.onStatusChanged(moveId, msg.arg2, (long) msg.obj);
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onStarted(int moveId, String title) {
+            mHandler.obtainMessage(MSG_STARTED, moveId, 0, title).sendToTarget();
+        }
+
+        @Override
+        public void onStatusChanged(int moveId, int status, long estMillis) {
+            mHandler.obtainMessage(MSG_STATUS_CHANGED, moveId, status, estMillis).sendToTarget();
+        }
     }
 
     private final ContextImpl mContext;

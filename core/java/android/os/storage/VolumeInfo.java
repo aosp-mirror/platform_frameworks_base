@@ -242,6 +242,10 @@ public class VolumeInfo implements Parcelable {
         return (mountFlags & MOUNT_FLAG_PRIMARY) != 0;
     }
 
+    public boolean isPrimaryPhysical() {
+        return isPrimary() && (getType() == TYPE_PUBLIC);
+    }
+
     public boolean isVisible() {
         return (mountFlags & MOUNT_FLAG_VISIBLE) != 0;
     }
