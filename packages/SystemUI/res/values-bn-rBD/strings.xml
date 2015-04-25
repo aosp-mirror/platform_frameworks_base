@@ -362,20 +362,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"নেটওয়ার্ক নিরীক্ষণ"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN অক্ষম করুন"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN এর সংযোগ বিচ্ছিন্ন করুন"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার ডিভাইস পরিচালনা করে৷\n\nআপনার প্রশাসক আপনার ডিভাইসের সাথে সম্পর্কিত সেটিংস, কর্পোরেট অ্যাক্সেস, অ্যাপ্লিকেশানগুলি, ডেটা এবং ডিভাইসের অবস্থান সম্পর্কিত তথ্য নিরীক্ষণ ও পরিচালনা করতে পারেন৷ আরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কাজের প্রোফাইল পরিচালনা করে৷\n\nআপনার প্রশাসক ইমেল, অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে সক্ষম৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"আপনার ডিভাইস পরিচালনা করছে:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>৷\nআপনার কাজের প্রোফাইল পরিচালনা করছে:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>৷\n\nআপনার প্রশাসক ইমেল,অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারেন।\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সঙ্গে যোগাযোগ করুন।"</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"আপনি VPN সংযোগ সেট আপ করার জন্য একটি অ্যাপ্লিকেশানকে অনুমতি দিন৷\n\nএই অ্যাপ্লিকেশানটি ইমেল, অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার ডিভাইস এবং নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে।"</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার ডিভাইস পরিচালনা করে৷\n\nআপনার প্রশাসক আপনার ডিভাইসের সাথে সম্পর্কিত সেটিংস, কর্পোরেট অ্যাক্সেস, অ্যাপ্লিকেশান ডেটা এবং ডিভাইসের অবস্থান সম্পর্কিত তথ্য নিরীক্ষণ ও পরিচালনা করতে পারেন৷\n\nআপনি একটি VPN এর সাথে সংযুক্ত রয়েছেন যা ইমেল, অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কাজের প্রোফাইল পরিচালনা করে৷\n\nআপনার প্রশাসক ইমেল, অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে সক্ষম৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷\n\nএছাড়াও আপনি একটি VPN এর সাথে সংযুক্ত রয়েছেন যা আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷"</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"<xliff:g id="ORGANIZATION_0">%1$s</xliff:g> আপনার ডিভাইস পরিচালনা করে৷\nআপনার কাজের প্রোফাইল পরিচালনা করছে:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>৷\n\nআপনার প্রশাসক ইমেল,অ্যাপ্লিকেশান ও নিরাপদ ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্ক ক্রিয়াকলাপ নিরীক্ষণ করতে সক্ষম।\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷\n\nএছাড়াও আপনি একটি VPN এর সাথে সংযুক্ত রয়েছেন যা আপনার নেটওয়ার্কের কার্যকলাপও নিরীক্ষণ করতে পারে।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"আপনি নিজে আনলক না করা পর্যন্ত ডিভাইসটি লক হয়ে থাকবে"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"বিজ্ঞপ্তিগুলি আরো দ্রুত পান"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"আপনি আনলক করার আগে ওগুলো দেখুন"</string>

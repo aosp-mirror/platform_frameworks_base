@@ -364,20 +364,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"Nadzor omrežja"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Onemogoči VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Prekini povezavo z VPN-jem"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Napravo upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, podatke, povezane z napravo, in podatke o lokaciji naprave. Če želite več informacij, se obrnite na skrbnika."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"Delovni profil upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in varnimi spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"Napravo upravlja:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nDelovni profil upravlja:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nSkrbnik lahko nadzira napravo in omrežno dejavnost, vključno z e-pošto, aplikacijami in varnimi spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"Aplikaciji ste dovolili vzpostavitev povezave z omrežjem VPN.\n\nTa aplikacija lahko nadzira napravo in omrežno dejavnost, vključno z e-pošto, aplikacijami in varnimi spletnimi mesti."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Napravo upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, podatke, povezane z napravo, in podatke o lokaciji naprave.\n\nPovezani ste z omrežjem VPN, ki lahko nadzira vašo omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Delovni profil upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in varnimi spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika.\n\nPovezani ste tudi z omrežjem VPN, ki lahko nadzira vašo omrežno dejavnost."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Napravo upravlja: <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nDelovni profil upravlja:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nSkrbnik lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in varnimi spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika.\n\nPovezani ste tudi z omrežjem VPN, ki lahko nadzira vašo osebno omrežno dejavnost."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Naprava bo ostala zaklenjena, dokler je ročno ne odklenete."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Hitrejše prejemanje obvestil"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Oglejte si jih pred odklepanjem"</string>

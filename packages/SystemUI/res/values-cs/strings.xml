@@ -366,20 +366,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"Sledování sítě"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Deaktivovat VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Odpojit VPN"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu. O další informace požádejte svého administrátora."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může monitorovat vaši síťovou aktivitu, včetně e-mailů, aplikací a zabezpečených webů.\n\nO další informace požádejte svého administrátora."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"Toto zařízení je spravováno následující organizací:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>\nVáš pracovní profil je spravován následující organizací:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nAdministrátor může monitorovat vaše zařízení a síťovou aktivitu, včetně e-mailů, aplikací a zabezpečených webů.\n\nO další informace požádejte svého administrátora."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"Udělili jste aplikaci oprávnění k nastavení připojení VPN.\n\nTato aplikace může sledovat vaši aktivitu v zařízení a v síti, včetně e-mailů, aplikací a zabezpečených webových stránek."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a jeho polohu.\n\nJste připojeni k síti VPN, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nO další informace požádejte svého administrátora."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může monitorovat vaši síťovou aktivitu, včetně e-mailů, aplikací a zabezpečených webů.\n\nO další informace požádejte svého administrátora.\n\nJste také připojeni k síti VPN, která může sledovat vaši aktivitu v síti."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nVáš pracovní profil je spravován následující organizací:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>\n\nAdministrátor může monitorovat vaši síťovou aktivitu, včetně e-mailů, aplikací a zabezpečených webů.\n\nO další informace požádejte svého administrátora.\n\nJste také připojeni k síti VPN, která může sledovat vaši osobní aktivitu v síti."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Zařízení zůstane uzamčeno, dokud je ručně neodemknete"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Čtěte si oznámení rychleji"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Můžete si je přečíst před odemčením obrazovky."</string>

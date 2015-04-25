@@ -362,20 +362,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"Verkon valvonta"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Poista VPN käytöstä"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Katkaise VPN-yhteys"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Tätä laitetta hallinnoi <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJärjestelmänvalvoja voi tarkkailla ja hallinnoida asetuksiasi, yrityskäyttöä, sovelluksia, laitteeseesi yhdistettyjä tietoja sekä laitteesi sijaintitietoja. Saat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"Työprofiiliasi hallinnoi <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJärjestelmänvalvoja voi tarkkailla toimiasi verkossa, esimerkiksi sähköpostin, sovellusten ja turvallisten verkkosivustojen käyttöä.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"Laitetta hallinnoi \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nTyöprofiiliasi hallinnoi \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nJärjestelmänvalvoja voi tarkkailla laitteellasi ja verkossa tekemiäsi toimia, esimerkiksi sähköpostin, sovellusten ja turvallisten verkkosivustojen käyttöä.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"Annoit sovellukselle luvan muodostaa VPN-yhteyden.\n\nTämä sovellus voi tarkkailla laitteellasi ja verkossa tekemiäsi toimia, esimerkiksi sähköpostin, sovellusten ja turvallisten verkkosivustojen käyttöä."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Tätä laitetta hallinnoi <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJärjestelmänvalvoja voi tarkkailla ja hallinnoida asetuksiasi, yrityskäyttöä, sovelluksia, laitteeseesi yhdistettyjä tietoja sekä laitteesi sijaintitietoja.\n\nKäytät VPN-yhteyttä, joka voi valvoa toimiasi verkossa, esimerkiksi sähköpostin, sovellusten ja verkkosivustojen käyttöä.\n\nSaat lisätietoja järjestelmänvalvojalta."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Työprofiiliasi hallinnoi <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nJärjestelmänvalvoja voi tarkkailla toimiasi verkossa, esimerkiksi sähköpostin, sovellusten ja turvallisten verkkosivustojen käyttöä.\n\nSaat lisätietoja järjestelmänvalvojalta.\n\nKäytät myös VPN-yhteyttä, joka voi valvoa toimiasi verkossa."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Laitettasi hallinnoi <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nTyöprofiiliasi hallinnoi \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nJärjestelmänvalvoja voi tarkkailla toimiasi verkossa, esimerkiksi sähköpostin, sovellusten ja turvallisten verkkosivustojen käyttöä.\n\nSaat lisätietoja järjestelmänvalvojalta.\n\nKäytät myös VPN-yhteyttä, joka voi valvoa toimiasi verkossa."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Laite pysyy lukittuna, kunnes se avataan käsin"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Näe ilmoitukset nopeammin"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Näytä ennen lukituksen avaamista"</string>

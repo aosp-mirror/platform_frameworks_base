@@ -146,7 +146,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth bog‘landi."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Parvoz rejimi"</string>
-    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobil tarmoq o‘zgartirilmoqda."</string>
+    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobil tarmoqni o‘zgartirish"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Tizim sozlamalari."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Eslatmalar."</string>
@@ -362,20 +362,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"Tarmoqlarni kuzatish"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN tarmog‘ini o‘chirish"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ulanishini uzish"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Qurilmangiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz sozlamalar, korporativ ruxsat, ilovalar, qurilmangiz va qurilmangizning joylashuv ma’lumoti bilan bog‘liq ma’lumotlarni kuzata oladi va boshqara oladi. Ko‘proq ma’lumot olish uchun administrator bilan bog‘laning."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"Sizning ish profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz tarmoqdagi faoliyatingizni, jumladan, e-pochtalar, ilovalar va xavfsiz veb-saytlaringizni kuzata oladi.\n\nKo‘proq ma’lumot olish uchun administrator bilan bog‘laning."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"Qurilmangiz \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g> tomonidan boshqariladi.\nIsh profilingiz \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz qurilmangiz va tarmoqdagi faoliyatingiz, jumladan, e-pochta, ilova va xavfsiz veb-saytlaringizni kuzata oladi.\n\nKo‘proq ma’lumot olish uchun administrator bilan bog‘laning."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"Siz ilovaga VPN ulanishini o‘rnatishga ruxsat bergansiz.\n\nUshbu ilova qurilmangiz va tarmoqdagi faoliyatingizni, jumladan, e-pochta, ilovalar va xavfsiz veb-saytlar bilan ishlashingizni kuzata oladi."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Qurilmangiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz sozlamalar, korporativ ruxsat, ilovalar, qurilmangiz va qurilmangizning joylashuv ma’lumoti bilan bog‘liq ma’lumotlarni kuzata oladi va boshqara oladi.\n\nShuningdek, siz tarmoqdagi faoliyatingizni, jumladan, e-pochtal, ilova va veb-saytlaringizni kuzata oladigan VPN tarmog‘iga ham ulangansiz.\n\nKo‘proq ma’lumot olish uchun  administrator bilan bog‘laning."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Sizning ish profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz tarmoqdagi faoliyatingizni, jumladan, e-pochta, ilova va xavfsiz veb-saytlar bilan ishlashingizni  kuzata oladi.\n\nKo‘proq ma’lumot olish uchun administrator bilan bog‘laning.\n\nShuningdek, siz tarmoqdagi faoliyatingizni kuzata oladigan VPN tarmog‘iga ham ulangansiz."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Qurilmangiz <xliff:g id="ORGANIZATION_0">%1$s</xliff:g> tomonidan boshqariladi.\nIsh profilingiz \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz tarmoqdagi faoliyatingizni, jumladan, e-pochta, ilova va xavfsiz veb-saytlaringizni kuzata oladi.\n\nKo‘proq ma’lumot olish uchun administrator bilan bog‘laning.\n\nShuningdek, siz shaxsiy tarmoqdagi faoliyatingizni kuzata oladigan VPN tarmog‘iga ham ulangansiz."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Qurilma qo‘lda qulfdan chiqarilmaguncha qulflangan holatda qoladi"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Bildirishnomalarni tezroq oling"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ularni qulfdan chiqarishdan oldin ko‘ring"</string>
