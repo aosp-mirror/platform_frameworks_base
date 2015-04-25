@@ -926,8 +926,7 @@ public class AudioTrack
         return new PlaybackSettings()
                 .setSpeed(floatArray[0])
                 .setPitch(floatArray[1])
-                .setAudioFallbackMode(intArray[0])
-                .setAudioStretchMode(intArray[1]);
+                .setAudioFallbackMode(intArray[0]);
     }
 
     /**
@@ -1350,7 +1349,7 @@ public class AudioTrack
             };
             intArray = new int[] {
                     settings.getAudioFallbackMode(),
-                    settings.getAudioStretchMode(),
+                    PlaybackSettings.AUDIO_STRETCH_MODE_DEFAULT,
             };
         } catch (IllegalStateException e) {
             throw new IllegalArgumentException(e);
