@@ -276,6 +276,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Приложение сможет получать и обрабатывать WAP-сообщения. Это значит, что оно сможет отслеживать и удалять отправленные на ваше устройство сообщения, не показывая их."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Получение данных о запущенных приложениях"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Приложение сможет получать информацию о недавно запущенных и выполняемых задачах, а следовательно, и о приложениях, используемых на устройстве."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Упорядочивание запущенных приложений"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Приложение сможет переключать активный и фоновый режимы выполнения задач без вашего ведома."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"Включение режима громкой связи"</string>

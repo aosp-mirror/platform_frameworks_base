@@ -276,6 +276,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikaci přijmout a zpracovat zprávy WAP. Toto oprávnění umožňuje sledovat přijaté zprávy nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načtení spuštěných aplikací"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikaci získat informace o aktuálně a naposledy spuštěných úlohách. Aplikace s tímto oprávněním může odhalit informace o aplikacích, které se v zařízení používají."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"změna uspořádání spuštěných aplikací"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Umožňuje aplikaci přesunout úlohy na popředí nebo pozadí. Aplikace tak může činit bez vašeho zásahu."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivovat režim V autě"</string>

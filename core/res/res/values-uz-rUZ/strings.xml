@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ilovaga WAP xabarlarni qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Ushbu huquq sizga ko‘rsatmasdan sizga yuborilgan xabarlarni kuzatish yoki o‘chirish xususiyatiga ham ega."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ishlab turgan ilovalar to‘g‘risida ma’lumot olish"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ilovaga hozirda va so‘nggi ishga tushirilgan vazifalar haqida to‘liq ma’lumot olishiga ruxsat beradi. Bu ilovaga qurilmadagi ishlatilayotgan ilovalar haqidagi ma’lumotlarga ega bo‘lishiga ruxsat berishi mumkin."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ishlab turgan ilovalarni qayta tartiblash"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Ilovalarga vazifalarni old va orqa fonga o‘tkazish uchun ruxsat beradi. Ilova buni sizning yordamingizsiz bajarishi mumkin."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"mashina usulini yoqish"</string>
@@ -499,8 +503,8 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ilovaga DRM sertifikatlarini o‘chirib tashlash uchun ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"aloqa operatorining xabar almashinuv xizmatiga bog‘lanish"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Egasiga aloqa operatorining xabar almashinuv xizmatining yuqori darajali interfeysiga bog‘lanish uchun ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
-    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"tarmoq operatori sozlamalari xizmatiga biriktirish"</string>
-    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Egasiga tarmoq operatori sozlamalari xizmatiga biriktirish imkoniyatini beradi. Oddiy ilovalarda hech qachon kerak bo‘lmaydi."</string>
+    <string name="permlab_bindCarrierConfigService" msgid="4110548389449423386">"uyali aloqa tarmog‘ini sozlash xizmatiga ulanish"</string>
+    <string name="permdesc_bindCarrierConfigService" msgid="1096888107671817447">"Foydalanuvchiga uyali aloqa tarmog‘ini sozlash xizmatiga ulanish imkonini beradi. Standart ilovalar uchun talab qilinmaydi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekranni qulfdan chiqarish urinishlarini nazorat qilish"</string>

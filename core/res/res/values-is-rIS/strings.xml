@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leyfir forriti að taka á móti og vinna úr WAP-skilaboðum. Þessi heimild felur í sér möguleikann á að fylgjast með eða eyða skilaboðum sem þér eru send án þess að birta þér þau."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"sækja forrit í gangi"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leyfir forriti að sækja upplýsingar um opin forrit og forrit sem nýlega hafa verið opin. Þetta getur gert forritinu kleift að nálgast upplýsingar um forritin sem notuð eru í tækinu."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"endurraða forritum í gangi"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Leyfir forriti að færa verk á milli forgrunns og bakgrunns. Forritið getur gert þetta án inngrips frá þér."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"kveikja á bílastillingu"</string>

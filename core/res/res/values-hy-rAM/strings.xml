@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Թույլ է տալիս հավելվածին ստանալ և գործարկել WAP հաղորդագրությունները: Այս թույլտվությունը ներառում է ձեզ ուղարկված հաղորդագրությունները հետևելու կամ ջնջելու կարողությունը` առանց ձեր տեսնելու:"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"առբերել աշխատող հավելվածները"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Թույլ է տալիս հավելվածին առբերել մանրամասն տեղեկություններ առկա և վերջերս աշխատող առաջադրանքների մասին: Սա կարող է թույլ տալ հավելվածին հայտնաբերել անձնական տեղեկություններ այլ հավելվածների վերաբերյալ:"</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"վերադասավորել աշխատող հավելվածները"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Թույլ է տալիս հավելվածին փոխանցել առաջադրանքները առջևք և հետնաշերտ: Հավելվածը կարող է սա անել առանց ձեր ներածման:"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"միացնել մեքենայի ռեժիմը"</string>

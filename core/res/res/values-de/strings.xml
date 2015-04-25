@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ermöglicht der App, WAP-Nachrichten zu empfangen und zu verarbeiten. Mit der Berechtigung können Nachrichten, die an Sie gesendet wurden, überwacht und gelöscht werden, bevor sie Ihnen angezeigt werden."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Aktive Apps abrufen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ermöglicht der App, Informationen zu aktuellen und kürzlich ausgeführten Aufgaben abzurufen. Damit kann die App möglicherweise ermitteln, welche Apps auf Ihrem Gerät zum Einsatz kommen."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Aktive Apps neu ordnen"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Ermöglicht der App, Aufgaben in den Vorder- und Hintergrund zu verschieben, ohne dass dazu ein Eingreifen Ihrerseits notwendig ist."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"Automodus aktivieren"</string>

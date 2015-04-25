@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ऐप्स  को WAP संदेशों को प्राप्‍त और संसाधित करने देता है. इस अनुमति में आपको भेजे गए संदेशों की निगरानी आपको दिखाए बिना करने और हटाने की क्षमता शामिल है."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चल रहे ऐप्स पुनर्प्राप्त करें"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ऐप्स  को वर्तमान में और हाल ही में चल रहे कार्यों के बारे में जानकारी को पुन: प्राप्‍त करने देता है. इससे ऐप्स  डिवाइस पर उपयोग किए गए ऐप्स  के बारे में जानकारी खोज सकता है."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चल रहे ऐप्स पुन: क्रमित करें"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ऐप्स  को कार्यों को अग्रभूमि और पृष्‍ठभूमि पर ले जाने देता है. ऐप्स  आपके इनपुट के बिना यह कर सकता है."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड सक्षम करें"</string>

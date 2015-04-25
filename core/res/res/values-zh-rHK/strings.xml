@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允許應用程式接收和處理 WAP 訊息。這項權限也能讓應用程式監控訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允許應用程式擷取有關目前和最近執行的工作的資訊。如此一來，應用程式或可找出裝置上所使用應用程式的相關資訊。"</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"為執行中的應用程式重新排序"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"允許應用程式將工作移至前景或背景。應用程式可以自行處理，您無須操作。"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"啟用行車模式"</string>
@@ -1205,7 +1209,7 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s (%2$s)：%3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"內部儲存空間"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD 記憶卡"</string>
-    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD卡"</string>
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD 卡"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB 驅動器"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB 驅動器"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 儲存裝置"</string>

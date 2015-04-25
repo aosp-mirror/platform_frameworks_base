@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ອະນຸຍາດໃຫ້ແອັບຯຮັບ ແລະປະມວນຜົນຂໍ້ຄວາມ WAP. ການອະນຸຍາດນີ້ຮວມເຖິງຄວາມສາມາດໃນການກວດເບິ່ງ ແລະລຶບຂໍ້ຄວາມທີ່ສົ່ງແລ້ວ ໂດຍບໍ່ຕ້ອງສະແດງໃຫ້ທ່ານເຫັນ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ດຶງແອັບຯທີ່ເຮັດວຽກຢູ່ມາ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ອະນຸຍາດໃຫ້ແອັບຯດຶງຂໍ້ມູນກ່ຽວກັບການເຮັດວຽກໃນປັດຈຸບັນ ແລະຫາກໍຜ່ານມາ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດຄົ້ນພົບຂໍ້ມູນ ກ່ຽວກັບແອັບພລິເຄຊັນທີ່ໃຊ້ຢູ່ໃນອຸປະກອນໄດ້."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ຮຽງລຳດັບແອັບຯທີ່ກຳລັງເຮັດວຽກຄືນໃໝ່"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ອະນຸຍາດໃຫ້ແອັບຯຍ້າຍການເຮັດວຽກໄປໃສ່ດ້ານໜ້າ ແລະພື້ນຫຼັງໄດ້. ແອັບຯອາດຈະດຳເນີນການໂດຍບໍ່ຕ້ອງໃຫ້ທ່ານບອກ."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ເປີດນຳໃຊ້ໂຫມດຂັບລົດ"</string>
