@@ -771,8 +771,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     permittedInputMethods = readPackageList(parser, tag);
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
+                    XmlUtils.skipCurrentTag(parser);
                 }
-                XmlUtils.skipCurrentTag(parser);
             }
         }
 
@@ -1565,11 +1565,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("failed-password-attempts".equals(tag)) {
                     policy.mFailedPasswordAttempts = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
-                    XmlUtils.skipCurrentTag(parser);
                 } else if ("password-owner".equals(tag)) {
                     policy.mPasswordOwner = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
-                    XmlUtils.skipCurrentTag(parser);
                 } else if ("active-password".equals(tag)) {
                     policy.mActivePasswordQuality = Integer.parseInt(
                             parser.getAttributeValue(null, "quality"));
@@ -1587,14 +1585,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, "symbols"));
                     policy.mActivePasswordNonLetter = Integer.parseInt(
                             parser.getAttributeValue(null, "nonletter"));
-                    XmlUtils.skipCurrentTag(parser);
                 } else if (TAG_LOCK_TASK_COMPONENTS.equals(tag)) {
                     policy.mLockTaskPackages.add(parser.getAttributeValue(null, "name"));
-                    XmlUtils.skipCurrentTag(parser);
                 } else if (TAG_STATUS_BAR.equals(tag)) {
                     policy.mStatusBarEnabledState = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_ENABLED));
-                    XmlUtils.skipCurrentTag(parser);
                 } else if (DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML.equals(tag)) {
                     policy.doNotAskCredentialsOnBoot = true;
                 } else {
