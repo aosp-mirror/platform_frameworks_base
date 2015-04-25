@@ -214,6 +214,10 @@ public class KeyguardAffordanceHelper {
         return null;
     }
 
+    public boolean isOnAffordanceIcon(float x, float y) {
+        return isOnIcon(mLeftIcon, x, y) || isOnIcon(mRightIcon, x, y);
+    }
+
     private boolean isOnIcon(View icon, float x, float y) {
         float iconX = icon.getX() + icon.getWidth() / 2.0f;
         float iconY = icon.getY() + icon.getHeight() / 2.0f;

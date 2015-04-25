@@ -1800,9 +1800,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public boolean isFalsingThresholdNeeded() {
-        boolean onKeyguard = getBarState() == StatusBarState.KEYGUARD;
-        boolean isCurrentlyInsecure = mUnlockMethodCache.isCurrentlyInsecure();
-        return onKeyguard && (isCurrentlyInsecure || mDozing || mScreenOnComingFromTouch);
+        return getBarState() == StatusBarState.KEYGUARD;
     }
 
     public boolean isDozing() {
