@@ -38,14 +38,6 @@ import android.annotation.IntDef;
  *   Return {@link java.lang.IllegalArgumentException} from
  *   <code>AudioTrack.setPlaybackSettings(PlaybackSettings)</code>.</li>
  * </ul>
- * <p> <strong>audio stretch mode:</strong> select
- * timestretch handling.
- * <ul>
- * <li> {@link PlaybackSettings#AUDIO_STRETCH_MODE_DEFAULT}:
- *   System will determine best selection. </li>
- * <li> {@link PlaybackSettings#AUDIO_STRETCH_MODE_VOICE}:
- *   Content is primarily voice.</li>
- * </ul>
  * <p> <strong>pitch:</strong> increases or decreases the tonal frequency of the audio content.
  * It is expressed as a multiplicative factor, where normal pitch is 1.0f.
  * <p> <strong>speed:</strong> increases or decreases the time to
@@ -84,7 +76,9 @@ public final class PlaybackSettings {
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioStretchMode {}
+    /** @hide */
     public static final int AUDIO_STRETCH_MODE_DEFAULT = 0;
+    /** @hide */
     public static final int AUDIO_STRETCH_MODE_VOICE = 1;
 
     // flags to indicate which settings are actually set
@@ -136,6 +130,7 @@ public final class PlaybackSettings {
     }
 
     /**
+     * @hide
      * Sets the audio stretch mode.
      * @param audioStretchMode
      * @return this <code>PlaybackSettings</code> instance.
@@ -147,6 +142,7 @@ public final class PlaybackSettings {
     }
 
     /**
+     * @hide
      * Retrieves the audio stretch mode.
      * @return audio stretch mode
      * @throws IllegalStateException if the audio stretch mode is not set.
