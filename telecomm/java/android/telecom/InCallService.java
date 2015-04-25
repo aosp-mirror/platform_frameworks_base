@@ -370,7 +370,7 @@ public abstract class InCallService extends Service {
         public abstract void registerCallback(VideoCall.Callback callback);
 
         /**
-         * Clears the video call listener set via {@link #setVideoCallListener(Listener)}.
+         * Clears the video call listener set via {@link #registerCallback(callback)}.
          */
         public abstract void unregisterCallback();
 
