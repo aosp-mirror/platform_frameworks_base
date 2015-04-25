@@ -65,12 +65,9 @@
       <item quantity="one">Menyalin <xliff:g id="COUNT_0">%1$d</xliff:g> file.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Menyiapkan salinan..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
-      <item quantity="other">Ada kesalahan saat menyalin <xliff:g id="COUNT_1">%1$d</xliff:g> file.</item>
-      <item quantity="one">Ada kesalahan saat menyalin <xliff:g id="COUNT_0">%1$d</xliff:g> file.</item>
-    </plurals>
+    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Sentuh untuk melihat detail"</string>
     <string name="retry" msgid="7564024179122207376">"Coba lagi"</string>
-    <string name="copy_failure_alert_title" msgid="616726451967793549">"Ada kesalahan saat menyalin file"</string>
-    <string name="copy_failure_alert_content" msgid="2655232627616241542">"File berikut tidak disalin: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
+    <skip />
 </resources>

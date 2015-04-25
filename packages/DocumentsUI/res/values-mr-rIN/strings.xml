@@ -65,12 +65,9 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फायली कॉपी करीत आहे.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"कॉपी करण्‍यासाठी तयार करीत आहे…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="4911333304372840735">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फाईल कॉपी करताना त्रुटी.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फायली कॉपी करताना त्रुटी.</item>
-    </plurals>
+    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
     <string name="notification_touch_for_details" msgid="4483108577842961665">"तपशील पाहण्यासाठी स्पर्श करा"</string>
     <string name="retry" msgid="7564024179122207376">"पुन्हा प्रयत्न करा"</string>
-    <string name="copy_failure_alert_title" msgid="616726451967793549">"फायली कॉपी करताना त्रुटी"</string>
-    <string name="copy_failure_alert_content" msgid="2655232627616241542">"या फायलींची कॉपी केली नाही: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
+    <skip />
 </resources>
