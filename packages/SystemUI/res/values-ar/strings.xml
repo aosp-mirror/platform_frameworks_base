@@ -366,20 +366,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"مراقبة الشبكات"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"تعطيل الشبكة الظاهرية الخاصة"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"‏قطع الاتصال بشبكة VPN"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"تتم إدارة جهازك عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nيمكن للمشرف مراقبة وإدارة كل من الإعدادات والدخول إلى الشركة والتطبيقات والبيانات المرتبطة بجهازك ومعلومات الموقع لجهازك. للمزيد من المعلومات، اتصل بالمشرف."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"تتم إدارة ملفك الشخصي للعمل عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nيستطيع المشرف مراقبة أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب الآمنة.\n\nللمزيد من المعلومات، اتصل بالمشرف."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"تتم إدارة جهازك عن طريق:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nتتم إدارة ملفك الشخصي للعمل عن طريق:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nيمكن للمشرف مراقبة جهازك وأنشطة الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب الآمنة.\n\nللمزيد من المعلومات، اتصل بالمشرف."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"‏لقد منحت تطبيقًا إذنًا لإعداد اتصال شبكة ظاهرية خاصة (VPN).\n\nيمكن لهذا التطبيق مراقبة جهازك وأنشطة الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب الآمنة."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"‏تتم إدارة جهازك عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nيمكن للمشرف مراقبة وإدارة كل من الإعدادات والدخول إلى الشركة والتطبيقات والبيانات المرتبطة بجهازك ومعلومات الموقع لجهازك.\n\nأنت متصل بشبكة ظاهرية خاصة (VPN)، يمكنها مراقبة أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nللمزيد من المعلومات، اتصل بالمشرف."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"‏تتم إدارة ملفك الشخصي للعمل عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nيستطيع المشرف مراقبة أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب الآمنة.\n\nللمزيد من المعلومات، اتصل بالمشرف.\n\nأنت متصل أيضًا بشبكة ظاهرية خاصة (VPN)، يمكنها مراقبة أنشطة الشبكة."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"‏تتم إدارة جهازك عن طريق <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nتتم إدارة ملفك الشخصي للعمل عن طريق:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nيستطيع المشرف مراقبة أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب الآمنة.\n\nللمزيد من المعلومات، اتصل بالمشرف.\n\nأنت متصل أيضًا بشبكة ظاهرية خاصة (VPN)، يمكنها مراقبة أنشطة شبكتك الشخصية"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"سيظل الجهاز مقفلاً إلى أن يتم إلغاء قفله يدويًا"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"الحصول على الإشعارات بشكل أسرع"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"الاطلاع عليها قبل إلغاء القفل"</string>

@@ -366,20 +366,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"Отслеживание сетей"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Отключить VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Отключить VPN"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Этим устройством управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может управлять настройками, корпоративным доступом, приложениями, данными на вашем устройстве, в том числе геоданными, а также просматривать соответствующие сведения. За дополнительной информацией обратитесь к администратору."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"Этим корпоративным профилем управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может отслеживать ваши действия в Интернете, включая работу с электронной почтой, приложениями и защищенными веб-сайтами.\n\nОбратитесь к нему за дополнительной информацией."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"Вашим устройством управляет\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nВашим корпоративным профилем управляет\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nАдминистратор может отслеживать ваши действия в Интернете, включая работу с электронной почтой, приложениями и защищенными веб-сайтами.\n\nОбратитесь к нему за дополнительной информацией."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"Вы разрешили приложению подключаться к сети VPN.\n\nЭто приложение может отслеживать ваши действия на устройстве и в Интернете, включая работу с электронной почтой, приложениями и защищенными веб-сайтами."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Этим устройством управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может управлять настройками, корпоративным доступом, приложениями, данными на вашем устройстве, в том числе геоданными, а также просматривать соответствующие сведения.\n\nВы подключены к сети VPN, поэтому возможно отслеживание ваших действий в Интернете, включая работу с электронной почтой, приложениями и защищенными веб-сайтами.\n\nЗа дополнительной информацией обратитесь к администратору."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Этим профилем управляет <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдминистратор может отслеживать ваши действия в Интернете, включая работу с электронной почтой, приложениями и защищенными веб-сайтами.\n\nОбратитесь к нему за дополнительной информацией.\n\nУстройство также подключено к сети VPN, в которой возможно отслеживание ваших действий."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Устройством управляет <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nВашим корпоративным профилем управляет\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nАдминистратор может отслеживать вашу работу с почтой, приложениями и защищенными веб-сайтами.\n\nОбратитесь к нему за дополнительной информацией.\n\nУстройство также подключено к сети VPN, в которой возможно отслеживание ваших действий."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Устройство необходимо будет разблокировать вручную"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Быстрый доступ к уведомлениям"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Просматривайте уведомления на заблокированном экране."</string>

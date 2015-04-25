@@ -364,20 +364,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"Відстеження дій у мережі"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Вимкнути VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Від’єднатися від мережі VPN"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Вашим пристроєм керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдміністратор може відстежувати та контролювати налаштування, корпоративний доступ, додатки й дані, пов’язані з вашим пристроєм, а також геодані пристрою. Зв’яжіться з адміністратором, щоб дізнатися більше."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"Вашим робочим профілем керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдміністратор може відстежувати вашу активність у мережі, зокрема листування, роботу в додатках і на захищених сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"Вашим пристроєм керує\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nВашим робочим профілем керує\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nАдміністратор може відстежувати вашу активність на пристрої та в мережі, зокрема листування, роботу в додатках і на захищених сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"Ви дозволити додатку під’єднуватися до мережі VPN.\n\nЦей додаток може відстежувати вашу активність на пристрої та в мережі, зокрема листування, роботу в додатках і на захищених сайтах."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Вашим пристроєм керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдміністратор може відстежувати та контролювати налаштування, корпоративний доступ, додатки й дані, пов’язані з вашим пристроєм, а також геодані пристрою.\n\nПристрій під’єднано до мережі VPN, постачальник послуг якої може відстежувати вашу активність у мережі, зокрема листування, роботу в додатках і на сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Вашим робочим профілем керує <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nАдміністратор може відстежувати вашу активність у мережі, зокрема листування, роботу в додатках і на захищених сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше.\n\nПристрій під’єднано до мережі VPN, постачальник послуг якої може відстежувати вашу активність у мережі."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Вашим пристроєм керує <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nВашим робочим профілем керує\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nАдміністратор може відстежувати вашу активність у мережі, зокрема листування, роботу в додатках і на захищених сайтах.\n\nЗв’яжіться з адміністратором, щоб дізнатися більше.\n\nПристрій під’єднано до мережі VPN, постачальник послуг якої може відстежувати вашу активність у мережі."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Пристрій залишатиметься заблокованим, доки ви не розблокуєте його вручну"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Швидше отримуйте сповіщення"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Переглядайте сповіщення, перш ніж розблокувати екран"</string>

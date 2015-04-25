@@ -362,20 +362,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"ქსელის მონიტორინგი"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN-ის გაუქმება"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-ის გათიშვა"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"თქვენ მოწყობილობას მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია ამ მოწყობილობასთან ასოცირებული პარამეტრების, კორპორატიული წვდომის, აპებისა და მონაცემების, მათ შორის, ქსელის აქტივობისა და თქვენი მოწყობილობის მდებარეობის ინფორმაციის მონიტორინგი და მართვა. დამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"თქვენ სამუშაო პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპების და უსაფრთხო ვებსაიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"თქვენ მოწყობილობას მართავს:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nთქვენ სამუშაო პროფილს მართავს:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი მოწყობილობისა და ქსელის აქტივობის, მათ შორის, ელფოსტის, აპების და უსაფრთხო ვებსაიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"თქვენ მიეცით ნებართვა აპს, რათა დააყენოს VPN კავშირი.\n\nამ აპს შეუძლია თქვენი მოწყობილობის და ქსელის აქტივობის, მათ შორის, ელფოსტების, აპების და უსაფრთხო საიტების  მონიტორინგი."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"თქვენ მოწყობილობას მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია ამ მოწყობილობასთან ასოცირებული პარამეტრების, კორპორატიული წვდომის, აპებისა და მონაცემების, და ასევე თქვენი მოწყობილობის მდებარეობის ინფორმაციის მონიტორინგი და მართვა.\n\nთქვენ ასევე დაკავშირებული ხართ VPN-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპების და ვებსაიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"თქვენ სამუშაო პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპების და უსაფრთხო ვებსაიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს.\n\nთქვენ ასევე დაკავშირებული ხართ VPN-თან, რომელსაც შეუძლია თქვენი პირადი ქსელის აქტივობის მონიტორინგი."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"თქვენ მოწყობილობას მართავს <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nთქვენ სამუშაო პროფილს მართავს:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nთქვენს ადმინისტრატორს შეუძლია თქვენი ქსელის აქტივობის, მათ შორის, ელფოსტის, აპების და უსაფრთხო ვებსაიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით თქვენს ადმინისტრატორს.\n\nთქვენ ასევე დაკავშირებული ხართ VPN-თან, რომელსაც შეუძლია თქვენი პირადი ქსელის აქტივობის მონიტორინგი"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"მოწყობილობის დარჩება ჩაკეტილი, სანამ ხელით არ გახსნით"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"შეტყობინებების უფრო სწრაფად მიღება"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"იხილეთ განბლოკვამდე"</string>

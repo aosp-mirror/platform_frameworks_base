@@ -363,20 +363,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"Nadzor mreže"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"Onemogući VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Prekini vezu s VPN-om"</string>
-    <!-- no translation found for monitoring_description_device_owned (5780988291898461883) -->
-    <skip />
-    <!-- no translation found for monitoring_description_profile_owned (8110044290898637925) -->
-    <skip />
-    <!-- no translation found for monitoring_description_device_and_profile_owned (1664428184778531249) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn (912328761766161919) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_owned (3090670777499161246) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2224494839524715272) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_device_and_profile_owned (2198546817407897093) -->
-    <skip />
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Vašim uređajem upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVaš administrator može nadzirati postavke, pristup tvrtki, aplikacije, podatke povezane s vašim uređajem i podatke o lokaciji uređaja, kao i upravljati svim prethodno navedenim. Više informacija možete saznati od administratora."</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"Vašim radnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVaš administrator može nadzirati vaše aktivnosti u mreži, uključujući e-poruke, aplikacije i sigurne web-lokacije.\n\nViše informacija možete saznati od administratora."</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"Vašim uređajem upravlja:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nVašim radnim profilom upravlja:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nVaš administrator može nadzirati vaše aktivnosti na uređaju i u mreži, uključujući e-poruke, aplikacije i sigurne web-lokacije.\n\nViše informacija možete saznati od administratora."</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"Dali ste aplikaciji dopuštenje za uspostavljanje VPN veze.\n\nTa aplikacija može nadzirati vaše aktivnosti na uređaju i u mreži, uključujući e-poruke, aplikacije i sigurne web-lokacije."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Vašim uređajem upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVaš administrator može nadzirati postavke, pristup tvrtki, aplikacije, podatke povezane s vašim uređajem i podatke o lokaciji uređaja, kao i upravljati svim prethodno navedenim.\n\nPovezani ste s VPN-om koji može nadzirati vaše aktivnosti u mreži, uključujući e-poruke, aplikacije i web-lokacije.\n\n Više informacija možete saznati od administratora."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Vašim radnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVaš administrator može nadzirati vašu aktivnost u mreži, uključujući e-poruke, aplikacije i sigurne web-lokacije.\n\n Više informacija možete saznati od administratora.\n\nPovezani ste i s VPN-om, koji može nadzirati vaše aktivnosti u mreži."</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Vašim uređajem upravlja <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nVašim radnim profilom upravlja:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nVaš administrator može nadzirati vaše aktivnosti u mreži, uključujući e-poruke, aplikacije i sigurne web-lokacije.\n\nViše informacija možete saznati od administratora.\n\nPovezani ste i s VPN-om, koji može nadzirati vaše osobne aktivnosti u mreži"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Uređaj će ostati zaključan dok ga ručno ne otključate"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Primajte obavijesti brže"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Pogledajte ih prije otključavanja"</string>
