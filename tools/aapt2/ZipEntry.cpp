@@ -144,9 +144,15 @@ void ZipEntry::initNew(const char* fileName, const char* comment)
  * Initializes the CDE and the LFH.
  */
 status_t ZipEntry::initFromExternal(const ZipFile* /* pZipFile */,
-    const ZipEntry* pEntry)
+    const ZipEntry* pEntry, const char* storageName)
 {
     mCDE = pEntry->mCDE;
+    if (storageName && *storageName != 0) {
+        mCDE.mFileNameLength = strlen(storageName);
+        mCDE.mFileName = new unsigned char[mCDE.mFileNameLength + 1];
+        strcpy((char*) mCDE.mFileName, storageName);
+    }
+
     // Check whether we got all the memory needed.
     if ((mCDE.mFileNameLength > 0 && mCDE.mFileName == NULL) ||
             (mCDE.mFileCommentLength > 0 && mCDE.mFileComment == NULL) ||

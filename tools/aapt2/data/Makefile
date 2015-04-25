@@ -2,10 +2,8 @@
 # Environment dependent variables
 ##
 
-SHELL := /bin/bash
 AAPT := aapt2
-ZIP := zip -n .arsc:.png:AndroidManifest.xml
-ZIPALIGN := zipalign 4
+ZIPALIGN := zipalign -f 4
 FRAMEWORK := ../../../../../out/target/common/obj/APPS/framework-res_intermediates/package-export.apk
 
 ##

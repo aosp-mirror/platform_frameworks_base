@@ -603,6 +603,13 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
                     mTable->getValueStringPool().makeRef(
                             styleStr, StringPool::Context{1, config}));
         } else {
+            if (name.type != ResourceType::kString &&
+                    util::stringStartsWith<char16_t>(str, u"res/")) {
+                // This must be a FileReference.
+                return util::make_unique<FileReference>(mTable->getValueStringPool().makeRef(
+                            str, StringPool::Context{ 0, config }));
+            }
+
             // There are no styles associated with this string, so treat it as
             // a simple string.
             return util::make_unique<String>(

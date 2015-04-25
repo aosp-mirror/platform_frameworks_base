@@ -123,14 +123,16 @@ public:
         int compressionMethod, ZipEntry** ppEntry);
 
     /*
-     * Add an entry by copying it from another zip file.  If "padding" is
+     * Add an entry by copying it from another zip file.  If storageName is
+     * non-NULL, the entry will be inserted with the name storageName, otherwise
+     * it will have the same name as the source entry.  If "padding" is
      * nonzero, the specified number of bytes will be added to the "extra"
      * field in the header.
      *
      * If "ppEntry" is non-NULL, a pointer to the new entry will be returned.
      */
     status_t add(const ZipFile* pSourceZip, const ZipEntry* pSourceEntry,
-        int padding, ZipEntry** ppEntry);
+                 const char* storageName, int padding, ZipEntry** ppEntry);
 
     /*
      * Mark an entry as having been removed.  It is not actually deleted
