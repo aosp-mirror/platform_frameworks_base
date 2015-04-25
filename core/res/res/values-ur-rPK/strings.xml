@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏ایپ کو WAP پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس اجازت میں آپ کو مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھنے یا انہیں حذف کرنے کی اہلیت شامل ہے۔"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"چل رہی ایپس کی بازیافت کریں"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ایپ کو موجودہ اور حالیہ چل رہے ٹاسکس کے بارے میں معلومات بازیافت کرنے کی اجازت دیتا ہے۔ یہ ایپ کو اس بارے میں معلومات دریافت کرنے کی اجازت دے سکتا ہے کہ آلہ پر کون سی ایپلیکیشنز استعمال کی جاتی ہیں۔"</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"چل رہی ایپس کو دوبارہ ترتیب دیں"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ایپ کو پیش منظر یا پس منظر میں ٹاسکس کو منتقل کرنے کی اجازت دیتا ہے۔ ایپ آپ کے ان پٹ کے بغیر یہ کام کرسکتی ہے۔"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"کار وضع فعال کریں"</string>

@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Разрешава на приложението да получава и обработва WAP съобщения. Това разрешение включва възможността да наблюдава или изтрива изпратените до вас, без да ви ги покаже."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"извличане на изпълняваните приложения"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Разрешава на приложението да извлича информация за задачите, изпълнявани понастоящем и неотдавна. Това може да му позволи да открива данни за това, кои приложения се използват на устройството."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"пренареждане на изпълняваните приложения"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Разрешава на приложението да прехвърля задачи на преден и на заден план. То може да направи това без вашето потвърждение."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"активиране на мото режима"</string>

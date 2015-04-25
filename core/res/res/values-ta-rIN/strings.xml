@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. உங்களுக்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்க அல்லது நீக்குவதற்கான திறன் இந்த அனுமதியில் உள்ளடங்கும்."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"இயங்கும் பயன்பாடுகளை மீட்டெடுத்தல்"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"நடப்பில் மற்றும் சமீபத்தில் இயங்கும் காரியங்களின் தகவலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. சாதனத்தில் எந்தப் பயன்பாடுகள் பயன்படுத்தப்படுகின்றன என்பது குறித்த தகவலைக் கண்டறிய பயன்பாட்டை இது அனுமதிக்கலாம்."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"இயங்கும் பயன்பாடுகளை மறுவரிசைப்படுத்தல்"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"பின்புலத்திலும், முன்புலத்திலும் காரியங்களை நகர்த்த பயன்பாட்டை அனுமதிக்கிறது. உங்கள் உள்ளீடு இல்லாமலே பயன்பாடு இதைச் செய்யலாம்."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"கார் பயன்முறையை இயக்குதல்"</string>

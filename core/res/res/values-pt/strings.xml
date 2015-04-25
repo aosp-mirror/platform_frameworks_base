@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite que o app receba e processe mensagens WAP. Esta permissão inclui a capacidade de monitorar ou excluir mensagens enviadas para você sem mostrá-las para você."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar apps em execução"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite que o app obtenha informações sobre tarefas em execução atuais e recentes. Pode permitir que o app descubra informações sobre os apps usados ​​no dispositivo."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordenar os apps em execução"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite que o app mova tarefas para o primeiro plano e o plano de fundo, sem sua intervenção."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ativar o modo carro"</string>
@@ -903,7 +907,7 @@
     <string name="aerr_application" msgid="932628488013092776">"O <xliff:g id="APPLICATION">%1$s</xliff:g> parou."</string>
     <string name="aerr_process" msgid="4507058997035697579">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> parou."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> não está respondendo.\n\nDeseja fechá-la?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> não está respondendo.\n\nDeseja fechá-lo?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"A atividade <xliff:g id="ACTIVITY">%1$s</xliff:g> não está respondendo.\n\nDeseja fechá-la?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> não está respondendo. Deseja encerrar o app?"</string>
     <string name="anr_process" msgid="6513209874880517125">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> não está respondendo.\n\nDeseja fechá-lo?"</string>

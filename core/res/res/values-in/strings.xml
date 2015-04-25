@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Memungkinkan aplikasi menerima dan memproses pesan WAP. Izin ini mencakup kemampuan untuk memantau atau menghapus pesan yang dikirim kepada Anda tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"mengambil apl yang berjalan"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Memungkinkan aplikasi mengambil informasi tentang tugas yang dijalankan saat ini dan baru-baru ini. Izin ini memungkinkan aplikasi menemukan informasi tentang aplikasi mana yang digunakan pada perangkat."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"menyusun ulang apl yang berjalan"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Memungkinkan aplikasi memindah tugas ke latar depan dan latar belakang. Aplikasi dapat melakukannya tanpa masukan dari Anda."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktifkan mode mobil"</string>

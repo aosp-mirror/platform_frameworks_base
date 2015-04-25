@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng WAP. Kabilang sa pahintulot na ito ang kakayahang sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyo nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"bawiin ang tumatakbong apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Pinapayagan ang app na kumuha ng impormasyon tungkol sa mga kasalukuyan at kamakailang gumaganang gawain. Maaari nitong payagan ang app na tumuklas ng impormasyon tungkol sa kung aling mga application ang ginagamit sa device."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"muling isaayos ang tumatakbong apps"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Pinapayagan ang app na maglipat ng mga gawain sa foreground at background. Maaari itong gawin ng app nang wala ng iyong input."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"paganahin ang car mode"</string>

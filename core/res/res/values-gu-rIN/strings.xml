@@ -274,6 +274,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"એપ્લિકેશનને WAP સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલ સંદેશાઓનું નિરીક્ષણ કરવાની અને કાઢી નાખવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ચાલુ એપ્લિકેશન્સ પુનઃપ્રાપ્ત કરો"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"એપ્લિકેશનને વર્તમાનમાં અને તાજેતરમાં ચાલી રહેલ કાર્યો વિશેની વિગતવાર માહિતી પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને ઉપકરણ પર કઈ એપ્લિકેશન્સનો ઉપયોગ થાય છે તેના વિશેની માહિતી શોધવાની મંજૂરી આપી શકે છે."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ચાલુ એપ્લિકેશન્સને ફરી ગોઠવો"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"એપ્લિકેશનને અગ્રભૂમિ અને પૃષ્ટભૂમિમાં કાર્યો ખસેડવાની મંજૂરી આપે છે. તમારા ઇનપુટ વિના એપ્લિકેશન આ કરી શકે છે."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"કાર મોડ સક્ષમ કરો"</string>

@@ -275,6 +275,10 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Дозвољава апликацији да прима и обрађује WAP поруке. Ова дозвола укључује могућност праћења или брисања порука које вам се шаљу, а које вам се не приказују."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"преузимање покренутих апликација"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Дозвољава апликацији да преузима информације о актуелним и недавно покренутим задацима. Ово може да омогући апликацији да открије информације о томе које се апликације користе на уређају."</string>
+    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
+    <skip />
+    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
+    <skip />
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"промена редоследа покренутих апликација"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Дозвољава апликацији да премешта задатке у први план и у позадину. Апликација може да ради ово без вашег уноса."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"омогућавање режима рада у аутомобилу"</string>
