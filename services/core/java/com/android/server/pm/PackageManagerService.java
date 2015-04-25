@@ -14307,12 +14307,22 @@ public class PackageManagerService extends IPackageManager.Stub {
     public int movePrimaryStorage(String volumeUuid) throws RemoteException {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
 
-        final int moveId = mNextMoveId.getAndIncrement();
+        final int realMoveId = mNextMoveId.getAndIncrement();
+        final IPackageMoveObserver callback = new IPackageMoveObserver.Stub() {
+            @Override
+            public void onStarted(int moveId, String title) {
+                // Ignored
+            }
 
-        // TODO: ask mountservice to take down both, connect over to DCS to
-        // migrate, and then bring up new storage
+            @Override
+            public void onStatusChanged(int moveId, int status, long estMillis) {
+                mMoveCallbacks.notifyStatusChanged(realMoveId, status, estMillis);
+            }
+        };
 
-        return moveId;
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        storage.setPrimaryStorageUuid(volumeUuid, callback);
+        return realMoveId;
     }
 
     @Override

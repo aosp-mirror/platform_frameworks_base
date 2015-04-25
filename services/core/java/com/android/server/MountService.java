@@ -30,6 +30,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.IPackageMoveObserver;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.ObbInfo;
 import android.mtp.MtpStorage;
@@ -178,6 +180,9 @@ class MountService extends IMountService.Stub
     /** Maximum number of ASEC containers allowed to be mounted. */
     private static final int MAX_CONTAINERS = 250;
 
+    /** Magic value sent by MoveTask.cpp */
+    private static final int MOVE_STATUS_COPY_FINISHED = 82;
+
     /*
      * Internal vold response code constants
      */
@@ -225,6 +230,8 @@ class MountService extends IMountService.Stub
         public static final int VOLUME_FS_LABEL_CHANGED = 654;
         public static final int VOLUME_PATH_CHANGED = 655;
         public static final int VOLUME_DESTROYED = 659;
+
+        public static final int MOVE_STATUS = 660;
 
         /*
          * 700 series - fstrim
@@ -314,6 +321,11 @@ class MountService extends IMountService.Stub
     @GuardedBy("mLock")
     private ArrayMap<String, CountDownLatch> mDiskScanLatches = new ArrayMap<>();
 
+    @GuardedBy("mLock")
+    private IPackageMoveObserver mMoveCallback;
+    @GuardedBy("mLock")
+    private String mMoveTargetUuid;
+
     private DiskInfo findDiskById(String id) {
         synchronized (mLock) {
             final DiskInfo disk = mDisks.get(id);
@@ -345,6 +357,17 @@ class MountService extends IMountService.Stub
             }
         }
         throw new IllegalArgumentException("No volume found for path " + path);
+    }
+
+    private VolumeInfo findStorageForUuid(String volumeUuid) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
+            return findVolumeById(VolumeInfo.ID_EMULATED_INTERNAL);
+        } else if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
+            return storage.getPrimaryPhysicalVolume();
+        } else {
+            return storage.findEmulatedForPrivate(storage.findVolumeByUuid(volumeUuid));
+        }
     }
 
     private VolumeMetadata findOrCreateMetadataLocked(VolumeInfo vol) {
@@ -937,6 +960,12 @@ class MountService extends IMountService.Stub
                 break;
             }
 
+            case VoldResponseCode.MOVE_STATUS: {
+                final int status = Integer.parseInt(cooked[1]);
+                onMoveStatusLocked(status);
+                break;
+            }
+
             case VoldResponseCode.FstrimCompleted: {
                 EventLogTags.writeFstrimFinish(SystemClock.elapsedRealtime());
                 break;
@@ -972,24 +1001,36 @@ class MountService extends IMountService.Stub
     }
 
     private void onVolumeCreatedLocked(VolumeInfo vol) {
-        final boolean primaryPhysical = SystemProperties.getBoolean(
-                StorageManager.PROP_PRIMARY_PHYSICAL, false);
-        // TODO: enable switching to another emulated primary
-        if (VolumeInfo.ID_EMULATED_INTERNAL.equals(vol.id) && !primaryPhysical) {
-            vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
-            vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
-            mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
+        if (vol.type == VolumeInfo.TYPE_EMULATED) {
+            final StorageManager storage = mContext.getSystemService(StorageManager.class);
+            final VolumeInfo privateVol = storage.findPrivateForEmulated(vol);
+
+            if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, mPrimaryStorageUuid)
+                    && VolumeInfo.ID_PRIVATE_INTERNAL.equals(privateVol.id)) {
+                Slog.v(TAG, "Found primary storage at " + vol);
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
+                mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
+
+            } else if (Objects.equals(privateVol.fsUuid, mPrimaryStorageUuid)) {
+                Slog.v(TAG, "Found primary storage at " + vol);
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
+                vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
+                mHandler.obtainMessage(H_VOLUME_MOUNT, vol).sendToTarget();
+            }
 
         } else if (vol.type == VolumeInfo.TYPE_PUBLIC) {
-            if (primaryPhysical) {
+            // TODO: only look at first public partition
+            if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, mPrimaryStorageUuid)
+                    && vol.disk.isDefaultPrimary()) {
+                Slog.v(TAG, "Found primary storage at " + vol);
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_PRIMARY;
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
             }
 
             // Adoptable public disks are visible to apps, since they meet
             // public API requirement of being in a stable location.
-            final DiskInfo disk = mDisks.get(vol.getDiskId());
-            if (disk != null && disk.isAdoptable()) {
+            if (vol.disk.isAdoptable()) {
                 vol.mountFlags |= VolumeInfo.MOUNT_FLAG_VISIBLE;
             }
 
@@ -1063,6 +1104,35 @@ class MountService extends IMountService.Stub
              */
             mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(
                     OBB_FLUSH_MOUNT_STATE, vol.path));
+        }
+    }
+
+    private void onMoveStatusLocked(int status) {
+        if (mMoveCallback == null) {
+            Slog.w(TAG, "Odd, status but no move requested");
+            return;
+        }
+
+        // TODO: estimate remaining time
+        try {
+            mMoveCallback.onStatusChanged(-1, status, -1);
+        } catch (RemoteException ignored) {
+        }
+
+        // We've finished copying and we're about to clean up old data, so
+        // remember that move was successful if we get rebooted
+        if (status == MOVE_STATUS_COPY_FINISHED) {
+            Slog.d(TAG, "Move to " + mMoveTargetUuid + " copy phase finshed; persisting");
+
+            mPrimaryStorageUuid = mMoveTargetUuid;
+            writeMetadataLocked();
+        }
+
+        if (PackageManager.isMoveStatusFinished(status)) {
+            Slog.d(TAG, "Move to " + mMoveTargetUuid + " finished with status " + status);
+
+            mMoveCallback = null;
+            mMoveTargetUuid = null;
         }
     }
 
@@ -1322,12 +1392,17 @@ class MountService extends IMountService.Stub
         final VolumeInfo vol = findVolumeById(volId);
 
         // TODO: expand PMS to know about multiple volumes
-        if (vol.isPrimary()) {
-            synchronized (mUnmountLock) {
-                mUnmountSignal = new CountDownLatch(1);
-                mPms.updateExternalMediaStatus(false, true);
-                waitForLatch(mUnmountSignal, "mUnmountSignal");
-                mUnmountSignal = null;
+        if (vol.isPrimaryPhysical()) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mUnmountLock) {
+                    mUnmountSignal = new CountDownLatch(1);
+                    mPms.updateExternalMediaStatus(false, true);
+                    waitForLatch(mUnmountSignal, "mUnmountSignal");
+                    mUnmountSignal = null;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
 
@@ -1424,20 +1499,41 @@ class MountService extends IMountService.Stub
     }
 
     @Override
-    public String getPrimaryStorageUuid() throws RemoteException {
+    public String getPrimaryStorageUuid() {
+        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        waitForReady();
+
         synchronized (mLock) {
             return mPrimaryStorageUuid;
         }
     }
 
     @Override
-    public void setPrimaryStorageUuid(String volumeUuid) throws RemoteException {
-        synchronized (mLock) {
-            Slog.d(TAG, "Changing primary storage UUID to " + volumeUuid);
-            mPrimaryStorageUuid = volumeUuid;
-            writeMetadataLocked();
+    public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback) {
+        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        waitForReady();
 
-            // TODO: reevaluate all volumes we know about!
+        synchronized (mLock) {
+            final VolumeInfo from = Preconditions.checkNotNull(
+                    findStorageForUuid(mPrimaryStorageUuid));
+            final VolumeInfo to = Preconditions.checkNotNull(
+                    findStorageForUuid(volumeUuid));
+
+            if (Objects.equals(from, to)) {
+                throw new IllegalArgumentException("Primary storage already at " + from);
+            }
+
+            if (mMoveCallback != null) {
+                throw new IllegalStateException("Move already in progress");
+            }
+            mMoveCallback = callback;
+            mMoveTargetUuid = volumeUuid;
+
+            try {
+                mConnector.execute("volume", "move_storage", from.id, to.id);
+            } catch (NativeDaemonConnectorException e) {
+                throw e.rethrowAsParcelableException();
+            }
         }
     }
 
@@ -2875,6 +2971,9 @@ class MountService extends IMountService.Stub
                 meta.dump(pw);
             }
             pw.decreaseIndent();
+
+            pw.println();
+            pw.println("Primary storage UUID: " + mPrimaryStorageUuid);
         }
 
         synchronized (mObbMounts) {

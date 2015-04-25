@@ -30,7 +30,6 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
-import android.content.pm.IPackageMoveObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -237,8 +236,12 @@ public final class Pm {
             return runForceDexOpt();
         }
 
-        if ("move".equals(op)) {
-            return runMove();
+        if ("move-package".equals(op)) {
+            return runMovePackage();
+        }
+
+        if ("move-primary-storage".equals(op)) {
+            return runMovePrimaryStorage();
         }
 
         try {
@@ -1285,7 +1288,7 @@ public final class Pm {
         }
     }
 
-    public int runMove() {
+    public int runMovePackage() {
         final String packageName = nextArg();
         String volumeUuid = nextArg();
         if ("internal".equals(volumeUuid)) {
@@ -1294,6 +1297,33 @@ public final class Pm {
 
         try {
             final int moveId = mPm.movePackage(packageName, volumeUuid);
+
+            int status = mPm.getMoveStatus(moveId);
+            while (!PackageManager.isMoveStatusFinished(status)) {
+                SystemClock.sleep(DateUtils.SECOND_IN_MILLIS);
+                status = mPm.getMoveStatus(moveId);
+            }
+
+            if (status == PackageManager.MOVE_SUCCEEDED) {
+                System.out.println("Success");
+                return 0;
+            } else {
+                System.err.println("Failure [" + status + "]");
+                return 1;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    public int runMovePrimaryStorage() {
+        String volumeUuid = nextArg();
+        if ("internal".equals(volumeUuid)) {
+            volumeUuid = null;
+        }
+
+        try {
+            final int moveId = mPm.movePrimaryStorage(volumeUuid);
 
             int status = mPm.getMoveStatus(moveId);
             while (!PackageManager.isMoveStatusFinished(status)) {
@@ -1860,7 +1890,8 @@ public final class Pm {
         System.err.println("       pm install-abandon SESSION_ID");
         System.err.println("       pm uninstall [-k] [--user USER_ID] PACKAGE");
         System.err.println("       pm set-installer PACKAGE INSTALLER");
-        System.err.println("       pm move PACKAGE [internal|UUID]");
+        System.err.println("       pm move-package PACKAGE [internal|UUID]");
+        System.err.println("       pm move-primary-storage [internal|UUID]");
         System.err.println("       pm clear [--user USER_ID] PACKAGE");
         System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");

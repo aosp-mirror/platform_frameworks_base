@@ -1556,6 +1556,7 @@ final class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @Override
     public @Nullable VolumeInfo getPrimaryStorageCurrentVolume() {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         final String volumeUuid = storage.getPrimaryStorageUuid();
@@ -1568,6 +1569,7 @@ final class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @Override
     public @NonNull List<VolumeInfo> getPrimaryStorageCandidateVolumes() {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         final VolumeInfo currentVol = getPrimaryStorageCurrentVolume();

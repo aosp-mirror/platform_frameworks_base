@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import android.content.pm.IPackageMoveObserver;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -1082,12 +1083,14 @@ public interface IMountService extends IInterface {
             }
 
             @Override
-            public void setPrimaryStorageUuid(String volumeUuid) throws RemoteException {
+            public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     _data.writeString(volumeUuid);
+                    _data.writeStrongBinder((callback != null ? callback.asBinder() : null));
                     mRemote.transact(Stub.TRANSACTION_setPrimaryStorageUuid, _data, _reply, 0);
                     _reply.readException();
                 } finally {
@@ -1714,7 +1717,9 @@ public interface IMountService extends IInterface {
                 case TRANSACTION_setPrimaryStorageUuid: {
                     data.enforceInterface(DESCRIPTOR);
                     String volumeUuid = data.readString();
-                    setPrimaryStorageUuid(volumeUuid);
+                    IPackageMoveObserver listener = IPackageMoveObserver.Stub.asInterface(
+                            data.readStrongBinder());
+                    setPrimaryStorageUuid(volumeUuid, listener);
                     reply.writeNoException();
                     return true;
                 }
@@ -2020,5 +2025,6 @@ public interface IMountService extends IInterface {
     public void setVolumeUserFlags(String volId, int flags, int mask) throws RemoteException;
 
     public String getPrimaryStorageUuid() throws RemoteException;
-    public void setPrimaryStorageUuid(String volumeUuid) throws RemoteException;
+    public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback)
+            throws RemoteException;
 }
