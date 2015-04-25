@@ -201,9 +201,11 @@ public class WindowAnimator {
                 null : winShowWhenLocked.mAppToken;
         final boolean hideWhenLocked =
                 !(((win.mIsImWindow || imeTarget == win) && showImeOverKeyguard)
-                        || (appShowWhenLocked != null && (appShowWhenLocked == win.mAppToken ||
+                        || (appShowWhenLocked != null && (appShowWhenLocked == win.mAppToken
+                        // Show all SHOW_WHEN_LOCKED windows while they're animating
+                        || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.isAnimatingLw()
                         // Show error dialogs over apps that dismiss keyguard.
-                        (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
+                        || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
         return ((mForceHiding == KEYGUARD_ANIMATING_IN)
                 && (!win.mWinAnimator.isAnimating() || hideWhenLocked))
                 || ((mForceHiding == KEYGUARD_SHOWN) && hideWhenLocked);
