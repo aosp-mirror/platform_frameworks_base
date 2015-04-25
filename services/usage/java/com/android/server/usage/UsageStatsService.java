@@ -28,7 +28,6 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
-import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,6 +40,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -81,6 +81,8 @@ public class UsageStatsService extends SystemService implements
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
     private static final long FLUSH_INTERVAL = DEBUG ? TEN_SECONDS : TWENTY_MINUTES;
     private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
+    static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = 2L * 24 * 60 * 60 * 1000; // 1 day
+    static final long DEFAULT_CHECK_IDLE_INTERVAL = 8 * 3600 * 1000; // 8 hours
 
     // Handler message types.
     static final int MSG_REPORT_EVENT = 0;
@@ -88,6 +90,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_REMOVE_USER = 2;
     static final int MSG_INFORM_LISTENERS = 3;
     static final int MSG_RESET_LAST_TIMESTAMP = 4;
+    static final int MSG_CHECK_IDLE_STATES = 5;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -98,9 +101,11 @@ public class UsageStatsService extends SystemService implements
     private File mUsageStatsDir;
     long mRealTimeSnapshot;
     long mSystemTimeSnapshot;
+    boolean mAppIdleParoled;
 
-    private static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = 1L * 24 * 60 * 60 * 1000; // 1 day
-    private long mAppIdleDurationMillis;
+    long mAppIdleDurationMillis;
+
+    long mCheckIdleIntervalMillis = DEFAULT_CHECK_IDLE_INTERVAL;
 
     private ArrayList<UsageStatsManagerInternal.AppIdleStateChangeListener>
             mPackageAccessListeners = new ArrayList<>();
@@ -113,6 +118,7 @@ public class UsageStatsService extends SystemService implements
     public void onStart() {
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+
         mHandler = new H(BackgroundThread.get().getLooper());
 
         File systemDataDir = new File(Environment.getDataDirectory(), "system");
@@ -123,9 +129,14 @@ public class UsageStatsService extends SystemService implements
                     + mUsageStatsDir.getAbsolutePath());
         }
 
-        getContext().registerReceiver(new UserRemovedReceiver(),
-                new IntentFilter(Intent.ACTION_USER_REMOVED));
+        IntentFilter userActions = new IntentFilter(Intent.ACTION_USER_REMOVED);
+        userActions.addAction(Intent.ACTION_USER_STARTED);
+        getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, userActions,
+                null, null);
 
+        IntentFilter deviceStates = new IntentFilter(BatteryManager.ACTION_CHARGING);
+        deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
+        getContext().registerReceiver(new DeviceStateReceiver(), deviceStates);
         synchronized (mLock) {
             cleanUpRemovedUsersLocked();
         }
@@ -147,18 +158,35 @@ public class UsageStatsService extends SystemService implements
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             // Observe changes to the threshold
             new SettingsObserver(mHandler).registerObserver();
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            setAppIdleParoled(getContext().getSystemService(BatteryManager.class).isCharging());
         }
     }
 
-    private class UserRemovedReceiver extends BroadcastReceiver {
+    private class UserActionsReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
-                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+            if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
                 if (userId >= 0) {
                     mHandler.obtainMessage(MSG_REMOVE_USER, userId, 0).sendToTarget();
                 }
+            } else if (Intent.ACTION_USER_STARTED.equals(intent.getAction())) {
+                if (userId >=0) {
+                    postCheckIdleStates();
+                }
+            }
+        }
+    }
+
+    private class DeviceStateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BatteryManager.ACTION_CHARGING.equals(action)
+                    || BatteryManager.ACTION_DISCHARGING.equals(action)) {
+                setAppIdleParoled(BatteryManager.ACTION_CHARGING.equals(action));
             }
         }
     }
@@ -193,6 +221,49 @@ public class UsageStatsService extends SystemService implements
         for (int i = 0; i < deleteCount; i++) {
             deleteRecursively(new File(mUsageStatsDir, toDelete.valueAt(i)));
         }
+    }
+
+    void setAppIdleParoled(boolean paroled) {
+        synchronized (mLock) {
+            if (mAppIdleParoled != paroled) {
+                mAppIdleParoled = paroled;
+                postCheckIdleStates();
+            }
+        }
+    }
+
+    void postCheckIdleStates() {
+        mHandler.removeMessages(MSG_CHECK_IDLE_STATES);
+        mHandler.sendEmptyMessage(MSG_CHECK_IDLE_STATES);
+    }
+
+    /** Check all running users' apps to see if they enter an idle state. */
+    void checkIdleStates() {
+        final int[] runningUsers;
+        try {
+            runningUsers = ActivityManagerNative.getDefault().getRunningUserIds();
+        } catch (RemoteException re) {
+            return;
+        }
+
+        for (int i = 0; i < runningUsers.length; i++) {
+            final int userId = runningUsers[i];
+            List<PackageInfo> packages =
+                    getContext().getPackageManager().getInstalledPackages(
+                            PackageManager.GET_DISABLED_COMPONENTS
+                                | PackageManager.GET_UNINSTALLED_PACKAGES,
+                            userId);
+            synchronized (mLock) {
+                final int packageCount = packages.size();
+                for (int p = 0; p < packageCount; p++) {
+                    final String packageName = packages.get(p).packageName;
+                    final boolean isIdle = isAppIdle(packageName, userId);
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
+                            userId, isIdle ? 1 : 0, packageName));
+                }
+            }
+        }
+        mHandler.sendEmptyMessageDelayed(MSG_CHECK_IDLE_STATES, mCheckIdleIntervalMillis);
     }
 
     private static void deleteRecursively(File f) {
@@ -291,7 +362,7 @@ public class UsageStatsService extends SystemService implements
     void resetLastTimestamp(String packageName, int userId, boolean idle) {
         synchronized (mLock) {
             final long timeNow = checkAndGetTimeLocked();
-            final long lastTimestamp = timeNow - (idle ? mAppIdleDurationMillis : 0);
+            final long lastTimestamp = timeNow - (idle ? mAppIdleDurationMillis : 0) - 5000;
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
@@ -409,14 +480,22 @@ public class UsageStatsService extends SystemService implements
 
     private boolean hasPassedIdleDuration(long lastUsed) {
         final long now = System.currentTimeMillis();
-        return lastUsed < now - mAppIdleDurationMillis;
+        return lastUsed <= now - mAppIdleDurationMillis;
     }
 
     boolean isAppIdle(String packageName, int userId) {
         if (packageName == null) return false;
+        synchronized (mLock) {
+            // Temporary exemption, probably due to device charging or occasional allowance to
+            // be allowed to sync, etc.
+            if (mAppIdleParoled) {
+                return false;
+            }
+        }
         if (SystemConfig.getInstance().getAllowInPowerSave().contains(packageName)) {
             return false;
         }
+        // TODO: Optimize this check
         if (isActiveDeviceAdmin(packageName, userId)) {
             return false;
         }
@@ -518,6 +597,9 @@ public class UsageStatsService extends SystemService implements
                     resetLastTimestamp((String) msg.obj, msg.arg1, msg.arg2 == 1);
                     break;
 
+                case MSG_CHECK_IDLE_STATES:
+                    checkIdleStates();
+                    break;
                 default:
                     super.handleMessage(msg);
                     break;
@@ -544,7 +626,9 @@ public class UsageStatsService extends SystemService implements
             mAppIdleDurationMillis = Settings.Secure.getLongForUser(getContext().getContentResolver(),
                     Settings.Secure.APP_IDLE_DURATION, DEFAULT_APP_IDLE_THRESHOLD_MILLIS,
                     UserHandle.USER_OWNER);
-            // TODO: Check if we need to update idle states of all the apps
+            mCheckIdleIntervalMillis = Math.min(DEFAULT_CHECK_IDLE_INTERVAL,
+                    mAppIdleDurationMillis / 4);
+            postCheckIdleStates();
         }
     }
 
