@@ -17,14 +17,14 @@
 #ifndef AAPT_SOURCE_XML_PULL_PARSER_H
 #define AAPT_SOURCE_XML_PULL_PARSER_H
 
+#include "XmlPullParser.h"
+
 #include <istream>
 #include <libexpat/expat.h>
 #include <queue>
 #include <stack>
 #include <string>
 #include <vector>
-
-#include "XmlPullParser.h"
 
 namespace aapt {
 
@@ -34,25 +34,28 @@ public:
     SourceXmlPullParser(const SourceXmlPullParser& rhs) = delete;
     ~SourceXmlPullParser();
 
-    Event getEvent() const;
-    const std::string& getLastError() const;
-    Event next();
+    Event getEvent() const override;
+    const std::string& getLastError() const override ;
+    Event next() override ;
 
-    const std::u16string& getComment() const;
-    size_t getLineNumber() const;
-    size_t getDepth() const;
+    const std::u16string& getComment() const override;
+    size_t getLineNumber() const override;
+    size_t getDepth() const override;
 
-    const std::u16string& getText() const;
+    const std::u16string& getText() const override;
 
-    const std::u16string& getNamespacePrefix() const;
-    const std::u16string& getNamespaceUri() const;
+    const std::u16string& getNamespacePrefix() const override;
+    const std::u16string& getNamespaceUri() const override;
+    bool applyPackageAlias(std::u16string* package,
+                           const std::u16string& defaultPackage) const override;
 
-    const std::u16string& getElementNamespace() const;
-    const std::u16string& getElementName() const;
 
-    const_iterator beginAttributes() const;
-    const_iterator endAttributes() const;
-    size_t getAttributeCount() const;
+    const std::u16string& getElementNamespace() const override;
+    const std::u16string& getElementName() const override;
+
+    const_iterator beginAttributes() const override;
+    const_iterator endAttributes() const override;
+    size_t getAttributeCount() const override;
 
 private:
     static void XMLCALL startNamespaceHandler(void* userData, const char* prefix, const char* uri);
@@ -80,6 +83,7 @@ private:
     const std::u16string mEmpty;
     size_t mDepth;
     std::stack<std::u16string> mNamespaceUris;
+    std::vector<std::pair<std::u16string, std::u16string>> mPackageAliases;
 };
 
 } // namespace aapt

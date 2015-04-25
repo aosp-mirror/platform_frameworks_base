@@ -76,12 +76,10 @@ public:
 
     /*
      * Returns a Reference object if the string was parsed as a resource or attribute reference,
-     * ( @[+][package:]type/name | ?[package:]type/name )
-     * assigning defaultPackage if the package was not present in the string, and setting
-     * outCreate to true if the '+' was present in the string.
+     * ( @[+][package:]type/name | ?[package:]type/name ) setting outCreate to true if
+     * the '+' was present in the string.
      */
     static std::unique_ptr<Reference> tryParseReference(const StringPiece16& str,
-                                                        const StringPiece16& defaultPackage,
                                                         bool* outCreate);
 
     /*
@@ -127,20 +125,18 @@ public:
      */
     static std::unique_ptr<BinaryPrimitive> tryParseFlagSymbol(const Attribute& enumAttr,
                                                                const StringPiece16& str);
-
     /*
      * Try to convert a string to an Item for the given attribute. The attribute will
      * restrict what values the string can be converted to.
-     * The defaultPackage is used when the string is a reference with no defined package.
      * The callback function onCreateReference is called when the parsed item is a
      * reference to an ID that must be created (@+id/foo).
      */
     static std::unique_ptr<Item> parseItemForAttribute(
-            const StringPiece16& value, const Attribute& attr, const StringPiece16& defaultPackage,
+            const StringPiece16& value, const Attribute& attr,
             std::function<void(const ResourceName&)> onCreateReference = {});
 
     static std::unique_ptr<Item> parseItemForAttribute(
-            const StringPiece16& value, uint32_t typeMask, const StringPiece16& defaultPackage,
+            const StringPiece16& value, uint32_t typeMask,
             std::function<void(const ResourceName&)> onCreateReference = {});
 
     static uint32_t androidTypeToAttributeTypeMask(uint16_t type);

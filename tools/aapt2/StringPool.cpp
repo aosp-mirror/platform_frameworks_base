@@ -265,25 +265,38 @@ void StringPool::sort(const std::function<bool(const Entry&, const Entry&)>& cmp
     );
 }
 
-static uint8_t* encodeLength(uint8_t* data, size_t length) {
-    if (length > 0x7fu) {
-        *data++ = 0x80u | (0x000000ffu & (length >> 8));
+template <typename T>
+static T* encodeLength(T* data, size_t length) {
+    static_assert(std::is_integral<T>::value, "wat.");
+
+    constexpr size_t kMask = 1 << ((sizeof(T) * 8) - 1);
+    constexpr size_t kMaxSize = kMask - 1;
+    if (length > kMaxSize) {
+        *data++ = kMask | (kMaxSize & (length >> (sizeof(T) * 8)));
     }
-    *data++ = 0x000000ffu & length;
+    *data++ = length;
     return data;
 }
 
-static size_t encodedLengthByteCount(size_t length) {
-    return length > 0x7fu ? 2 : 1;
+template <typename T>
+static size_t encodedLengthUnits(size_t length) {
+    static_assert(std::is_integral<T>::value, "wat.");
+
+    constexpr size_t kMask = 1 << ((sizeof(T) * 8) - 1);
+    constexpr size_t kMaxSize = kMask - 1;
+    return length > kMaxSize ? 2 : 1;
 }
 
-bool StringPool::flattenUtf8(BigBuffer* out, const StringPool& pool) {
+
+bool StringPool::flatten(BigBuffer* out, const StringPool& pool, bool utf8) {
     const size_t startIndex = out->size();
     android::ResStringPool_header* header = out->nextBlock<android::ResStringPool_header>();
     header->header.type = android::RES_STRING_POOL_TYPE;
     header->header.headerSize = sizeof(*header);
     header->stringCount = pool.size();
-    header->flags |= android::ResStringPool_header::UTF8_FLAG;
+    if (utf8) {
+        header->flags |= android::ResStringPool_header::UTF8_FLAG;
+    }
 
     uint32_t* indices = pool.size() != 0 ? out->nextBlock<uint32_t>(pool.size()) : nullptr;
 
@@ -300,25 +313,31 @@ bool StringPool::flattenUtf8(BigBuffer* out, const StringPool& pool) {
         *indices = out->size() - beforeStringsIndex;
         indices++;
 
-        std::string encoded = util::utf16ToUtf8(entry->value);
+        if (utf8) {
+            std::string encoded = util::utf16ToUtf8(entry->value);
 
-        const size_t stringByteLength = sizeof(char) * encoded.length();
-        const size_t totalSize = encodedLengthByteCount(entry->value.size())
-                + encodedLengthByteCount(encoded.length())
-                + stringByteLength
-                + sizeof(char);
+            const size_t totalSize = encodedLengthUnits<char>(entry->value.size())
+                    + encodedLengthUnits<char>(encoded.length())
+                    + encoded.size() + 1;
 
-        uint8_t* data = out->nextBlock<uint8_t>(totalSize);
+            char* data = out->nextBlock<char>(totalSize);
 
-        // First encode the actual UTF16 string length.
-        data = encodeLength(data, entry->value.size());
+            // First encode the actual UTF16 string length.
+            data = encodeLength(data, entry->value.size());
 
-        // Now encode the size of the converted UTF8 string.
-        data = encodeLength(data, encoded.length());
+            // Now encode the size of the converted UTF8 string.
+            data = encodeLength(data, encoded.length());
+            strncpy(data, encoded.data(), encoded.size());
+        } else {
+            const size_t totalSize = encodedLengthUnits<char16_t>(entry->value.size())
+                    + entry->value.size() + 1;
 
-        memcpy(data, encoded.data(), stringByteLength);
-        data += stringByteLength;
-        *data = 0;
+            char16_t* data = out->nextBlock<char16_t>(totalSize);
+
+            // Encode the actual UTF16 string length.
+            data = encodeLength(data, entry->value.size());
+            strncpy16(data, entry->value.data(), entry->value.size());
+        }
     }
 
     out->align4();
@@ -362,6 +381,14 @@ bool StringPool::flattenUtf8(BigBuffer* out, const StringPool& pool) {
     }
     header->header.size = out->size() - startIndex;
     return true;
+}
+
+bool StringPool::flattenUtf8(BigBuffer* out, const StringPool& pool) {
+    return flatten(out, pool, true);
+}
+
+bool StringPool::flattenUtf16(BigBuffer* out, const StringPool& pool) {
+    return flatten(out, pool, false);
 }
 
 } // namespace aapt

@@ -15,6 +15,8 @@
  */
 
 #include "BinaryXmlPullParser.h"
+#include "Maybe.h"
+#include "Util.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <memory>
@@ -77,12 +79,31 @@ XmlPullParser::Event BinaryXmlPullParser::next() {
     mEvent = codeToEvent(code);
     switch (mEvent) {
         case Event::kStartNamespace:
-        case Event::kEndNamespace:
+        case Event::kEndNamespace: {
             data = mParser->getNamespacePrefix(&len);
-            mStr1.assign(data, len);
+            if (data) {
+                mStr1.assign(data, len);
+            } else {
+                mStr1.clear();
+            }
             data = mParser->getNamespaceUri(&len);
-            mStr2.assign(data, len);
+            if (data) {
+                mStr2.assign(data, len);
+            } else {
+                mStr2.clear();
+            }
+
+            Maybe<std::u16string> result = util::extractPackageFromNamespace(mStr2);
+            if (result) {
+                if (mEvent == Event::kStartNamespace) {
+                    mPackageAliases.emplace_back(mStr1, result.value());
+                } else {
+                    assert(mPackageAliases.back().second == result.value());
+                    mPackageAliases.pop_back();
+                }
+            }
             break;
+        }
 
         case Event::kStartElement:
             copyAttributes();
@@ -90,14 +111,26 @@ XmlPullParser::Event BinaryXmlPullParser::next() {
 
         case Event::kEndElement:
             data = mParser->getElementNamespace(&len);
-            mStr1.assign(data, len);
+            if (data) {
+                mStr1.assign(data, len);
+            } else {
+                mStr1.clear();
+            }
             data = mParser->getElementName(&len);
-            mStr2.assign(data, len);
+            if (data) {
+                mStr2.assign(data, len);
+            } else {
+                mStr2.clear();
+            }
             break;
 
         case Event::kText:
             data = mParser->getText(&len);
-            mStr1.assign(data, len);
+            if (data) {
+                mStr1.assign(data, len);
+            } else {
+                mStr1.clear();
+            }
             break;
 
         default:
@@ -155,6 +188,22 @@ const std::u16string& BinaryXmlPullParser::getNamespaceUri() const {
     return sEmpty;
 }
 
+bool BinaryXmlPullParser::applyPackageAlias(std::u16string* package,
+                                            const std::u16string& defaultPackage) const {
+    const auto endIter = mPackageAliases.rend();
+    for (auto iter = mPackageAliases.rbegin(); iter != endIter; ++iter) {
+        if (iter->first == *package) {
+            if (iter->second.empty()) {
+                *package = defaultPackage;
+            } else {
+                *package = iter->second;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 const std::u16string& BinaryXmlPullParser::getElementNamespace() const {
     if (!mHasComment && (mEvent == XmlPullParser::Event::kStartElement ||
             mEvent == XmlPullParser::Event::kEndElement)) {
@@ -191,11 +240,17 @@ void BinaryXmlPullParser::copyAttributes() {
             XmlPullParser::Attribute attr;
             size_t len;
             const char16_t* str = mParser->getAttributeNamespace(i, &len);
-            attr.namespaceUri.assign(str, len);
+            if (str) {
+                attr.namespaceUri.assign(str, len);
+            }
             str = mParser->getAttributeName(i, &len);
-            attr.name.assign(str, len);
+            if (str) {
+                attr.name.assign(str, len);
+            }
             str = mParser->getAttributeStringValue(i, &len);
-            attr.value.assign(str, len);
+            if (str) {
+                attr.value.assign(str, len);
+            }
             mAttributes.push_back(std::move(attr));
         }
     }
