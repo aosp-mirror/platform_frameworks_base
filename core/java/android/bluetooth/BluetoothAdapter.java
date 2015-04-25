@@ -121,6 +121,9 @@ public final class BluetoothAdapter {
      * {@link #STATE_TURNING_ON},
      * {@link #STATE_ON},
      * {@link #STATE_TURNING_OFF},
+     * {@link #STATE_BLE_TURNING_ON},
+     * {@link #STATE_BLE_ON},
+     * {@link #STATE_BLE_TURNING_OFF},
      */
     public static final String EXTRA_STATE =
             "android.bluetooth.adapter.extra.STATE";
@@ -130,7 +133,7 @@ public final class BluetoothAdapter {
      * {@link #STATE_OFF},
      * {@link #STATE_TURNING_ON},
      * {@link #STATE_ON},
-     * {@link #STATE_TURNING_OFF},
+     * {@link #STATE_TURNING_OFF}
      */
     public static final String EXTRA_PREVIOUS_STATE =
             "android.bluetooth.adapter.extra.PREVIOUS_STATE";
@@ -1301,9 +1304,12 @@ public final class BluetoothAdapter {
     public boolean isHardwareTrackingFiltersAvailable() {
         if (getState() != STATE_ON) return false;
         try {
-            synchronized(mManagerCallback) {
-                if(mService != null) return (mService.numOfHwTrackFiltersAvailable() != 0);
+            IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
+            if (iGatt == null) {
+                // BLE is not supported
+                return false;
             }
+            return (iGatt.numHwTrackFiltersAvailable() != 0);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }

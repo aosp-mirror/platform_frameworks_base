@@ -115,4 +115,12 @@ interface IImsCallSessionListener {
      * - {@link com.android.internal.telephony.Phone#TTY_MODE_VCO}
      */
     void callSessionTtyModeReceived(in IImsCallSession session, in int mode);
+
+    /**
+     * Notifies of a change to the multiparty state for this {@code ImsCallSession}.
+     *
+     * @param session The call session.
+     * @param isMultiParty {@code true} if the session became multiparty, {@code false} otherwise.
+     */
+    void callSessionMultipartyStateChanged(in IImsCallSession session, in boolean isMultiParty);
 }

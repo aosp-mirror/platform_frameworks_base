@@ -98,13 +98,41 @@ public class ConnectivityManager {
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
+     * The device has connected to a network that has presented a captive
+     * portal, which is blocking Internet connectivity. The user was presented
+     * with a notification that network sign in is required,
+     * and the user invoked the notification's action indicating they
+     * desire to sign in to the network. Apps handling this action should
+     * facilitate signing in to the network. This action includes a
+     * {@link Network} typed extra called {@link #EXTRA_NETWORK} that represents
+     * the network presenting the captive portal; all communication with the
+     * captive portal must be done using this {@code Network} object.
+     * <p/>
+     * When the app handling this action believes the user has signed in to
+     * the network and the captive portal has been dismissed, the app should call
+     * {@link #reportCaptivePortalDismissed} so the system can reevaluate the network.
+     * If reevaluation finds the network no longer subject to a captive portal,
+     * the network may become the default active data network.
+     * <p/>
+     * When the app handling this action believes the user explicitly wants
+     * to ignore the captive portal and the network, the app should call
+     * {@link #ignoreNetworkWithCaptivePortal}.
+     * <p/>
+     * Note that this action includes a {@code String} extra named
+     * {@link #EXTRA_CAPTIVE_PORTAL_TOKEN} that must
+     * be passed in to {@link #reportCaptivePortalDismissed} and
+     * {@link #ignoreNetworkWithCaptivePortal}.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL";
+
+    /**
      * The lookup key for a {@link NetworkInfo} object. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      *
      * @deprecated Since {@link NetworkInfo} can vary based on UID, applications
      *             should always obtain network information through
-     *             {@link #getActiveNetworkInfo()} or
-     *             {@link #getAllNetworkInfo()}.
+     *             {@link #getActiveNetworkInfo()}.
      * @see #EXTRA_NETWORK_TYPE
      */
     @Deprecated
@@ -112,8 +140,6 @@ public class ConnectivityManager {
 
     /**
      * Network type which triggered a {@link #CONNECTIVITY_ACTION} broadcast.
-     * Can be used with {@link #getNetworkInfo(int)} to get {@link NetworkInfo}
-     * state based on the calling application.
      *
      * @see android.content.Intent#getIntExtra(String, int)
      */
@@ -161,6 +187,15 @@ public class ConnectivityManager {
      * {@hide}
      */
     public static final String EXTRA_INET_CONDITION = "inetCondition";
+
+    /**
+     * The lookup key for a string that is sent out with
+     * {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN}. This string must be
+     * passed in to {@link #reportCaptivePortalDismissed} and
+     * {@link #ignoreNetworkWithCaptivePortal}. Retrieve it with
+     * {@link android.content.Intent#getStringExtra(String)}.
+     */
+    public static final String EXTRA_CAPTIVE_PORTAL_TOKEN = "captivePortalToken";
 
     /**
      * Broadcast action to indicate the change of data activity status
@@ -660,6 +695,10 @@ public class ConnectivityManager {
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @deprecated This method does not support multiple connected networks
+     *             of the same type. Use {@link #getAllNetworks} and
+     *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     public NetworkInfo getNetworkInfo(int networkType) {
         try {
@@ -699,6 +738,10 @@ public class ConnectivityManager {
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * @deprecated This method does not support multiple connected networks
+     *             of the same type. Use {@link #getAllNetworks} and
+     *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     public NetworkInfo[] getAllNetworkInfo() {
         try {
@@ -716,6 +759,9 @@ public class ConnectivityManager {
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @hide
+     * @deprecated This method does not support multiple connected networks
+     *             of the same type. Use {@link #getAllNetworks} and
+     *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
     public Network getNetworkForType(int networkType) {
         try {
@@ -808,6 +854,10 @@ public class ConnectivityManager {
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
+     * @deprecated This method does not support multiple connected networks
+     *             of the same type. Use {@link #getAllNetworks},
+     *             {@link #getNetworkInfo(android.net.Network)}, and
+     *             {@link #getLinkProperties(android.net.Network)} instead.
      */
     public LinkProperties getLinkProperties(int networkType) {
         try {
@@ -1748,6 +1798,82 @@ public class ConnectivityManager {
         }
     }
 
+    /** {@hide} */
+    public static final int CAPTIVE_PORTAL_APP_RETURN_DISMISSED    = 0;
+    /** {@hide} */
+    public static final int CAPTIVE_PORTAL_APP_RETURN_UNWANTED     = 1;
+    /** {@hide} */
+    public static final int CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS = 2;
+
+    /**
+     * Called by an app handling the {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN}
+     * action to indicate to the system that the captive portal has been
+     * dismissed.  In response the framework will re-evaluate the network's
+     * connectivity and might take further action thereafter.
+     *
+     * @param network The {@link Network} object passed via
+     *                {@link #EXTRA_NETWORK} with the
+     *                {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
+     * @param actionToken The {@code String} passed via
+     *                    {@link #EXTRA_CAPTIVE_PORTAL_TOKEN} with the
+     *                    {@code ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
+     */
+    public void reportCaptivePortalDismissed(Network network, String actionToken) {
+        try {
+            mService.captivePortalAppResponse(network, CAPTIVE_PORTAL_APP_RETURN_DISMISSED,
+                    actionToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Called by an app handling the {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN}
+     * action to indicate that the user does not want to pursue signing in to
+     * captive portal and the system should continue to prefer other networks
+     * without captive portals for use as the default active data network.  The
+     * system will not retest the network for a captive portal so as to avoid
+     * disturbing the user with further sign in to network notifications.
+     *
+     * @param network The {@link Network} object passed via
+     *                {@link #EXTRA_NETWORK} with the
+     *                {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
+     * @param actionToken The {@code String} passed via
+     *                    {@link #EXTRA_CAPTIVE_PORTAL_TOKEN} with the
+     *                    {@code ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
+     */
+    public void ignoreNetworkWithCaptivePortal(Network network, String actionToken) {
+        try {
+            mService.captivePortalAppResponse(network, CAPTIVE_PORTAL_APP_RETURN_UNWANTED,
+                    actionToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Called by an app handling the {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN}
+     * action to indicate the user wants to use this network as is, even though
+     * the captive portal is still in place.  The system will treat the network
+     * as if it did not have a captive portal when selecting the network to use
+     * as the default active data network. This may result in this network
+     * becoming the default active data network, which could disrupt network
+     * connectivity for apps because the captive portal is still in place.
+     *
+     * @param network The {@link Network} object passed via
+     *                {@link #EXTRA_NETWORK} with the
+     *                {@link #ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
+     * @param actionToken The {@code String} passed via
+     *                    {@link #EXTRA_CAPTIVE_PORTAL_TOKEN} with the
+     *                    {@code ACTION_CAPTIVE_PORTAL_SIGN_IN} action.
+     * @hide
+     */
+    public void useNetworkWithCaptivePortal(Network network, String actionToken) {
+        try {
+            mService.captivePortalAppResponse(network, CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS,
+                    actionToken);
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * Set a network-independent global http proxy.  This is not normally what you want
      * for typical HTTP proxies - they are general network dependent.  However if you're
@@ -1941,6 +2067,7 @@ public class ConnectivityManager {
      * @param networkType
      *
      * {@hide}
+     * @deprecated Doesn't properly deal with multiple connected networks of the same type.
      */
     public void setProvisioningNotificationVisible(boolean visible, int networkType,
             String action) {

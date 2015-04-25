@@ -122,6 +122,11 @@ public final class Phone {
     final void internalRemoveCall(Call call) {
         mCallByTelecomCallId.remove(call.internalGetCallId());
         mCalls.remove(call);
+
+        InCallService.VideoCall videoCall = call.getVideoCall();
+        if (videoCall != null) {
+            videoCall.unregisterCallback();
+        }
         fireCallRemoved(call);
     }
 
@@ -167,6 +172,10 @@ public final class Phone {
      */
     final void destroy() {
         for (Call call : mCalls) {
+            InCallService.VideoCall videoCall = call.getVideoCall();
+            if (videoCall != null) {
+                videoCall.unregisterCallback();
+            }
             if (call.getState() != Call.STATE_DISCONNECTED) {
                 call.internalSetDisconnected();
             }

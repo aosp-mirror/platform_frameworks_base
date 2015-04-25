@@ -103,4 +103,5 @@ interface IBluetoothGatt {
                             in boolean confirm, in byte[] value);
     void disconnectAll();
     void unregAll();
+    int numHwTrackFiltersAvailable();
 }

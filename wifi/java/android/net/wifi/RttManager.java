@@ -808,7 +808,7 @@ public class RttManager {
         if (mRttCapabilities == null) {
             if(getRttCapabilities() == null) {
                 Log.e(TAG, "Can not get RTT capabilities");
-                //throw new IllegalStateException("RTT chip is not working");
+                throw new IllegalStateException("RTT chip is not working");
             }
         }
 
@@ -866,6 +866,15 @@ public class RttManager {
         return true;
     }
 
+    /**
+     * Request to start an RTT ranging
+     *
+     * @param params  -- RTT request Parameters
+     * @param listener -- Call back to inform RTT result
+     * @exception throw IllegalArgumentException when params are illegal
+     *            throw IllegalStateException when RttCapabilities do not exist
+     */
+
     public void startRanging(RttParams[] params, RttListener listener) {
         int index  = 0;
         for(RttParams rttParam : params) {
@@ -874,9 +883,9 @@ public class RttManager {
             }
             index++;
         }
-
         validateChannel();
         ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
+        Log.i(TAG, "Send RTT request to RTT Service");
         sAsyncChannel.sendMessage(CMD_OP_START_RANGING,
                 0, putListener(listener), parcelableParams);
     }
@@ -1024,6 +1033,7 @@ public class RttManager {
         }
         @Override
         public void handleMessage(Message msg) {
+            Log.i(TAG, "RTT manager get message: " + msg.what);
             switch (msg.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                     if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
@@ -1049,10 +1059,10 @@ public class RttManager {
 
             Object listener = getListener(msg.arg2);
             if (listener == null) {
-                if (DBG) Log.d(TAG, "invalid listener key = " + msg.arg2);
+                Log.e(TAG, "invalid listener key = " + msg.arg2 );
                 return;
             } else {
-                if (DBG) Log.d(TAG, "listener key = " + msg.arg2);
+                Log.i(TAG, "listener key = " + msg.arg2);
             }
 
             switch (msg.what) {

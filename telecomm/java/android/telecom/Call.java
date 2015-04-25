@@ -933,7 +933,8 @@ public final class Call {
                     Collections.unmodifiableList(parcelableCall.getCannedSmsResponses());
         }
 
-        boolean videoCallChanged = !Objects.equals(mVideoCall, parcelableCall.getVideoCall());
+        boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
+                !Objects.equals(mVideoCall, parcelableCall.getVideoCall());
         if (videoCallChanged) {
             mVideoCall = parcelableCall.getVideoCall();
         }

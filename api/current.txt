@@ -18299,17 +18299,18 @@ package android.net {
     method public boolean bindProcessToNetwork(android.net.Network);
     method public android.net.Network getActiveNetwork();
     method public android.net.NetworkInfo getActiveNetworkInfo();
-    method public android.net.NetworkInfo[] getAllNetworkInfo();
+    method public deprecated android.net.NetworkInfo[] getAllNetworkInfo();
     method public android.net.Network[] getAllNetworks();
     method public deprecated boolean getBackgroundDataSetting();
     method public android.net.Network getBoundNetworkForProcess();
     method public android.net.ProxyInfo getDefaultProxy();
     method public android.net.LinkProperties getLinkProperties(android.net.Network);
     method public android.net.NetworkCapabilities getNetworkCapabilities(android.net.Network);
-    method public android.net.NetworkInfo getNetworkInfo(int);
+    method public deprecated android.net.NetworkInfo getNetworkInfo(int);
     method public android.net.NetworkInfo getNetworkInfo(android.net.Network);
     method public deprecated int getNetworkPreference();
     method public static deprecated android.net.Network getProcessDefaultNetwork();
+    method public void ignoreNetworkWithCaptivePortal(android.net.Network, java.lang.String);
     method public boolean isActiveNetworkMetered();
     method public boolean isDefaultNetworkActive();
     method public static boolean isNetworkTypeValid(int);
@@ -18317,6 +18318,7 @@ package android.net {
     method public void releaseNetworkRequest(android.app.PendingIntent);
     method public void removeDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public deprecated void reportBadNetwork(android.net.Network);
+    method public void reportCaptivePortalDismissed(android.net.Network, java.lang.String);
     method public void reportNetworkConnectivity(android.net.Network, boolean);
     method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public void requestNetwork(android.net.NetworkRequest, android.app.PendingIntent);
@@ -18324,8 +18326,10 @@ package android.net {
     method public static deprecated boolean setProcessDefaultNetwork(android.net.Network);
     method public void unregisterNetworkCallback(android.net.ConnectivityManager.NetworkCallback);
     field public static final deprecated java.lang.String ACTION_BACKGROUND_DATA_SETTING_CHANGED = "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
+    field public static final java.lang.String ACTION_CAPTIVE_PORTAL_SIGN_IN = "android.net.conn.CAPTIVE_PORTAL";
     field public static final java.lang.String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
+    field public static final java.lang.String EXTRA_CAPTIVE_PORTAL_TOKEN = "captivePortalToken";
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
     field public static final java.lang.String EXTRA_NETWORK = "android.net.extra.NETWORK";
@@ -19286,8 +19290,6 @@ package android.net.wifi {
     field public java.util.BitSet allowedKeyManagement;
     field public java.util.BitSet allowedPairwiseCiphers;
     field public java.util.BitSet allowedProtocols;
-    field public int apBand;
-    field public int apChannel;
     field public android.net.wifi.WifiEnterpriseConfig enterpriseConfig;
     field public boolean hiddenSSID;
     field public int networkId;
@@ -19356,6 +19358,7 @@ package android.net.wifi {
     method public java.lang.String getAnonymousIdentity();
     method public java.security.cert.X509Certificate getCaCertificate();
     method public java.security.cert.X509Certificate getClientCertificate();
+    method public java.lang.String getDomainSubjectMatch();
     method public int getEapMethod();
     method public java.lang.String getIdentity();
     method public java.lang.String getPassword();
@@ -19367,6 +19370,7 @@ package android.net.wifi {
     method public void setAnonymousIdentity(java.lang.String);
     method public void setCaCertificate(java.security.cert.X509Certificate);
     method public void setClientKeyEntry(java.security.PrivateKey, java.security.cert.X509Certificate);
+    method public void setDomainSuffixMatch(java.lang.String);
     method public void setEapMethod(int);
     method public void setIdentity(java.lang.String);
     method public void setPassword(java.lang.String);
@@ -30218,6 +30222,7 @@ package android.telecom {
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method public android.telecom.Connection getPrimaryConnection();
     method public final int getState();
+    method public final android.telecom.StatusHints getStatusHints();
     method public void onAudioStateChanged(android.telecom.AudioState);
     method public void onConnectionAdded(android.telecom.Connection);
     method public void onDisconnect();
@@ -30236,6 +30241,7 @@ package android.telecom {
     method public final void setConnectionCapabilities(int);
     method public final void setDisconnected(android.telecom.DisconnectCause);
     method public final void setOnHold();
+    method public final void setStatusHints(android.telecom.StatusHints);
     field public static final long CONNECT_TIME_NOT_SPECIFIED = 0L; // 0x0L
   }
 
@@ -30426,6 +30432,7 @@ package android.telecom {
   public static abstract class InCallService.VideoCall {
     ctor public InCallService.VideoCall();
     method public abstract void registerCallback(android.telecom.InCallService.VideoCall.Callback);
+    method public abstract void unregisterCallback();
     method public abstract void requestCallDataUsage();
     method public abstract void requestCameraCapabilities();
     method public abstract void sendSessionModifyRequest(android.telecom.VideoProfile);

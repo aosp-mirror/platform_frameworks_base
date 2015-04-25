@@ -243,6 +243,7 @@ public class WifiConfiguration implements Parcelable {
      * The band which AP resides on
      * 0-2G  1-5G
      * By default, 2G is chosen
+     * @hide
      */
     public int apBand = 0;
 
@@ -251,6 +252,7 @@ public class WifiConfiguration implements Parcelable {
      * 2G  1-11
      * 5G  36,40,44,48,149,153,157,161,165
      * 0 - find a random available channel according to the apBand
+     * @hide
      */
     public int apChannel = 0;
 
@@ -953,7 +955,7 @@ public class WifiConfiguration implements Parcelable {
         if (!TextUtils.isEmpty(FQDN)) {
             /* this is passpoint configuration; it must not have an SSID */
             if (!TextUtils.isEmpty(SSID)) {
-                return "no SSID";
+                return "SSID not expected for Passpoint: '" + SSID + "'";
             }
             /* this is passpoint configuration; it must have a providerFriendlyName */
             if (TextUtils.isEmpty(providerFriendlyName)) {

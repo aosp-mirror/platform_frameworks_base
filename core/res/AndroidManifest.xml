@@ -212,6 +212,7 @@
     <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTABLE" />
     <protected-broadcast android:name="android.intent.action.MEDIA_EJECT" />
 
+    <protected-broadcast android:name="android.net.conn.CAPTIVE_PORTAL" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
     <!-- @deprecated.  Only {@link android.net.ConnectivityManager.CONNECTIVITY_ACTION} is sent. -->
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
