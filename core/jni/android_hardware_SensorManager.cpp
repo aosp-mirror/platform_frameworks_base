@@ -174,6 +174,11 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     return size_t(next) < count ? next : 0;
 }
 
+static int nativeEnableDataInjection(JNIEnv *_env, jclass _this, jboolean enable) {
+     SensorManager& mgr(SensorManager::getInstance());
+     return mgr.enableDataInjection(enable);
+}
+
 //----------------------------------------------------------------------------
 
 class Receiver : public LooperCallback {
@@ -277,11 +282,11 @@ private:
 };
 
 static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQWeak, jobject msgQ,
-        jfloatArray scratch, jstring packageName) {
+        jfloatArray scratch, jstring packageName, jint mode) {
     SensorManager& mgr(SensorManager::getInstance());
     ScopedUtfChars packageUtf(env, packageName);
     String8 clientName(packageUtf.c_str());
-    sp<SensorEventQueue> queue(mgr.createEventQueue(clientName));
+    sp<SensorEventQueue> queue(mgr.createEventQueue(clientName, mode));
 
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, msgQ);
     if (messageQueue == NULL) {
@@ -297,7 +302,6 @@ static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject event
 static jint nativeEnableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint handle, jint rate_us,
                                jint maxBatchReportLatency) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
-
     return receiver->getSensorEventQueue()->enableSensor(handle, rate_us, maxBatchReportLatency,
                                                          0);
 }
@@ -307,7 +311,7 @@ static jint nativeDisableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint ha
     return receiver->getSensorEventQueue()->disableSensor(handle);
 }
 
-static void nativeDestroySensorEventQueue(JNIEnv *env, jclass clazz, jlong eventQ, jint handle) {
+static void nativeDestroySensorEventQueue(JNIEnv *env, jclass clazz, jlong eventQ) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     receiver->destroy();
     receiver->decStrong((void*)nativeInitSensorEventQueue);
@@ -318,6 +322,17 @@ static jint nativeFlushSensor(JNIEnv *env, jclass clazz, jlong eventQ) {
     return receiver->getSensorEventQueue()->flush();
 }
 
+static jint nativeInjectSensorData(JNIEnv *env, jclass clazz, jlong eventQ, jint handle,
+        jfloatArray values, jint accuracy, jlong timestamp) {
+    sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
+    // Create a sensor_event from the above data which can be injected into the HAL.
+    ASensorEvent sensor_event;
+    memset(&sensor_event, 0, sizeof(sensor_event));
+    sensor_event.sensor = handle;
+    sensor_event.timestamp = timestamp;
+    env->GetFloatArrayRegion(values, 0, env->GetArrayLength(values), sensor_event.data);
+    return receiver->getSensorEventQueue()->injectSensorEvent(sensor_event);
+}
 //----------------------------------------------------------------------------
 
 static JNINativeMethod gSystemSensorManagerMethods[] = {
@@ -328,11 +343,15 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
     {"nativeGetNextSensor",
             "(Landroid/hardware/Sensor;I)I",
             (void*)nativeGetNextSensor },
+
+    {"nativeEnableDataInjection",
+            "(Z)I",
+            (void*)nativeEnableDataInjection },
 };
 
 static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
-     "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;[FLjava/lang/String;)J",
+     "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;[FLjava/lang/String;I)J",
      (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
@@ -350,6 +369,10 @@ static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeFlushSensor",
             "(J)I",
             (void*)nativeFlushSensor },
+
+    {"nativeInjectSensorData",
+            "(JI[FIJ)I",
+            (void*)nativeInjectSensorData },
 };
 
 }; // namespace android

@@ -580,6 +580,10 @@ public final class Sensor {
     private static final int REPORTING_MODE_MASK = 0xE;
     private static final int REPORTING_MODE_SHIFT = 1;
 
+    // MASK for LSB fifth bit. Used to know whether the sensor supports data injection or not.
+    private static final int DATA_INJECTION_MASK = 0x10;
+    private static final int DATA_INJECTION_SHIFT = 4;
+
     // TODO(): The following arrays are fragile and error-prone. This needs to be refactored.
 
     // Note: This needs to be updated, whenever a new sensor is added.
@@ -820,6 +824,20 @@ public final class Sensor {
      */
     public boolean isWakeUpSensor() {
         return (mFlags & SENSOR_FLAG_WAKE_UP_SENSOR) != 0;
+    }
+
+    /**
+     * Returns true if the sensor supports data injection when the
+     * HAL is set to data injection mode.
+     *
+     * @return <code>true</code> if the sensor supports data
+     *         injection when the HAL is set in injection mode,
+     *         false otherwise.
+     * @hide
+     */
+    @SystemApi
+    public boolean isDataInjectionSupported() {
+        return (((mFlags & DATA_INJECTION_MASK) >> DATA_INJECTION_SHIFT)) != 0;
     }
 
     void setRange(float max, float res) {
