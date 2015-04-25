@@ -518,9 +518,9 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void flingToHeight(float vel, boolean expand, float target,
-            float collapseSpeedUpFactor) {
+            float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         mHeadsUpTouchHelper.notifyFling(!expand);
-        super.flingToHeight(vel, expand, target, collapseSpeedUpFactor);
+        super.flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 
     @Override
@@ -771,8 +771,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    protected boolean flingExpands(float vel, float vectorVel) {
-        boolean expands = super.flingExpands(vel, vectorVel);
+    protected boolean flingExpands(float vel, float vectorVel, float x, float y) {
+        boolean expands = super.flingExpands(vel, vectorVel, x, y);
 
         // If we are already running a QS expansion, make sure that we keep the panel open.
         if (mQsExpansionAnimator != null) {
@@ -784,6 +784,11 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected boolean hasConflictingGestures() {
         return mStatusBar.getBarState() != StatusBarState.SHADE;
+    }
+
+    @Override
+    protected boolean shouldGestureIgnoreXTouchSlop(float x, float y) {
+        return !mAfforanceHelper.isOnAffordanceIcon(x, y);
     }
 
     private void onQsTouch(MotionEvent event) {
