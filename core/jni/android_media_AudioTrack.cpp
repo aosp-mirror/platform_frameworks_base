@@ -189,32 +189,44 @@ sp<AudioTrack> android_media_AudioTrack_getAudioTrack(JNIEnv* env, jobject audio
     return getAudioTrack(env, audioTrackObj);
 }
 
+// This function converts Java channel masks to a native channel mask.
+// validity should be checked with audio_is_output_channel().
+static inline audio_channel_mask_t nativeChannelMaskFromJavaChannelMasks(
+        jint channelPositionMask, jint channelIndexMask)
+{
+    if (channelIndexMask != 0) {  // channel index mask takes priority
+        // To convert to a native channel mask, the Java channel index mask
+        // requires adding the index representation.
+        return audio_channel_mask_from_representation_and_bits(
+                        AUDIO_CHANNEL_REPRESENTATION_INDEX,
+                        channelIndexMask);
+    }
+    // To convert to a native channel mask, the Java channel position mask
+    // requires a shift by 2 to skip the two deprecated channel
+    // configurations "default" and "mono".
+    return (audio_channel_mask_t)(channelPositionMask >> 2);
+}
+
 // ----------------------------------------------------------------------------
 static jint
 android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jobject jaa,
-        jint sampleRateInHertz, jint javaChannelMask,
+        jint sampleRateInHertz, jint channelPositionMask, jint channelIndexMask,
         jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession) {
 
-    ALOGV("sampleRate=%d, audioFormat(from Java)=%d, channel mask=%x, buffSize=%d",
-        sampleRateInHertz, audioFormat, javaChannelMask, buffSizeInBytes);
+    ALOGV("sampleRate=%d, channel mask=%x, index mask=%x, audioFormat(Java)=%d, buffSize=%d",
+        sampleRateInHertz, channelPositionMask, channelIndexMask, audioFormat, buffSizeInBytes);
 
     if (jaa == 0) {
         ALOGE("Error creating AudioTrack: invalid audio attributes");
         return (jint) AUDIO_JAVA_ERROR;
     }
 
-    // Java channel masks don't map directly to the native definition for positional
-    // channel masks: it's a shift by 2 to skip the two deprecated channel
-    // configurations "default" and "mono".
     // Invalid channel representations are caught by !audio_is_output_channel() below.
-    audio_channel_mask_t nativeChannelMask =
-            audio_channel_mask_get_representation(javaChannelMask)
-                == AUDIO_CHANNEL_REPRESENTATION_POSITION
-            ? javaChannelMask >> 2 : javaChannelMask;
-
+    audio_channel_mask_t nativeChannelMask = nativeChannelMaskFromJavaChannelMasks(
+            channelPositionMask, channelIndexMask);
     if (!audio_is_output_channel(nativeChannelMask)) {
-        ALOGE("Error creating AudioTrack: invalid channel mask %#x.", javaChannelMask);
+        ALOGE("Error creating AudioTrack: invalid native channel mask %#x.", nativeChannelMask);
         return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
 
@@ -982,7 +994,7 @@ static JNINativeMethod gMethods[] = {
     {"native_stop",          "()V",      (void *)android_media_AudioTrack_stop},
     {"native_pause",         "()V",      (void *)android_media_AudioTrack_pause},
     {"native_flush",         "()V",      (void *)android_media_AudioTrack_flush},
-    {"native_setup",     "(Ljava/lang/Object;Ljava/lang/Object;IIIII[I)I",
+    {"native_setup",     "(Ljava/lang/Object;Ljava/lang/Object;IIIIII[I)I",
                                          (void *)android_media_AudioTrack_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioTrack_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioTrack_release},
