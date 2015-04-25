@@ -37,7 +37,6 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -364,12 +363,12 @@ public class FingerprintService extends SystemService {
 
     private class ClientMonitor implements IBinder.DeathRecipient {
         IBinder token;
-        WeakReference<IFingerprintServiceReceiver> receiver;
+        IFingerprintServiceReceiver receiver;
         int userId;
 
         public ClientMonitor(IBinder token, IFingerprintServiceReceiver receiver, int userId) {
             this.token = token;
-            this.receiver = new WeakReference<IFingerprintServiceReceiver>(receiver);
+            this.receiver = receiver;
             this.userId = userId;
             try {
                 token.linkToDeath(this, 0);
@@ -389,6 +388,7 @@ public class FingerprintService extends SystemService {
         public void binderDied() {
             token = null;
             removeClient(this);
+            receiver = null;
         }
 
         protected void finalize() throws Throwable {
@@ -406,10 +406,9 @@ public class FingerprintService extends SystemService {
          * @return true if we're done.
          */
         private boolean sendRemoved(int fingerId, int groupId) {
-            IFingerprintServiceReceiver rx = receiver.get();
-            if (rx == null) return true; // client not listening
+            if (receiver == null) return true; // client not listening
             try {
-                rx.onRemoved(mHalDeviceId, fingerId, groupId);
+                receiver.onRemoved(mHalDeviceId, fingerId, groupId);
                 return fingerId == 0;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to notify Removed:", e);
@@ -421,11 +420,10 @@ public class FingerprintService extends SystemService {
          * @return true if we're done.
          */
         private boolean sendEnrollResult(int fpId, int groupId, int remaining) {
-            IFingerprintServiceReceiver rx = receiver.get();
-            if (rx == null) return true; // client not listening
+            if (receiver == null) return true; // client not listening
             FingerprintUtils.vibrateFingerprintSuccess(getContext());
             try {
-                rx.onEnrollResult(mHalDeviceId, fpId, groupId, remaining);
+                receiver.onEnrollResult(mHalDeviceId, fpId, groupId, remaining);
                 return remaining == 0;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to notify EnrollResult:", e);
@@ -437,11 +435,10 @@ public class FingerprintService extends SystemService {
          * @return true if we're done.
          */
         private boolean sendAuthenticated(int fpId, int groupId) {
-            IFingerprintServiceReceiver rx = receiver.get();
             boolean result = false;
-            if (rx != null) {
+            if (receiver != null) {
                 try {
-                    rx.onAuthenticated(mHalDeviceId, fpId, groupId);
+                    receiver.onAuthenticated(mHalDeviceId, fpId, groupId);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to notify Authenticated:", e);
                     result = true; // client failed
@@ -464,10 +461,9 @@ public class FingerprintService extends SystemService {
          * @return true if we're done.
          */
         private boolean sendAcquired(int acquiredInfo) {
-            IFingerprintServiceReceiver rx = receiver.get();
-            if (rx == null) return true; // client not listening
+            if (receiver == null) return true; // client not listening
             try {
-                rx.onAcquired(mHalDeviceId, acquiredInfo);
+                receiver.onAcquired(mHalDeviceId, acquiredInfo);
                 return false; // acquisition continues...
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to invoke sendAcquired:", e);
@@ -479,10 +475,9 @@ public class FingerprintService extends SystemService {
          * @return true if we're done.
          */
         private boolean sendError(int error) {
-            IFingerprintServiceReceiver rx = receiver.get();
-            if (rx != null) {
+            if (receiver != null) {
                 try {
-                    rx.onError(mHalDeviceId, error);
+                    receiver.onError(mHalDeviceId, error);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to invoke sendError:", e);
                 }
