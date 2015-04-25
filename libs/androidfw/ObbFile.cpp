@@ -337,7 +337,9 @@ bool ObbFile::removeFrom(int fd)
         return false;
     }
 
-    ftruncate(fd, mFooterStart);
+    if (ftruncate(fd, mFooterStart) == -1) {
+        return false;
+    }
 
     return true;
 }
