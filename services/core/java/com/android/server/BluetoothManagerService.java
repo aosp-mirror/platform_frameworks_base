@@ -48,6 +48,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -444,6 +445,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     /** Internal death rec list */
     Map<IBinder, ClientDeathRecipient> mBleApps = new HashMap<IBinder, ClientDeathRecipient>();
+
+    @Override
+    public boolean isBleScanAlwaysAvailable() {
+        try {
+            return (Settings.Global.getInt(mContentResolver,
+                    Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE)) != 0;
+        } catch (SettingNotFoundException e) {
+        }
+        return false;
+    }
 
     public int updateBleAppCount(IBinder token, boolean enable) {
         if (enable) {
