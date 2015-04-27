@@ -22,6 +22,5 @@ package android.content.pm;
  * @hide
  */
 oneway interface IPackageMoveObserver {
-    void onStarted(int moveId, String title);
-    void onStatusChanged(int moveId, int status, long estMillis);
+    void onStatusChanged(int moveId, String moveTitle, int status, long estMillis);
 }

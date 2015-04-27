@@ -3012,6 +3012,26 @@
     <!-- Notification action to browse external media [CHAR LIMIT=20] -->
     <string name="ext_media_browse_action">Explore</string>
 
+    <!-- Notification title when external media is missing [CHAR LIMIT=30] -->
+    <string name="ext_media_missing_title"><xliff:g id="name" example="SD card">%s</xliff:g> missing</string>
+    <!-- Notification body when external media is missing [CHAR LIMIT=30] -->
+    <string name="ext_media_missing_message">Reinsert this device</string>
+
+    <!-- Notification title when moving an application to external storage [CHAR LIMIT=30] -->
+    <string name="ext_media_move_specific_title">Moving <xliff:g id="name" example="Calculator">%s</xliff:g></string>
+    <!-- Notification title when moving data to external storage [CHAR LIMIT=32] -->
+    <string name="ext_media_move_title">Moving data</string>
+
+    <!-- Notification title when moving data to external storage [CHAR LIMIT=32] -->
+    <string name="ext_media_move_success_title">Move complete</string>
+    <!-- Notification title when moving data to external storage [CHAR LIMIT=64] -->
+    <string name="ext_media_move_success_message">Data moved to <xliff:g id="name" example="SD card">%s</xliff:g></string>
+
+    <!-- Notification title when moving data to external storage failed [CHAR LIMIT=32] -->
+    <string name="ext_media_move_failure_title">Couldn\'t move data</string>
+    <!-- Notification title when moving data to external storage failed [CHAR LIMIT=64] -->
+    <string name="ext_media_move_failure_message">Data left at original location</string>
+
     <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
     <string name="activity_list_empty">No matching activities found.</string>
 

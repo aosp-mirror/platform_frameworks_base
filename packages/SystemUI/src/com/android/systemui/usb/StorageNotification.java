@@ -24,11 +24,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.MoveCallback;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.os.storage.DiskInfo;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.os.storage.VolumeRecord;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -39,12 +45,14 @@ import java.util.List;
 public class StorageNotification extends SystemUI {
     private static final String TAG = "StorageNotification";
 
-    private static final int NOTIF_ID = 0x53544f52; // STOR
+    private static final int PUBLIC_ID = 0x53505542; // SPUB
+    private static final int PRIVATE_ID = 0x53505256; // SPRV
+    private static final int DISK_ID = 0x5344534b; // SDSK
+    private static final int MOVE_ID = 0x534d4f56; // SMOV
 
     private static final String ACTION_SNOOZE_VOLUME = "com.android.systemui.action.SNOOZE_VOLUME";
 
     // TODO: delay some notifications to avoid bumpy fast operations
-    // TODO: annoy user when private media is missing
 
     private NotificationManager mNotificationManager;
     private StorageManager mStorageManager;
@@ -52,17 +60,29 @@ public class StorageNotification extends SystemUI {
     private final StorageEventListener mListener = new StorageEventListener() {
         @Override
         public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
-            onVolumeStateChangedInternal(vol, oldState, newState);
+            onVolumeStateChangedInternal(vol);
         }
 
         @Override
-        public void onVolumeMetadataChanged(VolumeInfo vol) {
+        public void onVolumeMetadataChanged(String fsUuid) {
             // Avoid kicking notifications when getting early metadata before
             // mounted. If already mounted, we're being kicked because of a
             // nickname or init'ed change.
-            if (vol.isMountedReadable()) {
-                onVolumeStateChangedInternal(vol, vol.getState(), vol.getState());
+            final VolumeInfo vol = mStorageManager.findVolumeByUuid(fsUuid);
+            if (vol != null && vol.isMountedReadable()) {
+                onVolumeStateChangedInternal(vol);
             }
+
+            final VolumeRecord rec = mStorageManager.findRecordByUuid(fsUuid);
+            if (rec == null) {
+                // Private volume was probably just forgotten
+                mNotificationManager.cancelAsUser(fsUuid, PRIVATE_ID, UserHandle.ALL);
+            }
+        }
+
+        @Override
+        public void onDiskScanned(DiskInfo disk, int volumeCount) {
+            onDiskScannedInternal(disk, volumeCount);
         }
     };
 
@@ -70,8 +90,19 @@ public class StorageNotification extends SystemUI {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO: kick this onto background thread
-            final String volId = intent.getStringExtra(VolumeInfo.EXTRA_VOLUME_ID);
-            mStorageManager.setVolumeSnoozed(volId, true);
+            final String fsUuid = intent.getStringExtra(VolumeRecord.EXTRA_FS_UUID);
+            mStorageManager.setVolumeSnoozed(fsUuid, true);
+        }
+    };
+
+    private final MoveCallback mMoveCallback = new MoveCallback() {
+        @Override
+        public void onStatusChanged(int moveId, String moveTitle, int status, long estMillis) {
+            if (PackageManager.isMoveStatusFinished(status)) {
+                onMoveFinished(moveId, moveTitle, status);
+            } else {
+                onMoveProgress(moveId, moveTitle, status, estMillis);
+            }
         }
     };
 
@@ -88,20 +119,99 @@ public class StorageNotification extends SystemUI {
         // Kick current state into place
         final List<VolumeInfo> vols = mStorageManager.getVolumes();
         for (VolumeInfo vol : vols) {
-            onVolumeStateChangedInternal(vol, vol.getState(), vol.getState());
+            onVolumeStateChangedInternal(vol);
+        }
+
+        mContext.getPackageManager().registerMoveCallback(mMoveCallback, new Handler());
+
+        updateMissingPrivateVolumes();
+    }
+
+    private void updateMissingPrivateVolumes() {
+        final List<VolumeRecord> recs = mStorageManager.getVolumeRecords();
+        for (VolumeRecord rec : recs) {
+            if (rec.getType() != VolumeInfo.TYPE_PRIVATE) continue;
+
+            final String fsUuid = rec.getFsUuid();
+            final VolumeInfo info = mStorageManager.findVolumeByUuid(fsUuid);
+            if (info != null && info.isMountedWritable()) {
+                // Yay, private volume is here!
+                mNotificationManager.cancelAsUser(fsUuid, PRIVATE_ID, UserHandle.ALL);
+
+            } else {
+                // Boo, annoy the user to reinsert the private volume
+                final CharSequence title = mContext.getString(R.string.ext_media_missing_title,
+                        rec.getNickname());
+                final CharSequence text = mContext.getString(R.string.ext_media_missing_message);
+
+                final Notification notif = new Notification.Builder(mContext)
+                        .setSmallIcon(R.drawable.stat_notify_sdcard)
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setStyle(new Notification.BigTextStyle().bigText(text))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setLocalOnly(true)
+                        .setContentIntent(buildForgetPendingIntent(rec))
+                        .setCategory(Notification.CATEGORY_SYSTEM)
+                        .setOngoing(true)
+                        .build();
+
+                mNotificationManager.notifyAsUser(fsUuid, PRIVATE_ID, notif, UserHandle.ALL);
+            }
         }
     }
 
-    public void onVolumeStateChangedInternal(VolumeInfo vol, int oldState, int newState) {
-        // We only care about public volumes
-        if (vol.getType() != VolumeInfo.TYPE_PUBLIC) {
-            return;
-        }
+    private void onDiskScannedInternal(DiskInfo disk, int volumeCount) {
+        if (volumeCount == 0) {
+            // No supported volumes found, give user option to format
+            final CharSequence title = mContext.getString(
+                    R.string.ext_media_unmountable_notification_title, disk.getDescription());
+            final CharSequence text = mContext.getString(
+                    R.string.ext_media_unmountable_notification_message, disk.getDescription());
 
-        Log.d(TAG, vol.toString());
+            final Notification notif = new Notification.Builder(mContext)
+                    .setSmallIcon(getSmallIcon(disk, VolumeInfo.STATE_UNMOUNTABLE))
+                    .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                    .setContentTitle(title)
+                    .setContentText(text)
+                    .setStyle(new Notification.BigTextStyle().bigText(text))
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setLocalOnly(true)
+                    .setContentIntent(buildInitPendingIntent(disk))
+                    .setCategory(Notification.CATEGORY_ERROR)
+                    .build();
+
+            mNotificationManager.notifyAsUser(disk.getId(), DISK_ID, notif, UserHandle.ALL);
+
+        } else {
+            // Yay, we have volumes!
+            mNotificationManager.cancelAsUser(disk.getId(), DISK_ID, UserHandle.ALL);
+        }
+    }
+
+    private void onVolumeStateChangedInternal(VolumeInfo vol) {
+        switch (vol.getType()) {
+            case VolumeInfo.TYPE_PRIVATE:
+                onPrivateVolumeStateChangedInternal(vol);
+                break;
+            case VolumeInfo.TYPE_PUBLIC:
+                onPublicVolumeStateChangedInternal(vol);
+                break;
+        }
+    }
+
+    private void onPrivateVolumeStateChangedInternal(VolumeInfo vol) {
+        Log.d(TAG, "Notifying about private volume: " + vol.toString());
+
+        updateMissingPrivateVolumes();
+    }
+
+    private void onPublicVolumeStateChangedInternal(VolumeInfo vol) {
+        Log.d(TAG, "Notifying about public volume: " + vol.toString());
 
         final Notification notif;
-        switch (newState) {
+        switch (vol.getState()) {
             case VolumeInfo.STATE_UNMOUNTED:
                 notif = onVolumeUnmounted(vol);
                 break;
@@ -133,9 +243,9 @@ public class StorageNotification extends SystemUI {
         }
 
         if (notif != null) {
-            mNotificationManager.notifyAsUser(vol.getId(), NOTIF_ID, notif, UserHandle.ALL);
+            mNotificationManager.notifyAsUser(vol.getId(), PUBLIC_ID, notif, UserHandle.ALL);
         } else {
-            mNotificationManager.cancelAsUser(vol.getId(), NOTIF_ID, UserHandle.ALL);
+            mNotificationManager.cancelAsUser(vol.getId(), PUBLIC_ID, UserHandle.ALL);
         }
     }
 
@@ -159,20 +269,24 @@ public class StorageNotification extends SystemUI {
     }
 
     private Notification onVolumeMounted(VolumeInfo vol) {
+        final VolumeRecord rec = mStorageManager.findRecordByUuid(vol.getFsUuid());
+
         // Don't annoy when user dismissed in past
-        if (vol.isSnoozed()) return null;
+        if (rec.isSnoozed()) return null;
 
         final DiskInfo disk = vol.getDisk();
-        if (disk.isAdoptable() && !vol.isInited()) {
+        if (disk.isAdoptable() && !rec.isInited()) {
             final CharSequence title = disk.getDescription();
             final CharSequence text = mContext.getString(
                     R.string.ext_media_new_notification_message, disk.getDescription());
 
+            final PendingIntent initAction = buildInitPendingIntent(vol);
             return buildNotificationBuilder(vol, title, text)
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_init_action),
-                            buildInitPendingIntent(vol)))
+                            initAction))
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
+                    .setContentIntent(initAction)
                     .setDeleteIntent(buildSnoozeIntent(vol))
                     .setCategory(Notification.CATEGORY_SYSTEM)
                     .build();
@@ -182,11 +296,13 @@ public class StorageNotification extends SystemUI {
             final CharSequence text = mContext.getString(
                     R.string.ext_media_ready_notification_message, disk.getDescription());
 
+            final PendingIntent browseAction = buildBrowsePendingIntent(vol);
             return buildNotificationBuilder(vol, title, text)
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_browse_action),
-                            buildBrowsePendingIntent(vol)))
+                            browseAction))
                     .addAction(new Action(0, mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
+                    .setContentIntent(browseAction)
                     .setDeleteIntent(buildSnoozeIntent(vol))
                     .setCategory(Notification.CATEGORY_SYSTEM)
                     .setPriority(Notification.PRIORITY_LOW)
@@ -260,16 +376,84 @@ public class StorageNotification extends SystemUI {
                 .build();
     }
 
-    private int getSmallIcon(VolumeInfo vol) {
-        if (vol.disk.isSd()) {
-            switch (vol.getState()) {
+    private void onMoveProgress(int moveId, String moveTitle, int status, long estMillis) {
+        final CharSequence title;
+        if (!TextUtils.isEmpty(moveTitle)) {
+            title = mContext.getString(R.string.ext_media_move_specific_title, moveTitle);
+        } else {
+            title = mContext.getString(R.string.ext_media_move_title);
+        }
+
+        final CharSequence text;
+        if (estMillis < 0) {
+            text = null;
+        } else {
+            text = DateUtils.formatDuration(estMillis);
+        }
+
+        final Notification notif = new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.stat_notify_sdcard)
+                .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new Notification.BigTextStyle().bigText(text))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setLocalOnly(true)
+                .setCategory(Notification.CATEGORY_PROGRESS)
+                .setPriority(Notification.PRIORITY_LOW)
+                .setProgress(100, status, false)
+                .setOngoing(true)
+                .build();
+
+        mNotificationManager.notifyAsUser(moveTitle, MOVE_ID, notif, UserHandle.ALL);
+    }
+
+    private void onMoveFinished(int moveId, String moveTitle, int status) {
+        if (!TextUtils.isEmpty(moveTitle)) {
+            // We currently ignore finished app moves; just clear the last
+            // published progress
+            mNotificationManager.cancelAsUser(moveTitle, MOVE_ID, UserHandle.ALL);
+            return;
+        }
+
+        final VolumeInfo vol = mContext.getPackageManager().getPrimaryStorageCurrentVolume();
+        final String descrip = mStorageManager.getBestVolumeDescription(vol);
+
+        final CharSequence title;
+        final CharSequence text;
+        if (status == PackageManager.MOVE_SUCCEEDED) {
+            title = mContext.getString(R.string.ext_media_move_success_title);
+            text = mContext.getString(R.string.ext_media_move_success_message, descrip);
+        } else {
+            title = mContext.getString(R.string.ext_media_move_failure_title);
+            text = mContext.getString(R.string.ext_media_move_failure_message);
+        }
+
+        final Notification notif = new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.stat_notify_sdcard)
+                .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new Notification.BigTextStyle().bigText(text))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setLocalOnly(true)
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setPriority(Notification.PRIORITY_LOW)
+                .build();
+
+        mNotificationManager.notifyAsUser(moveTitle, MOVE_ID, notif, UserHandle.ALL);
+    }
+
+    private int getSmallIcon(DiskInfo disk, int state) {
+        if (disk.isSd()) {
+            switch (state) {
                 case VolumeInfo.STATE_CHECKING:
                 case VolumeInfo.STATE_EJECTING:
                     return R.drawable.stat_notify_sdcard_prepare;
                 default:
                     return R.drawable.stat_notify_sdcard;
             }
-        } else if (vol.disk.isUsb()) {
+        } else if (disk.isUsb()) {
             return R.drawable.stat_sys_data_usb;
         } else {
             return R.drawable.stat_notify_sdcard;
@@ -279,13 +463,24 @@ public class StorageNotification extends SystemUI {
     private Notification.Builder buildNotificationBuilder(VolumeInfo vol, CharSequence title,
             CharSequence text) {
         return new Notification.Builder(mContext)
-                .setSmallIcon(getSmallIcon(vol))
+                .setSmallIcon(getSmallIcon(vol.getDisk(), vol.getState()))
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentText(text)
                 .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setLocalOnly(true);
+    }
+
+    private PendingIntent buildInitPendingIntent(DiskInfo disk) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.deviceinfo.StorageWizardInit");
+        intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.getId());
+
+        final int requestKey = disk.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
     }
 
     private PendingIntent buildInitPendingIntent(VolumeInfo vol) {
@@ -321,7 +516,7 @@ public class StorageNotification extends SystemUI {
     private PendingIntent buildDetailsPendingIntent(VolumeInfo vol) {
         final Intent intent = new Intent();
         intent.setClassName("com.android.settings",
-                "com.android.settings.Settings$StorageVolumeSettingsActivity");
+                "com.android.settings.Settings$PublicVolumeSettingsActivity");
         intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
 
         final int requestKey = vol.getId().hashCode();
@@ -331,10 +526,21 @@ public class StorageNotification extends SystemUI {
 
     private PendingIntent buildSnoozeIntent(VolumeInfo vol) {
         final Intent intent = new Intent(ACTION_SNOOZE_VOLUME);
-        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+        intent.putExtra(VolumeRecord.EXTRA_FS_UUID, vol.getFsUuid());
 
         final int requestKey = vol.getId().hashCode();
         return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildForgetPendingIntent(VolumeRecord rec) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.Settings$PrivateVolumeForgetActivity");
+        intent.putExtra(VolumeRecord.EXTRA_FS_UUID, rec.getFsUuid());
+
+        final int requestKey = rec.getFsUuid().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
     }
 }

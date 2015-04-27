@@ -41,7 +41,7 @@ public class StorageEventListener {
     public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
     }
 
-    public void onVolumeMetadataChanged(VolumeInfo vol) {
+    public void onVolumeMetadataChanged(String fsUuid) {
     }
 
     public void onDiskScanned(DiskInfo disk, int volumeCount) {
