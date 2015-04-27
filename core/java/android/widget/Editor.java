@@ -2994,8 +2994,10 @@ public class Editor {
         public SelectionActionModeCallback() {
             SelectionModifierCursorController selectionController = getSelectionController();
             if (selectionController.mStartHandle == null) {
+                // As these are for initializing selectionController, hide() must be called.
                 selectionController.initDrawables();
                 selectionController.initHandles();
+                selectionController.hide();
             }
             mSelectionHandleHeight = Math.max(
                     mSelectHandleLeft.getMinimumHeight(), mSelectHandleRight.getMinimumHeight());
