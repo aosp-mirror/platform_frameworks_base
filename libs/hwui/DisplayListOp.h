@@ -1398,10 +1398,9 @@ class DrawRenderNodeOp : public DrawBoundedOp {
     friend class RenderNode; // grant RenderNode access to info of child
     friend class DisplayListData; // grant DisplayListData access to info of child
 public:
-    DrawRenderNodeOp(RenderNode* renderNode, int flags, const mat4& transformFromParent)
+    DrawRenderNodeOp(RenderNode* renderNode, const mat4& transformFromParent)
             : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr)
             , mRenderNode(renderNode)
-            , mFlags(flags)
             , mTransformFromParent(transformFromParent)
             , mSkipInOrderDraw(false) {}
 
@@ -1424,7 +1423,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("Draw RenderNode %p %s, flags %#x", mRenderNode, mRenderNode->getName(), mFlags);
+        OP_LOG("Draw RenderNode %p %s, flags %#x", mRenderNode, mRenderNode->getName());
         if (mRenderNode && (logFlags & kOpLogFlag_Recurse)) {
             mRenderNode->output(level + 1);
         }
@@ -1436,7 +1435,6 @@ public:
 
 private:
     RenderNode* mRenderNode;
-    const int mFlags;
 
     ///////////////////////////
     // Properties below are used by RenderNode::computeOrderingImpl() and issueOperations()

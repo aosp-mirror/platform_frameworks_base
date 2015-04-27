@@ -145,16 +145,16 @@ public class Editor {
     InputContentType mInputContentType;
     InputMethodState mInputMethodState;
 
-    private static class TextDisplayList {
-        RenderNode displayList;
+    private static class TextRenderNode {
+        RenderNode renderNode;
         boolean isDirty;
-        public TextDisplayList(String name) {
+        public TextRenderNode(String name) {
             isDirty = true;
-            displayList = RenderNode.create(name, null);
+            renderNode = RenderNode.create(name, null);
         }
-        boolean needsRecord() { return isDirty || !displayList.isValid(); }
+        boolean needsRecord() { return isDirty || !renderNode.isValid(); }
     }
-    TextDisplayList[] mTextDisplayLists;
+    TextRenderNode[] mTextRenderNodes;
 
     boolean mFrozenWithFocus;
     boolean mSelectionMoved;
@@ -360,10 +360,10 @@ public class Editor {
     }
 
     private void destroyDisplayListsData() {
-        if (mTextDisplayLists != null) {
-            for (int i = 0; i < mTextDisplayLists.length; i++) {
-                RenderNode displayList = mTextDisplayLists[i] != null
-                        ? mTextDisplayLists[i].displayList : null;
+        if (mTextRenderNodes != null) {
+            for (int i = 0; i < mTextRenderNodes.length; i++) {
+                RenderNode displayList = mTextRenderNodes[i] != null
+                        ? mTextRenderNodes[i].renderNode : null;
                 if (displayList != null && displayList.isValid()) {
                     displayList.destroyDisplayListData();
                 }
@@ -1467,8 +1467,8 @@ public class Editor {
                 firstLine, lastLine);
 
         if (layout instanceof DynamicLayout) {
-            if (mTextDisplayLists == null) {
-                mTextDisplayLists = ArrayUtils.emptyArray(TextDisplayList.class);
+            if (mTextRenderNodes == null) {
+                mTextRenderNodes = ArrayUtils.emptyArray(TextRenderNode.class);
             }
 
             DynamicLayout dynamicLayout = (DynamicLayout) layout;
@@ -1489,19 +1489,19 @@ public class Editor {
                             searchStartIndex);
                     // Note how dynamic layout's internal block indices get updated from Editor
                     blockIndices[i] = blockIndex;
-                    if (mTextDisplayLists[blockIndex] != null) {
-                        mTextDisplayLists[blockIndex].isDirty = true;
+                    if (mTextRenderNodes[blockIndex] != null) {
+                        mTextRenderNodes[blockIndex].isDirty = true;
                     }
                     searchStartIndex = blockIndex + 1;
                 }
 
-                if (mTextDisplayLists[blockIndex] == null) {
-                    mTextDisplayLists[blockIndex] =
-                            new TextDisplayList("Text " + blockIndex);
+                if (mTextRenderNodes[blockIndex] == null) {
+                    mTextRenderNodes[blockIndex] =
+                            new TextRenderNode("Text " + blockIndex);
                 }
 
-                final boolean blockDisplayListIsInvalid = mTextDisplayLists[blockIndex].needsRecord();
-                RenderNode blockDisplayList = mTextDisplayLists[blockIndex].displayList;
+                final boolean blockDisplayListIsInvalid = mTextRenderNodes[blockIndex].needsRecord();
+                RenderNode blockDisplayList = mTextRenderNodes[blockIndex].renderNode;
                 if (i >= indexFirstChangedBlock || blockDisplayListIsInvalid) {
                     final int blockBeginLine = endOfPreviousBlock + 1;
                     final int top = layout.getLineTop(blockBeginLine);
@@ -1528,7 +1528,7 @@ public class Editor {
                             // brings this range of text back to the top left corner of the viewport
                             displayListCanvas.translate(-left, -top);
                             layout.drawText(displayListCanvas, blockBeginLine, blockEndLine);
-                            mTextDisplayLists[blockIndex].isDirty = false;
+                            mTextRenderNodes[blockIndex].isDirty = false;
                             // No need to untranslate, previous context is popped after
                             // drawDisplayList
                         } finally {
@@ -1543,8 +1543,7 @@ public class Editor {
                     blockDisplayList.setLeftTopRightBottom(left, top, right, bottom);
                 }
 
-                ((DisplayListCanvas) canvas).drawRenderNode(blockDisplayList,
-                        0 /* no child clipping, our TextView parent enforces it */);
+                ((DisplayListCanvas) canvas).drawRenderNode(blockDisplayList);
 
                 endOfPreviousBlock = blockEndLine;
             }
@@ -1558,7 +1557,7 @@ public class Editor {
 
     private int getAvailableDisplayListIndex(int[] blockIndices, int numberOfBlocks,
             int searchStartIndex) {
-        int length = mTextDisplayLists.length;
+        int length = mTextRenderNodes.length;
         for (int i = searchStartIndex; i < length; i++) {
             boolean blockIndexFound = false;
             for (int j = 0; j < numberOfBlocks; j++) {
@@ -1572,7 +1571,7 @@ public class Editor {
         }
 
         // No available index found, the pool has to grow
-        mTextDisplayLists = GrowingArrayUtils.append(mTextDisplayLists, length, null);
+        mTextRenderNodes = GrowingArrayUtils.append(mTextRenderNodes, length, null);
         return length;
     }
 
@@ -1589,7 +1588,7 @@ public class Editor {
      * Invalidates all the sub-display lists that overlap the specified character range
      */
     void invalidateTextDisplayList(Layout layout, int start, int end) {
-        if (mTextDisplayLists != null && layout instanceof DynamicLayout) {
+        if (mTextRenderNodes != null && layout instanceof DynamicLayout) {
             final int firstLine = layout.getLineForOffset(start);
             final int lastLine = layout.getLineForOffset(end);
 
@@ -1609,7 +1608,7 @@ public class Editor {
             while (i < numberOfBlocks) {
                 final int blockIndex = blockIndices[i];
                 if (blockIndex != DynamicLayout.INVALID_BLOCK_INDEX) {
-                    mTextDisplayLists[blockIndex].isDirty = true;
+                    mTextRenderNodes[blockIndex].isDirty = true;
                 }
                 if (blockEndLines[i] >= lastLine) break;
                 i++;
@@ -1618,9 +1617,9 @@ public class Editor {
     }
 
     void invalidateTextDisplayList() {
-        if (mTextDisplayLists != null) {
-            for (int i = 0; i < mTextDisplayLists.length; i++) {
-                if (mTextDisplayLists[i] != null) mTextDisplayLists[i].isDirty = true;
+        if (mTextRenderNodes != null) {
+            for (int i = 0; i < mTextRenderNodes.length; i++) {
+                if (mTextRenderNodes[i] != null) mTextRenderNodes[i].isDirty = true;
             }
         }
     }
