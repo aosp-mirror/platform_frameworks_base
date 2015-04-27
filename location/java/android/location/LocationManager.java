@@ -18,6 +18,7 @@ package android.location;
 
 import com.android.internal.location.ProviderProperties;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -33,6 +34,10 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.ACCESS_MOCK_LOCATION;
 
 /**
  * This class provides access to the system location services.  These
@@ -449,6 +454,7 @@ public class LocationManager {
      * @throws RuntimeException if the calling thread has no Looper
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(String provider, long minTime, float minDistance,
             LocationListener listener) {
         checkProvider(provider);
@@ -480,6 +486,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(String provider, long minTime, float minDistance,
             LocationListener listener, Looper looper) {
         checkProvider(provider);
@@ -512,6 +519,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
             LocationListener listener, Looper looper) {
         checkCriteria(criteria);
@@ -539,6 +547,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(String provider, long minTime, float minDistance,
             PendingIntent intent) {
         checkProvider(provider);
@@ -640,6 +649,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
             PendingIntent intent) {
         checkCriteria(criteria);
@@ -669,6 +679,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(String provider, LocationListener listener, Looper looper) {
         checkProvider(provider);
         checkListener(listener);
@@ -698,6 +709,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(Criteria criteria, LocationListener listener, Looper looper) {
         checkCriteria(criteria);
         checkListener(listener);
@@ -720,6 +732,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(String provider, PendingIntent intent) {
         checkProvider(provider);
         checkPendingIntent(intent);
@@ -743,6 +756,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if intent is null
      * @throws SecurityException if no suitable permission is present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(Criteria criteria, PendingIntent intent) {
         checkCriteria(criteria);
         checkPendingIntent(intent);
@@ -879,6 +893,7 @@ public class LocationManager {
      * @param listener listener object that no longer needs location updates
      * @throws IllegalArgumentException if listener is null
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void removeUpdates(LocationListener listener) {
         checkListener(listener);
         String packageName = mContext.getPackageName();
@@ -962,6 +977,7 @@ public class LocationManager {
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission is not present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void addProximityAlert(double latitude, double longitude, float radius, long expiration,
             PendingIntent intent) {
         checkPendingIntent(intent);
@@ -1012,6 +1028,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void addGeofence(LocationRequest request, Geofence fence, PendingIntent intent) {
         checkPendingIntent(intent);
         checkGeofence(fence);
@@ -1039,6 +1056,7 @@ public class LocationManager {
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
      * permission is not present
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void removeProximityAlert(PendingIntent intent) {
         checkPendingIntent(intent);
         String packageName = mContext.getPackageName();
@@ -1066,6 +1084,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void removeGeofence(Geofence fence, PendingIntent intent) {
         checkPendingIntent(intent);
         checkGeofence(fence);
@@ -1089,6 +1108,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void removeAllGeofences(PendingIntent intent) {
         checkPendingIntent(intent);
         String packageName = mContext.getPackageName();
@@ -1174,6 +1194,7 @@ public class LocationManager {
      * @throws SecurityException if no suitable permission is present
      * @throws IllegalArgumentException if provider is null or doesn't exist
      */
+    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public Location getLastKnownLocation(String provider) {
         checkProvider(provider);
         String packageName = mContext.getPackageName();
@@ -1202,6 +1223,7 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION} system setting is not enabled
      * @throws IllegalArgumentException if a provider with the given name already exists
      */
+    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
             boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
             boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
@@ -1229,6 +1251,7 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
      */
+    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void removeTestProvider(String provider) {
         try {
             mService.removeTestProvider(provider);
@@ -1253,6 +1276,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if no provider with the given name exists
      * @throws IllegalArgumentException if the location is incomplete
      */
+    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void setTestProviderLocation(String provider, Location loc) {
         if (!loc.isComplete()) {
             IllegalArgumentException e = new IllegalArgumentException(
@@ -1284,6 +1308,7 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
      */
+    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void clearTestProviderLocation(String provider) {
         try {
             mService.clearTestProviderLocation(provider);
@@ -1304,6 +1329,7 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
      */
+    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void setTestProviderEnabled(String provider, boolean enabled) {
         try {
             mService.setTestProviderEnabled(provider, enabled);
@@ -1322,6 +1348,7 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
      */
+    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void clearTestProviderEnabled(String provider) {
         try {
             mService.clearTestProviderEnabled(provider);
@@ -1344,6 +1371,7 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
      */
+    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
         try {
             mService.setTestProviderStatus(provider, status, extras, updateTime);
@@ -1362,6 +1390,7 @@ public class LocationManager {
      * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
      * @throws IllegalArgumentException if no provider with the given name exists
      */
+    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void clearTestProviderStatus(String provider) {
         try {
             mService.clearTestProviderStatus(provider);
@@ -1492,6 +1521,7 @@ public class LocationManager {
      *
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addGpsStatusListener(GpsStatus.Listener listener) {
         boolean result;
 
@@ -1538,6 +1568,7 @@ public class LocationManager {
      *
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addNmeaListener(GpsStatus.NmeaListener listener) {
         boolean result;
 
