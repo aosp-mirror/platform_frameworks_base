@@ -160,7 +160,7 @@ void JNIImageWriterContext::onBufferReleased() {
         // Writer. Do the detach unconditionally for opaque format now. see b/19977520
         if (mFormat == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
             sp<Fence> fence;
-            ANativeWindowBuffer* buffer;
+            sp<GraphicBuffer> buffer;
             ALOGV("%s: One buffer is detached", __FUNCTION__);
             mProducer->detachNextBuffer(&buffer, &fence);
         }
