@@ -38,6 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -62,6 +63,16 @@ public class AudioManager {
     private final boolean mUseFixedVolume;
     private static String TAG = "AudioManager";
     private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
+
+    /**
+     * System properties for whether the default microphone and speaker paths support
+     * near-ultrasound frequencies (range of 18 - 21 kHz).
+     */
+    private static final String SYSTEM_PROPERTY_MIC_NEAR_ULTRASOUND =
+            "persist.audio.mic.near_ultrasound";
+    private static final String SYSTEM_PROPERTY_SPEAKER_NEAR_ULTRASOUND =
+            "persist.audio.speaker.near_ultrasound";
+    private static final String DEFAULT_RESULT_FALSE_STRING = "false";
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -3175,6 +3186,12 @@ public class AudioManager {
         } else if (PROPERTY_OUTPUT_FRAMES_PER_BUFFER.equals(key)) {
             int outputFramesPerBuffer = AudioSystem.getPrimaryOutputFrameCount();
             return outputFramesPerBuffer > 0 ? Integer.toString(outputFramesPerBuffer) : null;
+        } else if (PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND.equals(key)) {
+            return SystemProperties.get(SYSTEM_PROPERTY_MIC_NEAR_ULTRASOUND,
+                    DEFAULT_RESULT_FALSE_STRING);
+        } else if (PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND.equals(key)) {
+            return SystemProperties.get(SYSTEM_PROPERTY_SPEAKER_NEAR_ULTRASOUND,
+                    DEFAULT_RESULT_FALSE_STRING);
         } else {
             // null or unknown key
             return null;
