@@ -83,7 +83,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void updateIcon(String slot, int index, int viewIndex,
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
-        public void disable(int state, boolean animate);
+        public void disable(int state1, int state2, boolean animate);
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
         public void animateExpandSettingsPanel();
@@ -127,10 +127,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void disable(int state) {
+    public void disable(int state1, int state2) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_DISABLE);
-            mHandler.obtainMessage(MSG_DISABLE, state, 0, null).sendToTarget();
+            mHandler.obtainMessage(MSG_DISABLE, state1, state2, null).sendToTarget();
         }
     }
 
@@ -304,7 +304,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 }
                 case MSG_DISABLE:
-                    mCallbacks.disable(msg.arg1, true /* animate */);
+                    mCallbacks.disable(msg.arg1, msg.arg2, true /* animate */);
                     break;
                 case MSG_EXPAND_NOTIFICATIONS:
                     mCallbacks.animateExpandNotificationsPanel();
