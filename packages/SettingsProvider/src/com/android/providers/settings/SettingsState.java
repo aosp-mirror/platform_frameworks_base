@@ -153,7 +153,7 @@ final class SettingsState {
         final int settingCount = mSettings.size();
         for (int i = settingCount - 1; i >= 0; i--) {
             String name = mSettings.keyAt(i);
-            // Settings defined by use are never dropped.
+            // Settings defined by us are never dropped.
             if (Settings.System.PUBLIC_SETTINGS.contains(name)
                     || Settings.System.PRIVATE_SETTINGS.contains(name)) {
                 continue;
