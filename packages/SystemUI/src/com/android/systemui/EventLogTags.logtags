@@ -5,7 +5,7 @@ option java_package com.android.systemui;
 # ---------------------------
 # PhoneStatusBar.java
 # ---------------------------
-36000 sysui_statusbar_touch (type|1),(x|1),(y|1),(enabled|1)
+36000 sysui_statusbar_touch (type|1),(x|1),(y|1),(disable1|1),(disable2|1)
 36001 sysui_heads_up_status (key|3),(visible|1)
 36002 sysui_fullscreen_notification (key|3)
 36003 sysui_heads_up_escalation (key|3)
