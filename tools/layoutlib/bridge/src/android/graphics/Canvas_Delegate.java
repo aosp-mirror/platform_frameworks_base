@@ -220,7 +220,8 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_restore(long nativeCanvas) {
+    /*package*/ static void native_restore(long nativeCanvas, boolean throwOnUnderflow) {
+        // FIXME: implement throwOnUnderflow.
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
@@ -231,7 +232,9 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_restoreToCount(long nativeCanvas, int saveCount) {
+    /*package*/ static void native_restoreToCount(long nativeCanvas, int saveCount,
+            boolean throwOnUnderflow) {
+        // FIXME: implement throwOnUnderflow.
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
