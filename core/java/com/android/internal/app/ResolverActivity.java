@@ -376,6 +376,10 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
     }
 
+    public Intent getTargetIntent() {
+        return mIntent;
+    }
+
     private String getReferrerPackageName() {
         final Uri referrer = getReferrer();
         if (referrer != null && "android-app".equals(referrer.getScheme())) {
