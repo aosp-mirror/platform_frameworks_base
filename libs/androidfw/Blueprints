@@ -49,7 +49,10 @@ cc_library {
         "external/zlib",
         "system/core/include",
     ],
-    static_libs: ["libziparchive"],
+    static_libs: [
+        "libziparchive",
+        "libbase",
+    ],
     shared_libs: [
         "liblog",
         "libcutils",

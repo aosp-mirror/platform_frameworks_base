@@ -139,6 +139,7 @@ cc_binary {
                 "libcutils",
                 "libexpat",
                 "libziparchive",
+                "libbase",
             ],
         },
         android: {
@@ -174,6 +175,7 @@ cc_test_host {
         "libcutils",
         "libexpat",
         "libziparchive",
+        "libbase",
     ],
     target: {
         not_windows: {
