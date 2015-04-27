@@ -65,9 +65,11 @@
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරමින්.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"පිටපතක් සඳහා සූදානම් කරමින්..."</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කළ නොහැකි විය</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කළ නොහැකි විය</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"විස්තර බැලීමට ස්පර්ශ කරන්න"</string>
     <string name="retry" msgid="7564024179122207376">"නැවත උත්සාහ කරන්න"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"මෙම ගොනු පිටපත් නොකරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>
