@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ਐਪ ਨੂੰ WAP ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸ ਅਨੁਮਤੀ ਵਿੱਚ ਸ਼ਾਮਲ ਹੈ ਐਪ ਦੀ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਤੇ ਭੇਜੇ ਗਏ ਸੁਨੇਹਿਆਂ ਨੂੰ ਤੁਹਾਨੂੰ ਦਿਖਾਏ ਬਿਨਾਂ ਨਿਰੀਖਣ ਕਰਨ ਅਤੇ ਮਿਟਾਉਣ ਦੀ ਸਮਰੱਥਾ।"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ਚੱਲ ਰਹੇ ਐਪਸ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ਐਪ ਨੂੰ ਵਰਤਮਾਨ ਵਿੱਚ ਅਤੇ ਹੁਣੇ ਜਿਹੇ ਚੱਲ ਰਹੇ ਕੰਮਾਂ ਬਾਰੇ ਵਿਸਤ੍ਰਿਤ ਜਾਣਕਾਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਇਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਖੋਜਣ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ ਕਿ ਡਿਵਾਈਸ ਤੇ ਕਿਹੜੀਆਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਵਰਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"ਪ੍ਰੋਫ਼ਾਈਲ ਅਤੇ ਡਿਵਾਈਸ ਦੇ ਮਾਲਕਾਂ ਨੂੰ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ਪ੍ਰੋਫ਼ਾਈਲ ਦੇ ਮਾਲਕ ਅਤੇ ਡਿਵਾਈਸ ਦਾ ਮਾਲਕ ਨੂੰ ਸੈੱਟ ਕਰਨ ਲਈ ਐਪਸ ਨੂੰ ਅਨੁਮਤੀ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ਚੱਲ ਰਹੇ ਐਪਸ ਨੂੰ ਦੁਬਾਰਾ ਕ੍ਰਮ ਦਿਓ"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ਐਪ ਨੂੰ ਕੰਮਾਂ ਨੂੰ ਅਗਲੇ ਭਾਗ ਅਤੇ ਪਿਛੋਕੜ ਵਿੱਚ ਮੂਵ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਐਪ ਤੁਹਾਡੇ ਇਨਪੁਟ ਤੋਂ ਬਿਨਾਂ ਇਹ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ਕਾਰ ਮੋਡ ਸਮਰੱਥ ਬਣਾਓ"</string>

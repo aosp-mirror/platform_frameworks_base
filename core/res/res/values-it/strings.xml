@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Consente all\'applicazione di ricevere ed elaborare messaggi WAP. Questa autorizzazione include la facoltà di monitorare o eliminare i messaggi che ti vengono inviati senza mostrarteli."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupero applicazioni in esecuzione"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Consente all\'applicazione di recuperare informazioni sulle attività attualmente e recentemente in esecuzione. Ciò potrebbe consentire all\'applicazione di scoprire informazioni sulle applicazioni in uso sul dispositivo."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Gestione dei proprietari di profili e dispositivi"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Consente alle app di impostare i proprietari dei profili e dei dispositivi."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"riordinamento applicazioni in esecuzione"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Consente all\'applicazione di spostare attività in primo piano e in background. L\'applicazione potrebbe farlo senza un tuo comando."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"abilitazione modalità auto"</string>

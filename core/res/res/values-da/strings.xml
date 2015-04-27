@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillader, at appen kan modtage og behandle WAP-beskeder. Denne tilladelse omfatter muligheden for at overvåge eller slette de beskeder, der sendes til dig, uden at vise dem til dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hente kørende apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillader, at appen kan hente oplysninger om nuværende og seneste opgaver. Med denne tilladelse kan appen finde oplysninger om, hvilke applikationer der bruges på enheden."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Administrer profil- og enhedsejere"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Tillader, at apps konfigurerer profilejerne og enhedens ejer."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"omorganisere kørende apps"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Tillader, at appen kan flytte opgaver til forgrunden og baggrunden. Appen kan gøre dette uden din bekræftelse."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivere biltilstand"</string>

@@ -276,10 +276,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogoča prejemanje in obdelavo sporočil WAP. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dobivanje aplikacij, ki se izvajajo"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Aplikaciji omogoča prejemanje podatkov o trenutnih in nedavno izvajajočih se opravilih. S tem lahko aplikacija odkrije podatke o aplikacijah, ki se uporabljajo v napravi."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Upravljanje lastnikov profilov in lastnika naprave."</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Dovolite aplikacijam, da nastavijo lastnike profilov in lastnika naprave."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"preurejanje aplikacij, ki se izvajajo"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Aplikaciji omogoča premikanje opravil v ospredje in ozadje. Aplikacija lahko to naredi brez vašega nadzora."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"omogočanje načina delovanja v avtomobilu"</string>

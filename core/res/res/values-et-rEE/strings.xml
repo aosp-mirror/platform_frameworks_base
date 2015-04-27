@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Võimaldab rakendusel vastu võtta ja töödelda WAP-sõnumeid. See luba hõlmab võimet jälgida või kustutada teile saadetud sõnumeid neid teile näitamata."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Käitatud rakenduste toomine"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Võimaldab rakendusel tuua teavet praegu ja hiljuti käitatud ülesannete kohta. See võib lubada rakendusel avastada teavet selle kohta, milliseid rakendusi seadmes kasutatakse."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profiili- ja seadmeomanike haldamine"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Võimaldab rakendustel määrata profiiliomanikud ja seadmeomaniku."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käitatud rakenduste ümberjärjestamine"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Võimaldab rakendusel teisaldada ülesanded esiplaanile ja taustale. Rakendus võib seda teha teie sisendita."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"autorežiimi lubamine"</string>
