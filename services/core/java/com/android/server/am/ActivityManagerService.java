@@ -3179,6 +3179,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     debugFlags |= Zygote.DEBUG_ENABLE_JIT;
                 }
             }
+            String genCFIDebugProperty = SystemProperties.get("debug.gencfi");
+            if ("true".equals(genCFIDebugProperty)) {
+                debugFlags |= Zygote.DEBUG_GENERATE_CFI;
+            }
             if ("1".equals(SystemProperties.get("debug.jni.logging"))) {
                 debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
             }
