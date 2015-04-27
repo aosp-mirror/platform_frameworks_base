@@ -4325,4 +4325,21 @@ public class DevicePolicyManager {
             }
         }
     }
+
+    /**
+     * Called by a device initializer to set the activity to be launched on device boot or after a
+     * user switch during user setup. This activity will be started regardless of the priority of
+     * other 'home' activities. Once user setup is complete, the preferred setup activity will be
+     * ignored.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param activity The Activity to be started by default during user setup.
+     */
+    public void setPreferredSetupActivity(ComponentName admin, ComponentName activity) {
+        try {
+            mService.setPreferredSetupActivity(admin, activity);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+        }
+    }
 }
