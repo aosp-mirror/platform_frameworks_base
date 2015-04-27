@@ -93,6 +93,11 @@ please see themes_device_defaults.xml.
          (large, xlarge). -->
     <style name="Theme.Material.DayNight.DialogWhenLarge" parent="Theme.Material.DialogWhenLarge" />
 
+    <!-- Theme for a window with a dark action bar that will be displayed
+         either full-screen on smaller screens (small, normal) or as a dialog
+         on larger screens (large, xlarge). -->
+    <style name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" parent="Theme.Material.DialogWhenLarge" />
+
     <!-- Theme for a window without an action bar that will be displayed either full-screen
          on smaller screens (small, normal) or as a dialog on larger screens
          (large, xlarge). -->
