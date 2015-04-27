@@ -875,6 +875,19 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     parseRuntimeOption("dalvik.vm.zygote.max-boot-retry", cachePruneBuf,
                        "-Xzygote-max-boot-retry=");
 
+    /*
+     * When running with debug.gencfi, add --include-cfi to the compiler options so that the boot
+     * image, if it is compiled on device, will include CFI info, as well as other compilations
+     * started by the runtime.
+     */
+    property_get("debug.gencfi", propBuf, "");
+    if (strcmp(propBuf, "true") == 0) {
+        addOption("-Xcompiler-option");
+        addOption("--include-cfi");
+        addOption("-Ximage-compiler-option");
+        addOption("--include-cfi");
+    }
+
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
     initArgs.nOptions = mOptions.size();
