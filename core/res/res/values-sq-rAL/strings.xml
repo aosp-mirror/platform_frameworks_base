@@ -129,7 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Joaktiv"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Çaktivizuar"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferohet Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferohet rrjeti celular"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Vetëm Wi-Fi"</string>
@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Lejon aplikacionin të marrë dhe përpunojë mesazhe WAP. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"gjej aplikacionet në punë"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Lejon aplikacionin të gjejë informacione mbi detyrat aktuale dhe të fundit në punë. Kjo mund të lejojë aplikacionin të zbulojë informacione rreth aplikacioneve të përdorura në pajisje."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Menaxho pronarët e profilit dhe të pajisjes"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Lejo aplikacionet që të caktojnë pronarët e profilit dhe pronarin e pajisjes"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ri-poziciono aplikacionet në punë"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Lejon aplikacionin të zhvendosë detyra në plan të parë dhe në sfond. Aplikacioni mund ta bëjë këtë pa hyrjen tënde."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivizo modalitetin \"në makinë\""</string>
@@ -422,7 +420,7 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lejon aplikacionin të komunikojë me etiketimet e \"Komunikimit të fushës së afërt (NFC)\", kartat dhe lexuesit."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"çaktivizo kyçjen e ekranit"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lejon aplikacionin të çaktivizojë kyçjen e tasteve dhe çdo mbrojtje të lidhur me fjalëkalimin. Për shembull, telefoni çaktivizon kyçjen e tasteve kur merr një telefonatë hyrëse, pastaj riaktivizon kyçjen e tasteve kur mbaron telefonata."</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"të qaset te hardueri i gjurmës së gishtit"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"të menaxhojë harduerin e gjurmës së gishtit"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"E lejon aplikacionin që të aktivizojë metoda për të shtuar dhe për të fshirë shabllonet e gjurmës së gishtit për përdorim."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"të përdorë harduerin e gjurmës së gishtit"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"E lejon aplikacinin që të përdorë harduerin e gjurmës së gishtit për verifikimin"</string>
@@ -435,7 +433,7 @@
   </string-array>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardueri i gjurmës së gishtit nuk mundësohet."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Gjurma e gishtit nuk mund të ruhet. Hiq një gjurmë gishti ekzistuese."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"U arrit vonesa e skadimit për gjurmën e gishtit. Provo përsëri."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Koha e veprimit për gjurmën e gishtit skadoi. Provo përsëri."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operacioni i gjurmës së gishtit u anulua."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Keni bërë shumë tentativa. Provo përsëri më vonë."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Provo përsëri."</string>
@@ -939,9 +937,9 @@
     <string name="new_app_action" msgid="5472756926945440706">"Fillo <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Ndalo aplikacionin e vjetër pa e ruajtur."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> e ka kaluar kufirin e memories"</string>
-    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Hedhja e dëmtimit të grumbullimit është marrë; prek për ta ndarë"</string>
-    <string name="dump_heap_title" msgid="5864292264307651673">"Të ndahet hedhja e dëmtimit të grumbullimit?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories së procesit me <xliff:g id="SIZE">%2$s</xliff:g>. Ofrohet një hedhje e dëmtimit të grumbullimit që ta ndani me zhvilluesit e tij. Trego kujdes: kjo hedhje e dëmtimit të grumbullimit mund të përmbajë çdo informacion tëndin personal ku ka qasje ky aplikacion."</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Skedarët fiktivë u stivosën; prek për t\'i ndarë"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Të ndahet stiva e skedarëve fiktivë?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Procesi <xliff:g id="PROC">%1$s</xliff:g> ka kaluar kufirin e tij të memories së procesit me <xliff:g id="SIZE">%2$s</xliff:g>. Mundësohet stivimi e skedarëve fiktivë në mënyrë që t\'i ndani me zhvilluesit e tyre. Bëni kujdes pasi stiva e skedarëve fiktivë mund të përmbajë ndonjë informacion tëndin personal ku aplikacioni ka qasje."</string>
     <string name="sendText" msgid="5209874571959469142">"Zgjidh një veprim për tekstin"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volumi i ziles"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volumi i klipeve \"media\""</string>
@@ -1445,7 +1443,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Puna <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Për t\'i hequr gozhdimin ekranit, prek dhe mbaj shtypur njëkohësisht \"Prapa\" dhe \"Përmbledhje\"."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Për t\'i hequr gozhdimin ekranit, prek dhe mbaj shtypur \"Përmbledhje\"."</string>
-    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ekrani është i mbërthyer. Anulimi i mbërthimit nuk lejohet nga organizata jote."</string>
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ekrani është i gozhduar. Anulimi i mbërthimit nuk lejohet nga organizata jote."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrani u gozhdua"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrani u hoq nga gozhdimi"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Kërko PIN-in para se t\'i heqësh gozhdimin"</string>
@@ -1475,7 +1473,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Shpalos"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Mos shqetëso"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Koha joaktive"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"periudha joaktive"</string>
     <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Natën gjatë javës"</string>
     <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Fundjava"</string>
     <string name="muted_by" msgid="6147073845094180001">"Lënë në heshtje nga <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
@@ -1487,7 +1485,7 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Kërkesa SS është e modifikuar në kërkesën DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Kërkesa SS është modifikuar në kërkesën USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Kërkesa SS është e modifikuar në kërkesën e re SS."</string>
-    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Porta periferike USB e Android"</string>
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Porta periferike USB e Androidit"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Porta periferike USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Opsione të tjera"</string>

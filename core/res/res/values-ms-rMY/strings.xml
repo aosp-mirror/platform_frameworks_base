@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Membenarkan apl menerima dan memproses mesej WAP. Kebenaran ini termasuk keupayaan untuk memantau atau memadam mesej yang dihantar kepada anda tanpa menunjukkannya kepada anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dapatkan semula apl yang sedang dijalankan"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Membenarkan apl mengambil maklumat tentang tugasan yang sedang dan baru berjalan. Ini boleh membenarkan apl untuk menemui maklumat tentang apl mana yang digunakan pada peranti."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Urus profil dan pemilik peranti"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Membenarkan apl menetapkan profil pemilik dan pemilik peranti."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"susun semula tertib apl yang dijalankan"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Membenarkan apl memindahkan tugasan ke latar depan dan latar belakang. Apl boleh melakukan ini tanpa input anda."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"dayakan mod kereta"</string>

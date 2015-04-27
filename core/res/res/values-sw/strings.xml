@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Inaruhusu programu kupokea na kuchakata ujumbe wa WAP. Idhini hii inajumuisha uwezo wa kuchunguza na kufuta ujumbe uliotumwa kwako bila ya kukuonyesha."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"rudisha programu zinazoendeshwa"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Inaruhusu programu kurudisha taarifa kuhusu kazi zinazoendeshwa sasa na hivi karibuni. Hii inaweza kuruhusu programu kugundua taarifa kuhusu ni programu zipi zinazotumika kwenye kifaa."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Simamia wamiliki wa wasifu na kifaa"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Huruhusu programu kuweka wamiliki wa wasifu na mmiliki wa kifaa."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Agiza tena programu za kuendeshwa"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Inaruhusu programu kusongesha kazi hadi kwenye mandhari-mbele na mandari nyuma. Programu inaweza kufanya haya bila ya maingizo yako."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"Wezesha mtindo wa gari"</string>

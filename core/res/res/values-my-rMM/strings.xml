@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"အပလီကေးရှင်းအား WAP စာများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"အလုပ်လုပ်နေကြသည့် appများကို ရယူခြင်း"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"အပလီကေးရှင်းအား လက်ရှိနဲ့ လတ်တလော လုပ်ဆောင်ခဲ့သော သတင်းအချက်အလက် အသေးစိတ်အား ထုတ်ယူခွင့်ပြုရန်။ အပလီကေးရှင်းမှ သင် ဘယ် အပလီကေးရှင်းများသုံးရှိကြောင့် တွေ့ရှိနိုင်ပါသည်"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"ကိုယ်ရေးအချက်အလက်နှင့် စက်ပစ္စည်းပိုင်ရှင်များကို စီမံပါ"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ကိုယ်ရေးအချက်လက်ပိုင်ရှင်များနှင့်စက်ပစ္စည်းပိုင်ရှင်အား သတ်မှတ်ရန် App အားခွင့်ပြုပါ။"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"အလုပ်လုပ်နေကြသည့် appများကို ပြန်လည်စီစဉ်ခြင်း"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"အပလီကေးရှင်းအား နောက်ကွယ် နှင့် ရှေ့မှောက်တွင် လက်ရှိ လုပ်ဆောင်နေမှုများအား ဖယ်ခွင့် ပြုပါ။ သင့် ခွင့်ပြုချက်မပါပဲ လုပ်ဆောင်နိုင်ပါလိမ့်မည်"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ကားမောင်းနေစဥ်စနစ်အား ရရှိစေခြင်း"</string>

@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"actieve apps ophalen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Hiermee kan de app informatie ophalen over actieve en recent uitgevoerde taken. Zo kan de app informatie vinden over welke apps op het apparaat worden gebruikt."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profiel- en apparaateigenaren beheren"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Apps toestaan de profieleigenaren en apparaateigenaar in te stellen."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"actieve apps opnieuw rangschikken"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Hiermee kan de app taken naar de voor- en achtergrond verplaatsen. De app kan dit doen zonder om uw bevestiging te vragen."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"automodus inschakelen"</string>

@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tillåter att appen tar emot och hanterar WAP-meddelanden. Med den här behörigheten kan appen övervaka eller ta bort meddelanden som skickats till dig utan att visa dem för dig."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"hämta appar som körs"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tillåter att appen hämtar information om nyligen körda och pågående aktiviteter. Detta kan innebära att appen tillåts ta reda på vilka appar som används på enheten."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Hantera profil- och enhetsägare"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Tillåter att appar anger profilägare och enhetsägare."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"byt ordning på appar som körs"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Tillåter att appen flyttar aktiviteter till förgrunden eller bakgrunden. Appen kan göra detta utan åtgärd från dig."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivera trafikläge"</string>
