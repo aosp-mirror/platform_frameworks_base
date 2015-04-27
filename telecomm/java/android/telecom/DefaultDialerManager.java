@@ -41,7 +41,7 @@ public class DefaultDialerManager {
      *
      * @hide
      * */
-    public static void setDefaultPhoneApplication(Context context, String packageName) {
+    public static void setDefaultDialerApplication(Context context, String packageName) {
         // Get old package name
         String oldPackageName = Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.DIALER_DEFAULT_APPLICATION);
