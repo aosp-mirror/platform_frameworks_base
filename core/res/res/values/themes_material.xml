@@ -1239,6 +1239,11 @@ please see themes_device_defaults.xml.
          (large, xlarge). -->
     <style name="Theme.Material.Light.DialogWhenLarge" parent="@style/Theme.Material.Light" />
 
+    <!-- Theme for a window with a dark title bar that will be displayed either
+         full-screen on smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge). -->
+    <style name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" parent="@style/Theme.Material.Light.DarkActionBar" />
+
     <!-- Theme for a window without an action bar that will be displayed either full-screen
          on smaller screens (small, normal) or as a dialog on larger screens
          (large, xlarge). -->
@@ -1283,6 +1288,16 @@ please see themes_device_defaults.xml.
         <item name="panelMenuListTheme">@style/Theme.Material.Settings.CompactMenu</item>
     </style>
 
+    <!-- Default theme for Settings and activities launched from Settings. -->
+    <style name="Theme.Material.Settings.NoActionBar" parent="Theme.Material.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+
+        <item name="presentationTheme">@style/Theme.Material.Settings.Dialog.Presentation</item>
+        <item name="searchDialogTheme">@style/Theme.Material.Settings.SearchBar</item>
+        <item name="panelMenuListTheme">@style/Theme.Material.Settings.CompactMenu</item>
+    </style>
+
     <style name="Theme.Material.Settings.BaseDialog" parent="Theme.Material.DayNight.BaseDialog">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
@@ -1297,6 +1312,16 @@ please see themes_device_defaults.xml.
 
     <style name="Theme.Material.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.BaseAlert" />
 
+    <style name="Theme.Material.Settings.DialogWhenLarge" parent="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+    </style>
+
+    <style name="Theme.Material.Settings.DialogWhenLarge.NoActionBar" parent="Theme.Material.DayNight.DialogWhenLarge.NoActionBar">
+        <item name="colorPrimary">@color/material_blue_grey_900</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
+    </style>
+
     <style name="Theme.Material.Settings.Dialog.Presentation" parent="Theme.Material.DayNight.Dialog.Presentation">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
@@ -1305,7 +1330,6 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.SearchBar" parent="Theme.Material.DayNight.SearchBar">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
-        <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
     <style name="Theme.Material.Settings.CompactMenu" parent="Theme.Material.DayNight.CompactMenu">

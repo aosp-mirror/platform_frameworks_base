@@ -2643,6 +2643,8 @@
   <public type="style" name="ThemeOverlay.Material.Dialog" />
   <public type="style" name="TextAppearance.Material.Widget.Button.Inverse" />
   <public type="style" name="ThemeOverlay.Material.Dialog.Alert" />
+  <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
+  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
 
   <public type="id" name="pasteAsPlainText" />
   <public type="id" name="undo" />
