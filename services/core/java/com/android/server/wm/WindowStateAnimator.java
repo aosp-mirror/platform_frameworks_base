@@ -131,6 +131,7 @@ class WindowStateAnimator {
     // used.
     int mAnimDw;
     int mAnimDh;
+    boolean mAnimateMove = false;
     float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
     float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
 
@@ -304,9 +305,15 @@ class WindowStateAnimator {
                         " wh=" + mWin.mFrame.height() +
                         " dw=" + mAnimDw + " dh=" + mAnimDh +
                         " scale=" + mService.getWindowAnimationScaleLocked());
-                    mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
-                            mAnimDw, mAnimDh);
                     final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+                    if (mAnimateMove) {
+                        mAnimateMove = false;
+                        mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
+                                mAnimDw, mAnimDh);
+                    } else {
+                        mAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(),
+                                displayInfo.appWidth, displayInfo.appHeight);
+                    }
                     mAnimDw = displayInfo.appWidth;
                     mAnimDh = displayInfo.appHeight;
                     mAnimation.setStartTime(mAnimationStartTime != -1
