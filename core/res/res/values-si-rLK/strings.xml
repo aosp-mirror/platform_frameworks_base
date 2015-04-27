@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP පණිවිඩ ලැබීමට සහ ක්‍රියාවලි කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙහි ඔබව ඒවාට පෙන්වීමකින් තොරව ඔබට පණිවිඩ නිරීක්ෂණයට හෝ මැකීමට හැකියාව ඇතුළත් වේ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ධාවනය වන යෙදුම් ලබාගැනීම"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"දැනට සහ මෑත ක්‍රියාත්මක කාර්යයන් පිළිබඳ විස්තරාත්මක තොරතුරු සොයා ලබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය කුමන යෙදුම් උපාංගයේ භාවිතා කරන්නේද යන තොරතුරු යෙදුම්වලට සොයා ගැනීමට ඉඩ දිය හැක."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"පැතිකඩ සහ උපාංග හිමිකරුවන් කළමනාකරණය කරන්න"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"යෙදුම්වලට පැතිකඩ හිමියන් සහ උපාංග හිමිකරු සැකසීමට ඉඩ දෙයි."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ධාවනය වන යෙදුම් නැවත අනුපිළිවෙලට සැකසීම"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"පෙරබිමට හෝ පසුබිමට සිදුවීම් ගෙනයාමට යෙදුමට අවසර දෙන්න. ඔබගේ ආදානයකින් තොරව යෙදුම මෙය සිදුකරයි."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"මෝටර් රථ ආකාරය ක්‍රියාත්මක කරන්න"</string>
