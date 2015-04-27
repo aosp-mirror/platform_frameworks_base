@@ -35,4 +35,9 @@ public class AccessibilityContentDescriptions {
     };
 
     static final int WIFI_NO_CONNECTION = R.string.accessibility_no_wifi;
+
+    static final int[] ETHERNET_CONNECTION_VALUES = {
+        R.string.accessibility_ethernet_disconnected,
+        R.string.accessibility_ethernet_connected,
+    };
 }
