@@ -1683,7 +1683,11 @@ package android {
 
   public static final class R.id {
     ctor public R.id();
+    field public static final int accessibilityActionScrollDown = 16908345; // 0x1020039
+    field public static final int accessibilityActionScrollLeft = 16908344; // 0x1020038
+    field public static final int accessibilityActionScrollRight = 16908346; // 0x102003a
     field public static final int accessibilityActionScrollToPosition = 16908342; // 0x1020036
+    field public static final int accessibilityActionScrollUp = 16908343; // 0x1020037
     field public static final int accessibilityActionShowOnScreen = 16908341; // 0x1020035
     field public static final int addToDictionary = 16908330; // 0x102002a
     field public static final int background = 16908288; // 0x1020000
@@ -1724,7 +1728,7 @@ package android {
     field public static final int selectAll = 16908319; // 0x102001f
     field public static final int selectTextMode = 16908333; // 0x102002d
     field public static final int selectedIcon = 16908302; // 0x102000e
-    field public static final int shareText = 16908343; // 0x1020037
+    field public static final int shareText = 16908347; // 0x102003b
     field public static final int startSelectingText = 16908328; // 0x1020028
     field public static final int statusBarBackground = 16908335; // 0x102002f
     field public static final int stopSelectingText = 16908329; // 0x1020029
@@ -37694,8 +37698,12 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_PREVIOUS_HTML_ELEMENT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_BACKWARD;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_DOWN;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_FORWARD;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_LEFT;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_RIGHT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_TO_POSITION;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_UP;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SELECT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_SELECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_TEXT;

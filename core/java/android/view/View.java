@@ -8440,7 +8440,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         if (isNestedScrollingEnabled()
                 && (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
-                || action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
+                || action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+                || action == R.id.accessibilityActionScrollUp
+                || action == R.id.accessibilityActionScrollLeft
+                || action == R.id.accessibilityActionScrollDown
+                || action == R.id.accessibilityActionScrollRight)) {
             if (dispatchNestedPrePerformAccessibilityAction(action, arguments)) {
                 return true;
             }

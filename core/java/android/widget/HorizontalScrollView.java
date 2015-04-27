@@ -40,6 +40,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.R;
+
 import java.util.List;
 
 /**
@@ -768,7 +770,8 @@ public class HorizontalScrollView extends FrameLayout {
             return true;
         }
         switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+            case R.id.accessibilityActionScrollRight: {
                 if (!isEnabled()) {
                     return false;
                 }
@@ -779,7 +782,8 @@ public class HorizontalScrollView extends FrameLayout {
                     return true;
                 }
             } return false;
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+            case R.id.accessibilityActionScrollLeft: {
                 if (!isEnabled()) {
                     return false;
                 }
@@ -807,10 +811,12 @@ public class HorizontalScrollView extends FrameLayout {
         if (scrollRange > 0) {
             info.setScrollable(true);
             if (isEnabled() && mScrollX > 0) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_LEFT);
             }
             if (isEnabled() && mScrollX < scrollRange) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_RIGHT);
             }
         }
     }
