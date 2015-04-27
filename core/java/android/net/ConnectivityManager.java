@@ -2586,7 +2586,7 @@ public class ConnectivityManager {
      * method assumes that the caller has previously called {@link #registerNetworkCallback} to
      * listen for network changes.
      *
-     * @param network{@link Network} specifying which network you're interested.
+     * @param network {@link Network} specifying which network you're interested.
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
      */
     public boolean requestBandwidthUpdate(Network network) {
