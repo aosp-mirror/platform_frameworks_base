@@ -20,7 +20,6 @@ import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -1081,16 +1080,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     /**
-     * Return whether this window is wanting to have a translation
-     * animation applied to it for an in-progress move.  (Only makes
+     * Return whether this window has moved. (Only makes
      * sense to call from performLayoutAndPlaceSurfacesLockedInner().)
      */
-    boolean shouldAnimateMove() {
-        return mContentChanged && !mExiting && !mWinAnimator.mLastHidden && mService.okToDisplay()
-                && (mFrame.top != mLastFrame.top
+    boolean hasMoved() {
+        return mHasSurface && mContentChanged && !mExiting && !mWinAnimator.mLastHidden
+                && mService.okToDisplay() && (mFrame.top != mLastFrame.top
                         || mFrame.left != mLastFrame.left)
-                && (mAttrs.privateFlags&PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                && (mAttachedWindow == null || !mAttachedWindow.shouldAnimateMove());
+                && (mAttachedWindow == null || !mAttachedWindow.hasMoved());
     }
 
     boolean isFullscreen(int screenWidth, int screenHeight) {
