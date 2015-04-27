@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Επιτρέπει στην εφαρμογή τη λήψη και την επεξεργασία μηνυμάτων WAP. Αυτό σημαίνει ότι η εφαρμογή θα μπορούσε να παρακολουθήσει ή να διαγράψει τα μηνύματα που αποστέλλονται στη συσκευή σας χωρίς αυτά να εμφανιστούν σε εσάς."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ανάκτηση εκτελούμενων εφαρμογών"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Επιτρέπει στην εφαρμογή την ανάκτηση πληροφοριών σχετικά με τρέχουσες και πρόσφατα εκτελούμενες εργασίες. Αυτό μπορεί να δίνει τη δυνατότητα στην εφαρμογή να ανακαλύπτει πληροφορίες σχετικά με το ποιες εφαρμογές χρησιμοποιούνται στη συσκευή."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Διαχείριση προφίλ και κατόχων συσκευής"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Επιτρέπει σε εφαρμογές να ορίζουν τους κατόχους προφίλ και τον κάτοχο της συσκευής."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"αναδιάταξη εκτελούμενων εφαρμογών"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Επιτρέπει στην εφαρμογή τη μετακίνηση εργασιών στο προσκήνιο και το παρασκήνιο. Η εφαρμογή μπορεί να το κάνει αυτό χωρίς να καταχωρίσετε δεδομένα εισόδου."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ενεργοποίηση λειτουργίας αυτοκινήτου"</string>

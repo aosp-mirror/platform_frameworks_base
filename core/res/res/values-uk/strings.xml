@@ -276,10 +276,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Дозволяє програмі отримувати й обробляти WAP-повідомлення. Це означає, що програма може відстежувати чи видаляти повідомлення, надіслані на ваш пристрій, навіть не показуючи їх вам."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"отримувати запущені програми"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Дозволяє програмі отримувати інформацію про поточні й останні запущені завдання. Це може дозволити програмі виявляти інформацію про програми, які використовуються на пристрої."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Керування власниками профілю та пристрою"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Додатки можуть вибирати власника профілю та пристрою."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"змінювати порядок запущених програм"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Дозволяє програмі переміщувати завдання в активні чи фонові вікна. Програма може робити це без вашого відома."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"увімк. режим авто"</string>

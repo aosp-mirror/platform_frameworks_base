@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"käynnissä olevien sovellusten noutaminen"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Antaa sovelluksen noutaa tietoja käynnissä olevista ja äskettäin suoritetuista tehtävistä. Sovellus voi saada tietoja laitteella käytetyistä sovelluksista."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Hallinnoi laitteen ja profiilien omistajia"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Sallii sovelluksien määrittää laitteen ja profiilien omistajat."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"käynnissä olevien sovellusten järjesteleminen"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Antaa sovelluksen siirtää tehtäviä etualalle ja taustalle. Sovellus ei tarvitse toimiin käyttäjän lupaa."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ota autotila käyttöön"</string>

@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీకు పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగల లేదా తొలగించగల సామర్థ్యాన్ని కలిగి ఉంటుంది."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"అమలవుతున్న అనువర్తనాలను పునరుద్ధరించడం"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ప్రస్తుతం మరియు ఇటీవల అమలవుతున్న విధుల గురించి వివరణాత్మక సమాచారాన్ని తిరిగి పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది పరికరంలో ఉపయోగించబడిన అనువర్తనాల గురించి సమాచారాన్ని కనుగొనడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"ప్రొఫైల్ మరియు పరికరం యజమానులను నిర్వహించడానికి అనుమతి"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ప్రొఫైల్ యజమానులను మరియు పరికరం యజమానిని సెట్ చేయడానికి అనువర్తనాలను అనుమతిస్తుంది."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"అమలవుతున్న అనువర్తనాలను మళ్లీ క్రమం చేయడం"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"విధులను ముందుకు మరియు నేపథ్యానికి తరలించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మీ ప్రమేయం లేకుండానే దీన్ని చేయవచ్చు."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"కారు మోడ్‌ను ప్రారంభించడం"</string>
