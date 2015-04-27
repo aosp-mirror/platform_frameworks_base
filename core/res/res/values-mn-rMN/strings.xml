@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Апп нь WAP мессежийг хүлээн авах болон биелүүлэх боломжтой. Энэ зөвшөөрөл нь танд илгээсэн мессежийг танд харуулалгүйгээр хянах эсвэл устгах боломжийг агуулна."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ажиллаж байгаа апп-г дуудах"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Апп нь одоо ажиллаж байгаа болон сүүлд ажилласан даалгаврын талаарх мэдээллийг авах боломжтой. Ингэснээр апп нь төхөөмж дээрх ямар аппликешнүүд ашиглагдсан талаарх мэдээлийг олох боломжтой."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Профайл болон төхөөрөмжийн эзэмшигчийг удирдах"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Аппликейшнд профайл болон төхөөрөмж эзэмшигчийг сонгохыг зөвшөөрөх"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ажиллаж байгаа апп-уудыг дахин эрэмбэлэх"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Апп нь даалгавруудыг нүүрлүү болон арлуу зөөх боломжтой. Апп нь энийг таны оролцоогүйгээр хийж болзошгүй"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"машины горимыг идэвхжүүлэх"</string>

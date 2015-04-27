@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP mezuak jasotzeko eta prozesatzeko baimena ematen die aplikazioei. Horrela, aplikazioak, besteak beste, gailura bidalitako mezuak kontrola eta ezaba ditzake zuri erakutsi gabe."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Eskuratu abian diren aplikazioak"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Unean edo duela gutxi exekutatutako zereginei buruzko informazioa lortzeko baimena ematen die aplikazioei. Horrela, aplikazioak gailuan erabiltzen ari diren aplikazioei buruzko informazioa ezagut dezake."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Kudeatu profilen eta gailuen jabeak"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Profilaren eta gailuaren jabeak zehazteko baimena ematen die aplikazioei"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Ordenatu abian diren aplikazioak"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Zereginak aurreko eta atzeko planora eramateko baimena ematen die aplikazioei. Aplikazioak zuk ezer egin gabe egin dezake hori."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"gaitu auto modua"</string>

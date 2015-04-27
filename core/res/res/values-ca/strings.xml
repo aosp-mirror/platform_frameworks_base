@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permet que l\'aplicació rebi i processi missatges WAP. Aquest permís inclou la capacitat de controlar o de suprimir missatges que s\'han enviat al teu dispositiu sense mostrar-te\'ls."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupera les aplicacions en execució"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet que l\'aplicació recuperi informació sobre les tasques que s\'executen actualment i les que s\'han executat recentment. Aquesta acció pot permetre que l\'aplicació descobreixi informació sobre les aplicacions que s\'utilitzen al dispositiu."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Gestionar els propietaris del perfil i del dispositiu"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Permet que les aplicacions defineixin els propietaris del perfil i del dispositiu."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"canvia l\'ordre de les aplicacions en execució"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permet que l\'aplicació desplaci tasques en primer o segon pla. L\'aplicació pot fer-ho sense que tu ho indiquis."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activar el mode de cotxe"</string>
