@@ -2126,4 +2126,7 @@
 
     <!-- Keyguard component -->
     <string name="config_keyguardComponent" translatable="false">com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
+
+    <!-- This config is used to force VoiceInteractionService to start on certain low ram devices. -->
+    <bool name="config_forceEnableVoiceInteractionService">false</bool>
 </resources>
