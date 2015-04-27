@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.WorkerThread;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -158,5 +159,6 @@ public abstract class IntentService extends Service {
      * @param intent The value passed to {@link
      *               android.content.Context#startService(Intent)}.
      */
+    @WorkerThread
     protected abstract void onHandleIntent(Intent intent);
 }
