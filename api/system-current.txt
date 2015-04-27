@@ -31309,6 +31309,7 @@ package android.speech {
     field public static final java.lang.String EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE = "android.speech.extra.ONLY_RETURN_LANGUAGE_PREFERENCE";
     field public static final java.lang.String EXTRA_ORIGIN = "android.speech.extra.ORIGIN";
     field public static final java.lang.String EXTRA_PARTIAL_RESULTS = "android.speech.extra.PARTIAL_RESULTS";
+    field public static final java.lang.String EXTRA_PREFER_OFFLINE = "android.speech.extra.PREFER_OFFLINE";
     field public static final java.lang.String EXTRA_PROMPT = "android.speech.extra.PROMPT";
     field public static final java.lang.String EXTRA_RESULTS = "android.speech.extra.RESULTS";
     field public static final java.lang.String EXTRA_RESULTS_PENDINGINTENT = "android.speech.extra.RESULTS_PENDINGINTENT";
@@ -32545,7 +32546,6 @@ package android.telecom {
   public static abstract class InCallService.VideoCall {
     ctor public InCallService.VideoCall();
     method public abstract void registerCallback(android.telecom.InCallService.VideoCall.Callback);
-    method public abstract void unregisterCallback();
     method public abstract void requestCallDataUsage();
     method public abstract void requestCameraCapabilities();
     method public abstract void sendSessionModifyRequest(android.telecom.VideoProfile);
@@ -32556,6 +32556,7 @@ package android.telecom {
     method public abstract void setPauseImage(java.lang.String);
     method public abstract void setPreviewSurface(android.view.Surface);
     method public abstract void setZoom(float);
+    method public abstract void unregisterCallback();
   }
 
   public static abstract class InCallService.VideoCall.Callback {
