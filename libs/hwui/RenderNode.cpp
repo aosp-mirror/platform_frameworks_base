@@ -138,7 +138,7 @@ void RenderNode::damageSelf(TreeInfo& info) {
 }
 
 void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
-    LayerType layerType = properties().layerProperties().type();
+    LayerType layerType = properties().effectiveLayerType();
     if (CC_UNLIKELY(layerType == LayerType::RenderLayer)) {
         // Damage applied so far needs to affect our parent, but does not require
         // the layer to be updated. So we pop/push here to clear out the current
@@ -153,7 +153,7 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
 }
 
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
-    LayerType layerType = properties().layerProperties().type();
+    LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
     if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable())) {
@@ -384,33 +384,16 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
             renderer.concatMatrix(*properties().getTransformMatrix());
         }
     }
-    const bool isLayer = properties().layerProperties().type() != LayerType::None;
+    const bool isLayer = properties().effectiveLayerType() != LayerType::None;
     int clipFlags = properties().getClippingFlags();
     if (properties().getAlpha() < 1) {
         if (isLayer) {
             clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
 
             renderer.setOverrideLayerAlpha(properties().getAlpha());
-        } else if (!properties().getHasOverlappingRendering()) {
-            renderer.scaleAlpha(properties().getAlpha());
         } else {
-            Rect layerBounds(0, 0, getWidth(), getHeight());
-            int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (clipFlags) {
-                saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
-                properties().getClippingRectForFlags(clipFlags, &layerBounds);
-                clipFlags = 0; // all clipping done by saveLayer
-            }
-
-            ATRACE_FORMAT("%s alpha caused %ssaveLayer %dx%d", getName(),
-                    (saveFlags & SkCanvas::kClipToLayer_SaveFlag) ? "" : "unclipped ",
-                    static_cast<int>(layerBounds.getWidth()),
-                    static_cast<int>(layerBounds.getHeight()));
-
-            SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
-                    layerBounds.left, layerBounds.top, layerBounds.right, layerBounds.bottom,
-                    properties().getAlpha() * 255, saveFlags);
-            handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
+            LOG_ALWAYS_FATAL_IF(properties().getHasOverlappingRendering());
+            renderer.scaleAlpha(properties().getAlpha());
         }
     }
     if (clipFlags) {

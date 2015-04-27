@@ -73,10 +73,6 @@ public:
         return false;
     }
 
-    LayerType type() const {
-        return mType;
-    }
-
     bool setOpaque(bool opaque) {
         return RP_SET(mOpaque, opaque);
     }
@@ -121,6 +117,11 @@ private:
     LayerProperties();
     ~LayerProperties();
     void reset();
+
+    // Private since external users should go through properties().effectiveLayerType()
+    LayerType type() const {
+        return mType;
+    }
 
     friend class RenderProperties;
 
@@ -573,6 +574,17 @@ public:
         return getZ() > 0.0f
                 && getOutline().getPath() != nullptr
                 && getOutline().getAlpha() != 0.0f;
+    }
+
+    LayerType effectiveLayerType() const {
+        LayerType type = mLayerProperties.mType;
+        if (type == LayerType::None
+                && !MathUtils::isZero(mPrimitiveFields.mAlpha)
+                && mPrimitiveFields.mAlpha < 1
+                && mPrimitiveFields.mHasOverlappingRendering) {
+            return LayerType::RenderLayer;
+        }
+        return type;
     }
 
 private:
