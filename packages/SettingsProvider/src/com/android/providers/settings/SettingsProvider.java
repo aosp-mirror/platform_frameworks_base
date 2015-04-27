@@ -1500,17 +1500,16 @@ public class SettingsProvider extends ContentProvider {
         }
 
         public void onPackageRemovedLocked(String packageName, int userId) {
-            final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
-            SettingsState globalSettings = mSettingsStates.get(globalKey);
-            if (globalSettings != null) globalSettings.onPackageRemovedLocked(packageName);
-
-            final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
-            SettingsState secureSettings = mSettingsStates.get(secureKey);
-            if (secureSettings != null) secureSettings.onPackageRemovedLocked(packageName);
+            // Global and secure settings are signature protected. Apps signed
+            // by the platform certificate are generally not uninstalled  and
+            // the main exception is tests. We trust components signed
+            // by the platform certificate and do not do a clean up after them.
 
             final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
             SettingsState systemSettings = mSettingsStates.get(systemKey);
-            if (systemSettings != null) systemSettings.onPackageRemovedLocked(packageName);
+            if (systemSettings != null) {
+                systemSettings.onPackageRemovedLocked(packageName);
+            }
         }
 
         private SettingsState peekSettingsStateLocked(int key) {
