@@ -2345,7 +2345,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean reportNewConfig = false;
         WindowState attachedWindow = null;
-        WindowState win = null;
         long origId;
         final int type = attrs.type;
 
@@ -2482,7 +2481,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 addToken = true;
             }
 
-            win = new WindowState(this, session, client, token,
+            WindowState win = new WindowState(this, session, client, token,
                     attachedWindow, appOp[0], seq, attrs, viewVisibility, displayContent);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
