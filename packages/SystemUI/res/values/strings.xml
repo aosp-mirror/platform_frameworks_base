@@ -439,7 +439,7 @@
     <!-- Content description of the do not disturb tile in quick settings when on in priority (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_priority_on">Do not disturb on, priority only.</string>
     <!-- Content description of the do not disturb tile in quick settings when on in none (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_none_on">Do not disturb on, no interruptions.</string>
+    <string name="accessibility_quick_settings_dnd_none_on">Do not disturb on, total silence.</string>
     <!-- Content description of the do not disturb tile in quick settings when on in alarms only (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_alarms_on">Do not disturb on, alarms only.</string>
      <!-- Content description of the do not disturb tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -576,8 +576,8 @@
     <string name="quick_settings_dnd_priority_label">Priority only</string>
     <!-- QuickSettings: Do not disturb - Alarms only [CHAR LIMIT=NONE] -->
     <string name="quick_settings_dnd_alarms_label">Alarms only</string>
-    <!-- QuickSettings: Do not disturb - No interruptions [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_dnd_none_label">No interruptions</string>
+    <!-- QuickSettings: Do not disturb - Total silence [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_dnd_none_label">Total silence</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Bluetooth (Multiple) [CHAR LIMIT=NONE] -->
@@ -725,32 +725,14 @@
     <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
     <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
 
-    <!-- Zen mode: No interruptions title, with a warning about alarms. [CHAR LIMIT=60] -->
-    <string name="zen_no_interruptions_with_warning">No interruptions. Not even alarms.</string>
-
     <!-- Zen mode: Priority only introduction message on first use -->
-    <string name="zen_priority_introduction">You won\'t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify.</string>
+    <string name="zen_priority_introduction">You won’t be disturbed by sounds and vibrations, except from alarms, reminders, events, and callers you specify.</string>
 
     <!-- Zen mode: Priority only customization button label -->
     <string name="zen_priority_customize_button">Customize</string>
 
-    <!-- Zen mode: No interruptions. [CHAR LIMIT=40] -->
-    <string name="zen_no_interruptions">No interruptions</string>
-
-    <!-- Zen mode: Only important interruptions. [CHAR LIMIT=40] -->
-    <string name="zen_important_interruptions">Priority interruptions only</string>
-
-    <!-- Zen mode: Only alarms. [CHAR LIMIT=40] -->
-    <string name="zen_alarms">Alarms only</string>
-
-    <!-- Zen mode: Next alarm information - just a time. [CHAR LIMIT=40] -->
-    <string name="zen_alarm_information_time">Your next alarm is at <xliff:g id="alarm_time" example="5:00 PM">%s</xliff:g></string>
-
-    <!-- Zen mode: Next alarm information - day and time. [CHAR LIMIT=40] -->
-    <string name="zen_alarm_information_day_time">Your next alarm is <xliff:g id="alarm_day_and_time" example="Fri 5:00 PM">%s</xliff:g></string>
-
-    <!-- Zen mode: Next alarm warning. [CHAR LIMIT=40] -->
-    <string name="zen_alarm_warning">You won\'t hear your alarm at <xliff:g id="alarm_time" example="5:00 PM">%s</xliff:g></string>
+    <!-- Zen mode: Total silence introduction message on first use -->
+    <string name="zen_silence_introduction">This blocks ALL sounds and vibrations, including from alarms, music, videos, and games. You’ll still be able to make phone calls.</string>
 
     <!-- Text for overflow card on Keyguard when there is not enough space for all notifications on Keyguard. [CHAR LIMIT=1] -->
     <string name="keyguard_more_overflow_text">+<xliff:g id="number_of_notifications" example="5">%d</xliff:g></string>
@@ -771,7 +753,7 @@
     <string name="camera_hint">Swipe left for camera</string>
 
     <!-- Interruption level: None. [CHAR LIMIT=20] -->
-    <string name="interruption_level_none">No interruptions</string>
+    <string name="interruption_level_none">Total silence</string>
 
     <!-- Interruption level: Priority. [CHAR LIMIT=20] -->
     <string name="interruption_level_priority">Priority only</string>
@@ -779,11 +761,8 @@
     <!-- Interruption level: Alarms only. [CHAR LIMIT=20] -->
     <string name="interruption_level_alarms">Alarms only</string>
 
-    <!-- Interruption level: All. [CHAR LIMIT=20] -->
-    <string name="interruption_level_all">All</string>
-
     <!-- Interruption level: None.  Optimized for narrow two-line display. [CHAR LIMIT=20] -->
-    <string name="interruption_level_none_twoline">No\ninterruptions</string>
+    <string name="interruption_level_none_twoline">Total\nsilence</string>
 
     <!-- Interruption level: Priority.  Optimized for narrow two-line display. [CHAR LIMIT=20] -->
     <string name="interruption_level_priority_twoline">Priority\nonly</string>
@@ -953,6 +932,9 @@
     <!-- Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description. [CHAR LIMIT=20] -->
     <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
 
+    <!-- Button label for ending zen mode in the volume dialog -->
+    <string name="volume_zen_end_now">End now</string>
+
     <!-- Screen pinning dialog title. -->
     <string name="screen_pinning_title">Screen is pinned</string>
     <!-- Screen pinning dialog description. -->
@@ -988,9 +970,26 @@
     <!-- VolumeUI restoration notification: text -->
     <string name="volumeui_notification_text">Touch to restore the original.</string>
 
-    <!-- Volume dialog zen toggle switch title -->
-    <string name="volume_zen_switch_text" translatable="false">@*android:string/zen_mode_feature_name</string>
-
     <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
     <string name="managed_profile_foreground_toast">You are in the Work profile</string>
+
+    <string-array name="volume_stream_titles" translatable="false">
+        <item>Voice calls</item> <!-- STREAM_VOICE_CALL -->
+        <item>System</item> <!-- STREAM_SYSTEM -->
+        <item>Notifications</item> <!-- STREAM_RING -->
+        <item>Media</item> <!-- STREAM_MUSIC -->
+        <item>Alarms</item> <!-- STREAM_ALARM -->
+        <item></item> <!-- STREAM_NOTIFICATION -->
+        <item>Bluetooth calls</item> <!-- STREAM_BLUETOOTH_SCO -->
+        <item></item> <!-- STREAM_SYSTEM_ENFORCED -->
+        <item></item> <!-- STREAM_DTMF -->
+        <item></item> <!-- STREAM_TTS -->
+    </string-array>
+
+    <string name="volume_stream_muted" translatable="false">%s silent</string>
+    <string name="volume_stream_vibrate" translatable="false">%s vibrate</string>
+    <string name="volume_stream_suppressed" translatable="false">%1$s silent — %2$s</string>
+    <string name="volume_stream_muted_dnd" translatable="false">%s silent — Total silence</string>
+    <string name="volume_stream_limited_dnd" translatable="false">%s — Priority only</string>
+    <string name="volume_stream_vibrate_dnd" translatable="false">%s vibrate — Priority only</string>
 </resources>

@@ -144,9 +144,14 @@ class Util {
         return HMMAA.format(new Date(millis));
     }
 
-    public static void setText(TextView tv, CharSequence text) {
-        if (Objects.equals(tv.getText(), text)) return;
+    private static CharSequence emptyToNull(CharSequence str) {
+        return str == null || str.length() == 0 ? null : str;
+    }
+
+    public static boolean setText(TextView tv, CharSequence text) {
+        if (Objects.equals(emptyToNull(tv.getText()), emptyToNull(text))) return false;
         tv.setText(text);
+        return true;
     }
 
     public static final void setVisOrGone(View v, boolean vis) {

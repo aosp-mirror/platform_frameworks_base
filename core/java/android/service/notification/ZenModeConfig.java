@@ -62,7 +62,7 @@ public class ZenModeConfig implements Parcelable {
             Calendar.WEDNESDAY, Calendar.THURSDAY };
     public static final int[] WEEKEND_DAYS = { Calendar.FRIDAY, Calendar.SATURDAY };
 
-    public static final int[] MINUTE_BUCKETS = new int[] { 15, 30, 45, 60, 120, 180, 240, 480 };
+    public static final int[] MINUTE_BUCKETS = generateMinuteBuckets();
     private static final int SECONDS_MS = 1000;
     private static final int MINUTES_MS = 60 * SECONDS_MS;
     private static final int ZERO_VALUE_MS = 10 * SECONDS_MS;
@@ -201,6 +201,18 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    private static int[] generateMinuteBuckets() {
+        final int maxHrs = 12;
+        final int[] buckets = new int[maxHrs + 3];
+        buckets[0] = 15;
+        buckets[1] = 30;
+        buckets[2] = 45;
+        for (int i = 1; i <= maxHrs; i++) {
+            buckets[2 + i] = 60 * i;
+        }
+        return buckets;
+    }
+
     public static String sourceToString(int source) {
         switch (source) {
             case SOURCE_ANYONE:
@@ -298,10 +310,10 @@ public class ZenModeConfig implements Parcelable {
                         throw new IndexOutOfBoundsException("bad source in config:" + rt.allowFrom);
                     }
                 } else if (MANUAL_TAG.equals(tag)) {
-                    rt.manualRule = readRuleXml(parser);
+                    rt.manualRule = readRuleXml(parser, false /*conditionRequired*/);
                 } else if (AUTOMATIC_TAG.equals(tag)) {
                     final String id = parser.getAttributeValue(null, RULE_ATT_ID);
-                    final ZenRule automaticRule = readRuleXml(parser);
+                    final ZenRule automaticRule = readRuleXml(parser, true /*conditionRequired*/);
                     if (id != null && automaticRule != null) {
                         rt.automaticRules.put(id, automaticRule);
                     }
@@ -341,7 +353,7 @@ public class ZenModeConfig implements Parcelable {
         out.endTag(null, ZEN_TAG);
     }
 
-    public static ZenRule readRuleXml(XmlPullParser parser) {
+    public static ZenRule readRuleXml(XmlPullParser parser, boolean conditionRequired) {
         final ZenRule rt = new ZenRule();
         rt.enabled = safeBoolean(parser, RULE_ATT_ENABLED, true);
         rt.snoozing = safeBoolean(parser, RULE_ATT_SNOOZING, false);
@@ -355,7 +367,7 @@ public class ZenModeConfig implements Parcelable {
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
         rt.condition = readConditionXml(parser);
-        return rt.condition != null ? rt : null;
+        return rt.condition != null || !conditionRequired ? rt : null;
     }
 
     public static void writeRuleXml(ZenRule rule, XmlSerializer out) throws IOException {
