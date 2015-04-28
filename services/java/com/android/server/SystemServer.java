@@ -403,7 +403,6 @@ public final class SystemServer {
         NsdService serviceDiscovery= null;
         WindowManagerService wm = null;
         BluetoothManagerService bluetooth = null;
-        UsbService usb = null;
         SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
         CommonTimeManagementService commonTimeMgmtService = null;
@@ -413,7 +412,6 @@ public final class SystemServer {
         AudioService audioService = null;
         MmsServiceBroker mmsService = null;
         EntropyMixer entropyMixer = null;
-        CameraService cameraService = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
@@ -1206,6 +1204,6 @@ public final class SystemServer {
         intent.setComponent(new ComponentName("com.android.systemui",
                     "com.android.systemui.SystemUIService"));
         //Slog.d(TAG, "Starting service: " + intent);
-        context.startServiceAsUser(intent, UserHandle.OWNER);
+        context.startServiceAsUser(intent, UserHandle.SYSTEM);
     }
 }
