@@ -65,9 +65,11 @@
       <item quantity="one">Αντιγραφή <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Προετοιμασία για αντιγραφή…"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other">Δεν ήταν δυνατή η αντιγραφή <xliff:g id="COUNT_1">%1$d</xliff:g> αρχείων</item>
+      <item quantity="one">Δεν ήταν δυνατή η αντιγραφή <xliff:g id="COUNT_0">%1$d</xliff:g> αρχείου</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Αγγίξτε για προβολή λεπτομερειών"</string>
     <string name="retry" msgid="7564024179122207376">"Επανάληψη"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Αυτά τα αρχεία δεν αντιγράφηκαν: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

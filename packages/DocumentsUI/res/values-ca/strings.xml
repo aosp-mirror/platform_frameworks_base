@@ -65,9 +65,11 @@
       <item quantity="one">S\'està copiant <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"S\'està preparant una còpia…"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other">No s\'han pogut copiar <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers</item>
+      <item quantity="one">No s\'ha pogut copiar <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Toca per veure els detalls"</string>
     <string name="retry" msgid="7564024179122207376">"Torna-ho a provar"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Aquests fitxers no s\'han copiat: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>
