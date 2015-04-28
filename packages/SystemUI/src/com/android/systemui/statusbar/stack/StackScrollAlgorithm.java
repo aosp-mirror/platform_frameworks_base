@@ -311,7 +311,8 @@ public class StackScrollAlgorithm {
                     StackViewState viewState = resultState.getViewStateForView(
                             nextChild);
                     // The child below the dragged one must be fully visible
-                    if (!isPinnedHeadsUpView(draggedView) || isPinnedHeadsUpView(nextChild)) {
+                    if (!NotificationStackScrollLayout.isPinnedHeadsUp(draggedView)
+                            || NotificationStackScrollLayout.isPinnedHeadsUp(nextChild)) {
                         viewState.alpha = 1;
                     }
                 }
@@ -322,14 +323,6 @@ public class StackScrollAlgorithm {
                 viewState.alpha = draggedView.getAlpha();
             }
         }
-    }
-
-    private boolean isPinnedHeadsUpView(View view) {
-        if (view instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-            return row.isHeadsUp() && !row.isInShade();
-        }
-        return false;
     }
 
     /**
@@ -380,7 +373,7 @@ public class StackScrollAlgorithm {
     /**
      * Determine the positions for the views. This is the main part of the algorithm.
      *
-     *  @param resultState The result state to update if a change to the properties of a child occurs
+     * @param resultState The result state to update if a change to the properties of a child occurs
      * @param algorithmState The state in which the current pass of the algorithm is currently in
      * @param ambientState The current ambient state
      */
@@ -515,11 +508,12 @@ public class StackScrollAlgorithm {
             }
             StackViewState childState = resultState.getViewStateForView(row);
             boolean isTopEntry = topHeadsUpEntry == row;
-            if (!row.isInShade()) {
+            if (row.isPinned()) {
                 childState.yTranslation = 0;
                 childState.height = row.getHeadsUpHeight();
                 if (!isTopEntry) {
-                    // Ensure that a headsUp is never below the topmost headsUp
+                    // Ensure that a headsUp doesn't vertically extend further than the heads-up at
+                    // the top most z-position
                     StackViewState topState = resultState.getViewStateForView(topHeadsUpEntry);
                     childState.height = row.getHeadsUpHeight();
                     childState.yTranslation = topState.yTranslation + topState.height

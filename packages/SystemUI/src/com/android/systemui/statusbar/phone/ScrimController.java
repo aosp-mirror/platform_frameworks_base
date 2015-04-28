@@ -80,7 +80,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private float mCurrentInFrontAlpha;
     private float mCurrentBehindAlpha;
     private float mCurrentHeadsUpAlpha = 1;
-    private int mAmountOfPinnedHeadsUps;
+    private int mPinnedHeadsUpCount;
     private float mTopHeadsUpDragAmount;
     private View mDraggedHeadsUpView;
 
@@ -347,25 +347,27 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     @Override
-    public void OnPinnedHeadsUpExistChanged(boolean exist, boolean changeImmediatly) {
+    public void onPinnedModeChanged(boolean inPinnedMode) {
     }
 
     @Override
-    public void OnHeadsUpPinnedChanged(ExpandableNotificationRow headsUp, boolean isHeadsUp) {
-        if (isHeadsUp) {
-            mAmountOfPinnedHeadsUps++;
-        } else {
-            mAmountOfPinnedHeadsUps--;
-            if (headsUp == mDraggedHeadsUpView) {
-                mDraggedHeadsUpView = null;
-                mTopHeadsUpDragAmount = 0.0f;
-            }
+    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
+        mPinnedHeadsUpCount++;
+        updateHeadsUpScrim(true);
+    }
+
+    @Override
+    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
+        mPinnedHeadsUpCount--;
+        if (headsUp == mDraggedHeadsUpView) {
+            mDraggedHeadsUpView = null;
+            mTopHeadsUpDragAmount = 0.0f;
         }
         updateHeadsUpScrim(true);
     }
 
     @Override
-    public void OnHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
+    public void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
     }
 
     private void updateHeadsUpScrim(boolean animate) {
@@ -374,12 +376,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 TAG_KEY_ANIM);
         float animEndValue = -1;
         if (previousAnimator != null) {
-            if ((animate || alpha == mCurrentHeadsUpAlpha)) {
-                // lets cancel any running animators
+            if (animate || alpha == mCurrentHeadsUpAlpha) {
                 previousAnimator.cancel();
             }
-            animEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
-                    TAG_HUN_START_ALPHA);
+            animEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim, TAG_HUN_START_ALPHA);
         }
         if (alpha != mCurrentHeadsUpAlpha && alpha != animEndValue) {
             if (animate) {
@@ -390,7 +390,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 if (previousAnimator != null) {
                     float previousStartValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
                             TAG_HUN_START_ALPHA);
-                   float previousEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
+                    float previousEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
                            TAG_HUN_END_ALPHA);
                     // we need to increase all animation keyframes of the previous animator by the
                     // relative change to the end value
@@ -410,6 +410,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         }
     }
 
+    /**
+     * Set the amount the current top heads up view is dragged. The range is from 0 to 1 and 0 means
+     * the heads up is in its resting space and 1 means it's fully dragged out.
+     *
+     * @param draggedHeadsUpView the dragged view
+     * @param topHeadsUpDragAmount how far is it dragged
+     */
     public void setTopHeadsUpDragAmount(View draggedHeadsUpView, float topHeadsUpDragAmount) {
         mTopHeadsUpDragAmount = topHeadsUpDragAmount;
         mDraggedHeadsUpView = draggedHeadsUpView;
@@ -417,9 +424,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private float calculateHeadsUpAlpha() {
-        if (mAmountOfPinnedHeadsUps >= 2) {
+        if (mPinnedHeadsUpCount >= 2) {
             return 1.0f;
-        } else if (mAmountOfPinnedHeadsUps == 0) {
+        } else if (mPinnedHeadsUpCount == 0) {
             return 0.0f;
         } else {
             return 1.0f - mTopHeadsUpDragAmount;

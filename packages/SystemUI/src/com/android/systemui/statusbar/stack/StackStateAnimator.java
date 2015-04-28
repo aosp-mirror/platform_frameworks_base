@@ -21,11 +21,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
-import android.graphics.Path;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -78,6 +76,7 @@ public class StackStateAnimator {
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mHeadsUpAppearInterpolator;
     private final int mGoToFullShadeAppearingTranslation;
+    private final StackViewState mTmpState = new StackViewState();
     public NotificationStackScrollLayout mHostLayout;
     private ArrayList<NotificationStackScrollLayout.AnimationEvent> mNewEvents =
             new ArrayList<>();
@@ -95,7 +94,6 @@ public class StackStateAnimator {
     private ValueAnimator mTopOverScrollAnimator;
     private ValueAnimator mBottomOverScrollAnimator;
     private ExpandableNotificationRow mChildExpandingView;
-    private StackViewState mTmpState = new StackViewState();
     private int mHeadsUpAppearHeightBottom;
     private boolean mShadeExpanded;
 
@@ -106,25 +104,7 @@ public class StackStateAnimator {
         mGoToFullShadeAppearingTranslation =
                 hostLayout.getContext().getResources().getDimensionPixelSize(
                         R.dimen.go_to_full_shade_appearing_translation);
-        Path path = new Path();
-        path.moveTo(0, 0);
-        float x1 = 250f;
-        float x2 = 150f;
-        float x3 = 100f;
-        float y1 = 90f;
-        float y2 = 78f;
-        float y3 = 80f;
-        float xTot = (x1 + x2 + x3);
-        path.cubicTo(x1 * 0.9f / xTot, 0f,
-                x1 * 0.8f / xTot, y1 / y3,
-                x1 / xTot , y1 / y3);
-        path.cubicTo((x1 + x2 * 0.4f) / xTot, y1 / y3,
-                (x1 + x2 * 0.2f) / xTot, y2 / y3,
-                (x1 + x2) / xTot, y2 / y3);
-        path.cubicTo((x1 + x2 + x3 * 0.4f) / xTot, y2 / y3,
-                (x1 + x2 + x3 * 0.2f) / xTot, 1f,
-                1f, 1f);
-        mHeadsUpAppearInterpolator = new PathInterpolator(path);
+        mHeadsUpAppearInterpolator = new HeadsUpAppearInterpolator();
     }
 
     public boolean isRunning() {
