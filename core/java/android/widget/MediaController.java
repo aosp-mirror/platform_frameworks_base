@@ -326,6 +326,16 @@ public class MediaController extends FrameLayout {
             if (mFfwdButton != null && !mPlayer.canSeekForward()) {
                 mFfwdButton.setEnabled(false);
             }
+            // TODO What we really should do is add a canSeek to the MediaPlayerControl interface;
+            // this scheme can break the case when applications want to allow seek through the
+            // progress bar but disable forward/backward buttons.
+            //
+            // However, currently the flags SEEK_BACKWARD_AVAILABLE, SEEK_FORWARD_AVAILABLE,
+            // and SEEK_AVAILABLE are all (un)set together; as such the aforementioned issue
+            // shouldn't arise in existing applications.
+            if (mProgress != null && !mPlayer.canSeekBackward() && !mPlayer.canSeekForward()) {
+                mProgress.setEnabled(false);
+            }
         } catch (IncompatibleClassChangeError ex) {
             // We were given an old version of the interface, that doesn't have
             // the canPause/canSeekXYZ methods. This is OK, it just means we
