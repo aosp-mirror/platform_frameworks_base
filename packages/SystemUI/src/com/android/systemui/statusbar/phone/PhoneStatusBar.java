@@ -2852,6 +2852,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         } catch (RemoteException e) {
             // Ignore.
         }
+        setNotificationsShown(newlyVisibleAr);
     }
 
     // State logging
