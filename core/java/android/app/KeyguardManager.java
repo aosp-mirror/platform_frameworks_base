@@ -199,9 +199,12 @@ public class KeyguardManager {
     }
 
     /**
-     * Return whether the keyguard requires a password to unlock.
+     * Return whether the keyguard is secured by a PIN, pattern or password or a SIM card
+     * is currently locked.
      *
-     * @return true if keyguard is secure.
+     * <p>See also {@link #isDeviceSecure()} which ignores SIM locked states.
+     *
+     * @return true if a PIN, pattern or password is set or a SIM card is locked.
      */
     public boolean isKeyguardSecure() {
         try {
@@ -240,12 +243,8 @@ public class KeyguardManager {
     }
 
     /**
-     * Returns whether the device is currently locked and requires a PIN, pattern or
-     * password to unlock.
+     * Per-user version of {@link #isDeviceLocked()}.
      *
-     * @param userId the user for which the locked state should be reported.
-     * @return true if unlocking the device currently requires a PIN, pattern or
-     * password.
      * @hide
      */
     public boolean isDeviceLocked(int userId) {
@@ -260,6 +259,8 @@ public class KeyguardManager {
      * Returns whether the device is secured with a PIN, pattern or
      * password.
      *
+     * <p>See also {@link #isKeyguardSecure} which treats SIM locked states as secure.
+     *
      * @return true if a PIN, pattern or password was set.
      */
     public boolean isDeviceSecure() {
@@ -267,11 +268,8 @@ public class KeyguardManager {
     }
 
     /**
-     * Returns whether the device is secured with a PIN, pattern or
-     * password.
+     * Per-user version of {@link #isDeviceSecure()}.
      *
-     * @param userId the user for which the secure state should be reported.
-     * @return true if a PIN, pattern or password was set.
      * @hide
      */
     public boolean isDeviceSecure(int userId) {
