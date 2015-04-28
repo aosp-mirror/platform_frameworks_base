@@ -58,9 +58,9 @@ public class KeySetManagerService {
 
     private final ArrayMap<String, PackageSetting> mPackages;
 
-    private static long lastIssuedKeySetId = 0;
+    private long lastIssuedKeySetId = 0;
 
-    private static long lastIssuedKeyId = 0;
+    private long lastIssuedKeyId = 0;
 
     class PublicKeyHandle {
         private final PublicKey mKey;
