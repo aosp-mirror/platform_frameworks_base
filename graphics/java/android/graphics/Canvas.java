@@ -81,17 +81,9 @@ public class Canvas {
      */
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
 
-    /**
-     * Flag for drawTextRun indicating left-to-right run direction.
-     * @hide
-     */
-    public static final int DIRECTION_LTR = 0;
-
-    /**
-     * Flag for drawTextRun indicating right-to-left run direction.
-     * @hide
-     */
-    public static final int DIRECTION_RTL = 1;
+    // Used by native code
+    @SuppressWarnings("UnusedDeclaration")
+    private int mSurfaceFormat;
 
     // Maximum bitmap size as defined in Skia's native code
     // (see SkCanvas.cpp, SkDraw.cpp)
@@ -1724,10 +1716,15 @@ public class Canvas {
     }
 
     /**
-     * Render a run of all LTR or all RTL text, with shaping. This does not run
-     * bidi on the provided text, but renders it as a uniform right-to-left or
-     * left-to-right run, as indicated by dir. Alignment of the text is as
-     * determined by the Paint's TextAlign value.
+     * Draw a run of text, all in a single direction, with optional context for complex text
+     * shaping.
+     *
+     * <p>See {@link #drawTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)}
+     * for more details. This method uses a character array rather than CharSequence to
+     * represent the string. Also, to be consistent with the pattern established in
+     * {@link #drawText}, in this method {@code count} and {@code contextCount} are used rather
+     * than offsets of the end position; {@code count = end - start, contextCount = contextEnd -
+     * contextStart}.
      *
      * @param text the text to render
      * @param index the start of the text to render
@@ -1735,13 +1732,12 @@ public class Canvas {
      * @param contextIndex the start of the context for shaping.  Must be
      *         no greater than index.
      * @param contextCount the number of characters in the context for shaping.
-     *         ContexIndex + contextCount must be no less than index
+     *         contexIndex + contextCount must be no less than index
      *         + count.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
      * @param isRtl whether the run is in RTL direction
      * @param paint the paint
-     * @hide
      */
     public void drawTextRun(@NonNull char[] text, int index, int count, int contextIndex,
             int contextCount, float x, float y, boolean isRtl, @NonNull Paint paint) {
@@ -1761,21 +1757,39 @@ public class Canvas {
     }
 
     /**
-     * Render a run of all LTR or all RTL text, with shaping. This does not run
-     * bidi on the provided text, but renders it as a uniform right-to-left or
-     * left-to-right run, as indicated by dir. Alignment of the text is as
-     * determined by the Paint's TextAlign value.
+     * Draw a run of text, all in a single direction, with optional context for complex text
+     * shaping.
+     *
+     * <p>The run of text includes the characters from {@code start} to {@code end} in the text. In
+     * addition, the range {@code contextStart} to {@code contextEnd} is used as context for the
+     * purpose of complex text shaping, such as Arabic text potentially shaped differently based on
+     * the text next to it.
+     *
+     * <p>All text outside the range {@code contextStart..contextEnd} is ignored. The text between
+     * {@code start} and {@code end} will be laid out and drawn.
+     *
+     * <p>The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
+     * suitable only for runs of a single direction. Alignment of the text is as determined by the
+     * Paint's TextAlign value. Further, {@code 0 <= contextStart <= start <= end <= contextEnd
+     * <= text.length} must hold on entry.
+     *
+     * <p>Also see {@link android.graphics.Paint#getRunAdvance} for a corresponding method to
+     * measure the text; the advance width of the text drawn matches the value obtained from that
+     * method.
      *
      * @param text the text to render
      * @param start the start of the text to render. Data before this position
      *            can be used for shaping context.
      * @param end the end of the text to render. Data at or after this
      *            position can be used for shaping context.
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index of the end of the shaping context
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
      * @param isRtl whether the run is in RTL direction
      * @param paint the paint
-     * @hide
+     *
+     * @see #drawTextRun(char[], int, int, int, int, float, float, boolean, Paint)
      */
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
             int contextEnd, float x, float y, boolean isRtl, @NonNull Paint paint) {

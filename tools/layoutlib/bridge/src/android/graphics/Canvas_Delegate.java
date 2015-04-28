@@ -844,7 +844,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_drawText(long nativeCanvas, char[] text, int index, int count,
             float startX, float startY, int flags, long paint, long typeface) {
-        drawText(nativeCanvas, text, index, count, startX, startY, flags == Canvas.DIRECTION_RTL,
+        drawText(nativeCanvas, text, index, count, startX, startY, (flags & 1) != 0,
                 paint, typeface);
     }
 

@@ -2263,10 +2263,10 @@ public class Paint {
      * the input is a pair of regional indicator symbols, determine whether there is an emoji flag
      * for the pair.
      *
-     * Finally, if the string contains a variation selector, the method only returns true if
+     * <p>Finally, if the string contains a variation selector, the method only returns true if
      * the fonts contains a glyph specific to that variation.
      *
-     * Checking is done on the entire fallback chain, not just the immediate font referenced.
+     * <p>Checking is done on the entire fallback chain, not just the immediate font referenced.
      *
      * @param string the string to test whether there is glyph support
      * @return true if the typeface has a glyph for the string
@@ -2283,20 +2283,20 @@ public class Paint {
      * purpose of complex text shaping, such as Arabic text potentially shaped differently based on
      * the text next to it.
      *
-     * All text outside the range {@code contextStart..contextEnd} is ignored. The text between
+     * <p>All text outside the range {@code contextStart..contextEnd} is ignored. The text between
      * {@code start} and {@code end} will be laid out to be measured.
      *
-     * The returned width measurement is the advance from {@code start} to {@code offset}. It is
+     * <p>The returned width measurement is the advance from {@code start} to {@code offset}. It is
      * generally a positive value, no matter the direction of the run. If {@code offset == end},
      * the return value is simply the width of the whole run from {@code start} to {@code end}.
      *
-     * Ligatures are formed for characters in the range {@code start..end} (but not for
+     * <p>Ligatures are formed for characters in the range {@code start..end} (but not for
      * {@code start..contextStart} or {@code end..contextEnd}). If {@code offset} points to a
      * character in the middle of such a formed ligature, but at a grapheme cluster boundary, the
      * return value will also reflect an advance in the middle of the ligature. See
      * {@link #getOffsetForAdvance} for more discussion of grapheme cluster boundaries.
      *
-     * The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
+     * <p>The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
      * suitable only for runs of a single direction.
      *
      * <p>All indices are relative to the start of {@code text}. Further, {@code 0 <= contextStart
@@ -2306,7 +2306,7 @@ public class Paint {
      * @param start the index of the start of the range to measure
      * @param end the index + 1 of the end of the range to measure
      * @param contextStart the index of the start of the shaping context
-     * @param contextEnd the index + 1 of the end of the range to measure
+     * @param contextEnd the index + 1 of the end of the shaping context
      * @param isRtl whether the run is in RTL direction
      * @param offset index of caret position
      * @return width measurement between start and offset
@@ -2336,7 +2336,7 @@ public class Paint {
      * @param start the index of the start of the range to measure
      * @param end the index + 1 of the end of the range to measure
      * @param contextStart the index of the start of the shaping context
-     * @param contextEnd the index + 1 of the end of the range to measure
+     * @param contextEnd the index + 1 of the end of the shaping context
      * @param isRtl whether the run is in RTL direction
      * @param offset index of caret position
      * @return width measurement between start and offset
