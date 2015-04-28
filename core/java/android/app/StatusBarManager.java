@@ -17,6 +17,7 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -26,6 +27,9 @@ import android.util.Slog;
 import android.view.View;
 
 import com.android.internal.statusbar.IStatusBarService;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Allows an app to control the status bar.
@@ -58,6 +62,15 @@ public class StatusBarManager {
             | DISABLE_NOTIFICATION_ALERTS | DISABLE_NOTIFICATION_TICKER
             | DISABLE_SYSTEM_INFO | DISABLE_RECENT | DISABLE_HOME | DISABLE_BACK | DISABLE_CLOCK
             | DISABLE_SEARCH;
+
+    public static final int DISABLE2_NONE = 0x00000000;
+
+    public static final int DISABLE2_MASK = 0x00000000;
+
+    @IntDef(flag = true,
+            value = {DISABLE2_NONE, DISABLE2_MASK})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Disable2Flags {}
 
     public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 0;
     public static final int NAVIGATION_HINT_IME_SHOWN     = 1 << 1;
@@ -103,7 +116,25 @@ public class StatusBarManager {
             throw new RuntimeException(ex);
         }
     }
-    
+
+    /**
+     * Disable additional status bar features. Pass the bitwise-or of the DISABLE2_* flags.
+     * To re-enable everything, pass {@link #DISABLE_NONE}.
+     *
+     * Warning: Only pass DISABLE2_* flags into this function, do not use DISABLE_* flags.
+     */
+    public void disable2(@Disable2Flags int what) {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                svc.disable2(what, mToken, mContext.getPackageName());
+            }
+        } catch (RemoteException ex) {
+            // system process is dead anyway.
+            throw new RuntimeException(ex);
+        }
+    }
+
     /**
      * Expand the notifications panel.
      */
