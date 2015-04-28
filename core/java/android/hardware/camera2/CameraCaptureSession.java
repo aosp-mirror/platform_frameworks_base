@@ -207,8 +207,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * <p>All capture sessions can be used for capturing images from the camera but only capture
      * sessions created by
      * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession}
-     * can submit reprocess capture requests. The list of requests must all be capturing images from
-     * the camera or all be reprocess capture requests. Submitting a reprocess request to a regular
+     * can submit reprocess capture requests. Submitting a reprocess request to a regular
      * capture session will result in an {@link IllegalArgumentException}.</p>
      *
      * @param requests the list of settings for this burst capture
@@ -231,9 +230,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalArgumentException If the requests target no Surfaces, or the requests target
      *                                  Surfaces not currently configured as outputs; or a reprocess
      *                                  capture request is submitted in a non-reprocessible capture
-     *                                  session; or the list of requests contains both requests to
-     *                                  capture images from the camera and reprocess capture
-     *                                  requests; or one of the reprocess capture requests was
+     *                                  session; or one of the reprocess capture requests was
      *                                  created with a {@link TotalCaptureResult} from a different
      *                                  session; or one of the captures targets a Surface in the
      *                                  middle of being {@link #prepare prepared}; or if the handler
