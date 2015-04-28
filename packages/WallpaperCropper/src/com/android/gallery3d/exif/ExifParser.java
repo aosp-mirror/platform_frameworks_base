@@ -223,7 +223,7 @@ class ExifParser {
         mIfdType = IfdId.TYPE_IFD_0;
         if (isIfdRequested(IfdId.TYPE_IFD_0) || needToParseOffsetsInCurrentIfd()) {
             registerIfd(IfdId.TYPE_IFD_0, offset);
-            if (offset != DEFAULT_IFD0_OFFSET) {
+            if (((int)offset - DEFAULT_IFD0_OFFSET) > 0) {
                 mDataAboveIfd0 = new byte[(int) offset - DEFAULT_IFD0_OFFSET];
                 read(mDataAboveIfd0);
             }
@@ -557,10 +557,15 @@ class ExifParser {
             // Some invalid images put some undefined data before IFD0.
             // Read the data here.
             if ((offset < mIfd0Position) && (dataFormat == ExifTag.TYPE_UNDEFINED)) {
-                byte[] buf = new byte[(int) numOfComp];
-                System.arraycopy(mDataAboveIfd0, (int) offset - DEFAULT_IFD0_OFFSET,
+                try{
+                    byte[] buf = new byte[(int) numOfComp];
+                    System.arraycopy(mDataAboveIfd0, (int) offset - DEFAULT_IFD0_OFFSET,
                         buf, 0, (int) numOfComp);
-                tag.setValue(buf);
+                    tag.setValue(buf);
+                }catch(Exception e){
+                    // skip invalid data format
+                    tag.setOffset((int) offset);
+                }
             } else {
                 tag.setOffset((int) offset);
             }
