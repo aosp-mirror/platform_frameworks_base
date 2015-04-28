@@ -399,6 +399,7 @@ public:
     void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
     void setClippingRoundRect(LinearAllocator& allocator,
             const Rect& rect, float radius, bool highPriority = true);
+    void setProjectionPathMask(LinearAllocator& allocator, const SkPath* path);
 
     inline bool hasRectToRectTransform() const { return mState.hasRectToRectTransform(); }
     inline const mat4* currentTransform() const { return mState.currentTransform(); }
