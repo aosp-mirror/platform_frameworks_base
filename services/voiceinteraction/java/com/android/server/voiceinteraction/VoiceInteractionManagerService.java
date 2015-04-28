@@ -28,6 +28,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
@@ -79,6 +81,7 @@ public class VoiceInteractionManagerService extends SystemService {
         mResolver = context.getContentResolver();
         mDbHelper = new DatabaseHelper(context);
         mSoundTriggerHelper = new SoundTriggerHelper(context);
+        mServiceStub = new VoiceInteractionManagerServiceStub();
     }
 
     @Override
@@ -104,8 +107,7 @@ public class VoiceInteractionManagerService extends SystemService {
     }
 
     // implementation entry point and binder service
-    private final VoiceInteractionManagerServiceStub mServiceStub
-            = new VoiceInteractionManagerServiceStub();
+    private final VoiceInteractionManagerServiceStub mServiceStub;
 
     class VoiceInteractionManagerServiceStub extends IVoiceInteractionManagerService.Stub {
 
@@ -113,6 +115,11 @@ public class VoiceInteractionManagerService extends SystemService {
 
         private boolean mSafeMode;
         private int mCurUser;
+        private final boolean mEnableService;
+
+        VoiceInteractionManagerServiceStub() {
+            mEnableService = shouldEnableService(mContext.getResources());
+        }
 
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
@@ -138,8 +145,7 @@ public class VoiceInteractionManagerService extends SystemService {
             VoiceInteractionServiceInfo curInteractorInfo = null;
             if (DEBUG) Slog.d(TAG, "curInteractorStr=" + curInteractorStr
                     + " curRecognizer=" + curRecognizer);
-            if (curInteractorStr == null && curRecognizer != null
-                    && !ActivityManager.isLowRamDeviceStatic()) {
+            if (curInteractorStr == null && curRecognizer != null && mEnableService) {
                 // If there is no interactor setting, that means we are upgrading
                 // from an older platform version.  If the current recognizer is not
                 // set or matches the preferred recognizer, then we want to upgrade
@@ -159,7 +165,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
             // If we are on a svelte device, make sure an interactor is not currently
             // enabled; if it is, turn it off.
-            if (ActivityManager.isLowRamDeviceStatic() && curInteractorStr != null) {
+            if (!mEnableService && curInteractorStr != null) {
                 if (!TextUtils.isEmpty(curInteractorStr)) {
                     if (DEBUG) Slog.d(TAG, "Svelte device; disabling interactor");
                     setCurInteractor(null, userHandle);
@@ -192,7 +198,7 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             // Initializing settings, look for an interactor first (but only on non-svelte).
-            if (curInteractorInfo == null && !ActivityManager.isLowRamDeviceStatic()) {
+            if (curInteractorInfo == null && mEnableService) {
                 curInteractorInfo = findAvailInteractor(userHandle, null);
             }
 
@@ -216,6 +222,12 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 setCurRecognizer(curRecognizer, userHandle);
             }
+        }
+
+        private boolean shouldEnableService(Resources res) {
+            // VoiceInteractionService should not be enabled on low ram devices unless it has the config flag.
+            return !ActivityManager.isLowRamDeviceStatic()
+                    || res.getBoolean(com.android.internal.R.bool.config_forceEnableVoiceInteractionService);
         }
 
         public void systemRunning(boolean safeMode) {
@@ -740,6 +752,7 @@ public class VoiceInteractionManagerService extends SystemService {
             }
             synchronized (this) {
                 pw.println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)\n");
+                pw.println("  mEnableService: " + mEnableService);
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
                     return;
