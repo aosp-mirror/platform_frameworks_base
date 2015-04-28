@@ -211,7 +211,27 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 // We do not call ContentProvider#query with a modified where clause since
                 // the implementation is not guaranteed to be backed by a SQL database, hence
                 // it may not handle properly the tautology where clause we would have created.
-                return new MatrixCursor(projection, 0);
+                if (projection != null) {
+                    return new MatrixCursor(projection, 0);
+                }
+
+                // Null projection means all columns but we have no idea which they are.
+                // However, the caller may be expecting to access them my index. Hence,
+                // we have to execute the query as if allowed to get a cursor with the
+                // columns. We then use the column names to return an empty cursor.
+                Cursor cursor = ContentProvider.this.query(uri, projection, selection,
+                        selectionArgs, sortOrder, CancellationSignal.fromTransport(
+                                cancellationSignal));
+
+                // Create a projection for all columns.
+                final int columnCount = cursor.getCount();
+                String[] allColumns = new String[columnCount];
+                for (int i = 0; i < columnCount; i++) {
+                    allColumns[i] = cursor.getColumnName(i);
+                }
+
+                // Return an empty cursor for all columns.
+                return new MatrixCursor(allColumns, 0);
             }
             final String original = setCallingPackage(callingPkg);
             try {
