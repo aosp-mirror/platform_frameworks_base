@@ -211,8 +211,9 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
                     } else if (obj instanceof Parcelable[]) {
                         Parcelable[] array = (Parcelable[]) obj;
                         for (int n = array.length - 1; n >= 0; n--) {
-                            if ((array[n].describeContents()
-                                    & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0) {
+                            Parcelable p = array[n];
+                            if (p != null && ((p.describeContents()
+                                    & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0)) {
                                 fdFound = true;
                                 break;
                             }
