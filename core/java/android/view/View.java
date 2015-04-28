@@ -15780,11 +15780,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
-        if (mBackgroundSizeChanged) {
-            background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
-            mBackgroundSizeChanged = false;
-            rebuildOutline();
-        }
+        setBackgroundBounds();
 
         // Attempt to use a display list if requested.
         if (canvas.isHardwareAccelerated() && mAttachInfo != null
@@ -15807,6 +15803,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             canvas.translate(scrollX, scrollY);
             background.draw(canvas);
             canvas.translate(-scrollX, -scrollY);
+        }
+    }
+
+    /**
+     * Sets the correct background bounds and rebuilds the outline, if needed.
+     * <p/>
+     * This is called by LayoutLib.
+     */
+    void setBackgroundBounds() {
+        if (mBackgroundSizeChanged && mBackground != null) {
+            mBackground.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
+            mBackgroundSizeChanged = false;
+            rebuildOutline();
         }
     }
 
