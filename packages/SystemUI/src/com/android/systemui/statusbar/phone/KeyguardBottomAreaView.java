@@ -86,7 +86,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private KeyguardAffordanceView mCameraImageView;
     private KeyguardAffordanceView mPhoneImageView;
-    private KeyguardAffordanceView mLockIcon;
+    private LockIcon mLockIcon;
     private TextView mIndicationText;
     private ViewGroup mPreviewContainer;
 
@@ -102,11 +102,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private AccessibilityController mAccessibilityController;
     private PhoneStatusBar mPhoneStatusBar;
 
-    private final TrustDrawable mTrustDrawable;
     private final Interpolator mLinearOutSlowInInterpolator;
-    private int mLastUnlockIconRes = 0;
     private boolean mPrewarmSent;
-    private boolean mTransientFpError;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -123,7 +120,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public KeyguardBottomAreaView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mTrustDrawable = new TrustDrawable(mContext);
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
     }
@@ -169,20 +165,19 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mPreviewContainer = (ViewGroup) findViewById(R.id.preview_container);
         mCameraImageView = (KeyguardAffordanceView) findViewById(R.id.camera_button);
         mPhoneImageView = (KeyguardAffordanceView) findViewById(R.id.phone_button);
-        mLockIcon = (KeyguardAffordanceView) findViewById(R.id.lock_icon);
+        mLockIcon = (LockIcon) findViewById(R.id.lock_icon);
         mIndicationText = (TextView) findViewById(R.id.keyguard_indication_text);
         watchForCameraPolicyChanges();
         updateCameraVisibility();
         updatePhoneVisibility();
         mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
         mUnlockMethodCache.addListener(this);
-        updateLockIcon();
+        mLockIcon.update();
         setClipChildren(false);
         setClipToPadding(false);
         mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext));
         inflatePreviews();
         mLockIcon.setOnClickListener(this);
-        mLockIcon.setBackground(mTrustDrawable);
         mLockIcon.setOnLongClickListener(this);
         mCameraImageView.setOnClickListener(this);
         mPhoneImageView.setOnClickListener(this);
@@ -222,6 +217,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void setAccessibilityController(AccessibilityController accessibilityController) {
         mAccessibilityController = accessibilityController;
+        mLockIcon.setAccessibilityController(accessibilityController);
         accessibilityController.addStateChangedCallback(this);
     }
 
@@ -294,21 +290,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mPhoneImageView.setClickable(touchExplorationEnabled);
         mCameraImageView.setFocusable(accessibilityEnabled);
         mPhoneImageView.setFocusable(accessibilityEnabled);
-        updateLockIconClickability();
-    }
-
-    private void updateLockIconClickability() {
-        if (mAccessibilityController == null) {
-            return;
-        }
-        boolean clickToUnlock = mAccessibilityController.isTouchExplorationEnabled();
-        boolean clickToForceLock = mUnlockMethodCache.isTrustManaged()
-                && !mAccessibilityController.isAccessibilityEnabled();
-        boolean longClickToForceLock = mUnlockMethodCache.isTrustManaged()
-                && !clickToForceLock;
-        mLockIcon.setClickable(clickToForceLock || clickToUnlock);
-        mLockIcon.setLongClickable(longClickToForceLock);
-        mLockIcon.setFocusable(mAccessibilityController.isAccessibilityEnabled());
+        mLockIcon.update();
     }
 
     @Override
@@ -409,67 +391,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
-        if (isShown()) {
-            mTrustDrawable.start();
-        } else {
-            mTrustDrawable.stop();
-        }
         if (changedView == this && visibility == VISIBLE) {
-            updateLockIcon();
+            mLockIcon.update();
             updateCameraVisibility();
         }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        mTrustDrawable.stop();
-    }
-
-    private void updateLockIcon() {
-        boolean visible = isShown() && KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
-        if (visible) {
-            mTrustDrawable.start();
-        } else {
-            mTrustDrawable.stop();
-        }
-        if (!visible) {
-            return;
-        }
-        // TODO: Real icon for facelock.
-        boolean isFingerprintIcon =
-                KeyguardUpdateMonitor.getInstance(mContext).isFingerprintDetectionRunning();
-        boolean anyFingerprintIcon = isFingerprintIcon || mTransientFpError;
-        int iconRes = mTransientFpError ? R.drawable.ic_fingerprint_error
-                : isFingerprintIcon ? R.drawable.ic_fingerprint
-                : mUnlockMethodCache.isFaceUnlockRunning()
-                        ? com.android.internal.R.drawable.ic_account_circle
-                : mUnlockMethodCache.isCurrentlyInsecure() ? R.drawable.ic_lock_open_24dp
-                : R.drawable.ic_lock_24dp;
-
-        if (mLastUnlockIconRes != iconRes) {
-            Drawable icon = mContext.getDrawable(iconRes);
-            int iconHeight = getResources().getDimensionPixelSize(
-                    R.dimen.keyguard_affordance_icon_height);
-            int iconWidth = getResources().getDimensionPixelSize(
-                    R.dimen.keyguard_affordance_icon_width);
-            if (!anyFingerprintIcon && (icon.getIntrinsicHeight() != iconHeight
-                    || icon.getIntrinsicWidth() != iconWidth)) {
-                icon = new IntrinsicSizeDrawable(icon, iconWidth, iconHeight);
-            }
-            mLockIcon.setImageDrawable(icon);
-            mLockIcon.setPaddingRelative(0, 0, 0, anyFingerprintIcon
-                    ? getResources().getDimensionPixelSize(
-                            R.dimen.fingerprint_icon_additional_padding)
-                    : 0);
-            mLockIcon.setRestingAlpha(
-                    anyFingerprintIcon ? 1f : KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT);
-        }
-
-        // Hide trust circle when fingerprint is running.
-        boolean trustManaged = mUnlockMethodCache.isTrustManaged() && !anyFingerprintIcon;
-        mTrustDrawable.setTrustManaged(trustManaged);
-        updateLockIconClickability();
     }
 
     public KeyguardAffordanceView getPhoneView() {
@@ -503,7 +428,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     @Override
     public void onUnlockMethodStateChanged() {
-        updateLockIcon();
+        mLockIcon.update();
         updateCameraVisibility();
     }
 
@@ -563,9 +488,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private final Runnable mTransientFpErrorClearRunnable = new Runnable() {
         @Override
         public void run() {
-            mTransientFpError = false;
+            mLockIcon.setTransientFpError(false);
             mIndicationController.hideTransientIndication();
-            updateLockIcon();
         }
     };
 
@@ -578,17 +502,17 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public void onScreenTurnedOn() {
-            updateLockIcon();
+            mLockIcon.update();
         }
 
         @Override
         public void onScreenTurnedOff(int why) {
-            updateLockIcon();
+            mLockIcon.update();
         }
 
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
-            updateLockIcon();
+            mLockIcon.update();
         }
 
         @Override
@@ -597,54 +521,26 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public void onFingerprintRunningStateChanged(boolean running) {
-            updateLockIcon();
+            mLockIcon.update();
         }
 
         @Override
         public void onFingerprintHelp(int msgId, String helpString) {
-            mTransientFpError = true;
+            mLockIcon.setTransientFpError(true);
             mIndicationController.showTransientIndication(helpString,
                     getResources().getColor(R.color.system_warning_color, null));
             removeCallbacks(mTransientFpErrorClearRunnable);
             postDelayed(mTransientFpErrorClearRunnable, TRANSIENT_FP_ERROR_TIMEOUT);
-            updateLockIcon();
         }
 
         @Override
         public void onFingerprintError(int msgId, String errString) {
             // TODO: Go to bouncer if this is "too many attempts" (lockout) error.
-            Log.i(TAG, "FP Error: " + errString);
-            updateLockIcon();
         }
     };
 
     public void setKeyguardIndicationController(
             KeyguardIndicationController keyguardIndicationController) {
         mIndicationController = keyguardIndicationController;
-    }
-
-    /**
-     * A wrapper around another Drawable that overrides the intrinsic size.
-     */
-    private static class IntrinsicSizeDrawable extends InsetDrawable {
-
-        private final int mIntrinsicWidth;
-        private final int mIntrinsicHeight;
-
-        public IntrinsicSizeDrawable(Drawable drawable, int intrinsicWidth, int intrinsicHeight) {
-            super(drawable, 0);
-            mIntrinsicWidth = intrinsicWidth;
-            mIntrinsicHeight = intrinsicHeight;
-        }
-
-        @Override
-        public int getIntrinsicWidth() {
-            return mIntrinsicWidth;
-        }
-
-        @Override
-        public int getIntrinsicHeight() {
-            return mIntrinsicHeight;
-        }
     }
 }
