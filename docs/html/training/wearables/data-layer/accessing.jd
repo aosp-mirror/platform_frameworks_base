@@ -61,13 +61,16 @@ GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
 </pre>
 
 <p class="caution">
-<strong>Important:</strong> To avoid client connection errors on devices that do not have the
+<strong>Important:</strong> If you are adding multiple APIs to a
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code></a>,
+you may run into client connection errors on devices that do not have the
 <a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
-Wear app</a> installed, use a separate <a
-href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
-GoogleApiClient}</a> instance to access only the <a
+Wear app</a> installed. To avoid connection errors, call the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApiIfAvailable(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>, com.google.android.gms.common.api.Scope...)">{@code addApiIfAvailable()}</a>
+method and pass in the <a
 href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
-Wearable}</a> API. For more information, see <a
+Wearable}</a> API to indicate that your client should gracefully handle the missing API.
+For more information, see <a
 href="{@docRoot}google/auth/api-client.html#WearableApi">Access the Wearable API</a>.</p>
 
 <p>Before you use the data layer API, start a connection on your client by calling the
