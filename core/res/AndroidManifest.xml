@@ -1178,13 +1178,13 @@
     <permission android:name="android.permission.REGISTER_CONNECTION_MANAGER"
         android:protectionLevel="system|signature" />
 
-    <!-- @SystemApi Allows an application to bind to InCallService implementations.
-         @hide -->
+    <!-- Must be required by a {@link android.telecom.InCallService},
+         to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_INCALL_SERVICE"
         android:protectionLevel="system|signature" />
 
-    <!-- @SystemApi Allows an application to bind to ConnectionService implementations.
-         @hide -->
+    <!-- Must be required by a {@link android.telecom.ConnectionService},
+         to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_CONNECTION_SERVICE"
         android:protectionLevel="system|signature" />
 
