@@ -1692,7 +1692,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>This lists the maximum stall duration for each
-     * format/size combination.</p>
+     * output format/size combination.</p>
      * <p>A stall duration is how much extra time would get added
      * to the normal minimum frame duration for a repeating request
      * that has streams with non-zero stall.</p>
@@ -2634,6 +2634,41 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.sync.maxLatency", int.class);
 
     /**
+     * <p>The maximal camera capture pipeline stall (in unit of frame count) introduced by a
+     * reprocess capture request.</p>
+     * <p>The key describes the maximal interference that one reprocess (input) request
+     * can introduce to the camera simultaneous streaming of regular (output) capture
+     * requests, including repeating requests.</p>
+     * <p>When a reprocessing capture request is submitted while a camera output repeating request
+     * (e.g. preview) is being served by the camera device, it may preempt the camera capture
+     * pipeline for at least one frame duration so that the camera device is unable to process
+     * the following capture request in time for the next sensor start of exposure boundary.
+     * When this happens, the application may observe a capture time gap (longer than one frame
+     * duration) between adjacent capture output frames, which usually exhibits as preview
+     * glitch if the repeating request output targets include a preview surface. This key gives
+     * the worst-case number of frame stall introduced by one reprocess request with any kind of
+     * formats/sizes combination.</p>
+     * <p>If this key reports 0, it means a reprocess request doesn't introduce any glitch to the
+     * ongoing camera repeating request outputs, as if this reprocess request is never issued.</p>
+     * <p>This key is supported if the camera device supports OPAQUE or YUV reprocessing (
+     * i.e. {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains OPAQUE_REPROCESSING or
+     * YUV_REPROCESSING).</p>
+     * <p><b>Units</b>: Number of frames.</p>
+     * <p><b>Range of valid values:</b><br>
+     * &lt;= 4</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    @PublicKey
+    public static final Key<Integer> REPROCESS_MAX_CAPTURE_STALL =
+            new Key<Integer>("android.reprocess.maxCaptureStall", int.class);
+
+    /**
      * <p>The available depth dataspace stream
      * configurations that this camera device supports
      * (i.e. format, width, height, output/input stream).</p>
@@ -2689,7 +2724,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>This lists the maximum stall duration for each
-     * format/size combination for depth streams.</p>
+     * output format/size combination for depth streams.</p>
      * <p>A stall duration is how much extra time would get added
      * to the normal minimum frame duration for a repeating request
      * that has streams with non-zero stall.</p>
