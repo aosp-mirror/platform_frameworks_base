@@ -9940,18 +9940,20 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     final WindowStateAnimator winAnimator = w.mWinAnimator;
 
-                    // If the window has moved due to its containing
-                    // content frame changing, then we'd like to animate
-                    // it.
-                    if (w.mHasSurface && w.shouldAnimateMove()) {
-                        // Frame has moved, containing content frame
-                        // has also moved, and we're not currently animating...
-                        // let's do something.
-                        Animation a = AnimationUtils.loadAnimation(mContext,
-                                com.android.internal.R.anim.window_move_from_decor);
-                        winAnimator.setAnimation(a);
-                        winAnimator.mAnimDw = w.mLastFrame.left - w.mFrame.left;
-                        winAnimator.mAnimDh = w.mLastFrame.top - w.mFrame.top;
+                    // If the window has moved due to its containing content frame changing, then
+                    // notify the listeners and optionally animate it.
+                    if (w.hasMoved()) {
+                        // Frame has moved, containing content frame has also moved, and we're not
+                        // currently animating... let's do something.
+                        final int left = w.mFrame.left;
+                        final int top = w.mFrame.top;
+                        if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0) {
+                            Animation a = AnimationUtils.loadAnimation(mContext,
+                                    com.android.internal.R.anim.window_move_from_decor);
+                            winAnimator.setAnimation(a);
+                            winAnimator.mAnimDw = w.mLastFrame.left - left;
+                            winAnimator.mAnimDh = w.mLastFrame.top - top;
+                        }
 
                         //TODO (multidisplay): Accessibility supported only for the default display.
                         if (mAccessibilityController != null
@@ -9960,7 +9962,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
 
                         try {
-                            w.mClient.moved(w.mFrame.left, w.mFrame.top);
+                            w.mClient.moved(left, top);
                         } catch (RemoteException e) {
                         }
                     }
