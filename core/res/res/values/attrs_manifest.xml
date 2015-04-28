@@ -1044,7 +1044,8 @@
 
          <p>NOTE: The value of {@link android.R.attr#screenOrientation} will be ignored for
          resizeable activities as the system doesn't support fixed orientation on a resizeable
-         activity. -->
+         activity.
+         @hide -->
     <attr name="resizeableActivity" format="boolean" />
 
     <!-- This value indicates how tasks rooted at this activity will behave in lockTask mode.
@@ -1796,6 +1797,7 @@
         <attr name="autoRemoveFromRecents" />
         <attr name="relinquishTaskIdentity" />
         <attr name="resumeWhilePausing" />
+        <!-- @hide -->
         <attr name="resizeableActivity" />
         <attr name="lockTaskMode" />
         <attr name="showForAllUsers" />
