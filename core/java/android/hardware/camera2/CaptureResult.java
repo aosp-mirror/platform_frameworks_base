@@ -2886,8 +2886,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * cannot process more than 1 capture at a time.</li>
      * </ul>
      * <p>The necessary information for the application, given the model above,
-     * is provided via the {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} field
-     * using StreamConfigurationMap#getOutputMinFrameDuration(int, Size).
+     * is provided via the {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} field using
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration }.
      * These are used to determine the maximum frame rate / minimum frame
      * duration that is possible for a given stream configuration.</p>
      * <p>Specifically, the application can use the following rules to
@@ -2896,21 +2896,19 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <ol>
      * <li>Let the set of currently configured input/output streams
      * be called <code>S</code>.</li>
-     * <li>Find the minimum frame durations for each stream in <code>S</code>, by
-     * looking it up in {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} using
-     * StreamConfigurationMap#getOutputMinFrameDuration(int, Size) (with
-     * its respective size/format). Let this set of frame durations be called
-     * <code>F</code>.</li>
+     * <li>Find the minimum frame durations for each stream in <code>S</code>, by looking
+     * it up in {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap} using {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration }
+     * (with its respective size/format). Let this set of frame durations be
+     * called <code>F</code>.</li>
      * <li>For any given request <code>R</code>, the minimum frame duration allowed
      * for <code>R</code> is the maximum out of all values in <code>F</code>. Let the streams
      * used in <code>R</code> be called <code>S_r</code>.</li>
      * </ol>
-     * <p>If none of the streams in <code>S_r</code> have a stall time (listed in
-     * StreamConfigurationMap#getOutputStallDuration(int,Size) using its
-     * respective size/format), then the frame duration in
-     * <code>F</code> determines the steady state frame rate that the application will
-     * get if it uses <code>R</code> as a repeating request. Let this special kind
-     * of request be called <code>Rsimple</code>.</p>
+     * <p>If none of the streams in <code>S_r</code> have a stall time (listed in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }
+     * using its respective size/format), then the frame duration in <code>F</code>
+     * determines the steady state frame rate that the application will get
+     * if it uses <code>R</code> as a repeating request. Let this special kind of
+     * request be called <code>Rsimple</code>.</p>
      * <p>A repeating request <code>Rsimple</code> can be <em>occasionally</em> interleaved
      * by a single capture of a new request <code>Rstall</code> (which has at least
      * one in-use stream with a non-0 stall time) and if <code>Rstall</code> has the
@@ -2918,7 +2916,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * if all buffers from the previous <code>Rstall</code> have already been
      * delivered.</p>
      * <p>For more details about stalling, see
-     * StreamConfigurationMap#getOutputStallDuration(int,Size).</p>
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
      * OFF; otherwise the auto-exposure algorithm will override this value.</p>
      * <p><b>Units</b>: Nanoseconds</p>
@@ -2980,11 +2978,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * and are monotonically increasing. They can be compared with the
      * timestamps for other captures from the same camera device, but are
      * not guaranteed to be comparable to any other time source.</p>
-     * <p>When {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE android.sensor.info.timestampSource} <code>==</code> REALTIME,
-     * the timestamps measure time in the same timebase as
-     * android.os.SystemClock#elapsedRealtimeNanos(), and they can be
-     * compared to other timestamps from other subsystems that are using
-     * that base.</p>
+     * <p>When {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE android.sensor.info.timestampSource} <code>==</code> REALTIME, the
+     * timestamps measure time in the same timebase as {@link android.os.SystemClock#elapsedRealtimeNanos }, and they can
+     * be compared to other timestamps from other subsystems that
+     * are using that base.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * &gt; 0</p>
@@ -3142,7 +3139,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 0 and &lt;
-     * StreamConfigurationMap#getOutputMinFrameDuration(int, Size).</p>
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputMinFrameDuration }.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
