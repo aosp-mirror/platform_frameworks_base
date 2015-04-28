@@ -144,27 +144,16 @@ void RenderProperties::debugOutputProperties(const int level) const {
         }
     }
 
-    const bool isLayer = layerProperties().type() != LayerType::None;
+    const bool isLayer = effectiveLayerType() != LayerType::None;
     int clipFlags = getClippingFlags();
     if (mPrimitiveFields.mAlpha < 1) {
         if (isLayer) {
             clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
 
             ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
-        } else if (!mPrimitiveFields.mHasOverlappingRendering) {
-            ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
         } else {
-            Rect layerBounds(0, 0, getWidth(), getHeight());
-            int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (clipFlags) {
-                saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
-                getClippingRectForFlags(clipFlags, &layerBounds);
-                clipFlags = 0; // all clipping done by saveLayer
-            }
-
-            ALOGD("%*sSaveLayerAlpha %d, %d, %d, %d, %d, 0x%x", level * 2, "",
-                    (int)layerBounds.left, (int)layerBounds.top, (int)layerBounds.right, (int)layerBounds.bottom,
-                    (int)(mPrimitiveFields.mAlpha * 255), saveFlags);
+            LOG_ALWAYS_FATAL_IF(mPrimitiveFields.mHasOverlappingRendering);
+            ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
         }
     }
     if (clipFlags) {
