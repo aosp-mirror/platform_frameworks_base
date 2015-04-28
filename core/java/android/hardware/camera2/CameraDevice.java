@@ -54,6 +54,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * means that high frame rate is given priority over the highest-quality
      * post-processing. These requests would normally be used with the
      * {@link CameraCaptureSession#setRepeatingRequest} method.
+     * This template is guaranteed to be supported on all camera devices.
      *
      * @see #createCaptureRequest
      */
@@ -63,6 +64,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * Create a request suitable for still image capture. Specifically, this
      * means prioritizing image quality over frame rate. These requests would
      * commonly be used with the {@link CameraCaptureSession#capture} method.
+     * This template is guaranteed to be supported on all camera devices.
      *
      * @see #createCaptureRequest
      */
@@ -73,6 +75,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * that a stable frame rate is used, and post-processing is set for
      * recording quality. These requests would commonly be used with the
      * {@link CameraCaptureSession#setRepeatingRequest} method.
+     * This template is guaranteed to be supported on all camera devices.
      *
      * @see #createCaptureRequest
      */
@@ -84,6 +87,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * disrupting the ongoing recording. These requests would commonly be used
      * with the {@link CameraCaptureSession#capture} method while a request based on
      * {@link #TEMPLATE_RECORD} is is in use with {@link CameraCaptureSession#setRepeatingRequest}.
+     * This template is guaranteed to be supported on all camera devices except
+     * legacy devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
+     * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY})
      *
      * @see #createCaptureRequest
      */
@@ -93,6 +99,11 @@ public abstract class CameraDevice implements AutoCloseable {
      * Create a request suitable for zero shutter lag still capture. This means
      * means maximizing image quality without compromising preview frame rate.
      * AE/AWB/AF should be on auto mode.
+     * This template is guaranteed to be supported on camera devices that support the
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING OPAQUE_REPROCESSING}
+     * capability or the
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING YUV_REPROCESSING}
+     * capability.
      *
      * @see #createCaptureRequest
      */
@@ -105,6 +116,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * quality. The manual capture parameters (exposure, sensitivity, and so on)
      * are set to reasonable defaults, but should be overriden by the
      * application depending on the intended use case.
+     * This template is guaranteed to be supported on camera devices that support the
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR MANUAL_SENSOR}
+     * capability.
      *
      * @see #createCaptureRequest
      */
@@ -473,12 +487,14 @@ public abstract class CameraDevice implements AutoCloseable {
      * settings as desired, instead.</p>
      *
      * @param templateType An enumeration selecting the use case for this
-     * request; one of the CameraDevice.TEMPLATE_ values.
+     * request; one of the CameraDevice.TEMPLATE_ values. Not all template
+     * types are supported on every device. See the documentation for each
+     * template type for details.
      * @return a builder for a capture request, initialized with default
      * settings for that template, and no output streams
      *
-     * @throws IllegalArgumentException if the templateType is not in the list
-     * of supported templates.
+     * @throws IllegalArgumentException if the templateType is not supported by
+     * this device.
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
