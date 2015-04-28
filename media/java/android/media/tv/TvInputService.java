@@ -891,6 +891,8 @@ public abstract class TvInputService extends Service {
          * @param rate The ratio between desired playback rate and normal one.
          * @param audioMode Audio playback mode. Must be one of the supported audio modes:
          * <ul>
+         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_DEFAULT}
+         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_STRETCH}
          * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
          * </ul>
          * @see #onTimeShiftResume
