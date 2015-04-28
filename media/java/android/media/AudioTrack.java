@@ -920,13 +920,7 @@ public class AudioTrack
      * @throws IllegalStateException if track is not initialized.
      */
     public @NonNull PlaybackSettings getPlaybackSettings() {
-        float[] floatArray = new float[2];
-        int[] intArray = new int[2];
-        native_get_playback_settings(floatArray, intArray);
-        return new PlaybackSettings()
-                .setSpeed(floatArray[0])
-                .setPitch(floatArray[1])
-                .setAudioFallbackMode(intArray[0]);
+        return native_get_playback_settings();
     }
 
     /**
@@ -1340,21 +1334,7 @@ public class AudioTrack
         if (settings == null) {
             throw new IllegalArgumentException("settings is null");
         }
-        float[] floatArray;
-        int[] intArray;
-        try {
-            floatArray = new float[] {
-                    settings.getSpeed(),
-                    settings.getPitch(),
-            };
-            intArray = new int[] {
-                    settings.getAudioFallbackMode(),
-                    PlaybackSettings.AUDIO_STRETCH_MODE_DEFAULT,
-            };
-        } catch (IllegalStateException e) {
-            throw new IllegalArgumentException(e);
-        }
-        native_set_playback_settings(floatArray, intArray);
+        native_set_playback_settings(settings);
     }
 
 
@@ -2353,14 +2333,8 @@ public class AudioTrack
     private native final int native_set_playback_rate(int sampleRateInHz);
     private native final int native_get_playback_rate();
 
-    // floatArray must be a non-null array of length >= 2
-    // [0] is speed
-    // [1] is pitch
-    // intArray must be a non-null array of length >= 2
-    // [0] is audio fallback mode
-    // [1] is audio stretch mode
-    private native final void native_set_playback_settings(float[] floatArray, int[] intArray);
-    private native final void native_get_playback_settings(float[] floatArray, int[] intArray);
+    private native final void native_set_playback_settings(@NonNull PlaybackSettings settings);
+    private native final @NonNull PlaybackSettings native_get_playback_settings();
 
     private native final int native_set_marker_pos(int marker);
     private native final int native_get_marker_pos();
