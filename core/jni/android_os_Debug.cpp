@@ -568,6 +568,29 @@ static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
     return android_os_Debug_getPssPid(env, clazz, getpid(), NULL, NULL);
 }
 
+static long get_allocated_vmalloc_memory() {
+    char line[1024];
+    long size, vmalloc_allocated_size = 0;
+    FILE* fp = fopen("/proc/vmallocinfo", "r");
+    if (fp == NULL) {
+        return 0;
+    }
+    while (true) {
+        if (fgets(line, 1024, fp) == NULL) {
+            break;
+        }
+
+        if (!strstr(line, "ioremap")) {
+            // Ignore ioremap regions, since they don't actually consume memory
+            if (sscanf(line, "%*x-%*x %ld", &size) == 1) {
+                vmalloc_allocated_size += size;
+            }
+        }
+    }
+    fclose(fp);
+    return vmalloc_allocated_size;
+}
+
 enum {
     MEMINFO_TOTAL,
     MEMINFO_FREE,
@@ -588,7 +611,7 @@ enum {
 static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray out)
 {
     char buffer[1024];
-    int numFound = 0;
+    size_t numFound = 0;
 
     if (out == NULL) {
         jniThrowNullPointerException(env, "out == null");
@@ -646,7 +669,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
     long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     char* p = buffer;
-    while (*p && numFound < 13) {
+    while (*p && numFound < (sizeof(tagsLen) / sizeof(tagsLen[0]))) {
         int i = 0;
         while (tags[i]) {
             if (strncmp(p, tags[i], tagsLen[i]) == 0) {
@@ -679,6 +702,9 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             mem[MEMINFO_ZRAM_TOTAL] = atoll(buffer)/1024;
         }
     }
+    // Recompute Vmalloc Used since the value in meminfo
+    // doesn't account for I/O remapping which doesn't use RAM.
+    mem[MEMINFO_VMALLOC_USED] = get_allocated_vmalloc_memory() / 1024;
 
     int maxNum = env->GetArrayLength(out);
     if (maxNum > MEMINFO_COUNT) {
@@ -692,6 +718,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
     }
     env->ReleaseLongArrayElements(out, outArray, 0);
 }
+
 
 static jint read_binder_stat(const char* stat)
 {
