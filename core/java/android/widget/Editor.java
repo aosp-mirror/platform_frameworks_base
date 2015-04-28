@@ -3534,7 +3534,7 @@ public class Editor {
                 return false;
             }
 
-            return isPositionVisible(mPositionX + mHotspotX, mPositionY);
+            return isPositionVisible(mPositionX + mHotspotX + getHorizontalOffset(), mPositionY);
         }
 
         public abstract int getCurrentCursorOffset();
