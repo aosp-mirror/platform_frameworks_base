@@ -11479,6 +11479,8 @@ package android.graphics {
     method public void drawText(java.lang.CharSequence, int, int, float, float, android.graphics.Paint);
     method public void drawTextOnPath(char[], int, int, android.graphics.Path, float, float, android.graphics.Paint);
     method public void drawTextOnPath(java.lang.String, android.graphics.Path, float, float, android.graphics.Paint);
+    method public void drawTextRun(char[], int, int, int, int, float, float, boolean, android.graphics.Paint);
+    method public void drawTextRun(java.lang.CharSequence, int, int, int, int, float, float, boolean, android.graphics.Paint);
     method public void drawVertices(android.graphics.Canvas.VertexMode, int, float[], int, float[], int, int[], int, short[], int, int, android.graphics.Paint);
     method public boolean getClipBounds(android.graphics.Rect);
     method public final android.graphics.Rect getClipBounds();
