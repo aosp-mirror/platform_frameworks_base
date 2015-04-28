@@ -46,16 +46,12 @@ public class ViewGroup_Delegate {
     /*package*/ static boolean drawChild(ViewGroup thisVG, Canvas canvas, View child,
             long drawingTime) {
         if (child.getZ() > thisVG.getZ()) {
+            // The background's bounds are set lazily. Make sure they are set correctly so that
+            // the outline obtained is correct.
+            child.setBackgroundBounds();
             ViewOutlineProvider outlineProvider = child.getOutlineProvider();
-            Outline outline = new Outline();
+            Outline outline = child.mAttachInfo.mTmpOutline;
             outlineProvider.getOutline(child, outline);
-            if (outline.mPath == null && outline.mRect == null) {
-                // Sometimes, the bounds of the background drawable are not set until View.draw()
-                // is called. So, we set the bounds manually and try to get the outline again.
-                child.getBackground().setBounds(0, 0, child.mRight - child.mLeft,
-                        child.mBottom - child.mTop);
-                outlineProvider.getOutline(child, outline);
-            }
             if (outline.mPath != null || (outline.mRect != null && !outline.mRect.isEmpty())) {
                 int restoreTo = transformCanvas(thisVG, canvas, child);
                 drawShadow(thisVG, canvas, child, outline);
