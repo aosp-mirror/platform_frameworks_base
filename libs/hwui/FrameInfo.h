@@ -53,6 +53,7 @@ enum class FrameInfoFlags {
     kWindowLayoutChanged = 1 << 0,
     kRTAnimation = 1 << 1,
     kSurfaceCanvas = 1 << 2,
+    kSkippedFrame = 1 << 3,
 };
 MAKE_FLAGS_ENUM(FrameInfoFlags)
 
@@ -99,6 +100,10 @@ public:
 
     void markFrameCompleted() {
         set(FrameInfoIndex::kFrameCompleted) = systemTime(CLOCK_MONOTONIC);
+    }
+
+    void addFlag(FrameInfoFlags flag) {
+        set(FrameInfoIndex::kFlags) |= static_cast<uint64_t>(flag);
     }
 
     int64_t operator[](FrameInfoIndex index) const {
