@@ -99,20 +99,23 @@ GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
 href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
 GoogleApiClient}</a> by appending
 additional calls to
-<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api)"
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)"
 >{@code addApi()}</a> and
 <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addScope(com.google.android.gms.common.api.Scope)"
 >{@code addScope()}</a>.</p>
 
 <p class="caution">
-<strong>Important:</strong> To avoid client connection errors on devices that do not have the
+<strong>Important:</strong> If you are adding multiple APIs to a
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code></a>,
+you may run into client connection errors on devices that do not have the
 <a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
-Wear app</a> installed, use a separate <a
-href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
-GoogleApiClient}</a> instance to access only the <a
+Wear app</a> installed. To avoid connection errors, call the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApiIfAvailable(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>, com.google.android.gms.common.api.Scope...)">{@code addApiIfAvailable()}</a>
+method and pass in the <a
 href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
-Wearable}</a> API. For more information, see <a href="#WearableApi">Access the Wearable
-API</a>.</p>
+Wearable}</a> API to indicate that your client should gracefully handle the missing API.
+For more information, see <a
+href="{@docRoot}google/auth/api-client.html#WearableApi">Access the Wearable API</a>.</p>
 
 <p>Before you can begin a connection by calling <a
 href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
@@ -421,27 +424,52 @@ consult the corresponding documentation, such as for
 
 <h3 id="WearableApi">Access the Wearable API</h3>
 
-<p>On devices that do not have the <a
-href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
-Wear app</a> installed, connection requests that include the <a
+<p>The Wearable API provides a communication channel for your handheld and wearable apps. The API
+consists of a set of data objects that the system can send and synchronize over the wire and
+listeners that notify your apps of important events with the data layer. The
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API is available on devices running Android 4.3 (API level 18) or higher when a wearable device is
+connected. The API is not available under the following conditions:
+</p>
+
+<ul>
+<li>Devices running Android 4.2 (API level 17) or earlier.</li>
+<li><a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear companion app</a> is not installed on the device.</li>
+<li>Android Wear device is not connected.</li>
+</ul>
+
+<h4 id="OnlyWearableApi">Using only the Wearable API</h4>
+
+<p>If your app uses the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API but not other Google APIs, you can add this API by calling the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)"
+>{@code addApi()}</a> method. The following example shows how to add the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API to your <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> instance:</p>
+
+<pre>
+GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+    .addApi(Wearable.API)
+    .build();
+</pre>
+
+<p>In situations where the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API is not available, connection requests that include the <a
 href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
 Wearable}</a> API fail with the <a
 href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#API_UNAVAILABLE">
-<code>API_UNAVAILABLE</code></a> error code. If your app uses the <a
-href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
-Wearable}</a> API in addition to other Google APIs, use a separate <a
-href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
-GoogleApiClient}</a> instance to access the <a
-href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
-Wearable}</a> API. This approach enables you to access other Google APIs on devices that are not
-paired with a wearable device.</p>
+<code>API_UNAVAILABLE</code></a> error code.</p>
 
-<p>When you use a separate <a
-href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
-GoogleApiClient}</a> instance to access only the Wearable API, you can determine
-whether the <a
-href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
-Wear app</a> is installed on the device:</p>
+<p>
+The following example shows how to determine whether the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API is available:
+</p>
 
 <pre>
 // Connection failed listener method for a client that only
@@ -449,15 +477,55 @@ Wear app</a> is installed on the device:</p>
 &#64;Override
 public void onConnectionFailed(ConnectionResult result) {
     if (result.getErrorCode() == ConnectionResult.API_UNAVAILABLE) {
-        // The Android Wear app is not installed
+        // The Wearable API is unavailable
     }
     ...
 }
 </pre>
 
 
+<h4 id="WearableApiWithOthers">Using the Wearable API with other APIs</h4>
 
+<p>
+If your app uses the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API in addition to other Google APIs, call the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApiIfAvailable(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>, com.google.android.gms.common.api.Scope...)">addApiIfAvailable()</a>
+method and pass in the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API to indicate that your client should gracefully handle the missing API.</p>
 
+<p>The following example shows how to access the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API along with the
+<a href="{@docRoot}reference/com/google/android/gms/drive/DriveApi.html">{@code Drive}</a>
+API:</p>
+
+<pre>
+// Create a GoogleApiClient instance
+mGoogleApiClient = new GoogleApiClient.Builder(this)
+        .addApi(Drive.API)
+        .addApiIfAvailable(Wearable.API)
+        .addScope(Drive.SCOPE_FILE)
+        .addConnectionCallbacks(this)
+        .addOnConnectionFailedListener(this)
+        .build();
+</pre>
+
+<p>In the example above, the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code GoogleApiClient}</a>
+can successfully connect with the Google Drive service without connecting to the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API if it is unavailable. After you connect your
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code GoogleApiClient}</a>
+instance, ensure that the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code Wearable}</a>
+API is available before making the API calls:
+</p>
+
+<pre>
+mGoogleApiClient.hasConnectedApi(Wearable.API);
+</pre>
 
 
 <h2 id="Communicating">Communicate with Google Services</h2>
