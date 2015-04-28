@@ -477,6 +477,7 @@ public abstract class CameraMetadata<TKey> {
      * <li>The maximum available resolution for OPAQUE streams
      *   (both input/output) will match the maximum available
      *   resolution of JPEG streams.</li>
+     * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
      * <li>Only below controls are effective for reprocessing requests and
      *   will be present in capture results, other controls in reprocess
      *   requests will be ignored by the camera device.<ul>
@@ -489,6 +490,7 @@ public abstract class CameraMetadata<TKey> {
      *
      * @see CaptureRequest#EDGE_MODE
      * @see CaptureRequest#NOISE_REDUCTION_MODE
+     * @see CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL
      * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
@@ -584,6 +586,7 @@ public abstract class CameraMetadata<TKey> {
      * <li>The maximum available resolution for YUV_420_888 streams
      *   (both input/output) will match the maximum available
      *   resolution of JPEG streams.</li>
+     * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
      * <li>Only the below controls are effective for reprocessing requests and will be
      *   present in capture results. The reprocess requests are from the original capture
      *   results that are assocaited with the intermidate YUV_420_888 output buffers.
@@ -599,6 +602,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#EDGE_MODE
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      * @see CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR
+     * @see CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL
      * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
