@@ -30533,10 +30533,9 @@ package android.security {
     method public java.lang.String getKeystoreAlias();
     method public int getPurposes();
     method public int getUserAuthenticationValidityDurationSeconds();
-    method public int getUserAuthenticators();
     method public boolean isEncryptionRequired();
-    method public boolean isInvalidatedOnNewFingerprintEnrolled();
     method public boolean isRandomizedEncryptionRequired();
+    method public boolean isUserAuthenticationRequired();
   }
 
   public static class KeyGeneratorSpec.Builder {
@@ -30546,7 +30545,6 @@ package android.security {
     method public android.security.KeyGeneratorSpec.Builder setBlockModes(java.lang.String...);
     method public android.security.KeyGeneratorSpec.Builder setEncryptionPaddings(java.lang.String...);
     method public android.security.KeyGeneratorSpec.Builder setEncryptionRequired(boolean);
-    method public android.security.KeyGeneratorSpec.Builder setInvalidatedOnNewFingerprintEnrolled(boolean);
     method public android.security.KeyGeneratorSpec.Builder setKeySize(int);
     method public android.security.KeyGeneratorSpec.Builder setKeyValidityEnd(java.util.Date);
     method public android.security.KeyGeneratorSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
@@ -30554,8 +30552,8 @@ package android.security {
     method public android.security.KeyGeneratorSpec.Builder setKeyValidityStart(java.util.Date);
     method public android.security.KeyGeneratorSpec.Builder setPurposes(int);
     method public android.security.KeyGeneratorSpec.Builder setRandomizedEncryptionRequired(boolean);
+    method public android.security.KeyGeneratorSpec.Builder setUserAuthenticationRequired(boolean);
     method public android.security.KeyGeneratorSpec.Builder setUserAuthenticationValidityDurationSeconds(int);
-    method public android.security.KeyGeneratorSpec.Builder setUserAuthenticators(int);
   }
 
   public class KeyNotYetValidException extends java.security.InvalidKeyException {
@@ -30583,10 +30581,9 @@ package android.security {
     method public java.util.Date getStartDate();
     method public javax.security.auth.x500.X500Principal getSubjectDN();
     method public int getUserAuthenticationValidityDurationSeconds();
-    method public int getUserAuthenticators();
     method public boolean isEncryptionRequired();
-    method public boolean isInvalidatedOnNewFingerprintEnrolled();
     method public boolean isRandomizedEncryptionRequired();
+    method public boolean isUserAuthenticationRequired();
   }
 
   public static final class KeyPairGeneratorSpec.Builder {
@@ -30599,7 +30596,6 @@ package android.security {
     method public android.security.KeyPairGeneratorSpec.Builder setEncryptionPaddings(java.lang.String...);
     method public android.security.KeyPairGeneratorSpec.Builder setEncryptionRequired();
     method public android.security.KeyPairGeneratorSpec.Builder setEndDate(java.util.Date);
-    method public android.security.KeyPairGeneratorSpec.Builder setInvalidatedOnNewFingerprintEnrolled(boolean);
     method public android.security.KeyPairGeneratorSpec.Builder setKeySize(int);
     method public android.security.KeyPairGeneratorSpec.Builder setKeyType(java.lang.String) throws java.security.NoSuchAlgorithmException;
     method public android.security.KeyPairGeneratorSpec.Builder setKeyValidityEnd(java.util.Date);
@@ -30612,8 +30608,8 @@ package android.security {
     method public android.security.KeyPairGeneratorSpec.Builder setSignaturePaddings(java.lang.String...);
     method public android.security.KeyPairGeneratorSpec.Builder setStartDate(java.util.Date);
     method public android.security.KeyPairGeneratorSpec.Builder setSubject(javax.security.auth.x500.X500Principal);
+    method public android.security.KeyPairGeneratorSpec.Builder setUserAuthenticationRequired(boolean);
     method public android.security.KeyPairGeneratorSpec.Builder setUserAuthenticationValidityDurationSeconds(int);
-    method public android.security.KeyPairGeneratorSpec.Builder setUserAuthenticators(int);
   }
 
   public abstract class KeyStoreKeyProperties {
@@ -30638,14 +30634,6 @@ package android.security {
   public static abstract class KeyStoreKeyProperties.PurposeEnum implements java.lang.annotation.Annotation {
   }
 
-  public static abstract class KeyStoreKeyProperties.UserAuthenticator {
-    field public static final int FINGERPRINT_READER = 2; // 0x2
-    field public static final int LOCK_SCREEN = 1; // 0x1
-  }
-
-  public static abstract class KeyStoreKeyProperties.UserAuthenticatorEnum implements java.lang.annotation.Annotation {
-  }
-
   public class KeyStoreKeySpec implements java.security.spec.KeySpec {
     method public java.lang.String[] getBlockModes();
     method public java.lang.String[] getDigests();
@@ -30658,15 +30646,15 @@ package android.security {
     method public int getOrigin();
     method public int getPurposes();
     method public java.lang.String[] getSignaturePaddings();
-    method public int getTeeEnforcedUserAuthenticators();
     method public int getUserAuthenticationValidityDurationSeconds();
-    method public int getUserAuthenticators();
-    method public boolean isInvalidatedOnNewFingerprintEnrolled();
     method public boolean isTeeBacked();
+    method public boolean isUserAuthenticationRequired();
+    method public boolean isUserAuthenticationRequirementTeeEnforced();
   }
 
   public final class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
     method public java.lang.String[] getBlockModes();
+    method public android.content.Context getContext();
     method public java.lang.String[] getDigests();
     method public java.lang.String[] getEncryptionPaddings();
     method public java.util.Date getKeyValidityForConsumptionEnd();
@@ -30675,11 +30663,10 @@ package android.security {
     method public int getPurposes();
     method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
-    method public int getUserAuthenticators();
     method public boolean isDigestsSpecified();
     method public boolean isEncryptionRequired();
-    method public boolean isInvalidatedOnNewFingerprintEnrolled();
     method public boolean isRandomizedEncryptionRequired();
+    method public boolean isUserAuthenticationRequired();
   }
 
   public static final class KeyStoreParameter.Builder {
@@ -30689,7 +30676,6 @@ package android.security {
     method public android.security.KeyStoreParameter.Builder setDigests(java.lang.String...);
     method public android.security.KeyStoreParameter.Builder setEncryptionPaddings(java.lang.String...);
     method public android.security.KeyStoreParameter.Builder setEncryptionRequired(boolean);
-    method public android.security.KeyStoreParameter.Builder setInvalidatedOnNewFingerprintEnrolled(boolean);
     method public android.security.KeyStoreParameter.Builder setKeyValidityEnd(java.util.Date);
     method public android.security.KeyStoreParameter.Builder setKeyValidityForConsumptionEnd(java.util.Date);
     method public android.security.KeyStoreParameter.Builder setKeyValidityForOriginationEnd(java.util.Date);
@@ -30697,8 +30683,8 @@ package android.security {
     method public android.security.KeyStoreParameter.Builder setPurposes(int);
     method public android.security.KeyStoreParameter.Builder setRandomizedEncryptionRequired(boolean);
     method public android.security.KeyStoreParameter.Builder setSignaturePaddings(java.lang.String...);
+    method public android.security.KeyStoreParameter.Builder setUserAuthenticationRequired(boolean);
     method public android.security.KeyStoreParameter.Builder setUserAuthenticationValidityDurationSeconds(int);
-    method public android.security.KeyStoreParameter.Builder setUserAuthenticators(int);
   }
 
   public class NetworkSecurityPolicy {

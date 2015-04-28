@@ -81,8 +81,8 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         String[] encryptionPaddings;
         String[] digests;
         String[] blockModes;
-        @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators;
-        @KeyStoreKeyProperties.UserAuthenticatorEnum int teeEnforcedUserAuthenticators;
+        int keymasterSwEnforcedUserAuthenticators;
+        int keymasterHwEnforcedUserAuthenticators;
         try {
             if (keyCharacteristics.hwEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
                 teeBacked = true;
@@ -122,21 +122,10 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST));
             blockModes = KeymasterUtils.getJcaBlockModesFromKeymasterBlockModes(
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_BLOCK_MODE));
-
-            @KeyStoreKeyProperties.UserAuthenticatorEnum
-            int swEnforcedKeymasterUserAuthenticators =
+            keymasterSwEnforcedUserAuthenticators =
                     keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
-            @KeyStoreKeyProperties.UserAuthenticatorEnum
-            int hwEnforcedKeymasterUserAuthenticators =
+            keymasterHwEnforcedUserAuthenticators =
                     keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
-            @KeyStoreKeyProperties.UserAuthenticatorEnum
-            int keymasterUserAuthenticators =
-                    swEnforcedKeymasterUserAuthenticators | hwEnforcedKeymasterUserAuthenticators;
-            userAuthenticators = KeyStoreKeyProperties.UserAuthenticator.allFromKeymaster(
-                    keymasterUserAuthenticators);
-            teeEnforcedUserAuthenticators =
-                    KeyStoreKeyProperties.UserAuthenticator.allFromKeymaster(
-                            hwEnforcedKeymasterUserAuthenticators);
         } catch (IllegalArgumentException e) {
             throw new InvalidKeySpecException("Unsupported key characteristic", e);
         }
@@ -157,11 +146,13 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 && (keyValidityForConsumptionEnd.getTime() == Long.MAX_VALUE)) {
             keyValidityForConsumptionEnd = null;
         }
+        boolean userAuthenticationRequired =
+                !keyCharacteristics.getBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         int userAuthenticationValidityDurationSeconds =
                 keyCharacteristics.getInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT, -1);
-
-        // TODO: Populate the value below from key characteristics once Keymaster is ready.
-        boolean invalidatedOnNewFingerprintEnrolled = false;
+        boolean userAuthenticationRequirementEnforcedInTee = (userAuthenticationRequired)
+                && (keymasterHwEnforcedUserAuthenticators != 0)
+                && (keymasterSwEnforcedUserAuthenticators == 0);
 
         return new KeyStoreKeySpec(entryAlias,
                 teeBacked,
@@ -175,10 +166,9 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 EmptyArray.STRING, // no signature paddings -- this is symmetric crypto
                 digests,
                 blockModes,
-                userAuthenticators,
-                teeEnforcedUserAuthenticators,
+                userAuthenticationRequired,
                 userAuthenticationValidityDurationSeconds,
-                invalidatedOnNewFingerprintEnrolled);
+                userAuthenticationRequirementEnforcedInTee);
     }
 
     @Override

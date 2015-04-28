@@ -529,27 +529,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
                 KeymasterUtils.getKeymasterPaddingsFromJcaSignaturePaddings(
                         params.getSignaturePaddings()));
         args.addInts(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
-        if (params.getUserAuthenticators() == 0) {
-            args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-        } else {
-            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
-                    KeyStoreKeyProperties.UserAuthenticator.allToKeymaster(
-                            params.getUserAuthenticators()));
-            long secureUserId = GateKeeper.getSecureUserId();
-            if (secureUserId == 0) {
-                throw new IllegalStateException("Secure lock screen must be enabled"
-                        + " to import keys requiring user authentication");
-            }
-            args.addLong(KeymasterDefs.KM_TAG_USER_SECURE_ID, secureUserId);
-        }
-        if (params.isInvalidatedOnNewFingerprintEnrolled()) {
-            // TODO: Add the invalidate on fingerprint enrolled constraint once Keymaster supports
-            // that.
-        }
-        if (params.getUserAuthenticationValidityDurationSeconds() != -1) {
-            args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
-                    params.getUserAuthenticationValidityDurationSeconds());
-        }
+        KeymasterUtils.addUserAuthArgs(args,
+                params.getContext(),
+                params.isUserAuthenticationRequired(),
+                params.getUserAuthenticationValidityDurationSeconds());
         args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
                 (params.getKeyValidityStart() != null)
                         ? params.getKeyValidityStart() : new Date(0));

@@ -39,7 +39,8 @@ import javax.crypto.Cipher;
  * {@code KeyStore}.
  */
 public final class KeyStoreParameter implements ProtectionParameter {
-    private int mFlags;
+    private final Context mContext;
+    private final int mFlags;
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
@@ -49,11 +50,12 @@ public final class KeyStoreParameter implements ProtectionParameter {
     private final String[] mDigests;
     private final String[] mBlockModes;
     private final boolean mRandomizedEncryptionRequired;
-    private final @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
+    private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
-    private final boolean mInvalidatedOnNewFingerprintEnrolled;
 
-    private KeyStoreParameter(int flags,
+    private KeyStoreParameter(
+            Context context,
+            int flags,
             Date keyValidityStart,
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
@@ -63,15 +65,17 @@ public final class KeyStoreParameter implements ProtectionParameter {
             String[] digests,
             String[] blockModes,
             boolean randomizedEncryptionRequired,
-            @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators,
-            int userAuthenticationValidityDurationSeconds,
-            boolean invalidatedOnNewFingerprintEnrolled) {
-        if ((userAuthenticationValidityDurationSeconds < 0)
+            boolean userAuthenticationRequired,
+            int userAuthenticationValidityDurationSeconds) {
+        if (context == null) {
+            throw new IllegalArgumentException("context == null");
+        } else if ((userAuthenticationValidityDurationSeconds < 0)
                 && (userAuthenticationValidityDurationSeconds != -1)) {
             throw new IllegalArgumentException(
                     "userAuthenticationValidityDurationSeconds must not be negative");
         }
 
+        mContext = context;
         mFlags = flags;
         mKeyValidityStart = keyValidityStart;
         mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
@@ -84,9 +88,15 @@ public final class KeyStoreParameter implements ProtectionParameter {
         mDigests = ArrayUtils.cloneIfNotEmpty(digests);
         mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
-        mUserAuthenticators = userAuthenticators;
+        mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
-        mInvalidatedOnNewFingerprintEnrolled = invalidatedOnNewFingerprintEnrolled;
+    }
+
+    /**
+     * Gets the Android context used for operations with this instance.
+     */
+    public Context getContext() {
+        return mContext;
     }
 
     /**
@@ -198,35 +208,23 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Gets the set of user authenticators which protect access to this key. The key can only be
-     * used iff the user has authenticated to at least one of these user authenticators.
+     * Returns {@code true} if user authentication is required for this key to be used.
      *
-     * @return user authenticators or {@code 0} if the key can be used without user authentication.
+     * @see #getUserAuthenticationValidityDurationSeconds()
      */
-    public @KeyStoreKeyProperties.UserAuthenticatorEnum int getUserAuthenticators() {
-        return mUserAuthenticators;
+    public boolean isUserAuthenticationRequired() {
+        return mUserAuthenticationRequired;
     }
 
     /**
-     * Gets the duration of time (seconds) for which this key can be used after the user
-     * successfully authenticates to one of the associated user authenticators.
+     * Gets the duration of time (seconds) for which this key can be used after the user is
+     * successfully authenticated.
      *
      * @return duration in seconds or {@code -1} if not restricted. {@code 0} means authentication
      *         is required for every use of the key.
      */
     public int getUserAuthenticationValidityDurationSeconds() {
         return mUserAuthenticationValidityDurationSeconds;
-    }
-
-    /**
-     * Returns {@code true} if this key must be permanently invalidated once a new fingerprint is
-     * enrolled. This constraint only has effect if fingerprint reader is one of the user
-     * authenticators protecting access to this key.
-     *
-     * @see #getUserAuthenticators()
-     */
-    public boolean isInvalidatedOnNewFingerprintEnrolled() {
-        return mInvalidatedOnNewFingerprintEnrolled;
     }
 
     /**
@@ -247,6 +245,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      * </pre>
      */
     public final static class Builder {
+        private final Context mContext;
         private int mFlags;
         private Date mKeyValidityStart;
         private Date mKeyValidityForOriginationEnd;
@@ -257,9 +256,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
         private String[] mDigests;
         private String[] mBlockModes;
         private boolean mRandomizedEncryptionRequired = true;
-        private @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
+        private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
-        private boolean mInvalidatedOnNewFingerprintEnrolled;
 
         /**
          * Creates a new instance of the {@code Builder} with the given
@@ -271,8 +269,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
             if (context == null) {
                 throw new NullPointerException("context == null");
             }
-
-            // Context is currently not used, but will be in the future.
+            mContext = context;
         }
 
         /**
@@ -440,49 +437,38 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Sets the user authenticators which protect access to this key. The key can only be used
-         * iff the user has authenticated to at least one of these user authenticators.
+         * Sets whether user authentication is required to use this key.
          *
          * <p>By default, the key can be used without user authentication.
          *
-         * @param userAuthenticators user authenticators or {@code 0} if this key can be accessed
-         *        without user authentication.
+         * <p>When user authentication is required, the user authorizes the use of the key by
+         * authenticating to this Android device using a subset of their secure lock screen
+         * credentials. Different authentication methods are used depending on whether the every
+         * use of the key must be authenticated (as specified by
+         * {@link #setUserAuthenticationValidityDurationSeconds(int)}).
+         * <a href="{@docRoot}training/articles/keystore.html#UserAuthentication">More
+         * information</a>.
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
-        public Builder setUserAuthenticators(
-                @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators) {
-            mUserAuthenticators = userAuthenticators;
+        public Builder setUserAuthenticationRequired(boolean required) {
+            mUserAuthenticationRequired = required;
             return this;
         }
 
         /**
-         * Sets the duration of time (seconds) for which this key can be used after the user
-         * successfully authenticates to one of the associated user authenticators.
+         * Sets the duration of time (seconds) for which this key can be used after the user is
+         * successfully authenticated. This has effect only if user authentication is required.
          *
          * <p>By default, the user needs to authenticate for every use of the key.
          *
          * @param seconds duration in seconds or {@code 0} if the user needs to authenticate for
          *        every use of the key.
          *
-         * @see #setUserAuthenticators(int)
+         * @see #setUserAuthenticationRequired(boolean)
          */
         public Builder setUserAuthenticationValidityDurationSeconds(int seconds) {
             mUserAuthenticationValidityDurationSeconds = seconds;
-            return this;
-        }
-
-        /**
-         * Sets whether this key must be invalidated (permanently) whenever a new fingerprint is
-         * enrolled. This only has effect if fingerprint reader is one of the user authenticators
-         * protecting access to the key.
-         *
-         * <p>By default, enrolling a new fingerprint does not invalidate the key.
-         *
-         * @see #setUserAuthenticators(Set)
-         */
-        public Builder setInvalidatedOnNewFingerprintEnrolled(boolean invalidated) {
-            mInvalidatedOnNewFingerprintEnrolled = invalidated;
             return this;
         }
 
@@ -493,7 +479,9 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * @return built instance of {@code KeyStoreParameter}
          */
         public KeyStoreParameter build() {
-            return new KeyStoreParameter(mFlags,
+            return new KeyStoreParameter(
+                    mContext,
+                    mFlags,
                     mKeyValidityStart,
                     mKeyValidityForOriginationEnd,
                     mKeyValidityForConsumptionEnd,
@@ -503,9 +491,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
                     mDigests,
                     mBlockModes,
                     mRandomizedEncryptionRequired,
-                    mUserAuthenticators,
-                    mUserAuthenticationValidityDurationSeconds,
-                    mInvalidatedOnNewFingerprintEnrolled);
+                    mUserAuthenticationRequired,
+                    mUserAuthenticationValidityDurationSeconds);
         }
     }
 }
