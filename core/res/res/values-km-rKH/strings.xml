@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ឲ្យ​កម្មវិធី​ទទួល និង​ដំណើរការ​សារ WAP ។ សិទ្ធិ​នេះ​​មានលទ្ធភាព​តាមដាន ឬ​លុប​សារ​ដែល​បាន​ផ្ញើ​ឲ្យ​អ្នក​ដោយ​មិន​បង្ហា​ញ។"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ទៅ​យក​កម្មវិធី​កំពុង​ដំណើរការ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ឲ្យ​កម្មវិធី​ទៅ​យក​ព័ត៌មាន​លម្អិត​អំពី​កិច្ចការ​ដែល​កំពុង​ដំណើរការ​បច្ចុប្បន្ន។ វា​អាច​ឲ្យ​កម្មវិធី​រកមើល​ព័ត៌មាន​ថា​តើ​កម្មវិធី​ណាមួយ​ត្រូវ​បាន​ប្រើ​លើ​ឧបករណ៍។"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"គ្រប់គ្រងម្ចាស់ឧបករណ៍ និងប្រវត្តិរូប"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"អនុញ្ញាតឲ្យកម្មវិធីកំណត់ម្ចាស់ប្រវត្តិរូប និងម្ចាស់ឧបករណ៍។"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"តម្រៀប​កម្មវិធី​កំពុង​ដំណើរការ​ឡើងវិញ"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ឲ្យ​កម្មវិធី​ផ្លាស់ទី​ភារកិច្ច​​ទៅ​ផ្ទៃ​ខាង​មុខ។​ កម្មវិធី​អាច​ធ្វើ​វា​ដោយ​គ្មាន​ការ​បញ្ចូល​របស់​អ្នក។"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"បើក​របៀប​រថយន្ត"</string>

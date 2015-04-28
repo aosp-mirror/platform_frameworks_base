@@ -275,10 +275,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite aplicației să primească și să proceseze mesaje WAP. Această permisiune include capacitatea de a monitoriza sau şterge mesajele care v-au fost trimise fără a vi le arăta."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"preluare aplicații care rulează"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite aplicației să preia informaţiile despre activităţile care rulează în prezent și care au rulat recent. În acest fel, aplicația poate descoperi informaţii despre aplicațiile care sunt utilizate pe dispozitiv."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Gestionează proprietarii de profiluri și proprietarul dispozitivului"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Permite aplicațiilor să seteze proprietarii de profiluri și proprietarul dispozitivului."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordonare aplicații care rulează"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite aplicației să mute activităţile în prim-plan și în fundal. Aplicaţia poate face acest lucru fără aportul dvs."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activare mod Maşină"</string>
