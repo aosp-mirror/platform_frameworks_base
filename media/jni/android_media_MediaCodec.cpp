@@ -592,8 +592,8 @@ static jthrowable createCodecException(
         break;
     }
 
-    // TODO: propagate reason from MediaCodec.
-    int reason = gExceptionReason.reasonHardware;
+    int reason =
+        (err == DEAD_OBJECT) ? gExceptionReason.reasonReclaimed : gExceptionReason.reasonHardware;
     return (jthrowable)env->NewObject(clazz.get(), ctor, err, actionCode, msgObj.get(), reason);
 }
 
