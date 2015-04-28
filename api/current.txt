@@ -2732,7 +2732,6 @@ package android.accounts {
   }
 
   public class AccountManager {
-    method public boolean accountAuthenticated(android.accounts.Account);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> addAccount(java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public boolean addAccountExplicitly(android.accounts.Account, java.lang.String, android.os.Bundle);
     method public void addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean);
@@ -2756,6 +2755,7 @@ package android.accounts {
     method public android.accounts.AccountManagerFuture<java.lang.Boolean> hasFeatures(android.accounts.Account, java.lang.String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler);
     method public void invalidateAuthToken(java.lang.String, java.lang.String);
     method public static android.content.Intent newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, java.lang.String[], boolean, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle);
+    method public boolean notifyAccountAuthenticated(android.accounts.Account);
     method public java.lang.String peekAuthToken(android.accounts.Account, java.lang.String);
     method public deprecated android.accounts.AccountManagerFuture<java.lang.Boolean> removeAccount(android.accounts.Account, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> removeAccount(android.accounts.Account, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
@@ -2793,7 +2793,7 @@ package android.accounts {
     field public static final java.lang.String KEY_ERROR_CODE = "errorCode";
     field public static final java.lang.String KEY_ERROR_MESSAGE = "errorMessage";
     field public static final java.lang.String KEY_INTENT = "intent";
-    field public static final java.lang.String KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH = "lastAuthenticatedTimeMillisEpoch";
+    field public static final java.lang.String KEY_LAST_AUTHENTICATED_TIME = "lastAuthenticatedTime";
     field public static final java.lang.String KEY_PASSWORD = "password";
     field public static final java.lang.String KEY_USERDATA = "userdata";
     field public static final java.lang.String LOGIN_ACCOUNTS_CHANGED_ACTION = "android.accounts.LOGIN_ACCOUNTS_CHANGED";
@@ -30432,7 +30432,6 @@ package android.telecom {
   public static abstract class InCallService.VideoCall {
     ctor public InCallService.VideoCall();
     method public abstract void registerCallback(android.telecom.InCallService.VideoCall.Callback);
-    method public abstract void unregisterCallback();
     method public abstract void requestCallDataUsage();
     method public abstract void requestCameraCapabilities();
     method public abstract void sendSessionModifyRequest(android.telecom.VideoProfile);
@@ -30443,6 +30442,7 @@ package android.telecom {
     method public abstract void setPauseImage(java.lang.String);
     method public abstract void setPreviewSurface(android.view.Surface);
     method public abstract void setZoom(float);
+    method public abstract void unregisterCallback();
   }
 
   public static abstract class InCallService.VideoCall.Callback {
