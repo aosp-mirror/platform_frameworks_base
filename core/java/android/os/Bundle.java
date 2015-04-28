@@ -222,7 +222,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
                         SparseArray<? extends Parcelable> array =
                                 (SparseArray<? extends Parcelable>) obj;
                         for (int n = array.size() - 1; n >= 0; n--) {
-                            if ((array.valueAt(n).describeContents()
+                            Parcelable p = array.valueAt(n);
+                            if (p != null && (p.describeContents()
                                     & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0) {
                                 fdFound = true;
                                 break;
