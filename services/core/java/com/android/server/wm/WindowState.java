@@ -1709,7 +1709,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.println(mWallpaperDisplayOffsetY);
         }
         if (mDrawLock != null) {
-            pw.println("mDrawLock=" + mDrawLock);
+            pw.print(prefix); pw.println("mDrawLock=" + mDrawLock);
         }
     }
 
