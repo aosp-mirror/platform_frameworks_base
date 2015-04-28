@@ -182,6 +182,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
     private static final String ATTR_PREFERRED_SETUP_ACTIVITY = "setup-activity";
+    private static final String ATTR_PERMISSION_POLICY = "permission-policy";
 
     private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
 
@@ -300,6 +301,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int mPasswordOwner = -1;
         long mLastMaximumTimeToLock = -1;
         boolean mUserSetupComplete = false;
+        int mPermissionPolicy;
 
         final HashMap<ComponentName, ActiveAdmin> mAdminMap = new HashMap<>();
         final ArrayList<ActiveAdmin> mAdminList = new ArrayList<>();
@@ -1409,6 +1411,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_SETUP_COMPLETE,
                         Boolean.toString(true));
             }
+            if (policy.mPermissionPolicy != DevicePolicyManager.PERMISSION_POLICY_PROMPT) {
+                out.attribute(null, ATTR_PERMISSION_POLICY,
+                        Integer.toString(policy.mPermissionPolicy));
+            }
             if (policy.mDelegatedCertInstallerPackage != null) {
                 out.attribute(null, ATTR_DELEGATED_CERT_INSTALLER,
                         policy.mDelegatedCertInstallerPackage);
@@ -1536,6 +1542,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String userSetupComplete = parser.getAttributeValue(null, ATTR_SETUP_COMPLETE);
             if (userSetupComplete != null && Boolean.toString(true).equals(userSetupComplete)) {
                 policy.mUserSetupComplete = true;
+            }
+            String permissionPolicy = parser.getAttributeValue(null, ATTR_PERMISSION_POLICY);
+            if (!TextUtils.isEmpty(permissionPolicy)) {
+                policy.mPermissionPolicy = Integer.parseInt(permissionPolicy);
             }
             policy.mDelegatedCertInstallerPackage = parser.getAttributeValue(null,
                     ATTR_DELEGATED_CERT_INSTALLER);
@@ -4253,14 +4263,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         UserHandle callingUser = Binder.getCallingUserHandle();
+        int userId = callingUser.getIdentifier();
         // Check if this is the profile owner who is calling
         getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         synchronized (this) {
+            // Reset some of the profile-owner policies
+            DevicePolicyData policy = getUserData(userId);
+            policy.mPermissionPolicy = DevicePolicyManager.PERMISSION_POLICY_PROMPT;
+            policy.mDelegatedCertInstallerPackage = null;
+            policy.mStatusBarEnabledState = true;
+            saveSettingsLocked(userId);
+
             long ident = Binder.clearCallingIdentity();
             try {
                 clearUserRestrictions(callingUser);
                 if (mDeviceOwner != null) {
-                    mDeviceOwner.removeProfileOwner(callingUser.getIdentifier());
+                    mDeviceOwner.removeProfileOwner(userId);
                     mDeviceOwner.writeOwnerFile();
                 }
             } finally {
@@ -6258,6 +6276,50 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Cannot find device owner package", e);
+            }
+        }
+    }
+
+    @Override
+    public void setPermissionPolicy(ComponentName admin, int policy) throws RemoteException {
+        int userId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            DevicePolicyData userPolicy = getUserData(userId);
+            if (userPolicy.mPermissionPolicy != policy) {
+                userPolicy.mPermissionPolicy = policy;
+                saveSettingsLocked(userId);
+            }
+        }
+    }
+
+    @Override
+    public int getPermissionPolicy(ComponentName admin) throws RemoteException {
+        int userId = UserHandle.getCallingUserId();
+        synchronized (this) {
+            DevicePolicyData userPolicy = getUserData(userId);
+            return userPolicy.mPermissionPolicy;
+        }
+    }
+
+    @Override
+    public boolean setPermissionGranted(ComponentName admin, String packageName,
+            String permission, boolean granted) throws RemoteException {
+        UserHandle user = Binder.getCallingUserHandle();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                if (granted) {
+                    mContext.getPackageManager().grantPermission(packageName, permission, user);
+                } else {
+                    mContext.getPackageManager().revokePermission(packageName, permission, user);
+                }
+                return true;
+            } catch (SecurityException se) {
+                return false;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }

@@ -5828,6 +5828,7 @@ package android.app.admin {
     method public int getPasswordMinimumSymbols(android.content.ComponentName);
     method public int getPasswordMinimumUpperCase(android.content.ComponentName);
     method public int getPasswordQuality(android.content.ComponentName);
+    method public int getPermissionPolicy(android.content.ComponentName);
     method public java.util.List<java.lang.String> getPermittedAccessibilityServices(android.content.ComponentName);
     method public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method public java.util.List<java.lang.String> getPermittedInputMethods(android.content.ComponentName);
@@ -5886,6 +5887,8 @@ package android.app.admin {
     method public void setPasswordMinimumSymbols(android.content.ComponentName, int);
     method public void setPasswordMinimumUpperCase(android.content.ComponentName, int);
     method public void setPasswordQuality(android.content.ComponentName, int);
+    method public boolean setPermissionGranted(android.content.ComponentName, java.lang.String, java.lang.String, boolean);
+    method public void setPermissionPolicy(android.content.ComponentName, int);
     method public boolean setPermittedAccessibilityServices(android.content.ComponentName, java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(android.content.ComponentName, java.util.List<java.lang.String>);
     method public void setPreferredSetupActivity(android.content.ComponentName, android.content.ComponentName);
@@ -5979,6 +5982,9 @@ package android.app.admin {
     field public static final int PASSWORD_QUALITY_NUMERIC_COMPLEX = 196608; // 0x30000
     field public static final int PASSWORD_QUALITY_SOMETHING = 65536; // 0x10000
     field public static final int PASSWORD_QUALITY_UNSPECIFIED = 0; // 0x0
+    field public static final int PERMISSION_POLICY_AUTO_DENY = 2; // 0x2
+    field public static final int PERMISSION_POLICY_AUTO_GRANT = 1; // 0x1
+    field public static final int PERMISSION_POLICY_PROMPT = 0; // 0x0
     field public static final int RESET_PASSWORD_REQUIRE_ENTRY = 1; // 0x1
     field public static final int WIPE_EXTERNAL_STORAGE = 1; // 0x1
     field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
@@ -32550,7 +32556,6 @@ package android.telecom {
   public static abstract class InCallService.VideoCall {
     ctor public InCallService.VideoCall();
     method public abstract void registerCallback(android.telecom.InCallService.VideoCall.Callback);
-    method public abstract void unregisterCallback();
     method public abstract void requestCallDataUsage();
     method public abstract void requestCameraCapabilities();
     method public abstract void sendSessionModifyRequest(android.telecom.VideoProfile);
@@ -32561,6 +32566,7 @@ package android.telecom {
     method public abstract void setPauseImage(java.lang.String);
     method public abstract void setPreviewSurface(android.view.Surface);
     method public abstract void setZoom(float);
+    method public abstract void unregisterCallback();
   }
 
   public static abstract class InCallService.VideoCall.Callback {
