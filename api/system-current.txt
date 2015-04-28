@@ -2184,6 +2184,7 @@ package android {
     field public static final int Theme_Material_DayNight_DarkActionBar = 16974549; // 0x10302d5
     field public static final int Theme_Material_DayNight_Dialog = 16974550; // 0x10302d6
     field public static final int Theme_Material_DayNight_DialogWhenLarge = 16974556; // 0x10302dc
+    field public static final int Theme_Material_DayNight_DialogWhenLarge_DarkActionBar = 16974568; // 0x10302e8
     field public static final int Theme_Material_DayNight_DialogWhenLarge_NoActionBar = 16974557; // 0x10302dd
     field public static final int Theme_Material_DayNight_Dialog_Alert = 16974551; // 0x10302d7
     field public static final int Theme_Material_DayNight_Dialog_MinWidth = 16974552; // 0x10302d8
@@ -2208,6 +2209,7 @@ package android {
     field public static final int Theme_Material_Light_DarkActionBar = 16974392; // 0x1030238
     field public static final int Theme_Material_Light_Dialog = 16974393; // 0x1030239
     field public static final int Theme_Material_Light_DialogWhenLarge = 16974399; // 0x103023f
+    field public static final int Theme_Material_Light_DialogWhenLarge_DarkActionBar = 16974567; // 0x10302e7
     field public static final int Theme_Material_Light_DialogWhenLarge_NoActionBar = 16974400; // 0x1030240
     field public static final int Theme_Material_Light_Dialog_Alert = 16974394; // 0x103023a
     field public static final int Theme_Material_Light_Dialog_MinWidth = 16974395; // 0x103023b
