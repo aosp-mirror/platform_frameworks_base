@@ -67,9 +67,13 @@
       <item quantity="one">Kopírování <xliff:g id="COUNT_0">%1$d</xliff:g> souboru</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Příprava na kopírování…"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="few">Nepodařilo se zkopírovat <xliff:g id="COUNT_1">%1$d</xliff:g> soubory</item>
+      <item quantity="many">Nepodařilo se zkopírovat <xliff:g id="COUNT_1">%1$d</xliff:g> souboru</item>
+      <item quantity="other">Nepodařilo se zkopírovat <xliff:g id="COUNT_1">%1$d</xliff:g> souborů</item>
+      <item quantity="one">Nepodařilo se zkopírovat <xliff:g id="COUNT_0">%1$d</xliff:g> soubor</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Podrobnosti zobrazíte klepnutím"</string>
     <string name="retry" msgid="7564024179122207376">"Opakovat"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tyto soubory nebyly zkopírovány: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

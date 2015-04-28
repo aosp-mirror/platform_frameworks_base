@@ -67,9 +67,13 @@
       <item quantity="one">Kopíruje sa <xliff:g id="COUNT_0">%1$d</xliff:g> súbor.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravuje sa na kopírovanie..."</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="few">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
+      <item quantity="many">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súboru</item>
+      <item quantity="other">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
+      <item quantity="one">Zlyhalo kopírovanie <xliff:g id="COUNT_0">%1$d</xliff:g> súboru</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Klepnutím zobrazíte podrobné informácie"</string>
     <string name="retry" msgid="7564024179122207376">"Skúsiť znova"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tieto súbory neboli skopírované: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

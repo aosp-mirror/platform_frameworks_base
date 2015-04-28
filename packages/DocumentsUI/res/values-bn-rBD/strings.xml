@@ -65,9 +65,11 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল অনুলিপি করা হচ্ছে৷</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"অনুলিপি করার জন্য প্রস্তুত করা হচ্ছে..."</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"বিশদ বিবরণ দেখতে স্পর্শ করুন"</string>
     <string name="retry" msgid="7564024179122207376">"পুনরায় চেষ্টা করুন"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"এই ফাইলগুলির প্রতিলিপি করা হয় নি: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>
