@@ -620,7 +620,15 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 // remove based on both its position as well as it's current memory usage, as well
                 // as whether it was directly requested vs. whether it was preloaded by our caching
                 // mechanism.
-                mIndexRemoteViews.remove(getFarthestPositionFrom(pruneFromPosition, visibleWindow));
+                int trimIndex = getFarthestPositionFrom(pruneFromPosition, visibleWindow);
+
+                // Need to check that this is a valid index, to cover the case where you have only
+                // a single view in the cache, but it's larger than the max memory limit
+                if (trimIndex < 0) {
+                    break;
+                }
+
+                mIndexRemoteViews.remove(trimIndex);
             }
 
             // Update the metadata cache
