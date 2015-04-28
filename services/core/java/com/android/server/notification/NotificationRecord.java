@@ -112,6 +112,7 @@ public final class NotificationRecord {
                 + " / " + idDebugString(baseContext, sbn.getPackageName(), notification.icon));
         pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.getScore());
         pw.println(prefix + "  key=" + sbn.getKey());
+        pw.println(prefix + "  seen=" + mIsSeen);
         pw.println(prefix + "  groupKey=" + getGroupKey());
         pw.println(prefix + "  contentIntent=" + notification.contentIntent);
         pw.println(prefix + "  deleteIntent=" + notification.deleteIntent);
