@@ -31,6 +31,8 @@
 #include <media/mediarecorder.h>
 #include <utils/threads.h>
 
+#include <ScopedUtfChars.h>
+
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
@@ -444,11 +446,13 @@ android_media_MediaRecorder_native_init(JNIEnv *env)
 
 static void
 android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-                                         jstring packageName)
+                                         jstring packageName, jstring opPackageName)
 {
     ALOGV("setup");
 
-    sp<MediaRecorder> mr = new MediaRecorder();
+    ScopedUtfChars opPackageNameStr(env, opPackageName);
+
+    sp<MediaRecorder> mr = new MediaRecorder(String16(opPackageNameStr.c_str()));
     if (mr == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
@@ -506,7 +510,8 @@ static JNINativeMethod gMethods[] = {
     {"native_reset",         "()V",                             (void *)android_media_MediaRecorder_native_reset},
     {"release",              "()V",                             (void *)android_media_MediaRecorder_release},
     {"native_init",          "()V",                             (void *)android_media_MediaRecorder_native_init},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;)V", (void *)android_media_MediaRecorder_native_setup},
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V",
+                                                                (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
 };
 
