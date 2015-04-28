@@ -244,6 +244,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SparseBooleanArray mUserFingerprintAuthenticated = new SparseBooleanArray();
     private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
 
+    private static int sCurrentUser;
+
+    public synchronized static void setCurrentUser(int currentUser) {
+        sCurrentUser = currentUser;
+    }
+
+    public synchronized static int getCurrentUser() {
+        return sCurrentUser;
+    }
+
     @Override
     public void onTrustChanged(boolean enabled, int userId, int flags) {
         mUserHasTrust.put(userId, enabled);

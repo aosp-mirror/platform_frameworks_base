@@ -71,7 +71,7 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
         @Override
         public void onTrustGrantedWithFlags(int flags, int userId) {
-            if (userId != mLockPatternUtils.getCurrentUser()) return;
+            if (userId != KeyguardUpdateMonitor.getCurrentUser()) return;
             if (!isAttachedToWindow()) return;
             boolean bouncerVisible = isVisibleToUser();
             boolean initiatedByUser =
