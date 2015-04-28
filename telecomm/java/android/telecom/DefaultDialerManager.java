@@ -150,6 +150,27 @@ public class DefaultDialerManager {
     }
 
     /**
+     * Determines if the package name belongs to the user-selected default dialer or the preloaded
+     * system dialer, and thus should be allowed to perform certain privileged operations.
+     *
+     * @param context A valid context.
+     * @param packageName of the package to check for.
+     *
+     * @return {@code true} if the provided package name corresponds to the user-selected default
+     *         dialer or the preloaded system dialer, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public static boolean isDefaultOrSystemDialer(Context context, String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
+            return false;
+        }
+        final TelecomManager tm = getTelecomManager(context);
+        return packageName.equals(tm.getDefaultDialerPackage())
+                || packageName.equals(tm.getSystemDialerPackage());
+    }
+
+    /**
      * Returns the component from a list of application components that corresponds to the package
      * name.
      *
