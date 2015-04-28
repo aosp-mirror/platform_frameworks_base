@@ -2592,7 +2592,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_STATUS
      *         FLAG_TRANSLUCENT_STATUS}.
      *
-     * @see android.R.attr#windowHasLightStatusBar
+     * @see android.R.attr#windowLightStatusBar
      */
     public static final int SYSTEM_UI_FLAG_LIGHT_STATUS_BAR = 0x00002000;
 

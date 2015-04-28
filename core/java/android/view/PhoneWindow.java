@@ -3599,7 +3599,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (!mForcedNavigationBarColor) {
             mNavigationBarColor = a.getColor(R.styleable.Window_navigationBarColor, 0xFF000000);
         }
-        if (a.getBoolean(R.styleable.Window_windowHasLightStatusBar, false)) {
+        if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
             decor.setSystemUiVisibility(
                     decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         }
