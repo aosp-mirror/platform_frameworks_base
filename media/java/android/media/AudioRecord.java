@@ -26,6 +26,8 @@ import java.util.Iterator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
+import android.app.Application;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -378,7 +380,7 @@ public class AudioRecord
         int initResult = native_setup( new WeakReference<AudioRecord>(this),
                 mAudioAttributes, mSampleRate, mChannelMask, mChannelIndexMask,
                 mAudioFormat, mNativeBufferSizeInBytes,
-                session);
+                session, getMyOpPackageName());
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
             return; // with mState == STATE_UNINITIALIZED
@@ -1321,7 +1323,6 @@ public class AudioRecord
         return native_set_pos_update_period(periodInFrames);
     }
 
-
     //--------------------------------------------------------------------------
     // Explicit Routing
     //--------------------
@@ -1451,7 +1452,7 @@ public class AudioRecord
     private native final int native_setup(Object audiorecord_this,
             Object /*AudioAttributes*/ attributes,
             int sampleRate, int channelMask, int channelIndexMask, int audioFormat,
-            int buffSizeInBytes, int[] sessionId);
+            int buffSizeInBytes, int[] sessionId, String opPackageName);
 
     // TODO remove: implementation calls directly into implementation of native_release()
     private native final void native_finalize();
@@ -1500,4 +1501,14 @@ public class AudioRecord
         Log.e(TAG, msg);
     }
 
+    private static String getMyOpPackageName() {
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread != null) {
+            Application application = activityThread.getApplication();
+            if (application != null) {
+                return application.getOpPackageName();
+            }
+        }
+        throw new IllegalStateException("Cannot create AudioRecord outside of an app");
+    }
 }
