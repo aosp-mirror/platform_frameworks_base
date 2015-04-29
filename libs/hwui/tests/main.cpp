@@ -111,15 +111,13 @@ class ShadowGridAnimation : public TreeContentAnimation {
 public:
     std::vector< sp<RenderNode> > cards;
     void createContent(int width, int height, DisplayListCanvas* renderer) override {
-        android::uirenderer::Rect DUMMY;
-
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         renderer->insertReorderBarrier(true);
 
         for (int x = dp(16); x < (width - dp(116)); x += dp(116)) {
             for (int y = dp(16); y < (height - dp(116)); y += dp(116)) {
                 sp<RenderNode> card = createCard(x, y, dp(100), dp(100));
-                renderer->drawRenderNode(card.get(), DUMMY, 0);
+                renderer->drawRenderNode(card.get());
                 cards.push_back(card);
             }
         }
@@ -153,13 +151,11 @@ class RectGridAnimation : public TreeContentAnimation {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, DisplayListCanvas* renderer) override {
-        android::uirenderer::Rect DUMMY;
-
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         renderer->insertReorderBarrier(true);
 
         card = createCard(40, 40, 200, 200);
-        renderer->drawRenderNode(card.get(), DUMMY, 0);
+        renderer->drawRenderNode(card.get());
 
         renderer->insertReorderBarrier(false);
     }
@@ -202,13 +198,11 @@ class OvalAnimation : public TreeContentAnimation {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, DisplayListCanvas* renderer) override {
-        android::uirenderer::Rect DUMMY;
-
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         renderer->insertReorderBarrier(true);
 
         card = createCard(40, 40, 400, 400);
-        renderer->drawRenderNode(card.get(), DUMMY, 0);
+        renderer->drawRenderNode(card.get());
 
         renderer->insertReorderBarrier(false);
     }
