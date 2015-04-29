@@ -221,22 +221,34 @@ public class ResolveInfo implements Parcelable {
         }
         return ci.loadIcon(pm);
     }
-    
+
     /**
      * Return the icon resource identifier to use for this match.  If the
      * match defines an icon, that is used; else if the activity defines
      * an icon, that is used; else, the application icon is used.
-     * 
+     * This function does not check noResourceId flag.
+     *
      * @return The icon associated with this match.
      */
-    public final int getIconResource() {
-        if (noResourceId) return 0;
+    final int getIconResourceInternal() {
         if (icon != 0) return icon;
         final ComponentInfo ci = getComponentInfo();
         if (ci != null) {
             return ci.getIconResource();
         }
         return 0;
+    }
+
+    /**
+     * Return the icon resource identifier to use for this match.  If the
+     * match defines an icon, that is used; else if the activity defines
+     * an icon, that is used; else, the application icon is used.
+     *
+     * @return The icon associated with this match.
+     */
+    public final int getIconResource() {
+        if (noResourceId) return 0;
+        return getIconResourceInternal();
     }
 
     public void dump(Printer pw, String prefix) {
