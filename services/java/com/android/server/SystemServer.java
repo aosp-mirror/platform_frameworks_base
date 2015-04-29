@@ -76,7 +76,6 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.LauncherAppsService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
-import com.android.server.power.DeviceIdleController;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.restrictions.RestrictionsManagerService;
@@ -599,6 +598,8 @@ public final class SystemServer {
                     mSystemServiceManager.startService(PersistentDataBlockService.class);
                 }
 
+                mSystemServiceManager.startService(DeviceIdleController.class);
+
                 // Always start the Device Policy Manager, so that the API is compatible with
                 // API8.
                 mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
@@ -965,7 +966,6 @@ public final class SystemServer {
 
         if (!disableNonCoreServices) {
             mSystemServiceManager.startService(MediaProjectionManagerService.class);
-            mSystemServiceManager.startService(DeviceIdleController.class);
         }
 
         // Before things start rolling, be sure we have decided whether

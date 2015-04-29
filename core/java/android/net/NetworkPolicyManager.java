@@ -129,14 +129,6 @@ public class NetworkPolicyManager {
         }
     }
 
-    public int[] getPowerSaveAppIdWhitelist() {
-        try {
-            return mService.getPowerSaveAppIdWhitelist();
-        } catch (RemoteException e) {
-            return new int[0];
-        }
-    }
-
     public void registerListener(INetworkPolicyListener listener) {
         try {
             mService.registerListener(listener);
