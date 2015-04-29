@@ -26,6 +26,7 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -199,7 +200,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public boolean matches(WifiConfiguration config) {
-        return ssid.equals(removeDoubleQuotes(config.SSID)) && security == getSecurity(config);
+        if (config.isPasspoint() && mConfig != null && mConfig.isPasspoint())
+            return config.FQDN.equals(mConfig.providerFriendlyName);
+        else
+            return ssid.equals(removeDoubleQuotes(config.SSID)) && security == getSecurity(config);
     }
 
     public WifiConfiguration getConfig() {
@@ -265,19 +269,47 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return ssid;
     }
 
+    public String getConfigName() {
+        if (mConfig != null && mConfig.isPasspoint()) {
+            return mConfig.providerFriendlyName;
+        } else {
+            return ssid;
+        }
+    }
+
     public DetailedState getDetailedState() {
         return mNetworkInfo != null ? mNetworkInfo.getDetailedState() : null;
     }
 
+    public String getSavedNetworkSummary() {
+        // Update to new summary
+        if (mConfig != null && mConfig.isPasspoint()) {
+            return "";
+        } else {
+            return getSettingsSummary();
+        }
+    }
+
     public String getSummary() {
+        return getSettingsSummary();
+    }
+
+    public String getSettingsSummary() {
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
-        if (isActive()) { // This is the active connection
+        if (isActive() && mConfig != null && mConfig.isPasspoint()) {
+            // This is the active connection on passpoint
+            summary.append(getSummary(mContext, getDetailedState(),
+                    false, mConfig.providerFriendlyName));
+        } else if (isActive()) {
+            // This is the active connection on non-passpoint network
             summary.append(getSummary(mContext, getDetailedState(),
                     networkId == WifiConfiguration.INVALID_NETWORK_ID));
-        } else if (mConfig != null
-                && mConfig.hasNoInternetAccess()) {
+        } else if (mConfig != null && mConfig.isPasspoint()) {
+            String format = mContext.getString(R.string.available_via_passpoint);
+            summary.append(String.format(format, mConfig.providerFriendlyName));
+        } else if (mConfig != null && mConfig.hasNoInternetAccess()) {
             summary.append(mContext.getString(R.string.wifi_no_internet));
         } else if (mConfig != null && ((mConfig.status == WifiConfiguration.Status.DISABLED &&
                 mConfig.disableReason != WifiConfiguration.DISABLED_UNKNOWN_REASON)
@@ -559,7 +591,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     void loadConfig(WifiConfiguration config) {
-        ssid = (config.SSID == null ? "" : removeDoubleQuotes(config.SSID));
+        if (config.isPasspoint())
+            ssid = config.providerFriendlyName;
+        else
+            ssid = (config.SSID == null ? "" : removeDoubleQuotes(config.SSID));
+            
         security = getSecurity(config);
         networkId = config.networkId;
         mConfig = config;
@@ -643,11 +679,25 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return reorder;
     }
 
+    void update(WifiConfiguration config) {
+        mConfig = config;
+        networkId = config.networkId;
+        if (mAccessPointListener != null) {
+            mAccessPointListener.onAccessPointChanged(this);
+        }
+    }
+    
     public static String getSummary(Context context, String ssid, DetailedState state,
-            boolean isEphemeral) {
-        if (state == DetailedState.CONNECTED && isEphemeral && ssid == null) {
-            // Special case for connected + ephemeral networks.
-            return context.getString(R.string.connected_via_wfa);
+            boolean isEphemeral, String passpointProvider) {
+        if (state == DetailedState.CONNECTED && ssid == null) {
+            if (TextUtils.isEmpty(passpointProvider) == false) {
+                // Special case for connected + passpoint networks.
+                String format = context.getString(R.string.connected_via_passpoint);
+                return String.format(format, passpointProvider);
+            } else if (isEphemeral) {
+                // Special case for connected + ephemeral networks.
+                return context.getString(R.string.connected_via_wfa);
+            }
         }
 
         String[] formats = context.getResources().getStringArray((ssid == null)
@@ -661,7 +711,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public static String getSummary(Context context, DetailedState state, boolean isEphemeral) {
-        return getSummary(context, null, state, isEphemeral);
+        return getSummary(context, null, state, isEphemeral, null);
+    }
+
+    public static String getSummary(Context context, DetailedState state, boolean isEphemeral,
+            String passpointProvider) {
+        return getSummary(context, null, state, isEphemeral, passpointProvider);
     }
 
     public static String convertToQuotedString(String string) {
