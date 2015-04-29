@@ -1464,7 +1464,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                     bounds.right - insetR - padR, bounds.bottom - r.mInsetB - padB);
 
             // Apply resolved gravity to drawable based on resolved size.
-            final int gravity = resolveGravity(r.mGravity, r.mWidth, r.mHeight);
+            final int gravity = resolveGravity(r.mGravity, r.mWidth, r.mHeight,
+                    d.getIntrinsicWidth(), d.getIntrinsicHeight());
             final int w = r.mWidth < 0 ? d.getIntrinsicWidth() : r.mWidth;
             final int h = r.mHeight < 0 ? d.getIntrinsicHeight() : r.mHeight;
             Gravity.apply(gravity, w, h, container, outRect, layoutDirection);
@@ -1491,7 +1492,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @param height height of the layer if set, -1 otherwise
      * @return the default gravity for the layer
      */
-    private static int resolveGravity(int gravity, int width, int height) {
+    private static int resolveGravity(int gravity, int width, int height,
+            int intrinsicWidth, int intrinsicHeight) {
         if (!Gravity.isHorizontal(gravity)) {
             if (width < 0) {
                 gravity |= Gravity.FILL_HORIZONTAL;
@@ -1506,6 +1508,17 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             } else {
                 gravity |= Gravity.TOP;
             }
+        }
+
+        // If a dimension if not specified, either implicitly or explicitly,
+        // force FILL for that dimension's gravity. This ensures that colors
+        // are handled correctly and ensures backward compatibility.
+        if (width < 0 && intrinsicWidth < 0) {
+            gravity |= Gravity.FILL_HORIZONTAL;
+        }
+
+        if (height < 0 && intrinsicHeight < 0) {
+            gravity |= Gravity.FILL_VERTICAL;
         }
 
         return gravity;
