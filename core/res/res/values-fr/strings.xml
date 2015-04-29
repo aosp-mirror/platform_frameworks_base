@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sans nom&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Aucun numéro de téléphone)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Inconnu"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Messagerie vocale"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Bannière d\'itinérance activée"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Bannière d\'itinérance désactivée"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Recherche des services disponibles"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Appels Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Désactivé"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi de préférence"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobile de préférence"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi uniquement"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g> au bout de <xliff:g id="TIME_DELAY">{2}</xliff:g> secondes"</string>
@@ -541,9 +550,9 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permet à l\'application d\'accéder à des commandes de localisation supplémentaires offertes par le fournisseur. Elle est ainsi susceptible d\'interférer avec le bon fonctionnement du GPS ou de toute autre source de localisation."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"autoriser l\'installation d\'un fournisseur de services de localisation"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Permet de créer des sources de localisation fictives à des fins de tests ou pour installer un nouveau fournisseur de position. L\'application peut ainsi modifier la position et/ou l\'état renvoyé par d\'autres sources de localisation telles que le GPS ou les fournisseurs de position."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"position précise (GPS et réseau)"</string>
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"connaître votre position précise (GPS et réseau)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Permet à l\'application d\'obtenir votre position exacte à l\'aide du récepteur satellite GPS ou des sources de localisation de réseau tels que les points d\'accès Wi-Fi et les antennes-relais. Ces services de localisation doivent être activés et disponibles sur votre appareil pour que l\'application puisse déterminer où vous vous trouvez, le cas échéant. Cette autorisation peut entraîner une utilisation accrue de la batterie."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"position approximative (réseau)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"connaître votre position approximative (réseau)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Permet à l\'application d\'obtenir votre position approximative. Celle-ci est fournie par des services de localisation sur la base des sources de localisation de réseau tels que les points d\'accès Wi-Fi et les antennes-relais. Ces services de localisation doivent être activés et disponibles sur votre appareil pour que l\'application puisse déterminer où vous vous trouvez de façon approximative, le cas échéant."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"Accès à SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permet à l\'application d\'utiliser les fonctionnalités de bas niveau de SurfaceFlinger."</string>
@@ -619,7 +628,7 @@
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Permet à l\'application de contrôler différents périphériques à des fins de test matériel."</string>
     <string name="permlab_fm" msgid="8749504526866832">"accéder aux radios FM"</string>
     <string name="permdesc_fm" msgid="4145699441237962818">"Permet à l\'application d\'accéder aux radios FM afin d\'écouter des programmes."</string>
-    <string name="permlab_callPhone" msgid="3925836347681847954">"Appeler directement les numéros de téléphone"</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"appeler directement les numéros de téléphone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet à l\'application d\'appeler des numéros de téléphone sans votre intervention. Cette autorisation peut entraîner des frais ou des appels imprévus et ne permet pas à l\'application d\'appeler des numéros d\'urgence. Les applications malveillantes peuvent générer des frais en passant des appels sans votre consentement."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"Appel direct de tout numéro de téléphone"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permet à l\'application d\'appeler n\'importe quel numéro de téléphone, y compris les numéros d\'urgence, sans votre intervention. Des applications malveillantes peuvent passer des appels inutiles et interdits aux services d\'urgence."</string>
@@ -693,7 +702,7 @@
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permet à l\'application de créer des sockets réseau et d\'utiliser des protocoles réseau personnalisés. Le navigateur et d\'autres applications permettent d\'envoyer des données sur Internet. Cette autorisation n\'est donc pas nécessaire pour envoyer des données sur Internet."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"changer/intercepter les paramètres et le trafic du réseau"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permet à l\'application de modifier les paramètres réseau, ainsi que d\'intercepter et de surveiller tout le trafic réseau ayant pour but de modifier le proxy et le port d\'un APN, par exemple. Des applications malveillantes peuvent exploiter cette fonctionnalité pour surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
-    <string name="permlab_changeNetworkState" msgid="958884291454327309">"Modification de la connectivité du réseau"</string>
+    <string name="permlab_changeNetworkState" msgid="958884291454327309">"modifier la connectivité réseau"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet à l\'application de modifier l\'état de la connectivité du réseau."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"changer la connectivité du partage de connexion"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet à l\'application de modifier l\'état de la connectivité du partage de connexion."</string>

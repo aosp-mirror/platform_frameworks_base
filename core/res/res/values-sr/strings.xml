@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> сек"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> сек"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Без наслова&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Нема броја телефона)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Непознато"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Гласовна пошта"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"Банер роминга је укључен"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Банер роминга је искључен"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Претраживање услуге"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Позивање преко Wi-Fi-ја"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Искључено"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Предност има Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Предност има мобилна мрежа"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Само Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Није прослеђено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> након <xliff:g id="TIME_DELAY">{2}</xliff:g> секунде(и)"</string>
@@ -1842,8 +1852,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Тражи шаблон за откључавање пре откачињања"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тражи лозинку пре откачињања"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Да би продужила време трајања батерије, уштеда батерије смањује перформансе уређаја и ограничава вибрацију, услуге локације и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију можда неће да се ажурирају ако их не отворите.\n\nУштеда батерије се аутоматски искључује када се уређај пуни."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Док се прекид рада не заврши у <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Док се време одмора не заврши"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Док се одмор не заврши у <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Док се одмор не заврши"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Један минут (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d минута (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>

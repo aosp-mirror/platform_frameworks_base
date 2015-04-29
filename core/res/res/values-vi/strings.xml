@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> giây"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> giây"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Không có tiêu đề&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Không có số điện thoại nào)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Không xác định"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Thư thoại"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"Biểu ngữ Chuyển vùng Bật"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Biểu ngữ Chuyển vùng Tắt"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Đang tìm kiếm Dịch vụ"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Gọi qua Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Tắt"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Ưu tiên Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Ưu tiên mạng di động"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Chỉ Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Không được chuyển tiếp"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> sau <xliff:g id="TIME_DELAY">{2}</xliff:g> giây"</string>
@@ -835,7 +845,7 @@
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Ngăn sử dụng một số tính năng trong chế độ bảo vệ phím."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nhà riêng"</item>
-    <item msgid="869923650527136615">"ĐT di động"</item>
+    <item msgid="869923650527136615">"Di Động"</item>
     <item msgid="7897544654242874543">"Cơ quan"</item>
     <item msgid="1103601433382158155">"Số fax Cơ quan"</item>
     <item msgid="1735177144948329370">"Số fax Nhà riêng"</item>
@@ -878,7 +888,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Tùy chỉnh"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Nhà riêng"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"ĐT di động"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Di Động"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Cơ quan"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Số fax Cơ quan"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Số fax Nhà riêng"</string>
@@ -905,7 +915,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"Nhà riêng"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Cơ quan"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Khác"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"ĐT di động"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Di Động"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Tùy chỉnh"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Nhà riêng"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Cơ quan"</string>

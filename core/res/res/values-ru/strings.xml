@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> с"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> с"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Без названия&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"..."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Нет номера телефона)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Неизвестно"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голосовая почта"</string>
@@ -73,7 +71,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"Идентификация звонящего абонента"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Идентификатор подключенной линии"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Ограничение идентификатора подключенной линии"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Переадресация вызова"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Переадресация вызовов"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Параллельный вызов"</string>
     <string name="BaMmi" msgid="455193067926770581">"Запрет вызовов"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Смена пароля"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"Баннер роуминга включен"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Баннер роуминга выключен"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Поиск службы"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Звонки по Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Отключено"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Приоритет Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Приоритет моб. сети"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Только Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не переадресовано"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> через <xliff:g id="TIME_DELAY">{2}</xliff:g> с."</string>
@@ -841,30 +851,30 @@
     <item msgid="1735177144948329370">"Домашний факс"</item>
     <item msgid="603878674477207394">"Пейджер"</item>
     <item msgid="1650824275177931637">"Другой"</item>
-    <item msgid="9192514806975898961">"Создать свой ярлык"</item>
+    <item msgid="9192514806975898961">"Новый тип"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Личный"</item>
     <item msgid="7084237356602625604">"Рабочий"</item>
     <item msgid="1112044410659011023">"Другой"</item>
-    <item msgid="2374913952870110618">"Создать свой ярлык"</item>
+    <item msgid="2374913952870110618">"Новый тип"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Домашний"</item>
     <item msgid="5629153956045109251">"Рабочий"</item>
     <item msgid="4966604264500343469">"Другой"</item>
-    <item msgid="4932682847595299369">"Создать свой ярлык"</item>
+    <item msgid="4932682847595299369">"Новый тип"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Домашний"</item>
     <item msgid="1359644565647383708">"Рабочий"</item>
     <item msgid="7868549401053615677">"Другое"</item>
-    <item msgid="3145118944639869809">"Создать свой ярлык"</item>
+    <item msgid="3145118944639869809">"Новый тип"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Рабочий"</item>
     <item msgid="4378074129049520373">"Другое"</item>
-    <item msgid="3455047468583965104">"Создать свой ярлык"</item>
+    <item msgid="3455047468583965104">"Новый тип"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -876,7 +886,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Создать свой ярлык"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Новый тип"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Домашний"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Мобильный"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Рабочий"</string>
@@ -901,20 +911,20 @@
     <string name="eventTypeBirthday" msgid="2813379844211390740">"День рождения"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Юбилей"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Другой"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Создать свой ярлык"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Новый тип"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Личный"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Рабочий"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Другой"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Мобильный"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Создать свой ярлык"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Новый тип"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Домашний"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Рабочий"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Другой"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Создать свой ярлык"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Новый тип"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Домашний"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Рабочий"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Другой"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Создать свой ярлык"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Новый тип"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -926,7 +936,7 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Работа"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Другое"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Создать свой ярлык"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Новый тип"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Особый"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Секретарь"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Брат"</string>
@@ -1267,8 +1277,8 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Открыть с помощью приложения \"%1$s\""</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Редактировать с помощью приложения \"%1$s\""</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Поделиться с помощью приложения:"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Предоставлять доступ с помощью приложения \"%1$s\""</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Поделиться с помощью:"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Поделиться через %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Выберите главное приложение"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Назначьте приложение \"%1$s\" главным"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"По умолчанию для этого действия"</string>
@@ -1598,7 +1608,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Ещё"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Внутренняя память"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Внутр. память"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-карта"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-накопитель"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Изменить"</string>
@@ -1841,7 +1851,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запрашивать PIN-код для отключения блокировки"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ для отключения блокировки"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль для отключения блокировки"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы заряд батареи расходовался медленнее, режим энергосбережения уменьшает быстродействие устройства и ограничивает количество ресурсов, затрачиваемых на вибрацию, Геолокацию и большинство процессов обработки данных в фоновом режиме. Приложения, которые используют синхронизацию (например, для электронной почты и обмена SMS), могут не обновляться, пока вы их не откроете.\n\nКогда устройство заряжается, режим энергосбережения отключается автоматически."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"До отключения режима (в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"До отключения режима"</string>
   <plurals name="zen_mode_duration_minutes_summary">

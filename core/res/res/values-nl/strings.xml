@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> seconden"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> seconde"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Zonder titel&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Geen telefoonnummer)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Onbekend"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Voicemail"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roamingbanner aan"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roamingbanner uit"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Service zoeken"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Bellen via wifi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Uit"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Voorkeur voor wifi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Voorkeur voor mobiel"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Alleen wifi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> na <xliff:g id="TIME_DELAY">{2}</xliff:g> seconden"</string>
@@ -198,9 +207,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Stille modus"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Geluid is UIT"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Geluid is AAN"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegmodus"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegmodus is AAN"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegmodus is UIT"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegtuigmodus"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegtuigmodus is AAN"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegtuigmodus is UIT"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Instellingen"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Nu vergrendelen"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>

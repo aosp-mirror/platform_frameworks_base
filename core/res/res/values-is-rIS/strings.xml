@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sek."</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sek."</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Ónefnt&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Ekkert símanúmer)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Óþekkt"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Talhólf"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Kveikt á reikiborða"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Slökkt á reikiborða"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Leitar að þjónustu"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi símtöl"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Slökkt"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi í forgangi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Farsímakerfi í forgangi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi eingöngu"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ekki áframsent"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> eftir <xliff:g id="TIME_DELAY">{2}</xliff:g> sekúndur"</string>
@@ -902,7 +911,7 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Brúðkaupsafmæli"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Annað"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Sérsniðið"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Heim"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Heima"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Vinna"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Annað"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Farsími"</string>

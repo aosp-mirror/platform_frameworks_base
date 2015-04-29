@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;新規&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"..."</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"（電話番号なし）"</string>
     <string name="unknownName" msgid="6867811765370350269">"不明"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"ボイスメール"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"ローミングバナーON"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ローミングバナーOFF"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"サービスを検索中"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi通話"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"OFF"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi優先"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"モバイル優先"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fiのみ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g> (<xliff:g id="TIME_DELAY">{2}</xliff:g>秒後)"</string>
@@ -158,11 +168,11 @@
     <string name="low_memory" product="default" msgid="3475999286680000541">"端末のストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ネットワークが監視される場合があります"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"不明な第三者"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"ワークプロフィールの管理者によって監視される場合があります"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"仕事用プロファイルの管理者によって監視される場合があります"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>によって監視される場合があります"</string>
-    <string name="work_profile_deleted" msgid="5005572078641980632">"ワークプロフィールが削除されました"</string>
-    <string name="work_profile_deleted_description" msgid="6305147513054341102">"管理アプリがないためワークプロフィールが削除されました。"</string>
-    <string name="work_profile_deleted_details" msgid="226615743462361248">"ワークプロフィールの管理アプリがないか、破損しています。そのためワークプロフィールと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
+    <string name="work_profile_deleted" msgid="5005572078641980632">"仕事用プロファイルが削除されました"</string>
+    <string name="work_profile_deleted_description" msgid="6305147513054341102">"管理アプリがないため仕事用プロファイルが削除されました。"</string>
+    <string name="work_profile_deleted_details" msgid="226615743462361248">"仕事用プロファイルの管理アプリがないか、破損しています。そのため仕事用プロファイルと関連データが削除されました。管理者にサポートをご依頼ください。"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"端末のデータが消去されます"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"管理アプリの構成要素が不足しているか、アプリが破損しているため、ご利用になれません。端末のデータはこれから消去されます。管理者にサポートをご依頼ください。"</string>
     <string name="me" msgid="6545696007631404292">"自分"</string>
@@ -527,7 +537,7 @@
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"あなたや友だちのソーシャル更新情報へのアクセスと同期をアプリに許可します。情報の共有は慎重に行ってください。これを許可すると、あなたと友だちがソーシャルネットワークで行ったやり取りを、機密性に関係なくアプリから読み取ることができるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ソーシャルストリームに書く"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"友だちのソーシャル更新情報の表示をアプリに許可します。情報の共有は慎重に行ってください。これによりアプリは、友だちから発信されたかのようなメッセージを作成できるようになります。注: この許可は、一部のソーシャルネットワークでは適用されない場合があります。"</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報を読み取る"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報の読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"タブレットに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"テレビに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"携帯端末に保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
@@ -931,7 +941,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"アシスタント"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"兄弟"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"子ども"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"パートナー（国内）"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"同棲相手"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"父"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"友だち"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"上司"</string>
@@ -1413,7 +1423,7 @@
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"カメラとして接続"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"インストーラとして接続"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBアクセサリを接続しました"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"他のUSBオプションをタップしてください。"</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"USB接続方法を変更するにはタップしてください。"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USBストレージをフォーマットしますか？"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SDカードをフォーマットしますか？"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USBストレージに保存されているファイルはすべて消去されます。この操作は元に戻せません。"</string>
@@ -1496,8 +1506,8 @@
     <string name="deny" msgid="2081879885755434506">"拒否"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"権限がリクエストされました"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"次のアカウントにアクセスする権限が\nリクエストされました: <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"ワークプロフィールの外部でこのアプリを使用しています"</string>
-    <string name="forward_intent_to_work" msgid="621480743856004612">"ワークプロフィールでこのアプリを使用しています"</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"仕事用プロファイルの外部でこのアプリを使用しています"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"仕事用プロファイルでこのアプリを使用しています"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"入力方法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同期"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"ユーザー補助"</string>
@@ -1639,7 +1649,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"通話を受けますか？"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"常時"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"1回のみ"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$sはワークプロフィールをサポートしていません"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$sは仕事用プロファイルをサポートしていません"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"タブレット"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"テレビ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"携帯端末"</string>
@@ -1842,7 +1852,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"画面固定を解除する前にロック解除パターンの入力を求める"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"オフライン再生を解除する前にパスワードの入力を求める"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンロードが終わるまで"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンタイムが終わるまで"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"ダウンタイム終了まで"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"1分間（<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>まで）"</item>

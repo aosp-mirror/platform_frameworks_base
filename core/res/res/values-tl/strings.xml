@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> (na) seg"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> (na) seg"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Walang pamagat&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Walang numero ng telepono)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Hindi alam"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Voicemail"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"Naka-on ang Banner ng Roaming"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Naka-off ang Banner ng Roaming"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Naghahanap ng Serbisyo"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Pagtawag sa pamamagitan ng Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Naka-off"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Mas gusto ang Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mas gusto ang cellular"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi lang"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi naipasa"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pagkatapos ng <xliff:g id="TIME_DELAY">{2}</xliff:g> (na) segundo"</string>
@@ -937,7 +947,7 @@
     <string name="relationTypeManager" msgid="6365677861610137895">"Manager"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Ina"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Magulang"</string>
-    <string name="relationTypePartner" msgid="7266490285120262781">"Kasosyo"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Ni-refer ni"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Kamag-anak"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Kapatid na Babae"</string>

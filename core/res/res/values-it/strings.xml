@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> secondi"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> secondo"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Senza nome&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nessun numero di telefono)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Sconosciuto"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Segreteria"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Banner roaming attivato"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Banner roaming disattivato"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Ricerca servizio"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Chiamate Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Non attiva"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Rete preferita: Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Rete preferita: cellulare"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> dopo <xliff:g id="TIME_DELAY">{2}</xliff:g> secondi"</string>
@@ -755,7 +764,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lettura contenuti scheda SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"L\'app può leggere i contenuti dell\'archivio USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Consente all\'applicazione di leggere i contenuti della scheda SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"Modifica/eliminazione contenuti USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifica/eliminazione contenuti USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifica o eliminazione dei contenuti della scheda SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Consente all\'applicazione di scrivere nell\'archivio USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Consente all\'applicazione di scrivere sulla scheda SD."</string>
@@ -1422,7 +1431,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tocca per disattivare il debug USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambia tastiera"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Scegli tastiere"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Scegli tastiera"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostra metodo immissione"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Seleziona layout tastiera"</string>

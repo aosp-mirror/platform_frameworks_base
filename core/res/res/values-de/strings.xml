@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> Sek."</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> Sek."</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Unbenannt&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Keine Telefonnummer)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Unbekannt"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Mailbox"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roaming-Banner ein"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roaming-Banner aus"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Suche nach Dienst"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"WLAN-Telefonie"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Aus"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WLAN bevorzugt"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobilfunk bevorzugt"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Nur WLAN"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nicht weitergeleitet"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> nach <xliff:g id="TIME_DELAY">{2}</xliff:g> Sekunden."</string>
@@ -1842,8 +1851,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vor dem Beenden nach Entsperrungsmuster fragen"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vor dem Beenden nach Passwort fragen"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf Ihrem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn Ihr Gerät aufgeladen wird."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Bis zum Ende der Downtime um <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Bis zum Ende der Inaktivität"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Bis zum Ende der Ruhezeit um <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Bis zum Ende der Ruhezeit"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"1 Minute (bis <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d Minuten (bis <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>

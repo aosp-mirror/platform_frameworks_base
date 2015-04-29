@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sek."</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sek."</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Uden titel&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Intet telefonnummer)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Ukendt"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Telefonsvarer"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roamingbanner til"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roamingbanner fra"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Søger efter tjeneste"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Opkald via Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Fra"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WiFi-netværk er foretrukket"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobilnetværk er foretrukket"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Kun Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderestillet"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
@@ -703,7 +713,7 @@
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Tillader, at appen kan læse oplysninger om Wi-Fi-netværk, f.eks. hvorvidt Wi-Fi er aktiveret og navnet på forbundne Wi-Fi-enheder."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"oprette og afbryde Wi-Fi-forbindelse"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Tillader, at appen kan oprette og afbryde forbindelsen fra Wi-Fi-adgangspunkter og foretage ændringer i enhedskonfigurationen for Wi-Fi-netværk."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillad Wi-Fi-multicastmodtagelse"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillade Wi-Fi-multicastmodtagelse"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Tillader, at appen kan modtage pakker, der sendes til alle enheder på et Wi-Fi-netværk ved hjælp af multicastadresser, ikke kun din tablet. Den bruger mere strøm end tilstanden, der ikke anvender multicast."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Giver appen lov til at modtage pakker, der sendes til alle enheder og ikke bare dit tv på et Wi-Fi-netværk ved hjælp af multicast-adresser. Dette bruger mere strøm end tilstanden uden multicast."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Tillader, at appen kan modtage pakker, der sendes til alle enheder på et Wi-Fi-netværk ved hjælp af multicastadresser, ikke kun din telefon. Den bruger mere strøm end tilstanden, der ikke anvender multicast."</string>
@@ -781,7 +791,7 @@
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Tillader, at appen kan interagere med telefonitjenester for at foretage/modtage opkald."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"leverer brugeroplevelsen under opkald"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Tillader, at appen leverer brugeroplevelsen under opkald."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"læse oversigt over netværksbrug"</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"læse historisk netværksbrug"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Tillader, at appen kan læse historisk netværksbrug for specifikke netværk og apps."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"administrer netværkspolitik"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Tillader, at appen kan administrere netværkspolitikker og definere appspecifikke regler."</string>
@@ -888,7 +898,7 @@
     <string name="phoneTypeCar" msgid="8738360689616716982">"Bil"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Virksomhed (hovednummer)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
-    <string name="phoneTypeMain" msgid="6766137010628326916">"Hoved"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Hovednr."</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Andre faxbeskeder"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
@@ -1603,7 +1613,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-lager"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Rediger"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advarsel om dataforbrug"</string>
-    <string name="data_usage_warning_body" msgid="2814673551471969954">"Tryk for at se brug og indstill."</string>
+    <string name="data_usage_warning_body" msgid="2814673551471969954">"Tryk for at se forbrug og indstillinger."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Grænsen for 2G-3G-data er nået"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Grænsen for 4G-data er nået"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Grænsen for mobildata er nået"</string>

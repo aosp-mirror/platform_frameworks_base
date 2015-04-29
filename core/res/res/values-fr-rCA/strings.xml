@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sans_titre&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"..."</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Aucun numéro de téléphone)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Inconnu"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Messagerie vocale"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"Bannière d\'itinérance activée"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Bannière d\'itinérance désactivée"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Recherche des services disponibles"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Appels Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Désactivé"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Réseau Wi-Fi de préférence"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Réseau cellulaire de préférence"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi seulement"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g> au bout de <xliff:g id="TIME_DELAY">{2}</xliff:g> secondes"</string>
@@ -543,7 +553,7 @@
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Permet de créer des sources de localisation fictives à des fins de tests ou pour installer un nouveau fournisseur de position. L\'application peut ainsi modifier la position ou l\'état renvoyé par d\'autres sources de localisation telles que le GPS ou les fournisseurs de position."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"position précise (GPS et réseau)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Permet à l\'application d\'obtenir votre position exacte à l\'aide du récepteur satellite GPS ou des sources de localisation de réseau tels que les points d\'accès Wi-Fi et les antennes-relais. Ces services de localisation doivent être activés et disponibles sur votre appareil pour que l\'application puissent déterminer où vous vous trouvez, le cas échéant. Cette autorisation peut entraîner une utilisation accrue de la batterie."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"position approximative (réseau)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"connaître votre position approximative (réseau)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Permet à l\'application d\'obtenir votre position approximative. Celle-ci est fournie par des services de localisation sur la base des sources de localisation de réseau tels que les points d\'accès Wi-Fi et les antennes-relais. Ces services de localisation doivent être activés et disponibles sur votre appareil pour que l\'application puisse déterminer où vous vous trouvez de façon approximative, le cas échéant."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"accéder à SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permet à l\'application d\'utiliser les fonctionnalités de bas niveau de SurfaceFlinger."</string>
@@ -571,7 +581,7 @@
     <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Permet à l\'application de contrôler la lecture des contenus multimédias et d\'accéder aux données associées (titre, auteur...)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifier vos paramètres audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrer fichier audio"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrer des fichiers audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Permet à l\'application d\'enregistrer des contenus audio à l\'aide du microphone. Cette autorisation lui donne la possibilité d\'enregistrer du contenu audio à tout moment sans votre consentement."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"Communication avec la carte SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permet à l\'application d\'envoyer des commandes à la carte SIM. Cette fonctionnalité est très dangereuse."</string>
@@ -1267,7 +1277,7 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Ouvrir avec %1$s"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Modifier avec"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Modifier avec %1$s"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Partager avec"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Partager"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Partager avec %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Sélectionner une application pour l\'écran d\'accueil"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Utiliser %1$s comme écran d\'accueil"</string>

@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> segundos"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> segundo"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sen título&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"…"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Sen número de teléfono)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Descoñecido"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Correo de voz"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"Banner de itinerancia activado"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Banner de itinerancia desactivado"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Buscando servizo"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Chamadas por wifi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wifi preferida"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Móbil preferido"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Só wifi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: non desviada"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> tras <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
@@ -1627,9 +1637,9 @@
     <string name="issued_on" msgid="5895017404361397232">"Data de emisión:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Caduca o:"</string>
     <string name="serial_number" msgid="758814067660862493">"Número de serie:"</string>
-    <string name="fingerprints" msgid="4516019619850763049">"Identificacións dixitais:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Identificación dixital SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Identificación dixital SHA-1:"</string>
+    <string name="fingerprints" msgid="4516019619850763049">"Impresións dixitais:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Impresión dixital SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Impresión dixital SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Ver todas"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Seleccionar actividade"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Compartir con"</string>

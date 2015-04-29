@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> வினாடிகள்"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> வினாடி"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;பெயரிடப்படாதது&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(தொலைபேசி எண் இல்லை)"</string>
     <string name="unknownName" msgid="6867811765370350269">"அறியப்படாதவர்"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"குரலஞ்சல்"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"ரோமிங் பேனர் இயக்கத்தில் உள்ளது"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ரோமிங் பேனர் முடக்கப்பட்டது"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"சேவையைத் தேடுகிறது"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"வைஃபை அழைப்பு"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"முடக்கப்பட்டுள்ளது"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"செல்லுலாருக்கு முன்னுரிமை"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"வைஃபை மட்டும்"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: பகிரப்படவில்லை"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> வினாடிகளுக்குப் பிறகு <xliff:g id="DIALING_NUMBER">{1}</xliff:g> ஐப் பகிர்"</string>

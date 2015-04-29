@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sekunder"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sekund"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Okänd&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">".."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Inget telefonnummer)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Okänt"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Röstbrevlåda"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roamingbanner på"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roamingbanner av"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Söker efter tjänst"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-samtal"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Av"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi i första hand"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobil i första hand"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Endast Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Vidarebefordras inte"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
@@ -630,7 +639,7 @@
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"styra meddelanden för platsuppdatering"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Tillåter att appen aktiverar/inaktiverar meddelanden om platsuppdateringar från radion. Används inte av vanliga appar."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"få åtkomst till incheckningsegenskaper"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Tillåter att appen får läs/skrivåtkomst till egenskaper som läggs upp via incheckningstjänsten. Används inte av vanliga appar."</string>
+    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Tillåter att appen får läs/skrivåtkomst till egenskaper som laddas upp via incheckningstjänsten. Används inte av vanliga appar."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"välja widgetar"</string>
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Tillåter att appen meddelar systemet vilka widgetar som kan användas av vilka appar. Med den här behörigheten kan andra appar få åtkomst till personliga uppgifter. Används inte av vanliga appar."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"ändra telefonstatus"</string>

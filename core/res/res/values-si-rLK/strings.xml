@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"තත් <xliff:g id="SECONDS">%1$d</xliff:g>"</string>
     <string name="durationSecond" msgid="985669622276420331">"තත් <xliff:g id="SECONDS">%1$d</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;නම් යොදා නැත&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(දුරකථන අංකයක් නොමැත)"</string>
     <string name="unknownName" msgid="6867811765370350269">"නොදනී"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"කටහඬ තැපෑල"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"රෝමිං  බැනරය සක්‍රීයයි"</string>
     <string name="roamingText12" msgid="1189071119992726320">"රෝමිං බැනරය අක්‍රියයි"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"සේවාව සඳහා සොයමින්"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi ඇමතීම"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ක්‍රියාවිරහිතයි"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi වඩා කැමතියි"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"සෙලියුලර් වඩා කැමතියි"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi පමණයි"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ඉදිරියට නොයවන ලදි"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: තත්පර <xliff:g id="TIME_DELAY">{2}</xliff:g> ට පසුව <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>

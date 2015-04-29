@@ -40,14 +40,12 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> δευτ."</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> δευτ."</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Χωρίς τίτλο&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Δεν υπάρχει τηλεφωνικός αριθμός)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Άγνωστο"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Αυτόματος τηλεφωνητής"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Αυτ/τος τηλεφωνητής"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Πρόβλημα σύνδεσης ή μη έγκυρος κώδικας MMI."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"Η λειτουργία περιορίζεται μόνο σε καθορισμένους αριθμούς κλήσης."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Η λειτουργία περιορίζεται μόνο σε προκαθορισμένους αριθμούς κλήσης."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Η υπηρεσία ενεργοποιήθηκε."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Η υπηρεσία ενεργοποιήθηκε για:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Η υπηρεσία έχει απενεργοποιηθεί."</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Ενεργό διαφημιστικό πλαίσιο περιαγωγής"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Διαφημιστικό πλαίσιο περιαγωγής απενεργοποιημένο"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Αναζήτηση υπηρεσιών"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Κλήση Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ανενεργό"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Προτίμηση Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Προτίμηση δικτύου κινητής τηλεφωνίας"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Μόνο Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Δεν προωθήθηκε"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> μετά από <xliff:g id="TIME_DELAY">{2}</xliff:g> δευτερόλεπτα"</string>

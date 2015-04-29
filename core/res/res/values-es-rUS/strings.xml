@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sin título&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(No hay número de teléfono)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Desconocido"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Correo de voz"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"Banner de roaming activado"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Banner de roaming desactivado"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Buscando servicio"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Llamada por Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivada"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Red Wi-Fi preferida"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Red móvil preferida"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> después de <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
@@ -527,7 +537,7 @@
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Permite que la aplicación acceda a las actualizaciones de tus redes sociales y las de tus amigos, y que las sincronice. Ten cuidado al compartir información, ya que la aplicación puede utilizar este permiso para leer las conversaciones que tengas con tus amigos en las redes sociales sin tener en cuenta si son confidenciales. Nota: Este permiso no se puede utilizar en todas las redes sociales."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"Escritura en tu muro social"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Permite que la aplicación muestre actualizaciones de las redes sociales de tus amigos. Ten cuidado al compartir información, ya que la aplicación puede generar mensajes que parezcan proceder de amigos. Nota: Este permiso no se puede utilizar en todas las redes sociales."</string>
-    <string name="permlab_readCalendar" msgid="5972727560257612398">"Leer eventos de calendario e información confidencial"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"leer eventos de calendario e información confidencial"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permite que la aplicación consulte todos los eventos de calendario almacenados en la tablet, incluidos los de amigos y compañeros de trabajo. La aplicación puede utilizar este permiso para compartir o guardar datos del calendario del usuario sin tener en cuenta si son privados o confidenciales."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Permite que la aplicación lea todos los eventos de calendario almacenados en la TV, incluidos aquellos de amigos o colegas. Esta opción puede permitir que la aplicación comparta o guarde datos de calendario, independientemente de la confidencialidad o la privacidad."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Permite que la aplicación consulte todos los eventos de calendario almacenados en el dispositivo, incluidos los de amigos y compañeros de trabajo. La aplicación puede utilizar este permiso para compartir o guardar los datos del calendario sin tener en cuenta si son privados o confidenciales."</string>
@@ -751,7 +761,7 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Permite que la aplicación consulte cualquier palabra, nombre o frase que el usuario haya almacenado en su diccionario."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"agregar palabras en el diccionario definido por el usuario"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Permite que la aplicación ingrese palabras nuevas en el diccionario del usuario."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"leer contenido dispositivo USB"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"leer contenido de disp. USB"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"leer el contenido de tu tarjeta SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Permite leer contenido de USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Permite que la aplicación lea el contenido de la tarjeta SD."</string>
@@ -1137,8 +1147,8 @@
     <item quantity="other" msgid="2176942008915455116">"hace <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"Hace 1 hora."</item>
-    <item quantity="other" msgid="2467273239587587569">"Hace <xliff:g id="COUNT">%d</xliff:g> horas."</item>
+    <item quantity="one" msgid="9150797944610821849">"Hace 1 hora"</item>
+    <item quantity="other" msgid="2467273239587587569">"Hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
   </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Últimos <xliff:g id="COUNT">%d</xliff:g> días"</item>
@@ -1147,7 +1157,7 @@
     <string name="older" msgid="5211975022815554840">"Antiguos"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"ayer"</item>
-    <item quantity="other" msgid="2479586466153314633">"Hace <xliff:g id="COUNT">%d</xliff:g> días."</item>
+    <item quantity="other" msgid="2479586466153314633">"Hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
   </plurals>
   <plurals name="in_num_seconds">
     <item quantity="one" msgid="2729745560954905102">"en 1 segundo"</item>
@@ -1174,7 +1184,7 @@
     <item quantity="other" msgid="851164968597150710">"Hace <xliff:g id="COUNT">%d</xliff:g> minutos."</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"Hace 1 hora."</item>
+    <item quantity="one" msgid="4796212039724722116">"Hace 1 hora"</item>
     <item quantity="other" msgid="6889970745748538901">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
@@ -1517,8 +1527,8 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"No se seleccionó un archivo."</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo auto habilitado"</string>
-    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Toca para salir del modo auto."</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Modo Auto habilitado"</string>
+    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Toca para salir del modo Auto."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red o zona activa conectados"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Toca para configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Atrás"</string>

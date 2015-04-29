@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez nosaukuma&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nav tālruņa numura)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Nezināms"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Balss pasts"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Viesabonēšanas reklāmkarogs ir ieslēgts."</string>
     <string name="roamingText12" msgid="1189071119992726320">"Viesabonēšanas reklāmkarogs ir izslēgts."</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Pakalpojuma meklēšana"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi zvani"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Izslēgts"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Vēlams Wi-Fi tīkls"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Vēlams mobilais tīkls"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Tikai Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nav pāradresēts"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pēc <xliff:g id="TIME_DELAY">{2}</xliff:g> sekundes(-ēm)"</string>
@@ -1260,7 +1269,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Uzmanību!"</string>
     <string name="loading" msgid="7933681260296021180">"Notiek ielāde..."</string>
     <string name="capital_on" msgid="1544682755514494298">"IESLĒGT"</string>
-    <string name="capital_off" msgid="6815870386972805832">"IZSLĒGT"</string>
+    <string name="capital_off" msgid="6815870386972805832">"IZSL."</string>
     <string name="whichApplication" msgid="4533185947064773386">"Pabeigt darbību, izmantojot"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Pabeigt darbību, izmantojot %1$s"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Atvērt, izmantojot"</string>

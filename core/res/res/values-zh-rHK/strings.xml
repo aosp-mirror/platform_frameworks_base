@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> 秒"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> 秒"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;未命名&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"..."</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(沒有電話號碼)"</string>
     <string name="unknownName" msgid="6867811765370350269">"不明"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"留言信箱"</string>
@@ -125,6 +123,18 @@
     <string name="roamingText11" msgid="4154476854426920970">"漫遊橫幅開啟"</string>
     <string name="roamingText12" msgid="1189071119992726320">"漫遊橫幅關閉"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜尋服務"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi 通話"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首選 Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"首選流動數據"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"只限 Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：尚未轉接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> 於 <xliff:g id="TIME_DELAY">{2}</xliff:g> 秒後轉接"</string>
@@ -1842,8 +1852,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"直到停機時間於 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 結束"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"直到停機時間完結"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"直到休息時間結束 (<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"直到休息時間結束"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"需時 1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"需時 %1$d 分鐘 (完成時間 <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>

@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sin título&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"..."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Sin número de teléfono)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Desconocido"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Buzón de voz"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Banner de itinerancia activado"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Banner de itinerancia desactivado"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Buscando servicio"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Llamadas Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferir datos móviles"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: No desviada"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> transcurridos <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
@@ -541,9 +550,9 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite que la aplicación acceda a otros comandos del proveedor de ubicación. De esta forma, la aplicación podrá interferir en el funcionamiento del GPS o de otras fuentes de ubicación."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"permiso para instalar un proveedor de ubicación"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Permite crear fuentes de ubicación simuladas para hacer pruebas o instalar un nuevo proveedor de ubicación. Este permiso autoriza a la aplicación a sobrescribir la ubicación o el estado proporcionados por otras fuentes de ubicación, como los proveedores de ubicación o GPS."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ubicación precisa (basada en red y GPS)"</string>
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ubicación precisa (basada en redes y GPS)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Permite que la aplicación obtenga tu ubicación precisa mediante el Sistema de posicionamiento global (GPS) o fuentes de ubicación de red, como torres de telefonía y redes Wi-Fi. Estos servicios de ubicación deben estar activados y disponibles para que la aplicación pueda utilizarlos. Las aplicaciones pueden utilizar este permiso para determinar tu ubicación y es posible que el dispositivo consuma más batería."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ubicación aproximada (basada en red)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ubicación aproximada (basada en redes)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Permite que la aplicación obtenga tu ubicación aproximada. Esta ubicación se deriva de los servicios de ubicación que utilizan fuentes de ubicación de red, como torres de telefonía y redes Wi-Fi. Estos servicios de ubicación deben estar activados y disponibles para que la aplicación pueda utilizarlos. Las aplicaciones pueden utilizar este permiso para determinar tu ubicación de forma aproximada."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"acceder a SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite que la aplicación use funciones de SurfaceFlinger de nivel inferior."</string>
@@ -689,7 +698,7 @@
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permite que la aplicación solicite tokens de autenticación."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ver conexiones de red"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Permite que la aplicación vea información sobre conexiones de red (por ejemplo, qué redes existen y están conectadas)."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"acceso completo a red"</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"acceso completo a la red"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permite que la aplicación cree sockets de red y utilice protocolos de red personalizados. El navegador y otras aplicaciones proporcionan los medios necesarios para el envío de datos a Internet, por lo que no hace falta utilizar este permiso para eso."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"cambiar/interceptar el tráfico y la configuración de red"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permite que la aplicación modifique los ajustes de red y que intercepte e inspeccione todo el tráfico de red para, por ejemplo, cambiar el proxy y el puerto de cualquier APN. Las aplicaciones malintencionadas pueden controlar, redirigir o modificar los paquetes de red sin el consentimiento del usuario."</string>
@@ -1388,7 +1397,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NUEVO:"</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Proporcionado por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"es posible que se cobre por usar la aplicación."</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"es posible que esto te cueste dinero"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Almacenamiento USB masivo"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Conexión por USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Has conectado el dispositivo al ordenador por USB. Toca el siguiente botón si quieres transferir archivos entre el ordenador y el almacenamiento USB del dispositivo."</string>
@@ -1517,7 +1526,7 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"Archivo no seleccionado"</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Se ha habilitado el modo coche."</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Se ha habilitado el modo coche"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Toca para salir del modo coche."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Anclaje a red/Zona Wi-Fi activo"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Toca para configurar"</string>

@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> másodperc"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> másodperc"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Névtelen&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nincs telefonszám)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Ismeretlen"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Hangposta"</string>
@@ -58,7 +56,7 @@
     <string name="badPin" msgid="9015277645546710014">"A megadott régi PIN kód helytelen."</string>
     <string name="badPuk" msgid="5487257647081132201">"A megadott PUK kód helytelen."</string>
     <string name="mismatchPin" msgid="609379054496863419">"A beírt PIN kódok nem egyeznek."</string>
-    <string name="invalidPin" msgid="3850018445187475377">"Írjon be egy 4-8 számjegyű PIN-kódot."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"Írjon be egy 4-8 számjegyű PIN kódot."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 számjegyű vagy hosszabb PUK kódot írjon be."</string>
     <string name="needPuk" msgid="919668385956251611">"A SIM kártya le van zárva a PUK kóddal. A feloldáshoz adja meg a PUK kódot."</string>
     <string name="needPuk2" msgid="4526033371987193070">"A SIM kártya feloldásához adja meg a PUK2 kódot."</string>
@@ -77,7 +75,7 @@
     <string name="CwMmi" msgid="9129678056795016867">"Hívásvárakoztatás"</string>
     <string name="BaMmi" msgid="455193067926770581">"Hívásletiltás"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Jelszómódosítás"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"PIN-kód módosítása"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"PIN kód módosítása"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"Szám hívása"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"Hívószám korlátozva"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Háromutas hívás"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Barangolást jelző szalaghirdetés bekapcsolva"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Barangolást jelző szalaghirdetés kikapcsolva"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Szolgáltatás keresése"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-hívás"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ki"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi előnyben részesítve"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobiladat-kapcsolat előnyben részesítve"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Csak Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nincs átirányítva"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> másodperc után"</string>

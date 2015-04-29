@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंद"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंद"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;अशीर्षकांकित&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(कोणताही फोन नंबर नाही)"</string>
     <string name="unknownName" msgid="6867811765370350269">"अज्ञात"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"व्हॉइसमेल"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"रोमिंग बॅनर चालू"</string>
     <string name="roamingText12" msgid="1189071119992726320">"रोमिंग बॅनर बंद"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवा शोधत आहे"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"वाय-फाय कॉलिंग"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बंद"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"वाय-फाय प्राधान्यकृत"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेल्युलर प्राधान्यकृत"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"केवळ वाय-फाय"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंदांनंतर <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -220,7 +229,7 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"आपल्या प्रत्यक्ष स्थानाचे परीक्षण करेल."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"नेटवर्क संप्रेषण"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"विविध नेटवर्क वैशिष्ट्यांवर प्रवेश करेल."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ब"</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ब्लूटुथ"</string>
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"ब द्वारे डिव्हाइसेसवर आणि नेटवर्कवर प्रवेश करेल."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ऑडिओ सेटिंग्ज"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ऑडिओ सेटिंग्ज बदला."</string>

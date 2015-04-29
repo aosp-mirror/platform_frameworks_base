@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंड"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंड"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;शीर्षक-रहित&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(कोई फ़ोन नंबर नहीं)"</string>
     <string name="unknownName" msgid="6867811765370350269">"अज्ञात"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"वॉयस मेल"</string>
@@ -73,7 +71,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"आउटगोइंग कॉलर ID"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट किया गया लाइन आईडी"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट किया गया लाइन आईडी प्रतिबंध"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"कॉल अग्रेषण"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"कॉल आगे भेजना"</string>
     <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल बाधित करना"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"पासवर्ड बदलें"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"रोमिंग बैनर चालू"</string>
     <string name="roamingText12" msgid="1189071119992726320">"रोमिंग बैनर बंद"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवा खोज रहा है"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"वाई-फ़ाई कॉलिंग"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बंद"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"वाई-फ़ाई को प्राथमिकता"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेल्‍युलर को प्राथमिकता"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"केवल वाई-फ़ाई"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित नहीं किया गया"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंड के बाद"</string>
@@ -931,7 +940,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"सहायक"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"भाई"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"बच्चा"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"घरेलू सहयोगी"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"हमसफ़र"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"पिता"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"मित्र"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"प्रबंधक"</string>
@@ -1254,10 +1263,10 @@
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चल रहा है"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"अधिक जानकारी के लिए या ऐप्स  रोकने के लिए स्पर्श करें."</string>
     <string name="ok" msgid="5970060430562524910">"ठीक है"</string>
-    <string name="cancel" msgid="6442560571259935130">"रहने दें"</string>
+    <string name="cancel" msgid="6442560571259935130">"अभी नहीं"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक है"</string>
-    <string name="no" msgid="5141531044935541497">"रहने दें"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"ध्यानाकर्षण"</string>
+    <string name="no" msgid="5141531044935541497">"अभी नहीं"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"ध्यान दें"</string>
     <string name="loading" msgid="7933681260296021180">"लोड हो रहे हैं..."</string>
     <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
     <string name="capital_off" msgid="6815870386972805832">"बंद"</string>
@@ -1370,7 +1379,7 @@
     <string name="sms_short_code_details" msgid="5873295990846059400">"इससे आपके मोबाइल खाते पर "<b>"शुल्क लग सकता है"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"इससे आपके मोबाइल खाते पर शुल्क लगेगा."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"भेजें"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"रहने दें"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"अभी नहीं"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"मेरी पसंद को याद रखें"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"आप इसे बाद में सेटिंग &gt; ऐप्स  में बदल सकते हैं"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"हमेशा अनुमति दें"</string>
@@ -1559,7 +1568,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"आइटम हटाएं"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"हटाए गए को वापस लाएं"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"फिलहाल कुछ न करें"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"कोई खाता चुनें"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"खाता चुनें"</string>
     <string name="add_account_label" msgid="2935267344849993553">"कोई खाता जोड़ें"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"खाता जोड़ें"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"बढ़ाएं"</string>
@@ -1579,7 +1588,7 @@
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"वर्ष बढ़ाएं"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"वर्ष कम करें"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"रहने दें"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"अभी नहीं"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"हटाएं"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"पूर्ण"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Mode change"</string>
@@ -1752,8 +1761,8 @@
     <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
     <string name="mediasize_na_letter" msgid="2841414839888344296">"लेटर"</string>
     <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"गवर्नमेंट लेटर"</string>
-    <string name="mediasize_na_legal" msgid="8621364037680465666">"लीगल"</string>
-    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"जूनियर लीगल"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"वैधानिक"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"जूनियर वैधानिक"</string>
     <string name="mediasize_na_ledger" msgid="5567030340509075333">"लेजर"</string>
     <string name="mediasize_na_tabloid" msgid="4571735038501661757">"टेबलॉइड"</string>
     <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"इंडेक्स कार्ड 3x5"</string>

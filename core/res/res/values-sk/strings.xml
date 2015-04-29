@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez mena&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(žiadne telefónne číslo)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Bez názvu"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Hlasová schránka"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Banner roamingu je zapnutý"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Banner roamingu je vypnutý"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Vyhľadávanie služby"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Volanie cez Wi-Fi"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuté"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Uprednostniť Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Uprednostniť mobilné pripojenie"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Len Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepresmerované"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> s"</string>
@@ -703,7 +712,7 @@
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Umožňuje aplikácii zobraziť informácie o sieťach Wi-Fi. Napríklad o tom, či je sieť Wi-Fi povolená alebo názvy pripojených zariadení Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"pripojiť a odpojiť od siete Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Umožňuje aplikácii pripojiť sa na prístupové body siete Wi-Fi, odpojiť sa od nich a meniť konfiguráciu zariadení pre siete Wi-Fi."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Povoliť príjem viacsmerového vysielania Wi-Fi"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"povoliť príjem Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Umožňuje aplikácii prijímať pakety odoslané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries, nielen pomocou vášho tabletu. Spotrebuje viac energie ako režim bez viacsmerového vysielania."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Umožňuje aplikácii prijímať pakety odosielané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries (a nie iba do vášho televízora). Spotrebúva viac energie ako režim bez viacsmerového vysielania."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Umožňuje aplikácii prijímať pakety odoslané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries, nielen pomocou vášho telefónu. Spotrebuje viac energie ako režim bez viacsmerového vysielania."</string>
@@ -1329,7 +1338,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"Predvolený tón zvonenia"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Predvolený tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Žiadny"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváňacie tóny"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Tóny zvonenia"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámy tón zvonenia"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"K dispozícii je sieť Wi-Fi"</item>
@@ -1842,8 +1851,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred uvoľnením požiadať o heslo"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Šetrič batérie znižuje výkonnosť vášho zariadenia a obmedzuje vibrovanie, služby určovania polohy a väčšinu údajov na pozadí, aby tak pomohol predĺžiť výdrž batérie. E-mailová aplikácia, aplikácia na odosielanie správ SMS a MMS a ďalšie aplikácie, ktoré sú založené na synchronizácii, sa pravdepodobne aktualizujú až po ich otvorení.\n\nŠetrič batérie sa automaticky vypne, keď zariadenie začnete nabíjať."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokým o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí výpadok"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Kým skončí vaša odstávka"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Kým o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí doba pokoja"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Kým neskončí doba pokoja"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Na minútu (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"Na %1$d min. (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>

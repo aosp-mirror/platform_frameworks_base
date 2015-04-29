@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Izengabea&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Ez dago telefono-zenbakirik)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Ezezaguna"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Erantzungailua"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Ibiltaritzari buruzko jakinarazpena aktibatuta"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Ibiltaritzari buruzko jakinarazpena desaktibatuta"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Zerbitzu bila"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi bidezko deiak"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desaktibatuta"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi sarea hobesten da"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Sare mugikorra hobesten da"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi sarea soilik"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> zenbakira <xliff:g id="TIME_DELAY">{2}</xliff:g> segundotan"</string>
@@ -192,9 +201,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonoaren aukerak"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Pantailaren blokeoa"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Itzali"</string>
-    <string name="global_action_bug_report" msgid="7934010578922304799">"Programa-akatsen txostena"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Sortu programa-akatsen txostena"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira programa-akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Akatsen txostena"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Sortu akatsen txostena"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Isilik modua"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Soinua DESAKTIBATUTA dago"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Soinua AKTIBATUTA dago"</string>
@@ -426,7 +435,7 @@
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"Lotu ahots bidezko elkarrekintzako zerbitzuei"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Ahots bidezko elkarrekintzako zerbitzu baten goi-mailako interfazeari lotzea baimentzen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"kudeatu ahozko gako-esaldiak"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Ahoz esandako gako-hitzak hautemateko gako-esaldiak kudeatzea baimentzen die aplikazioei. Aplikazio normalek ez lukete behar."</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Ahozko pasahitzak hautemateko gako-esaldiak kudeatzea baimentzen die aplikazioei. Aplikazio normalek ez lukete behar."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"Lotu urruneko pantaila batera"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Urruneko pantaila baten goi-mailako interfazera lotzeko aukera ematen dio titularrari. Aplikazio normalek ez dute baimen hau behar."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"lotu widget-zerbitzu batekin"</string>
@@ -559,7 +568,7 @@
     <string name="permdesc_controlVpn" msgid="762852603315861214">"Sare pribatu birtualen behe-mailako eginbideak kontrolatzea baimentzen die aplikazioei."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"Grabatu audio-irteera"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Audio-irteera grabatzeko eta birbideratzeko aukera ematen die aplikazioei."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hauteman Hotword"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hauteman ahozko pasahitza"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Hotword bidez hauteman daitekeen audioa grabatzeko aukera ematen die aplikazioei. Atzeko planoan grabatzeak ez du bestelako audio-grabazioak (adibidez, bideokamera bidezkoak) egitea eragozten."</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Audio-bideratzea"</string>
     <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Audio-bideratzea zuzenean kontrolatzea eta audio-gidalerroei gainjartzea baimentzen die aplikazioei."</string>
@@ -828,7 +837,7 @@
     <string name="policylab_expirePassword" msgid="885279151847254056">"Ezarri blokeatzeko pasahitzaren iraungitzea"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Kontrolatu pantaila blokeatuko pasahitza aldatu beharreko maiztasuna."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ezarri memoria-enkriptatzea"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Eskatu gordetako aplikazio-datuak enkriptatzea."</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Eskatu gordetako aplikazioen datuak enkriptatzea."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desgaitu kamerak"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Eragotzi gailuaren kamerak erabiltzea."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Teklen blokeoko eginbideak desgaitzea"</string>
@@ -1660,7 +1669,7 @@
     <string name="media_route_status_available" msgid="6983258067194649391">"Erabilgarri"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Ez dago erabilgarri"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"Abian"</string>
-    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantaila barneratua"</string>
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantaila integratua"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI pantaila"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>. gainjartzea"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>

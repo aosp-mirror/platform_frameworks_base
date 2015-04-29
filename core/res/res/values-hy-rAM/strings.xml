@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"Բ"</string>
-    <string name="kilobyteShort" msgid="5973789783504771878">"Կբ"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"Մբ"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"Գբ"</string>
+    <string name="kilobyteShort" msgid="5973789783504771878">"ԿԲ"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"ՄԲ"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"ԳԲ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Տբ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Պբ"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> վ"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> վ"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Անանուն&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Հեռախոսահամար չկա)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Անհայտ"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Ձայնային փոստ"</string>
@@ -125,6 +123,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Ռոումինգի ազդերիզը միացված է"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Ռոումինգի ազդերիզն անջատված է"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Ծառայության որոնում..."</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Զանգեր Wi-Fi-ի միջոցով"</string>
+  <string-array name="wfcOperatorErrorAlertMessages">
+  </string-array>
+  <string-array name="wfcOperatorErrorNotificationMessages">
+  </string-array>
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Անջատված է"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi, նախընտրելի"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Բջջային, նախընտրելի"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Միայն Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Չի վերահասցեավորվել"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> վայրկյանից"</string>
@@ -233,7 +242,7 @@
     <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Գրել օգտվողի բառարանում"</string>
     <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Ավելացնել բառեր օգտվողի բառարանում:"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Էջանիշեր և պատմություն"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Ուղղակի մուտք դեպի էջանիշեր և դիտարկչի պատմություն:"</string>
+    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Ուղղակի մուտք դեպի էջանիշեր և դիտարկիչի պատմություն:"</string>
     <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Ազդանշան"</string>
     <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Կարգավորել զարթուցիչի ժամացույցը:"</string>
     <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Ձայնային փոստ"</string>
@@ -1055,7 +1064,7 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Վերաբեռնել"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"«<xliff:g id="TITLE">%s</xliff:g>»-ի էջում ասվում է`"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Հաստատել կողմնորոշումը"</string>
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Գործողության հաստատում"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Լքել այս էջը"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Մնալ այս էջում"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nՎստա՞հ եք, որ ցանկանում եք հեռանալ այս էջից:"</string>
@@ -1080,11 +1089,11 @@
     <string name="autofill_area" msgid="3547409050889952423">"Տարածք"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Էմիրություն"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"կարդալ ձեր վեբ էջանիշերը և պատմությունը"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Թույլ է տալիս հավելվածին կարդալ դիտարկչի այցելած բոլոր URL-ների պատմությունը և դիտարկչի բոլոր էջանիշերը: Նշում. այս թույլտվությունը չի կարող գործածվել կողմնակի դիտարկիչների կամ վեբ զննարկման հնարավորություններով այլ հավելվածների կողմից:"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Թույլ է տալիս հավելվածին կարդալ դիտարկիչի այցելած բոլոր URL-ների պատմությունը և դիտարկիչի բոլոր էջանիշերը: Նշում. այս թույլտվությունը չի կարող գործածվել կողմնակի դիտարկիչների կամ վեբ զննարկման հնարավորություններով այլ հավելվածների կողմից:"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"գրել վեբ էջանիշերը և պատմությունը"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Թույլ է տալիս հավելվածին փոփոխել դիտարկչի պատմությունը կամ ձեր գրասալիկում պահված էջանիշերը: Այն կարող է թույլ տալ հավելվածին ջնջել կամ փոփոխել դիտարկչի տվյալները: Նշում. այս թույլտվությունը չի կարող գործածվել կողմնակի դիտարկիչների կամ վեբ զննարկման հնարավորություններով այլ հավելվածների կողմից:"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Թույլ է տալիս հավելվածին փոփոխել դիտարկիչի պատմությունը կամ ձեր գրասալիկում պահված էջանիշերը: Այն կարող է թույլ տալ հավելվածին ջնջել կամ փոփոխել դիտարկիչի տվյալները: Նշում. այս թույլտվությունը չի կարող գործածվել կողմնակի դիտարկիչների կամ վեբ զննարկման հնարավորություններով այլ հավելվածների կողմից:"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Թույլ է տալիս հավելվածին փոփոխել դիտարկիչի պատմությունը կամ հեռուստացույցում պահված էջանիշները: Սա կարող է թույլ տալ հավելվածին ջնջել կամ փոփոխել դիտարկիչի տվյալները: Ուշադրություն. այս թույլտվությունը չի կարող հարկադրվել երրորդ կողմի դիտարկիչների կամ այլ հավելվածների կողմից, որոնք նույնպես կարողանում են վեբ էջեր բացել:"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Թույլ է տալիս հավելվածին փոփոխել դիտարկչի պատմությունը կամ ձեր հեռախոսում պահված էջանիշերը: Այն կարող է թույլ տալ հավելվածին ջնջել կամ փոփոխել դիտարկչի տվյալները: Նշում. այս թույլտվությունը չի կարող գործածվել կողմնակի դիտարկիչների կամ վեբ զննարկման հնարավորություններով այլ հավելվածների կողմից:"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Թույլ է տալիս հավելվածին փոփոխել դիտարկիչի պատմությունը կամ ձեր հեռախոսում պահված էջանիշերը: Այն կարող է թույլ տալ հավելվածին ջնջել կամ փոփոխել դիտարկիչի տվյալները: Նշում. այս թույլտվությունը չի կարող գործածվել կողմնակի դիտարկիչների կամ վեբ զննարկման հնարավորություններով այլ հավելվածների կողմից:"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"դնել ազդանշան"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Թույլ է տալիս հավելվածին սահմանել զարթուցիչի ծրագրում տեղադրված ազդանշանը: Զարթուցիչի որոշ հավելվածներ չեն կարող կիրառել այս հատկությունը:"</string>
     <string name="permlab_writeVoicemail" msgid="7309899891683938100">"գրել ձայնային փոստ"</string>
@@ -1093,8 +1102,8 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Թույլ է տալիս հավելվածին ավելացնել հաղորդագրություններ ձեր ձայնային փոստի արկղում:"</string>
     <string name="permlab_readVoicemail" msgid="8415201752589140137">"կարդալ ձայնային փոստը"</string>
     <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Ծրագրին թույլ է տալիս կարդալ ձեր ձայնային փոստը"</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"փոփոխել դիտարկչի աշխարհագրական տեղանքի թույլտվությունները"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Թույլ է տալիս հավելվածին փոփոխել զննարկչի աշխարհագրական դիրքի թույլտվությունները: Վնասարար հավելվածները կարող են օգտագործել սա` թույլատրելու ուղարկել տեղադրության վերաբերյալ տեղեկությունները կամայական վեբ կայքերին:"</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"փոփոխել դիտարկիչի աշխարհագրական տեղանքի թույլտվությունները"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Թույլ է տալիս հավելվածին փոփոխել դիտարկիչի աշխարհագրական դիրքի թույլտվությունները: Վնասարար հավելվածները կարող են օգտագործել սա` թույլատրելու ուղարկել տեղադրության վերաբերյալ տեղեկությունները կամայական վեբ կայքերին:"</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"հաստատել փաթեթները"</string>
     <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Թույլ է տալիս հավելվածին հաստատել, որ փաթեթը տեղադրելի է:"</string>
     <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"միանալ փաթեթի ստուգիչին"</string>
