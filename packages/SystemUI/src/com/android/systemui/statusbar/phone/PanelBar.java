@@ -80,6 +80,14 @@ public class PanelBar extends FrameLayout {
         }
     }
 
+    public void setBouncerShowing(boolean showing) {
+        if (mPanelHolder != null) {
+            mPanelHolder.setImportantForAccessibility(
+                    showing ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                            : IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+        }
+    }
+
     public float getBarHeight() {
         return getMeasuredHeight();
     }
