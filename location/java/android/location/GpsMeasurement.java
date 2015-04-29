@@ -140,8 +140,6 @@ public class GpsMeasurement implements Parcelable {
 
     /**
      * The state of the GPS receiver contains millisecond ambiguity.
-     *
-     * @hide
      */
     public static final short STATE_MSEC_AMBIGUOUS = (1<<4);
 
@@ -399,8 +397,6 @@ public class GpsMeasurement implements Parcelable {
      *
      * @return {@code true} if {@link #getPseudorangeRateInMetersPerSec()} contains a corrected
      *         value, {@code false} if it contains an uncorrected value.
-     *
-     * @hide
      */
     public boolean isPseudorangeRateCorrected() {
         return !isFlagSet(GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE);
