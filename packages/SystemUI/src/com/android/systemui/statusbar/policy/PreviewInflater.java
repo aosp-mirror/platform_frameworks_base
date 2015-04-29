@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.statusbar.phone.KeyguardPreviewContainer;
 
 import java.util.List;
@@ -80,13 +81,13 @@ public class PreviewInflater {
         WidgetInfo info = new WidgetInfo();
         PackageManager packageManager = mContext.getPackageManager();
         final List<ResolveInfo> appList = packageManager.queryIntentActivitiesAsUser(
-                intent, PackageManager.MATCH_DEFAULT_ONLY, mLockPatternUtils.getCurrentUser());
+                intent, PackageManager.MATCH_DEFAULT_ONLY, KeyguardUpdateMonitor.getCurrentUser());
         if (appList.size() == 0) {
             return null;
         }
         ResolveInfo resolved = packageManager.resolveActivityAsUser(intent,
                 PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
         if (wouldLaunchResolverActivity(resolved, appList)) {
             return null;
         }

@@ -754,7 +754,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
      */
     private byte[] getLockSettings() {
         final LockPatternUtils lockPatternUtils = new LockPatternUtils(this);
-        final boolean ownerInfoEnabled = lockPatternUtils.isOwnerInfoEnabled();
+        final boolean ownerInfoEnabled = lockPatternUtils.isOwnerInfoEnabled(UserHandle.myUserId());
         final String ownerInfo = lockPatternUtils.getOwnerInfo(UserHandle.myUserId());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -871,7 +871,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
                 switch (key) {
                     case KEY_LOCK_SETTINGS_OWNER_INFO_ENABLED:
-                        lockPatternUtils.setOwnerInfoEnabled("1".equals(value));
+                        lockPatternUtils.setOwnerInfoEnabled("1".equals(value),
+                                UserHandle.myUserId());
                         break;
                     case KEY_LOCK_SETTINGS_OWNER_INFO:
                         lockPatternUtils.setOwnerInfo(value, UserHandle.myUserId());
