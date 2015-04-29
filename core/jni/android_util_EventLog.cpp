@@ -40,6 +40,9 @@ static jfieldID gIntegerValueID;
 static jclass gLongClass;
 static jfieldID gLongValueID;
 
+static jclass gFloatClass;
+static jfieldID gFloatValueID;
+
 static jclass gStringClass;
 
 /*
@@ -62,6 +65,17 @@ static jint android_util_EventLog_writeEvent_Long(JNIEnv* env UNUSED,
                                                   jint tag, jlong value)
 {
     return android_btWriteLog(tag, EVENT_TYPE_LONG, &value, sizeof(value));
+}
+
+/*
+ * In class android.util.EventLog:
+ *  static native int writeEvent(long tag, float value)
+ */
+static jint android_util_EventLog_writeEvent_Float(JNIEnv* env UNUSED,
+                                                  jobject clazz UNUSED,
+                                                  jint tag, jfloat value)
+{
+    return android_btWriteLog(tag, EVENT_TYPE_FLOAT, &value, sizeof(value));
 }
 
 /*
@@ -128,6 +142,12 @@ static jint android_util_EventLog_writeEvent_Array(JNIEnv* env, jobject clazz,
             buf[pos++] = EVENT_TYPE_LONG;
             memcpy(&buf[pos], &longVal, sizeof(longVal));
             pos += sizeof(longVal);
+        } else if (env->IsInstanceOf(item, gFloatClass)) {
+            jfloat floatVal = env->GetFloatField(item, gFloatValueID);
+            if (pos + 1 + sizeof(floatVal) > max) break;
+            buf[pos++] = EVENT_TYPE_FLOAT;
+            memcpy(&buf[pos], &floatVal, sizeof(floatVal));
+            pos += sizeof(floatVal);
         } else {
             jniThrowException(env,
                     "java/lang/IllegalArgumentException",
@@ -233,6 +253,7 @@ static JNINativeMethod gRegisterMethods[] = {
     /* name, signature, funcPtr */
     { "writeEvent", "(II)I", (void*) android_util_EventLog_writeEvent_Integer },
     { "writeEvent", "(IJ)I", (void*) android_util_EventLog_writeEvent_Long },
+    { "writeEvent", "(IF)I", (void*) android_util_EventLog_writeEvent_Float },
     { "writeEvent",
       "(ILjava/lang/String;)I",
       (void*) android_util_EventLog_writeEvent_String
@@ -251,6 +272,7 @@ static struct { const char *name; jclass *clazz; } gClasses[] = {
     { "android/util/EventLog$Event", &gEventClass },
     { "java/lang/Integer", &gIntegerClass },
     { "java/lang/Long", &gLongClass },
+    { "java/lang/Float", &gFloatClass },
     { "java/lang/String", &gStringClass },
     { "java/util/Collection", &gCollectionClass },
 };
@@ -258,6 +280,7 @@ static struct { const char *name; jclass *clazz; } gClasses[] = {
 static struct { jclass *c; const char *name, *ft; jfieldID *id; } gFields[] = {
     { &gIntegerClass, "value", "I", &gIntegerValueID },
     { &gLongClass, "value", "J", &gLongValueID },
+    { &gFloatClass, "value", "F", &gFloatValueID },
 };
 
 static struct { jclass *c; const char *name, *mt; jmethodID *id; } gMethods[] = {

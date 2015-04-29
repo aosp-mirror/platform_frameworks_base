@@ -182,6 +182,10 @@ public abstract class DisplayManagerInternal {
         // The screen auto-brightness adjustment factor in the range -1 (dimmer) to 1 (brighter).
         public float screenAutoBrightnessAdjustment;
 
+        // Set to true if screenBrightness and screenAutoBrightnessAdjustment were both
+        // set by the user as opposed to being programmatically controlled by apps.
+        public boolean brightnessSetByUser;
+
         // If true, enables automatic brightness control.
         public boolean useAutoBrightness;
 
@@ -229,6 +233,7 @@ public abstract class DisplayManagerInternal {
             useProximitySensor = other.useProximitySensor;
             screenBrightness = other.screenBrightness;
             screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
+            brightnessSetByUser = other.brightnessSetByUser;
             useAutoBrightness = other.useAutoBrightness;
             blockScreenOn = other.blockScreenOn;
             lowPowerMode = other.lowPowerMode;
@@ -249,6 +254,7 @@ public abstract class DisplayManagerInternal {
                     && useProximitySensor == other.useProximitySensor
                     && screenBrightness == other.screenBrightness
                     && screenAutoBrightnessAdjustment == other.screenAutoBrightnessAdjustment
+                    && brightnessSetByUser == other.brightnessSetByUser
                     && useAutoBrightness == other.useAutoBrightness
                     && blockScreenOn == other.blockScreenOn
                     && lowPowerMode == other.lowPowerMode
@@ -268,6 +274,7 @@ public abstract class DisplayManagerInternal {
                     + ", useProximitySensor=" + useProximitySensor
                     + ", screenBrightness=" + screenBrightness
                     + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
+                    + ", brightnessSetByUser=" + brightnessSetByUser
                     + ", useAutoBrightness=" + useAutoBrightness
                     + ", blockScreenOn=" + blockScreenOn
                     + ", lowPowerMode=" + lowPowerMode
