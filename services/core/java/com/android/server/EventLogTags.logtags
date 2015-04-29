@@ -180,6 +180,11 @@ option java_package com.android.server
 34001 device_idle_step
 34002 device_idle_wake_from_idle (is_idle|1|5), (reason|3)
 
+# ---------------------------
+# DisplayManagerService.java
+# ---------------------------
+# Auto-brightness adjustments by the user.
+35000 auto_brightness_adj (old_adj|5),(old_lux|5),(old_brightness|5),(old_gamma|5),(new_adj|5),(new_lux|5),(new_brightness|5),(new_gamma|5)
 
 # ---------------------------
 # ConnectivityService.java
