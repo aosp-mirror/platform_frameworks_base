@@ -726,6 +726,16 @@ public class AppOpsManager {
             false
     };
 
+    /**
+     * This is a mapping from a permission name to public app op name.
+     */
+    private static final ArrayMap<String, String> sPermToOp = new ArrayMap<>();
+    static {
+        sPermToOp.put(Manifest.permission.ACCESS_COARSE_LOCATION, OPSTR_COARSE_LOCATION);
+        sPermToOp.put(Manifest.permission.ACCESS_FINE_LOCATION, OPSTR_FINE_LOCATION);
+        sPermToOp.put(Manifest.permission.PACKAGE_USAGE_STATS, OPSTR_GET_USAGE_STATS);
+    }
+
     private static HashMap<String, Integer> sOpStrToOp = new HashMap<String, Integer>();
 
     static {
@@ -1063,6 +1073,21 @@ public class AppOpsManager {
             mService.resetAllModes(UserHandle.myUserId(), null);
         } catch (RemoteException e) {
         }
+    }
+
+    /**
+     * Gets the app op name associated with a given permission.
+     * The app op name is one of the public constants defined
+     * in this class such as {@link #OPSTR_COARSE_LOCATION}.
+     *
+     * @param permission The permission.
+     * @return The app op associated with the permission or null.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static String permissionToOp(String permission) {
+        return sPermToOp.get(permission);
     }
 
     /**
