@@ -1899,6 +1899,14 @@
   <java-symbol type="string" name="ext_media_init_action" />
   <java-symbol type="string" name="ext_media_unmount_action" />
   <java-symbol type="string" name="ext_media_browse_action" />
+  <java-symbol type="string" name="ext_media_missing_title" />
+  <java-symbol type="string" name="ext_media_missing_message" />
+  <java-symbol type="string" name="ext_media_move_specific_title" />
+  <java-symbol type="string" name="ext_media_move_title" />
+  <java-symbol type="string" name="ext_media_move_success_title" />
+  <java-symbol type="string" name="ext_media_move_success_message" />
+  <java-symbol type="string" name="ext_media_move_failure_title" />
+  <java-symbol type="string" name="ext_media_move_failure_message" />
   <java-symbol type="string" name="usb_storage_error_message" />
   <java-symbol type="string" name="usb_storage_message" />
   <java-symbol type="string" name="usb_storage_notification_message" />
