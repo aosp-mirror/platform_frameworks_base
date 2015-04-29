@@ -405,8 +405,10 @@ public class ChooserActivity extends ResolverActivity {
                 int launchedFromUid, boolean filterLastUsed, ChooserTarget[] callerChooserTargets) {
             super(context, initialIntents, rList, launchedFromUid, filterLastUsed);
 
-            for (ChooserTarget target : callerChooserTargets) {
-                mCallerTargets.add(new ChooserTargetInfo(target));
+            if (callerChooserTargets != null) {
+                for (ChooserTarget target : callerChooserTargets) {
+                    mCallerTargets.add(new ChooserTargetInfo(target));
+                }
             }
         }
 
