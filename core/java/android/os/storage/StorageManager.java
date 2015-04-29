@@ -34,6 +34,7 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.os.SomeArgs;
@@ -635,6 +636,30 @@ public class StorageManager {
             mMountService.partitionMixed(diskId, ratio);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void wipeAdoptableDisks() {
+        // We only wipe devices in "adoptable" locations, which are in a
+        // long-term stable slot/location on the device, where apps have a
+        // reasonable chance of storing sensitive data. (Apps need to go through
+        // SAF to write to transient volumes.)
+        final List<DiskInfo> disks = getDisks();
+        for (DiskInfo disk : disks) {
+            final String diskId = disk.getId();
+            if (disk.isAdoptable()) {
+                Slog.d(TAG, "Found adoptable " + diskId + "; wiping");
+                try {
+                    // TODO: switch to explicit wipe command when we have it,
+                    // for now rely on the fact that vfat format does a wipe
+                    mMountService.partitionPublic(diskId);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed to wipe " + diskId + ", but soldiering onward", e);
+                }
+            } else {
+                Slog.d(TAG, "Ignorning non-adoptable disk " + disk.getId());
+            }
         }
     }
 
