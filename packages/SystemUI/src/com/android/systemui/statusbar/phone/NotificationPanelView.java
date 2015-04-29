@@ -2158,7 +2158,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void onPinnedModeChanged(final boolean inPinnedMode) {
+    public void onHeadsUpPinnedModeChanged(final boolean inPinnedMode) {
         if (inPinnedMode) {
             mHeadsUpExistenceChangedRunnable.run();
             updateNotificationTranslucency();
