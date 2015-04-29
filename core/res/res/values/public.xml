@@ -2610,7 +2610,6 @@
 
   <public type="attr" name="trackTint" />
   <public type="attr" name="trackTintMode" />
-  <public type="attr" name="resizeableActivity" />
   <public type="attr" name="start" />
   <public type="attr" name="end" />
   <public type="attr" name="windowLightStatusBar" />
