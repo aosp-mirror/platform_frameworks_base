@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏ایپ کو WAP پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس اجازت میں آپ کو مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھنے یا انہیں حذف کرنے کی اہلیت شامل ہے۔"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"چل رہی ایپس کی بازیافت کریں"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ایپ کو موجودہ اور حالیہ چل رہے ٹاسکس کے بارے میں معلومات بازیافت کرنے کی اجازت دیتا ہے۔ یہ ایپ کو اس بارے میں معلومات دریافت کرنے کی اجازت دے سکتا ہے کہ آلہ پر کون سی ایپلیکیشنز استعمال کی جاتی ہیں۔"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"پروفائل اور آلہ کے مالکان کا نظم کریں"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ایپس کو پروفائل کے مالکان اور آلہ کے مالک کو سیٹ کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"چل رہی ایپس کو دوبارہ ترتیب دیں"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ایپ کو پیش منظر یا پس منظر میں ٹاسکس کو منتقل کرنے کی اجازت دیتا ہے۔ ایپ آپ کے ان پٹ کے بغیر یہ کام کرسکتی ہے۔"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"کار وضع فعال کریں"</string>
@@ -1080,6 +1078,22 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"ترتیب دیں"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"خارج کریں"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"دریافت کریں"</string>
+    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
+    <skip />
+    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
+    <skip />
+    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
+    <skip />
+    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"کوئی مماثل سرگرمیاں نہیں ملیں۔"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"میڈیا آؤٹ پٹ کی سمت طے کریں"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"کسی ایپلیکیشن کو دوسرے خارجی آلات تک میڈیا آؤٹ پٹ کا راستہ بنانے کی اجازت دیتا ہے۔"</string>

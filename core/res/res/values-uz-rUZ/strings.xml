@@ -275,7 +275,7 @@
     <string name="permlab_getTasks" msgid="6466095396623933906">"ishlab turgan ilovalar to‘g‘risida ma’lumot olish"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ilovaga hozirda va so‘nggi ishga tushirilgan vazifalar haqida to‘liq ma’lumot olishiga ruxsat beradi. Bu ilovaga qurilmadagi ishlatilayotgan ilovalar haqidagi ma’lumotlarga ega bo‘lishiga ruxsat berishi mumkin."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profil va qurilma egalarini boshqarish"</string>
-    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Ilovaga profil va qurilma egalarini sozlash uchun ruxsat beradi"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Ilovaga profil egalari va qurilma egalarini aniqlash uchun ruxsat beradi."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ishlab turgan ilovalarni qayta tartiblash"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Ilovalarga vazifalarni old va orqa fonga o‘tkazish uchun ruxsat beradi. Ilova buni sizning yordamingizsiz bajarishi mumkin."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"mashina usulini yoqish"</string>
@@ -1078,6 +1078,22 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Sozlash"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Chiqarish"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"O‘rganish"</string>
+    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
+    <skip />
+    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
+    <skip />
+    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
+    <skip />
+    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Hech qanday mos faoliyat topilmadi."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Media chiqishni yo‘naltirish"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ilovaga media chiqish ovozini boshqa tashqi qurilmalarga yo‘naltirish uchun ruxsat beradi."</string>

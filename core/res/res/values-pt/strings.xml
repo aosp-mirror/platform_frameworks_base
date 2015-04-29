@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite que o app receba e processe mensagens WAP. Esta permissão inclui a capacidade de monitorar ou excluir mensagens enviadas para você sem mostrá-las para você."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar apps em execução"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite que o app obtenha informações sobre tarefas em execução atuais e recentes. Pode permitir que o app descubra informações sobre os apps usados ​​no dispositivo."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Gerenciar proprietários de perfis e de dispositivos"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Permitir que os apps definam os proprietários de perfis e de dispositivos."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordenar os apps em execução"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite que o app mova tarefas para o primeiro plano e o plano de fundo, sem sua intervenção."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ativar o modo carro"</string>
@@ -1080,6 +1078,22 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Configurar"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Ejetar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorar"</string>
+    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
+    <skip />
+    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
+    <skip />
+    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
+    <skip />
+    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Nenhum atividade correspondente foi encontrada."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Rotear saída de mídia"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que um app faça o roteamento de saída de mídia para outros dispositivos externos."</string>
