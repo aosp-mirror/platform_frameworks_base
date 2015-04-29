@@ -149,12 +149,10 @@ void RenderProperties::debugOutputProperties(const int level) const {
     if (mPrimitiveFields.mAlpha < 1) {
         if (isLayer) {
             clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
-
-            ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
-        } else {
-            LOG_ALWAYS_FATAL_IF(mPrimitiveFields.mHasOverlappingRendering);
-            ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
         }
+
+        LOG_ALWAYS_FATAL_IF(!isLayer && mPrimitiveFields.mHasOverlappingRendering);
+        ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
     }
     if (clipFlags) {
         Rect clipRect;
