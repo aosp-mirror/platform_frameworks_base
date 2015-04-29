@@ -1293,13 +1293,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateClearAll();
         updateEmptyShadeView();
 
-        // Disable QS if device not provisioned.
-        // If the user switcher is simple then disable QS during setup because
-        // the user intends to use the lock screen user switcher, QS in not needed.
+        updateQsExpansionEnabled();
+        mShadeUpdates.check();
+    }
+
+    /**
+     * Disable QS if device not provisioned.
+     * If the user switcher is simple then disable QS during setup because
+     * the user intends to use the lock screen user switcher, QS in not needed.
+     */
+    private void updateQsExpansionEnabled() {
         mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned()
                 && (mUserSetup || mUserSwitcherController == null
-                        || !mUserSwitcherController.isSimpleUserSwitcher()));
-        mShadeUpdates.check();
+                        || !mUserSwitcherController.isSimpleUserSwitcher())
+                && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0));
     }
 
     private void updateNotificationShadeForChildren() {
@@ -1732,6 +1739,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         flagdbg.append(((diff1  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
         flagdbg.append(((state1 & StatusBarManager.DISABLE_SEARCH) != 0) ? "SEARCH" : "search");
         flagdbg.append(((diff1  & StatusBarManager.DISABLE_SEARCH) != 0) ? "* " : " ");
+        flagdbg.append(((state2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) != 0) ? "QUICK_SETTINGS"
+                : "quick_settings");
+        flagdbg.append(((diff2  & StatusBarManager.DISABLE2_QUICK_SETTINGS) != 0) ? "* " : " ");
         flagdbg.append(">");
         Log.d(TAG, flagdbg.toString());
 
@@ -1779,6 +1789,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDisableNotificationAlerts =
                     (state1 & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
             mHeadsUpObserver.onChange(true);
+        }
+
+        if ((diff2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) != 0) {
+            updateQsExpansionEnabled();
         }
     }
 
