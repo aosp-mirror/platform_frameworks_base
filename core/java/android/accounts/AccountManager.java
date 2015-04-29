@@ -207,8 +207,7 @@ public class AccountManager {
      * were authenticated successfully. Time is specified in milliseconds since
      * epoch.
      */
-    public static final String KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH =
-            "lastAuthenticatedTimeMillisEpoch";
+    public static final String KEY_LAST_AUTHENTICATED_TIME = "lastAuthenticatedTime";
 
     /**
      * Authenticators using 'customTokens' option will also get the UID of the
@@ -671,8 +670,8 @@ public class AccountManager {
     }
 
     /**
-     * Informs the system that the account has been authenticated recently. This
-     * recency may be used by other applications to verify the account. This
+     * Notifies the system that the account has just been authenticated. This
+     * information may be used by other applications to verify the account. This
      * should be called only when the user has entered correct credentials for
      * the account.
      * <p>
@@ -685,7 +684,7 @@ public class AccountManager {
      *
      * @param account The {@link Account} to be updated.
      */
-    public boolean accountAuthenticated(Account account) {
+    public boolean notifyAccountAuthenticated(Account account) {
         if (account == null)
             throw new IllegalArgumentException("account is null");
         try {
@@ -1587,7 +1586,7 @@ public class AccountManager {
      * password prompt.
      * 
      * <p>Also the returning Bundle may contain {@link
-     * #KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH} indicating the last time the
+     * #KEY_LAST_AUTHENTICATED_TIME} indicating the last time the
      * credential was validated/created.
      * 
      * If an error occurred,{@link AccountManagerFuture#getResult()} throws:
