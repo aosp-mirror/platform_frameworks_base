@@ -1078,6 +1078,22 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"സജ്ജമാക്കുക"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"നിരസിക്കുക"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"പര്യവേക്ഷണം ചെയ്യുക"</string>
+    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
+    <skip />
+    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
+    <skip />
+    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
+    <skip />
+    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"പൊരുത്തമുള്ള പ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"മീഡിയ ഔട്ട്പുട്ട് റൂട്ടുചെയ്യുക"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"മീഡിയ ഔട്ട്‌പുട്ടിനെ മറ്റ് ബാഹ്യ ഉപകരണങ്ങളിലേക്ക് റൂട്ടുചെയ്യാൻ ഒരു അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
