@@ -41,12 +41,18 @@ class DisplayAdjustmentUtils {
              0,      0,      0, 1
     };
 
-    /** Matrix and offset used for value-only display inversion. */
+    /**
+     * Matrix and offset used for luminance inversion. Represents a transform
+     * from RGB to YIQ color space, rotation around the Y axis by 180 degrees,
+     * transform back to RGB color space, and subtraction from 1. The last row
+     * represents a non-multiplied addition, see surfaceflinger's ProgramCache
+     * for full implementation details.
+     */
     private static final float[] INVERSION_MATRIX_VALUE_ONLY = new float[] {
-           0, -.5f, -.5f, 0,
-        -.5f,    0, -.5f, 0,
-        -.5f, -.5f,    0, 0,
-           1,    1,    1, 1
+        0.402f, -0.598f, -0.599f, 0,
+       -1.174f, -0.174f, -1.175f, 0,
+       -0.228f, -0.228f,  0.772f, 0,
+             1,       1,       1, 1
     };
 
     /** Default inversion mode for display color correction. */
