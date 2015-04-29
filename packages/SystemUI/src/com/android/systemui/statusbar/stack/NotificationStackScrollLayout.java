@@ -204,7 +204,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ViewGroup mScrollView;
     private boolean mInterceptDelegateEnabled;
     private boolean mDelegateToScrollView;
-
     private boolean mDisallowScrollingInThisMotion;
     private long mGoToFullShadeDelay;
     private ViewTreeObserver.OnPreDrawListener mChildrenUpdater
@@ -487,9 +486,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         int stackHeight;
         float paddingOffset;
         boolean trackingHeadsUp = mTrackingHeadsUp;
-        int normalExpandPositionStart = trackingHeadsUp ? mHeadsUpManager.getTopHeadsUpHeight()
+        int normalUnfoldPositionStart = trackingHeadsUp ? mHeadsUpManager.getTopHeadsUpHeight()
                 : minStackHeight;
-        if (newStackHeight - mTopPadding - mTopPaddingOverflow >= normalExpandPositionStart
+        if (newStackHeight - mTopPadding - mTopPaddingOverflow >= normalUnfoldPositionStart
                 || getNotGoneChildCount() == 0) {
             paddingOffset = mTopPaddingOverflow;
             stackHeight = newStackHeight;
@@ -582,7 +581,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
             if (row.isHeadsUp()) {
-                mHeadsUpManager.addSwipedOutKey(row.getStatusBarNotification().getKey());
+                mHeadsUpManager.addSwipedOutNotification(row.getStatusBarNotification().getKey());
             }
         }
         final View veto = v.findViewById(R.id.veto);
@@ -626,10 +625,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
     }
 
-    public boolean isPinnedHeadsUp(View v) {
+    public static boolean isPinnedHeadsUp(View v) {
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-            return row.isHeadsUp() && !row.isInShade();
+            return row.isHeadsUp() && row.isPinned();
         }
         return false;
     }
@@ -711,7 +710,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
-                    if (row.isHeadsUp() && !row.isInShade()
+                    if (row.isHeadsUp() && row.isPinned()
                             && mHeadsUpManager.getTopEntry().entry.row != row) {
                         continue;
                     }
@@ -812,7 +811,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
-        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion && isScrollingEnabled()) {
+        if (mIsExpanded && !mSwipingInProgress && !mOnlyScrollingInThisMotion
+                && isScrollingEnabled()) {
             if (isCancelOrUp) {
                 mExpandHelper.onlyObserveMovements(false);
             }
@@ -824,7 +824,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
         boolean scrollerWantsIt = false;
-        if (!mSwipingInProgress && !mExpandingNotification && !mDisallowScrollingInThisMotion) {
+        if (mIsExpanded && !mSwipingInProgress && !mExpandingNotification
+                && !mDisallowScrollingInThisMotion) {
             scrollerWantsIt = onScrollTouch(ev);
         }
         boolean horizontalSwipeWantsIt = false;
@@ -1872,15 +1873,15 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean onBottom = false;
             if (!mIsExpanded && !isHeadsUp) {
                 type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
-            } else if (mAddedHeadsUpChildren.contains(row) || (!row.isInShade() && !mIsExpanded)) {
-                if (!row.isInShade() || shouldHunAppearFromBottom(row)) {
+            } else if (mAddedHeadsUpChildren.contains(row) || (row.isPinned() && !mIsExpanded)) {
+                if (row.isPinned() || shouldHunAppearFromBottom(row)) {
                     // Our custom add animation
                     type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;
                 } else {
                     // Normal add animation
                     type = AnimationEvent.ANIMATION_TYPE_ADD;
                 }
-                onBottom = row.isInShade();
+                onBottom = !row.isPinned();
             }
             AnimationEvent event = new AnimationEvent(row, type);
             event.headsUpFromBottom = onBottom;
@@ -2670,7 +2671,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public void performOnAnimationFinished(Runnable runnable) {
+    public void runAfterAnimationFinished(Runnable runnable) {
         mAnimationFinishedRunnables.add(runnable);
     }
 

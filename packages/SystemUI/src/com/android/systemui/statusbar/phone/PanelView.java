@@ -46,13 +46,13 @@ import java.io.PrintWriter;
 public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
-    protected HeadsUpManager mHeadsUpManager;
-
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
     protected PhoneStatusBar mStatusBar;
+    protected HeadsUpManager mHeadsUpManager;
+
     private float mPeekHeight;
     private float mHintDistance;
     private int mEdgeTapAreaWidth;
@@ -242,15 +242,15 @@ public abstract class PanelView extends FrameLayout {
         final float y = event.getY(pointerIndex);
 
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            mGestureWaitForTouchSlop = isShadeCollapsed() || hasConflictingGestures();
-            mIgnoreXTouchSlop = isShadeCollapsed() || shouldGestureIgnoreXTouchSlop(x, y);
+            mGestureWaitForTouchSlop = isFullyCollapsed() || hasConflictingGestures();
+            mIgnoreXTouchSlop = isFullyCollapsed() || shouldGestureIgnoreXTouchSlop(x, y);
         }
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 startExpandMotion(x, y, false /* startTracking */, mExpandedHeight);
                 mJustPeeked = false;
-                mPanelClosedOnDown = isShadeCollapsed();
+                mPanelClosedOnDown = isFullyCollapsed();
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mMotionAborted = false;
@@ -268,7 +268,7 @@ public abstract class PanelView extends FrameLayout {
                             || mPeekPending || mPeekAnimator != null;
                     onTrackingStarted();
                 }
-                if (isShadeCollapsed()) {
+                if (isFullyCollapsed()) {
                     schedulePeek();
                 }
                 break;
@@ -472,7 +472,7 @@ public abstract class PanelView extends FrameLayout {
                 mTouchSlopExceeded = false;
                 mJustPeeked = false;
                 mMotionAborted = false;
-                mPanelClosedOnDown = isShadeCollapsed();
+                mPanelClosedOnDown = isFullyCollapsed();
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mTouchAboveFalsingThreshold = false;
@@ -707,7 +707,7 @@ public abstract class PanelView extends FrameLayout {
         // If the user isn't actively poking us, let's update the height
         if ((!mTracking || isTrackingBlocked())
                 && mHeightAnimator == null
-                && !isShadeCollapsed()
+                && !isFullyCollapsed()
                 && currentMaxPanelHeight != mExpandedHeight
                 && !mPeekPending
                 && mPeekAnimator == null
@@ -1056,8 +1056,6 @@ public abstract class PanelView extends FrameLayout {
      * @return the height of the clear all button, in pixels
      */
     protected abstract int getClearAllHeight();
-
-    protected abstract boolean isShadeCollapsed();
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;

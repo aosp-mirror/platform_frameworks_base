@@ -150,7 +150,7 @@
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
     <!-- milliseconds before the heads up notification accepts touches. -->
-    <integer name="heads_up_sensitivity_delay">700</integer>
+    <integer name="touch_acceptance_delay">700</integer>
 
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
     <integer name="recents_task_bar_dismiss_delay_seconds">1</integer>
