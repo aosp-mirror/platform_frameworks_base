@@ -18,12 +18,8 @@ package android.security;
 
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
-import android.service.gatekeeper.IGateKeeperService;
 
 import libcore.util.EmptyArray;
 
@@ -347,20 +343,6 @@ public abstract class KeymasterUtils {
         return result;
     }
 
-    private static long getRootSid() {
-        IGateKeeperService gatekeeperService = IGateKeeperService.Stub.asInterface(
-                ServiceManager.getService("android.service.gatekeeper.IGateKeeperService"));
-        if (gatekeeperService == null) {
-            throw new IllegalStateException("Gatekeeper service not available");
-        }
-
-        try {
-            return gatekeeperService.getSecureUserId(UserHandle.myUserId());
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Failed to obtain root SID");
-        }
-    }
-
     /**
      * Adds keymaster arguments to express the key's authorization policy supported by user
      * authentication.
@@ -402,7 +384,7 @@ public abstract class KeymasterUtils {
         } else {
             // The key is authorized for use for the specified amount of time after the user has
             // authenticated. Whatever unlocks the secure lock screen should authorize this key.
-            long rootSid = getRootSid();
+            long rootSid = GateKeeper.getSecureUserId();
             if (rootSid == 0) {
                 throw new IllegalStateException("Secure lock screen must be enabled"
                         + " to create keys requiring user authentication");
