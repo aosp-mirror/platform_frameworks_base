@@ -699,12 +699,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final StringBuilder mStrictModeBuffer = new StringBuilder();
 
     /**
-     * Keeps track of all IIntentReceivers that have been registered for
-     * broadcasts.  Hash keys are the receiver IBinder, hash value is
-     * a ReceiverList.
+     * Keeps track of all IIntentReceivers that have been registered for broadcasts.
+     * Hash keys are the receiver IBinder, hash value is a ReceiverList.
      */
-    final HashMap<IBinder, ReceiverList> mRegisteredReceivers =
-            new HashMap<IBinder, ReceiverList>();
+    final HashMap<IBinder, ReceiverList> mRegisteredReceivers = new HashMap<>();
 
     /**
      * Resolver for broadcast intents to registered receivers.
@@ -716,7 +714,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         protected boolean allowFilterResult(
                 BroadcastFilter filter, List<BroadcastFilter> dest) {
             IBinder target = filter.receiverList.receiver.asBinder();
-            for (int i=dest.size()-1; i>=0; i--) {
+            for (int i = dest.size() - 1; i >= 0; i--) {
                 if (dest.get(i).receiverList.receiver.asBinder() == target) {
                     return false;
                 }
@@ -15662,8 +15660,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Original caller already died
                 return null;
             }
-            ReceiverList rl
-                = (ReceiverList)mRegisteredReceivers.get(receiver.asBinder());
+            ReceiverList rl = mRegisteredReceivers.get(receiver.asBinder());
             if (rl == null) {
                 rl = new ReceiverList(this, callerApp, callingPid, callingUid,
                         userId, receiver);
@@ -15695,7 +15692,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     permission, callingUid, userId);
             rl.add(bf);
             if (!bf.debugCheck()) {
-                Slog.w(TAG, "==> For Dynamic broadast");
+                Slog.w(TAG, "==> For Dynamic broadcast");
             }
             mReceiverResolver.addFilter(bf);
 
@@ -15705,9 +15702,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ArrayList receivers = new ArrayList();
                 receivers.add(bf);
 
-                int N = allSticky.size();
-                for (int i=0; i<N; i++) {
-                    Intent intent = (Intent)allSticky.get(i);
+                final int stickyCount = allSticky.size();
+                for (int i = 0; i < stickyCount; i++) {
+                    Intent intent = allSticky.get(i);
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
                             null, -1, -1, null, null, AppOpsManager.OP_NONE, receivers, null, 0,
@@ -15767,8 +15764,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void removeReceiverLocked(ReceiverList rl) {
         mRegisteredReceivers.remove(rl.receiver.asBinder());
-        int N = rl.size();
-        for (int i=0; i<N; i++) {
+        for (int i = rl.size() - 1; i >= 0; i--) {
             mReceiverResolver.removeFilter(rl.get(i));
         }
     }
@@ -16139,24 +16135,24 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
             if (stickies == null) {
-                stickies = new ArrayMap<String, ArrayList<Intent>>();
+                stickies = new ArrayMap<>();
                 mStickyBroadcasts.put(userId, stickies);
             }
             ArrayList<Intent> list = stickies.get(intent.getAction());
             if (list == null) {
-                list = new ArrayList<Intent>();
+                list = new ArrayList<>();
                 stickies.put(intent.getAction(), list);
             }
-            int N = list.size();
+            final int stickiesCount = list.size();
             int i;
-            for (i=0; i<N; i++) {
+            for (i = 0; i < stickiesCount; i++) {
                 if (intent.filterEquals(list.get(i))) {
                     // This sticky already exists, replace it.
                     list.set(i, new Intent(intent));
                     break;
                 }
             }
-            if (i >= N) {
+            if (i >= stickiesCount) {
                 list.add(new Intent(intent));
             }
         }
