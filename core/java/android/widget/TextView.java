@@ -4569,7 +4569,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @return true if the current transformation method is of the password type.
      */
-    private boolean hasPasswordTransformationMethod() {
+    boolean hasPasswordTransformationMethod() {
         return mTransformation instanceof PasswordTransformationMethod;
     }
 
@@ -8583,7 +8583,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * a selection controller (see {@link Editor#prepareCursorControllers()}), but this is not
      * sufficient.
      */
-    private boolean canSelectText() {
+    boolean canSelectText() {
         return mText.length() != 0 && mEditor != null && mEditor.hasSelectionController();
     }
 
@@ -9197,6 +9197,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return false;
+    }
+
+    boolean canSelectAllText() {
+        return canSelectText() && !hasPasswordTransformationMethod();
     }
 
     boolean selectAllText() {
