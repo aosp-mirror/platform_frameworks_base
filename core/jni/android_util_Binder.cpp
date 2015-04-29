@@ -202,8 +202,7 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
          */
         JavaVM* vm = jnienv_to_javavm(env);
         env->Throw(excep);
-        vm->DetachCurrentThread();
-        sleep(60);
+        env->ExceptionDescribe();
         ALOGE("Forcefully exiting");
         exit(1);
     }
