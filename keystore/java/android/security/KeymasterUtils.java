@@ -16,7 +16,14 @@
 
 package android.security;
 
+import android.content.Context;
+import android.hardware.fingerprint.FingerprintManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
+import android.service.gatekeeper.IGateKeeperService;
 
 import libcore.util.EmptyArray;
 
@@ -338,5 +345,73 @@ public abstract class KeymasterUtils {
             result[i] = getKeymasterPaddingFromJcaSignaturePadding(jcaPaddings[i]);
         }
         return result;
+    }
+
+    private static long getRootSid() {
+        IGateKeeperService gatekeeperService = IGateKeeperService.Stub.asInterface(
+                ServiceManager.getService("android.service.gatekeeper.IGateKeeperService"));
+        if (gatekeeperService == null) {
+            throw new IllegalStateException("Gatekeeper service not available");
+        }
+
+        try {
+            return gatekeeperService.getSecureUserId(UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed to obtain root SID");
+        }
+    }
+
+    /**
+     * Adds keymaster arguments to express the key's authorization policy supported by user
+     * authentication.
+     *
+     * @param userAuthenticationRequired whether user authentication is required to authorize the
+     *        use of the key.
+     * @param userAuthenticationValidityDurationSeconds duration of time (seconds) for which user
+     *        authentication is valid as authorization for using the key or {@code -1} if every
+     *        use of the key needs authorization.
+     */
+    public static void addUserAuthArgs(KeymasterArguments args,
+            Context context,
+            boolean userAuthenticationRequired,
+            int userAuthenticationValidityDurationSeconds) {
+        if (!userAuthenticationRequired) {
+            args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+            return;
+        }
+
+        if (userAuthenticationValidityDurationSeconds == -1) {
+            // Every use of this key needs to be authorized by the user. This currently means
+            // fingerprint-only auth.
+            FingerprintManager fingerprintManager =
+                    context.getSystemService(FingerprintManager.class);
+            if ((fingerprintManager == null) || (!fingerprintManager.isHardwareDetected())) {
+                throw new IllegalStateException(
+                        "This device does not support keys which require authentication for every"
+                        + " use -- this requires fingerprint authentication which is not"
+                        + " available on this device");
+            }
+            long fingerprintOnlySid = fingerprintManager.getAuthenticatorId();
+            if (fingerprintOnlySid == 0) {
+                throw new IllegalStateException(
+                        "At least one fingerprint must be enrolled to create keys requiring user"
+                        + " authentication for every use");
+            }
+            args.addLong(KeymasterDefs.KM_TAG_USER_SECURE_ID, fingerprintOnlySid);
+            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, KeymasterDefs.HW_AUTH_FINGERPRINT);
+        } else {
+            // The key is authorized for use for the specified amount of time after the user has
+            // authenticated. Whatever unlocks the secure lock screen should authorize this key.
+            long rootSid = getRootSid();
+            if (rootSid == 0) {
+                throw new IllegalStateException("Secure lock screen must be enabled"
+                        + " to create keys requiring user authentication");
+            }
+            args.addLong(KeymasterDefs.KM_TAG_USER_SECURE_ID, rootSid);
+            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
+                    KeymasterDefs.HW_AUTH_PASSWORD | KeymasterDefs.HW_AUTH_FINGERPRINT);
+            args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
+                    userAuthenticationValidityDurationSeconds);
+        }
     }
 }
