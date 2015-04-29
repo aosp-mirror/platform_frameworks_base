@@ -134,8 +134,10 @@ private:
 
 // ----------------------------------------------------------------------------
 
-static jlong nativeListen(JNIEnv* env, jobject remoteDisplayObj, jstring ifaceStr) {
+static jlong nativeListen(JNIEnv* env, jobject remoteDisplayObj, jstring ifaceStr,
+        jstring opPackageNameStr) {
     ScopedUtfChars iface(env, ifaceStr);
+    ScopedUtfChars opPackageName(env, opPackageNameStr);
 
     sp<IServiceManager> sm = defaultServiceManager();
     sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(
@@ -146,7 +148,7 @@ static jlong nativeListen(JNIEnv* env, jobject remoteDisplayObj, jstring ifaceSt
     }
 
     sp<NativeRemoteDisplayClient> client(new NativeRemoteDisplayClient(env, remoteDisplayObj));
-    sp<IRemoteDisplay> display = service->listenForRemoteDisplay(
+    sp<IRemoteDisplay> display = service->listenForRemoteDisplay(String16(opPackageName.c_str()),
             client, String8(iface.c_str()));
     if (display == NULL) {
         ALOGE("Media player service rejected request to listen for remote display '%s'.",
@@ -176,7 +178,7 @@ static void nativeDispose(JNIEnv* env, jobject remoteDisplayObj, jlong ptr) {
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"nativeListen", "(Ljava/lang/String;)J",
+    {"nativeListen", "(Ljava/lang/String;Ljava/lang/String;)J",
             (void*)nativeListen },
     {"nativeDispose", "(J)V",
             (void*)nativeDispose },

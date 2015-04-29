@@ -26,6 +26,8 @@
 #include <utils/threads.h>
 #include "media/Visualizer.h"
 
+#include <ScopedUtfChars.h>
+
 using namespace android;
 
 #define VISUALIZER_SUCCESS                      0
@@ -331,13 +333,15 @@ static void android_media_visualizer_effect_callback(int32_t event,
 
 static jint
 android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jint sessionId, jintArray jId)
+        jint sessionId, jintArray jId, jstring opPackageName)
 {
     ALOGV("android_media_visualizer_native_setup");
     visualizerJniStorage* lpJniStorage = NULL;
     int lStatus = VISUALIZER_ERROR_NO_MEMORY;
     Visualizer* lpVisualizer = NULL;
     jint* nId = NULL;
+
+    ScopedUtfChars opPackageNameStr(env, opPackageName);
 
     lpJniStorage = new visualizerJniStorage();
     if (lpJniStorage == NULL) {
@@ -362,7 +366,8 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     }
 
     // create the native Visualizer object
-    lpVisualizer = new Visualizer(0,
+    lpVisualizer = new Visualizer(String16(opPackageNameStr.c_str()),
+                                  0,
                                   android_media_visualizer_effect_callback,
                                   lpJniStorage,
                                   sessionId);
@@ -662,7 +667,7 @@ android_media_setPeriodicCapture(JNIEnv *env, jobject thiz, jint rate, jboolean 
 // Dalvik VM type signatures
 static JNINativeMethod gMethods[] = {
     {"native_init",            "()V",     (void *)android_media_visualizer_native_init},
-    {"native_setup",           "(Ljava/lang/Object;I[I)I",
+    {"native_setup",           "(Ljava/lang/Object;I[ILjava/lang/String;)I",
                                           (void *)android_media_visualizer_native_setup},
     {"native_finalize",          "()V",   (void *)android_media_visualizer_native_finalize},
     {"native_release",           "()V",   (void *)android_media_visualizer_native_release},
