@@ -32847,11 +32847,34 @@ package android.telephony {
     method public void reloadCarrierConfigForSubId(int);
     method public void updateConfigForPhoneId(int, java.lang.String);
     field public static final java.lang.String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
+    field public static final java.lang.String BOOL_ADDITIONAL_CALL_SETTING = "bool_additional_call_setting";
+    field public static final java.lang.String BOOL_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG = "bool_allow_emergency_numbers_in_call_log";
+    field public static final java.lang.String BOOL_ALLOW_LOCAL_DTMF_TONES = "bool_allow_local_dtmf_tones";
     field public static final java.lang.String BOOL_APN_EXPAND = "bool_apn_expand";
+    field public static final java.lang.String BOOL_AUTO_RETRY_ENABLED = "bool_auto_retry_enabled";
+    field public static final java.lang.String BOOL_CARRIER_SETTINGS_ENABLE = "bool_carrier_settings_enable";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_AVAILABLE = "bool_carrier_volte_available";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_PROVISIONED = "bool_carrier_volte_provisioned";
     field public static final java.lang.String BOOL_CARRIER_VOLTE_TTY_SUPPORTED = "bool_carrier_volte_tty_supported";
+    field public static final java.lang.String BOOL_DISABLE_CDMA_ACTIVATION_CODE = "bool_disable_cdma_activation_code";
+    field public static final java.lang.String BOOL_DTMF_TYPE_ENABLED = "bool_dtmf_type_enabled";
+    field public static final java.lang.String BOOL_ENABLE_DIALER_KEY_VIBRATION = "bool_enable_dialer_key_vibration";
+    field public static final java.lang.String BOOL_HAS_IN_CALL_NOISE_SUPPRESSION = "bool_has_in_call_noise_suppression";
+    field public static final java.lang.String BOOL_HIDE_CARRIER_NETWORK_SETTINGS = "bool_hide_carrier_network_settings";
+    field public static final java.lang.String BOOL_IGNORE_SIM_NETWORK_LOCKED_EVENTS = "bool_ignore_sim_network_locked_events";
+    field public static final java.lang.String BOOL_OPERATOR_SELECTION_EXPAND = "bool_operator_selection_expand";
+    field public static final java.lang.String BOOL_PREFER_2G = "bool_prefer_2g";
     field public static final java.lang.String BOOL_SHOW_APN_SETTING_CDMA = "bool_show_apn_setting_cdma";
+    field public static final java.lang.String BOOL_SHOW_CDMA = "bool_show_cdma";
+    field public static final java.lang.String BOOL_SHOW_ONSCREEN_DIAL_BUTTON = "bool_show_onscreen_dial_button";
+    field public static final java.lang.String BOOL_SIM_NETWORK_UNLOCK_ALLOW_DISMISS = "bool_sim_network_unlock_allow_dismiss";
+    field public static final java.lang.String BOOL_SUPPORT_PAUSE_IMS_VIDEO_CALLS = "bool_support_pause_ims_video_calls";
+    field public static final java.lang.String BOOL_SUPPORT_SWAP_AFTER_MERGE = "bool_support_swap_after_merge";
+    field public static final java.lang.String BOOL_USE_HFA_FOR_PROVISIONING = "bool_use_hfa_for_provisioning";
+    field public static final java.lang.String BOOL_USE_OTASP_FOR_PROVISIONING = "bool_use_otasp_for_provisioning";
+    field public static final java.lang.String BOOL_VOICEMAIL_NOTIFICATION_PERSISTENT = "bool_voicemail_notification_persistent";
+    field public static final java.lang.String BOOL_VOICE_PRIVACY_DISABLE = "bool_voice_privacy_disable";
+    field public static final java.lang.String BOOL_WORLD_PHONE = "bool_world_phone";
     field public static final java.lang.String INT_VOLTE_REPLACEMENT_RAT = "int_volte_replacement_rat";
   }
 
