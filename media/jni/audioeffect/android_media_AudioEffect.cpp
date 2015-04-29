@@ -25,6 +25,8 @@
 #include <android_runtime/AndroidRuntime.h>
 #include "media/AudioEffect.h"
 
+#include <ScopedUtfChars.h>
+
 using namespace android;
 
 #define AUDIOEFFECT_SUCCESS                      0
@@ -249,7 +251,8 @@ android_media_AudioEffect_native_init(JNIEnv *env)
 
 static jint
 android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jstring type, jstring uuid, jint priority, jint sessionId, jintArray jId, jobjectArray javadesc)
+        jstring type, jstring uuid, jint priority, jint sessionId, jintArray jId,
+        jobjectArray javadesc, jstring opPackageName)
 {
     ALOGV("android_media_AudioEffect_native_setup");
     AudioEffectJniStorage* lpJniStorage = NULL;
@@ -266,6 +269,8 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     jstring jdescConnect;
     jstring jdescName;
     jstring jdescImplementor;
+
+    ScopedUtfChars opPackageNameStr(env, opPackageName);
 
     if (type != NULL) {
         typeStr = env->GetStringUTFChars(type, NULL);
@@ -312,6 +317,7 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
 
     // create the native AudioEffect object
     lpAudioEffect = new AudioEffect(typeStr,
+                                    String16(opPackageNameStr.c_str()),
                                     uuidStr,
                                     priority,
                                     effectCallback,
@@ -868,7 +874,7 @@ android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz _
 // Dalvik VM type signatures
 static JNINativeMethod gMethods[] = {
     {"native_init",          "()V",      (void *)android_media_AudioEffect_native_init},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;II[I[Ljava/lang/Object;)I",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;II[I[Ljava/lang/Object;Ljava/lang/String;)I",
                                          (void *)android_media_AudioEffect_native_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioEffect_native_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioEffect_native_release},

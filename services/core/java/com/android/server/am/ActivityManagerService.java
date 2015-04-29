@@ -6607,6 +6607,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             return mActivityManagerService.checkPermission(permission, pid,
                     uid) == PackageManager.PERMISSION_GRANTED;
         }
+
+        @Override
+        public String[] getPackagesForUid(int uid) {
+            return mActivityManagerService.mContext.getPackageManager()
+                    .getPackagesForUid(uid);
+        }
     }
 
     class IntentFirewallInterface implements IntentFirewall.AMSInterface {

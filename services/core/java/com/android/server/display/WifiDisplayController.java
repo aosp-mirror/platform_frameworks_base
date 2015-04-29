@@ -775,7 +775,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                         handleConnectionFailure(false);
                     }
                 }
-            }, mHandler);
+            }, mHandler, mContext.getOpPackageName());
 
             // Use extended timeout value for certification, as some tests require user inputs
             int rtspTimeout = mWifiDisplayCertMode ?
