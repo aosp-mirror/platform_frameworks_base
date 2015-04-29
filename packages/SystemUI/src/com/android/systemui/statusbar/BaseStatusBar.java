@@ -784,7 +784,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void applyColorsAndBackgrounds(StatusBarNotification sbn,
             NotificationData.Entry entry) {
 
-        if (entry.expanded.getId() != com.android.internal.R.id.status_bar_latest_event_content) {
+        if (entry.getContentView().getId()
+                != com.android.internal.R.id.status_bar_latest_event_content) {
             // Using custom RemoteViews
             if (entry.targetSdk >= Build.VERSION_CODES.GINGERBREAD
                     && entry.targetSdk < Build.VERSION_CODES.LOLLIPOP) {
@@ -809,8 +810,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public boolean isMediaNotification(NotificationData.Entry entry) {
         // TODO: confirm that there's a valid media key
-        return entry.expandedBig != null &&
-               entry.expandedBig.findViewById(com.android.internal.R.id.media_actions) != null;
+        return entry.getExpandedContentView() != null &&
+               entry.getExpandedContentView()
+                       .findViewById(com.android.internal.R.id.media_actions) != null;
     }
 
     // The gear button in the guts that links to the app's own notification settings
@@ -1134,9 +1136,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     /**
-     * if the interrupting notification had a fullscreen intent, fire it now.
+     * If there is an active heads-up notification and it has a fullscreen intent, fire it now.
      */
-    public abstract void escalateHeadsUp();
+    public abstract void maybeEscalateHeadsUp();
 
     /**
      * Save the current "public" (locked and secure) state of the lockscreen.
@@ -1337,8 +1339,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         View publicViewLocal = null;
         if (publicNotification != null) {
             try {
-                publicViewLocal = publicNotification.contentView.apply(mContext, contentContainerPublic,
-                        mOnClickHandler);
+                publicViewLocal = publicNotification.contentView.apply(mContext,
+                        contentContainerPublic, mOnClickHandler);
 
                 if (publicViewLocal != null) {
                     publicViewLocal.setIsRootNamespace(true);
@@ -1445,9 +1447,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         entry.row = row;
         entry.row.setHeightRange(mRowMinHeight, maxHeight);
         entry.row.setOnActivatedListener(this);
-        entry.expanded = contentViewLocal;
-        entry.expandedPublic = publicViewLocal;
-        entry.setBigContentView(bigContentViewLocal);
+        entry.row.setExpandable(bigContentViewLocal != null);
 
         applyColorsAndBackgrounds(sbn, entry);
 
@@ -1536,12 +1536,13 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // See if we have somewhere to put that remote input
         if (remoteInput != null) {
-            if (entry.expandedBig != null) {
-                inflateRemoteInput(entry.expandedBig, remoteInput, actions);
+            View bigContentView = entry.getExpandedContentView();
+            if (bigContentView != null) {
+                inflateRemoteInput(bigContentView, remoteInput, actions);
             }
-            View headsUpChild = entry.row.getPrivateLayout().getHeadsUpChild();
-            if (headsUpChild != null) {
-                inflateRemoteInput(headsUpChild, remoteInput, actions);
+            View headsUpContentView = entry.getHeadsUpContentView();
+            if (headsUpContentView != null) {
+                inflateRemoteInput(headsUpContentView, remoteInput, actions);
             }
         }
 
@@ -1883,15 +1884,14 @@ public abstract class BaseStatusBar extends SystemUI implements
             logUpdate(entry, n);
         }
         boolean applyInPlace = shouldApplyInPlace(entry, n);
-        final boolean shouldInterrupt = shouldInterrupt(notification);
-        final boolean alertAgain = alertAgain(entry, n);
+        boolean shouldInterrupt = shouldInterrupt(notification);
+        boolean alertAgain = alertAgain(entry, n);
 
         entry.notification = notification;
         mGroupManager.onEntryUpdated(entry, entry.notification);
 
         boolean updateSuccessful = false;
         if (applyInPlace) {
-            // We can just reapply the notifications in place
             if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
             try {
                 if (entry.icon != null) {
@@ -1912,7 +1912,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 updateSuccessful = true;
             }
             catch (RuntimeException e) {
-                // It failed to add cleanly.  Log, and remove the view from the panel.
+                // It failed to apply cleanly.
                 Log.w(TAG, "Couldn't reapply views for package " + n.contentView.getPackage(), e);
             }
         }
@@ -1936,11 +1936,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         // swipe-dismissable)
         updateNotificationVetoButton(entry.row, notification);
 
-        // Is this for you?
-        boolean isForCurrentUser = isNotificationForCurrentProfiles(notification);
-        if (DEBUG) Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
+        if (DEBUG) {
+            // Is this for you?
+            boolean isForCurrentUser = isNotificationForCurrentProfiles(notification);
+            Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
+        }
 
-        // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
     }
 
@@ -1951,7 +1952,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         StatusBarNotification oldNotification = oldEntry.notification;
         Log.d(TAG, "old notification: when=" + oldNotification.getNotification().when
                 + " ongoing=" + oldNotification.isOngoing()
-                + " expanded=" + oldEntry.expanded
+                + " expanded=" + oldEntry.getContentView()
                 + " contentView=" + oldNotification.getNotification().contentView
                 + " bigContentView=" + oldNotification.getNotification().bigContentView
                 + " publicView=" + oldNotification.getNotification().publicVersion
@@ -1964,7 +1965,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     /**
-     * @return whether we can just reapply the RemoteViews in place when it is updated
+     * @return whether we can just reapply the RemoteViews from a notification in-place when it is
+     * updated
      */
     private boolean shouldApplyInPlace(Entry entry, Notification n) {
         StatusBarNotification oldNotification = entry.notification;
@@ -1982,15 +1984,15 @@ public abstract class BaseStatusBar extends SystemUI implements
         final Notification publicNotification = n.publicVersion;
         final RemoteViews publicContentView = publicNotification != null
                 ? publicNotification.contentView : null;
-        boolean contentsUnchanged = entry.expanded != null
+        boolean contentsUnchanged = entry.getContentView() != null
                 && contentView.getPackage() != null
                 && oldContentView.getPackage() != null
                 && oldContentView.getPackage().equals(contentView.getPackage())
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
         // large view may be null
         boolean bigContentsUnchanged =
-                (entry.getBigContentView() == null && bigContentView == null)
-                || ((entry.getBigContentView() != null && bigContentView != null)
+                (entry.getExpandedContentView() == null && bigContentView == null)
+                || ((entry.getExpandedContentView() != null && bigContentView != null)
                     && bigContentView.getPackage() != null
                     && oldBigContentView.getPackage() != null
                     && oldBigContentView.getPackage().equals(bigContentView.getPackage())
@@ -2022,12 +2024,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 : null;
 
         // Reapply the RemoteViews
-        contentView.reapply(mContext, entry.expanded, mOnClickHandler);
-        if (bigContentView != null && entry.getBigContentView() != null) {
-            bigContentView.reapply(mContext, entry.getBigContentView(),
+        contentView.reapply(mContext, entry.getContentView(), mOnClickHandler);
+        if (bigContentView != null && entry.getExpandedContentView() != null) {
+            bigContentView.reapply(mContext, entry.getExpandedContentView(),
                     mOnClickHandler);
         }
-        View headsUpChild = entry.row.getPrivateLayout().getHeadsUpChild();
+        View headsUpChild = entry.getHeadsUpContentView();
         if (headsUpContentView != null && headsUpChild != null) {
             headsUpContentView.reapply(mContext, headsUpChild, mOnClickHandler);
         }
@@ -2050,7 +2052,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void notifyHeadsUpScreenOff() {
-        escalateHeadsUp();
+        maybeEscalateHeadsUp();
     }
 
     private boolean alertAgain(Entry oldEntry, Notification newNotification) {

@@ -1152,11 +1152,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void removeNotification(String key, RankingMap ranking) {
-        boolean defferRemoval = false;
+        boolean deferRemoval = false;
         if (mHeadsUpManager.isHeadsUp(key)) {
-            defferRemoval = !mHeadsUpManager.removeNotification(key);
+            deferRemoval = !mHeadsUpManager.removeNotification(key);
         }
-        if (defferRemoval) {
+        if (deferRemoval) {
             mLatestRankingMap = ranking;
             mHeadsUpEntriesToRemoveOnSwitch.add(mHeadsUpManager.getEntry(key));
             return;
@@ -1838,8 +1838,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void OnPinnedHeadsUpExistChanged(boolean exist, boolean changeImmediatly) {
-        if (exist) {
+    public void onPinnedModeChanged(boolean inPinnedMode) {
+        if (inPinnedMode) {
             mStatusBarWindowManager.setHeadsUpShowing(true);
         } else {
             Runnable endRunnable = new Runnable() {
@@ -1850,20 +1850,24 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 }
             };
-            if (changeImmediatly) {
+            if (!mNotificationPanel.isFullyCollapsed()) {
                 endRunnable.run();
             } else {
-                mStackScroller.performOnAnimationFinished(endRunnable);
+                mStackScroller.runAfterAnimationFinished(endRunnable);
             }
         }
     }
 
     @Override
-    public void OnHeadsUpPinnedChanged(ExpandableNotificationRow headsUp, boolean isHeadsUp) {
+    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
     }
 
     @Override
-    public void OnHeadsUpStateChanged(Entry entry, boolean isHeadsUp) {
+    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
+    }
+
+    @Override
+    public void onHeadsUpStateChanged(Entry entry, boolean isHeadsUp) {
         if (!isHeadsUp && mHeadsUpEntriesToRemoveOnSwitch.contains(entry)) {
             removeNotification(entry.key, mLatestRankingMap);
             mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
@@ -1880,10 +1884,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             boolean alertAgain) {
         final boolean wasHeadsUp = isHeadsUp(key);
         if (wasHeadsUp) {
-            mHeadsUpManager.updateNotification(entry, alertAgain);
             if (!shouldInterrupt) {
                 // We don't want this to be interrupting anymore, lets remove it
                 mHeadsUpManager.removeNotification(key);
+            } else {
+                mHeadsUpManager.updateNotification(entry, alertAgain);
             }
         } else if (shouldInterrupt && alertAgain) {
             // This notification was updated to be a heads-up, show it!
@@ -1929,7 +1934,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void escalateHeadsUp() {
+    public void maybeEscalateHeadsUp() {
         TreeSet<HeadsUpManager.HeadsUpEntry> entries = mHeadsUpManager.getSortedEntries();
         for (HeadsUpManager.HeadsUpEntry entry : entries) {
             final StatusBarNotification sbn = entry.entry.notification;
