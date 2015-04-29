@@ -14373,15 +14373,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Indicates whether this view has a static layer. A view with layer type
-     * {@link #LAYER_TYPE_NONE} is a static layer. Other types of layers are
-     * dynamic.
-     */
-    boolean hasStaticLayer() {
-        return true;
-    }
-
-    /**
      * Indicates what type of layer is currently associated with this view. By default
      * a view does not have a layer, and the layer type is {@link #LAYER_TYPE_NONE}.
      * Refer to the documentation of {@link #setLayerType(int, android.graphics.Paint)}
