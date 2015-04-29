@@ -49,6 +49,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
@@ -2274,6 +2275,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 continue;
             }
+            if (!pkg.isSystemApp()) {
+                if (logging) {
+                    Slog.d(TAG, "No priming domain verifications for a non system package : " +
+                            packageName);
+                }
+                continue;
+            }
             for (PackageParser.Activity a : pkg.activities) {
                 for (ActivityIntentInfo filter : a.intents) {
                     if (hasValidDomains(filter, false)) {
@@ -2281,7 +2289,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-            if (allHosts.size() > 0) {
+            if (allHosts.size() == 0) {
                 allHosts.add("*");
             }
             IntentFilterVerificationInfo ivi =
@@ -3939,7 +3947,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 result = filterIfNotPrimaryUser(result, userId);
                 if (result.size() > 1 && hasWebURI(intent)) {
-                    return filterCandidatesWithDomainPreferedActivitiesLPr(result);
+                    return filterCandidatesWithDomainPreferedActivitiesLPr(flags, result);
                 }
                 return result;
             }
@@ -3984,7 +3992,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private List<ResolveInfo> filterCandidatesWithDomainPreferedActivitiesLPr(
-            List<ResolveInfo> candidates) {
+            int flags, List<ResolveInfo> candidates) {
         if (DEBUG_PREFERRED) {
             Slog.v("TAG", "Filtering results with prefered activities. Candidates count: " +
                     candidates.size());
@@ -4004,6 +4012,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 String packageName = info.activityInfo.packageName;
                 PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null) {
+                    // Add to the special match all list (Browser use case)
+                    if (info.handleAllWebDataURI) {
+                        matchAllList.add(info);
+                        continue;
+                    }
                     // Try to get the status from User settings first
                     int status = getDomainVerificationStatusLPr(ps, userId);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
@@ -4012,10 +4025,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         neverList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
                         undefinedList.add(info);
-                    }
-                    // Add to the special match all list (Browser use case)
-                    if (info.handleAllWebDataURI) {
-                        matchAllList.add(info);
                     }
                 }
             }
@@ -4031,7 +4040,30 @@ public class PackageManagerService extends IPackageManager.Stub {
             result.removeAll(matchAllList);
             if (result.size() == 0) {
                 result.addAll(undefinedList);
-                result.addAll(matchAllList);
+                if ((flags & MATCH_ALL) != 0) {
+                    result.addAll(matchAllList);
+                } else {
+                    // Try to add the Default Browser if we can
+                    final String defaultBrowserPackageName = getDefaultBrowserPackageName(
+                            UserHandle.myUserId());
+                    if (!TextUtils.isEmpty(defaultBrowserPackageName)) {
+                        boolean defaultBrowserFound = false;
+                        final int browserCount = matchAllList.size();
+                        for (int n=0; n<browserCount; n++) {
+                            ResolveInfo browser = matchAllList.get(n);
+                            if (browser.activityInfo.packageName.equals(defaultBrowserPackageName)) {
+                                result.add(browser);
+                                defaultBrowserFound = true;
+                                break;
+                            }
+                        }
+                        if (!defaultBrowserFound) {
+                            result.addAll(matchAllList);
+                        }
+                    } else {
+                        result.addAll(matchAllList);
+                    }
+                }
             }
         }
         if (DEBUG_PREFERRED) {
@@ -11331,10 +11363,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 verifierUid, userId, verificationId, filter, packageName);
                         count++;
                     } else if (!needsFilterVerification) {
-                        Slog.d(TAG, "No verification needed for IntentFilter:"
-                                + filter.toString());
+                        Slog.d(TAG, "No verification needed for IntentFilter:" + filter.toString());
                         if (hasValidDomains(filter)) {
-                            allHosts.addAll(filter.getHostsList());
+                            ArrayList<String> hosts = filter.getHostsList();
+                            if (hosts.size() > 0) {
+                                allHosts.addAll(hosts);
+                            } else {
+                                if (allHosts.isEmpty()) {
+                                    allHosts.add("*");
+                                }
+                            }
                         }
                     } else {
                         Slog.d(TAG, "Verification already done for IntentFilter:"

@@ -209,7 +209,14 @@ public abstract class PackageManager {
      * matching.  This is a synonym for including the CATEGORY_DEFAULT in your
      * supplied Intent.
      */
-    public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
+    public static final int MATCH_DEFAULT_ONLY  = 0x00010000;
+
+    /**
+     * Querying flag: if set and if the platform is doing any filtering of the results, then
+     * the filtering will not happen. This is a synonym for saying that all results should
+     * be returned.
+     */
+    public static final int MATCH_ALL = 0x00020000;
 
     /**
      * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
@@ -2637,6 +2644,8 @@ public abstract class PackageManager {
      * {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
      * those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
      *
+     * You can also set {@link #MATCH_ALL} for preventing the filtering of the results.
+     *
      * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
      *         Activity. These are ordered from best to worst match -- that
      *         is, the first item in the list is what is returned by
@@ -2657,6 +2666,8 @@ public abstract class PackageManager {
      * @param flags Additional option flags.  The most important is
      * {@link #MATCH_DEFAULT_ONLY}, to limit the resolution to only
      * those activities that support the {@link android.content.Intent#CATEGORY_DEFAULT}.
+     *
+     * You can also set {@link #MATCH_ALL} for preventing the filtering of the results.
      *
      * @return A List&lt;ResolveInfo&gt; containing one entry for each matching
      *         Activity. These are ordered from best to worst match -- that
