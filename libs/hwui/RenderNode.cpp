@@ -389,12 +389,9 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
     if (properties().getAlpha() < 1) {
         if (isLayer) {
             clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
-
-            renderer.setOverrideLayerAlpha(properties().getAlpha());
-        } else {
-            LOG_ALWAYS_FATAL_IF(properties().getHasOverlappingRendering());
-            renderer.scaleAlpha(properties().getAlpha());
         }
+        LOG_ALWAYS_FATAL_IF(!isLayer && properties().getHasOverlappingRendering());
+        renderer.scaleAlpha(properties().getAlpha());
     }
     if (clipFlags) {
         Rect clipRect;
@@ -902,7 +899,6 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
     handler(new (alloc) RestoreToCountOp(restoreTo),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
-    renderer.setOverrideLayerAlpha(1.0f);
 
     DISPLAY_LIST_LOGD("%*sDone (%p, %s)", level * 2, "", this, getName());
     handler.endMark();

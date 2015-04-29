@@ -61,7 +61,6 @@ public:
     int mClipSideFlags; // specifies which sides of the bounds are clipped, unclipped if cleared
     bool mClipped;
     mat4 mMatrix;
-    DrawModifiers mDrawModifiers;
     float mAlpha;
     const RoundRectClipState* mRoundRectClipState;
 };

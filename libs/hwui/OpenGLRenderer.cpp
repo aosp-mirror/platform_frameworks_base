@@ -76,9 +76,6 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
         , mLightRadius(FLT_MIN)
         , mAmbientShadowAlpha(0)
         , mSpotShadowAlpha(0) {
-    // *set* draw modifiers to be 0
-    memset(&mDrawModifiers, 0, sizeof(mDrawModifiers));
-    mDrawModifiers.mOverrideLayerAlpha = 1.0f;
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -1188,10 +1185,9 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
         state.mClip.set(currentClip);
     }
 
-    // Transform, drawModifiers, and alpha always deferred, since they are used by state operations
+    // Transform and alpha always deferred, since they are used by state operations
     // (Note: saveLayer/restore use colorFilter and alpha, so we just save restore everything)
     state.mMatrix.load(*currentMatrix);
-    state.mDrawModifiers = mDrawModifiers;
     state.mAlpha = currentSnapshot()->alpha;
 
     // always store/restore, since it's just a pointer
@@ -1202,7 +1198,6 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
 void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore) {
     setMatrix(state.mMatrix);
     writableSnapshot()->alpha = state.mAlpha;
-    mDrawModifiers = state.mDrawModifiers;
     writableSnapshot()->roundRectClipState = state.mRoundRectClipState;
 
     if (state.mClipValid && !skipClipRestore) {
@@ -2541,21 +2536,11 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 void OpenGLRenderer::getAlphaAndMode(const SkPaint* paint, int* alpha,
         SkXfermode::Mode* mode) const {
     getAlphaAndModeDirect(paint, alpha,  mode);
-    if (mDrawModifiers.mOverrideLayerAlpha < 1.0f) {
-        // if drawing a layer, ignore the paint's alpha
-        *alpha = mDrawModifiers.mOverrideLayerAlpha * 255;
-    }
     *alpha *= currentSnapshot()->alpha;
 }
 
 float OpenGLRenderer::getLayerAlpha(const Layer* layer) const {
-    float alpha;
-    if (mDrawModifiers.mOverrideLayerAlpha < 1.0f) {
-        alpha = mDrawModifiers.mOverrideLayerAlpha;
-    } else {
-        alpha = layer->getAlpha() / 255.0f;
-    }
-    return alpha * currentSnapshot()->alpha;
+    return (layer->getAlpha() / 255.0f) * currentSnapshot()->alpha;
 }
 
 }; // namespace uirenderer
