@@ -214,7 +214,7 @@ public class TransitionInflater {
                         sConstructors.put(className, constructor);
                     }
                 }
-
+                constructor.setAccessible(true);
                 return constructor.newInstance(mContext, attrs);
             }
         } catch (InstantiationException e) {
