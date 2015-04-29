@@ -184,10 +184,10 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
         result.putInt("ap-discovered", ssidAppearInScanResultsCount);
         getInstrumentation().sendStatus(Activity.RESULT_FIRST_USER, result);
         if (i == mScanIterations + 1) {
-            writeOutput(String.format("iteration %d out of %d", i, mScanIterations));
+            writeOutput(String.format("iteration %d out of %d", i - 1, mScanIterations));
             writeOutput(String.format("average scanning time is %d", scanTimeSum / (i - 1)));
             writeOutput(String.format("ssid appear %d out of %d scan iterations",
-                    ssidAppearInScanResultsCount, i));
+                    ssidAppearInScanResultsCount, i - 1));
         }
     }
 
@@ -289,7 +289,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
         getInstrumentation().sendStatus(Activity.RESULT_FIRST_USER, result);
         if (i == mReconnectIterations + 1) {
             writeOutput(String.format("iteration %d out of %d",
-                    i, mReconnectIterations));
+                    i - 1, mReconnectIterations));
         }
     }
 }
