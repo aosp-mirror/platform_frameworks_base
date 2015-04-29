@@ -461,19 +461,17 @@ public abstract class CameraMetadata<TKey> {
      * <p>The camera device supports the Zero Shutter Lag reprocessing use case.</p>
      * <ul>
      * <li>One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.</li>
-     * <li>ImageFormat#PRIVATE is supported as an output/input format, that is,
-     *   ImageFormat#PRIVATE is included in the lists of formats returned by
-     *   StreamConfigurationMap#getInputFormats and
-     *   StreamConfigurationMap#getOutputFormats.</li>
-     * <li>StreamConfigurationMap#getValidOutputFormatsForInput returns non empty int[] for
-     *   each supported input format returned by StreamConfigurationMap#getInputFormats.</li>
-     * <li>Each size returned by StreamConfigurationMap#getInputSizes(ImageFormat#PRIVATE)
-     *   is also included in StreamConfigurationMap#getOutputSizes(ImageFormat#PRIVATE)</li>
-     * <li>Using ImageFormat#PRIVATE does not cause a frame rate drop
-     *   relative to the sensor's maximum capture rate (at that
-     *   resolution).</li>
-     * <li>ImageFormat#PRIVATE will be reprocessable into both YUV_420_888
-     *   and JPEG formats.</li>
+     * <li>{@link android.graphics.ImageFormat#PRIVATE } is supported as an output/input format,
+     *   that is, {@link android.graphics.ImageFormat#PRIVATE } is included in the lists of
+     *   formats returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.</li>
+     * <li>{@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
+     *   returns non empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
+     * <li>Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(ImageFormat.PRIVATE)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(ImageFormat.PRIVATE)}</li>
+     * <li>Using {@link android.graphics.ImageFormat#PRIVATE } does not cause a frame rate drop
+     *   relative to the sensor's maximum capture rate (at that resolution).</li>
+     * <li>{@link android.graphics.ImageFormat#PRIVATE } will be reprocessable into both
+     *   {@link android.graphics.ImageFormat#YUV_420_888 } and
+     *   {@link android.graphics.ImageFormat#JPEG } formats.</li>
      * <li>The maximum available resolution for OPAQUE streams
      *   (both input/output) will match the maximum available
      *   resolution of JPEG streams.</li>
@@ -571,26 +569,25 @@ public abstract class CameraMetadata<TKey> {
      * following:</p>
      * <ul>
      * <li>One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.</li>
-     * <li>YUV_420_888 is supported as an output/input format, that is,
+     * <li>{@link android.graphics.ImageFormat#YUV_420_888 } is supported as an output/input format, that is,
      *   YUV_420_888 is included in the lists of formats returned by
-     *   StreamConfigurationMap#getInputFormats and
-     *   StreamConfigurationMap#getOutputFormats.</li>
-     * <li>StreamConfigurationMap#getValidOutputFormatsForInput returns non empty int[] for
-     *   each supported input format returned by StreamConfigurationMap#getInputFormats.</li>
-     * <li>Each size returned by StreamConfigurationMap#getInputSizes(YUV_420_888)
-     *   is also included in StreamConfigurationMap#getOutputSizes(YUV_420_888)</li>
-     * <li>Using YUV_420_888 does not cause a frame rate drop
+     *   {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and
+     *   {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.</li>
+     * <li>{@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
+     *   returns non-empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
+     * <li>Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(YUV_420_888)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(YUV_420_888)}</li>
+     * <li>Using {@link android.graphics.ImageFormat#YUV_420_888 } does not cause a frame rate drop
      *   relative to the sensor's maximum capture rate (at that resolution).</li>
-     * <li>YUV_420_888 will be reprocessable into both YUV_420_888
-     *   and JPEG formats.</li>
-     * <li>The maximum available resolution for YUV_420_888 streams
-     *   (both input/output) will match the maximum available
-     *   resolution of JPEG streams.</li>
+     * <li>{@link android.graphics.ImageFormat#YUV_420_888 } will be reprocessable into both
+     *   {@link android.graphics.ImageFormat#YUV_420_888 } and {@link android.graphics.ImageFormat#JPEG } formats.</li>
+     * <li>The maximum available resolution for {@link android.graphics.ImageFormat#YUV_420_888 } streams (both input/output) will match the
+     *   maximum available resolution of {@link android.graphics.ImageFormat#JPEG } streams.</li>
      * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
-     * <li>Only the below controls are effective for reprocessing requests and will be
-     *   present in capture results. The reprocess requests are from the original capture
-     *   results that are assocaited with the intermidate YUV_420_888 output buffers.
-     *   All other controls in the reprocess requests will be ignored by the camera device.<ul>
+     * <li>Only the below controls are effective for reprocessing requests and will be present
+     *   in capture results. The reprocess requests are from the original capture results that
+     *   are associated with the intermediate {@link android.graphics.ImageFormat#YUV_420_888 }
+     *   output buffers.  All other controls in the reprocess requests will be ignored by the
+     *   camera device.<ul>
      * <li>android.jpeg.*</li>
      * <li>{@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}</li>
      * <li>{@link CaptureRequest#EDGE_MODE android.edge.mode}</li>
@@ -612,11 +609,13 @@ public abstract class CameraMetadata<TKey> {
      * <p>The camera device can produce depth measurements from its field of view.</p>
      * <p>This capability requires the camera device to support the following:</p>
      * <ul>
-     * <li>DEPTH16 is supported as an output format.</li>
-     * <li>DEPTH_POINT_CLOUD is optionally supported as an output format.</li>
-     * <li>This camera device, and all camera devices with the same android.lens.info.facing,
-     *   will list the following calibration entries in both CameraCharacteristics and
-     *   CaptureResults:<ul>
+     * <li>{@link android.graphics.ImageFormat#DEPTH16 } is supported as an output format.</li>
+     * <li>{@link android.graphics.ImageFormat#DEPTH_POINT_CLOUD } is optionally supported as an
+     *   output format.</li>
+     * <li>This camera device, and all camera devices with the same {@link CameraCharacteristics#LENS_FACING android.lens.facing},
+     *   will list the following calibration entries in both
+     *   {@link android.hardware.camera2.CameraCharacteristics } and
+     *   {@link android.hardware.camera2.CaptureResult }:<ul>
      * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
      * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
      * <li>android.lens.intrinsicCalibration</li>
@@ -631,13 +630,14 @@ public abstract class CameraMetadata<TKey> {
      * <p>Generally, depth output operates at a slower frame rate than standard color capture,
      * so the DEPTH16 and DEPTH_POINT_CLOUD formats will commonly have a stall duration that
      * should be accounted for (see
-     * android.hardware.camera2.StreamConfigurationMap#getOutputStallDuration).  On a device
-     * that supports both depth and color-based output, to enable smooth preview, using a
-     * repeating burst is recommended, where a depth-output target is only included once
-     * every N frames, where N is the ratio between preview output rate and depth output
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }).
+     * On a device that supports both depth and color-based output, to enable smooth preview,
+     * using a repeating burst is recommended, where a depth-output target is only included
+     * once every N frames, where N is the ratio between preview output rate and depth output
      * rate, including depth stall time.</p>
      *
      * @see CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE
+     * @see CameraCharacteristics#LENS_FACING
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -711,7 +711,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Timestamps from {@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp} are in the same timebase as
-     * android.os.SystemClock#elapsedRealtimeNanos(),
+     * {@link android.os.SystemClock#elapsedRealtimeNanos },
      * and they can be compared to other timestamps using that base.</p>
      *
      * @see CaptureResult#SENSOR_TIMESTAMP
@@ -870,7 +870,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Every frame has the requests immediately applied.</p>
      * <p>Furthermore for all results,
-     * <code>android.sync.frameNumber == CaptureResult#getFrameNumber()</code></p>
+     * <code>android.sync.frameNumber == {@link android.hardware.camera2.CaptureResult#getFrameNumber }</code></p>
      * <p>Changing controls over multiple requests one after another will
      * produce results that have those controls applied atomically
      * each frame.</p>
