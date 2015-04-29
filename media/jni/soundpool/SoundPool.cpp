@@ -514,10 +514,11 @@ static status_t decode(int fd, int64_t offset, int64_t length,
         if (strncmp(mime, "audio/", 6) == 0) {
 
             AMediaCodec *codec = AMediaCodec_createDecoderByType(mime);
-            if (AMediaCodec_configure(codec, format,
-                    NULL /* window */, NULL /* drm */, 0 /* flags */) != AMEDIA_OK
-                || AMediaCodec_start(codec) != AMEDIA_OK
-                || AMediaExtractor_selectTrack(ex, i) != AMEDIA_OK) {
+            if (codec == NULL
+                    || AMediaCodec_configure(codec, format,
+                            NULL /* window */, NULL /* drm */, 0 /* flags */) != AMEDIA_OK
+                    || AMediaCodec_start(codec) != AMEDIA_OK
+                    || AMediaExtractor_selectTrack(ex, i) != AMEDIA_OK) {
                 AMediaExtractor_delete(ex);
                 AMediaCodec_delete(codec);
                 AMediaFormat_delete(format);
