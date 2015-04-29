@@ -17267,6 +17267,7 @@ package android.media.midi {
     field public static final java.lang.String PROPERTY_PRODUCT = "product";
     field public static final java.lang.String PROPERTY_SERIAL_NUMBER = "serial_number";
     field public static final java.lang.String PROPERTY_USB_DEVICE = "usb_device";
+    field public static final java.lang.String PROPERTY_VERSION = "version";
     field public static final int TYPE_BLUETOOTH = 3; // 0x3
     field public static final int TYPE_USB = 1; // 0x1
     field public static final int TYPE_VIRTUAL = 2; // 0x2
