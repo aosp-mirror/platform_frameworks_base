@@ -41,8 +41,9 @@ import com.android.internal.os.SomeArgs;
 public class ITvInputSessionWrapper extends ITvInputSession.Stub implements HandlerCaller.Callback {
     private static final String TAG = "TvInputSessionWrapper";
 
-    private static final int MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS = 50;
-    private static final int MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS = 2000;
+    private static final int EXECUTE_MESSAGE_TIMEOUT_SHORT_MILLIS = 50;
+    private static final int EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS = 2000;
+    private static final int EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS = 5 * 1000;
 
     private static final int DO_RELEASE = 1;
     private static final int DO_SET_MAIN = 2;
@@ -184,13 +185,17 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
         }
         long duration = System.currentTimeMillis() - startTime;
-        if (duration > MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS) {
+        if (duration > EXECUTE_MESSAGE_TIMEOUT_SHORT_MILLIS) {
             Log.w(TAG, "Handling message (" + msg.what + ") took too long time (duration="
                     + duration + "ms)");
-            if (msg.what == DO_TUNE && duration > MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS) {
+            if (msg.what == DO_TUNE && duration > EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS) {
                 throw new RuntimeException("Too much time to handle tune request. (" + duration
-                        + "ms > " + MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS + "ms) "
+                        + "ms > " + EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS + "ms) "
                         + "Consider handling the tune request in a separate thread.");
+            }
+            if (duration > EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS) {
+                throw new RuntimeException("Too much time to handle a request. (type=" + msg.what +
+                        ", " + duration + "ms > " + EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS + "ms).");
             }
         }
     }
