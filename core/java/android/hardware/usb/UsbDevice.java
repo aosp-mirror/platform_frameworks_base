@@ -45,6 +45,7 @@ public class UsbDevice implements Parcelable {
     private final String mName;
     private final String mManufacturerName;
     private final String mProductName;
+    private final String mVersion;
     private final String mSerialNumber;
     private final int mVendorId;
     private final int mProductId;
@@ -62,7 +63,7 @@ public class UsbDevice implements Parcelable {
      */
     public UsbDevice(String name, int vendorId, int productId,
             int Class, int subClass, int protocol,
-            String manufacturerName, String productName, String serialNumber) {
+            String manufacturerName, String productName, String version, String serialNumber) {
         mName = name;
         mVendorId = vendorId;
         mProductId = productId;
@@ -71,6 +72,7 @@ public class UsbDevice implements Parcelable {
         mProtocol = protocol;
         mManufacturerName = manufacturerName;
         mProductName = productName;
+        mVersion = version;
         mSerialNumber = serialNumber;
     }
 
@@ -101,6 +103,15 @@ public class UsbDevice implements Parcelable {
      */
     public String getProductName() {
         return mProductName;
+    }
+
+    /**
+     * Returns the version number of the device.
+     *
+     * @return the device version
+     */
+    public String getVersion() {
+        return mVersion;
     }
 
     /**
@@ -263,7 +274,7 @@ public class UsbDevice implements Parcelable {
                 ",mVendorId=" + mVendorId + ",mProductId=" + mProductId +
                 ",mClass=" + mClass + ",mSubclass=" + mSubclass + ",mProtocol=" + mProtocol +
                 ",mManufacturerName=" + mManufacturerName + ",mProductName=" + mProductName +
-                ",mSerialNumber=" + mSerialNumber + ",mConfigurations=[");
+                ",mVersion=" + mVersion + ",mSerialNumber=" + mSerialNumber + ",mConfigurations=[");
         for (int i = 0; i < mConfigurations.length; i++) {
             builder.append("\n");
             builder.append(mConfigurations[i].toString());
@@ -283,10 +294,11 @@ public class UsbDevice implements Parcelable {
             int protocol = in.readInt();
             String manufacturerName = in.readString();
             String productName = in.readString();
+            String version = in.readString();
             String serialNumber = in.readString();
             Parcelable[] configurations = in.readParcelableArray(UsbInterface.class.getClassLoader());
             UsbDevice device = new UsbDevice(name, vendorId, productId, clasz, subClass, protocol,
-                                 manufacturerName, productName, serialNumber);
+                                 manufacturerName, productName, version, serialNumber);
             device.setConfigurations(configurations);
             return device;
         }
@@ -309,6 +321,7 @@ public class UsbDevice implements Parcelable {
         parcel.writeInt(mProtocol);
         parcel.writeString(mManufacturerName);
         parcel.writeString(mProductName);
+        parcel.writeString(mVersion);
         parcel.writeString(mSerialNumber);
         parcel.writeParcelableArray(mConfigurations, 0);
    }
