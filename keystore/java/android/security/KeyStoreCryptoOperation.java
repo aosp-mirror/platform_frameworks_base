@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.server.updates;
+package android.security;
 
-import android.util.Base64;
-
-import java.io.IOException;
-
-public class TZInfoInstallReceiver extends ConfigUpdateInstallReceiver {
-
-    public TZInfoInstallReceiver() {
-        super("/data/misc/zoneinfo/", "tzdata", "metadata/", "version");
-    }
-
-    @Override
-    protected void install(byte[] encodedContent, int version) throws IOException {
-        super.install(Base64.decode(encodedContent, Base64.DEFAULT), version);
-    }
+/**
+ * Cryptographic operation backed by {@link KeyStore}.
+ *
+ * @hide
+ */
+public interface KeyStoreCryptoOperation {
+    /**
+     * Gets the KeyStore operation handle of this crypto operation.
+     *
+     * @return handle or {@code null} if the KeyStore operation is not in progress.
+     */
+    Long getOperationHandle();
 }

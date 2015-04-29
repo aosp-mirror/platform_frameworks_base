@@ -13,7 +13,7 @@
 #include "ResourceTable.h"
 
 // SSIZE: mingw does not have signed size_t == ssize_t.
-#if HAVE_PRINTF_ZD
+#if !defined(_WIN32)
 #  define ZD "%zd"
 #  define ZD_TYPE ssize_t
 #  define SSIZE(x) x

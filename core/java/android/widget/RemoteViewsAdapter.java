@@ -620,7 +620,15 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 // remove based on both its position as well as it's current memory usage, as well
                 // as whether it was directly requested vs. whether it was preloaded by our caching
                 // mechanism.
-                mIndexRemoteViews.remove(getFarthestPositionFrom(pruneFromPosition, visibleWindow));
+                int trimIndex = getFarthestPositionFrom(pruneFromPosition, visibleWindow);
+
+                // Need to check that this is a valid index, to cover the case where you have only
+                // a single view in the cache, but it's larger than the max memory limit
+                if (trimIndex < 0) {
+                    break;
+                }
+
+                mIndexRemoteViews.remove(trimIndex);
             }
 
             // Update the metadata cache
@@ -817,12 +825,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         mContext = context;
         mIntent = intent;
 
-        mAppWidgetId = intent.getIntExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID, -1);
-
-        mLayoutInflater = LayoutInflater.from(context);
         if (mIntent == null) {
             throw new IllegalArgumentException("Non-null Intent must be specified.");
         }
+
+        mAppWidgetId = intent.getIntExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID, -1);
+        mLayoutInflater = LayoutInflater.from(context);
         mRequestedViews = new RemoteViewsFrameLayoutRefSet();
 
         // Strip the previously injected app widget id from service intent

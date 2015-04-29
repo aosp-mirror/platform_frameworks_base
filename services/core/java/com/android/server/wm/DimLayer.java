@@ -140,10 +140,9 @@ public class DimLayer {
     }
 
     /**
-     * @param layer The new layer value.
-     * @param inTransaction Whether the call is made within a surface transaction.
+     * NOTE: Must be called with Surface transaction open.
      */
-    void adjustSurface(int layer, boolean inTransaction) {
+    private void adjustBounds() {
         final int dw, dh;
         final float xPos, yPos;
         if (!mStack.isFullscreen()) {
@@ -163,29 +162,31 @@ public class DimLayer {
             yPos = -1 * dh / 6;
         }
 
-        try {
-            if (!inTransaction) {
-                SurfaceControl.openTransaction();
-            }
-            mDimSurface.setPosition(xPos, yPos);
-            mDimSurface.setSize(dw, dh);
-            mDimSurface.setLayer(layer);
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Failure setting size or layer", e);
-        } finally {
-            if (!inTransaction) {
-                SurfaceControl.closeTransaction();
-            }
-        }
+        mDimSurface.setPosition(xPos, yPos);
+        mDimSurface.setSize(dw, dh);
+
         mLastBounds.set(mBounds);
-        mLayer = layer;
     }
 
-    // Assumes that surface transactions are currently closed.
-    void setBounds(Rect bounds) {
+    /**
+     * @param bounds The new bounds to set
+     * @param inTransaction Whether the call is made within a surface transaction.
+     */
+    void setBounds(Rect bounds, boolean inTransaction) {
         mBounds.set(bounds);
         if (isDimming() && !mLastBounds.equals(bounds)) {
-            adjustSurface(mLayer, false);
+            try {
+                if (!inTransaction) {
+                    SurfaceControl.openTransaction();
+                }
+                adjustBounds();
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Failure setting size", e);
+            } finally {
+                if (!inTransaction) {
+                    SurfaceControl.closeTransaction();
+                }
+            }
         }
     }
 
@@ -224,9 +225,10 @@ public class DimLayer {
             return;
         }
 
-        if (!mLastBounds.equals(mBounds) || mLayer != layer) {
-            adjustSurface(layer, true);
+        if (!mLastBounds.equals(mBounds)) {
+            adjustBounds();
         }
+        setLayer(layer);
 
         long curTime = SystemClock.uptimeMillis();
         final boolean animating = isAnimating();

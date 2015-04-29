@@ -1426,7 +1426,7 @@ public class Preference implements Comparable<Preference> {
     protected boolean persistString(String value) {
         if (shouldPersist()) {
             // Shouldn't store null
-            if (value == getPersistedString(null)) {
+            if (TextUtils.equals(value, getPersistedString(null))) {
                 // It's already there, so the same as persisting
                 return true;
             }

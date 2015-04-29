@@ -37,7 +37,7 @@ public interface BluetoothController {
         void onBluetoothPairedDevicesChanged();
     }
 
-    public static final class PairedDevice {
+    public static final class PairedDevice implements Comparable<PairedDevice> {
         public static int STATE_DISCONNECTED = 0;
         public static int STATE_CONNECTING = 1;
         public static int STATE_CONNECTED = 2;
@@ -54,6 +54,10 @@ public interface BluetoothController {
             if (state == STATE_CONNECTED) return "STATE_CONNECTED";
             if (state == STATE_DISCONNECTING) return "STATE_DISCONNECTING";
             return "UNKNOWN";
+        }
+
+        public int compareTo(PairedDevice another) {
+            return name.compareTo(another.name);
         }
     }
 }

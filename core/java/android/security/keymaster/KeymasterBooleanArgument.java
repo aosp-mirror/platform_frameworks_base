@@ -29,6 +29,12 @@ class KeymasterBooleanArgument extends KeymasterArgument {
 
     public KeymasterBooleanArgument(int tag) {
         super(tag);
+        switch (KeymasterDefs.getTagType(tag)) {
+            case KeymasterDefs.KM_BOOL:
+                break; // OK.
+            default:
+                throw new IllegalArgumentException("Bad bool tag " + tag);
+        }
     }
 
     public KeymasterBooleanArgument(int tag, Parcel in) {

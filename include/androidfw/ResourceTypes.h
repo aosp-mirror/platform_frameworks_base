@@ -112,7 +112,7 @@ struct __assertChar16Size {
  *
  * The PNG chunk type is "npTc".
  */
-struct Res_png_9patch
+struct alignas(uintptr_t) Res_png_9patch
 {
     Res_png_9patch() : wasDeserialized(false), xDivsOffset(0),
                        yDivsOffset(0), colorsOffset(0) { }
@@ -372,7 +372,8 @@ struct Res_value
     };
 
     // The data for this item, as interpreted according to dataType.
-    uint32_t data;
+    typedef uint32_t data_type;
+    data_type data;
 
     void copyFrom_dtoh(const Res_value& src);
 };
@@ -1501,6 +1502,8 @@ private:
     uint8_t                         mLookupTable[256];
     KeyedVector<String16, uint8_t>  mEntries;
 };
+
+bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);
 
 /**
  * Convenience class for accessing data in a ResTable resource.

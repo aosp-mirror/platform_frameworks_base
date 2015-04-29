@@ -66,7 +66,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide Pending API review
      * InvokeID is an identifier for an invoke function. It is used
      * as an identifier for ScriptGroup creation.
      *
@@ -86,7 +85,6 @@ public class Script extends BaseObj {
 
     private final SparseArray<InvokeID> mIIDs = new SparseArray<InvokeID>();
     /**
-     * @hide Pending API review
      * Only to be used by generated reflected classes.
      */
     protected InvokeID createInvokeID(int slot) {
@@ -251,9 +249,14 @@ public class Script extends BaseObj {
                 "At least one of ain or aout is required to be non-null.");
         }
 
-        long[] in_ids = new long[ains.length];
-        for (int index = 0; index < ains.length; ++index) {
-            in_ids[index] = ains[index].getID(mRS);
+        long[] in_ids;
+        if (ains != null) {
+            in_ids = new long[ains.length];
+            for (int index = 0; index < ains.length; ++index) {
+                in_ids[index] = ains[index].getID(mRS);
+            }
+        } else {
+            in_ids = null;
         }
 
         long out_id = 0;

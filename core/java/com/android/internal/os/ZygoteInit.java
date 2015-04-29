@@ -267,7 +267,12 @@ public class ZygoteInit {
                     if (false) {
                         Log.v(TAG, "Preloading " + line + "...");
                     }
-                    Class.forName(line);
+                    // Load and explicitly initialize the given class. Use
+                    // Class.forName(String, boolean, ClassLoader) to avoid repeated stack lookups
+                    // (to derive the caller's class-loader). Use true to force initialization, and
+                    // null for the boot classpath class-loader (could as well cache the
+                    // class-loader of this class in a variable).
+                    Class.forName(line, true, null);
                     count++;
                 } catch (ClassNotFoundException e) {
                     Log.w(TAG, "Class not found for preloading: " + line);
@@ -465,12 +470,11 @@ public class ZygoteInit {
 
         try {
             for (String classPathElement : classPathElements) {
-                final byte dexopt = DexFile.isDexOptNeededInternal(classPathElement, "*", instructionSet,
-                        false /* defer */);
-                if (dexopt == DexFile.DEXOPT_NEEDED) {
-                    installer.dexopt(classPathElement, Process.SYSTEM_UID, false, instructionSet);
-                } else if (dexopt == DexFile.PATCHOAT_NEEDED) {
-                    installer.patchoat(classPathElement, Process.SYSTEM_UID, false, instructionSet);
+                final int dexoptNeeded = DexFile.getDexOptNeeded(
+                        classPathElement, "*", instructionSet, false /* defer */);
+                if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                    installer.dexopt(classPathElement, Process.SYSTEM_UID, false,
+                            instructionSet, dexoptNeeded);
                 }
             }
         } catch (IOException ioe) {

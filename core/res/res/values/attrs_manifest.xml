@@ -389,6 +389,15 @@
          with the same {@link android.R.attr#taskAffinity} as it has. -->
     <attr name="allowTaskReparenting" format="boolean" />
 
+    <!-- Declare that this application may use cleartext traffic (e.g., HTTP rather than HTTPS;
+         WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or TLS).
+         Defaults to true. If set to false {@code false}, the app declares that it does not
+         intend to use cleartext network traffic, in which case platform components (e.g.,
+         HTTP stacks, {@code WebView}, {@code MediaPlayer}) will refuse app's requests to use
+         cleartext traffic. Third-party libraries are encouraged to honor this flag as well.
+         @hide -->
+    <attr name="usesCleartextTraffic" format="boolean" />
+
     <!-- Declare that code from this application will need to be loaded into other
          applications' processes. On devices that support multiple instruction sets,
          this implies the code might be loaded into a process that's using any of the devices
@@ -1012,6 +1021,10 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="resumeWhilePausing" format="boolean" />
 
+    <!-- When set installer will extract native libraries. If set to false
+         libraries in the apk must be stored and page-aligned.  -->
+    <attr name="extractNativeLibs" format="boolean"/>
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1133,9 +1146,17 @@
              "com.google". -->
         <attr name="requiredAccountType" format="string"/>
         <attr name="isGame" />
+        <!-- Declare that this application may use cleartext traffic (e.g., HTTP rather than HTTPS;
+             WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or TLS).
+             Defaults to true. If set to false {@code false}, the app declares that it does not
+             intend to use cleartext network traffic, in which case platform components (e.g.,
+             HTTP stacks, {@code WebView}, {@code MediaPlayer}) will refuse app's requests to use
+             cleartext traffic. Third-party libraries are encouraged to honor this flag as well.
+             @hide -->
+        <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
+        <attr name="extractNativeLibs" />
     </declare-styleable>
-    
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
          features in your package (or other packages).  See the

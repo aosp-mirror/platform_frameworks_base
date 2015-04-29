@@ -90,6 +90,7 @@ public class RouteInfoTest extends TestCase {
         assertFalse(r.matches(Address("2001:db8:f00::ace:d00e")));
         assertFalse(r.matches(Address("2001:db8:f00::bad:d00d")));
         assertFalse(r.matches(Address("2001:4868:4860::8888")));
+        assertFalse(r.matches(Address("8.8.8.8")));
 
         r = new PatchedRouteInfo(Prefix("192.0.2.0/23"), null, "wlan0");
         assertTrue(r.matches(Address("192.0.2.43")));

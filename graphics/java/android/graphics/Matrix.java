@@ -35,7 +35,7 @@ public class Matrix {
     public static final int MPERSP_2 = 8;   //!< use with getValues/setValues
 
     /** @hide */
-    public static Matrix IDENTITY_MATRIX = new Matrix() {
+    public final static Matrix IDENTITY_MATRIX = new Matrix() {
         void oops() {
             throw new IllegalStateException("Matrix can not be modified");
         }

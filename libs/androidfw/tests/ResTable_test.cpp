@@ -16,6 +16,10 @@
 
 #include <androidfw/ResourceTypes.h>
 
+#include <codecvt>
+#include <locale>
+#include <string>
+
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include "TestHelpers.h"
@@ -199,6 +203,83 @@ TEST(ResTableTest, emptyTableHasSensibleDefaults) {
 
     Res_value val;
     ASSERT_LT(table.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG), 0);
+}
+
+void testU16StringToInt(const char16_t* str, uint32_t expectedValue,
+                        bool expectSuccess, bool expectHex) {
+    size_t len = std::char_traits<char16_t>::length(str);
+
+    // Gtest can't print UTF-16 strings, so we have to convert to UTF-8 :(
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+    std::string s = convert.to_bytes(std::u16string(str, len));
+
+    Res_value out = {};
+    ASSERT_EQ(expectSuccess, U16StringToInt(str, len, &out))
+        << "Failed with " << s;
+
+    if (!expectSuccess) {
+        ASSERT_EQ(out.TYPE_NULL, out.dataType) << "Failed with " << s;
+        return;
+    }
+
+    if (expectHex) {
+        ASSERT_EQ(out.TYPE_INT_HEX, out.dataType) << "Failed with " << s;
+    } else {
+        ASSERT_EQ(out.TYPE_INT_DEC, out.dataType) << "Failed with " << s;
+    }
+
+    ASSERT_EQ(expectedValue, out.data) << "Failed with " << s;
+}
+
+TEST(ResTableTest, U16StringToInt) {
+    testU16StringToInt(u"", 0U, false, false);
+    testU16StringToInt(u"    ", 0U, false, false);
+    testU16StringToInt(u"\t\n", 0U, false, false);
+
+    testU16StringToInt(u"abcd", 0U, false, false);
+    testU16StringToInt(u"10abcd", 0U, false, false);
+    testU16StringToInt(u"42 42", 0U, false, false);
+    testU16StringToInt(u"- 42", 0U, false, false);
+    testU16StringToInt(u"-", 0U, false, false);
+
+    testU16StringToInt(u"0x", 0U, false, true);
+    testU16StringToInt(u"0xnope", 0U, false, true);
+    testU16StringToInt(u"0X42", 0U, false, true);
+    testU16StringToInt(u"0x42 0x42", 0U, false, true);
+    testU16StringToInt(u"-0x0", 0U, false, true);
+    testU16StringToInt(u"-0x42", 0U, false, true);
+    testU16StringToInt(u"- 0x42", 0U, false, true);
+
+    // Note that u" 42" would pass. This preserves the old behavior, but it may
+    // not be desired.
+    testU16StringToInt(u"42 ", 0U, false, false);
+    testU16StringToInt(u"0x42 ", 0U, false, true);
+
+    // Decimal cases.
+    testU16StringToInt(u"0", 0U, true, false);
+    testU16StringToInt(u"-0", 0U, true, false);
+    testU16StringToInt(u"42", 42U, true, false);
+    testU16StringToInt(u" 42", 42U, true, false);
+    testU16StringToInt(u"-42", static_cast<uint32_t>(-42), true, false);
+    testU16StringToInt(u" -42", static_cast<uint32_t>(-42), true, false);
+    testU16StringToInt(u"042", 42U, true, false);
+    testU16StringToInt(u"-042", static_cast<uint32_t>(-42), true, false);
+
+    // Hex cases.
+    testU16StringToInt(u"0x0", 0x0, true, true);
+    testU16StringToInt(u"0x42", 0x42, true, true);
+    testU16StringToInt(u" 0x42", 0x42, true, true);
+
+    // Just before overflow cases:
+    testU16StringToInt(u"2147483647", INT_MAX, true, false);
+    testU16StringToInt(u"-2147483648", static_cast<uint32_t>(INT_MIN), true,
+                       false);
+    testU16StringToInt(u"0xffffffff", UINT_MAX, true, true);
+
+    // Overflow cases:
+    testU16StringToInt(u"2147483648", 0U, false, false);
+    testU16StringToInt(u"-2147483649", 0U, false, false);
+    testU16StringToInt(u"0x1ffffffff", 0U, false, true);
 }
 
 }

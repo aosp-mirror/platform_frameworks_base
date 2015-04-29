@@ -34,9 +34,12 @@ public class KeymasterArguments implements Parcelable {
 
     public static final Parcelable.Creator<KeymasterArguments> CREATOR = new
             Parcelable.Creator<KeymasterArguments>() {
+                @Override
                 public KeymasterArguments createFromParcel(Parcel in) {
                     return new KeymasterArguments(in);
                 }
+
+                @Override
                 public KeymasterArguments[] newArray(int size) {
                     return new KeymasterArguments[size];
                 }
@@ -52,6 +55,18 @@ public class KeymasterArguments implements Parcelable {
 
     public void addInt(int tag, int value) {
         mArguments.add(new KeymasterIntArgument(tag, value));
+    }
+
+    public void addInts(int tag, int... values) {
+        for (int value : values) {
+            addInt(tag, value);
+        }
+    }
+
+    public void addLongs(int tag, long... values) {
+        for (long value : values) {
+            addLong(tag, value);
+        }
     }
 
     public void addBoolean(int tag) {
@@ -102,8 +117,13 @@ public class KeymasterArguments implements Parcelable {
     }
 
     public long getLong(int tag, long defaultValue) {
-        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_LONG) {
-            throw new IllegalArgumentException("Tag is not a long type: " + tag);
+        switch (KeymasterDefs.getTagType(tag)) {
+            case KeymasterDefs.KM_LONG:
+                break; // Accepted type
+            case KeymasterDefs.KM_LONG_REP:
+                throw new IllegalArgumentException("Repeatable tags must use getLongs: " + tag);
+            default:
+                throw new IllegalArgumentException("Tag is not a long type: " + tag);
         }
         KeymasterArgument arg = getArgumentByTag(tag);
         if (arg == null) {
@@ -161,6 +181,19 @@ public class KeymasterArguments implements Parcelable {
         for (KeymasterArgument arg : mArguments) {
             if (arg.tag == tag) {
                 values.add(((KeymasterIntArgument) arg).value);
+            }
+        }
+        return values;
+    }
+
+    public List<Long> getLongs(int tag) {
+        if (KeymasterDefs.getTagType(tag) != KeymasterDefs.KM_LONG_REP) {
+            throw new IllegalArgumentException("Tag is not a repeating long: " + tag);
+        }
+        List<Long> values = new ArrayList<Long>();
+        for (KeymasterArgument arg : mArguments) {
+            if (arg.tag == tag) {
+                values.add(((KeymasterLongArgument) arg).value);
             }
         }
         return values;

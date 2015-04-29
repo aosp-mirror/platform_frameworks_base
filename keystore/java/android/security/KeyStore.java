@@ -16,7 +16,7 @@
 
 package android.security;
 
-import com.android.org.conscrypt.NativeCrypto;
+import com.android.org.conscrypt.NativeConstants;
 
 import android.os.Binder;
 import android.os.IBinder;
@@ -25,9 +25,12 @@ import android.os.ServiceManager;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterBlob;
+import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 import android.util.Log;
 
+import java.security.InvalidKeyException;
 import java.util.Locale;
 
 /**
@@ -49,6 +52,14 @@ public class KeyStore {
     public static final int VALUE_CORRUPTED = 8;
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
+
+    /**
+     * Per operation authentication is needed before this operation is valid.
+     * This is returned from {@link #begin} when begin succeeds but the operation uses
+     * per-operation authentication and must authenticate before calling {@link #update} or
+     * {@link #finish}.
+     */
+    public static final int OP_AUTH_NEEDED = 15;
 
     // Used for UID field to indicate the calling UID.
     public static final int UID_SELF = -1;
@@ -85,9 +96,9 @@ public class KeyStore {
 
     static int getKeyTypeForAlgorithm(String keyType) {
         if ("RSA".equalsIgnoreCase(keyType)) {
-            return NativeCrypto.EVP_PKEY_RSA;
+            return NativeConstants.EVP_PKEY_RSA;
         } else if ("EC".equalsIgnoreCase(keyType)) {
-            return NativeCrypto.EVP_PKEY_EC;
+            return NativeConstants.EVP_PKEY_EC;
         } else {
             return -1;
         }
@@ -388,22 +399,22 @@ public class KeyStore {
         }
     }
 
-    public int generateKey(String alias, KeymasterArguments args, int uid, int flags,
-            KeyCharacteristics outCharacteristics) {
+    public int generateKey(String alias, KeymasterArguments args, byte[] entropy, int uid,
+            int flags, KeyCharacteristics outCharacteristics) {
         try {
-            return mBinder.generateKey(alias, args, uid, flags, outCharacteristics);
+            return mBinder.generateKey(alias, args, entropy, uid, flags, outCharacteristics);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
         }
     }
 
-    public int generateKey(String alias, KeymasterArguments args, int flags,
+    public int generateKey(String alias, KeymasterArguments args, byte[] entropy, int flags,
             KeyCharacteristics outCharacteristics) {
-        return generateKey(alias, args, UID_SELF, flags, outCharacteristics);
+        return generateKey(alias, args, entropy, UID_SELF, flags, outCharacteristics);
     }
 
-    public int getKeyCharacteristics(String alias, byte[] clientId, byte[] appId,
+    public int getKeyCharacteristics(String alias, KeymasterBlob clientId, KeymasterBlob appId,
             KeyCharacteristics outCharacteristics) {
         try {
             return mBinder.getKeyCharacteristics(alias, clientId, appId, outCharacteristics);
@@ -429,7 +440,8 @@ public class KeyStore {
         return importKey(alias, args, format, keyData, UID_SELF, flags, outCharacteristics);
     }
 
-    public ExportResult exportKey(String alias, int format, byte[] clientId, byte[] appId) {
+    public ExportResult exportKey(String alias, int format, KeymasterBlob clientId,
+            KeymasterBlob appId) {
         try {
             return mBinder.exportKey(alias, format, clientId, appId);
         } catch (RemoteException e) {
@@ -439,9 +451,9 @@ public class KeyStore {
     }
 
     public OperationResult begin(String alias, int purpose, boolean pruneable,
-            KeymasterArguments args, KeymasterArguments outArgs) {
+            KeymasterArguments args, byte[] entropy, KeymasterArguments outArgs) {
         try {
-            return mBinder.begin(getToken(), alias, purpose, pruneable, args, outArgs);
+            return mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy, outArgs);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;
@@ -473,5 +485,100 @@ public class KeyStore {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
         }
+    }
+
+    /**
+     * Check if the operation referenced by {@code token} is currently authorized.
+     *
+     * @param token An operation token returned by a call to {@link KeyStore.begin}.
+     */
+    public boolean isOperationAuthorized(IBinder token) {
+        try {
+            return mBinder.isOperationAuthorized(token);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
+    /**
+     * Add an authentication record to the keystore authorization table.
+     *
+     * @param authToken The packed bytes of a hw_auth_token_t to be provided to keymaster.
+     * @return {@code KeyStore.NO_ERROR} on success, otherwise an error value corresponding to
+     * a {@code KeymasterDefs.KM_ERROR_} value or {@code KeyStore} ResponseCode.
+     */
+    public int addAuthToken(byte[] authToken) {
+        try {
+            return mBinder.addAuthToken(authToken);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
+
+    /**
+     * Returns a {@link KeyStoreException} corresponding to the provided keystore/keymaster error
+     * code.
+     */
+    static KeyStoreException getKeyStoreException(int errorCode) {
+        if (errorCode > 0) {
+            // KeyStore layer error
+            switch (errorCode) {
+                case NO_ERROR:
+                    return new KeyStoreException(errorCode, "OK");
+                case LOCKED:
+                    return new KeyStoreException(errorCode, "Keystore locked");
+                case UNINITIALIZED:
+                    return new KeyStoreException(errorCode, "Keystore not initialized");
+                case SYSTEM_ERROR:
+                    return new KeyStoreException(errorCode, "System error");
+                case PERMISSION_DENIED:
+                    return new KeyStoreException(errorCode, "Permission denied");
+                case KEY_NOT_FOUND:
+                    return new KeyStoreException(errorCode, "Key not found");
+                case VALUE_CORRUPTED:
+                    return new KeyStoreException(errorCode, "Key blob corrupted");
+                default:
+                    return new KeyStoreException(errorCode, String.valueOf(errorCode));
+            }
+        } else {
+            // Keymaster layer error
+            switch (errorCode) {
+                case KeymasterDefs.KM_ERROR_INVALID_AUTHORIZATION_TIMEOUT:
+                    // The name of this parameter significantly differs between Keymaster and
+                    // framework APIs. Use the framework wording to make life easier for developers.
+                    return new KeyStoreException(errorCode,
+                            "Invalid user authentication validity duration");
+                default:
+                    return new KeyStoreException(errorCode,
+                            KeymasterDefs.getErrorMessage(errorCode));
+            }
+        }
+    }
+
+    /**
+     * Returns an {@link InvalidKeyException} corresponding to the provided
+     * {@link KeyStoreException}.
+     */
+    static InvalidKeyException getInvalidKeyException(KeyStoreException e) {
+        switch (e.getErrorCode()) {
+            case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
+                return new KeyExpiredException();
+            case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
+                return new KeyNotYetValidException();
+            case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
+                return new UserNotAuthenticatedException();
+            default:
+                return new InvalidKeyException("Keystore operation failed", e);
+        }
+    }
+
+    /**
+     * Returns an {@link InvalidKeyException} corresponding to the provided keystore/keymaster error
+     * code.
+     */
+    static InvalidKeyException getInvalidKeyException(int errorCode) {
+        return getInvalidKeyException(getKeyStoreException(errorCode));
     }
 }

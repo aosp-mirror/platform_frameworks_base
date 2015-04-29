@@ -25,17 +25,19 @@ import android.security.KeyStore;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterBlob;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 import android.test.ActivityUnitTestCase;
 import android.test.AssertionFailedError;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
-import com.android.org.conscrypt.NativeCrypto;
+import com.android.org.conscrypt.NativeConstants;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.security.spec.RSAKeyGenParameterSpec;
 
 import android.util.Log;
 import android.util.Base64;
@@ -292,14 +294,14 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testSaw_ungrantedUid_Bluetooth() throws Exception {
         String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
-        assertNull(results1);
+        assertEquals(0, results1.length);
 
         mKeyStore.password(TEST_PASSWD);
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
 
         String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
-        assertNull(results2);
+        assertEquals(0, results2.length);
     }
 
     public void testSaw_grantedUid_Wifi() throws Exception {
@@ -363,7 +365,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testGenerate_NotInitialized_Fail() throws Exception {
         assertFalse("Should fail when keystore is not initialized",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
     }
 
@@ -371,7 +373,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         mKeyStore.password(TEST_PASSWD);
         mKeyStore.lock();
         assertFalse("Should fail when keystore is locked",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
     }
 
@@ -379,7 +381,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertTrue(mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to generate key when unlocked",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
@@ -389,7 +391,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertTrue(mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to generate key when unlocked",
-                mKeyStore.generate(TEST_KEYNAME, Process.WIFI_UID, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, Process.WIFI_UID, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
@@ -399,7 +401,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertTrue(mKeyStore.password(TEST_PASSWD));
 
         assertFalse(mKeyStore.generate(TEST_KEYNAME, Process.BLUETOOTH_UID,
-                    NativeCrypto.EVP_PKEY_RSA, RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
+                    NativeConstants.EVP_PKEY_RSA, RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
@@ -445,7 +447,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testSign_Success() throws Exception {
         mKeyStore.password(TEST_PASSWD);
 
-        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                     RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         final byte[] signature = mKeyStore.sign(TEST_KEYNAME, TEST_DATA);
@@ -456,7 +458,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testVerify_Success() throws Exception {
         mKeyStore.password(TEST_PASSWD);
 
-        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                     RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         final byte[] signature = mKeyStore.sign(TEST_KEYNAME, TEST_DATA);
@@ -484,7 +486,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
@@ -518,7 +520,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
@@ -552,7 +554,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertFalse("Should not be able to revoke not existent grant",
@@ -564,7 +566,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
@@ -582,7 +584,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
                 mKeyStore.password(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
@@ -603,7 +605,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
-        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                     RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
@@ -642,7 +644,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
-        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                     RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
@@ -710,12 +712,13 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
+                RSAKeyGenParameterSpec.F4.longValue());
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        int result = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("generateRsaKey should succeed", KeyStore.NO_ERROR, result);
         return outCharacteristics;
     }
@@ -724,6 +727,25 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         generateRsaKey("test");
         mKeyStore.delete("test");
     }
+
+    public void testGenerateRsaWithEntropy() throws Exception {
+        byte[] entropy = new byte[] {1,2,3,4,5};
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
+                RSAKeyGenParameterSpec.F4.longValue());
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int result = mKeyStore.generateKey(name, args, entropy, 0, outCharacteristics);
+        assertEquals("generateKey should succeed", KeyStore.NO_ERROR, result);
+    }
+
     public void testGenerateAndDelete() throws Exception {
         generateRsaKey("test");
         assertTrue("delete should succeed", mKeyStore.delete("test"));
@@ -741,6 +763,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testAppId() throws Exception {
         String name = "test";
+        byte[] id = new byte[] {0x01, 0x02, 0x03};
         KeymasterArguments args = new KeymasterArguments();
         args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
         args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
@@ -748,18 +771,20 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, new byte[] {0x01, 0x02, 0x03});
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, id);
+        args.addLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT,
+                RSAKeyGenParameterSpec.F4.longValue());
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int result = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        int result = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("generateRsaKey should succeed", KeyStore.NO_ERROR, result);
         assertEquals("getKeyCharacteristics should fail without application ID",
                 KeymasterDefs.KM_ERROR_INVALID_KEY_BLOB,
                 mKeyStore.getKeyCharacteristics(name, null, null, outCharacteristics));
         assertEquals("getKeyCharacteristics should succeed with application ID",
                 KeyStore.NO_ERROR,
-                mKeyStore.getKeyCharacteristics(name, new byte[] {0x01, 0x02, 0x03}, null,
+                mKeyStore.getKeyCharacteristics(name, new KeymasterBlob(id), null,
                     outCharacteristics));
     }
 
@@ -773,7 +798,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         // TODO: Verify we have an RSA public key that's well formed.
     }
 
-    public void testAesOcbEncryptSuccess() throws Exception {
+    public void testAesGcmEncryptSuccess() throws Exception {
         String name = "test";
         KeymasterArguments args = new KeymasterArguments();
         args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
@@ -781,22 +806,19 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
         args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
         args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int rc = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
 
         KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
-                true, args, out);
+                true, args, null, out);
         IBinder token = result.token;
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
@@ -820,13 +842,14 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, mode);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, size);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         return mKeyStore.importKey(name, args, KeymasterDefs.KM_KEY_FORMAT_RAW, key, 0,
                 new KeyCharacteristics());
     }
     private byte[] doOperation(String name, int purpose, byte[] in, KeymasterArguments beginArgs) {
         KeymasterArguments out = new KeymasterArguments();
         OperationResult result = mKeyStore.begin(name, purpose,
-                true, beginArgs, out);
+                true, beginArgs, null, out);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         IBinder token = result.token;
         result = mKeyStore.update(token, null, in);
@@ -880,31 +903,51 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
         args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
-        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_OCB);
-        args.addInt(KeymasterDefs.KM_TAG_CHUNK_LENGTH, 4096);
-        args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 16);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
 
         KeyCharacteristics outCharacteristics = new KeyCharacteristics();
-        int rc = mKeyStore.generateKey(name, args, 0, outCharacteristics);
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
 
         KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_ID, null);
-        args.addBlob(KeymasterDefs.KM_TAG_APPLICATION_DATA, null);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
-                true, args, out);
+                true, args, null, out);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         IBinder first = result.token;
         // Implementation detail: softkeymaster supports 16 concurrent operations
         for (int i = 0; i < 16; i++) {
-            result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, true, args, out);
+            result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, true, args, null,
+                    out);
             assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
         }
         // At this point the first operation should be pruned.
         assertEquals("Operation should be pruned", KeymasterDefs.KM_ERROR_INVALID_OPERATION_HANDLE,
                 mKeyStore.update(first, null, new byte[] {0x01}).resultCode);
+    }
+
+    public void testAuthNeeded() throws Exception {
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_PKCS7);
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 1);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
+        KeymasterArguments out = new KeymasterArguments();
+        assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
+        OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
+                true, args, null, out);
+        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        IBinder token = result.token;
+        result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
+        assertEquals("Update should require authorization",
+                KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED, result.resultCode);
     }
 }

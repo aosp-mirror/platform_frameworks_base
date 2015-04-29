@@ -164,7 +164,7 @@ public class PathParser {
      * @return array of floats
      */
     private static float[] getFloats(String s) {
-        if (s.charAt(0) == 'z' | s.charAt(0) == 'Z') {
+        if (s.charAt(0) == 'z' || s.charAt(0) == 'Z') {
             return new float[0];
         }
         try {

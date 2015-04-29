@@ -384,6 +384,11 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                     }
                 }
                 return builder.toString();
+            } else if (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")
+                    || scheme.equalsIgnoreCase("ftp")) {
+                ssp = "//" + ((getHost() != null) ? getHost() : "")
+                        + ((getPort() != -1) ? (":" + getPort()) : "")
+                        + "/...";
             }
         }
         // Not a sensitive scheme, but let's still be conservative about
@@ -1652,7 +1657,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     /**
      * Searches the query string for the first value with the given key.
      *
-     * <p><strong>Warning:</strong> Prior to Ice Cream Sandwich, this decoded
+     * <p><strong>Warning:</strong> Prior to Jelly Bean, this decoded
      * the '+' character as '+' rather than ' '.
      *
      * @param key which will be encoded

@@ -1681,6 +1681,7 @@ final class Settings {
                     //
                     // DO NOT MODIFY THIS FORMAT UNLESS YOU CAN ALSO MODIFY ITS USERS
                     // FROM NATIVE CODE. AT THE MOMENT, LOOK AT THE FOLLOWING SOURCES:
+                    //   system/core/logd/LogStatistics.cpp
                     //   system/core/run-as/run-as.c
                     //   system/core/sdcard/sdcard.c
                     //   external/libselinux/src/android.c:package_info_init()

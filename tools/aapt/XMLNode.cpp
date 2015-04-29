@@ -18,7 +18,7 @@
 
 // SSIZE: mingw does not have signed size_t == ssize_t.
 // STATUST: mingw does seem to redefine UNKNOWN_ERROR from our enum value, so a cast is necessary.
-#if HAVE_PRINTF_ZD
+#if !defined(_WIN32)
 #  define SSIZE(x) x
 #  define STATUST(x) x
 #else

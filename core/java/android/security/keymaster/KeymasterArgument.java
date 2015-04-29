@@ -42,6 +42,7 @@ abstract class KeymasterArgument implements Parcelable {
                         case KeymasterDefs.KM_INT_REP:
                             return new KeymasterIntArgument(tag, in);
                         case KeymasterDefs.KM_LONG:
+                        case KeymasterDefs.KM_LONG_REP:
                             return new KeymasterLongArgument(tag, in);
                         case KeymasterDefs.KM_DATE:
                             return new KeymasterDateArgument(tag, in);

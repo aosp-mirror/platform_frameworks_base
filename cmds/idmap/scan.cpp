@@ -1,3 +1,6 @@
+#include <dirent.h>
+#include <sys/stat.h>
+
 #include "idmap.h"
 
 #include <UniquePtr.h>
@@ -8,8 +11,6 @@
 #include <utils/SortedVector.h>
 #include <utils/String16.h>
 #include <utils/String8.h>
-
-#include <dirent.h>
 
 #define NO_OVERLAY_TAG (-1000)
 

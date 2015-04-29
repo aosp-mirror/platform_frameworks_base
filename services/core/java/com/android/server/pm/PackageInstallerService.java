@@ -53,7 +53,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -225,9 +224,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             for (File stage : unclaimedStages) {
                 Slog.w(TAG, "Deleting orphan stage " + stage);
                 if (stage.isDirectory()) {
-                    FileUtils.deleteContents(stage);
+                    mPm.mInstaller.rmPackageDir(stage.getAbsolutePath());
+                } else {
+                    stage.delete();
                 }
-                stage.delete();
             }
 
             // Clean up orphaned icons

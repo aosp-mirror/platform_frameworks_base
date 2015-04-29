@@ -30,6 +30,7 @@ import java.util.List;
 public class OperationResult implements Parcelable {
     public final int resultCode;
     public final IBinder token;
+    public final long operationHandle;
     public final int inputConsumed;
     public final byte[] output;
 
@@ -47,6 +48,7 @@ public class OperationResult implements Parcelable {
     protected OperationResult(Parcel in) {
         resultCode = in.readInt();
         token = in.readStrongBinder();
+        operationHandle = in.readLong();
         inputConsumed = in.readInt();
         output = in.createByteArray();
     }
@@ -60,6 +62,7 @@ public class OperationResult implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(resultCode);
         out.writeStrongBinder(token);
+        out.writeLong(operationHandle);
         out.writeInt(inputConsumed);
         out.writeByteArray(output);
     }

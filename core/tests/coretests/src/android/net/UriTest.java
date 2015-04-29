@@ -804,4 +804,56 @@ public class UriTest extends TestCase {
         assertFalse(Uri.parse("content://com.example/path/path").isPathPrefixMatch(
                 Uri.parse("content://com.example/path%2Fpath")));
     }
+
+    public void testToSafeString() {
+        checkToSafeString("tel:xxxxxx", "tel:Google");
+        checkToSafeString("tel:xxxxxxxxxx", "tel:1234567890");
+        checkToSafeString("tEl:xxx.xxx-xxxx", "tEl:123.456-7890");
+
+        checkToSafeString("sms:xxxxxx", "sms:123abc");
+        checkToSafeString("smS:xxx.xxx-xxxx", "smS:123.456-7890");
+
+        checkToSafeString("smsto:xxxxxx", "smsto:123abc");
+        checkToSafeString("SMSTo:xxx.xxx-xxxx", "SMSTo:123.456-7890");
+
+        checkToSafeString("mailto:xxxxxxx@xxxxxxx.xxx", "mailto:android@android.com");
+        checkToSafeString("Mailto:xxxxxxx@xxxxxxx.xxxxxxxxxx",
+                "Mailto:android@android.com/secret");
+
+        checkToSafeString("sip:xxxxxxx@xxxxxxx.xxxxxxxx", "sip:android@android.com:1234");
+        checkToSafeString("sIp:xxxxxxx@xxxxxxx.xxx", "sIp:android@android.com");
+
+        checkToSafeString("http://www.android.com/...", "http://www.android.com");
+        checkToSafeString("HTTP://www.android.com/...", "HTTP://www.android.com");
+        checkToSafeString("http://www.android.com/...", "http://www.android.com/");
+        checkToSafeString("http://www.android.com/...", "http://www.android.com/secretUrl?param");
+        checkToSafeString("http://www.android.com/...",
+                "http://user:pwd@www.android.com/secretUrl?param");
+        checkToSafeString("http://www.android.com/...",
+                "http://user@www.android.com/secretUrl?param");
+        checkToSafeString("http://www.android.com/...", "http://www.android.com/secretUrl?param");
+        checkToSafeString("http:///...", "http:///path?param");
+        checkToSafeString("http:///...", "http://");
+        checkToSafeString("http://:12345/...", "http://:12345/");
+
+        checkToSafeString("https://www.android.com/...", "https://www.android.com/secretUrl?param");
+        checkToSafeString("https://www.android.com:8443/...",
+                "https://user:pwd@www.android.com:8443/secretUrl?param");
+        checkToSafeString("https://www.android.com/...", "https://user:pwd@www.android.com");
+        checkToSafeString("Https://www.android.com/...", "Https://user:pwd@www.android.com");
+
+        checkToSafeString("ftp://ftp.android.com/...", "ftp://ftp.android.com/");
+        checkToSafeString("ftP://ftp.android.com/...", "ftP://anonymous@ftp.android.com/");
+        checkToSafeString("ftp://ftp.android.com:2121/...",
+                "ftp://root:love@ftp.android.com:2121/");
+
+        checkToSafeString("unsupported://ajkakjah/askdha/secret?secret",
+                "unsupported://ajkakjah/askdha/secret?secret");
+        checkToSafeString("unsupported:ajkakjah/askdha/secret?secret",
+                "unsupported:ajkakjah/askdha/secret?secret");
+    }
+
+    private void checkToSafeString(String expectedSafeString, String original) {
+        assertEquals(expectedSafeString, Uri.parse(original).toSafeString());
+    }
 }

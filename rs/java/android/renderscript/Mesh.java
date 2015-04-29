@@ -363,6 +363,9 @@ public class Mesh extends BaseObj {
                     alloc = Allocation.createTyped(mRS, entry.t, mUsage);
                 } else if(entry.e != null) {
                     alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
+                } else {
+                    // Should never happen because the builder will always set one
+                    throw new IllegalStateException("Builder corrupt, no valid element in entry.");
                 }
                 vertexBuffers[ct] = alloc;
                 vtx[ct] = alloc.getID(mRS);
@@ -375,6 +378,9 @@ public class Mesh extends BaseObj {
                     alloc = Allocation.createTyped(mRS, entry.t, mUsage);
                 } else if(entry.e != null) {
                     alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
+                } else {
+                    // Should never happen because the builder will always set one
+                    throw new IllegalStateException("Builder corrupt, no valid element in entry.");
                 }
                 long allocID = (alloc == null) ? 0 : alloc.getID(mRS);
                 indexBuffers[ct] = alloc;
@@ -811,9 +817,7 @@ public class Mesh extends BaseObj {
 
             sm.getVertexAllocation(0).copy1DRangeFromUnchecked(0, mMaxIndex, mVtxData);
             if(uploadToBufferObject) {
-                if (uploadToBufferObject) {
-                    sm.getVertexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
-                }
+                sm.getVertexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
             }
 
             sm.getIndexSetAllocation(0).copy1DRangeFromUnchecked(0, mIndexCount, mIndexData);

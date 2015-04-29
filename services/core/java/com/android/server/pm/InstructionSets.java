@@ -74,6 +74,7 @@ public class InstructionSets {
      * a native bridge this might be different than the one shared libraries use.
      */
     public static String getDexCodeInstructionSet(String sharedLibraryIsa) {
+        // TODO b/19550105 Build mapping once instead of querying each time
         String dexCodeIsa = SystemProperties.get("ro.dalvik.vm.isa." + sharedLibraryIsa);
         return TextUtils.isEmpty(dexCodeIsa) ? sharedLibraryIsa : dexCodeIsa;
     }
@@ -111,4 +112,13 @@ public class InstructionSets {
 
         return allInstructionSets;
     }
+
+    public static String getPrimaryInstructionSet(ApplicationInfo info) {
+        if (info.primaryCpuAbi == null) {
+            return getPreferredInstructionSet();
+        }
+
+        return VMRuntime.getInstructionSet(info.primaryCpuAbi);
+    }
+
 }

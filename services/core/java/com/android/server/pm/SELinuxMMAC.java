@@ -37,6 +37,7 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,14 +56,15 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 public final class SELinuxMMAC {
 
-    private static final String TAG = "SELinuxMMAC";
+    static final String TAG = "SELinuxMMAC";
 
     private static final boolean DEBUG_POLICY = false;
     private static final boolean DEBUG_POLICY_INSTALL = DEBUG_POLICY || false;
+    private static final boolean DEBUG_POLICY_ORDER = DEBUG_POLICY || false;
 
     // All policy stanzas read from mac_permissions.xml. This is also the lock
     // to synchronize access during policy load and access attempts.
-    private static final List<Policy> sPolicies = new ArrayList<Policy>();
+    private static List<Policy> sPolicies = new ArrayList<>();
 
     // Data policy override version file.
     private static final String DATA_VERSION_FILE =
@@ -115,16 +117,8 @@ public final class SELinuxMMAC {
      *         were loaded successfully; no partial loading is possible.
      */
     public static boolean readInstallPolicy() {
-        // Temp structure to hold the rules while we parse the xml file. We add
-        // all the rules once we know there's no problems.
+        // Temp structure to hold the rules while we parse the xml file
         List<Policy> policies = new ArrayList<>();
-
-        // A separate structure to hold the default stanza. We need to add this to
-        // the end of the policies list structure.
-        Policy defaultPolicy = null;
-
-        // Track sets of known policy certs so we can enforce rules across stanzas.
-        Set<Set<Signature>> knownCerts = new HashSet<>();
 
         FileReader policyFile = null;
         XmlPullParser parser = Xml.newPullParser();
@@ -141,31 +135,15 @@ public final class SELinuxMMAC {
                     continue;
                 }
 
-                String tagName = parser.getName();
-                if ("signer".equals(tagName)) {
-                    Policy signerPolicy = readSignerOrThrow(parser);
-                    // Return of a Policy instance ensures certain invariants have
-                    // passed, however, we still want to do some cross policy checking.
-                    // Thus, check that we haven't seen the certs in another stanza.
-                    Set<Signature> certs = signerPolicy.getSignatures();
-                    if (knownCerts.contains(certs)) {
-                        String msg = "Separate stanzas have identical certs";
-                        throw new IllegalStateException(msg);
-                    }
-                    knownCerts.add(certs);
-                    policies.add(signerPolicy);
-                } else if ("default".equals(tagName)) {
-                    Policy defPolicy = readDefaultOrThrow(parser);
-                    // Return of a Policy instance ensures certain invariants have
-                    // passed, however, we still want to do some cross policy checking.
-                    // Thus, check that we haven't already seen a default stanza.
-                    if (defaultPolicy != null) {
-                        String msg = "Multiple default stanzas identified";
-                        throw new IllegalStateException(msg);
-                    }
-                    defaultPolicy = defPolicy;
-                } else {
-                    skip(parser);
+                switch (parser.getName()) {
+                    case "signer":
+                        policies.add(readSignerOrThrow(parser));
+                        break;
+                    case "default":
+                        policies.add(readDefaultOrThrow(parser));
+                        break;
+                    default:
+                        skip(parser);
                 }
             }
         } catch (IllegalStateException | IllegalArgumentException |
@@ -185,15 +163,22 @@ public final class SELinuxMMAC {
             IoUtils.closeQuietly(policyFile);
         }
 
-        // Add the default policy to the end if there is one. This will ensure that
-        // the default stanza is consulted last when performing policy lookups.
-        if (defaultPolicy != null) {
-            policies.add(defaultPolicy);
+        // Now sort the policy stanzas
+        PolicyComparator policySort = new PolicyComparator();
+        Collections.sort(policies, policySort);
+        if (policySort.foundDuplicate()) {
+            Slog.w(TAG, "ERROR! Duplicate entries found parsing " + MAC_PERMISSIONS);
+            return false;
         }
 
         synchronized (sPolicies) {
-            sPolicies.clear();
-            sPolicies.addAll(policies);
+            sPolicies = policies;
+
+            if (DEBUG_POLICY_ORDER) {
+                for (Policy policy : sPolicies) {
+                    Slog.d(TAG, "Policy: " + policy.toString());
+                }
+            }
         }
 
         return true;
@@ -497,9 +482,23 @@ public final class SELinuxMMAC {
  * of invariants before being built and returned. Each instance can be guaranteed to
  * hold one valid policy stanza as outlined in the external/sepolicy/mac_permissions.xml
  * file.
- * </p>
+ * <p>
  * The following is an example of how to use {@link Policy.PolicyBuilder} to create a
- * signer based Policy instance.
+ * signer based Policy instance with only inner package name refinements.
+ * </p>
+ * <pre>
+ * {@code
+ * Policy policy = new Policy.PolicyBuilder()
+ *         .addSignature("308204a8...")
+ *         .addSignature("483538c8...")
+ *         .addInnerPackageMapOrThrow("com.foo.", "bar")
+ *         .addInnerPackageMapOrThrow("com.foo.other", "bar")
+ *         .build();
+ * }
+ * </pre>
+ * <p>
+ * The following is an example of how to use {@link Policy.PolicyBuilder} to create a
+ * signer based Policy instance with only a global seinfo tag.
  * </p>
  * <pre>
  * {@code
@@ -507,20 +506,18 @@ public final class SELinuxMMAC {
  *         .addSignature("308204a8...")
  *         .addSignature("483538c8...")
  *         .setGlobalSeinfoOrThrow("paltform")
- *         .addInnerPackageMapOrThrow("com.foo.", "bar")
- *         .addInnerPackageMapOrThrow("com.foo.other", "bar")
  *         .build();
  * }
  * </pre>
  * <p>
- * An example of how to use {@link Policy.PolicyBuilder} to create a default based Policy
- * instance.
+ * The following is an example of how to use {@link Policy.PolicyBuilder} to create a
+ * default based Policy instance.
  * </p>
  * <pre>
  * {@code
  * Policy policy = new Policy.PolicyBuilder()
  *         .setAsDefaultPolicy()
- *         .setGlobalSeinfoOrThrow("defualt")
+ *         .setGlobalSeinfoOrThrow("default")
  *         .build();
  * }
  * </pre>
@@ -548,6 +545,65 @@ final class Policy {
      */
     public Set<Signature> getSignatures() {
         return mCerts;
+    }
+
+    /**
+     * Return whether this policy object represents a default stanza.
+     *
+     * @return A boolean indicating if this object represents a default policy stanza.
+     */
+    public boolean isDefaultStanza() {
+        return mDefaultStanza;
+    }
+
+    /**
+     * Return whether this policy object contains package name mapping refinements.
+     *
+     * @return A boolean indicating if this object has inner package name mappings.
+     */
+    public boolean hasInnerPackages() {
+        return !mPkgMap.isEmpty();
+    }
+
+    /**
+     * Return the mapping of all package name refinements.
+     *
+     * @return A Map object whose keys are the package names and whose values are
+     *         the seinfo assignments.
+     */
+    public Map<String, String> getInnerPackages() {
+        return mPkgMap;
+    }
+
+    /**
+     * Return whether the policy object has a global seinfo tag attached.
+     *
+     * @return A boolean indicating if this stanza has a global seinfo tag.
+     */
+    public boolean hasGlobalSeinfo() {
+        return mSeinfo != null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (mDefaultStanza) {
+            sb.append("defaultStanza=true ");
+        }
+
+        for (Signature cert : mCerts) {
+            sb.append("cert=" + cert.toCharsString().substring(0, 11) + "... ");
+        }
+
+        if (mSeinfo != null) {
+            sb.append("seinfo=" + mSeinfo);
+        }
+
+        for (String name : mPkgMap.keySet()) {
+            sb.append(" " + name + "=" + mPkgMap.get(name));
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -623,7 +679,7 @@ final class Policy {
         }
 
         /**
-         * Sets this stanza as a defualt stanza. All policy stanzas are assumed to
+         * Sets this stanza as a default stanza. All policy stanzas are assumed to
          * be signer stanzas unless this method is explicitly called. Default stanzas
          * are treated differently with respect to allowable child tags, ordering and
          * when and how policy decisions are enforced.
@@ -757,7 +813,7 @@ final class Policy {
          *        <ul>
          *           <li> at least one cert must be found </li>
          *           <li> either a global seinfo value is present OR at least one
-         *           inner package mapping must be present. </li>
+         *           inner package mapping must be present BUT not both. </li>
          *        </ul>
          *      </li>
          *    </ul>
@@ -786,14 +842,69 @@ final class Policy {
                     String err = "Missing certs with signer tag. Expecting at least one.";
                     throw new IllegalStateException(err);
                 }
-                if ((p.mSeinfo == null) && (p.mPkgMap.isEmpty())) {
-                    String err = "Missing seinfo OR package tags with signer tag. At " +
-                            "least one must be present.";
+                if (!(p.mSeinfo == null ^ p.mPkgMap.isEmpty())) {
+                    String err = "Only seinfo tag XOR package tags are allowed within " +
+                            "a signer stanza.";
                     throw new IllegalStateException(err);
                 }
             }
 
             return p;
         }
+    }
+}
+
+/**
+ * Comparision imposing an ordering on Policy objects. It is understood that Policy
+ * objects can only take one of three forms and ordered according to the following
+ * set of rules most specific to least.
+ * <ul>
+ *   <li> signer stanzas with inner package mappings </li>
+ *   <li> signer stanzas with global seinfo tags </li>
+ *   <li> default stanza </li>
+ * </ul>
+ * This comparison also checks for duplicate entries on the input selectors. Any
+ * found duplicates will be flagged and can be checked with {@link #foundDuplicate}.
+ */
+
+final class PolicyComparator implements Comparator<Policy> {
+
+    private boolean duplicateFound = false;
+
+    public boolean foundDuplicate() {
+        return duplicateFound;
+    }
+
+    @Override
+    public int compare(Policy p1, Policy p2) {
+
+        // Give precedence to signature stanzas over default stanzas
+        if (p1.isDefaultStanza() != p2.isDefaultStanza()) {
+            return p1.isDefaultStanza() ? 1 : -1;
+        }
+
+        // Give precedence to stanzas with inner package mappings
+        if (p1.hasInnerPackages() != p2.hasInnerPackages()) {
+            return p1.hasInnerPackages() ? -1 : 1;
+        }
+
+        // Check for duplicate entries
+        if (p1.getSignatures().equals(p2.getSignatures())) {
+            // Checks if default stanza or a signer w/o inner package names
+            if (p1.hasGlobalSeinfo()) {
+                duplicateFound = true;
+                Slog.e(SELinuxMMAC.TAG, "Duplicate policy entry: " + p1.toString());
+            }
+
+            // Look for common inner package name mappings
+            final Map<String, String> p1Packages = p1.getInnerPackages();
+            final Map<String, String> p2Packages = p2.getInnerPackages();
+            if (!Collections.disjoint(p1Packages.keySet(), p2Packages.keySet())) {
+                duplicateFound = true;
+                Slog.e(SELinuxMMAC.TAG, "Duplicate policy entry: " + p1.toString());
+            }
+        }
+
+        return 0;
     }
 }

@@ -170,6 +170,21 @@ public final class IpPrefix implements Parcelable {
     }
 
     /**
+     * Determines whether the prefix contains the specified address.
+     *
+     * @param address An {@link InetAddress} to test.
+     * @return {@code true} if the prefix covers the given address.
+     */
+    public boolean contains(InetAddress address) {
+        byte[] addrBytes = (address == null) ? null : address.getAddress();
+        if (addrBytes == null || addrBytes.length != this.address.length) {
+            return false;
+        }
+        NetworkUtils.maskRawAddress(addrBytes, prefixLength);
+        return Arrays.equals(this.address, addrBytes);
+    }
+
+    /**
      * Returns a string representation of this {@code IpPrefix}.
      *
      * @return a string such as {@code "192.0.2.0/24"} or {@code "2001:db8:1:2::/64"}.

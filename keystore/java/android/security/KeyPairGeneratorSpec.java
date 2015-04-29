@@ -52,6 +52,11 @@ import javax.security.auth.x500.X500Principal;
  */
 public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
+    private static final X500Principal DEFAULT_CERT_SUBJECT = new X500Principal("CN=fake");
+    private static final BigInteger DEFAULT_CERT_SERIAL_NUMBER = new BigInteger("1");
+    private static final Date DEFAULT_CERT_NOT_BEFORE = new Date(0L); // Jan 1 1970
+    private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
+
     private final Context mContext;
 
     private final String mKeystoreAlias;
@@ -71,6 +76,28 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     private final Date mEndDate;
 
     private final int mFlags;
+
+    private final Date mKeyValidityStart;
+
+    private final Date mKeyValidityForOriginationEnd;
+
+    private final Date mKeyValidityForConsumptionEnd;
+
+    private final @KeyStoreKeyProperties.PurposeEnum int mPurposes;
+
+    private final String[] mDigests;
+
+    private final String[] mEncryptionPaddings;
+
+    private final String[] mSignaturePaddings;
+
+    private final String[] mBlockModes;
+
+    private final boolean mRandomizedEncryptionRequired;
+
+    private final @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
+
+    private final int mUserAuthenticationValidityDurationSeconds;
 
     /**
      * Parameter specification for the "{@code AndroidKeyPairGenerator}"
@@ -106,20 +133,42 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      */
     public KeyPairGeneratorSpec(Context context, String keyStoreAlias, String keyType, int keySize,
             AlgorithmParameterSpec spec, X500Principal subjectDN, BigInteger serialNumber,
-            Date startDate, Date endDate, int flags) {
+            Date startDate, Date endDate, int flags,
+            Date keyValidityStart,
+            Date keyValidityForOriginationEnd,
+            Date keyValidityForConsumptionEnd,
+            @KeyStoreKeyProperties.PurposeEnum int purposes,
+            String[] digests,
+            String[] encryptionPaddings,
+            String[] signaturePaddings,
+            String[] blockModes,
+            boolean randomizedEncryptionRequired,
+            @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators,
+            int userAuthenticationValidityDurationSeconds) {
         if (context == null) {
             throw new IllegalArgumentException("context == null");
         } else if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
-        } else if (subjectDN == null) {
-            throw new IllegalArgumentException("subjectDN == null");
-        } else if (serialNumber == null) {
-            throw new IllegalArgumentException("serialNumber == null");
-        } else if (startDate == null) {
-            throw new IllegalArgumentException("startDate == null");
-        } else if (endDate == null) {
-            throw new IllegalArgumentException("endDate == null");
-        } else if (endDate.before(startDate)) {
+        } else if ((userAuthenticationValidityDurationSeconds < 0)
+                && (userAuthenticationValidityDurationSeconds != -1)) {
+            throw new IllegalArgumentException(
+                    "userAuthenticationValidityDurationSeconds must not be negative");
+        }
+
+        if (subjectDN == null) {
+            subjectDN = DEFAULT_CERT_SUBJECT;
+        }
+        if (startDate == null) {
+            startDate = DEFAULT_CERT_NOT_BEFORE;
+        }
+        if (endDate == null) {
+            endDate = DEFAULT_CERT_NOT_AFTER;
+        }
+        if (serialNumber == null) {
+            serialNumber = DEFAULT_CERT_SERIAL_NUMBER;
+        }
+
+        if (endDate.before(startDate)) {
             throw new IllegalArgumentException("endDate < startDate");
         }
 
@@ -133,6 +182,49 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         mStartDate = startDate;
         mEndDate = endDate;
         mFlags = flags;
+        mKeyValidityStart = keyValidityStart;
+        mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
+        mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
+        mPurposes = purposes;
+        mDigests = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(digests));
+        mEncryptionPaddings =
+                ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(encryptionPaddings));
+        mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(signaturePaddings));
+        mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
+        mRandomizedEncryptionRequired = randomizedEncryptionRequired;
+        mUserAuthenticators = userAuthenticators;
+        mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+    }
+
+    /**
+     * TODO: Remove this constructor once tests are switched over to the new one above.
+     * @hide
+     */
+    public KeyPairGeneratorSpec(Context context, String keyStoreAlias, String keyType, int keySize,
+            AlgorithmParameterSpec spec, X500Principal subjectDN, BigInteger serialNumber,
+            Date startDate, Date endDate, int flags) {
+        this(context,
+                keyStoreAlias,
+                keyType,
+                keySize,
+                spec,
+                subjectDN,
+                serialNumber,
+                startDate,
+                endDate,
+                flags,
+                startDate,
+                endDate,
+                endDate,
+                0, // purposes
+                null, // digests
+                null, // encryption paddings
+                null, // signature paddings
+                null, // block modes
+                false, // randomized encryption required
+                0, // user authenticators
+                -1 // user authentication validity duration (seconds)
+                );
     }
 
     /**
@@ -222,6 +314,131 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Gets the time instant before which the key pair is not yet valid.
+     *
+     * @return instant or {@code null} if not restricted.
+     *
+     * @hide
+     */
+    public Date getKeyValidityStart() {
+        return mKeyValidityStart;
+    }
+
+    /**
+     * Gets the time instant after which the key pair is no longer valid for decryption and
+     * verification.
+     *
+     * @return instant or {@code null} if not restricted.
+     *
+     * @hide
+     */
+    public Date getKeyValidityForConsumptionEnd() {
+        return mKeyValidityForConsumptionEnd;
+    }
+
+    /**
+     * Gets the time instant after which the key pair is no longer valid for encryption and signing.
+     *
+     * @return instant or {@code null} if not restricted.
+     *
+     * @hide
+     */
+    public Date getKeyValidityForOriginationEnd() {
+        return mKeyValidityForOriginationEnd;
+    }
+
+    /**
+     * Gets the set of purposes for which the key can be used.
+     *
+     * @hide
+     */
+    public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
+        return mPurposes;
+    }
+
+    /**
+     * Gets the set of digest algorithms with which the key can be used.
+     *
+     * @hide
+     */
+    public String[] getDigests() {
+        return ArrayUtils.cloneIfNotEmpty(mDigests);
+    }
+
+    /**
+     * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
+     *
+     * @hide
+     */
+    public String[] getEncryptionPaddings() {
+        return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
+    }
+
+    /**
+     * Gets the set of padding schemes with which the key can be used when signing/verifying.
+     *
+     * @hide
+     */
+    public String[] getSignaturePaddings() {
+        return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
+    }
+
+    /**
+     * Gets the set of block modes with which the key can be used.
+     *
+     * @hide
+     */
+    public String[] getBlockModes() {
+        return ArrayUtils.cloneIfNotEmpty(mBlockModes);
+    }
+
+    /**
+     * Returns {@code true} if encryption using this key must be sufficiently randomized to produce
+     * different ciphertexts for the same plaintext every time. The formal cryptographic property
+     * being required is <em>indistinguishability under chosen-plaintext attack ({@code
+     * IND-CPA})</em>. This property is important because it mitigates several classes of
+     * weaknesses due to which ciphertext may leak information about plaintext.  For example, if a
+     * given plaintext always produces the same ciphertext, an attacker may see the repeated
+     * ciphertexts and be able to deduce something about the plaintext.
+     *
+     * @hide
+     */
+    public boolean isRandomizedEncryptionRequired() {
+        return mRandomizedEncryptionRequired;
+    }
+
+    /**
+     * Gets the set of user authenticators which protect access to the private key. The key can only
+     * be used iff the user has authenticated to at least one of these user authenticators.
+     *
+     * <p>This restriction applies only to private key operations. Public key operations are not
+     * restricted.
+     *
+     * @return user authenticators or {@code 0} if the key can be used without user authentication.
+     *
+     * @hide
+     */
+    public @KeyStoreKeyProperties.UserAuthenticatorEnum int getUserAuthenticators() {
+        return mUserAuthenticators;
+    }
+
+    /**
+     * Gets the duration of time (seconds) for which the private key can be used after the user
+     * successfully authenticates to one of the associated user authenticators.
+     *
+     * <p>This restriction applies only to private key operations. Public key operations are not
+     * restricted.
+     *
+     * @return duration in seconds or {@code -1} if not restricted. {@code 0} means authentication
+     *         is required for every use of the key.
+     *
+     * @hide
+     */
+    public int getUserAuthenticationValidityDurationSeconds() {
+        return mUserAuthenticationValidityDurationSeconds;
+    }
+
+    /**
      * Builder class for {@link KeyPairGeneratorSpec} objects.
      * <p>
      * This will build a parameter spec for use with the <a href="{@docRoot}
@@ -262,6 +479,28 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         private Date mEndDate;
 
         private int mFlags;
+
+        private Date mKeyValidityStart;
+
+        private Date mKeyValidityForOriginationEnd;
+
+        private Date mKeyValidityForConsumptionEnd;
+
+        private @KeyStoreKeyProperties.PurposeEnum int mPurposes;
+
+        private String[] mDigests;
+
+        private String[] mEncryptionPaddings;
+
+        private String[] mSignaturePaddings;
+
+        private String[] mBlockModes;
+
+        private boolean mRandomizedEncryptionRequired = true;
+
+        private @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
+
+        private int mUserAuthenticationValidityDurationSeconds = -1;
 
         /**
          * Creates a new instance of the {@code Builder} with the given
@@ -332,6 +571,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the subject used for the self-signed certificate of the
          * generated key pair.
+         *
+         * <p>The subject must be specified on API Level
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
+         * newer platforms the subject defaults to {@code CN=fake} if not specified.
          */
         public Builder setSubject(X500Principal subject) {
             if (subject == null) {
@@ -344,6 +587,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the serial number used for the self-signed certificate of the
          * generated key pair.
+         *
+         * <p>The serial number must be specified on API Level
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
+         * newer platforms the serial number defaults to {@code 1} if not specified.
          */
         public Builder setSerialNumber(BigInteger serialNumber) {
             if (serialNumber == null) {
@@ -356,6 +603,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the start of the validity period for the self-signed certificate
          * of the generated key pair.
+         *
+         * <p>The date must be specified on API Level
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
+         * newer platforms the date defaults to {@code Jan 1 1970} if not specified.
          */
         public Builder setStartDate(Date startDate) {
             if (startDate == null) {
@@ -368,6 +619,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the end of the validity period for the self-signed certificate
          * of the generated key pair.
+         *
+         * <p>The date must be specified on API Level
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
+         * newer platforms the date defaults to {@code Jan 1 2048} if not specified.
          */
         public Builder setEndDate(Date endDate) {
             if (endDate == null) {
@@ -389,14 +644,229 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Sets the time instant before which the key is not yet valid.
+         *
+         * <p>By default, the key is valid at any instant.
+         *
+         * @see #setKeyValidityEnd(Date)
+         *
+         * @hide
+         */
+        public Builder setKeyValidityStart(Date startDate) {
+            mKeyValidityStart = startDate;
+            return this;
+        }
+
+        /**
+         * Sets the time instant after which the key is no longer valid.
+         *
+         * <p>By default, the key is valid at any instant.
+         *
+         * @see #setKeyValidityStart(Date)
+         * @see #setKeyValidityForConsumptionEnd(Date)
+         * @see #setKeyValidityForOriginationEnd(Date)
+         *
+         * @hide
+         */
+        public Builder setKeyValidityEnd(Date endDate) {
+            setKeyValidityForOriginationEnd(endDate);
+            setKeyValidityForConsumptionEnd(endDate);
+            return this;
+        }
+
+        /**
+         * Sets the time instant after which the key is no longer valid for encryption and signing.
+         *
+         * <p>By default, the key is valid at any instant.
+         *
+         * @see #setKeyValidityForConsumptionEnd(Date)
+         *
+         * @hide
+         */
+        public Builder setKeyValidityForOriginationEnd(Date endDate) {
+            mKeyValidityForOriginationEnd = endDate;
+            return this;
+        }
+
+        /**
+         * Sets the time instant after which the key is no longer valid for decryption and
+         * verification.
+         *
+         * <p>By default, the key is valid at any instant.
+         *
+         * @see #setKeyValidityForOriginationEnd(Date)
+         *
+         * @hide
+         */
+        public Builder setKeyValidityForConsumptionEnd(Date endDate) {
+            mKeyValidityForConsumptionEnd = endDate;
+            return this;
+        }
+
+        /**
+         * Sets the set of purposes for which the key can be used.
+         *
+         * <p>This must be specified for all keys. There is no default.
+         *
+         * @hide
+         */
+        public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
+            mPurposes = purposes;
+            return this;
+        }
+
+        /**
+         * Sets the set of digests with which the key can be used when signing/verifying. Attempts
+         * to use the key with any other digest will be rejected.
+         *
+         * <p>This must be specified for keys which are used for signing/verification.
+         *
+         * @hide
+         */
+        public Builder setDigests(String... digests) {
+            mDigests = ArrayUtils.cloneIfNotEmpty(digests);
+            return this;
+        }
+
+        /**
+         * Sets the set of padding schemes with which the key can be used when
+         * encrypting/decrypting. Attempts to use the key with any other padding scheme will be
+         * rejected.
+         *
+         * <p>This must be specified for keys which are used for encryption/decryption.
+         *
+         * @hide
+         */
+        public Builder setEncryptionPaddings(String... paddings) {
+            mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
+            return this;
+        }
+
+        /**
+         * Sets the set of padding schemes with which the key can be used when
+         * signing/verifying. Attempts to use the key with any other padding scheme will be
+         * rejected.
+         *
+         * <p>This must be specified for RSA keys which are used for signing/verification.
+         *
+         * @hide
+         */
+        public Builder setSignaturePaddings(String... paddings) {
+            mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(paddings);
+            return this;
+        }
+
+        /**
+         * Sets the set of block modes with which the key can be used when encrypting/decrypting.
+         * Attempts to use the key with any other block modes will be rejected.
+         *
+         * <p>This must be specified for encryption/decryption keys.
+         *
+         * @hide
+         */
+        public Builder setBlockModes(String... blockModes) {
+            mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
+            return this;
+        }
+
+        /**
+         * Sets whether encryption using this key must be sufficiently randomized to produce
+         * different ciphertexts for the same plaintext every time. The formal cryptographic
+         * property being required is <em>indistinguishability under chosen-plaintext attack
+         * ({@code IND-CPA})</em>. This property is important because it mitigates several classes
+         * of weaknesses due to which ciphertext may leak information about plaintext. For example,
+         * if a given plaintext always produces the same ciphertext, an attacker may see the
+         * repeated ciphertexts and be able to deduce something about the plaintext.
+         *
+         * <p>By default, {@code IND-CPA} is required.
+         *
+         * <p>When {@code IND-CPA} is required, encryption/decryption transformations which do not
+         * offer {@code IND-CPA}, such as RSA without padding, are prohibited.
+         *
+         * <p>Before disabling this requirement, consider the following approaches instead:
+         * <ul>
+         * <li>If you are using RSA encryption without padding, consider switching to padding
+         * schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
+         * </ul>
+         *
+         * @hide
+         */
+        public Builder setRandomizedEncryptionRequired(boolean required) {
+            mRandomizedEncryptionRequired = required;
+            return this;
+        }
+
+        /**
+         * Sets the user authenticators which protect access to this key. The key can only be used
+         * iff the user has authenticated to at least one of these user authenticators.
+         *
+         * <p>By default, the key can be used without user authentication.
+         *
+         * <p>This restriction applies only to private key operations. Public key operations are not
+         * restricted.
+         *
+         * @param userAuthenticators user authenticators or {@code 0} if this key can be accessed
+         *        without user authentication.
+         *
+         * @see #setUserAuthenticationValidityDurationSeconds(int)
+         *
+         * @hide
+         */
+        public Builder setUserAuthenticators(
+                @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators) {
+            mUserAuthenticators = userAuthenticators;
+            return this;
+        }
+
+        /**
+         * Sets the duration of time (seconds) for which this key can be used after the user
+         * successfully authenticates to one of the associated user authenticators.
+         *
+         * <p>By default, the user needs to authenticate for every use of the key.
+         *
+         * <p>This restriction applies only to private key operations. Public key operations are not
+         * restricted.
+         *
+         * @param seconds duration in seconds or {@code 0} if the user needs to authenticate for
+         *        every use of the key.
+         *
+         * @see #setUserAuthenticators(int)
+         *
+         * @hide
+         */
+        public Builder setUserAuthenticationValidityDurationSeconds(int seconds) {
+            mUserAuthenticationValidityDurationSeconds = seconds;
+            return this;
+        }
+
+        /**
          * Builds the instance of the {@code KeyPairGeneratorSpec}.
          *
          * @throws IllegalArgumentException if a required field is missing
          * @return built instance of {@code KeyPairGeneratorSpec}
          */
         public KeyPairGeneratorSpec build() {
-            return new KeyPairGeneratorSpec(mContext, mKeystoreAlias, mKeyType, mKeySize, mSpec,
-                    mSubjectDN, mSerialNumber, mStartDate, mEndDate, mFlags);
+            return new KeyPairGeneratorSpec(mContext,
+                    mKeystoreAlias,
+                    mKeyType,
+                    mKeySize,
+                    mSpec,
+                    mSubjectDN,
+                    mSerialNumber,
+                    mStartDate,
+                    mEndDate,
+                    mFlags,
+                    mKeyValidityStart,
+                    mKeyValidityForOriginationEnd,
+                    mKeyValidityForConsumptionEnd,
+                    mPurposes,
+                    mDigests,
+                    mEncryptionPaddings,
+                    mSignaturePaddings,
+                    mBlockModes,
+                    mRandomizedEncryptionRequired,
+                    mUserAuthenticators,
+                    mUserAuthenticationValidityDurationSeconds);
         }
     }
 }

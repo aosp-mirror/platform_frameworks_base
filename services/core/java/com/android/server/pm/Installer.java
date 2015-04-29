@@ -16,10 +16,13 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Slog;
+
 import dalvik.system.VMRuntime;
 
 import com.android.internal.os.InstallerConnection;
@@ -41,8 +44,23 @@ public final class Installer extends SystemService {
         ping();
     }
 
+    private static String escapeNull(String arg) {
+        if (TextUtils.isEmpty(arg)) {
+            return "!";
+        } else {
+            return arg;
+        }
+    }
+
+    @Deprecated
     public int install(String name, int uid, int gid, String seinfo) {
+        return install(null, name, uid, gid, seinfo);
+    }
+
+    public int install(String uuid, String name, int uid, int gid, String seinfo) {
         StringBuilder builder = new StringBuilder("install");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(name);
         builder.append(' ');
@@ -54,43 +72,26 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
-    public int patchoat(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet) {
+    public int dexopt(String apkPath, int uid, boolean isPublic,
+            String instructionSet, int dexoptNeeded) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
 
-        return mInstaller.patchoat(apkPath, uid, isPublic, pkgName, instructionSet);
-    }
-
-    public int patchoat(String apkPath, int uid, boolean isPublic, String instructionSet) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-
-        return mInstaller.patchoat(apkPath, uid, isPublic, instructionSet);
-    }
-
-    public int dexopt(String apkPath, int uid, boolean isPublic, String instructionSet) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-
-        return mInstaller.dexopt(apkPath, uid, isPublic, instructionSet);
+        return mInstaller.dexopt(apkPath, uid, isPublic, instructionSet, dexoptNeeded);
     }
 
     public int dexopt(String apkPath, int uid, boolean isPublic, String pkgName,
-            String instructionSet, boolean vmSafeMode, boolean debuggable) {
+            String instructionSet, int dexoptNeeded, boolean vmSafeMode,
+            boolean debuggable, @Nullable String outputPath) {
         if (!isValidInstructionSet(instructionSet)) {
             Slog.e(TAG, "Invalid instruction set: " + instructionSet);
             return -1;
         }
-
-        return mInstaller.dexopt(apkPath, uid, isPublic, pkgName, instructionSet, vmSafeMode,
-                debuggable);
+        return mInstaller.dexopt(apkPath, uid, isPublic, pkgName,
+                instructionSet, dexoptNeeded, vmSafeMode,
+                debuggable, outputPath);
     }
 
     public int idmap(String targetApkPath, String overlayApkPath, int uid) {
@@ -134,8 +135,25 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
+    /**
+     * Removes packageDir or its subdirectory
+     */
+    public int rmPackageDir(String packageDir) {
+        StringBuilder builder = new StringBuilder("rmpackagedir");
+        builder.append(' ');
+        builder.append(packageDir);
+        return mInstaller.execute(builder.toString());
+    }
+
+    @Deprecated
     public int remove(String name, int userId) {
+        return remove(null, name, userId);
+    }
+
+    public int remove(String uuid, String name, int userId) {
         StringBuilder builder = new StringBuilder("remove");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(name);
         builder.append(' ');
@@ -152,8 +170,15 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
+    @Deprecated
     public int fixUid(String name, int uid, int gid) {
+        return fixUid(null, name, uid, gid);
+    }
+
+    public int fixUid(String uuid, String name, int uid, int gid) {
         StringBuilder builder = new StringBuilder("fixuid");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(name);
         builder.append(' ');
@@ -163,26 +188,47 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
+    @Deprecated
     public int deleteCacheFiles(String name, int userId) {
+        return deleteCacheFiles(null, name, userId);
+    }
+
+    public int deleteCacheFiles(String uuid, String name, int userId) {
         StringBuilder builder = new StringBuilder("rmcache");
         builder.append(' ');
+        builder.append(escapeNull(uuid));
+        builder.append(' ');
         builder.append(name);
         builder.append(' ');
         builder.append(userId);
         return mInstaller.execute(builder.toString());
     }
 
+    @Deprecated
     public int deleteCodeCacheFiles(String name, int userId) {
+        return deleteCodeCacheFiles(null, name, userId);
+    }
+
+    public int deleteCodeCacheFiles(String uuid, String name, int userId) {
         StringBuilder builder = new StringBuilder("rmcodecache");
         builder.append(' ');
+        builder.append(escapeNull(uuid));
+        builder.append(' ');
         builder.append(name);
         builder.append(' ');
         builder.append(userId);
         return mInstaller.execute(builder.toString());
     }
 
+    @Deprecated
     public int createUserData(String name, int uid, int userId, String seinfo) {
+        return createUserData(null, name, uid, userId, seinfo);
+    }
+
+    public int createUserData(String uuid, String name, int uid, int userId, String seinfo) {
         StringBuilder builder = new StringBuilder("mkuserdata");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(name);
         builder.append(' ');
@@ -201,15 +247,29 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
+    @Deprecated
     public int removeUserDataDirs(int userId) {
+        return removeUserDataDirs(null, userId);
+    }
+
+    public int removeUserDataDirs(String uuid, int userId) {
         StringBuilder builder = new StringBuilder("rmuser");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(userId);
         return mInstaller.execute(builder.toString());
     }
 
+    @Deprecated
     public int clearUserData(String name, int userId) {
+        return clearUserData(null, name, userId);
+    }
+
+    public int clearUserData(String uuid, String name, int userId) {
         StringBuilder builder = new StringBuilder("rmuserdata");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(name);
         builder.append(' ');
@@ -237,15 +297,30 @@ public final class Installer extends SystemService {
         }
     }
 
+    @Deprecated
     public int freeCache(long freeStorageSize) {
+        return freeCache(null, freeStorageSize);
+    }
+
+    public int freeCache(String uuid, long freeStorageSize) {
         StringBuilder builder = new StringBuilder("freecache");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(String.valueOf(freeStorageSize));
         return mInstaller.execute(builder.toString());
     }
 
+    @Deprecated
     public int getSizeInfo(String pkgName, int persona, String apkPath, String libDirPath,
             String fwdLockApkPath, String asecPath, String[] instructionSets, PackageStats pStats) {
+        return getSizeInfo(null, pkgName, persona, apkPath, libDirPath, fwdLockApkPath, asecPath,
+                instructionSets, pStats);
+    }
+
+    public int getSizeInfo(String uuid, String pkgName, int persona, String apkPath,
+            String libDirPath, String fwdLockApkPath, String asecPath, String[] instructionSets,
+            PackageStats pStats) {
         for (String instructionSet : instructionSets) {
             if (!isValidInstructionSet(instructionSet)) {
                 Slog.e(TAG, "Invalid instruction set: " + instructionSet);
@@ -254,6 +329,8 @@ public final class Installer extends SystemService {
         }
 
         StringBuilder builder = new StringBuilder("getsize");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(pkgName);
         builder.append(' ');
@@ -294,6 +371,11 @@ public final class Installer extends SystemService {
         return mInstaller.execute("movefiles");
     }
 
+    @Deprecated
+    public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath32, int userId) {
+        return linkNativeLibraryDirectory(null, dataPath, nativeLibPath32, userId);
+    }
+
     /**
      * Links the 32 bit native library directory in an application's data directory to the
      * real location for backward compatibility. Note that no such symlink is created for
@@ -301,7 +383,8 @@ public final class Installer extends SystemService {
      *
      * @return -1 on error
      */
-    public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath32, int userId) {
+    public int linkNativeLibraryDirectory(String uuid, String dataPath, String nativeLibPath32,
+            int userId) {
         if (dataPath == null) {
             Slog.e(TAG, "linkNativeLibraryDirectory dataPath is null");
             return -1;
@@ -310,7 +393,10 @@ public final class Installer extends SystemService {
             return -1;
         }
 
-        StringBuilder builder = new StringBuilder("linklib ");
+        StringBuilder builder = new StringBuilder("linklib");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
+        builder.append(' ');
         builder.append(dataPath);
         builder.append(' ');
         builder.append(nativeLibPath32);
@@ -320,8 +406,15 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
+    @Deprecated
     public boolean restoreconData(String pkgName, String seinfo, int uid) {
+        return restoreconData(null, pkgName, seinfo, uid);
+    }
+
+    public boolean restoreconData(String uuid, String pkgName, String seinfo, int uid) {
         StringBuilder builder = new StringBuilder("restorecondata");
+        builder.append(' ');
+        builder.append(escapeNull(uuid));
         builder.append(' ');
         builder.append(pkgName);
         builder.append(' ');
@@ -329,6 +422,15 @@ public final class Installer extends SystemService {
         builder.append(' ');
         builder.append(uid);
         return (mInstaller.execute(builder.toString()) == 0);
+    }
+
+    public int createOatDir(String oatDir, String dexInstructionSet) {
+        StringBuilder builder = new StringBuilder("createoatdir");
+        builder.append(' ');
+        builder.append(oatDir);
+        builder.append(' ');
+        builder.append(dexInstructionSet);
+        return mInstaller.execute(builder.toString());
     }
 
     /**

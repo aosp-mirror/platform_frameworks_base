@@ -40,7 +40,6 @@
 #include <rsEnv.h>
 #include <gui/Surface.h>
 #include <gui/GLConsumer.h>
-#include <gui/Surface.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
 //#define LOG_API ALOGE
@@ -373,7 +372,7 @@ nClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong kernelID,
   return (jlong)(uintptr_t)rsClosureCreate(
       (RsContext)con, (RsScriptKernelID)kernelID, (RsAllocation)returnValue,
       fieldIDs, (size_t)fieldIDs_length, values, (size_t)values_length,
-      (size_t*)sizes, (size_t)sizes_length,
+      (int*)sizes, (size_t)sizes_length,
       depClosures, (size_t)depClosures_length,
       depFieldIDs, (size_t)depFieldIDs_length);
 }
@@ -406,7 +405,7 @@ nInvokeClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong invokeID,
   return (jlong)(uintptr_t)rsInvokeClosureCreate(
       (RsContext)con, (RsScriptInvokeID)invokeID, jParams, jParamLength,
       fieldIDs, (size_t)fieldIDs_length, values, (size_t)values_length,
-      (size_t*)sizes, (size_t)sizes_length);
+      (int*)sizes, (size_t)sizes_length);
 }
 
 static void
@@ -424,8 +423,9 @@ nClosureSetGlobal(JNIEnv *_env, jobject _this, jlong con, jlong closureID,
 }
 
 static long
-nScriptGroup2Create(JNIEnv *_env, jobject _this, jlong con,
+nScriptGroup2Create(JNIEnv *_env, jobject _this, jlong con, jstring name,
                     jstring cacheDir, jlongArray closureArray) {
+  AutoJavaStringToUTF8 nameUTF(_env, name);
   AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
 
   jlong* jClosures = _env->GetLongArrayElements(closureArray, nullptr);
@@ -436,7 +436,8 @@ nScriptGroup2Create(JNIEnv *_env, jobject _this, jlong con,
   }
 
   return (jlong)(uintptr_t)rsScriptGroup2Create(
-      (RsContext)con, cacheDirUTF.c_str(), cacheDirUTF.length(),
+      (RsContext)con, nameUTF.c_str(), nameUTF.length(),
+      cacheDirUTF.c_str(), cacheDirUTF.length(),
       closures, numClosures);
 }
 
@@ -583,6 +584,32 @@ nScriptIntrinsicBLAS_Z(JNIEnv *_env, jobject _this, jlong con, jlong id, jint fu
 
 
 static void
+nScriptIntrinsicBLAS_BNNM(JNIEnv *_env, jobject _this, jlong con, jlong id, jint M, jint N, jint K,
+                                             jlong A, jint a_offset, jlong B, jint b_offset, jlong C, jint c_offset,
+                                             jint c_mult_int) {
+    RsBlasCall call;
+    memset(&call, 0, sizeof(call));
+    call.func = RsBlas_bnnm;
+    call.M = M;
+    call.N = N;
+    call.K = K;
+    call.a_offset = a_offset;
+    call.b_offset = b_offset;
+    call.c_offset = c_offset;
+    call.c_mult_int = c_mult_int;
+
+    RsAllocation in_allocs[3];
+    in_allocs[0] = (RsAllocation)A;
+    in_allocs[1] = (RsAllocation)B;
+    in_allocs[2] = (RsAllocation)C;
+
+    rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
+                         in_allocs, sizeof(in_allocs), nullptr,
+                         &call, sizeof(call), nullptr, 0);
+}
+
+
+static void
 nAssignName(JNIEnv *_env, jobject _this, jlong con, jlong obj, jbyteArray str)
 {
     if (kLogApi) {
@@ -688,6 +715,17 @@ nContextSetPriority(JNIEnv *_env, jobject _this, jlong con, jint p)
         ALOGD("ContextSetPriority, con(%p), priority(%i)", (RsContext)con, p);
     }
     rsContextSetPriority((RsContext)con, p);
+}
+
+static void
+nContextSetCacheDir(JNIEnv *_env, jobject _this, jlong con, jstring cacheDir)
+{
+    AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
+
+    if (kLogApi) {
+        ALOGD("ContextSetCacheDir, con(%p), cacheDir(%s)", (RsContext)con, cacheDirUTF.c_str());
+    }
+    rsContextSetCacheDir((RsContext)con, cacheDirUTF.c_str(), cacheDirUTF.length());
 }
 
 
@@ -2313,6 +2351,7 @@ static JNINativeMethod methods[] = {
 {"rsnContextCreateGL",               "(JIIIIIIIIIIIIFI)J",                    (void*)nContextCreateGL },
 {"rsnContextFinish",                 "(J)V",                                  (void*)nContextFinish },
 {"rsnContextSetPriority",            "(JI)V",                                 (void*)nContextSetPriority },
+{"rsnContextSetCacheDir",            "(JLjava/lang/String;)V",                (void*)nContextSetCacheDir },
 {"rsnContextSetSurface",             "(JIILandroid/view/Surface;)V",          (void*)nContextSetSurface },
 {"rsnContextDestroy",                "(J)V",                                  (void*)nContextDestroy },
 {"rsnContextDump",                   "(JI)V",                                 (void*)nContextDump },
@@ -2403,7 +2442,7 @@ static JNINativeMethod methods[] = {
 {"rsnScriptInvokeIDCreate",          "(JJI)J",                                (void*)nScriptInvokeIDCreate },
 {"rsnScriptFieldIDCreate",           "(JJI)J",                                (void*)nScriptFieldIDCreate },
 {"rsnScriptGroupCreate",             "(J[J[J[J[J[J)J",                        (void*)nScriptGroupCreate },
-{"rsnScriptGroup2Create",            "(JLjava/lang/String;[J)J",               (void*)nScriptGroup2Create },
+{"rsnScriptGroup2Create",            "(JLjava/lang/String;Ljava/lang/String;[J)J", (void*)nScriptGroup2Create },
 {"rsnScriptGroupSetInput",           "(JJJJ)V",                               (void*)nScriptGroupSetInput },
 {"rsnScriptGroupSetOutput",          "(JJJJ)V",                               (void*)nScriptGroupSetOutput },
 {"rsnScriptGroupExecute",            "(JJ)V",                                 (void*)nScriptGroupExecute },
@@ -2413,6 +2452,8 @@ static JNINativeMethod methods[] = {
 {"rsnScriptIntrinsicBLAS_Double",    "(JJIIIIIIIIIDJJDJIIII)V",               (void*)nScriptIntrinsicBLAS_Double },
 {"rsnScriptIntrinsicBLAS_Complex",   "(JJIIIIIIIIIFFJJFFJIIII)V",             (void*)nScriptIntrinsicBLAS_Complex },
 {"rsnScriptIntrinsicBLAS_Z",         "(JJIIIIIIIIIDDJJDDJIIII)V",             (void*)nScriptIntrinsicBLAS_Z },
+
+{"rsnScriptIntrinsicBLAS_BNNM",      "(JJIIIJIJIJII)V",                       (void*)nScriptIntrinsicBLAS_BNNM },
 
 {"rsnProgramStoreCreate",            "(JZZZZZZIII)J",                         (void*)nProgramStoreCreate },
 

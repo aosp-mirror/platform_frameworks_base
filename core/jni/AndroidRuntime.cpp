@@ -536,7 +536,6 @@ bool AndroidRuntime::parseCompilerRuntimeOption(const char* property,
  */
 int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 {
-    int result = -1;
     JavaVMInitArgs initArgs;
     char propBuf[PROPERTY_VALUE_MAX];
     char stackTraceFileBuf[sizeof("-Xstacktracefile:")-1 + PROPERTY_VALUE_MAX];
@@ -552,12 +551,19 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char gctypeOptsBuf[sizeof("-Xgc:")-1 + PROPERTY_VALUE_MAX];
     char backgroundgcOptsBuf[sizeof("-XX:BackgroundGC=")-1 + PROPERTY_VALUE_MAX];
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
+    char cachePruneBuf[sizeof("-Xzygote-max-boot-retry=")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmsImageFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmxImageFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmsFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmxFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char dex2oatCompilerFilterBuf[sizeof("--compiler-filter=")-1 + PROPERTY_VALUE_MAX];
     char dex2oatImageCompilerFilterBuf[sizeof("--compiler-filter=")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatThreadsBuf[sizeof("-j")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatThreadsImageBuf[sizeof("-j")-1 + PROPERTY_VALUE_MAX];
+    char dex2oat_isa_variant_key[PROPERTY_KEY_MAX];
+    char dex2oat_isa_variant[sizeof("--instruction-set-variant=") -1 + PROPERTY_VALUE_MAX];
+    char dex2oat_isa_features_key[PROPERTY_KEY_MAX];
+    char dex2oat_isa_features[sizeof("--instruction-set-features=") -1 + PROPERTY_VALUE_MAX];
     char dex2oatFlagsBuf[PROPERTY_VALUE_MAX];
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
@@ -580,6 +586,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char localeOption[sizeof("-Duser.locale=") + PROPERTY_VALUE_MAX];
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
+    char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -698,7 +705,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     if (!hasFile("/system/etc/preloaded-classes")) {
         ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
               strerror(errno));
-        goto bail;
+        return -1;
     }
     addOption("-Ximage-compiler-option");
     addOption("--image-classes=/system/etc/preloaded-classes");
@@ -732,6 +739,46 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
                             "--compiler-filter=", "-Xcompiler-option");
     }
+    parseCompilerOption("dalvik.vm.dex2oat-threads", dex2oatThreadsBuf, "-j", "-Xcompiler-option");
+    parseCompilerOption("dalvik.vm.image-dex2oat-threads", dex2oatThreadsImageBuf, "-j",
+                        "-Ximage-compiler-option");
+
+    // The runtime will compile a boot image, when necessary, not using installd. Thus, we need to
+    // pass the instruction-set-features/variant as an image-compiler-option.
+    // TODO: Find a better way for the instruction-set.
+#if defined(__arm__)
+    constexpr const char* instruction_set = "arm";
+#elif defined(__aarch64__)
+    constexpr const char* instruction_set = "arm64";
+#elif defined(__mips__) && !defined(__LP64__)
+    constexpr const char* instruction_set = "mips";
+#elif defined(__mips__) && defined(__LP64__)
+    constexpr const char* instruction_set = "mips64";
+#elif defined(__i386__)
+    constexpr const char* instruction_set = "x86";
+#elif defined(__x86_64__)
+    constexpr const char* instruction_set = "x86_64";
+#else
+    constexpr const char* instruction_set = "unknown";
+#endif
+    // Note: it is OK to reuse the buffer, as the values are exactly the same between
+    //       * compiler-option, used for runtime compilation (DexClassLoader)
+    //       * image-compiler-option, used for boot-image compilation on device
+
+    // Copy the variant.
+    sprintf(dex2oat_isa_variant_key, "dalvik.vm.isa.%s.variant", instruction_set);
+    parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
+                        "--instruction-set-variant=", "-Ximage-compiler-option");
+    parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
+                        "--instruction-set-variant=", "-Xcompiler-option");
+    // Copy the features.
+    sprintf(dex2oat_isa_features_key, "dalvik.vm.isa.%s.features", instruction_set);
+    parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
+                        "--instruction-set-features=", "-Ximage-compiler-option");
+    parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
+                        "--instruction-set-features=", "-Xcompiler-option");
+
+
     property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
     parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
 
@@ -810,6 +857,35 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         addOption(nativeBridgeLibrary);
     }
 
+    // Dalvik-cache pruning counter.
+    parseRuntimeOption("dalvik.vm.zygote.max-boot-retry", cachePruneBuf,
+                       "-Xzygote-max-boot-retry=");
+#if defined(__LP64__)
+    const char* cpu_abilist_property_name = "ro.product.cpu.abilist64";
+#else
+    const char* cpu_abilist_property_name = "ro.product.cpu.abilist32";
+#endif  // defined(__LP64__)
+    property_get(cpu_abilist_property_name, propBuf, "");
+    if (propBuf[0] == '\0') {
+        ALOGE("%s is not expected to be empty", cpu_abilist_property_name);
+        return -1;
+    }
+    snprintf(cpuAbiListBuf, sizeof(cpuAbiListBuf), "--cpu-abilist=%s", propBuf);
+    addOption(cpuAbiListBuf);
+
+    /*
+     * When running with debug.gencfi, add --include-cfi to the compiler options so that the boot
+     * image, if it is compiled on device, will include CFI info, as well as other compilations
+     * started by the runtime.
+     */
+    property_get("debug.gencfi", propBuf, "");
+    if (strcmp(propBuf, "true") == 0) {
+        addOption("-Xcompiler-option");
+        addOption("--include-cfi");
+        addOption("-Ximage-compiler-option");
+        addOption("--include-cfi");
+    }
+
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
     initArgs.nOptions = mOptions.size();
@@ -824,13 +900,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
      */
     if (JNI_CreateJavaVM(pJavaVM, pEnv, &initArgs) < 0) {
         ALOGE("JNI_CreateJavaVM failed\n");
-        goto bail;
+        return -1;
     }
 
-    result = 0;
-
-bail:
-    return result;
+    return 0;
 }
 
 char* AndroidRuntime::toSlashClassName(const char* className)

@@ -436,11 +436,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
 
     Request removeRequest(IBinder reqInterface) {
         synchronized (this) {
-            Request req = mActiveRequests.get(reqInterface);
-            if (req != null) {
-                mActiveRequests.remove(req);
-            }
-            return req;
+            return mActiveRequests.remove(reqInterface);
         }
     }
 

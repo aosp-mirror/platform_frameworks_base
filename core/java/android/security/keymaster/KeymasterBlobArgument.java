@@ -27,6 +27,13 @@ class KeymasterBlobArgument extends KeymasterArgument {
 
     public KeymasterBlobArgument(int tag, byte[] blob) {
         super(tag);
+        switch (KeymasterDefs.getTagType(tag)) {
+            case KeymasterDefs.KM_BIGNUM:
+            case KeymasterDefs.KM_BYTES:
+                break; // OK.
+            default:
+                throw new IllegalArgumentException("Bad blob tag " + tag);
+        }
         this.blob = blob;
     }
 

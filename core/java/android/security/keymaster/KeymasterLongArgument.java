@@ -27,6 +27,13 @@ class KeymasterLongArgument extends KeymasterArgument {
 
     public KeymasterLongArgument(int tag, long value) {
         super(tag);
+        switch (KeymasterDefs.getTagType(tag)) {
+            case KeymasterDefs.KM_LONG:
+            case KeymasterDefs.KM_LONG_REP:
+                break; // OK.
+            default:
+                throw new IllegalArgumentException("Bad long tag " + tag);
+        }
         this.value = value;
     }
 

@@ -1005,30 +1005,22 @@ public class ViewDebug {
             return fields;
         }
 
-        final ArrayList<Field> declaredFields = new ArrayList();
-        klass.getDeclaredFieldsUnchecked(false, declaredFields);
-
-        final ArrayList<Field> foundFields = new ArrayList<Field>();
-        final int count = declaredFields.size();
-        for (int i = 0; i < count; i++) {
-            final Field field = declaredFields.get(i);
-
-            // Ensure the field type can be resolved.
-            try {
-                field.getType();
-            } catch (NoClassDefFoundError e) {
-                continue;
+        try {
+            final Field[] declaredFields = klass.getDeclaredFieldsUnchecked(false);
+            final ArrayList<Field> foundFields = new ArrayList<Field>();
+            for (final Field field : declaredFields) {
+              // Fields which can't be resolved have a null type.
+              if (field.getType() != null && field.isAnnotationPresent(ExportedProperty.class)) {
+                  field.setAccessible(true);
+                  foundFields.add(field);
+                  sAnnotations.put(field, field.getAnnotation(ExportedProperty.class));
+              }
             }
-
-            if (field.isAnnotationPresent(ExportedProperty.class)) {
-                field.setAccessible(true);
-                foundFields.add(field);
-                sAnnotations.put(field, field.getAnnotation(ExportedProperty.class));
-            }
+            fields = foundFields.toArray(new Field[foundFields.size()]);
+            map.put(klass, fields);
+        } catch (NoClassDefFoundError e) {
+            throw new AssertionError(e);
         }
-
-        fields = foundFields.toArray(new Field[foundFields.size()]);
-        map.put(klass, fields);
 
         return fields;
     }
@@ -1048,14 +1040,10 @@ public class ViewDebug {
             return methods;
         }
 
-        final ArrayList<Method> declaredMethods = new ArrayList();
-        klass.getDeclaredMethodsUnchecked(false, declaredMethods);
+        methods = klass.getDeclaredMethodsUnchecked(false);
 
         final ArrayList<Method> foundMethods = new ArrayList<Method>();
-        final int count = declaredMethods.size();
-        for (int i = 0; i < count; i++) {
-            final Method method = declaredMethods.get(i);
-
+        for (final Method method : methods) {
             // Ensure the method return and parameter types can be resolved.
             try {
                 method.getReturnType();

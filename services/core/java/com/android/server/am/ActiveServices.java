@@ -2127,8 +2127,16 @@ public final class ActiveServices {
             }
         }
 
-        // First clear app state from services.
-        for (int i=app.services.size()-1; i>=0; i--) {
+        // Clean up any connections this application has to other services.
+        for (int i = app.connections.size() - 1; i >= 0; i--) {
+            ConnectionRecord r = app.connections.valueAt(i);
+            removeConnectionLocked(r, app, null);
+        }
+        updateServiceConnectionActivitiesLocked(app);
+        app.connections.clear();
+
+        // Clear app state from services.
+        for (int i = app.services.size() - 1; i >= 0; i--) {
             ServiceRecord sr = app.services.valueAt(i);
             synchronized (sr.stats.getBatteryStats()) {
                 sr.stats.stopLaunchedLocked();
@@ -2188,14 +2196,6 @@ public final class ActiveServices {
             }
         }
 
-        // Clean up any connections this application has to other services.
-        for (int i=app.connections.size()-1; i>=0; i--) {
-            ConnectionRecord r = app.connections.valueAt(i);
-            removeConnectionLocked(r, app, null);
-        }
-        updateServiceConnectionActivitiesLocked(app);
-        app.connections.clear();
-
         ServiceMap smap = getServiceMap(app.userId);
 
         // Now do remaining service cleanup.
@@ -2228,7 +2228,7 @@ public final class ActiveServices {
                 EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
                         sr.userId, sr.crashCount, sr.shortName, app.pid);
                 bringDownServiceLocked(sr);
-            } else if (!allowRestart) {
+            } else if (!allowRestart || !mAm.isUserRunningLocked(sr.userId, false)) {
                 bringDownServiceLocked(sr);
             } else {
                 boolean canceled = scheduleServiceRestartLocked(sr, true);

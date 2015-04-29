@@ -104,6 +104,9 @@
     <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
     <uses-permission android:name="android.permission.TRUST_LISTENER" />
 
+    <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
+
     <!-- Recents -->
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
 

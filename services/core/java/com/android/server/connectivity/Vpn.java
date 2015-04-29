@@ -1009,6 +1009,14 @@ public class Vpn {
     public synchronized LegacyVpnInfo getLegacyVpnInfo() {
         // Check if the caller is authorized.
         enforceControlPermission();
+        return getLegacyVpnInfoPrivileged();
+    }
+
+    /**
+     * Return the information of the current ongoing legacy VPN.
+     * Callers are responsible for checking permissions if needed.
+     */
+    public synchronized LegacyVpnInfo getLegacyVpnInfoPrivileged() {
         if (mLegacyVpnRunner == null) return null;
 
         final LegacyVpnInfo info = new LegacyVpnInfo();

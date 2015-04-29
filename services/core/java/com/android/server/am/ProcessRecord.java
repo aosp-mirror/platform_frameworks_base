@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
@@ -83,10 +85,10 @@ final class ProcessRecord {
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
-    int curProcState = -1;      // Currently computed process state: ActivityManager.PROCESS_STATE_*
-    int repProcState = -1;      // Last reported process state
-    int setProcState = -1;      // Last set process state in process tracker
-    int pssProcState = -1;      // The proc state we are currently requesting pss for
+    int curProcState = PROCESS_STATE_NONEXISTENT; // Currently computed process state
+    int repProcState = PROCESS_STATE_NONEXISTENT; // Last reported process state
+    int setProcState = PROCESS_STATE_NONEXISTENT; // Last set process state in process tracker
+    int pssProcState = PROCESS_STATE_NONEXISTENT; // Currently requesting pss for
     boolean serviceb;           // Process currently is on the service B list
     boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
     boolean setIsForeground;    // Running foreground UI when last set?
@@ -418,7 +420,7 @@ final class ProcessRecord {
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList);
                 origBase.makeInactive();
             }
-            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, info.uid,
+            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, uid,
                     info.versionCode, processName);
             baseProcessTracker.makeActive();
             for (int i=0; i<pkgList.size(); i++) {
@@ -426,7 +428,7 @@ final class ProcessRecord {
                 if (holder.state != null && holder.state != origBase) {
                     holder.state.makeInactive();
                 }
-                holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), info.uid,
+                holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), uid,
                         info.versionCode, processName);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -617,7 +619,7 @@ final class ProcessRecord {
                     versionCode);
             if (baseProcessTracker != null) {
                 holder.state = tracker.getProcessStateLocked(
-                        pkg, info.uid, versionCode, processName);
+                        pkg, uid, versionCode, processName);
                 pkgList.put(pkg, holder);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -664,7 +666,7 @@ final class ProcessRecord {
                 }
                 pkgList.clear();
                 ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
-                        info.packageName, info.uid, info.versionCode, processName);
+                        info.packageName, uid, info.versionCode, processName);
                 ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                         info.versionCode);
                 holder.state = ps;

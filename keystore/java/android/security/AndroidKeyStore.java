@@ -19,6 +19,11 @@ package android.security;
 import com.android.org.conscrypt.OpenSSLEngine;
 import com.android.org.conscrypt.OpenSSLKeyHolder;
 
+import libcore.util.EmptyArray;
+
+import android.security.keymaster.KeyCharacteristics;
+import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterDefs;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -31,6 +36,7 @@ import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.ProtectionParameter;
 import java.security.KeyStore;
+import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
@@ -42,13 +48,17 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+
+import javax.crypto.SecretKey;
 
 /**
  * A java.security.KeyStore interface for the Android KeyStore. An instance of
@@ -77,18 +87,60 @@ public class AndroidKeyStore extends KeyStoreSpi {
     @Override
     public Key engineGetKey(String alias, char[] password) throws NoSuchAlgorithmException,
             UnrecoverableKeyException {
-        if (!isKeyEntry(alias)) {
-            return null;
+        if (isPrivateKeyEntry(alias)) {
+            final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
+            try {
+                return engine.getPrivateKeyById(Credentials.USER_PRIVATE_KEY + alias);
+            } catch (InvalidKeyException e) {
+                UnrecoverableKeyException t = new UnrecoverableKeyException("Can't get key");
+                t.initCause(e);
+                throw t;
+            }
+        } else if (isSecretKeyEntry(alias)) {
+            KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
+            String keyAliasInKeystore = Credentials.USER_SECRET_KEY + alias;
+            int errorCode = mKeyStore.getKeyCharacteristics(
+                    keyAliasInKeystore, null, null, keyCharacteristics);
+            if ((errorCode != KeymasterDefs.KM_ERROR_OK)
+                    && (errorCode != android.security.KeyStore.NO_ERROR)) {
+                throw new UnrecoverableKeyException("Failed to load information about key."
+                        + " Error code: " + errorCode);
+            }
+
+            int keymasterAlgorithm =
+                    keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_ALGORITHM, -1);
+            if (keymasterAlgorithm == -1) {
+                keymasterAlgorithm =
+                        keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_ALGORITHM, -1);
+            }
+            if (keymasterAlgorithm == -1) {
+                throw new UnrecoverableKeyException("Key algorithm unknown");
+            }
+
+            List<Integer> keymasterDigests =
+                    keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST);
+            int keymasterDigest;
+            if (keymasterDigests.isEmpty()) {
+                keymasterDigest = -1;
+            } else {
+                // More than one digest can be permitted for this key. Use the first one to form the
+                // JCA key algorithm name.
+                keymasterDigest = keymasterDigests.get(0);
+            }
+
+            String keyAlgorithmString;
+            try {
+                keyAlgorithmString = KeymasterUtils.getJcaSecretKeyAlgorithm(
+                        keymasterAlgorithm, keymasterDigest);
+            } catch (IllegalArgumentException e) {
+                throw (UnrecoverableKeyException)
+                        new UnrecoverableKeyException("Unsupported secret key type").initCause(e);
+            }
+
+            return new KeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmString);
         }
 
-        final OpenSSLEngine engine = OpenSSLEngine.getInstance("keystore");
-        try {
-            return engine.getPrivateKeyById(Credentials.USER_PRIVATE_KEY + alias);
-        } catch (InvalidKeyException e) {
-            UnrecoverableKeyException t = new UnrecoverableKeyException("Can't get key");
-            t.initCause(e);
-            throw t;
-        }
+        return null;
     }
 
     @Override
@@ -186,6 +238,11 @@ public class AndroidKeyStore extends KeyStoreSpi {
             return d;
         }
 
+        d = getModificationDate(Credentials.USER_SECRET_KEY + alias);
+        if (d != null) {
+            return d;
+        }
+
         d = getModificationDate(Credentials.USER_CERTIFICATE + alias);
         if (d != null) {
             return d;
@@ -203,8 +260,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
 
         if (key instanceof PrivateKey) {
             setPrivateKeyEntry(alias, (PrivateKey) key, chain, null);
+        } else if (key instanceof SecretKey) {
+            setSecretKeyEntry(alias, (SecretKey) key, null);
         } else {
-            throw new KeyStoreException("Only PrivateKeys are supported");
+            throw new KeyStoreException("Only PrivateKey and SecretKey are supported");
         }
     }
 
@@ -319,6 +378,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
         } else {
             Credentials.deleteCertificateTypesForAlias(mKeyStore, alias);
+            Credentials.deleteSecretKeyTypeForAlias(mKeyStore, alias);
         }
 
         final int flags = (params == null) ? 0 : params.getFlags();
@@ -337,6 +397,180 @@ public class AndroidKeyStore extends KeyStoreSpi {
                         android.security.KeyStore.UID_SELF, flags)) {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new KeyStoreException("Couldn't put certificate chain in keystore");
+        }
+    }
+
+    private void setSecretKeyEntry(String entryAlias, SecretKey key, KeyStoreParameter params)
+            throws KeyStoreException {
+        if (key instanceof KeyStoreSecretKey) {
+            // KeyStore-backed secret key. It cannot be duplicated into another entry and cannot
+            // overwrite its own entry.
+            String keyAliasInKeystore = ((KeyStoreSecretKey) key).getAlias();
+            if (keyAliasInKeystore == null) {
+                throw new KeyStoreException("KeyStore-backed secret key does not have an alias");
+            }
+            if (!keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)) {
+                throw new KeyStoreException("KeyStore-backed secret key has invalid alias: "
+                        + keyAliasInKeystore);
+            }
+            String keyEntryAlias =
+                    keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());
+            if (!entryAlias.equals(keyEntryAlias)) {
+                throw new KeyStoreException("Can only replace KeyStore-backed keys with same"
+                        + " alias: " + entryAlias + " != " + keyEntryAlias);
+            }
+            // This is the entry where this key is already stored. No need to do anything.
+            if (params != null) {
+                throw new KeyStoreException("Modifying KeyStore-backed key using protection"
+                        + " parameters not supported");
+            }
+            return;
+        }
+
+        if (params == null) {
+            throw new KeyStoreException(
+                    "Protection parameters must be specified when importing a symmetric key");
+        }
+
+        // Not a KeyStore-backed secret key -- import its key material into keystore.
+        String keyExportFormat = key.getFormat();
+        if (keyExportFormat == null) {
+            throw new KeyStoreException(
+                    "Only secret keys that export their key material are supported");
+        } else if (!"RAW".equals(keyExportFormat)) {
+            throw new KeyStoreException(
+                    "Unsupported secret key material export format: " + keyExportFormat);
+        }
+        byte[] keyMaterial = key.getEncoded();
+        if (keyMaterial == null) {
+            throw new KeyStoreException("Key did not export its key material despite supporting"
+                    + " RAW format export");
+        }
+
+        String keyAlgorithmString = key.getAlgorithm();
+        int keymasterAlgorithm;
+        int keymasterDigest;
+        try {
+            keymasterAlgorithm = KeymasterUtils.getKeymasterAlgorithmFromJcaSecretKeyAlgorithm(
+                    keyAlgorithmString);
+            keymasterDigest =
+                    KeymasterUtils.getKeymasterDigestfromJcaSecretKeyAlgorithm(keyAlgorithmString);
+        } catch (IllegalArgumentException e) {
+            throw new KeyStoreException("Unsupported secret key algorithm: " + keyAlgorithmString);
+        }
+
+        KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, keymasterAlgorithm);
+
+        int[] keymasterDigests;
+        if (params.isDigestsSpecified()) {
+            // Digest(s) specified in parameters
+            keymasterDigests =
+                    KeymasterUtils.getKeymasterDigestsFromJcaDigestAlgorithms(params.getDigests());
+            if (keymasterDigest != -1) {
+                // Digest also specified in the JCA key algorithm name.
+                if (!com.android.internal.util.ArrayUtils.contains(
+                        keymasterDigests, keymasterDigest)) {
+                    throw new KeyStoreException("Key digest mismatch"
+                            + ". Key: " + keyAlgorithmString
+                            + ", parameter spec: " + Arrays.asList(params.getDigests()));
+                }
+            }
+        } else {
+            // No digest specified in parameters
+            if (keymasterDigest != -1) {
+                // Digest specified in the JCA key algorithm name.
+                keymasterDigests = new int[] {keymasterDigest};
+            } else {
+                keymasterDigests = EmptyArray.INT;
+            }
+        }
+        args.addInts(KeymasterDefs.KM_TAG_DIGEST, keymasterDigests);
+        if (keymasterDigests.length > 0) {
+            // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
+            // This code will blow up if mode than one digest is specified.
+            int digestOutputSizeBytes =
+                    KeymasterUtils.getDigestOutputSizeBytes(keymasterDigests[0]);
+            if (digestOutputSizeBytes != -1) {
+                // TODO: Switch to bits instead of bytes, once this is fixed in Keymaster
+                args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, digestOutputSizeBytes);
+            }
+        }
+        if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
+            if (keymasterDigests.length == 0) {
+                throw new KeyStoreException("At least one digest algorithm must be specified"
+                        + " for key algorithm " + keyAlgorithmString);
+            }
+        }
+
+        @KeyStoreKeyProperties.PurposeEnum int purposes = params.getPurposes();
+        int[] keymasterBlockModes = KeymasterUtils.getKeymasterBlockModesFromJcaBlockModes(
+                params.getBlockModes());
+        if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
+                && (params.isRandomizedEncryptionRequired())) {
+            for (int keymasterBlockMode : keymasterBlockModes) {
+                if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(keymasterBlockMode)) {
+                    throw new KeyStoreException(
+                            "Randomized encryption (IND-CPA) required but may be violated by block"
+                            + " mode: "
+                            + KeymasterUtils.getJcaBlockModeFromKeymasterBlockMode(
+                                    keymasterBlockMode)
+                            + ". See KeyStoreParameter documentation.");
+                }
+            }
+        }
+        for (int keymasterPurpose : KeyStoreKeyProperties.Purpose.allToKeymaster(purposes)) {
+            args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
+        }
+        args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
+        int[] keymasterPaddings = ArrayUtils.concat(
+                KeymasterUtils.getKeymasterPaddingsFromJcaEncryptionPaddings(
+                        params.getEncryptionPaddings()),
+                KeymasterUtils.getKeymasterPaddingsFromJcaSignaturePaddings(
+                        params.getSignaturePaddings()));
+        args.addInts(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
+        if (params.getUserAuthenticators() == 0) {
+            args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+        } else {
+            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
+                    KeyStoreKeyProperties.UserAuthenticator.allToKeymaster(
+                            params.getUserAuthenticators()));
+        }
+        if (params.getUserAuthenticationValidityDurationSeconds() != -1) {
+            args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
+                    params.getUserAuthenticationValidityDurationSeconds());
+        }
+        args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
+                (params.getKeyValidityStart() != null)
+                        ? params.getKeyValidityStart() : new Date(0));
+        args.addDate(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                (params.getKeyValidityForOriginationEnd() != null)
+                        ? params.getKeyValidityForOriginationEnd() : new Date(Long.MAX_VALUE));
+        args.addDate(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                (params.getKeyValidityForConsumptionEnd() != null)
+                        ? params.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
+
+        // TODO: Remove this once keymaster does not require us to specify the size of imported key.
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keyMaterial.length * 8);
+
+        if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
+                && (!params.isRandomizedEncryptionRequired())) {
+            // Permit caller-provided IV when encrypting with this key
+            args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
+        }
+
+        Credentials.deleteAllTypesForAlias(mKeyStore, entryAlias);
+        String keyAliasInKeystore = Credentials.USER_SECRET_KEY + entryAlias;
+        int errorCode = mKeyStore.importKey(
+                keyAliasInKeystore,
+                args,
+                KeymasterDefs.KM_KEY_FORMAT_RAW,
+                keyMaterial,
+                params.getFlags(),
+                new KeyCharacteristics());
+        if (errorCode != android.security.KeyStore.NO_ERROR) {
+            throw new KeyStoreException("Failed to import secret key. Keystore error code: "
+                + errorCode);
         }
     }
 
@@ -413,6 +647,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
         }
 
         return mKeyStore.contains(Credentials.USER_PRIVATE_KEY + alias)
+                || mKeyStore.contains(Credentials.USER_SECRET_KEY + alias)
                 || mKeyStore.contains(Credentials.USER_CERTIFICATE + alias)
                 || mKeyStore.contains(Credentials.CA_CERTIFICATE + alias);
     }
@@ -428,11 +663,23 @@ public class AndroidKeyStore extends KeyStoreSpi {
     }
 
     private boolean isKeyEntry(String alias) {
+        return isPrivateKeyEntry(alias) || isSecretKeyEntry(alias);
+    }
+
+    private boolean isPrivateKeyEntry(String alias) {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
 
         return mKeyStore.contains(Credentials.USER_PRIVATE_KEY + alias);
+    }
+
+    private boolean isSecretKeyEntry(String alias) {
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+
+        return mKeyStore.contains(Credentials.USER_SECRET_KEY + alias);
     }
 
     private boolean isCertificateEntry(String alias) {
@@ -554,11 +801,14 @@ public class AndroidKeyStore extends KeyStoreSpi {
             PrivateKeyEntry prE = (PrivateKeyEntry) entry;
             setPrivateKeyEntry(alias, prE.getPrivateKey(), prE.getCertificateChain(),
                     (KeyStoreParameter) param);
-            return;
+        } else if (entry instanceof SecretKeyEntry) {
+            SecretKeyEntry secE = (SecretKeyEntry) entry;
+            setSecretKeyEntry(alias, secE.getSecretKey(), (KeyStoreParameter) param);
+        } else {
+            throw new KeyStoreException(
+                    "Entry must be a PrivateKeyEntry, SecretKeyEntry or TrustedCertificateEntry"
+                    + "; was " + entry);
         }
-
-        throw new KeyStoreException(
-                "Entry must be a PrivateKeyEntry or TrustedCertificateEntry; was " + entry);
     }
 
 }

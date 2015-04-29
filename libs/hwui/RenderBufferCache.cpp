@@ -158,6 +158,11 @@ bool RenderBufferCache::put(RenderBuffer* buffer) {
                 buffer->getWidth(), buffer->getHeight());
 
         return true;
+    } else {
+        RENDER_BUFFER_LOGD("Deleted %s render buffer (%dx%d) Size=%d, MaxSize=%d",
+        RenderBuffer::formatName(buffer->getFormat()),
+                 buffer->getWidth(), buffer->getHeight(), size, mMaxSize);
+        delete buffer;
     }
     return false;
 }

@@ -148,7 +148,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 if (timeout >= 0) {
                     // The activity manager declined to abort dispatching.
                     // Wait a bit longer and timeout again later.
-                    return timeout;
+                    return timeout * 1000000L; // nanoseconds
                 }
             } catch (RemoteException ex) {
             }

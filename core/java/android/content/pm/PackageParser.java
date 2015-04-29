@@ -268,6 +268,7 @@ public class PackageParser {
 
         public final boolean coreApp;
         public final boolean multiArch;
+        public final boolean extractNativeLibs;
 
         public PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
                 String[] splitCodePaths, int[] splitRevisionCodes) {
@@ -283,6 +284,7 @@ public class PackageParser {
             this.splitRevisionCodes = splitRevisionCodes;
             this.coreApp = baseApk.coreApp;
             this.multiArch = baseApk.multiArch;
+            this.extractNativeLibs = baseApk.extractNativeLibs;
         }
 
         public List<String> getAllCodePaths() {
@@ -309,10 +311,12 @@ public class PackageParser {
         public final Signature[] signatures;
         public final boolean coreApp;
         public final boolean multiArch;
+        public final boolean extractNativeLibs;
 
         public ApkLite(String codePath, String packageName, String splitName, int versionCode,
                 int revisionCode, int installLocation, List<VerifierInfo> verifiers,
-                Signature[] signatures, boolean coreApp, boolean multiArch) {
+                Signature[] signatures, boolean coreApp, boolean multiArch,
+                boolean extractNativeLibs) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -323,6 +327,7 @@ public class PackageParser {
             this.signatures = signatures;
             this.coreApp = coreApp;
             this.multiArch = multiArch;
+            this.extractNativeLibs = extractNativeLibs;
         }
     }
 
@@ -1269,6 +1274,7 @@ public class PackageParser {
         int revisionCode = 0;
         boolean coreApp = false;
         boolean multiArch = false;
+        boolean extractNativeLibs = true;
 
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
             final String attr = attrs.getAttributeName(i);
@@ -1307,14 +1313,17 @@ public class PackageParser {
                     final String attr = attrs.getAttributeName(i);
                     if ("multiArch".equals(attr)) {
                         multiArch = attrs.getAttributeBooleanValue(i, false);
-                        break;
+                    }
+                    if ("extractNativeLibs".equals(attr)) {
+                        extractNativeLibs = attrs.getAttributeBooleanValue(i, true);
                     }
                 }
             }
         }
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, versionCode,
-                revisionCode, installLocation, verifiers, signatures, coreApp, multiArch);
+                revisionCode, installLocation, verifiers, signatures, coreApp, multiArch,
+                extractNativeLibs);
     }
 
     /**
@@ -2550,6 +2559,12 @@ public class PackageParser {
         }
 
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_usesCleartextTraffic,
+                true)) {
+            ai.flags |= ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC;
+        }
+
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_supportsRtl,
                 false /* default is no RTL support*/)) {
             ai.flags |= ApplicationInfo.FLAG_SUPPORTS_RTL;
@@ -2559,6 +2574,12 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_multiArch,
                 false)) {
             ai.flags |= ApplicationInfo.FLAG_MULTIARCH;
+        }
+
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_extractNativeLibs,
+                true)) {
+            ai.flags |= ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS;
         }
 
         String str;
@@ -4436,6 +4457,20 @@ public class PackageParser {
          */
         public boolean isForwardLocked() {
             return applicationInfo.isForwardLocked();
+        }
+
+        /**
+         * @hide
+         */
+        public boolean isSystemApp() {
+            return applicationInfo.isSystemApp();
+        }
+
+        /**
+         * @hide
+         */
+        public boolean isUpdatedSystemApp() {
+            return applicationInfo.isUpdatedSystemApp();
         }
 
         public String toString() {
