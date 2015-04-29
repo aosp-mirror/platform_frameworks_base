@@ -593,7 +593,8 @@ final class ContentProviderProxy implements IContentProvider
 
             DatabaseUtils.readExceptionWithFileNotFoundExceptionFromParcel(reply);
             int has = reply.readInt();
-            ParcelFileDescriptor fd = has != 0 ? reply.readFileDescriptor() : null;
+            ParcelFileDescriptor fd = has != 0 ? ParcelFileDescriptor.CREATOR
+                    .createFromParcel(reply) : null;
             return fd;
         } finally {
             data.recycle();
