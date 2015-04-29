@@ -2771,25 +2771,9 @@ public class AccountManagerService
                                             mAccountName, mAccountType
                                     });
                         }
-                        result.putLong(AccountManager.KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH,
+                        result.putLong(AccountManager.KEY_LAST_AUTHENTICATED_TIME,
                                 lastAuthenticatedTime);
                     }
-                }
-                if (mAuthDetailsRequired) {
-                    long lastAuthenticatedTime = -1;
-                    if (isAccountPresentForCaller(mAccountName, mAccountType)) {
-                        lastAuthenticatedTime = DatabaseUtils.longForQuery(
-                                mAccounts.openHelper.getReadableDatabase(),
-                                "select " + ACCOUNTS_LAST_AUTHENTICATE_TIME_EPOCH_MILLIS + " from "
-                                        +
-                                        TABLE_ACCOUNTS + " WHERE " + ACCOUNTS_NAME + "=? AND "
-                                        + ACCOUNTS_TYPE + "=?",
-                                new String[] {
-                                        mAccountName, mAccountType
-                                });
-                    }
-                    result.putLong(AccountManager.KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH,
-                            lastAuthenticatedTime);
                 }
             }
             if (result != null
