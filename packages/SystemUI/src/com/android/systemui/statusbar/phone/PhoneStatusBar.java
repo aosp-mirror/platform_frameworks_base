@@ -1852,7 +1852,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void onPinnedModeChanged(boolean inPinnedMode) {
+    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
         if (inPinnedMode) {
             mStatusBarWindowManager.setHeadsUpShowing(true);
         } else {
@@ -1874,6 +1874,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
+        dismissVolumeDialog();
     }
 
     @Override
@@ -2377,11 +2378,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         // manually dismiss the volume panel when interacting with the nav bar
         if (changing && interacting && barWindow == StatusBarManager.WINDOW_NAVIGATION_BAR) {
-            if (mVolumeComponent != null) {
-                mVolumeComponent.dismissNow();
-            }
+            dismissVolumeDialog();
         }
         checkBarModes();
+    }
+
+    private void dismissVolumeDialog() {
+        if (mVolumeComponent != null) {
+            mVolumeComponent.dismissNow();
+        }
     }
 
     private void resumeSuspendedAutohide() {
