@@ -27,11 +27,24 @@
 #include "../OpenGLRenderer.h"
 
 #include <algorithm>
+#include <cutils/properties.h>
 #include <private/hwui/DrawGlInfo.h>
 #include <strings.h>
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
+
+#define PROPERTY_SKIP_EMPTY_DAMAGE "debug.hwui.skip_empty_damage"
+
+static bool sInitialized = false;
+static bool sSkipEmptyDamage = true;
+
+static void initGlobals() {
+    if (sInitialized) return;
+    sInitialized = true;
+    sSkipEmptyDamage = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE,
+            sSkipEmptyDamage);
+}
 
 namespace android {
 namespace uirenderer {
@@ -45,6 +58,9 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mRootRenderNode(rootRenderNode)
         , mJankTracker(thread.timeLord().frameIntervalNanos()) {
+    // Done lazily at first draw instead of at library load to avoid
+    // running pre-zygote fork
+    initGlobals();
     mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
 }
@@ -203,11 +219,16 @@ void CanvasContext::draw() {
     LOG_ALWAYS_FATAL_IF(!mCanvas || mEglSurface == EGL_NO_SURFACE,
             "drawRenderNode called on a context with no canvas or surface!");
 
-    profiler().markPlaybackStart();
-    mCurrentFrameInfo->markIssueDrawCommandsStart();
-
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
+
+    if (dirty.isEmpty() && sSkipEmptyDamage) {
+        mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
+        return;
+    }
+
+    profiler().markPlaybackStart();
+    mCurrentFrameInfo->markIssueDrawCommandsStart();
 
     EGLint width, height;
     mEglManager.beginFrame(mEglSurface, &width, &height);
@@ -277,6 +298,8 @@ void CanvasContext::doFrame() {
     prepareTree(info, frameInfo);
     if (info.out.canDrawThisFrame) {
         draw();
+    } else {
+        mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
     }
 }
 
