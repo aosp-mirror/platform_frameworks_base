@@ -41,6 +41,7 @@ import java.util.HashSet;
  */
 public class NetworkPolicyManager {
 
+    /* POLICY_* are masks and can be ORed */
     /** No specific network policy, use system default. */
     public static final int POLICY_NONE = 0x0;
     /** Reject network usage on metered networks when application in background. */
@@ -48,10 +49,17 @@ public class NetworkPolicyManager {
     /** Allow network use (metered or not) in the background in battery save mode. */
     public static final int POLICY_ALLOW_BACKGROUND_BATTERY_SAVE = 0x2;
 
+    /* RULE_* are not masks and they must be exclusive */
     /** All network traffic should be allowed. */
     public static final int RULE_ALLOW_ALL = 0x0;
     /** Reject traffic on metered networks. */
     public static final int RULE_REJECT_METERED = 0x1;
+    /** Reject traffic on all networks. */
+    public static final int RULE_REJECT_ALL = 0x2;
+
+    public static final int FIREWALL_RULE_DEFAULT = 0;
+    public static final int FIREWALL_RULE_ALLOW = 1;
+    public static final int FIREWALL_RULE_DENY = 2;
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
@@ -80,7 +88,7 @@ public class NetworkPolicyManager {
      * Set policy flags for specific UID.
      *
      * @param policy {@link #POLICY_NONE} or combination of flags like
-     * {@link #POLICY_REJECT_METERED_BACKGROUND}, {@link #POLICY_ALLOW_BACKGROUND_BATTERY_SAVE}.
+     * {@link #POLICY_REJECT_METERED_BACKGROUND} or {@link #POLICY_ALLOW_BACKGROUND_BATTERY_SAVE}.
      */
     public void setUidPolicy(int uid, int policy) {
         try {
@@ -322,6 +330,8 @@ public class NetworkPolicyManager {
         fout.write("[");
         if ((rules & RULE_REJECT_METERED) != 0) {
             fout.write("REJECT_METERED");
+        } else if ((rules & RULE_REJECT_ALL) != 0) {
+            fout.write("REJECT_ALL");
         }
         fout.write("]");
     }
