@@ -27,6 +27,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -228,7 +229,7 @@ public class SecureCameraLaunchManager {
 
         // Get the list of applications that can handle the intent.
         final List<ResolveInfo> appList = packageManager.queryIntentActivitiesAsUser(
-                intent, PackageManager.MATCH_DEFAULT_ONLY, mLockPatternUtils.getCurrentUser());
+                intent, PackageManager.MATCH_DEFAULT_ONLY, KeyguardUpdateMonitor.getCurrentUser());
         if (appList.size() == 0) {
             if (DEBUG) Log.d(TAG, "No targets found for secure camera intent");
             return false;
@@ -237,7 +238,7 @@ public class SecureCameraLaunchManager {
         // Get the application that the intent resolves to.
         ResolveInfo resolved = packageManager.resolveActivityAsUser(intent,
                 PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
-                mLockPatternUtils.getCurrentUser());
+                KeyguardUpdateMonitor.getCurrentUser());
 
         if (resolved == null || resolved.activityInfo == null) {
             return false;

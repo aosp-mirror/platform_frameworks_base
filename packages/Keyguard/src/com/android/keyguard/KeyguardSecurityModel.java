@@ -67,7 +67,8 @@ public class KeyguardSecurityModel {
             return SecurityMode.SimPuk;
         }
 
-        final int security = mLockPatternUtils.getActivePasswordQuality();
+        final int security = mLockPatternUtils.getActivePasswordQuality(
+                KeyguardUpdateMonitor.getCurrentUser());
         switch (security) {
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:

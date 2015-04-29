@@ -80,8 +80,8 @@ public class UnlockMethodCache {
     }
 
     private void update(boolean updateAlways) {
-        int user = mLockPatternUtils.getCurrentUser();
-        boolean secure = mLockPatternUtils.isSecure();
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        boolean secure = mLockPatternUtils.isSecure(user);
         boolean currentlyInsecure = !secure ||  mKeyguardUpdateMonitor.getUserHasTrust(user);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean faceUnlockRunning = mKeyguardUpdateMonitor.isFaceUnlockRunning(user)
