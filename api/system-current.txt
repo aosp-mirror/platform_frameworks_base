@@ -15471,6 +15471,7 @@ package android.location {
     method public boolean hasPseudorangeUncertaintyInMeters();
     method public boolean hasSnrInDb();
     method public boolean hasTimeFromLastBitInMs();
+    method public boolean isPseudorangeRateCorrected();
     method public boolean isUsedInFix();
     method public void reset();
     method public void resetAzimuthInDeg();
@@ -15536,6 +15537,7 @@ package android.location {
     field public static final byte MULTIPATH_INDICATOR_UNKNOWN = 0; // 0x0
     field public static final short STATE_BIT_SYNC = 2; // 0x2
     field public static final short STATE_CODE_LOCK = 1; // 0x1
+    field public static final short STATE_MSEC_AMBIGUOUS = 16; // 0x10
     field public static final short STATE_SUBFRAME_SYNC = 4; // 0x4
     field public static final short STATE_TOW_DECODED = 8; // 0x8
     field public static final short STATE_UNKNOWN = 0; // 0x0
@@ -15563,6 +15565,7 @@ package android.location {
     method public byte[] getData();
     method public short getMessageId();
     method public byte getPrn();
+    method public short getStatus();
     method public short getSubmessageId();
     method public byte getType();
     method public void reset();
@@ -15570,10 +15573,14 @@ package android.location {
     method public void setData(byte[]);
     method public void setMessageId(short);
     method public void setPrn(byte);
+    method public void setStatus(short);
     method public void setSubmessageId(short);
     method public void setType(byte);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessage> CREATOR;
+    field public static final short STATUS_PARITY_PASSED = 1; // 0x1
+    field public static final short STATUS_PARITY_REBUILT = 2; // 0x2
+    field public static final short STATUS_UNKNOWN = 0; // 0x0
     field public static final byte TYPE_CNAV2 = 4; // 0x4
     field public static final byte TYPE_L1CA = 1; // 0x1
     field public static final byte TYPE_L2CNAV = 2; // 0x2
