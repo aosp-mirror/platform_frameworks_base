@@ -90,7 +90,8 @@ hostStaticLibs := \
 	libcutils \
 	libexpat \
 	libziparchive-host \
-	libpng
+	libpng \
+	libbase
 
 ifneq ($(strip $(USE_MINGW)),)
 	hostStaticLibs += libz
