@@ -539,10 +539,11 @@ public class KeyguardViewMediator extends SystemUI {
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
 
         mLockPatternUtils = new LockPatternUtils(mContext);
-        mLockPatternUtils.setCurrentUser(ActivityManager.getCurrentUser());
+        KeyguardUpdateMonitor.setCurrentUser(ActivityManager.getCurrentUser());
 
         // Assume keyguard is showing (unless it's disabled) until we know for sure...
-        setShowingLocked(!shouldWaitForProvisioning() && !mLockPatternUtils.isLockScreenDisabled());
+        setShowingLocked(!shouldWaitForProvisioning() && !mLockPatternUtils.isLockScreenDisabled(
+                KeyguardUpdateMonitor.getCurrentUser()));
         mTrustManager.reportKeyguardShowingChanged();
 
         mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
@@ -623,8 +624,10 @@ public class KeyguardViewMediator extends SystemUI {
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
             // camera while preventing unwanted input.
+            int currentUser = KeyguardUpdateMonitor.getCurrentUser();
             final boolean lockImmediately =
-                mLockPatternUtils.getPowerButtonInstantlyLocks() || !mLockPatternUtils.isSecure();
+                mLockPatternUtils.getPowerButtonInstantlyLocks(currentUser)
+                        || !mLockPatternUtils.isSecure(currentUser);
 
             notifyScreenOffLocked();
 
@@ -670,7 +673,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         // From DevicePolicyAdmin
         final long policyTimeout = mLockPatternUtils.getDevicePolicyManager()
-                .getMaximumTimeToLock(null, mLockPatternUtils.getCurrentUser());
+                .getMaximumTimeToLock(null, KeyguardUpdateMonitor.getCurrentUser());
 
         long timeout;
         if (policyTimeout > 0) {
@@ -719,7 +722,8 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void maybeSendUserPresentBroadcast() {
-        if (mSystemReady && mLockPatternUtils.isLockScreenDisabled()) {
+        if (mSystemReady && mLockPatternUtils.isLockScreenDisabled(
+                KeyguardUpdateMonitor.getCurrentUser())) {
             // Lock screen is disabled because the user has set the preference to "None".
             // In this case, send out ACTION_USER_PRESENT here instead of in
             // handleKeyguardDone()
@@ -733,7 +737,7 @@ public class KeyguardViewMediator extends SystemUI {
      */
     public void onDreamingStarted() {
         synchronized (this) {
-            if (mScreenOn && mLockPatternUtils.isSecure()) {
+            if (mScreenOn && mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
                 doKeyguardLaterLocked();
             }
         }
@@ -974,12 +978,13 @@ public class KeyguardViewMediator extends SystemUI {
             return;
         }
 
-        if (mLockPatternUtils.isLockScreenDisabled() && !lockedOrMissing) {
+        if (mLockPatternUtils.isLockScreenDisabled(KeyguardUpdateMonitor.getCurrentUser())
+                && !lockedOrMissing) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
             return;
         }
 
-        if (mLockPatternUtils.checkVoldPassword()) {
+        if (mLockPatternUtils.checkVoldPassword(KeyguardUpdateMonitor.getCurrentUser())) {
             if (DEBUG) Log.d(TAG, "Not showing lock screen since just decrypted");
             // Without this, settings is not enabled until the lock screen first appears
             setShowingLocked(false);
@@ -1072,7 +1077,7 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     public boolean isSecure() {
-        return mLockPatternUtils.isSecure()
+        return mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())
             || KeyguardUpdateMonitor.getInstance(mContext).isSimPinSecure();
     }
 
@@ -1083,7 +1088,7 @@ public class KeyguardViewMediator extends SystemUI {
      * @param newUserId The id of the incoming user.
      */
     public void setCurrentUser(int newUserId) {
-        mLockPatternUtils.setCurrentUser(newUserId);
+        KeyguardUpdateMonitor.setCurrentUser(newUserId);
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -1213,7 +1218,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void sendUserPresentBroadcast() {
         synchronized (this) {
             if (mBootCompleted) {
-                final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
+                final UserHandle currentUser = new UserHandle(KeyguardUpdateMonitor.getCurrentUser());
                 final UserManager um = (UserManager) mContext.getSystemService(
                         Context.USER_SERVICE);
                 List <UserInfo> userHandles = um.getProfiles(currentUser.getIdentifier());
