@@ -38,8 +38,6 @@ interface INetworkPolicyManager {
 
     boolean isUidForeground(int uid);
 
-    int[] getPowerSaveAppIdWhitelist();
-
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 
