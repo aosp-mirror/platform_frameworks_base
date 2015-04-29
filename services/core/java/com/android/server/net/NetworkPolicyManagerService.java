@@ -36,11 +36,14 @@ import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
+import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
+import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_BACKGROUND_BATTERY_SAVE;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
+import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.dumpPolicy;
 import static android.net.NetworkPolicyManager.dumpRules;
@@ -80,6 +83,8 @@ import android.app.INotificationManager;
 import android.app.IProcessObserver;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.usage.UsageStatsManagerInternal;
+import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -88,6 +93,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
@@ -140,8 +146,6 @@ import android.util.SparseIntArray;
 import android.util.TrustedTime;
 import android.util.Xml;
 
-import com.android.server.AppOpsService;
-import com.android.server.DeviceIdleController;
 import libcore.io.IoUtils;
 
 import com.android.internal.R;
@@ -149,6 +153,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.AppOpsService;
+import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.google.android.collect.Lists;
@@ -176,7 +182,8 @@ import java.util.List;
  * and delivers to listeners, such as {@link ConnectivityManager}, for
  * enforcement.
  */
-public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
+public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
+        implements AppIdleStateChangeListener {
     private static final String TAG = "NetworkPolicy";
     private static final boolean LOGD = false;
     private static final boolean LOGV = false;
@@ -244,6 +251,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final IPowerManager mPowerManager;
     private final INetworkStatsService mNetworkStats;
     private final INetworkManagementService mNetworkManager;
+    private UsageStatsManagerInternal mUsageStats;
     private final TrustedTime mTime;
 
     private IConnectivityManager mConnManager;
@@ -368,6 +376,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return;
         }
 
+        mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+
+        final PackageManager pm = mContext.getPackageManager();
+
         synchronized (mRulesLock) {
             updatePowerSaveWhitelistLocked();
             mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
@@ -459,6 +471,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final IntentFilter wifiStateFilter = new IntentFilter(
                 WifiManager.NETWORK_STATE_CHANGED_ACTION);
         mContext.registerReceiver(mWifiStateReceiver, wifiStateFilter, null, mHandler);
+
+        mUsageStats.addAppIdleStateChangeListener(this);
 
     }
 
@@ -568,12 +582,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
             if (userId == -1) return;
 
-            synchronized (mRulesLock) {
-                // Remove any policies for given user; both cleaning up after a
-                // USER_REMOVED, and one last sanity check during USER_ADDED
-                removePoliciesForUserLocked(userId);
-                // Update global restrict for new user
-                updateRulesForGlobalChangeLocked(true);
+            switch (action) {
+                case ACTION_USER_REMOVED:
+                case ACTION_USER_ADDED:
+                    synchronized (mRulesLock) {
+                        // Remove any policies for given user; both cleaning up after a
+                        // USER_REMOVED, and one last sanity check during USER_ADDED
+                        removePoliciesForUserLocked(userId);
+                        // Update global restrict for new user
+                        updateRulesForGlobalChangeLocked(true);
+                    }
+                    break;
             }
         }
     };
@@ -2040,6 +2059,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return false;
     }
 
+    private boolean isUidIdle(int uid) {
+        final String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
+        final int userId = UserHandle.getUserId(uid);
+
+        for (String packageName : packages) {
+            if (!mUsageStats.isAppIdle(packageName, userId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Applies network rules to bandwidth and firewall controllers based on uid policy.
+     * @param uid The uid for which to apply the latest policy
+     */
     void updateRulesForUidLocked(int uid) {
         if (!isUidValidForRules(uid)) return;
 
@@ -2056,10 +2091,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
         final boolean uidForeground = isUidForegroundLocked(uid);
+        final boolean uidIdle = isUidIdle(uid);
 
         // derive active rules based on policy and active state
+
         int uidRules = RULE_ALLOW_ALL;
-        if (!uidForeground && (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
+        if (uidIdle && !mPowerSaveWhitelistAppIds.get(UserHandle.getAppId(uid))) {
+            uidRules = RULE_REJECT_ALL;
+        } else if (!uidForeground && (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
             // uid in background, and policy says to block metered data
             uidRules = RULE_REJECT_METERED;
         } else if (mRestrictBackground) {
@@ -2078,7 +2117,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        // TODO: only dispatch when rules actually change
+        final int oldRules = mUidRules.get(uid);
 
         if (uidRules == RULE_ALLOW_ALL) {
             mUidRules.delete(uid);
@@ -2086,17 +2125,42 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mUidRules.put(uid, uidRules);
         }
 
+        // Update bandwidth rules if necessary
+        final boolean oldRejectMetered = (oldRules & RULE_REJECT_METERED) != 0;
         final boolean rejectMetered = (uidRules & RULE_REJECT_METERED) != 0;
-        setUidNetworkRules(uid, rejectMetered);
+        if (oldRejectMetered != rejectMetered) {
+            setUidNetworkRules(uid, rejectMetered);
+        }
+
+        // Update firewall rules if necessary
+        final boolean oldFirewallReject = (oldRules & RULE_REJECT_ALL) != 0;
+        final boolean firewallReject = (uidRules & RULE_REJECT_ALL) != 0;
+        if (oldFirewallReject != firewallReject) {
+            setUidFirewallRules(uid, firewallReject);
+        }
 
         // dispatch changed rule to existing listeners
-        mHandler.obtainMessage(MSG_RULES_CHANGED, uid, uidRules).sendToTarget();
+        if (oldRules != uidRules) {
+            mHandler.obtainMessage(MSG_RULES_CHANGED, uid, uidRules).sendToTarget();
+        }
 
         try {
             // adjust stats accounting based on foreground status
             mNetworkStats.setUidForeground(uid, uidForeground);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
+        }
+    }
+
+    @Override
+    public void onAppIdleStateChanged(String packageName, int userId, boolean idle) {
+        try {
+            int uid = mContext.getPackageManager().getPackageUid(packageName, userId);
+            synchronized (mRulesLock) {
+                updateRulesForUidLocked(uid);
+            }
+        } catch (NameNotFoundException nnfe) {
+            return;
         }
     }
 
@@ -2218,6 +2282,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mNetworkManager.setUidNetworkRules(uid, rejectOnQuotaInterfaces);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting uid rules", e);
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
+        }
+    }
+
+    /**
+     * Add or remove a uid to the firewall blacklist for all network ifaces.
+     * @param uid
+     * @param rejectOnAll
+     */
+    private void setUidFirewallRules(int uid, boolean rejectOnAll) {
+        try {
+            mNetworkManager.setFirewallUidRule(uid,
+                    rejectOnAll ? FIREWALL_RULE_DENY : FIREWALL_RULE_DEFAULT);
+        } catch (IllegalStateException e) {
+            Log.wtf(TAG, "problem setting firewall uid rules", e);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
