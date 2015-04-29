@@ -9409,6 +9409,7 @@ package android.content.pm {
     field public static final int GET_SIGNATURES = 64; // 0x40
     field public static final int GET_UNINSTALLED_PACKAGES = 8192; // 0x2000
     field public static final int GET_URI_PERMISSION_PATTERNS = 2048; // 0x800
+    field public static final int MATCH_ALL = 131072; // 0x20000
     field public static final int MATCH_DEFAULT_ONLY = 65536; // 0x10000
     field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 3600000L; // 0x36ee80L
     field public static final int PERMISSION_DENIED = -1; // 0xffffffff
