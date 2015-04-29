@@ -88,8 +88,7 @@ void DisplayListCanvas::interrupt() {
 void DisplayListCanvas::resume() {
 }
 
-void DisplayListCanvas::callDrawGLFunction(Functor *functor, Rect& dirty) {
-    // Ignore dirty during recording, it matters only when we replay
+void DisplayListCanvas::callDrawGLFunction(Functor *functor) {
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
     mDisplayListData->functors.add(functor);
 }
@@ -202,12 +201,12 @@ bool DisplayListCanvas::clipRegion(const SkRegion* region, SkRegion::Op op) {
     return mState.clipRegion(region, op);
 }
 
-void DisplayListCanvas::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t flags) {
+void DisplayListCanvas::drawRenderNode(RenderNode* renderNode) {
     LOG_ALWAYS_FATAL_IF(!renderNode, "missing rendernode");
 
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
-    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, flags, *mState.currentTransform());
+    DrawRenderNodeOp* op = new (alloc()) DrawRenderNodeOp(renderNode, *mState.currentTransform());
     addRenderNodeOp(op);
 }
 

@@ -112,8 +112,7 @@ static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobje
         jlong rendererPtr, jlong functorPtr) {
     DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    android::uirenderer::Rect dirty;
-    renderer->callDrawGLFunction(functor, dirty);
+    renderer->callDrawGLFunction(functor);
 }
 
 // ----------------------------------------------------------------------------
@@ -212,12 +211,10 @@ static jlong android_view_DisplayListCanvas_createDisplayListCanvas(JNIEnv* env,
 }
 
 static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
-        jobject clazz, jlong rendererPtr, jlong renderNodePtr,
-        jint flags) {
+        jobject clazz, jlong rendererPtr, jlong renderNodePtr) {
     DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    android::uirenderer::Rect bounds;
-    renderer->drawRenderNode(renderNode, bounds, flags);
+    renderer->drawRenderNode(renderNode);
 }
 
 // ----------------------------------------------------------------------------
@@ -283,7 +280,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },
 
     { "nFinishRecording",   "(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
-    { "nDrawRenderNode",    "(JJI)V",          (void*) android_view_DisplayListCanvas_drawRenderNode },
+    { "nDrawRenderNode",    "(JJ)V",           (void*) android_view_DisplayListCanvas_drawRenderNode },
 
     { "nCreateDisplayListCanvas", "()J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
 

@@ -15542,7 +15542,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!drawingWithDrawingCache) {
             if (drawingWithRenderNode) {
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                ((DisplayListCanvas) canvas).drawRenderNode(renderNode, parentFlags);
+                ((DisplayListCanvas) canvas).drawRenderNode(renderNode);
             } else {
                 // Fast path for layouts with no backgrounds
                 if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
