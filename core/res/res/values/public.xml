@@ -2613,7 +2613,7 @@
   <public type="attr" name="resizeableActivity" />
   <public type="attr" name="start" />
   <public type="attr" name="end" />
-  <public type="attr" name="windowHasLightStatusBar" />
+  <public type="attr" name="windowLightStatusBar" />
   <public type="attr" name="numbersInnerTextColor" />
   <public type="attr" name="iconTint" />
   <public type="attr" name="iconTintMode" />
