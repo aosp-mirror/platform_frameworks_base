@@ -61,7 +61,7 @@
         android:scaleType="center"
         android:contentDescription="@string/accessibility_phone_button" />
 
-    <com.android.systemui.statusbar.KeyguardAffordanceView
+    <com.android.systemui.statusbar.phone.LockIcon
         android:id="@+id/lock_icon"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_height="@dimen/keyguard_affordance_height"
