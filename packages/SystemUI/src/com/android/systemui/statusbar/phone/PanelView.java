@@ -46,6 +46,7 @@ import java.io.PrintWriter;
 public abstract class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
+
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
@@ -77,6 +78,7 @@ public abstract class PanelView extends FrameLayout {
     private boolean mTouchStartedInEmptyArea;
     private boolean mMotionAborted;
     private boolean mUpwardsWhenTresholdReached;
+    private boolean mAnimatingOnDown;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -459,8 +461,8 @@ public abstract class PanelView extends FrameLayout {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mStatusBar.userActivity();
-                if (mHeightAnimator != null && !mHintAnimationRunning ||
-                        mPeekPending || mPeekAnimator != null) {
+                mAnimatingOnDown = mHeightAnimator != null;
+                if (mAnimatingOnDown && mClosing && !mHintAnimationRunning || mPeekPending || mPeekAnimator != null) {
                     cancelHeightAnimator();
                     cancelPeek();
                     mTouchSlopExceeded = true;
@@ -501,8 +503,10 @@ public abstract class PanelView extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 trackMovement(event);
-                if (scrolledToBottom || mTouchStartedInEmptyArea) {
-                    if (h < -mTouchSlop && h < -Math.abs(x - mInitialTouchX)) {
+                if (scrolledToBottom || mTouchStartedInEmptyArea || mAnimatingOnDown) {
+                    float hAbs = Math.abs(h);
+                    if ((h < -mTouchSlop || (mAnimatingOnDown && hAbs > mTouchSlop))
+                            && hAbs > Math.abs(x - mInitialTouchX)) {
                         cancelHeightAnimator();
                         startExpandMotion(x, y, true /* startTracking */, mExpandedHeight);
                         return true;
