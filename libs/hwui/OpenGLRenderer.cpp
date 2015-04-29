@@ -1262,7 +1262,7 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
         endTiling();
 
         RenderBuffer* buffer = mCaches.renderBufferCache.get(
-                Stencil::getSmallestStencilFormat(),
+                Stencil::getLayerStencilFormat(),
                 layer->getWidth(), layer->getHeight());
         layer->setStencilRenderBuffer(buffer);
 

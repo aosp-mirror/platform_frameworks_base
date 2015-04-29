@@ -42,12 +42,17 @@ uint8_t Stencil::getStencilSize() {
     return STENCIL_BUFFER_SIZE;
 }
 
-GLenum Stencil::getSmallestStencilFormat() {
+/**
+ * This method will return either GL_STENCIL_INDEX4_OES if supported,
+ * GL_STENCIL_INDEX8 if not.
+ *
+ * Layers can't use a single bit stencil because multi-rect ClipArea needs a high enough
+ * stencil resolution to represent the summation of multiple intersecting rect geometries.
+ */
+GLenum Stencil::getLayerStencilFormat() {
 #if !DEBUG_STENCIL
     const Extensions& extensions = Caches::getInstance().extensions();
-    if (extensions.has1BitStencil()) {
-        return GL_STENCIL_INDEX1_OES;
-    } else if (extensions.has4BitStencil()) {
+    if (extensions.has4BitStencil()) {
         return GL_STENCIL_INDEX4_OES;
     }
 #endif
