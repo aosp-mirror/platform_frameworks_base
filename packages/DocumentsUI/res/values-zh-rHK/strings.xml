@@ -71,5 +71,5 @@
     </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"輕觸即可查看詳情"</string>
     <string name="retry" msgid="7564024179122207376">"重試"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"以下檔案不會被複製：<xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"以下檔案未能複製：<xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>
