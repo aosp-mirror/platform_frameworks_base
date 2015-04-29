@@ -16,6 +16,8 @@
 
 package android.media.audiofx;
 
+import android.app.ActivityThread;
+import android.app.Application;
 import android.util.Log;
 import java.lang.ref.WeakReference;
 import android.os.Handler;
@@ -206,7 +208,8 @@ public class Visualizer {
         synchronized (mStateLock) {
             mState = STATE_UNINITIALIZED;
             // native initialization
-            int result = native_setup(new WeakReference<Visualizer>(this), audioSession, id);
+            int result = native_setup(new WeakReference<Visualizer>(this), audioSession, id,
+                    getMyOpPackageName());
             if (result != SUCCESS && result != ALREADY_EXISTS) {
                 Log.e(TAG, "Error code "+result+" when initializing Visualizer.");
                 switch (result) {
@@ -716,7 +719,8 @@ public class Visualizer {
 
     private native final int native_setup(Object audioeffect_this,
                                           int audioSession,
-                                          int[] id);
+                                          int[] id,
+                                          String opPackageName);
 
     private native final void native_finalize();
 
@@ -766,5 +770,15 @@ public class Visualizer {
 
     }
 
+    private static String getMyOpPackageName() {
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread != null) {
+            Application application = activityThread.getApplication();
+            if (application != null) {
+                return application.getOpPackageName();
+            }
+        }
+        throw new IllegalStateException("Cannot create AudioRecord outside of an app");
+    }
 }
 

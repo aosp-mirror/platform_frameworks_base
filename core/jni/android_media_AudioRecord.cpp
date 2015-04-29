@@ -26,6 +26,8 @@
 #include <utils/Log.h>
 #include <media/AudioRecord.h>
 
+#include <ScopedUtfChars.h>
+
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
 
@@ -146,7 +148,7 @@ static sp<AudioRecord> setAudioRecord(JNIEnv* env, jobject thiz, const sp<AudioR
 static jint
 android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jobject jaa, jint sampleRateInHertz, jint channelMask, jint channelIndexMask,
-        jint audioFormat, jint buffSizeInBytes, jintArray jSession)
+        jint audioFormat, jint buffSizeInBytes, jintArray jSession, jstring opPackageName)
 {
     //ALOGV(">> Entering android_media_AudioRecord_setup");
     //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d",
@@ -208,8 +210,10 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
     nSession = NULL;
 
+    ScopedUtfChars opPackageNameStr(env, opPackageName);
+
     // create an uninitialized AudioRecord object
-    sp<AudioRecord> lpRecorder = new AudioRecord();
+    sp<AudioRecord> lpRecorder = new AudioRecord(String16(opPackageNameStr.c_str()));
 
     audio_attributes_t *paa = NULL;
     // read the AudioAttributes values
@@ -597,7 +601,7 @@ static JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
     {"native_start",         "(II)I",    (void *)android_media_AudioRecord_start},
     {"native_stop",          "()V",    (void *)android_media_AudioRecord_stop},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/Object;IIIII[I)I",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/Object;IIIII[ILjava/lang/String;)I",
                                        (void *)android_media_AudioRecord_setup},
     {"native_finalize",      "()V",    (void *)android_media_AudioRecord_finalize},
     {"native_release",       "()V",    (void *)android_media_AudioRecord_release},
