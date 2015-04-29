@@ -234,25 +234,13 @@ public class DisplayListCanvas extends Canvas {
      * Draws the specified display list onto this canvas. The display list can only
      * be drawn if {@link android.view.RenderNode#isValid()} returns true.
      *
-     * @param renderNode The RenderNode to replay.
+     * @param renderNode The RenderNode to draw.
      */
     public void drawRenderNode(RenderNode renderNode) {
-        drawRenderNode(renderNode, RenderNode.FLAG_CLIP_CHILDREN);
+        nDrawRenderNode(mNativeCanvasWrapper, renderNode.getNativeDisplayList());
     }
 
-    /**
-     * Draws the specified display list onto this canvas.
-     *
-     * @param renderNode The RenderNode to replay.
-     * @param flags Optional flags about drawing, see {@link RenderNode} for
-     *              the possible flags.
-     */
-    public void drawRenderNode(RenderNode renderNode, int flags) {
-        nDrawRenderNode(mNativeCanvasWrapper, renderNode.getNativeDisplayList(), flags);
-    }
-
-    private static native void nDrawRenderNode(long renderer, long renderNode,
-            int flags);
+    private static native void nDrawRenderNode(long renderer, long renderNode);
 
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
