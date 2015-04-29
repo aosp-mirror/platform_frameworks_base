@@ -68,17 +68,6 @@ class RenderNode;
 class TextDrawFunctor;
 class VertexBuffer;
 
-struct DrawModifiers {
-    DrawModifiers()
-        : mOverrideLayerAlpha(0.0f) {}
-
-    void reset() {
-        mOverrideLayerAlpha = 0.0f;
-    }
-
-    float mOverrideLayerAlpha;
-};
-
 enum StateDeferFlags {
     kStateDeferFlag_Draw = 0x1,
     kStateDeferFlag_Clip = 0x2
@@ -236,9 +225,6 @@ public:
 
     void setDrawFilter(SkDrawFilter* filter);
 
-    // If this value is set to < 1.0, it overrides alpha set on layer (see drawBitmap, drawLayer)
-    void setOverrideLayerAlpha(float alpha) { mDrawModifiers.mOverrideLayerAlpha = alpha; }
-
     /**
      * Store the current display state (most importantly, the current clip and transform), and
      * additionally map the state's bounds from local to window coordinates.
@@ -248,9 +234,6 @@ public:
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
     void restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore = false);
     void setupMergedMultiDraw(const Rect* clipRect);
-
-    const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
-    void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
 
     bool isCurrentTransformSimple() {
         return currentTransform()->isSimple();
@@ -523,8 +506,7 @@ protected:
 
     /**
      * Gets the alpha and xfermode out of a paint object. If the paint is null
-     * alpha will be 255 and the xfermode will be SRC_OVER. Accounts for both
-     * snapshot alpha, and overrideLayerAlpha
+     * alpha will be 255 and the xfermode will be SRC_OVER. Accounts for snapshot alpha.
      *
      * @param paint The paint to extract values from
      * @param alpha Where to store the resulting alpha
@@ -533,7 +515,7 @@ protected:
     inline void getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) const;
 
     /**
-     * Gets the alpha from a layer, accounting for snapshot alpha and overrideLayerAlpha
+     * Gets the alpha from a layer, accounting for snapshot alpha
      *
      * @param layer The layer from which the alpha is extracted
      */
@@ -867,10 +849,6 @@ private:
 
     // Default UV mapper
     const UvMapper mUvMapper;
-
-    // shader, filters, and shadow
-    DrawModifiers mDrawModifiers;
-    SkPaint mFilteredPaint;
 
     // List of rectangles to clear after saveLayer() is invoked
     std::vector<Rect> mLayers;
