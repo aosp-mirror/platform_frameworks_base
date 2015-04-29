@@ -87,6 +87,28 @@ public class KeyCharacteristics implements Parcelable {
         return result;
     }
 
+    public Long getLong(int tag) {
+        if (hwEnforced.containsTag(tag)) {
+            return hwEnforced.getLong(tag, -1);
+        } else if (swEnforced.containsTag(tag)) {
+            return swEnforced.getLong(tag, -1);
+        } else {
+            return null;
+        }
+    }
+
+    public long getLong(int tag, long defaultValue) {
+        Long result = getLong(tag);
+        return (result != null) ? result : defaultValue;
+    }
+
+    public List<Long> getLongs(int tag) {
+        List<Long> result = new ArrayList<Long>();
+        result.addAll(hwEnforced.getLongs(tag));
+        result.addAll(swEnforced.getLongs(tag));
+        return result;
+    }
+
     public Date getDate(int tag) {
         Date result = hwEnforced.getDate(tag, null);
         if (result == null) {
