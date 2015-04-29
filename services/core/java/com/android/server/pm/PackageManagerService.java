@@ -3929,19 +3929,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Check for results that need to skip the current profile.
                 ResolveInfo resolveInfo  = querySkipCurrentProfileIntents(matchingFilters, intent,
                         resolvedType, flags, userId);
-                if (resolveInfo != null) {
+                if (resolveInfo != null && isUserEnabled(resolveInfo.targetUserId)) {
                     List<ResolveInfo> result = new ArrayList<ResolveInfo>(1);
                     result.add(resolveInfo);
                     return filterIfNotPrimaryUser(result, userId);
                 }
-                // Check for cross profile results.
-                resolveInfo = queryCrossProfileIntents(
-                        matchingFilters, intent, resolvedType, flags, userId);
 
                 // Check for results in the current profile.
                 List<ResolveInfo> result = mActivities.queryIntent(
                         intent, resolvedType, flags, userId);
-                if (resolveInfo != null) {
+
+                // Check for cross profile results.
+                resolveInfo = queryCrossProfileIntents(
+                        matchingFilters, intent, resolvedType, flags, userId);
+                if (resolveInfo != null && isUserEnabled(resolveInfo.targetUserId)) {
                     result.add(resolveInfo);
                     Collections.sort(result, mResolvePrioritySorter);
                 }
@@ -3959,6 +3960,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                         userId);
             }
             return new ArrayList<ResolveInfo>();
+        }
+    }
+
+    private boolean isUserEnabled(int userId) {
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            UserInfo userInfo = sUserManager.getUserInfo(userId);
+            return userInfo != null && userInfo.isEnabled();
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
         }
     }
 
