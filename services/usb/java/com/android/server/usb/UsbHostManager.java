@@ -112,7 +112,7 @@ public class UsbHostManager {
      */
     private boolean beginUsbDeviceAdded(String deviceName, int vendorID, int productID,
             int deviceClass, int deviceSubclass, int deviceProtocol,
-            String manufacturerName, String productName, String serialNumber) {
+            String manufacturerName, String productName, int version, String serialNumber) {
 
         if (DEBUG) {
             Slog.d(TAG, "usb:UsbHostManager.beginUsbDeviceAdded(" + deviceName + ")");
@@ -149,9 +149,12 @@ public class UsbHostManager {
                 return false;
             }
 
+            // Create version string in "%.%" format
+            String versionString = Integer.toString(version >> 8) + "." + (version & 0xFF);
+
             mNewDevice = new UsbDevice(deviceName, vendorID, productID,
                     deviceClass, deviceSubclass, deviceProtocol,
-                    manufacturerName, productName, serialNumber);
+                    manufacturerName, productName, versionString, serialNumber);
 
             mNewConfigurations = new ArrayList<UsbConfiguration>();
             mNewInterfaces = new ArrayList<UsbInterface>();
