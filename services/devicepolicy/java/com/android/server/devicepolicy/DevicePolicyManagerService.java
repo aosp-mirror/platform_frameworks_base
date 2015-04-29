@@ -192,6 +192,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             StatusBarManager.DISABLE_NOTIFICATION_ALERTS |
             StatusBarManager.DISABLE_SEARCH;
 
+    private static final int STATUS_BAR_DISABLE2_MASK =
+            StatusBarManager.DISABLE2_QUICK_SETTINGS;
+
     private static final Set<String> DEVICE_OWNER_USER_RESTRICTIONS;
     static {
         DEVICE_OWNER_USER_RESTRICTIONS = new HashSet();
@@ -6040,8 +6043,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             IStatusBarService statusBarService = IStatusBarService.Stub.asInterface(
                     ServiceManager.checkService(Context.STATUS_BAR_SERVICE));
             if (statusBarService != null) {
-                int flags = enabled ? StatusBarManager.DISABLE_NONE : STATUS_BAR_DISABLE_MASK;
-                statusBarService.disableForUser(flags, mToken, mContext.getPackageName(), userId);
+                int flags1 = enabled ? StatusBarManager.DISABLE_NONE : STATUS_BAR_DISABLE_MASK;
+                int flags2 = enabled ? StatusBarManager.DISABLE2_NONE : STATUS_BAR_DISABLE2_MASK;
+                statusBarService.disableForUser(flags1, mToken, mContext.getPackageName(), userId);
+                statusBarService.disable2ForUser(flags2, mToken, mContext.getPackageName(), userId);
             }
         } catch (RemoteException e) {
             Slog.e(LOG_TAG, "Failed to disable the status bar", e);
