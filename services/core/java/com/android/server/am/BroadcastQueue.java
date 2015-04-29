@@ -309,7 +309,6 @@ public final class BroadcastQueue {
     }
 
     public void skipCurrentReceiverLocked(ProcessRecord app) {
-        boolean reschedule = false;
         BroadcastRecord r = app.curReceiver;
         if (r != null && r.queue == this) {
             // The current broadcast is waiting for this app's receiver
@@ -318,7 +317,6 @@ public final class BroadcastQueue {
             logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r, r.resultCode, r.resultData,
                     r.resultExtras, r.resultAbort, false);
-            reschedule = true;
         }
         if (r == null && mPendingBroadcast != null && mPendingBroadcast.curApp == app) {
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
