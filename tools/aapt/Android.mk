@@ -64,7 +64,8 @@ aaptHostStaticLibs := \
     libutils \
     libcutils \
     libexpat \
-    libziparchive-host
+    libziparchive-host \
+    libbase
 
 aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER)\"
 aaptCFlags += -Wall -Werror
