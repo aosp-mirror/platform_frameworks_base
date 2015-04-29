@@ -24,7 +24,6 @@ import android.util.ArraySet;
 import android.util.LongSparseArray;
 import com.android.internal.util.ArrayUtils;
 
-import java.lang.reflect.Field;
 import java.io.File;
 import java.io.IOException;
 import java.security.cert.CertificateException;
@@ -42,53 +41,6 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
                 new File(mContext.getCacheDir(), "fakeResPath"), "", "", "",
                 "", 1, 0, 0);
     }
-
-    public PublicKey getPubKey(long pkId) throws NoSuchFieldException, IllegalAccessException {
-        Field pkField = mKsms.getClass().getDeclaredField("mPublicKeys");
-        pkField.setAccessible(true);
-        LongSparseArray<KeySetManagerService.PublicKeyHandle> mPublicKeys =
-            (LongSparseArray<KeySetManagerService.PublicKeyHandle>) pkField.get(mKsms);
-        KeySetManagerService.PublicKeyHandle pkh = mPublicKeys.get(pkId);
-        if (pkh == null) {
-            return null;
-        } else {
-            return pkh.getKey();
-        }
-    }
-
-    public int getPubKeyRefCount(long pkId) throws NoSuchFieldException, IllegalAccessException {
-        Field pkField = mKsms.getClass().getDeclaredField("mPublicKeys");
-        pkField.setAccessible(true);
-        LongSparseArray<KeySetManagerService.PublicKeyHandle> mPublicKeys =
-            (LongSparseArray<KeySetManagerService.PublicKeyHandle>) pkField.get(mKsms);
-        KeySetManagerService.PublicKeyHandle pkh = mPublicKeys.get(pkId);
-        if (pkh == null) {
-            return 0;
-        } else {
-            return pkh.getRefCountLPr();
-        }
-    }
-
-    public int getKeySetRefCount(long keysetId) throws NoSuchFieldException, IllegalAccessException {
-        Field ksField = mKsms.getClass().getDeclaredField("mKeySets");
-        ksField.setAccessible(true);
-        LongSparseArray<KeySetHandle> mKeySets =
-            (LongSparseArray<KeySetHandle>) ksField.get(mKsms);
-        KeySetHandle ksh = mKeySets.get(keysetId);
-        if (ksh == null) {
-            return 0;
-        } else {
-            return ksh.getRefCountLPr();
-        }
-    }
-
-    public LongSparseArray<ArraySet<Long>> getKeySetMapping()
-            throws NoSuchFieldException, IllegalAccessException {
-        Field ksField = mKsms.getClass().getDeclaredField("mKeySetMapping");
-        ksField.setAccessible(true);
-        return (LongSparseArray<ArraySet<Long>>) ksField.get(mKsms);
-    }
-
 
     @Override
     public void setUp() throws Exception {
@@ -168,10 +120,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         signingKeys.add(keyA);
         mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
 
-        assertEquals(1, getKeySetRefCount(1));
-        assertEquals(1, getPubKeyRefCount(1));
-        assertEquals(keyA, getPubKey(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(1);
         assertEquals(1, mapping.size());
@@ -198,10 +150,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         /* add again, to represent upgrade of package */
         mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
 
-        assertEquals(1, getKeySetRefCount(1));
-        assertEquals(1, getPubKeyRefCount(1));
-        assertEquals(keyA, getPubKey(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(1);
         assertEquals(1, mapping.size());
@@ -231,12 +183,12 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         signingKeys.add(keyB);
         mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
 
-        assertEquals(0, getKeySetRefCount(1));
-        assertEquals(1, getKeySetRefCount(2));
-        assertEquals(0, getPubKeyRefCount(1));
-        assertEquals(1, getPubKeyRefCount(2));
-        assertEquals(keyB, getPubKey(2));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
+        assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+        assertEquals(keyB, KeySetUtils.getPubKey(mKsms, 2));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(2);
         assertEquals(1, mapping.size());
@@ -269,13 +221,13 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         signingKeys.add(keyB);
         mKsms.addSigningKeySetToPackageLPw(ps1.name, signingKeys);
 
-        assertEquals(1, getKeySetRefCount(1));
-        assertEquals(1, getKeySetRefCount(2));
-        assertEquals(1, getPubKeyRefCount(1));
-        assertEquals(1, getPubKeyRefCount(2));
-        assertEquals(keyA, getPubKey(1));
-        assertEquals(keyB, getPubKey(2));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 1));
+        assertEquals(keyB, KeySetUtils.getPubKey(mKsms, 2));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(2, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(1);
         assertEquals(1, mapping.size());
@@ -312,10 +264,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         mKsms.addSigningKeySetToPackageLPw(ps2.name, signingKeys2);
 
         /* verify first is unchanged */
-        assertEquals(1, getKeySetRefCount(1));
-        assertEquals(1, getPubKeyRefCount(1));
-        assertEquals(keyA, getPubKey(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(2, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(1);
         assertEquals(1, mapping.size());
@@ -323,9 +275,9 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         assertEquals(1, ps1.keySetData.getProperSigningKeySet());
 
         /* verify second */
-        assertEquals(1, getKeySetRefCount(2));
-        assertEquals(1, getPubKeyRefCount(2));
-        assertEquals(keyB, getPubKey(2));
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+        assertEquals(keyB, KeySetUtils.getPubKey(mKsms, 2));
         mapping = ksMapping.get(2);
         assertEquals(1, mapping.size());
         assertTrue(mapping.contains(new  Long(2)));
@@ -353,10 +305,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         /* add again for second package */
         mKsms.addSigningKeySetToPackageLPw(ps2.name, signingKeys);
 
-        assertEquals(2, getKeySetRefCount(1));
-        assertEquals(1, getPubKeyRefCount(1));
-        assertEquals(keyA, getPubKey(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(2, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(1);
         assertEquals(1, mapping.size());
@@ -388,13 +340,13 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         signingKeys.add(keyB);
         mKsms.addSigningKeySetToPackageLPw(ps2.name, signingKeys);
 
-        assertEquals(1, getKeySetRefCount(1));
-        assertEquals(1, getKeySetRefCount(2));
-        assertEquals(2, getPubKeyRefCount(1));
-        assertEquals(1, getPubKeyRefCount(2));
-        assertEquals(keyA, getPubKey(1));
-        assertEquals(keyB, getPubKey(2));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
+        assertEquals(2, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 1));
+        assertEquals(keyB, KeySetUtils.getPubKey(mKsms, 2));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(2, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(1);
         assertEquals(1, mapping.size());
@@ -429,16 +381,17 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         signingKeys.add(keyB);
         mKsms.addSigningKeySetToPackageLPw(ps.name, signingKeys);
 
-        assertEquals(0, getKeySetRefCount(1));
-        assertEquals(1, getKeySetRefCount(2));
-        assertEquals(0, getPubKeyRefCount(1));
-        assertEquals(1, getPubKeyRefCount(2));
-        assertEquals(1, getPubKeyRefCount(3));
+        assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
+        assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 3));
 
         /* the pub key is removed w/prev keyset and may be either 2 or 3 */
-        assertTrue(keyA.equals(getPubKey(2)) && keyB.equals(getPubKey(3))
-                   || keyA.equals(getPubKey(3)) && keyB.equals(getPubKey(2)));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertTrue(keyA.equals(KeySetUtils.getPubKey(mKsms, 2)) || keyA.equals(KeySetUtils.getPubKey(mKsms, 3)));
+        assertTrue(keyB.equals(KeySetUtils.getPubKey(mKsms, 2)) || keyB.equals(KeySetUtils.getPubKey(mKsms, 3)));
+        assertFalse(KeySetUtils.getPubKey(mKsms, 2).equals(KeySetUtils.getPubKey(mKsms, 3)));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(2);
         assertEquals(2, mapping.size());
@@ -462,10 +415,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         definedKS.put("aliasA", keys);
         mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
 
-        assertEquals(1, getKeySetRefCount(1));
-        assertEquals(1, getPubKeyRefCount(1));
-        assertEquals(keyA, getPubKey(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(1);
         assertEquals(1, mapping.size());
@@ -490,10 +443,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         definedKS.put("aliasA2", keys);
         mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
 
-        assertEquals(2, getKeySetRefCount(1));
-        assertEquals(1, getPubKeyRefCount(1));
-        assertEquals(keyA, getPubKey(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(2, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(1);
         assertEquals(1, mapping.size());
@@ -527,12 +480,12 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         definedKS.put("aliasB", keys);
         mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
 
-        assertEquals(0, getKeySetRefCount(1));
-        assertEquals(0, getPubKeyRefCount(1));
-        assertEquals(1, getKeySetRefCount(2));
-        assertEquals(1, getPubKeyRefCount(2));
-        assertEquals(keyB, getPubKey(2));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+        assertEquals(keyB, KeySetUtils.getPubKey(mKsms, 2));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(2);
         assertEquals(1, mapping.size());
@@ -566,12 +519,12 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         definedKS.put("aliasA", keys);
         mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
 
-        assertEquals(0, getKeySetRefCount(1));
-        assertEquals(0, getPubKeyRefCount(1));
-        assertEquals(1, getKeySetRefCount(2));
-        assertEquals(1, getPubKeyRefCount(2));
-        assertEquals(keyB, getPubKey(2));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+        assertEquals(keyB, KeySetUtils.getPubKey(mKsms, 2));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(2);
         assertEquals(1, mapping.size());
@@ -608,10 +561,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         definedKS.put("aliasC", keys1);
         mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
 
-        assertEquals(1, getKeySetRefCount(3));
-        assertEquals(1, getPubKeyRefCount(3));
-        assertEquals(keyC, getPubKey(3));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 3));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 3));
+        assertEquals(keyC, KeySetUtils.getPubKey(mKsms, 3));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(2, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(3);
         assertEquals(1, mapping.size());
@@ -619,13 +572,13 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         assertEquals(new Long(3), ps.keySetData.getAliases().get("aliasC"));
 
         /* either keyset w/keyA or w/keyB was added first, address both cases */
-        if (1 == getKeySetRefCount(1)) {
+        if (1 == KeySetUtils.getKeySetRefCount(mKsms, 1)) {
 
             /* keyB was added first and should have keyset 1 and pub-key 1 */
-            assertEquals(1, getPubKeyRefCount(1));
-            assertEquals(0, getKeySetRefCount(2));
-            assertEquals(0, getPubKeyRefCount(2));
-            assertEquals(keyB, getPubKey(1));
+            assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+            assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 2));
+            assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+            assertEquals(keyB, KeySetUtils.getPubKey(mKsms, 1));
             mapping = ksMapping.get(1);
             assertEquals(1, mapping.size());
             assertTrue(mapping.contains(new Long(1)));
@@ -633,11 +586,11 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         } else {
 
             /* keyA was added first and keyB has id 2 */
-            assertEquals(1, getKeySetRefCount(2));
-            assertEquals(1, getPubKeyRefCount(2));
-            assertEquals(0, getKeySetRefCount(1));
-            assertEquals(0, getPubKeyRefCount(1));
-            assertEquals(keyB, getPubKey(2));
+            assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 2));
+            assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+            assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
+            assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+            assertEquals(keyB, KeySetUtils.getPubKey(mKsms, 2));
             mapping = ksMapping.get(2);
             assertEquals(1, mapping.size());
             assertTrue(mapping.contains(new Long(2)));
@@ -674,14 +627,14 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         definedKS.put("aliasA", keys1);
         mKsms.addDefinedKeySetsToPackageLPw(ps.name, definedKS);
 
-        assertEquals(0, getKeySetRefCount(1));
-        assertEquals(0, getKeySetRefCount(2));
-        assertEquals(1, getKeySetRefCount(3));
-        assertEquals(0, getPubKeyRefCount(1));
-        assertEquals(0, getPubKeyRefCount(2));
-        assertEquals(1, getPubKeyRefCount(3));
-        assertEquals(keyA, getPubKey(3));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 2));
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 3));
+        assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 2));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 3));
+        assertEquals(keyA, KeySetUtils.getPubKey(mKsms, 3));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         ArraySet<Long> mapping = ksMapping.get(3);
         assertEquals(1, mapping.size());
@@ -780,9 +733,9 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
 
         /* remove its references */
         mKsms.removeAppKeySetDataLPw(ps.name);
-        assertEquals(0, getKeySetRefCount(1));
-        assertEquals(0, getPubKeyRefCount(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(0, ksMapping.size());
         assertEquals(PackageKeySetData.KEYSET_UNASSIGNED, ps.keySetData.getProperSigningKeySet());
     }
@@ -807,9 +760,9 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         /* remove references from first package */
         mKsms.removeAppKeySetDataLPw(ps1.name);
 
-        assertEquals(1, getKeySetRefCount(1));
-        assertEquals(1, getPubKeyRefCount(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(1, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(1, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(1, ksMapping.size());
         assertEquals(PackageKeySetData.KEYSET_UNASSIGNED, ps1.keySetData.getProperSigningKeySet());
         assertEquals(1, ps2.keySetData.getProperSigningKeySet());
@@ -840,9 +793,9 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         mKsms.addUpgradeKeySetsToPackageLPw(ps.name, upgradeKS);
         mKsms.removeAppKeySetDataLPw(ps.name);
 
-        assertEquals(0, getKeySetRefCount(1));
-        assertEquals(0, getPubKeyRefCount(1));
-        LongSparseArray<ArraySet<Long>> ksMapping = getKeySetMapping();
+        assertEquals(0, KeySetUtils.getKeySetRefCount(mKsms, 1));
+        assertEquals(0, KeySetUtils.getPubKeyRefCount(mKsms, 1));
+        LongSparseArray<ArraySet<Long>> ksMapping = KeySetUtils.getKeySetMapping(mKsms);
         assertEquals(0, ksMapping.size());
         assertEquals(PackageKeySetData.KEYSET_UNASSIGNED, ps.keySetData.getProperSigningKeySet());
         assertEquals(0, ps.keySetData.getAliases().size());
