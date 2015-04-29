@@ -178,6 +178,13 @@ class DayPickerView extends ViewGroup {
         });
     }
 
+    private void updateButtonVisibility(int position) {
+        final boolean hasPrev = position > 0;
+        final boolean hasNext = position < (mAdapter.getCount() - 1);
+        mPrevButton.setVisibility(hasPrev ? View.VISIBLE : View.INVISIBLE);
+        mNextButton.setVisibility(hasNext ? View.VISIBLE : View.INVISIBLE);
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final ViewPager viewPager = mViewPager;
@@ -218,12 +225,6 @@ class DayPickerView extends ViewGroup {
         final int height = bottom - top;
         mViewPager.layout(0, 0, width, height);
 
-        if (mViewPager.getChildCount() < 1) {
-            leftButton.setVisibility(View.INVISIBLE);
-            rightButton.setVisibility(View.INVISIBLE);
-            return;
-        }
-
         final SimpleMonthView monthView = (SimpleMonthView) mViewPager.getChildAt(0);
         final int monthHeight = monthView.getMonthHeight();
         final int cellWidth = monthView.getCellWidth();
@@ -235,7 +236,6 @@ class DayPickerView extends ViewGroup {
         final int leftIconTop = monthView.getPaddingTop() + (monthHeight - leftDH) / 2;
         final int leftIconLeft = monthView.getPaddingLeft() + (cellWidth - leftDW) / 2;
         leftButton.layout(leftIconLeft, leftIconTop, leftIconLeft + leftDW, leftIconTop + leftDH);
-        leftButton.setVisibility(View.VISIBLE);
 
         final int rightDW = rightButton.getMeasuredWidth();
         final int rightDH = rightButton.getMeasuredHeight();
@@ -243,7 +243,6 @@ class DayPickerView extends ViewGroup {
         final int rightIconRight = width - monthView.getPaddingRight() - (cellWidth - rightDW) / 2;
         rightButton.layout(rightIconRight - rightDW, rightIconTop,
                 rightIconRight, rightIconTop + rightDH);
-        rightButton.setVisibility(View.VISIBLE);
     }
 
     public void setDayOfWeekTextAppearance(int resId) {
@@ -399,10 +398,7 @@ class DayPickerView extends ViewGroup {
 
         @Override
         public void onPageSelected(int position) {
-            mPrevButton.setVisibility(
-                    position > 0 ? View.VISIBLE : View.INVISIBLE);
-            mNextButton.setVisibility(
-                    position < (mAdapter.getCount() - 1) ? View.VISIBLE : View.INVISIBLE);
+            updateButtonVisibility(position);
         }
     };
 

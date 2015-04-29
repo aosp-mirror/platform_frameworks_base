@@ -286,14 +286,10 @@ class DayPickerPagerAdapter extends PagerAdapter {
         return null;
     }
 
-    private boolean isCalendarInRange(Calendar value) {
-        return value.compareTo(mMinDate) >= 0 && value.compareTo(mMaxDate) <= 0;
-    }
-
     private final OnDayClickListener mOnDayClickListener = new OnDayClickListener() {
         @Override
         public void onDayClick(SimpleMonthView view, Calendar day) {
-            if (day != null && isCalendarInRange(day)) {
+            if (day != null) {
                 setSelectedDay(day);
 
                 if (mOnDaySelectedListener != null) {

@@ -31,6 +31,7 @@ import android.text.TextPaint;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.IntArray;
+import android.util.MathUtils;
 import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -422,7 +423,8 @@ class SimpleMonthView extends View {
 
             int stateMask = 0;
 
-            if (day >= mEnabledDayStart && day <= mEnabledDayEnd) {
+            final boolean isDayEnabled = isDayEnabled(day);
+            if (isDayEnabled) {
                 stateMask |= StateSet.VIEW_STATE_ENABLED;
             }
 
@@ -435,8 +437,11 @@ class SimpleMonthView extends View {
             } else if (mTouchedItem == day) {
                 stateMask |= StateSet.VIEW_STATE_PRESSED;
 
-                // Adjust the circle to be centered on the row.
-                canvas.drawCircle(colCenterRtl, rowCenter, mDaySelectorRadius, mDayHighlightPaint);
+                if (isDayEnabled) {
+                    // Adjust the circle to be centered on the row.
+                    canvas.drawCircle(colCenterRtl, rowCenter,
+                            mDaySelectorRadius, mDayHighlightPaint);
+                }
             }
 
             final boolean isDayToday = mToday == day;
@@ -458,6 +463,14 @@ class SimpleMonthView extends View {
                 rowCenter += rowHeight;
             }
         }
+    }
+
+    private boolean isDayEnabled(int day) {
+        return day >= mEnabledDayStart && day <= mEnabledDayEnd;
+    }
+
+    private boolean isValidDayOfMonth(int day) {
+        return day >= 1 && day <= mDaysInMonth;
     }
 
     private static boolean isValidDayOfWeek(int day) {
@@ -536,13 +549,6 @@ class SimpleMonthView extends View {
             mWeekStart = mCalendar.getFirstDayOfWeek();
         }
 
-        if (enabledDayStart > 0 && enabledDayEnd < 32) {
-            mEnabledDayStart = enabledDayStart;
-        }
-        if (enabledDayEnd > 0 && enabledDayEnd < 32 && enabledDayEnd >= enabledDayStart) {
-            mEnabledDayEnd = enabledDayEnd;
-        }
-
         // Figure out what day today is.
         final Calendar today = Calendar.getInstance();
         mToday = -1;
@@ -553,6 +559,9 @@ class SimpleMonthView extends View {
                 mToday = day;
             }
         }
+
+        mEnabledDayStart = MathUtils.constrain(enabledDayStart, 1, mDaysInMonth);
+        mEnabledDayEnd = MathUtils.constrain(enabledDayEnd, mEnabledDayStart, mDaysInMonth);
 
         // Invalidate the old title.
         mTitle = null;
@@ -694,7 +703,7 @@ class SimpleMonthView extends View {
         final int col = (paddedXRtl * DAYS_IN_WEEK) / mPaddedWidth;
         final int index = col + row * DAYS_IN_WEEK;
         final int day = index + 1 - findDayOffset();
-        if (day < 1 || day > mDaysInMonth) {
+        if (!isValidDayOfMonth(day)) {
             return -1;
         }
 
@@ -708,7 +717,7 @@ class SimpleMonthView extends View {
      * @param outBounds the rect to populate with bounds
      */
     private boolean getBoundsForDay(int id, Rect outBounds) {
-        if (id < 1 || id > mDaysInMonth) {
+        if (!isValidDayOfMonth(id)) {
             return false;
         }
 
@@ -742,7 +751,7 @@ class SimpleMonthView extends View {
      * @param day the day that was clicked
      */
     private boolean onDayClicked(int day) {
-        if (day < 0 || day > mDaysInMonth) {
+        if (!isValidDayOfMonth(day) || !isDayEnabled(day)) {
             return false;
         }
 
@@ -774,7 +783,7 @@ class SimpleMonthView extends View {
         @Override
         protected int getVirtualViewAt(float x, float y) {
             final int day = getDayAtLocation((int) (x + 0.5f), (int) (y + 0.5f));
-            if (day >= 0) {
+            if (day != -1) {
                 return day;
             }
             return ExploreByTouchHelper.INVALID_ID;
@@ -808,7 +817,13 @@ class SimpleMonthView extends View {
             node.setText(getDayText(virtualViewId));
             node.setContentDescription(getDayDescription(virtualViewId));
             node.setBoundsInParent(mTempRect);
-            node.addAction(AccessibilityAction.ACTION_CLICK);
+
+            final boolean isDayEnabled = isDayEnabled(virtualViewId);
+            if (isDayEnabled) {
+                node.addAction(AccessibilityAction.ACTION_CLICK);
+            }
+
+            node.setEnabled(isDayEnabled);
 
             if (virtualViewId == mActivatedDay) {
                 // TODO: This should use activated once that's supported.
@@ -835,7 +850,7 @@ class SimpleMonthView extends View {
          * @return a description of the virtual view
          */
         private CharSequence getDayDescription(int id) {
-            if (id >= 1 && id <= mDaysInMonth) {
+            if (isValidDayOfMonth(id)) {
                 mTempCalendar.set(mYear, mMonth, id);
                 return DateFormat.format(DATE_FORMAT, mTempCalendar.getTimeInMillis());
             }
@@ -850,7 +865,7 @@ class SimpleMonthView extends View {
          * @return the visible text of the virtual view
          */
         private CharSequence getDayText(int id) {
-            if (id >= 1 && id <= mDaysInMonth) {
+            if (isValidDayOfMonth(id)) {
                 return Integer.toString(id);
             }
 
