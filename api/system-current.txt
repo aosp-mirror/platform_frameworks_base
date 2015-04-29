@@ -31306,6 +31306,7 @@ package android.speech {
     field public static final java.lang.String EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE = "android.speech.extra.ONLY_RETURN_LANGUAGE_PREFERENCE";
     field public static final java.lang.String EXTRA_ORIGIN = "android.speech.extra.ORIGIN";
     field public static final java.lang.String EXTRA_PARTIAL_RESULTS = "android.speech.extra.PARTIAL_RESULTS";
+    field public static final java.lang.String EXTRA_PREFER_OFFLINE = "android.speech.extra.PREFER_OFFLINE";
     field public static final java.lang.String EXTRA_PROMPT = "android.speech.extra.PROMPT";
     field public static final java.lang.String EXTRA_RESULTS = "android.speech.extra.RESULTS";
     field public static final java.lang.String EXTRA_RESULTS_PENDINGINTENT = "android.speech.extra.RESULTS_PENDINGINTENT";

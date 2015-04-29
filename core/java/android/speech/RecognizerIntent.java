@@ -403,4 +403,12 @@ public class RecognizerIntent {
      */
     public static final String EXTRA_SUPPORTED_LANGUAGES =
             "android.speech.extra.SUPPORTED_LANGUAGES";
+
+    /**
+     * Optional boolean, to be used with {@link #ACTION_RECOGNIZE_SPEECH},
+     * {@link #ACTION_VOICE_SEARCH_HANDS_FREE}, {@link #ACTION_WEB_SEARCH} to indicate whether to
+     * only use an offline speech recognition engine. The default is false, meaning that either
+     * network or offline recognition engines may be used.
+     */
+    public static final String EXTRA_PREFER_OFFLINE = "android.speech.extra.PREFER_OFFLINE";
 }
