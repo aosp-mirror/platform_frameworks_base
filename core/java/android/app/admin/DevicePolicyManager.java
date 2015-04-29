@@ -807,6 +807,24 @@ public class DevicePolicyManager {
     public static final String ACTION_SYSTEM_UPDATE_POLICY_CHANGED
             = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
 
+    /**
+     * Permission policy to prompt user for new permission requests for runtime permissions.
+     * Already granted or denied permissions are not affected by this.
+     */
+    public static final int PERMISSION_POLICY_PROMPT = 0;
+
+    /**
+     * Permission policy to always grant new permission requests for runtime permissions.
+     * Already granted or denied permissions are not affected by this.
+     */
+    public static final int PERMISSION_POLICY_AUTO_GRANT = 1;
+
+    /**
+     * Permission policy to always deny new permission requests for runtime permissions.
+     * Already granted or denied permissions are not affected by this.
+     */
+    public static final int PERMISSION_POLICY_AUTO_DENY = 2;
+
 
     /**
      * Return true if the given administrator component is currently
@@ -4340,6 +4358,60 @@ public class DevicePolicyManager {
             mService.setPreferredSetupActivity(admin, activity);
         } catch (RemoteException re) {
             Log.w(TAG, "Failed talking with device policy service", re);
+        }
+    }
+
+    /**
+     * Called by profile or device owners to set the default response for future runtime permission
+     * requests by applications. The policy can allow for normal operation which prompts the
+     * user to grant a permission, or can allow automatic granting or denying of runtime
+     * permission requests by an application. This also applies to new permissions declared by app
+     * updates.
+     * @param admin Which profile or device owner this request is associated with.
+     * @param policy One of the policy constants {@link #PERMISSION_POLICY_PROMPT},
+     * {@link #PERMISSION_POLICY_AUTO_GRANT} and {@link #PERMISSION_POLICY_AUTO_DENY}.
+     */
+    public void setPermissionPolicy(ComponentName admin, int policy) {
+        try {
+            mService.setPermissionPolicy(admin, policy);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+        }
+    }
+
+    /**
+     * Returns the current runtime permission policy set by the device or profile owner. The
+     * default is {@link #PERMISSION_POLICY_PROMPT}.
+     * @param admin Which profile or device owner this request is associated with.
+     * @return the current policy for future permission requests.
+     */
+    public int getPermissionPolicy(ComponentName admin) {
+        try {
+            return mService.getPermissionPolicy(admin);
+        } catch (RemoteException re) {
+            return PERMISSION_POLICY_PROMPT;
+        }
+    }
+
+    /**
+     * Grants or revokes a runtime permission to a specific application so that the user
+     * does not have to be prompted. This might affect all permissions in a group that the
+     * runtime permission belongs to. This method can only be called by a profile or device
+     * owner.
+     * @param admin Which profile or device owner this request is associated with.
+     * @param packageName The application to grant or revoke a permission to.
+     * @param permission The permission to grant or revoke.
+     * @param granted Whether or not to grant the permission. If false, all permissions in the
+     * associated permission group will be denied.
+     * @return whether the permission was successfully granted or revoked
+     */
+    public boolean setPermissionGranted(ComponentName admin, String packageName,
+            String permission, boolean granted) {
+        try {
+            return mService.setPermissionGranted(admin, packageName, permission, granted);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Failed talking with device policy service", re);
+            return false;
         }
     }
 }
