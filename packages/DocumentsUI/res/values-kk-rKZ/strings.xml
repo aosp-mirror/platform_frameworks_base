@@ -71,5 +71,5 @@
     </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Толығырақ мәліметті көру үшін түртіңіз"</string>
     <string name="retry" msgid="7564024179122207376">"Қайталау"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Бұл файлдар көшірілмейді: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Мына файлдар көшірілген жоқ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>
