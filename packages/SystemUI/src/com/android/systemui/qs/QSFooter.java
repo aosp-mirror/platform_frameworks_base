@@ -110,21 +110,15 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     }
 
     private void handleRefreshState() {
-        if (mSecurityController.hasDeviceOwner()) {
+        boolean hasDeviceOwner = mSecurityController.hasDeviceOwner();
+        boolean hasVpn = mSecurityController.isVpnEnabled();
+
+        mIsVisible = (hasVpn || hasDeviceOwner);
+        mIsIconVisible = hasVpn;
+        if (hasDeviceOwner) {
             mFooterTextId = R.string.device_owned_footer;
-            mIsVisible = true;
-            mIsIconVisible = false;
-        } else if (mSecurityController.hasProfileOwner()) {
-            mFooterTextId = R.string.profile_owned_footer;
-            mIsVisible = true;
-            mIsIconVisible = false;
-        } else if (mSecurityController.isVpnEnabled()) {
-            mFooterTextId = R.string.vpn_footer;
-            mIsVisible = true;
-            mIsIconVisible = true;
         } else {
-            mIsVisible = false;
-            mIsIconVisible = false;
+            mFooterTextId = R.string.vpn_footer;
         }
         mMainHandler.post(mUpdateDisplayState);
     }
@@ -162,37 +156,17 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
 
     private String getMessage(boolean hasDeviceOwner, boolean hasProfile, boolean hasVpn) {
         if (hasDeviceOwner) {
-            if (hasProfile) {
-                if (hasVpn) {
-                    return mContext.getString(
-                            R.string.monitoring_description_vpn_device_and_profile_owned,
-                            mSecurityController.getDeviceOwnerName(),
-                            mSecurityController.getProfileOwnerName());
-                } else {
-                    return mContext.getString(
-                            R.string.monitoring_description_device_and_profile_owned,
-                            mSecurityController.getDeviceOwnerName(),
-                            mSecurityController.getProfileOwnerName());
-                }
+            if (hasVpn) {
+                return mContext.getString(R.string.monitoring_description_vpn_device_owned,
+                        mSecurityController.getDeviceOwnerName());
             } else {
-                if (hasVpn) {
-                    return mContext.getString(R.string.monitoring_description_vpn_device_owned,
-                            mSecurityController.getDeviceOwnerName());
-                } else {
-                    return mContext.getString(R.string.monitoring_description_device_owned,
-                            mSecurityController.getDeviceOwnerName());
-                }
+                return mContext.getString(R.string.monitoring_description_device_owned,
+                        mSecurityController.getDeviceOwnerName());
             }
         } else if (hasProfile) {
-            if (hasVpn) {
-                return mContext.getString(
-                        R.string.monitoring_description_vpn_profile_owned,
-                        mSecurityController.getProfileOwnerName());
-            } else {
-                return mContext.getString(
-                        R.string.monitoring_description_profile_owned,
-                        mSecurityController.getProfileOwnerName());
-            }
+            return mContext.getString(
+                    R.string.monitoring_description_vpn_profile_owned,
+                    mSecurityController.getProfileOwnerName());
         } else {
             return mContext.getString(R.string.monitoring_description_vpn);
         }
