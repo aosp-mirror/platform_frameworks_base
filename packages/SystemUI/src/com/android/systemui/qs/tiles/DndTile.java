@@ -37,7 +37,11 @@ import com.android.systemui.volume.ZenModePanel;
 
 /** Quick settings tile: Do not disturb **/
 public class DndTile extends QSTile<QSTile.BooleanState> {
-    private static final Intent ZEN_SETTINGS = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
+    private static final Intent ZEN_SETTINGS =
+            new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
+
+    private static final Intent ZEN_PRIORITY_SETTINGS =
+            new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS);
 
     private static final String ACTION_SET_VISIBLE = "com.android.systemui.dndtile.SET_VISIBLE";
     private static final String EXTRA_VISIBLE = "visible";
@@ -87,7 +91,9 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         if (mState.value) {
             mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
         } else {
-            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+            int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN, Global.ZEN_MODE_ALARMS);
+            mController.setZen(zen, null, TAG);
+            refreshState(zen); // this one's optimistic
             showDetail(true);
         }
     }
@@ -209,8 +215,8 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                             R.layout.zen_mode_panel, parent, false);
             if (convertView == null) {
                 zmp.init(mController);
-                zmp.setEmbedded(true);
                 zmp.addOnAttachStateChangeListener(this);
+                zmp.setCallback(mZenModePanelCallback);
             }
             return zmp;
         }
@@ -225,4 +231,22 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
             mShowingDetail = false;
         }
     }
+
+    private final ZenModePanel.Callback mZenModePanelCallback = new ZenModePanel.Callback() {
+        @Override
+        public void onPrioritySettings() {
+            mHost.startSettingsActivity(ZEN_PRIORITY_SETTINGS);
+        }
+
+        @Override
+        public void onInteraction() {
+            // noop
+        }
+
+        @Override
+        public void onExpanded(boolean expanded) {
+            // noop
+        }
+    };
+
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -157,6 +158,11 @@ public class ZenModeControllerImpl implements ZenModeController {
     public boolean isCountdownConditionSupported() {
         return NotificationManager.from(mContext)
                 .isSystemConditionProviderEnabled(ZenModeConfig.COUNTDOWN_PATH);
+    }
+
+    @Override
+    public int getCurrentUser() {
+        return ActivityManager.getCurrentUser();
     }
 
     private void fireNextAlarmChanged() {

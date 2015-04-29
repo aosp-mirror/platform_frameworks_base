@@ -20,93 +20,58 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" > <!-- extends LinearLayout -->
 
-    <LinearLayout
-        android:id="@+id/volume_zen_switch_bar"
+    <View
+        android:id="@+id/zen_embedded_divider"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/volume_button_size"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:clickable="true"
-        android:orientation="horizontal" >
+        android:layout_height="1dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:background="#4dffffff" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp" >
 
         <ImageView
-            android:id="@+id/volume_zen_switch_bar_icon"
+            android:id="@+id/volume_zen_icon"
             android:layout_width="@dimen/volume_button_size"
             android:layout_height="@dimen/volume_button_size"
+            android:layout_marginEnd="7dp"
             android:scaleType="center"
             android:src="@drawable/ic_dnd" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:textDirection="locale"
-            android:padding="3dp"
-            android:text="@string/volume_zen_switch_text"
-            android:textAppearance="@style/TextAppearance.Volume.ZenSwitch" />
+            android:orientation="vertical" >
 
-        <Switch
-            android:id="@+id/volume_zen_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:layout_marginEnd="11dp" />
+            <TextView
+                android:id="@+id/volume_zen_summary_line_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Volume.ZenSummary" />
 
-    </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/volume_zen_panel_summary"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/volume_button_size"
-        android:layout_marginStart="@dimen/volume_button_size"
-        android:paddingEnd="7dp"
-        android:paddingStart="7dp" >
+            <TextView
+                android:id="@+id/volume_zen_summary_line_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Volume.ZenDetail" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/volume_zen_panel_summary_line_1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Volume.ZenSwitchSummary" />
-
-        <TextView
-            android:id="@+id/volume_zen_panel_summary_line_2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/volume_zen_panel_summary_line_1"
-            android:textAppearance="@style/TextAppearance.Volume.ZenSwitchDetail" />
-    </RelativeLayout>
-
-    <include layout="@layout/zen_mode_panel" />
-
-    <LinearLayout
-        android:id="@+id/volume_zen_mode_panel_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:gravity="end" >
-
-        <TextView
-            android:id="@+id/volume_zen_mode_panel_more"
-            style="@style/QSBorderlessButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:minWidth="132dp"
-            android:text="@string/quick_settings_more_settings"
-            android:textAppearance="@style/TextAppearance.QS.DetailButton" />
-
-        <TextView
-            android:id="@+id/volume_zen_mode_panel_done"
+            android:id="@+id/volume_zen_end_now"
             style="@style/QSBorderlessButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
             android:focusable="true"
-            android:minWidth="66dp"
-            android:text="@string/quick_settings_done"
+            android:minWidth="91dp"
+            android:text="@string/volume_zen_end_now"
             android:textAppearance="@style/TextAppearance.QS.DetailButton" />
     </LinearLayout>
 
