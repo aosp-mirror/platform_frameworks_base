@@ -580,7 +580,9 @@ class MountService extends IMountService.Stub
                 case H_FSTRIM: {
                     if (!isReady()) {
                         Slog.i(TAG, "fstrim requested, but no daemon connection yet; trying again");
-                        sendMessageDelayed(obtainMessage(H_FSTRIM), DateUtils.SECOND_IN_MILLIS);
+                        sendMessageDelayed(obtainMessage(H_FSTRIM, msg.obj),
+                                DateUtils.SECOND_IN_MILLIS);
+                        break;
                     }
 
                     Slog.i(TAG, "Running fstrim idle maintenance");
