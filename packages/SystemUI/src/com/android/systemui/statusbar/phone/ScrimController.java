@@ -347,7 +347,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     @Override
-    public void onPinnedModeChanged(boolean inPinnedMode) {
+    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
     }
 
     @Override
