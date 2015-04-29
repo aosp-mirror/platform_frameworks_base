@@ -53,6 +53,14 @@ public class KeyStore {
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
 
+    /**
+     * Per operation authentication is needed before this operation is valid.
+     * This is returned from {@link #begin} when begin succeeds but the operation uses
+     * per-operation authentication and must authenticate before calling {@link #update} or
+     * {@link #finish}.
+     */
+    public static final int OP_AUTH_NEEDED = 15;
+
     // Used for UID field to indicate the calling UID.
     public static final int UID_SELF = -1;
 
