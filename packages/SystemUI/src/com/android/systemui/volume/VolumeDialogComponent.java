@@ -24,6 +24,7 @@ import android.media.VolumePolicy;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.view.WindowManager;
 
 import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -61,7 +62,8 @@ public class VolumeDialogComponent implements VolumeComponent {
             }
         };
         mZenModeController = zen;
-        mDialog = new VolumeDialog(context, mController, zen, mVolumeDialogCallback);
+        mDialog = new VolumeDialog(context, WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY,
+                mController, zen, mVolumeDialogCallback);
         applyConfiguration();
     }
 
@@ -76,12 +78,10 @@ public class VolumeDialogComponent implements VolumeComponent {
         mDialog.setStreamImportant(AudioManager.STREAM_ALARM, true);
         mDialog.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         mDialog.setShowHeaders(false);
-        mDialog.setShowFooter(true);
-        mDialog.setZenFooter(true);
         mDialog.setAutomute(true);
         mDialog.setSilentMode(false);
         mController.setVolumePolicy(mVolumePolicy);
-        mController.showDndTile(false);
+        mController.showDndTile(true);
     }
 
     @Override
