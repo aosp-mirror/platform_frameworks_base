@@ -168,7 +168,7 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"स्क्रीन बन्द गर्नुहोस्।"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"सेटिङहरू"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"सारांश।"</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"निश्चित गर्नुहोस्"</string>
+    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"पुष्टि गर्नुहोस्"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"प्रयोगकर्ता <xliff:g id="USER">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"वाइफाइ बन्द गरियो।"</string>
@@ -303,7 +303,7 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>को लागि माथि धिसार्नुहोस्"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"स्लाइड <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>को लागि बायाँ।"</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"कुनै रुकावट छैन। चेतावनी समेत छैन।"</string>
-    <string name="zen_priority_introduction" msgid="7253045784560169993">"अलार्म, अनुस्मारक, घटनाहरु, र तपाईँले निर्दिष्ट कल देखि बाहेक, आवाज र कंपनले तपाईँ व्याकुल हुनुहुने छैन।"</string>
+    <string name="zen_priority_introduction" msgid="7253045784560169993">"अलार्म, रिमाइन्डर, घटना, र तपाईँले निर्दिष्ट गर्नुहुने कलरहरू बाहेक, आवाज र कंपनले तपाईँ वाधा गर्ने छैन।"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"अनुकूलन गर्नुहोस्"</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"कुनै रुकावटहरू छैन"</string>
     <string name="zen_important_interruptions" msgid="3477041776609757628">"प्राथमिकता रुकावटहरूमा मात्र"</string>
@@ -341,8 +341,8 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"सुरु गर्नुहोस्"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"हो, जारी राख्नुहोस्"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"अतिथि प्रयोगकर्ता"</string>
-    <string name="guest_notification_text" msgid="7513706222848825467">"अनुप्रयोगहरू र डेटा मेटाउन अतिथिलाई निकाल्नु"</string>
-    <string name="guest_notification_remove_action" msgid="8820670703892101990">"REMOVE GUEST"</string>
+    <string name="guest_notification_text" msgid="7513706222848825467">"अनुप्रयोगहरू र डेटा मेटाउन अतिथिलाई निकाल्नुहोस्"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"अतिथिलाई हटाउनुहोस्"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"नयाँ प्रयोगकर्ता थप्नुहुन्छ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्।"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ब्याट्रि सेभर चालु छ"</string>
@@ -362,13 +362,13 @@
     <string name="monitoring_title" msgid="169206259253048106">"सञ्जाल अनुगमन"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN असक्षम गर्नुहोस्"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"विच्छेद VPN"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"तपाईँको उपकरण <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले सेटिङहरू, कर्पोरेट पहुँच, अनुप्रयोगहरू, आफ्नो उपकरण सम्बन्धित डेटा, र उपकरणको स्थानीय जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्छ। थप जानकारीको लागि, आफ्नो प्रशासक संग सम्पर्क राख्नुहोस्।"</string>
-    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासक इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्षम छ।\n\n थप जानकारीको लागि, आफ्नो प्रशासक संग सम्पर्क राख्नुहोस्।"</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"तपाईँको उपकरण \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n तपाईँको कार्य प्रोफाइल \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू सहित आफ्नो उपकरण र सञ्जाल गतिविधि अनुगमन गर्न सक्छ।\n\n थप जानकारीको लागि, आफ्नो प्रशासक संग सम्पर्क राख्नुहोस्।"</string>
-    <string name="monitoring_description_vpn" msgid="912328761766161919">"तपाईँले VPN जडान गर्न अनुप्रयोगलाई अनुमति दिनुभयो।\n\nयो अनुप्रयोगले तपाईको यन्त्र र नेटवर्क गतिविधि,  इमेलहरु सम्मिलित, अनुप्रयोगहरू र सुरक्षित वेबसाइटहरू।"</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"तपाईँको उपकरण <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले सेटिङ्हरू, कर्पोरेट पहुँच, अनुप्रयोगहरू, आफ्नो उपकरण सम्बन्धित डेटा, र उपकरणको स्थानीय जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्छ।\n\nतपाईँ VPN संग जडित हुनुहुन्छ, जसले तपाईँको इमेल, अनुप्रयोगहरू, र वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्छ। \n\nथप जानकारीको लागि, आफ्नो प्रशासक संग सम्पर्क राख्नुहोस्।"</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्षम छ।\n\n थप जानकारीको लागि, आफ्नो प्रशासक संग सम्पर्क राख्नुहोस्।\n\n तपाईँ VPN संग पनि जडित हुनुहुन्छ, जसले आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्छ।"</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"तपाईँको उपकरण <xliff:g id="ORGANIZATION_0">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\nतपाईँको कार्य प्रोफाइल \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासक इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्षम छ।\n\n थप जानकारीको लागि, आफ्नो प्रशासक संग सम्पर्क राख्नुहोस्।\n\n तपाईँ VPN संग पनि जडित हुनुहुन्छ, जसले आफ्नो व्यक्तिगत सञ्जाल गतिविधि अनुगमन गर्न सक्छ।"</string>
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"तपाईँको यन्त्र <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले सेटिङहरू, कर्पोरेट पहुँच, अनुप्रयोगहरू, आफ्नो उपकरण सम्बन्धित डेटा, र उपकरणको स्थानीय जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्छ। थप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।"</string>
+    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासक इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्षम छ।\n\n थप जानकारीको लागि, आफ्नो प्रशासकससँग सम्पर्क राख्नुहोस्।"</string>
+    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"तपाईँको यन्त्र \n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n तपाईँको कार्य प्रोफाइल \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू सहित आफ्नो उपकरण र सञ्जाल गतिविधि अनुगमन गर्न सक्छ।\n\n थप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।"</string>
+    <string name="monitoring_description_vpn" msgid="912328761766161919">"तपाईँले VPN जडान गर्न अनुप्रयोगलाई अनुमति दिनुभयो।\n\nयो अनुप्रयोगले तपाईको यन्त्र र नेटवर्क गतिविधि,  इमेलहरु सम्मिलित, अनुप्रयोगहरू र सुरक्षित वेबसाइटहरूका अनुगमन गर्नसक्छ।"</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"तपाईँको यन्त्र <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले सेटिङ्हरू, कर्पोरेट पहुँच, अनुप्रयोगहरू, आफ्नो उपकरण सम्बन्धित डेटा, र उपकरणको स्थानीय जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्छ।\n\nतपाईँ VPN सँग जडित हुनुहुन्छ, जसले तपाईँको इमेल, अनुप्रयोगहरू, र वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्छ। \n\nथप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।"</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासकले इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्षम छ।\n\n थप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।\n\n तपाईँ VPN सँग पनि जडित हुनुहुन्छ, जसले आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्छ।"</string>
+    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"तपाईँको यन्त्र <xliff:g id="ORGANIZATION_0">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\nतपाईँको कार्य प्रोफाइल \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ।\n\n तपाईँको प्रशासक इमेल, अनुप्रयोगहरू, र सुरक्षित वेबसाइटहरू सहित आफ्नो सञ्जाल गतिविधि अनुगमन गर्न सक्षम छ।\n\n थप जानकारीको लागि, आफ्नो प्रशासकसँग सम्पर्क राख्नुहोस्।\n\n तपाईँ VPN सँग पनि जडित हुनुहुन्छ, जसले आफ्नो व्यक्तिगत सञ्जाल गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"तपाईँले अनलक गर्नअघि तिनीहरूलाई हेर्नुहोस्"</string>
