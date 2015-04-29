@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允许该应用接收和处理 WAP 消息。此权限包括监视发送给您的消息或删除发送给您的消息而不向您显示的功能。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"检索正在运行的应用"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允许该应用检索近期运行的和当前正在运行的任务的相关信息。此权限可让该应用了解设备上使用了哪些应用。"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"管理个人资料和设备所有者"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"允许应用设置个人资料所有者和设备所有者。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"对正在运行的应用重新排序"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"允许该应用将任务移动到前台和后台。该应用可能不经您的命令自行执行此操作。"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"启用车载模式"</string>
@@ -1080,6 +1078,22 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"设置"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"弹出"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"浏览"</string>
+    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
+    <skip />
+    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
+    <skip />
+    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
+    <skip />
+    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"未找到匹配的活动。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"更改媒体输出线路"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>

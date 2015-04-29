@@ -276,10 +276,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikaci přijmout a zpracovat zprávy WAP. Toto oprávnění umožňuje sledovat přijaté zprávy nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načtení spuštěných aplikací"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikaci získat informace o aktuálně a naposledy spuštěných úlohách. Aplikace s tímto oprávněním může odhalit informace o aplikacích, které se v zařízení používají."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Správa vlastníků profilu a zařízení"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Umožňuje aplikacím nastavit vlastníky profilu a vlastníka zařízení."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"změna uspořádání spuštěných aplikací"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Umožňuje aplikaci přesunout úlohy na popředí nebo pozadí. Aplikace tak může činit bez vašeho zásahu."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivovat režim V autě"</string>
@@ -1094,6 +1092,22 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Nastavení"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Odpojit"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Prozkoumat"</string>
+    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
+    <skip />
+    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
+    <skip />
+    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
+    <skip />
+    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
+    <skip />
     <string name="activity_list_empty" msgid="1675388330786841066">"Nebyly nalezeny žádné odpovídající aktivity."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Směrování výstupu médií"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Umožňuje aplikaci směrovat výstup médií do dalších externích zařízení."</string>
