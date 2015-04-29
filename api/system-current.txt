@@ -9702,6 +9702,7 @@ package android.content.pm {
     field public static final int INSTALL_PARSE_FAILED_NO_CERTIFICATES = -103; // 0xffffff99
     field public static final int INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION = -102; // 0xffffff9a
     field public static final int INSTALL_SUCCEEDED = 1; // 0x1
+    field public static final int MATCH_ALL = 131072; // 0x20000
     field public static final int MATCH_DEFAULT_ONLY = 65536; // 0x10000
     field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 3600000L; // 0x36ee80L
     field public static final int PERMISSION_DENIED = -1; // 0xffffffff
