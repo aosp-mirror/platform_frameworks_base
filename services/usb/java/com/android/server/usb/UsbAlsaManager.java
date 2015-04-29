@@ -401,6 +401,7 @@ public final class UsbAlsaManager {
                     Bundle properties = new Bundle();
                     String manufacturer = usbDevice.getManufacturerName();
                     String product = usbDevice.getProductName();
+                    String version = usbDevice.getVersion();
                     String name;
                     if (manufacturer == null || manufacturer.isEmpty()) {
                         name = product;
@@ -412,6 +413,7 @@ public final class UsbAlsaManager {
                     properties.putString(MidiDeviceInfo.PROPERTY_NAME, name);
                     properties.putString(MidiDeviceInfo.PROPERTY_MANUFACTURER, manufacturer);
                     properties.putString(MidiDeviceInfo.PROPERTY_PRODUCT, product);
+                    properties.putString(MidiDeviceInfo.PROPERTY_VERSION, version);
                     properties.putString(MidiDeviceInfo.PROPERTY_SERIAL_NUMBER,
                             usbDevice.getSerialNumber());
                     properties.putInt(MidiDeviceInfo.PROPERTY_ALSA_CARD, alsaDevice.mCard);
