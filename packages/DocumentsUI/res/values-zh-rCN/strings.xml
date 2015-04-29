@@ -65,9 +65,11 @@
       <item quantity="one">正在复制 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件。</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"正在准备复制…"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other">无法复制 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件</item>
+      <item quantity="one">无法复制 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"触摸可查看详情"</string>
     <string name="retry" msgid="7564024179122207376">"重试"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"以下文件无法复制：<xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

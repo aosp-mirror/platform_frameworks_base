@@ -69,9 +69,15 @@
       <item quantity="one">جارٍ نسخ ملف واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>).</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"جارٍ التحضير للنسخ ..."</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="zero">لم يتعذر نسخ أية ملفات (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="two">تعذر نسخ ملفين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="few"> تعذر نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> ملفات</item>
+      <item quantity="many"> تعذر نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> ملفًا</item>
+      <item quantity="other"> تعذر نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات</item>
+      <item quantity="one"> تعذر نسخ <xliff:g id="COUNT_0">%1$d</xliff:g> ملف</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"المس لعرض التفاصيل"</string>
     <string name="retry" msgid="7564024179122207376">"إعادة المحاولة"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"لم يتم نسخ هذه الملفات: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>
