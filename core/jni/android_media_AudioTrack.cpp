@@ -35,6 +35,7 @@
 
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
+#include "android_media_PlaybackSettings.h"
 
 // ----------------------------------------------------------------------------
 
@@ -59,6 +60,7 @@ struct audio_attributes_fields_t {
 };
 static audio_track_fields_t      javaAudioTrackFields;
 static audio_attributes_fields_t javaAudioAttrFields;
+static PlaybackSettings::fields_t gPlaybackSettingsFields;
 
 struct audiotrack_callback_cookie {
     jclass      audioTrack_class;
@@ -690,7 +692,7 @@ static jint android_media_AudioTrack_get_playback_rate(JNIEnv *env,  jobject thi
 
 // ----------------------------------------------------------------------------
 static void android_media_AudioTrack_set_playback_settings(JNIEnv *env,  jobject thiz,
-        jfloatArray floatArray, jintArray intArray) {
+        jobject settings) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -698,50 +700,39 @@ static void android_media_AudioTrack_set_playback_settings(JNIEnv *env,  jobject
         return;
     }
 
-    // NOTE: Get<Primitive>ArrayRegion throws ArrayIndexOutOfBoundsException if not valid.
-    // TODO: consider the actual occupancy.
-    float farray[2];
-    int iarray[2];
-    if ((env->GetFloatArrayRegion(floatArray, 0, 2, farray), env->ExceptionCheck()) == JNI_FALSE
-            &&
-        (env->GetIntArrayRegion(intArray, 0, 2, iarray), env->ExceptionCheck()) == JNI_FALSE) {
-        // arrays retrieved OK
-        AudioPlaybackRate playbackRate;
-        playbackRate.mSpeed = farray[0];
-        playbackRate.mPitch = farray[1];
-        playbackRate.mFallbackMode = (AudioTimestretchFallbackMode)iarray[0];
-        playbackRate.mStretchMode = (AudioTimestretchStretchMode)iarray[1];
-        if (lpTrack->setPlaybackRate(playbackRate) != OK) {
-            jniThrowException(env, "java/lang/IllegalArgumentException",
-                    "arguments out of range");
-        }
+    PlaybackSettings pbs;
+    pbs.fillFromJobject(env, gPlaybackSettingsFields, settings);
+
+    ALOGV("setPlaybackSettings: %d:%f %d:%f %d:%u %d:%u",
+            pbs.speedSet, pbs.audioRate.mSpeed,
+            pbs.pitchSet, pbs.audioRate.mPitch,
+            pbs.audioFallbackModeSet, pbs.audioRate.mFallbackMode,
+            pbs.audioStretchModeSet, pbs.audioRate.mStretchMode);
+
+    if (lpTrack->setPlaybackRate(pbs.audioRate) != OK) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "arguments out of range");
     }
 }
 
 
 // ----------------------------------------------------------------------------
-static void android_media_AudioTrack_get_playback_settings(JNIEnv *env,  jobject thiz,
-        jfloatArray floatArray, jintArray intArray) {
+static jobject android_media_AudioTrack_get_playback_settings(JNIEnv *env,  jobject thiz,
+        jobject settings) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
             "AudioTrack not initialized");
-        return;
+        return NULL;
     }
 
-    AudioPlaybackRate playbackRate = lpTrack->getPlaybackRate();
-
-    float farray[2] = {
-            playbackRate.mSpeed,
-            playbackRate.mPitch,
-    };
-    int iarray[2] = {
-            playbackRate.mFallbackMode,
-            playbackRate.mStretchMode,
-    };
-    // NOTE: Set<Primitive>ArrayRegion throws ArrayIndexOutOfBoundsException if not valid.
-    env->SetFloatArrayRegion(floatArray, 0, 2, farray);
-    env->SetIntArrayRegion(intArray, 0, 2, iarray);
+    PlaybackSettings pbs;
+    pbs.audioRate = lpTrack->getPlaybackRate();
+    pbs.speedSet = true;
+    pbs.pitchSet = true;
+    pbs.audioFallbackModeSet = true;
+    pbs.audioStretchModeSet = true;
+    return pbs.asJobject(env, gPlaybackSettingsFields);
 }
 
 
@@ -1012,9 +1003,11 @@ static JNINativeMethod gMethods[] = {
     {"native_get_playback_rate",
                              "()I",      (void *)android_media_AudioTrack_get_playback_rate},
     {"native_set_playback_settings",
-                             "([F[I)V",  (void *)android_media_AudioTrack_set_playback_settings},
+                             "(Landroid/media/PlaybackSettings;)V",
+                                         (void *)android_media_AudioTrack_set_playback_settings},
     {"native_get_playback_settings",
-                             "([F[I)V",  (void *)android_media_AudioTrack_get_playback_settings},
+                             "()Landroid/media/PlaybackSettings;",
+                                         (void *)android_media_AudioTrack_get_playback_settings},
     {"native_set_marker_pos","(I)I",     (void *)android_media_AudioTrack_set_marker_pos},
     {"native_get_marker_pos","()I",      (void *)android_media_AudioTrack_get_marker_pos},
     {"native_set_pos_update_period",
@@ -1088,6 +1081,8 @@ int register_android_media_AudioTrack(JNIEnv *env)
     javaAudioTrackFields.fieldStreamType = GetFieldIDOrDie(env,
             audioTrackClass, JAVA_STREAMTYPE_FIELD_NAME, "I");
 
+    env->DeleteLocalRef(audioTrackClass);
+
     // Get the AudioAttributes class and fields
     jclass audioAttrClass = FindClassOrDie(env, kAudioAttributesClassPathName);
     javaAudioAttrFields.fieldUsage = GetFieldIDOrDie(env, audioAttrClass, "mUsage", "I");
@@ -1096,6 +1091,11 @@ int register_android_media_AudioTrack(JNIEnv *env)
     javaAudioAttrFields.fieldFlags = GetFieldIDOrDie(env, audioAttrClass, "mFlags", "I");
     javaAudioAttrFields.fieldFormattedTags = GetFieldIDOrDie(env,
             audioAttrClass, "mFormattedTags", "Ljava/lang/String;");
+
+    env->DeleteLocalRef(audioAttrClass);
+
+    // initialize PlaybackSettings field info
+    gPlaybackSettingsFields.init(env);
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
