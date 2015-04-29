@@ -17,10 +17,13 @@
 
 package android.content.pm;
 
+import android.os.Bundle;
+
 /**
  * Callback for moving package resources from the Package Manager.
  * @hide
  */
 oneway interface IPackageMoveObserver {
-    void onStatusChanged(int moveId, String moveTitle, int status, long estMillis);
+    void onCreated(int moveId, in Bundle extras);
+    void onStatusChanged(int moveId, int status, long estMillis);
 }
