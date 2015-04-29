@@ -79,9 +79,6 @@ public class StorageManager {
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
 
-    /** {@hide} */
-    public static final int FLAG_ALL_METADATA = 1 << 0;
-
     private final Context mContext;
     private final ContentResolver mResolver;
 
@@ -120,7 +117,7 @@ public class StorageManager {
                     args.recycle();
                     return true;
                 case MSG_VOLUME_METADATA_CHANGED:
-                    mCallback.onVolumeMetadataChanged((VolumeInfo) args.arg1);
+                    mCallback.onVolumeMetadataChanged((String) args.arg1);
                     args.recycle();
                     return true;
                 case MSG_DISK_SCANNED:
@@ -156,9 +153,9 @@ public class StorageManager {
         }
 
         @Override
-        public void onVolumeMetadataChanged(VolumeInfo vol) {
+        public void onVolumeMetadataChanged(String fsUuid) {
             final SomeArgs args = SomeArgs.obtain();
-            args.arg1 = vol;
+            args.arg1 = fsUuid;
             mHandler.obtainMessage(MSG_VOLUME_METADATA_CHANGED, args).sendToTarget();
         }
 
@@ -516,6 +513,18 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public @Nullable VolumeRecord findRecordByUuid(String fsUuid) {
+        Preconditions.checkNotNull(fsUuid);
+        // TODO; go directly to service to make this faster
+        for (VolumeRecord rec : getVolumeRecords()) {
+            if (Objects.equals(rec.fsUuid, fsUuid)) {
+                return rec;
+            }
+        }
+        return null;
+    }
+
+    /** {@hide} */
     public @Nullable VolumeInfo findPrivateForEmulated(VolumeInfo emulatedVol) {
         return findVolumeById(emulatedVol.getId().replace("emulated", "private"));
     }
@@ -527,13 +536,17 @@ public class StorageManager {
 
     /** {@hide} */
     public @NonNull List<VolumeInfo> getVolumes() {
-        return getVolumes(0);
+        try {
+            return Arrays.asList(mMountService.getVolumes(0));
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 
     /** {@hide} */
-    public @NonNull List<VolumeInfo> getVolumes(int flags) {
+    public @NonNull List<VolumeRecord> getVolumeRecords() {
         try {
-            return Arrays.asList(mMountService.getVolumes(flags));
+            return Arrays.asList(mMountService.getVolumeRecords(0));
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -541,13 +554,23 @@ public class StorageManager {
 
     /** {@hide} */
     public @Nullable String getBestVolumeDescription(VolumeInfo vol) {
-        String descrip = vol.getDescription();
-        if (vol.disk != null) {
-            if (TextUtils.isEmpty(descrip)) {
-                descrip = vol.disk.getDescription();
+        // Nickname always takes precedence when defined
+        if (!TextUtils.isEmpty(vol.fsUuid)) {
+            final VolumeRecord rec = findRecordByUuid(vol.fsUuid);
+            if (!TextUtils.isEmpty(rec.nickname)) {
+                return rec.nickname;
             }
         }
-        return descrip;
+
+        if (!TextUtils.isEmpty(vol.getDescription())) {
+            return vol.getDescription();
+        }
+
+        if (vol.disk != null) {
+            return vol.disk.getDescription();
+        }
+
+        return null;
     }
 
     /** {@hide} */
@@ -616,29 +639,38 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void setVolumeNickname(String volId, String nickname) {
+    public void setVolumeNickname(String fsUuid, String nickname) {
         try {
-            mMountService.setVolumeNickname(volId, nickname);
+            mMountService.setVolumeNickname(fsUuid, nickname);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /** {@hide} */
-    public void setVolumeInited(String volId, boolean inited) {
+    public void setVolumeInited(String fsUuid, boolean inited) {
         try {
-            mMountService.setVolumeUserFlags(volId, inited ? VolumeInfo.USER_FLAG_INITED : 0,
-                    VolumeInfo.USER_FLAG_INITED);
+            mMountService.setVolumeUserFlags(fsUuid, inited ? VolumeRecord.USER_FLAG_INITED : 0,
+                    VolumeRecord.USER_FLAG_INITED);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     /** {@hide} */
-    public void setVolumeSnoozed(String volId, boolean snoozed) {
+    public void setVolumeSnoozed(String fsUuid, boolean snoozed) {
         try {
-            mMountService.setVolumeUserFlags(volId, snoozed ? VolumeInfo.USER_FLAG_SNOOZED : 0,
-                    VolumeInfo.USER_FLAG_SNOOZED);
+            mMountService.setVolumeUserFlags(fsUuid, snoozed ? VolumeRecord.USER_FLAG_SNOOZED : 0,
+                    VolumeRecord.USER_FLAG_SNOOZED);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public void forgetVolume(String fsUuid) {
+        try {
+            mMountService.forgetVolume(fsUuid);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

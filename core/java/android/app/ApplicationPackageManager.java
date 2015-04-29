@@ -79,6 +79,7 @@ import android.view.Display;
 import dalvik.system.VMRuntime;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.UserIcons;
 
@@ -2054,8 +2055,7 @@ final class ApplicationPackageManager extends PackageManager {
     /** {@hide} */
     private static class MoveCallbackDelegate extends IPackageMoveObserver.Stub implements
             Handler.Callback {
-        private static final int MSG_STARTED = 1;
-        private static final int MSG_STATUS_CHANGED = 2;
+        private static final int MSG_STATUS_CHANGED = 1;
 
         final MoveCallback mCallback;
         final Handler mHandler;
@@ -2067,26 +2067,25 @@ final class ApplicationPackageManager extends PackageManager {
 
         @Override
         public boolean handleMessage(Message msg) {
-            final int moveId = msg.arg1;
             switch (msg.what) {
-                case MSG_STARTED:
-                    mCallback.onStarted(moveId, (String) msg.obj);
-                    return true;
                 case MSG_STATUS_CHANGED:
-                    mCallback.onStatusChanged(moveId, msg.arg2, (long) msg.obj);
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    mCallback.onStatusChanged(args.argi1, (String) args.arg2, args.argi3,
+                            (long) args.arg4);
+                    args.recycle();
                     return true;
             }
             return false;
         }
 
         @Override
-        public void onStarted(int moveId, String title) {
-            mHandler.obtainMessage(MSG_STARTED, moveId, 0, title).sendToTarget();
-        }
-
-        @Override
-        public void onStatusChanged(int moveId, int status, long estMillis) {
-            mHandler.obtainMessage(MSG_STATUS_CHANGED, moveId, status, estMillis).sendToTarget();
+        public void onStatusChanged(int moveId, String moveTitle, int status, long estMillis) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = moveId;
+            args.arg2 = moveTitle;
+            args.argi3 = status;
+            args.arg4 = estMillis;
+            mHandler.obtainMessage(MSG_STATUS_CHANGED, args).sendToTarget();
         }
     }
 
