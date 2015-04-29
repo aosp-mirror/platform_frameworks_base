@@ -327,7 +327,7 @@ public class NotificationPanelView extends PanelView implements
         } else if (!mQsExpanded) {
             setQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
         }
-        mNotificationStackScroller.setStackHeight(getExpandedHeight());
+        updateStackHeight(getExpandedHeight());
         updateHeader();
         mNotificationStackScroller.updateIsSmallScreen(
                 mHeader.getCollapsedHeight() + mQsPeekHeight);
@@ -1457,7 +1457,7 @@ public class NotificationPanelView extends PanelView implements
             setQsExpansion(mQsMinExpansionHeight
                     + t * (getTempQsMaxExpansion() - mQsMinExpansionHeight));
         }
-        mNotificationStackScroller.setStackHeight(expandedHeight);
+        updateStackHeight(expandedHeight);
         updateHeader();
         updateUnlockIcon();
         updateNotificationTranslucency();
@@ -2233,5 +2233,10 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setTranslationX(translation);
         mScrollView.setTranslationX(translation);
         mHeader.setTranslationX(translation);
+    }
+
+    private void updateStackHeight(float stackHeight) {
+        mNotificationStackScroller.setStackHeight(stackHeight);
+        updateKeyguardBottomAreaAlpha();
     }
 }
