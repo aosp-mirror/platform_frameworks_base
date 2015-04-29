@@ -42,10 +42,7 @@ public:
      */
     ANDROID_API static uint8_t getStencilSize();
 
-    /**
-     * Returns the smallest stencil format accepted by render buffers.
-     */
-    static GLenum getSmallestStencilFormat();
+    static GLenum getLayerStencilFormat();
 
     /**
      * Clears the stencil buffer.
