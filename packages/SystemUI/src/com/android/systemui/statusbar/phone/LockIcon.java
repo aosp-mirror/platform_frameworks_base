@@ -48,7 +48,7 @@ public class LockIcon extends KeyguardAffordanceView {
     private final UnlockMethodCache mUnlockMethodCache;
     private AccessibilityController mAccessibilityController;
 
-    public LockIcon(Context context, @Nullable AttributeSet attrs) {
+    public LockIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTrustDrawable = new TrustDrawable(context);
         setBackground(mTrustDrawable);
@@ -56,7 +56,7 @@ public class LockIcon extends KeyguardAffordanceView {
     }
 
     @Override
-    protected void onVisibilityChanged(@NonNull View changedView, @Visibility int visibility) {
+    protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (isShown()) {
             mTrustDrawable.start();
