@@ -17,6 +17,7 @@
 package com.android.internal.midi;
 
 import android.media.midi.MidiReceiver;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -38,6 +39,7 @@ public class MidiFramer extends MidiReceiver {
     private int mCount;
     private int mRunningStatus;
     private int mNeeded;
+    private boolean mInSysEx;
 
     public MidiFramer(MidiReceiver receiver) {
         mReceiver = receiver;
@@ -52,12 +54,14 @@ public class MidiFramer extends MidiReceiver {
     }
 
     /*
-     * @see android.midi.MidiReceiver#onPost(byte[], int, int, long)
+     * @see android.midi.MidiReceiver#onReceive(byte[], int, int, long)
      */
     @Override
     public void onReceive(byte[] data, int offset, int count, long timestamp)
             throws IOException {
         // Log.i(TAG, formatMidiData(data, offset, count));
+        int sysExStartOffset = (mInSysEx ? offset : -1);
+
         for (int i = 0; i < count; i++) {
             int b = data[offset] & 0xFF;
             if (b >= 0x80) { // status byte?
@@ -66,26 +70,49 @@ public class MidiFramer extends MidiReceiver {
                     mCount = 1;
                     mNeeded = MidiConstants.getBytesPerMessage(b) - 1;
                 } else if (b < 0xF8) { // system common?
-                    mBuffer[0] = (byte) b;
-                    mRunningStatus = 0;
-                    mCount = 1;
-                    mNeeded = MidiConstants.getBytesPerMessage(b) - 1;
+                    if (b == 0xF0 /* SysEx Start */) {
+                        // Log.i(TAG, "SysEx Start");
+                        mInSysEx = true;
+                        sysExStartOffset = offset;
+                    } else if (b == 0xF7 /* SysEx End */) {
+                        // Log.i(TAG, "SysEx End");
+                        if (mInSysEx) {
+                            mReceiver.sendWithTimestamp(data, sysExStartOffset,
+                                offset - sysExStartOffset, timestamp);
+                            mInSysEx = false;
+                            sysExStartOffset = -1;
+                        }
+                    } else {
+                        mBuffer[0] = (byte) b;
+                        mRunningStatus = 0;
+                        mCount = 1;
+                        mNeeded = MidiConstants.getBytesPerMessage(b) - 1;
+                    }
                 } else { // real-time?
                     // Single byte message interleaved with other data.
                     mReceiver.sendWithTimestamp(data, offset, 1, timestamp);
                 }
             } else { // data byte
-                mBuffer[mCount++] = (byte) b;
-                if (--mNeeded == 0) {
-                    if (mRunningStatus != 0) {
-                        mBuffer[0] = (byte) mRunningStatus;
+                // Save SysEx data for SysEx End marker or end of buffer.
+                if (!mInSysEx) {
+                    mBuffer[mCount++] = (byte) b;
+                    if (--mNeeded == 0) {
+                        if (mRunningStatus != 0) {
+                            mBuffer[0] = (byte) mRunningStatus;
+                        }
+                        mReceiver.sendWithTimestamp(mBuffer, 0, mCount, timestamp);
+                        mNeeded = MidiConstants.getBytesPerMessage(mBuffer[0]) - 1;
+                        mCount = 1;
                     }
-                    mReceiver.sendWithTimestamp(mBuffer, 0, mCount, timestamp);
-                    mNeeded = MidiConstants.getBytesPerMessage(mBuffer[0]) - 1;
-                    mCount = 1;
                 }
             }
             ++offset;
+        }
+
+        // send any accumulatedSysEx data
+        if (sysExStartOffset >= 0) {
+            mReceiver.sendWithTimestamp(data, sysExStartOffset,
+                    offset - sysExStartOffset, timestamp);
         }
     }
 
