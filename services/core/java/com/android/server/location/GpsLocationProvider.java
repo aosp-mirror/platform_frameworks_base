@@ -952,13 +952,18 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     return GPS_POSITION_MODE_STANDALONE;
                 }
             }
+            // MS-Based is the preferred mode for Assisted-GPS position computation, so we favor
+            // such mode when it is available
+            if (hasCapability(GPS_CAPABILITY_MSB) && (suplMode & AGPS_SUPL_MODE_MSB) != 0) {
+                return GPS_POSITION_MODE_MS_BASED;
+            }
+            // for now, just as the legacy code did, we fallback to MS-Assisted if it is available,
+            // do fallback only for single-shot requests, because it is too expensive to do for
+            // periodic requests as well
             if (singleShot
                     && hasCapability(GPS_CAPABILITY_MSA)
                     && (suplMode & AGPS_SUPL_MODE_MSA) != 0) {
                 return GPS_POSITION_MODE_MS_ASSISTED;
-            } else if (hasCapability(GPS_CAPABILITY_MSB)
-                    && (suplMode & AGPS_SUPL_MODE_MSB) != 0) {
-                return GPS_POSITION_MODE_MS_BASED;
             }
         }
         return GPS_POSITION_MODE_STANDALONE;
