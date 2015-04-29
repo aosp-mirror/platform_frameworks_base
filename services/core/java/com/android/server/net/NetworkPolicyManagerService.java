@@ -110,13 +110,16 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IDeviceIdleController;
 import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
+import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -138,6 +141,7 @@ import android.util.TrustedTime;
 import android.util.Xml;
 
 import com.android.server.AppOpsService;
+import com.android.server.DeviceIdleController;
 import libcore.io.IoUtils;
 
 import com.android.internal.R;
@@ -245,6 +249,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private IConnectivityManager mConnManager;
     private INotificationManager mNotifManager;
     private PowerManagerInternal mPowerManagerInternal;
+    private IDeviceIdleController mDeviceIdleController;
 
     final Object mRulesLock = new Object();
 
@@ -321,6 +326,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mPowerManager = checkNotNull(powerManager, "missing powerManager");
         mNetworkStats = checkNotNull(networkStats, "missing networkStats");
         mNetworkManager = checkNotNull(networkManagement, "missing networkManagement");
+        mDeviceIdleController = IDeviceIdleController.Stub.asInterface(ServiceManager.getService(
+                DeviceIdleController.SERVICE_NAME));
         mTime = checkNotNull(time, "missing TrustedTime");
 
         HandlerThread thread = new HandlerThread(TAG);
@@ -342,28 +349,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mNotifManager = checkNotNull(notifManager, "missing INotificationManager");
     }
 
+    void updatePowerSaveWhitelistLocked() {
+        try {
+            final int[] whitelist = mDeviceIdleController.getAppIdWhitelist();
+            mPowerSaveWhitelistAppIds.clear();
+            if (whitelist != null) {
+                for (int uid : whitelist) {
+                    mPowerSaveWhitelistAppIds.put(uid, true);
+                }
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
     public void systemReady() {
         if (!isBandwidthControlEnabled()) {
             Slog.w(TAG, "bandwidth controls disabled, unable to enforce policy");
             return;
         }
 
-        final PackageManager pm = mContext.getPackageManager();
-
         synchronized (mRulesLock) {
-            SystemConfig sysConfig = SystemConfig.getInstance();
-            ArraySet<String> allowPower = sysConfig.getAllowInPowerSave();
-            for (int i=0; i<allowPower.size(); i++) {
-                String pkg = allowPower.valueAt(i);
-                try {
-                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
-                    if ((ai.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        mPowerSaveWhitelistAppIds.put(UserHandle.getAppId(ai.uid), true);
-                    }
-                } catch (PackageManager.NameNotFoundException e) {
-                }
-            }
-
+            updatePowerSaveWhitelistLocked();
             mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
             mPowerManagerInternal.registerLowPowerModeObserver(
                     new PowerManagerInternal.LowPowerModeListener() {
@@ -405,6 +411,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         screenFilter.addAction(Intent.ACTION_SCREEN_ON);
         screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mScreenReceiver, screenFilter);
+
+        // listen for changes to power save whitelist
+        final IntentFilter whitelistFilter = new IntentFilter(
+                PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
+        mContext.registerReceiver(mPowerSaveWhitelistReceiver, whitelistFilter, null, mHandler);
 
         // watch for network interfaces to be claimed
         final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION);
@@ -485,6 +496,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                     computeUidStateLocked(uid);
                 }
+            }
+        }
+    };
+
+    private BroadcastReceiver mPowerSaveWhitelistReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and POWER_SAVE_WHITELIST_CHANGED is protected
+            synchronized (mRulesLock) {
+                updatePowerSaveWhitelistLocked();
+                updateRulesForGlobalChangeLocked(false);
             }
         }
     };
@@ -1526,20 +1548,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
         return uids;
-    }
-
-    @Override
-    public int[] getPowerSaveAppIdWhitelist() {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-
-        synchronized (mRulesLock) {
-            int size = mPowerSaveWhitelistAppIds.size();
-            int[] appids = new int[size];
-            for (int i = 0; i < size; i++) {
-                appids[i] = mPowerSaveWhitelistAppIds.keyAt(i);
-            }
-            return appids;
-        }
     }
 
     /**
