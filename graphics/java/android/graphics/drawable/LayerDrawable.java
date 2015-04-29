@@ -564,8 +564,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         if (drawable != null) {
             drawable.setCallback(this);
-            drawable.setLayoutDirection(getLayoutDirection());
-            drawable.setLevel(getLevel());
         }
 
         childDrawable.mDrawable = drawable;
