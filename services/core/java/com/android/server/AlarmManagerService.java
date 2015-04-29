@@ -461,7 +461,7 @@ class AlarmManagerService extends SystemService {
     // to run during this time are placed in mPendingWhileIdleAlarms
     Alarm mPendingIdleUntil = null;
     Alarm mNextWakeFromIdle = null;
-    final ArrayList<Alarm> mPendingWhileIdleAlarms = new ArrayList<>();
+    ArrayList<Alarm> mPendingWhileIdleAlarms = new ArrayList<>();
 
     public AlarmManagerService(Context context) {
         super(context);
@@ -567,10 +567,14 @@ class AlarmManagerService extends SystemService {
 
     void restorePendingWhileIdleAlarmsLocked() {
         // Bring pending alarms back into the main list.
-        final long nowElapsed = SystemClock.elapsedRealtime();
-        for (int i=mPendingWhileIdleAlarms.size() - 1; i >= 0 && mPendingIdleUntil == null; i--) {
-            Alarm a = mPendingWhileIdleAlarms.remove(i);
-            reAddAlarmLocked(a, nowElapsed, false);
+        if (mPendingWhileIdleAlarms.size() > 0) {
+            ArrayList<Alarm> alarms = mPendingWhileIdleAlarms;
+            mPendingWhileIdleAlarms = new ArrayList<>();
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            for (int i=alarms.size() - 1; i >= 0; i--) {
+                Alarm a = alarms.get(i);
+                reAddAlarmLocked(a, nowElapsed, false);
+            }
         }
 
         // Reschedule everything.
@@ -1053,11 +1057,16 @@ class AlarmManagerService extends SystemService {
                     dumpAlarmList(pw, b.alarms, "  ", nowELAPSED, nowRTC, sdf);
                 }
             }
-            if (mPendingIdleUntil != null) {
+            if (mPendingIdleUntil != null || mPendingWhileIdleAlarms.size() > 0) {
                 pw.println();
                 pw.println("Idle mode state:");
-                pw.print("  Idling until: "); pw.println(mPendingIdleUntil);
-                mPendingIdleUntil.dump(pw, "    ", nowRTC, nowELAPSED, sdf);
+                pw.print("  Idling until: ");
+                if (mPendingIdleUntil != null) {
+                    pw.println(mPendingIdleUntil);
+                    mPendingIdleUntil.dump(pw, "    ", nowRTC, nowELAPSED, sdf);
+                } else {
+                    pw.println("null");
+                }
                 pw.println("  Pending alarms:");
                 dumpAlarmList(pw, mPendingWhileIdleAlarms, "    ", nowELAPSED, nowRTC, sdf);
             }
