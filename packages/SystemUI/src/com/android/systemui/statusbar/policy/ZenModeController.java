@@ -35,6 +35,7 @@ public interface ZenModeController {
     boolean isZenAvailable();
     ComponentName getEffectsSuppressor();
     boolean isCountdownConditionSupported();
+    int getCurrentUser();
 
     public static class Callback {
         public void onZenChanged(int zen) {}
@@ -45,4 +46,5 @@ public interface ZenModeController {
         public void onManualRuleChanged(ZenRule rule) {}
         public void onConfigChanged(ZenModeConfig config) {}
     }
+
 }

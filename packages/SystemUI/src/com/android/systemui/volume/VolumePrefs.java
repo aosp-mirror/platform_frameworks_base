@@ -32,8 +32,6 @@ public class VolumePrefs {
     public static final String PREF_SHOW_HEADERS = "pref_show_headers";
     public static final String PREF_SHOW_FAKE_REMOTE_1 = "pref_show_fake_remote_1";
     public static final String PREF_SHOW_FAKE_REMOTE_2 = "pref_show_fake_remote_2";
-    public static final String PREF_SHOW_FOOTER = "pref_show_footer";
-    public static final String PREF_ZEN_FOOTER = "pref_zen_footer";
     public static final String PREF_ENABLE_AUTOMUTE = "pref_enable_automute";
     public static final String PREF_ENABLE_SILENT_MODE = "pref_enable_silent_mode";
     public static final String PREF_DEBUG_LOGGING = "pref_debug_logging";
@@ -46,10 +44,8 @@ public class VolumePrefs {
     public static final String PREF_ADJUST_NOTIFICATION = "pref_adjust_notification";
 
     public static final boolean DEFAULT_SHOW_HEADERS = true;
-    public static final boolean DEFAULT_SHOW_FOOTER = true;
     public static final boolean DEFAULT_ENABLE_AUTOMUTE = true;
     public static final boolean DEFAULT_ENABLE_SILENT_MODE = true;
-    public static final boolean DEFAULT_ZEN_FOOTER = true;
 
     public static void unregisterCallbacks(Context c, OnSharedPreferenceChangeListener listener) {
         prefs(c).unregisterOnSharedPreferenceChangeListener(listener);

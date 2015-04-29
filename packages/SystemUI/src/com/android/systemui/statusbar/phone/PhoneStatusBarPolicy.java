@@ -224,14 +224,14 @@ public class PhoneStatusBarPolicy {
         } else if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
             zenIconId = R.drawable.stat_sys_zen_none;
-            zenDescription = mContext.getString(R.string.zen_no_interruptions);
+            zenDescription = mContext.getString(R.string.interruption_level_none);
         } else if (mZen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             zenVisible = true;
             zenIconId = R.drawable.stat_sys_zen_important;
-            zenDescription = mContext.getString(R.string.zen_important_interruptions);
+            zenDescription = mContext.getString(R.string.interruption_level_priority);
         }
 
-        if (DndTile.isVisible(mContext)
+        if (DndTile.isVisible(mContext) && !DndTile.isCombinedIcon(mContext)
                 && audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_silent;

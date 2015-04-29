@@ -51,5 +51,7 @@ public abstract class AudioManagerInternal {
         /** Called when internal ringer mode is evaluated, returns the new external ringer mode */
         int onSetRingerModeInternal(int ringerModeOld, int ringerModeNew, String caller,
                 int ringerModeExternal, VolumePolicy policy);
+
+        boolean canVolumeDownEnterSilent();
     }
 }

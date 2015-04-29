@@ -37,8 +37,10 @@ public final class Prefs {
         Key.DND_TILE_VISIBLE,
         Key.DND_TILE_COMBINED_ICON,
         Key.DND_CONFIRMED_PRIORITY_INTRODUCTION,
+        Key.DND_CONFIRMED_SILENCE_INTRODUCTION,
         Key.DND_FAVORITE_BUCKET_INDEX,
         Key.DND_NONE_SELECTED,
+        Key.DND_FAVORITE_ZEN,
     })
     public @interface Key {
         String SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
@@ -48,8 +50,10 @@ public final class Prefs {
         String DND_TILE_VISIBLE = "DndTileVisible";
         String DND_TILE_COMBINED_ICON = "DndTileCombinedIcon";
         String DND_CONFIRMED_PRIORITY_INTRODUCTION = "DndConfirmedPriorityIntroduction";
+        String DND_CONFIRMED_SILENCE_INTRODUCTION = "DndConfirmedSilenceIntroduction";
         String DND_FAVORITE_BUCKET_INDEX = "DndCountdownMinuteIndex";
         String DND_NONE_SELECTED = "DndNoneSelected";
+        String DND_FAVORITE_ZEN = "DndFavoriteZen";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {
