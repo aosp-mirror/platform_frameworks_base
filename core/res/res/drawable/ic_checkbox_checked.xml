@@ -22,7 +22,7 @@
     android:viewportWidth="48"
     android:height="32dp"
     android:viewportHeight="48"
-    android:tint="?attr/colorControlNormal" >
+    android:tint="?attr/colorControlActivated" >
     <group
         android:name="icon_null"
         android:translateX="24"
