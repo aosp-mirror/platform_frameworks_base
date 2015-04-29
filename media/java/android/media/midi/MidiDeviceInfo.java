@@ -69,6 +69,13 @@ public final class MidiDeviceInfo implements Parcelable {
     public static final String PROPERTY_PRODUCT = "product";
 
     /**
+     * Bundle key for the device's version property.
+     * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
+     * Matches the USB device version number for USB MIDI devices.
+     */
+    public static final String PROPERTY_VERSION = "version";
+
+    /**
      * Bundle key for the device's serial number property.
      * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
      * Matches the USB device serial number for USB MIDI devices.
