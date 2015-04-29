@@ -32,37 +32,34 @@ import android.widget.FrameLayout;
 import com.android.systemui.R;
 
 /**
- * A frame layout containing the actual payload of the notification, including the contracted and
- * expanded layout. This class is responsible for clipping the content and and switching between the
- * expanded and contracted view depending on its clipped size.
+ * A frame layout containing the actual payload of the notification, including the contracted,
+ * expanded and heads up layout. This class is responsible for clipping the content and and
+ * switching between the expanded, contracted and the heads up view depending on its clipped size.
  */
 public class NotificationContentView extends FrameLayout {
 
     private static final long ANIMATION_DURATION_LENGTH = 170;
-    private static final int CONTRACTED = 1;
-    private static final int EXPANDED = 2;
-    private static final int HEADSUP = 3;
+    private static final int VISIBLE_TYPE_CONTRACTED = 0;
+    private static final int VISIBLE_TYPE_EXPANDED = 1;
+    private static final int VISIBLE_TYPE_HEADSUP = 2;
 
     private final Rect mClipBounds = new Rect();
+    private final int mSmallHeight;
+    private final int mHeadsUpHeight;
+    private final Interpolator mLinearInterpolator = new LinearInterpolator();
 
     private View mContractedChild;
     private View mExpandedChild;
     private View mHeadsUpChild;
 
     private NotificationViewWrapper mContractedWrapper;
-
-    private final int mSmallHeight;
-    private final int mHeadsUpHeight;
     private int mClipTopAmount;
-
     private int mContentHeight;
-
-    private final Interpolator mLinearInterpolator = new LinearInterpolator();
-    private int mVisibleView = CONTRACTED;
-
+    private int mVisibleType = VISIBLE_TYPE_CONTRACTED;
     private boolean mDark;
     private final Paint mFadePaint = new Paint();
     private boolean mAnimate;
+    private boolean mIsHeadsUp;
     private ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
@@ -72,7 +69,6 @@ public class NotificationContentView extends FrameLayout {
             return true;
         }
     };
-    private boolean mIsHeadsUp;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -105,9 +101,9 @@ public class NotificationContentView extends FrameLayout {
                 // An actual height is set
                 size = Math.min(maxSize, layoutParams.height);
             }
-            int spec = size == Integer.MAX_VALUE ?
-                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED) :
-                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
+            int spec = size == Integer.MAX_VALUE
+                    ? MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+                    : MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
             mExpandedChild.measure(widthMeasureSpec, spec);
             maxChildHeight = Math.max(maxChildHeight, mExpandedChild.getMeasuredHeight());
         }
@@ -153,7 +149,7 @@ public class NotificationContentView extends FrameLayout {
         mContractedChild = null;
         mExpandedChild = null;
         mHeadsUpChild = null;
-        mVisibleView = CONTRACTED;
+        mVisibleType = VISIBLE_TYPE_CONTRACTED;
         if (resetActualHeight) {
             mContentHeight = mSmallHeight;
         }
@@ -263,30 +259,32 @@ public class NotificationContentView extends FrameLayout {
         if (mContractedChild == null) {
             return;
         }
-        int visibleView = calculateVisibleView();
-        if (visibleView != mVisibleView || force) {
-            if (animate && mExpandedChild != null) {
-                runSwitchAnimation(visibleView);
+        int visibleType = calculateVisibleType();
+        if (visibleType != mVisibleType || force) {
+            if (animate && (visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
+                    || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
+                    || visibleType == VISIBLE_TYPE_CONTRACTED) {
+                runSwitchAnimation(visibleType);
             } else {
-                updateViewVisibilities(visibleView);
+                updateViewVisibilities(visibleType);
             }
-            mVisibleView = visibleView;
+            mVisibleType = visibleType;
         }
     }
 
-    private void updateViewVisibilities(int visibleView) {
-        boolean contractedVisible = visibleView == CONTRACTED;
+    private void updateViewVisibilities(int visibleType) {
+        boolean contractedVisible = visibleType == VISIBLE_TYPE_CONTRACTED;
         mContractedChild.setVisibility(contractedVisible ? View.VISIBLE : View.INVISIBLE);
         mContractedChild.setAlpha(contractedVisible ? 1f : 0f);
         mContractedChild.setLayerType(LAYER_TYPE_NONE, null);
         if (mExpandedChild != null) {
-            boolean expandedVisible = visibleView == EXPANDED;
+            boolean expandedVisible = visibleType == VISIBLE_TYPE_EXPANDED;
             mExpandedChild.setVisibility(expandedVisible ? View.VISIBLE : View.INVISIBLE);
             mExpandedChild.setAlpha(expandedVisible ? 1f : 0f);
             mExpandedChild.setLayerType(LAYER_TYPE_NONE, null);
         }
         if (mHeadsUpChild != null) {
-            boolean headsUpVisible = visibleView == HEADSUP;
+            boolean headsUpVisible = visibleType == VISIBLE_TYPE_HEADSUP;
             mHeadsUpChild.setVisibility(headsUpVisible ? View.VISIBLE : View.INVISIBLE);
             mHeadsUpChild.setAlpha(headsUpVisible ? 1f : 0f);
             mHeadsUpChild.setLayerType(LAYER_TYPE_NONE, null);
@@ -294,9 +292,9 @@ public class NotificationContentView extends FrameLayout {
         setLayerType(LAYER_TYPE_NONE, null);
     }
 
-    private void runSwitchAnimation(int visibleView) {
-        View shownView = getViewFromFlag(visibleView);
-        View hiddenView = getViewFromFlag(mVisibleView);
+    private void runSwitchAnimation(int visibleType) {
+        View shownView = getViewForVisibleType(visibleType);
+        View hiddenView = getViewForVisibleType(mVisibleType);
         shownView.setVisibility(View.VISIBLE);
         hiddenView.setVisibility(View.VISIBLE);
         shownView.setLayerType(LAYER_TYPE_HARDWARE, mFadePaint);
@@ -314,34 +312,42 @@ public class NotificationContentView extends FrameLayout {
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        updateViewVisibilities(mVisibleView);
+                        updateViewVisibilities(mVisibleType);
                     }
                 });
     }
 
-    private View getViewFromFlag(int visibleView) {
-        switch (visibleView) {
-            case EXPANDED:
+    /**
+     * @param visibleType one of the static enum types in this view
+     * @return the corresponding view according to the given visible type
+     */
+    private View getViewForVisibleType(int visibleType) {
+        switch (visibleType) {
+            case VISIBLE_TYPE_EXPANDED:
                 return mExpandedChild;
-            case HEADSUP:
+            case VISIBLE_TYPE_HEADSUP:
                 return mHeadsUpChild;
+            default:
+                return mContractedChild;
         }
-        return mContractedChild;
     }
 
-    private int calculateVisibleView() {
+    /**
+     * @return one of the static enum types in this view, calculated form the current state
+     */
+    private int calculateVisibleType() {
         boolean noExpandedChild = mExpandedChild == null;
         if (mIsHeadsUp && mHeadsUpChild != null) {
             if (mContentHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
-                return HEADSUP;
+                return VISIBLE_TYPE_HEADSUP;
             } else {
-                return EXPANDED;
+                return VISIBLE_TYPE_EXPANDED;
             }
         } else {
             if (mContentHeight <= mSmallHeight || noExpandedChild) {
-                return CONTRACTED;
+                return VISIBLE_TYPE_CONTRACTED;
             } else {
-                return EXPANDED;
+                return VISIBLE_TYPE_EXPANDED;
             }
         }
     }

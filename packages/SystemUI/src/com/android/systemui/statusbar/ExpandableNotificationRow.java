@@ -84,7 +84,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private ExpansionLogger mLogger;
     private String mLoggingKey;
     private boolean mWasReset;
-
     private NotificationGuts mGuts;
     private StatusBarNotification mStatusBarNotification;
     private boolean mIsHeadsUp;
@@ -102,6 +101,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private ViewStub mGutsStub;
     private boolean mHasExpandAction;
     private boolean mIsSystemChildExpanded;
+    private boolean mIsPinned;
     private OnClickListener mExpandClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -109,7 +109,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     !mChildrenExpanded);
         }
     };
-    private boolean mInShade;
 
     public NotificationContentView getPrivateLayout() {
         return mPrivateLayout;
@@ -284,12 +283,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return realActualHeight;
     }
 
-    public void setInShade(boolean inShade) {
-        mInShade = inShade;
+    /**
+     * Set this notification to be pinned to the top if {@link #isHeadsUp()} is true. By doing this
+     * the notification will be rendered on top of the screen.
+     *
+     * @param pinned whether it is pinned
+     */
+    public void setPinned(boolean pinned) {
+        mIsPinned = pinned;
     }
 
-    public boolean isInShade() {
-        return mInShade;
+    public boolean isPinned() {
+        return mIsPinned;
     }
 
     public int getHeadsUpHeight() {
