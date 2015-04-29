@@ -161,27 +161,10 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 KeymasterDefs.KM_TAG_PADDING,
                 KeymasterUtils.getKeymasterPaddingsFromJcaEncryptionPaddings(
                         spec.getEncryptionPaddings()));
-        if (spec.getUserAuthenticators() == 0) {
-            args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
-        } else {
-            args.addInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
-                    KeyStoreKeyProperties.UserAuthenticator.allToKeymaster(
-                            spec.getUserAuthenticators()));
-            long secureUserId = GateKeeper.getSecureUserId();
-            if (secureUserId == 0) {
-                throw new IllegalStateException("Secure lock screen must be enabled"
-                        + " to generate keys requiring user authentication");
-            }
-            args.addLong(KeymasterDefs.KM_TAG_USER_SECURE_ID, secureUserId);
-        }
-        if (spec.isInvalidatedOnNewFingerprintEnrolled()) {
-            // TODO: Add the invalidate on fingerprint enrolled constraint once Keymaster supports
-            // that.
-        }
-        if (spec.getUserAuthenticationValidityDurationSeconds() != -1) {
-            args.addInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
-                    spec.getUserAuthenticationValidityDurationSeconds());
-        }
+        KeymasterUtils.addUserAuthArgs(args,
+                spec.getContext(),
+                spec.isUserAuthenticationRequired(),
+                spec.getUserAuthenticationValidityDurationSeconds());
         args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
                 (spec.getKeyValidityStart() != null)
                 ? spec.getKeyValidityStart() : new Date(0));

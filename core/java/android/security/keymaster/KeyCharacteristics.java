@@ -105,11 +105,11 @@ public class KeyCharacteristics implements Parcelable {
         }
     }
 
-    public boolean getBoolean(KeyCharacteristics keyCharacteristics, int tag) {
-        if (keyCharacteristics.hwEnforced.containsTag(tag)) {
-            return keyCharacteristics.hwEnforced.getBoolean(tag, false);
+    public boolean getBoolean(int tag) {
+        if (hwEnforced.containsTag(tag)) {
+            return hwEnforced.getBoolean(tag, false);
         } else {
-            return keyCharacteristics.swEnforced.getBoolean(tag, false);
+            return swEnforced.getBoolean(tag, false);
         }
     }
 }

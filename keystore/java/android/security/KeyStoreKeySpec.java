@@ -36,10 +36,9 @@ public class KeyStoreKeySpec implements KeySpec {
     private final String[] mSignaturePaddings;
     private final String[] mDigests;
     private final String[] mBlockModes;
-    private final @KeyStoreKeyProperties.UserAuthenticatorEnum int mUserAuthenticators;
-    private final @KeyStoreKeyProperties.UserAuthenticatorEnum int mTeeEnforcedUserAuthenticators;
+    private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
-    private final boolean mInvalidatedOnNewFingerprintEnrolled;
+    private final boolean mUserAuthenticationRequirementTeeEnforced;
 
     /**
      * @hide
@@ -56,10 +55,9 @@ public class KeyStoreKeySpec implements KeySpec {
             String[] signaturePaddings,
             String[] digests,
             String[] blockModes,
-            @KeyStoreKeyProperties.UserAuthenticatorEnum int userAuthenticators,
-            @KeyStoreKeyProperties.UserAuthenticatorEnum int teeEnforcedUserAuthenticators,
+            boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean invalidatedOnNewFingerprintEnrolled) {
+            boolean userAuthenticationRequirementTeeEnforced) {
         mKeystoreAlias = keystoreKeyAlias;
         mTeeBacked = teeBacked;
         mOrigin = origin;
@@ -74,10 +72,9 @@ public class KeyStoreKeySpec implements KeySpec {
                 ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(signaturePaddings));
         mDigests = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(digests));
         mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
-        mUserAuthenticators = userAuthenticators;
-        mTeeEnforcedUserAuthenticators = teeEnforcedUserAuthenticators;
+        mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
-        mInvalidatedOnNewFingerprintEnrolled = invalidatedOnNewFingerprintEnrolled;
+        mUserAuthenticationRequirementTeeEnforced = userAuthenticationRequirementTeeEnforced;
     }
 
     /**
@@ -172,43 +169,34 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the set of user authenticators which protect access to the key. The key can only be used
-     * iff the user has authenticated to at least one of these user authenticators.
+     * Returns {@code true} if user authentication is required for this key to be used.
      *
-     * @return user authenticators or {@code 0} if the key can be used without user authentication.
+     * @see #getUserAuthenticationValidityDurationSeconds()
      */
-    public @KeyStoreKeyProperties.UserAuthenticatorEnum int getUserAuthenticators() {
-        return mUserAuthenticators;
+    public boolean isUserAuthenticationRequired() {
+        return mUserAuthenticationRequired;
     }
 
     /**
-     * Gets the set of user authenticators for which the TEE enforces access restrictions for this
-     * key. This is a subset of the user authentications returned by
-     * {@link #getUserAuthenticators()}.
-     */
-    public @KeyStoreKeyProperties.UserAuthenticatorEnum int getTeeEnforcedUserAuthenticators() {
-        return mTeeEnforcedUserAuthenticators;
-    }
-
-    /**
-     * Gets the duration of time (seconds) for which the key can be used after the user
-     * successfully authenticates to one of the associated user authenticators.
+     * Gets the duration of time (seconds) for which this key can be used after the user is
+     * successfully authenticated.
      *
      * @return duration in seconds or {@code -1} if not restricted. {@code 0} means authentication
      *         is required for every use of the key.
+     *
+     * @see #isUserAuthenticationRequired()
      */
     public int getUserAuthenticationValidityDurationSeconds() {
         return mUserAuthenticationValidityDurationSeconds;
     }
 
     /**
-     * Returns {@code true} if this key will be permanently invalidated once a new fingerprint is
-     * enrolled. This constraint only has effect if fingerprint reader is one of the user
-     * authenticators protecting access to this key.
+     * Returns {@code true} if the requirement that this key can only be used if the user has been
+     * authenticated if enforced by the TEE.
      *
-     * @see #getUserAuthenticators()
+     * @see #isUserAuthenticationRequired()
      */
-    public boolean isInvalidatedOnNewFingerprintEnrolled() {
-        return mInvalidatedOnNewFingerprintEnrolled;
+    public boolean isUserAuthenticationRequirementTeeEnforced() {
+        return mUserAuthenticationRequirementTeeEnforced;
     }
 }
