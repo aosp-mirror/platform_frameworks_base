@@ -1398,12 +1398,7 @@ public class KeyguardViewMediator extends SystemUI {
             updateActivityLockScreenState();
             adjustStatusBarLocked();
             sendUserPresentBroadcast();
-            maybeStopListeningForFingerprint();
         }
-    }
-
-    private void maybeStopListeningForFingerprint() {
-        mUpdateMonitor.stopListeningForFingerprint();
     }
 
     private void adjustStatusBarLocked() {

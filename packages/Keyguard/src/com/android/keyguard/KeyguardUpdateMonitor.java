@@ -679,7 +679,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onScreenTurnedOn();
             }
         }
-        startListeningForFingerprint();
+        updateFingerprintListeningState();
     }
 
     protected void handleScreenTurnedOff(int arg1) {
@@ -691,7 +691,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onScreenTurnedOff(arg1);
             }
         }
-        stopListeningForFingerprint();
+        updateFingerprintListeningState();
     }
 
     /**
@@ -764,14 +764,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHING,
                                     newUserId, 0, reply));
                             mSwitchingUser = true;
-                            stopListeningForFingerprint();
+                            updateFingerprintListeningState();
                         }
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
                                     newUserId, 0));
                             mSwitchingUser = false;
-                            startListeningForFingerprint();
+                            updateFingerprintListeningState();
                         }
                         @Override
                         public void onForegroundProfileSwitch(int newProfileId) {
@@ -787,7 +787,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         trustManager.registerTrustListener(this);
 
         mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
-        startListeningForFingerprint();
+        updateFingerprintListeningState();
+    }
+
+    private void updateFingerprintListeningState() {
+        boolean shouldListenForFingerprint = shouldListenForFingerprint();
+        if (mFingerprintDetectionRunning && !shouldListenForFingerprint) {
+            stopListeningForFingerprint();
+        } else if (!mFingerprintDetectionRunning && shouldListenForFingerprint) {
+            startListeningForFingerprint();
+        }
+    }
+
+    private boolean shouldListenForFingerprint() {
+        return mScreenOn && mKeyguardIsVisible && !mSwitchingUser;
     }
 
     private void startListeningForFingerprint() {
@@ -804,7 +817,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    public void stopListeningForFingerprint() {
+    private void stopListeningForFingerprint() {
         if (DEBUG) Log.v(TAG, "stopListeningForFingerprint()");
         if (isFingerprintDetectionRunning()) {
             mFingerprintCancelSignal.cancel();
@@ -1062,6 +1075,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onKeyguardVisibilityChangedRaw(isShowing);
             }
         }
+        updateFingerprintListeningState();
     }
 
     /**
