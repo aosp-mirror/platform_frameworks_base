@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.media.AudioAttributes.USAGE_ALARM;
+import static android.media.AudioAttributes.USAGE_MEDIA;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
@@ -262,8 +263,8 @@ public class ZenModeHelper {
         }
         mConditions.evaluateConfig(config);  // may modify config
         if (config.equals(mConfig)) return true;
-        if (DEBUG) Log.d(TAG, "setConfig reason=" + reason);
-        ZenLog.traceConfig(mConfig, config);
+        if (DEBUG) Log.d(TAG, "setConfig reason=" + reason, new Throwable());
+        ZenLog.traceConfig(reason, config);
         final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
                 getNotificationPolicy(config));
         mConfig = config;
@@ -329,9 +330,10 @@ public class ZenModeHelper {
                 || mEffectsSuppressed;
         applyRestrictions(muteCalls, USAGE_NOTIFICATION_RINGTONE);
 
-        // alarm restrictions
-        final boolean muteAlarms = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        applyRestrictions(muteAlarms, USAGE_ALARM);
+        // alarm/media restrictions
+        final boolean zenNone = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        applyRestrictions(zenNone, USAGE_ALARM);
+        applyRestrictions(zenNone, USAGE_MEDIA);
     }
 
     private void applyRestrictions(boolean mute, int usage) {
@@ -589,6 +591,11 @@ public class ZenModeHelper {
             ZenLog.traceSetRingerModeExternal(ringerModeOld, ringerModeNew, caller,
                     ringerModeInternal, ringerModeInternalOut);
             return ringerModeInternalOut;
+        }
+
+        @Override
+        public boolean canVolumeDownEnterSilent() {
+            return mZenMode == Global.ZEN_MODE_OFF;
         }
     }
 

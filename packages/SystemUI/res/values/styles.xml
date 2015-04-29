@@ -165,7 +165,7 @@
     </style>
 
     <style name="TextAppearance.QS.SegmentedButton">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="TextAppearance.QS.DataUsage">
@@ -262,4 +262,31 @@
         <item name="fillColor">@color/dark_mode_icon_color_dual_tone_fill</item>
         <item name="singleToneColor">@color/dark_mode_icon_color_single_tone</item>
     </style>
+
+    <style name="TextAppearance.Volume">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Volume.ZenSummary">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Volume.ZenDetail">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">#ffb0b3c5</item>
+    </style>
+
+    <style name="VolumeDialogAnimations">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
+        <item name="android:background">@drawable/btn_borderless_rect</item>
+    </style>
+
 </resources>

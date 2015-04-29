@@ -100,7 +100,7 @@ public class VolumeDialogController {
     private boolean mEnabled;
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
-    private boolean mShowDndTile = false;
+    private boolean mShowDndTile = true;
 
     public VolumeDialogController(Context context, ComponentName component) {
         mContext = context.getApplicationContext();
@@ -123,6 +123,10 @@ public class VolumeDialogController {
 
     public AudioManager getAudioManager() {
         return mAudio;
+    }
+
+    public ZenModeConfig getZenModeConfig() {
+        return mNoMan.getZenModeConfig();
     }
 
     public void dismiss() {
@@ -342,7 +346,7 @@ public class VolumeDialogController {
         updateRingerModeExternalW(mAudio.getRingerMode());
         updateZenModeW();
         updateEffectsSuppressorW(mNoMan.getEffectsSuppressor());
-        updateExitConditionW();
+        updateZenModeConfigW();
         mCallbacks.onStateChanged(mState);
     }
 
@@ -395,17 +399,10 @@ public class VolumeDialogController {
         return stream == AudioManager.STREAM_RING || stream == AudioManager.STREAM_NOTIFICATION;
     }
 
-    private Condition getExitCondition() {
-        final ZenModeConfig config = mNoMan.getZenModeConfig();
-        return config == null ? null
-                : config.manualRule == null ? null
-                : config.manualRule.condition;
-    }
-
-    private boolean updateExitConditionW() {
-        final Condition exitCondition = getExitCondition();
-        if (Objects.equals(mState.exitCondition, exitCondition)) return false;
-        mState.exitCondition = exitCondition;
+    private boolean updateZenModeConfigW() {
+        final ZenModeConfig zenModeConfig = getZenModeConfig();
+        if (Objects.equals(mState.zenModeConfig, zenModeConfig)) return false;
+        mState.zenModeConfig = zenModeConfig;
         return true;
     }
 
@@ -750,7 +747,7 @@ public class VolumeDialogController {
                 changed = updateZenModeW();
             }
             if (ZEN_MODE_CONFIG_URI.equals(uri)) {
-                changed = updateExitConditionW();
+                changed = updateZenModeConfigW();
             }
             if (changed) {
                 mCallbacks.onStateChanged(mState);
@@ -943,7 +940,7 @@ public class VolumeDialogController {
         public int zenMode;
         public ComponentName effectsSuppressor;
         public String effectsSuppressorName;
-        public Condition exitCondition;
+        public ZenModeConfig zenModeConfig;
         public int activeStream = NO_ACTIVE_STREAM;
 
         public State copy() {
@@ -956,7 +953,7 @@ public class VolumeDialogController {
             rt.zenMode = zenMode;
             if (effectsSuppressor != null) rt.effectsSuppressor = effectsSuppressor.clone();
             rt.effectsSuppressorName = effectsSuppressorName;
-            if (exitCondition != null) rt.exitCondition = exitCondition.copy();
+            if (zenModeConfig != null) rt.zenModeConfig = zenModeConfig.copy();
             rt.activeStream = activeStream;
             return rt;
         }
@@ -977,9 +974,14 @@ public class VolumeDialogController {
             sb.append(",zenMode:").append(zenMode);
             sb.append(",effectsSuppressor:").append(effectsSuppressor);
             sb.append(",effectsSuppressorName:").append(effectsSuppressorName);
-            sb.append(",exitCondition:").append(exitCondition);
+            sb.append(",zenModeConfig:").append(zenModeConfig);
             sb.append(",activeStream:").append(activeStream);
             return sb.append('}').toString();
+        }
+
+        public Condition getManualExitCondition() {
+            return zenModeConfig != null && zenModeConfig.manualRule != null
+                    ? zenModeConfig.manualRule.condition : null;
         }
     }
 
