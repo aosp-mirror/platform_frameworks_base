@@ -208,7 +208,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
         mHasPinnedNotification = hasPinnedNotification;
         for (OnHeadsUpChangedListener listener : mListeners) {
-            listener.onPinnedModeChanged(hasPinnedNotification);
+            listener.onHeadsUpPinnedModeChanged(hasPinnedNotification);
         }
     }
 
@@ -539,7 +539,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
          *
          * @param inPinnedMode whether there are any pinned heads-ups
          */
-        void onPinnedModeChanged(boolean inPinnedMode);
+        void onHeadsUpPinnedModeChanged(boolean inPinnedMode);
 
         /**
          * A notification was just pinned to the top.
