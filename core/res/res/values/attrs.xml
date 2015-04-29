@@ -1971,7 +1971,7 @@
              {@link android.R.attr#windowTranslucentStatus}.
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_STATUS_BAR} on
              the decor view. -->
-        <attr name="windowHasLightStatusBar" format="boolean" />
+        <attr name="windowLightStatusBar" format="boolean" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

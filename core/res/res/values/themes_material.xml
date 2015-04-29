@@ -760,7 +760,7 @@ please see themes_device_defaults.xml.
          status bar contents. -->
     <style name="Theme.Material.Light.LightStatusBar">
         <item name="colorPrimaryDark">@color/primary_dark_material_light_light_status_bar</item>
-        <item name="windowHasLightStatusBar">true</item>
+        <item name="windowLightStatusBar">true</item>
     </style>
 
     <style name="ThemeOverlay" />
