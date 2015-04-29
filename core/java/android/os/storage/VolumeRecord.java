@@ -26,7 +26,7 @@ import com.android.internal.util.Preconditions;
 import java.util.Objects;
 
 /**
- * Notes for a storage volume which may not be currently present.
+ * Metadata for a storage volume which may not be currently present.
  *
  * @hide
  */
