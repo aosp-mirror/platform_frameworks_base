@@ -93,8 +93,8 @@ public interface IMountServiceListener extends IInterface {
                 }
                 case TRANSACTION_onVolumeMetadataChanged: {
                     data.enforceInterface(DESCRIPTOR);
-                    final VolumeInfo vol = (VolumeInfo) data.readParcelable(null);
-                    onVolumeMetadataChanged(vol);
+                    final String fsUuid = data.readString();
+                    onVolumeMetadataChanged(fsUuid);
                     reply.writeNoException();
                     return true;
                 }
@@ -192,12 +192,12 @@ public interface IMountServiceListener extends IInterface {
             }
 
             @Override
-            public void onVolumeMetadataChanged(VolumeInfo vol) throws RemoteException {
+            public void onVolumeMetadataChanged(String fsUuid) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeParcelable(vol, 0);
+                    _data.writeString(fsUuid);
                     mRemote.transact(Stub.TRANSACTION_onVolumeMetadataChanged, _data, _reply,
                             android.os.IBinder.FLAG_ONEWAY);
                     _reply.readException();
@@ -253,7 +253,7 @@ public interface IMountServiceListener extends IInterface {
     public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState)
             throws RemoteException;
 
-    public void onVolumeMetadataChanged(VolumeInfo vol) throws RemoteException;
+    public void onVolumeMetadataChanged(String fsUuid) throws RemoteException;
 
     public void onDiskScanned(DiskInfo disk, int volumeCount) throws RemoteException;
 }

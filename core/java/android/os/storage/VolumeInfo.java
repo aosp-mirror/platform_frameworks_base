@@ -78,9 +78,6 @@ public class VolumeInfo implements Parcelable {
     public static final int MOUNT_FLAG_PRIMARY = 1 << 0;
     public static final int MOUNT_FLAG_VISIBLE = 1 << 1;
 
-    public static final int USER_FLAG_INITED = 1 << 0;
-    public static final int USER_FLAG_SNOOZED = 1 << 1;
-
     private static SparseArray<String> sStateToEnvironment = new SparseArray<>();
     private static ArrayMap<String, String> sEnvironmentToBroadcast = new ArrayMap<>();
 
@@ -135,8 +132,6 @@ public class VolumeInfo implements Parcelable {
 
     /** Framework state */
     public final int mtpIndex;
-    public String nickname;
-    public int userFlags = 0;
 
     public VolumeInfo(String id, int type, DiskInfo disk, int mtpIndex) {
         this.id = Preconditions.checkNotNull(id);
@@ -161,8 +156,6 @@ public class VolumeInfo implements Parcelable {
         fsLabel = parcel.readString();
         path = parcel.readString();
         mtpIndex = parcel.readInt();
-        nickname = parcel.readString();
-        userFlags = parcel.readInt();
     }
 
     public static @NonNull String getEnvironmentForState(int state) {
@@ -210,10 +203,6 @@ public class VolumeInfo implements Parcelable {
         return fsUuid;
     }
 
-    public @Nullable String getNickname() {
-        return nickname;
-    }
-
     public int getMountUserId() {
         return mountUserId;
     }
@@ -221,8 +210,6 @@ public class VolumeInfo implements Parcelable {
     public @Nullable String getDescription() {
         if (ID_PRIVATE_INTERNAL.equals(id)) {
             return Resources.getSystem().getString(com.android.internal.R.string.storage_internal);
-        } else if (!TextUtils.isEmpty(nickname)) {
-            return nickname;
         } else if (!TextUtils.isEmpty(fsLabel)) {
             return fsLabel;
         } else {
@@ -248,14 +235,6 @@ public class VolumeInfo implements Parcelable {
 
     public boolean isVisible() {
         return (mountFlags & MOUNT_FLAG_VISIBLE) != 0;
-    }
-
-    public boolean isInited() {
-        return (userFlags & USER_FLAG_INITED) != 0;
-    }
-
-    public boolean isSnoozed() {
-        return (userFlags & USER_FLAG_SNOOZED) != 0;
     }
 
     public boolean isVisibleToUser(int userId) {
@@ -394,8 +373,6 @@ public class VolumeInfo implements Parcelable {
         pw.println();
         pw.printPair("path", path);
         pw.printPair("mtpIndex", mtpIndex);
-        pw.printPair("nickname", nickname);
-        pw.printPair("userFlags", DebugUtils.flagsToString(getClass(), "USER_FLAG_", userFlags));
         pw.decreaseIndent();
         pw.println();
     }
@@ -461,7 +438,5 @@ public class VolumeInfo implements Parcelable {
         parcel.writeString(fsLabel);
         parcel.writeString(path);
         parcel.writeInt(mtpIndex);
-        parcel.writeString(nickname);
-        parcel.writeInt(userFlags);
     }
 }
