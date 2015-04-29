@@ -36209,6 +36209,7 @@ package android.util {
     method public static void readEvents(int[], java.util.Collection<android.util.EventLog.Event>) throws java.io.IOException;
     method public static int writeEvent(int, int);
     method public static int writeEvent(int, long);
+    method public static int writeEvent(int, float);
     method public static int writeEvent(int, java.lang.String);
     method public static int writeEvent(int, java.lang.Object...);
   }
