@@ -1173,6 +1173,7 @@ package android {
     field public static final int strokeLineJoin = 16843788; // 0x101040c
     field public static final int strokeMiterLimit = 16843789; // 0x101040d
     field public static final int strokeWidth = 16843783; // 0x1010407
+    field public static final int stylusButtonPressable = 16844020; // 0x10104f4
     field public static final int submitBackground = 16843912; // 0x1010488
     field public static final int subtitle = 16843473; // 0x10102d1
     field public static final int subtitleTextAppearance = 16843823; // 0x101042f
@@ -1686,6 +1687,7 @@ package android {
     ctor public R.id();
     field public static final int accessibilityActionScrollToPosition = 16908342; // 0x1020036
     field public static final int accessibilityActionShowOnScreen = 16908341; // 0x1020035
+    field public static final int accessibilityActionStylusButtonPress = 16908344; // 0x1020038
     field public static final int addToDictionary = 16908330; // 0x102002a
     field public static final int background = 16908288; // 0x1020000
     field public static final int button1 = 16908313; // 0x1020019
@@ -4079,6 +4081,7 @@ package android.app {
     method public boolean isFocused();
     method public boolean isLongClickable();
     method public boolean isSelected();
+    method public boolean isStylusButtonPressable();
     field public static final int TEXT_COLOR_UNDEFINED = 1; // 0x1
     field public static final int TEXT_STYLE_BOLD = 1; // 0x1
     field public static final int TEXT_STYLE_ITALIC = 2; // 0x2
@@ -34874,6 +34877,7 @@ package android.view {
     field public static final int FLAG_IGNORE_VIEW_SETTING = 1; // 0x1
     field public static final int KEYBOARD_TAP = 3; // 0x3
     field public static final int LONG_PRESS = 0; // 0x0
+    field public static final int STYLUS_BUTTON_PRESS = 6; // 0x6
     field public static final int VIRTUAL_KEY = 1; // 0x1
   }
 
@@ -35606,6 +35610,7 @@ package android.view {
     method public final float getY(int);
     method public final float getYPrecision();
     method public final boolean isButtonPressed(int);
+    method public final boolean isStylusButtonPressed();
     method public static android.view.MotionEvent obtain(long, long, int, int, android.view.MotionEvent.PointerProperties[], android.view.MotionEvent.PointerCoords[], int, int, float, float, int, int, int, int);
     method public static deprecated android.view.MotionEvent obtain(long, long, int, int, int[], android.view.MotionEvent.PointerCoords[], int, float, float, int, int, int, int);
     method public static android.view.MotionEvent obtain(long, long, int, float, float, float, float, int, float, float, int, int);
@@ -36210,6 +36215,7 @@ package android.view {
     method public boolean isSelected();
     method public boolean isShown();
     method public boolean isSoundEffectsEnabled();
+    method public boolean isStylusButtonPressable();
     method public boolean isTextAlignmentResolved();
     method public boolean isTextDirectionResolved();
     method public boolean isVerticalFadingEdgeEnabled();
@@ -36277,6 +36283,7 @@ package android.view {
     method public boolean performHapticFeedback(int);
     method public boolean performHapticFeedback(int, int);
     method public boolean performLongClick();
+    method public boolean performStylusButtonPress();
     method public void playSoundEffect(int);
     method public boolean post(java.lang.Runnable);
     method public boolean postDelayed(java.lang.Runnable, long);
@@ -36380,6 +36387,7 @@ package android.view {
     method public void setOnKeyListener(android.view.View.OnKeyListener);
     method public void setOnLongClickListener(android.view.View.OnLongClickListener);
     method public void setOnScrollChangeListener(android.view.View.OnScrollChangeListener);
+    method public void setOnStylusButtonPressListener(android.view.View.OnStylusButtonPressListener);
     method public void setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener);
     method public void setOnTouchListener(android.view.View.OnTouchListener);
     method public void setOutlineProvider(android.view.ViewOutlineProvider);
@@ -36408,6 +36416,7 @@ package android.view {
     method public void setSelected(boolean);
     method public void setSoundEffectsEnabled(boolean);
     method public void setStateListAnimator(android.animation.StateListAnimator);
+    method public void setStylusButtonPressable(boolean);
     method public void setSystemUiVisibility(int);
     method public void setTag(java.lang.Object);
     method public void setTag(int, java.lang.Object);
@@ -36655,6 +36664,10 @@ package android.view {
     method public abstract void onScrollChange(android.view.View, int, int, int, int);
   }
 
+  public static abstract interface View.OnStylusButtonPressListener {
+    method public abstract boolean onStylusButtonPress(android.view.View);
+  }
+
   public static abstract interface View.OnSystemUiVisibilityChangeListener {
     method public abstract void onSystemUiVisibilityChange(int);
   }
@@ -36696,6 +36709,7 @@ package android.view {
     method public abstract void setId(int, java.lang.String, java.lang.String, java.lang.String);
     method public abstract void setLongClickable(boolean);
     method public abstract void setSelected(boolean);
+    method public abstract void setStylusButtonPressable(boolean);
     method public abstract void setText(java.lang.CharSequence);
     method public abstract void setText(java.lang.CharSequence, int, int);
     method public abstract void setTextPaint(android.text.TextPaint);
@@ -37581,6 +37595,7 @@ package android.view.accessibility {
     field public static final int TYPE_VIEW_LONG_CLICKED = 2; // 0x2
     field public static final int TYPE_VIEW_SCROLLED = 4096; // 0x1000
     field public static final int TYPE_VIEW_SELECTED = 4; // 0x4
+    field public static final int TYPE_VIEW_STYLUS_BUTTON_PRESSED = 8388608; // 0x800000
     field public static final int TYPE_VIEW_TEXT_CHANGED = 16; // 0x10
     field public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 8192; // 0x2000
     field public static final int TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY = 131072; // 0x20000
@@ -37671,6 +37686,7 @@ package android.view.accessibility {
     method public boolean isPassword();
     method public boolean isScrollable();
     method public boolean isSelected();
+    method public boolean isStylusButtonPressable();
     method public boolean isVisibleToUser();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
@@ -37721,6 +37737,7 @@ package android.view.accessibility {
     method public void setSelected(boolean);
     method public void setSource(android.view.View);
     method public void setSource(android.view.View, int);
+    method public void setStylusButtonPressable(boolean);
     method public void setText(java.lang.CharSequence);
     method public void setTextSelection(int, int);
     method public void setTraversalAfter(android.view.View);
@@ -37798,6 +37815,7 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_SELECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_TEXT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SHOW_ON_SCREEN;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_STYLUS_BUTTON_PRESS;
   }
 
   public static final class AccessibilityNodeInfo.CollectionInfo {
