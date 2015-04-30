@@ -17,6 +17,7 @@
 package android.security;
 
 import java.security.Provider;
+import java.security.Security;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -32,10 +33,12 @@ public class AndroidKeyStoreProvider extends Provider {
     // IMPLEMENTATION NOTE: Class names are hard-coded in this provider to avoid loading these
     // classes when this provider is instantiated and installed early on during each app's
     // initialization process.
+    //
+    // Crypto operations operating on the AndroidKeyStore keys must not be offered by this provider.
+    // Instead, they need to be offered by AndroidKeyStoreBCWorkaroundProvider. See its Javadoc
+    // for details.
 
     private static final String PACKAGE_NAME = "android.security";
-    private static final String KEYSTORE_SECRET_KEY_CLASS_NAME =
-            PACKAGE_NAME + ".KeyStoreSecretKey";
 
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
@@ -62,41 +65,37 @@ public class AndroidKeyStoreProvider extends Provider {
         putSecretKeyFactoryImpl("HmacSHA256");
         putSecretKeyFactoryImpl("HmacSHA384");
         putSecretKeyFactoryImpl("HmacSHA512");
+    }
 
-        // javax.crypto.Mac
-        putMacImpl("HmacSHA1", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA1");
-        putMacImpl("HmacSHA224", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA224");
-        putMacImpl("HmacSHA256", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA256");
-        putMacImpl("HmacSHA384", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA384");
-        putMacImpl("HmacSHA512", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA512");
+    /**
+     * Installs a new instance of this provider (and the
+     * {@link AndroidKeyStoreBCWorkaroundProvider}).
+     */
+    public static void install() {
+        Provider[] providers = Security.getProviders();
+        int bcProviderPosition = -1;
+        for (int position = 0; position < providers.length; position++) {
+            Provider provider = providers[position];
+            if ("BC".equals(provider.getName())) {
+                bcProviderPosition = position;
+                break;
+            }
+        }
 
-        // javax.crypto.Cipher
-        putSymmetricCipherImpl("AES/ECB/NoPadding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$ECB$NoPadding");
-        putSymmetricCipherImpl("AES/ECB/PKCS7Padding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$ECB$PKCS7Padding");
-
-        putSymmetricCipherImpl("AES/CBC/NoPadding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CBC$NoPadding");
-        putSymmetricCipherImpl("AES/CBC/PKCS7Padding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CBC$PKCS7Padding");
-
-        putSymmetricCipherImpl("AES/CTR/NoPadding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CTR$NoPadding");
+        Security.addProvider(new AndroidKeyStoreProvider());
+        Provider workaroundProvider = new AndroidKeyStoreBCWorkaroundProvider();
+        if (bcProviderPosition != -1) {
+            // Bouncy Castle provider found -- install the workaround provider above it.
+            Security.insertProviderAt(workaroundProvider, bcProviderPosition);
+        } else {
+            // Bouncy Castle provider not found -- install the workaround provider at lowest
+            // priority.
+            Security.addProvider(workaroundProvider);
+        }
     }
 
     private void putSecretKeyFactoryImpl(String algorithm) {
         put("SecretKeyFactory." + algorithm, PACKAGE_NAME + ".KeyStoreSecretKeyFactorySpi");
-    }
-
-    private void putMacImpl(String algorithm, String implClass) {
-        put("Mac." + algorithm, implClass);
-        put("Mac." + algorithm + " SupportedKeyClasses", KEYSTORE_SECRET_KEY_CLASS_NAME);
-    }
-
-    private void putSymmetricCipherImpl(String transformation, String implClass) {
-        put("Cipher." + transformation, implClass);
-        put("Cipher." + transformation + " SupportedKeyClasses", KEYSTORE_SECRET_KEY_CLASS_NAME);
     }
 
     /**

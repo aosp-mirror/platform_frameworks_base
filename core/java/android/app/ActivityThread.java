@@ -114,7 +114,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
-import java.security.Security;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -5338,7 +5337,7 @@ public final class ActivityThread {
         // Set the reporter for event logging in libcore
         EventLogger.setReporter(new EventLoggingReporter());
 
-        Security.addProvider(new AndroidKeyStoreProvider());
+        AndroidKeyStoreProvider.install();
 
         // Make sure TrustedCertificateStore looks in the right place for CA certificates
         final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
