@@ -280,32 +280,32 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
             throw new RSRuntimeException("Incorrect vector dimensions for GEMV");
         }
     }
-    void SGEMV(@Transpose int TransA, float alpha, Allocation A, Allocation X, int incX, float beta, Allocation Y, int incY) {
+    public void SGEMV(@Transpose int TransA, float alpha, Allocation A, Allocation X, int incX, float beta, Allocation Y, int incY) {
         validateGEMV(Element.F32(mRS), TransA, A, X, incX, Y, incY);
         int M = A.getType().getY();
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_sgemv, TransA, 0, 0, 0, 0, M, N, 0, alpha, A.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void DGEMV(@Transpose int TransA, double alpha, Allocation A, Allocation X, int incX, double beta, Allocation Y, int incY) {
+    public void DGEMV(@Transpose int TransA, double alpha, Allocation A, Allocation X, int incX, double beta, Allocation Y, int incY) {
         validateGEMV(Element.F64(mRS), TransA, A, X, incX, Y, incY);
         int M = A.getType().getY();
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dgemv, TransA, 0, 0, 0, 0, M, N, 0, alpha, A.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void CGEMV(@Transpose int TransA, Float2 alpha, Allocation A, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
+    public void CGEMV(@Transpose int TransA, Float2 alpha, Allocation A, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
         validateGEMV(Element.F32_2(mRS), TransA, A, X, incX, Y, incY);
         int M = A.getType().getY();
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_cgemv, TransA, 0, 0, 0, 0, M, N, 0, alpha.x, alpha.y, A.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void ZGEMV(@Transpose int TransA, Double2 alpha, Allocation A, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
+    public void ZGEMV(@Transpose int TransA, Double2 alpha, Allocation A, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
         validateGEMV(Element.F64_2(mRS), TransA, A, X, incX, Y, incY);
         int M = A.getType().getY();
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zgemv, TransA, 0, 0, 0, 0, M, N, 0, alpha.x, alpha.y, A.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, 0, 0);
     }
 
-    void SGBMV(@Transpose int TransA, int KL, int KU, float alpha, Allocation A, Allocation X, int incX, float beta, Allocation Y, int incY) {
+    public void SGBMV(@Transpose int TransA, int KL, int KU, float alpha, Allocation A, Allocation X, int incX, float beta, Allocation Y, int incY) {
         // GBMV has the same validation requirements as GEMV + KL and KU >= 0
         validateGEMV(Element.F32(mRS), TransA, A, X, incX, Y, incY);
         if (KL < 0 || KU < 0) {
@@ -315,7 +315,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_sgbmv, TransA, 0, 0, 0, 0, M, N, 0, alpha, A.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, KL, KU);
     }
-    void DGBMV(@Transpose int TransA, int KL, int KU, double alpha, Allocation A, Allocation X, int incX, double beta, Allocation Y, int incY) {
+    public void DGBMV(@Transpose int TransA, int KL, int KU, double alpha, Allocation A, Allocation X, int incX, double beta, Allocation Y, int incY) {
         // GBMV has the same validation requirements as GEMV + KL and KU >= 0
         validateGEMV(Element.F64(mRS), TransA, A, X, incX, Y, incY);
         if (KL < 0 || KU < 0) {
@@ -325,7 +325,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dgbmv, TransA, 0, 0, 0, 0, M, N, 0, alpha, A.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, KL, KU);
     }
-    void CGBMV(@Transpose int TransA, int KL, int KU, Float2 alpha, Allocation A, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
+    public void CGBMV(@Transpose int TransA, int KL, int KU, Float2 alpha, Allocation A, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
         // GBMV has the same validation requirements as GEMV + KL and KU >= 0
         validateGEMV(Element.F32_2(mRS), TransA, A, X, incX, Y, incY);
         if (KL < 0 || KU < 0) {
@@ -335,7 +335,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_cgbmv, TransA, 0, 0, 0, 0, M, N, 0, alpha.x, alpha.y, A.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, KL, KU);
     }
-    void ZGBMV(@Transpose int TransA, int KL, int KU, Double2 alpha, Allocation A, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
+    public void ZGBMV(@Transpose int TransA, int KL, int KU, Double2 alpha, Allocation A, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
         // GBMV has the same validation requirements as GEMV + KL and KU >= 0
         validateGEMV(Element.F64_2(mRS), TransA, A, X, incX, Y, incY);
         if (KL < 0 || KU < 0) {
@@ -403,28 +403,28 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         return N;
     }
 
-    void STRMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag, Allocation A, Allocation X, int incX) {
+    public void STRMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag, Allocation A, Allocation X, int incX) {
         validateTRMV(Element.F32(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_strmv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void DTRMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag, Allocation A, Allocation X, int incX) {
+    public void DTRMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag, Allocation A, Allocation X, int incX) {
         validateTRMV(Element.F64(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dtrmv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void CTRMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag, Allocation A, Allocation X, int incX) {
+    public void CTRMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag, Allocation A, Allocation X, int incX) {
         validateTRMV(Element.F32_2(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_ctrmv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
-    void ZTRMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag, Allocation A, Allocation X, int incX) {
+    public void ZTRMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag, Allocation A, Allocation X, int incX) {
         validateTRMV(Element.F64_2(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_ztrmv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
 
-    void STBMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
+    public void STBMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
         // TBMV has the same requirements as TRMV + K >= 0
         if (K < 0) {
             throw new RSRuntimeException("K must be greater than or equal to 0");
@@ -433,7 +433,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_stbmv, TransA, 0, 0, Uplo, Diag, 0, N, K, 0, A.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void DTBMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
+    public void DTBMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
         // TBMV has the same requirements as TRMV + K >= 0
         if (K < 0) {
             throw new RSRuntimeException("K must be greater than or equal to 0");
@@ -442,7 +442,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dtbmv, TransA, 0, 0, Uplo, Diag, 0, N, K, 0, A.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void CTBMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
+    public void CTBMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
         // TBMV has the same requirements as TRMV + K >= 0
         if (K < 0) {
             throw new RSRuntimeException("K must be greater than or equal to 0");
@@ -451,7 +451,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_ctbmv, TransA, 0, 0, Uplo, Diag, 0, N, K, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
-    void ZTBMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
+    public void ZTBMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
         // TBMV has the same requirements as TRMV + K >= 0
         if (K < 0) {
             throw new RSRuntimeException("K must be greater than or equal to 0");
@@ -460,51 +460,51 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_ztbmv, TransA, 0, 0, Uplo, Diag, 0, N, K, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
-    void STPMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
+    public void STPMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
         int N = validateTPMV(Element.F32(mRS), Uplo, TransA, Diag, Ap, X, incX);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_stpmv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, Ap.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void DTPMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
+    public void DTPMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
         int N = validateTPMV(Element.F64(mRS), Uplo, TransA, Diag, Ap, X, incX);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dtpmv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, Ap.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void CTPMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
+    public void CTPMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
         int N = validateTPMV(Element.F32_2(mRS), Uplo, TransA, Diag, Ap, X, incX);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_ctpmv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, 0, Ap.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
-    void ZTPMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
+    public void ZTPMV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
         int N = validateTPMV(Element.F64_2(mRS), Uplo, TransA, Diag, Ap, X, incX);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_ztpmv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, 0, Ap.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
-    void STRSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation A,  Allocation X,  int incX) {
+    public void STRSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation A,  Allocation X,  int incX) {
         // TRSV is the same as TRMV
         validateTRMV(Element.F32(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_strsv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
 
     }
-    void DTRSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation A,  Allocation X,  int incX) {
+    public void DTRSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation A,  Allocation X,  int incX) {
         // TRSV is the same as TRMV
         validateTRMV(Element.F64(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dtrsv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
 
     }
-    void CTRSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation A,  Allocation X,  int incX) {
+    public void CTRSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation A,  Allocation X,  int incX) {
         // TRSV is the same as TRMV
         validateTRMV(Element.F32_2(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_ctrsv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
 
     }
-    void ZTRSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation A,  Allocation X,  int incX) {
+    public void ZTRSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation A,  Allocation X,  int incX) {
         // TRSV is the same as TRMV
         validateTRMV(Element.F64_2(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_ztrsv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
 
     }
-    void STBSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
+    public void STBSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
         // TBSV is the same as TRMV + K >= 0
         validateTRMV(Element.F32(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
@@ -513,7 +513,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         }
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_stbsv, TransA, 0, 0, Uplo, Diag, 0, N, K, 0, A.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void DTBSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
+    public void DTBSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
         // TBSV is the same as TRMV + K >= 0
         validateTRMV(Element.F64(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
@@ -522,7 +522,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         }
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dtbsv, TransA, 0, 0, Uplo, Diag, 0, N, K, 0, A.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void CTBSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
+    public void CTBSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
         // TBSV is the same as TRMV + K >= 0
         validateTRMV(Element.F32_2(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
@@ -531,7 +531,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         }
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_ctbsv, TransA, 0, 0, Uplo, Diag, 0, N, K, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
-    void ZTBSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
+    public void ZTBSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  int K, Allocation A,  Allocation X,  int incX) {
         // TBSV is the same as TRMV + K >= 0
         validateTRMV(Element.F64_2(mRS), Uplo, TransA, Diag, A, X, incX);
         int N = A.getType().getY();
@@ -540,22 +540,22 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         }
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_ztbsv, TransA, 0, 0, Uplo, Diag, 0, N, K, 0, 0, A.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
-    void STPSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
+    public void STPSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
         // TPSV is same as TPMV
         int N = validateTPMV(Element.F32(mRS), Uplo, TransA, Diag, Ap, X, incX);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_stpsv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, Ap.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void DTPSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
+    public void DTPSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
         // TPSV is same as TPMV
         int N = validateTPMV(Element.F64(mRS), Uplo, TransA, Diag, Ap, X, incX);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dtpsv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, Ap.getID(mRS), X.getID(mRS), 0, 0, incX, 0, 0, 0);
     }
-    void CTPSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
+    public void CTPSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
         // TPSV is same as TPMV
         int N = validateTPMV(Element.F32_2(mRS), Uplo, TransA, Diag, Ap, X, incX);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_ctpsv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, 0, Ap.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
     }
-    void ZTPSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
+    public void ZTPSV(@Uplo int Uplo, @Transpose int TransA, @Diag int Diag,  Allocation Ap,  Allocation X,  int incX) {
         // TPSV is same as TPMV
         int N = validateTPMV(Element.F64_2(mRS), Uplo, TransA, Diag, Ap, X, incX);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_ztpsv, TransA, 0, 0, Uplo, Diag, 0, N, 0, 0, 0, Ap.getID(mRS), X.getID(mRS), 0, 0, 0, incX, 0, 0, 0);
@@ -768,11 +768,11 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         return N;
     }
 
-    void SSYMV(@Uplo int Uplo, float alpha, Allocation A, Allocation X, int incX, float beta, Allocation Y, int incY) {
+    public void SSYMV(@Uplo int Uplo, float alpha, Allocation A, Allocation X, int incX, float beta, Allocation Y, int incY) {
         int N = validateSYMV(Element.F32(mRS), Uplo, A, X, Y, incX, incY);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_ssymv, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, A.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void SSBMV(@Uplo int Uplo, int K, float alpha, Allocation A, Allocation X, int incX, float beta, Allocation Y, int incY) {
+    public void SSBMV(@Uplo int Uplo, int K, float alpha, Allocation A, Allocation X, int incX, float beta, Allocation Y, int incY) {
         // SBMV is the same as SYMV + K >= 0
         if (K < 0) {
             throw new RSRuntimeException("K must be greater than or equal to 0");
@@ -780,37 +780,37 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = validateSYMV(Element.F32(mRS), Uplo, A, X, Y, incX, incY);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_ssbmv, 0, 0, 0, Uplo, 0, 0, N, K, alpha, A.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void SSPMV(@Uplo int Uplo, float alpha, Allocation Ap, Allocation X, int incX, float beta, Allocation Y, int incY) {
+    public void SSPMV(@Uplo int Uplo, float alpha, Allocation Ap, Allocation X, int incX, float beta, Allocation Y, int incY) {
         int N = validateSPMV(Element.F32(mRS), Uplo, Ap, X, incX, Y, incY);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_sspmv, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, Ap.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void SGER(float alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void SGER(float alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         int M = A.getType().getY();
         int N = A.getType().getX();
         validateGER(Element.F32(mRS), X, incX, Y, incY, A);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_sger, 0, 0, 0, 0, 0, M, N, 0, alpha, X.getID(mRS), Y.getID(mRS), 0.f, A.getID(mRS), incX, incY, 0, 0);
     }
-    void SSYR(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation A) {
+    public void SSYR(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation A) {
         int N = validateSYR(Element.F32(mRS), Uplo, X, incX, A);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_ssyr, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, X.getID(mRS), A.getID(mRS), 0.f, 0, incX, 0, 0, 0);
     }
-    void SSPR(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation Ap) {
+    public void SSPR(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation Ap) {
         int N = validateSPR(Element.F32(mRS), Uplo, X, incX, Ap);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_sspr, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, X.getID(mRS), Ap.getID(mRS), 0.f, 0, incX, 0, 0, 0);
     }
-    void SSYR2(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void SSYR2(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         int N = validateSYR2(Element.F32(mRS), Uplo, X, incX, Y, incY, A);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_ssyr2, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, X.getID(mRS), Y.getID(mRS), 0, A.getID(mRS), incX, incY, 0, 0);
     }
-    void SSPR2(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation Y, int incY, Allocation Ap) {
+    public void SSPR2(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation Y, int incY, Allocation Ap) {
         int N = validateSPR2(Element.F32(mRS), Uplo, X, incX, Y, incY, Ap);
         mRS.nScriptIntrinsicBLAS_Single(getID(mRS), RsBlas_sspr2, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, X.getID(mRS), Y.getID(mRS), 0, Ap.getID(mRS), incX, incY, 0, 0);
     }
-    void DSYMV(@Uplo int Uplo, double alpha, Allocation A, Allocation X, int incX, double beta, Allocation Y, int incY) {
+    public void DSYMV(@Uplo int Uplo, double alpha, Allocation A, Allocation X, int incX, double beta, Allocation Y, int incY) {
         int N = validateSYMV(Element.F64(mRS), Uplo, A, X, Y, incX, incY);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dsymv, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, A.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void DSBMV(@Uplo int Uplo, int K, double alpha, Allocation A, Allocation X, int incX, double beta, Allocation Y, int incY) {
+    public void DSBMV(@Uplo int Uplo, int K, double alpha, Allocation A, Allocation X, int incX, double beta, Allocation Y, int incY) {
         // SBMV is the same as SYMV + K >= 0
         if (K < 0) {
             throw new RSRuntimeException("K must be greater than or equal to 0");
@@ -818,29 +818,29 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         int N = validateSYMV(Element.F64(mRS), Uplo, A, X, Y, incX, incY);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dsbmv, 0, 0, 0, Uplo, 0, 0, N, K, alpha, A.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void DSPMV(@Uplo int Uplo, double alpha, Allocation Ap, Allocation X, int incX, double beta, Allocation Y, int incY) {
+    public void DSPMV(@Uplo int Uplo, double alpha, Allocation Ap, Allocation X, int incX, double beta, Allocation Y, int incY) {
         int N = validateSPMV(Element.F64(mRS), Uplo, Ap, X, incX, Y, incY);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dspmv, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, Ap.getID(mRS), X.getID(mRS), beta, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void DGER(double alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void DGER(double alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         int M = A.getType().getY();
         int N = A.getType().getX();
         validateGER(Element.F64(mRS), X, incX, Y, incY, A);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dger, 0, 0, 0, 0, 0, M, N, 0, alpha, X.getID(mRS), Y.getID(mRS), 0.f, A.getID(mRS), incX, incY, 0, 0);
     }
-    void DSYR(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation A) {
+    public void DSYR(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation A) {
         int N = validateSYR(Element.F64(mRS), Uplo, X, incX, A);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dsyr, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, X.getID(mRS), A.getID(mRS), 0.f, 0, incX, 0, 0, 0);
     }
-    void DSPR(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation Ap) {
+    public void DSPR(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation Ap) {
         int N = validateSPR(Element.F64(mRS), Uplo, X, incX, Ap);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dspr, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, X.getID(mRS), Ap.getID(mRS), 0.f, 0, incX, 0, 0, 0);
     }
-    void DSYR2(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void DSYR2(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         int N = validateSYR2(Element.F64(mRS), Uplo, X, incX, Y, incY, A);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dsyr2, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, X.getID(mRS), Y.getID(mRS), 0, A.getID(mRS), incX, incY, 0, 0);
     }
-    void DSPR2(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation Y, int incY, Allocation Ap) {
+    public void DSPR2(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation Y, int incY, Allocation Ap) {
         int N = validateSPR2(Element.F64(mRS), Uplo, X, incX, Y, incY, Ap);
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dspr2, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, X.getID(mRS), Y.getID(mRS), 0, Ap.getID(mRS), incX, incY, 0, 0);
     }
@@ -876,12 +876,12 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
 
     }
 
-    void CHEMV(@Uplo int Uplo, Float2 alpha, Allocation A, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
+    public void CHEMV(@Uplo int Uplo, Float2 alpha, Allocation A, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
         // HEMV is the same as SYR2 validation-wise
         int N = validateSYR2(Element.F32_2(mRS), Uplo, X, incX, Y, incY, A);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_chemv, 0, 0, 0, Uplo, 0, 0, N, 0, alpha.x, alpha.y, A.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void CHBMV(@Uplo int Uplo, int K, Float2 alpha, Allocation A, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
+    public void CHBMV(@Uplo int Uplo, int K, Float2 alpha, Allocation A, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
         // HBMV is the same as SYR2 validation-wise
         int N = validateSYR2(Element.F32_2(mRS), Uplo, X, incX, Y, incY, A);
         if (K < 0) {
@@ -889,50 +889,50 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         }
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_chbmv, 0, 0, 0, Uplo, 0, 0, N, K, alpha.x, alpha.y, A.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void CHPMV(@Uplo int Uplo, Float2 alpha, Allocation Ap, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
+    public void CHPMV(@Uplo int Uplo, Float2 alpha, Allocation Ap, Allocation X, int incX, Float2 beta, Allocation Y, int incY) {
         // HPMV is the same as SPR2
         int N = validateSPR2(Element.F32_2(mRS), Uplo, X, incX, Y, incY, Ap);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_chpmv, 0, 0, 0, Uplo, 0, 0, N, 0, alpha.x, alpha.y, Ap.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void CGERU(Float2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void CGERU(Float2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         validateGERU(Element.F32_2(mRS), X, incX, Y, incY, A);
         int M = A.getType().getY();
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_cgeru, 0, 0, 0, 0, 0, M, N, 0, alpha.x, alpha.y, X.getID(mRS), Y.getID(mRS), 0, 0, A.getID(mRS), incX, incY, 0, 0);
     }
-    void CGERC(Float2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void CGERC(Float2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         // same as GERU
         validateGERU(Element.F32_2(mRS), X, incX, Y, incY, A);
         int M = A.getType().getY();
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_cgerc, 0, 0, 0, 0, 0, M, N, 0, alpha.x, alpha.y, X.getID(mRS), Y.getID(mRS), 0, 0, A.getID(mRS), incX, incY, 0, 0);
     }
-    void CHER(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation A) {
+    public void CHER(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation A) {
         // same as SYR
         int N = validateSYR(Element.F32_2(mRS), Uplo, X, incX, A);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_cher, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, 0, X.getID(mRS), 0, 0, 0, A.getID(mRS), incX, 0, 0, 0);
     }
-    void CHPR(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation Ap) {
+    public void CHPR(@Uplo int Uplo, float alpha, Allocation X, int incX, Allocation Ap) {
         // equivalent to SPR for validation
         int N = validateSPR(Element.F32_2(mRS), Uplo, X, incX, Ap);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_chpr, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, 0, X.getID(mRS), 0, 0, 0, Ap.getID(mRS), incX, 0, 0, 0);
     }
-    void CHER2(@Uplo int Uplo, Float2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void CHER2(@Uplo int Uplo, Float2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         // same as SYR2
         int N = validateSYR2(Element.F32_2(mRS), Uplo, X, incX, Y, incY, A);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_cher2, 0, 0, 0, Uplo, 0, 0, N, 0, alpha.x, alpha.y, X.getID(mRS), Y.getID(mRS), 0, 0, A.getID(mRS), incX, incY, 0, 0);
     }
-    void CHPR2(@Uplo int Uplo, Float2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation Ap) {
+    public void CHPR2(@Uplo int Uplo, Float2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation Ap) {
         // same as SPR2
         int N = validateSPR2(Element.F32_2(mRS), Uplo, X, incX, Y, incY, Ap);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_chpr2, 0, 0, 0, Uplo, 0, 0, N, 0, alpha.x, alpha.y, X.getID(mRS), Y.getID(mRS), 0, 0, Ap.getID(mRS), incX, incY, 0, 0);
     }
-    void ZHEMV(@Uplo int Uplo, Double2 alpha, Allocation A, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
+    public void ZHEMV(@Uplo int Uplo, Double2 alpha, Allocation A, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
         // HEMV is the same as SYR2 validation-wise
         int N = validateSYR2(Element.F64_2(mRS), Uplo, X, incX, Y, incY, A);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zhemv, 0, 0, 0, Uplo, 0, 0, N, 0, alpha.x, alpha.y, A.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void ZHBMV(@Uplo int Uplo, int K, Double2 alpha, Allocation A, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
+    public void ZHBMV(@Uplo int Uplo, int K, Double2 alpha, Allocation A, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
         // HBMV is the same as SYR2 validation-wise
         int N = validateSYR2(Element.F64_2(mRS), Uplo, X, incX, Y, incY, A);
         if (K < 0) {
@@ -940,40 +940,40 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         }
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zhbmv, 0, 0, 0, Uplo, 0, 0, N, K, alpha.x, alpha.y, A.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void ZHPMV(@Uplo int Uplo, Double2 alpha, Allocation Ap, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
+    public void ZHPMV(@Uplo int Uplo, Double2 alpha, Allocation Ap, Allocation X, int incX, Double2 beta, Allocation Y, int incY) {
         // HPMV is the same as SPR2
         int N = validateSPR2(Element.F64_2(mRS), Uplo, X, incX, Y, incY, Ap);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zhpmv, 0, 0, 0, Uplo, 0, 0, N, 0, alpha.x, alpha.y, Ap.getID(mRS), X.getID(mRS), beta.x, beta.y, Y.getID(mRS), incX, incY, 0, 0);
     }
-    void ZGERU(Double2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void ZGERU(Double2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         validateGERU(Element.F64_2(mRS), X, incX, Y, incY, A);
         int M = A.getType().getY();
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zgeru, 0, 0, 0, 0, 0, M, N, 0, alpha.x, alpha.y, X.getID(mRS), Y.getID(mRS), 0, 0, A.getID(mRS), incX, incY, 0, 0);
     }
-    void ZGERC(Double2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void ZGERC(Double2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         // same as GERU
         validateGERU(Element.F64_2(mRS), X, incX, Y, incY, A);
         int M = A.getType().getY();
         int N = A.getType().getX();
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zgerc, 0, 0, 0, 0, 0, M, N, 0, alpha.x, alpha.y, X.getID(mRS), Y.getID(mRS), 0, 0, A.getID(mRS), incX, incY, 0, 0);
     }
-    void ZHER(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation A) {
+    public void ZHER(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation A) {
         // same as SYR
         int N = validateSYR(Element.F64(mRS), Uplo, X, incX, A);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zher, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, 0, X.getID(mRS), 0, 0, 0, A.getID(mRS), incX, 0, 0, 0);
     }
-    void ZHPR(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation Ap) {
+    public void ZHPR(@Uplo int Uplo, double alpha, Allocation X, int incX, Allocation Ap) {
         // equivalent to SPR for validation
         int N = validateSPR(Element.F64_2(mRS), Uplo, X, incX, Ap);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zhpr, 0, 0, 0, Uplo, 0, 0, N, 0, alpha, 0, X.getID(mRS), 0, 0, 0, Ap.getID(mRS), incX, 0, 0, 0);
     }
-    void ZHER2(@Uplo int Uplo, Double2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
+    public void ZHER2(@Uplo int Uplo, Double2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation A) {
         // same as SYR2
         int N = validateSYR2(Element.F64_2(mRS), Uplo, X, incX, Y, incY, A);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zher2, 0, 0, 0, Uplo, 0, 0, N, 0, alpha.x, alpha.y, X.getID(mRS), Y.getID(mRS), 0, 0, A.getID(mRS), incX, incY, 0, 0);
     }
-    void ZHPR2(@Uplo int Uplo, Double2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation Ap) {
+    public void ZHPR2(@Uplo int Uplo, Double2 alpha, Allocation X, int incX, Allocation Y, int incY, Allocation Ap) {
         // same as SPR2
         int N = validateSPR2(Element.F64_2(mRS), Uplo, X, incX, Y, incY, Ap);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zhpr2, 0, 0, 0, Uplo, 0, 0, N, 0, alpha.x, alpha.y, X.getID(mRS), Y.getID(mRS), 0, 0, Ap.getID(mRS), incX, incY, 0, 0);
