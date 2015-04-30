@@ -179,22 +179,22 @@ public abstract class KeymasterUtils {
         return result;
     }
 
-    public static int getDigestOutputSizeBytes(int keymasterDigest) {
+    public static int getDigestOutputSizeBits(int keymasterDigest) {
         switch (keymasterDigest) {
             case KeymasterDefs.KM_DIGEST_NONE:
                 return -1;
             case KeymasterDefs.KM_DIGEST_MD5:
-                return 128 / 8;
+                return 128;
             case KeymasterDefs.KM_DIGEST_SHA1:
-                return 160 / 8;
+                return 160;
             case KeymasterDefs.KM_DIGEST_SHA_2_224:
-                return 224 / 8;
+                return 224;
             case KeymasterDefs.KM_DIGEST_SHA_2_256:
-                return 256 / 8;
+                return 256;
             case KeymasterDefs.KM_DIGEST_SHA_2_384:
-                return 384 / 8;
+                return 384;
             case KeymasterDefs.KM_DIGEST_SHA_2_512:
-                return 512 / 8;
+                return 512;
             default:
                 throw new IllegalArgumentException("Unknown digest: " + keymasterDigest);
         }
