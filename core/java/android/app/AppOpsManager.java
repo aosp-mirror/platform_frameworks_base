@@ -219,8 +219,10 @@ public class AppOpsManager {
     public static final int OP_ADD_VOICEMAIL = 52;
     /** @hide Access APIs for SIP calling over VOIP or WiFi. */
     public static final int OP_USE_SIP = 53;
+    /** @hide Intercept outgoing calls. */
+    public static final int OP_PROCESS_OUTGOING_CALLS = 54;
     /** @hide */
-    public static final int _NUM_OP = 54;
+    public static final int _NUM_OP = 55;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -354,7 +356,8 @@ public class AppOpsManager {
             OP_ASSIST_SCREENSHOT,
             OP_READ_PHONE_STATE,
             OP_ADD_VOICEMAIL,
-            OP_USE_SIP
+            OP_USE_SIP,
+            OP_PROCESS_OUTGOING_CALLS
     };
 
     /**
@@ -410,6 +413,7 @@ public class AppOpsManager {
             null,
             null,
             OPSTR_ACTIVATE_VPN,
+            null,
             null,
             null,
             null,
@@ -476,7 +480,8 @@ public class AppOpsManager {
             "ASSIST_SCREENSHOT",
             "OP_READ_PHONE_STATE",
             "ADD_VOICEMAIL",
-            "USE_SIP"
+            "USE_SIP",
+            "PROCESS_OUTGOING_CALLS"
     };
 
     /**
@@ -537,7 +542,8 @@ public class AppOpsManager {
             null, // no permission for receiving assist screenshot
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.ADD_VOICEMAIL,
-            Manifest.permission.USE_SIP
+            Manifest.permission.USE_SIP,
+            Manifest.permission.PROCESS_OUTGOING_CALLS
     };
 
     /**
@@ -599,7 +605,8 @@ public class AppOpsManager {
             null, // ASSIST_SCREENSHOT
             null, // READ_PHONE_STATE
             null, // ADD_VOICEMAIL
-            null  // USE_SIP
+            null, // USE_SIP
+            null  // PROCESS_OUTGOING_CALLS
     };
 
     /**
@@ -660,7 +667,8 @@ public class AppOpsManager {
             false, //ASSIST_SCREENSHOT
             false, //READ_PHONE_STATE
             false, //ADD_VOICEMAIL
-            false  // USE_SIP
+            false, // USE_SIP
+            false  // PROCESS_OUTGOING_CALLS
     };
 
     /**
@@ -720,6 +728,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED
     };
 
@@ -747,6 +756,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,
