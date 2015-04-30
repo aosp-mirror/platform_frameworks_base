@@ -18,6 +18,7 @@ package android.widget;
 
 import static android.widget.SuggestionsAdapter.getColumnString;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -119,6 +120,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     // Intents used for voice searching.
     private final Intent mVoiceWebSearchIntent;
     private final Intent mVoiceAppSearchIntent;
+
+    private final CharSequence mDefaultQueryHint;
 
     private OnQueryTextListener mOnQueryChangeListener;
     private OnCloseListener mOnCloseListener;
@@ -329,10 +332,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             setMaxWidth(maxWidth);
         }
 
-        final CharSequence queryHint = a.getText(R.styleable.SearchView_queryHint);
-        if (!TextUtils.isEmpty(queryHint)) {
-            setQueryHint(queryHint);
-        }
+        mDefaultQueryHint = a.getText(R.styleable.SearchView_defaultQueryHint);
+        mQueryHint = a.getText(R.styleable.SearchView_queryHint);
 
         final int imeOptions = a.getInt(R.styleable.SearchView_imeOptions, -1);
         if (imeOptions != -1) {
@@ -570,36 +571,48 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     }
 
     /**
-     * Sets the hint text to display in the query text field. This overrides any hint specified
-     * in the SearchableInfo.
+     * Sets the hint text to display in the query text field. This overrides
+     * any hint specified in the {@link SearchableInfo}.
+     * <p>
+     * This value may be specified as an empty string to prevent any query hint
+     * from being displayed.
      *
-     * @param hint the hint text to display
-     *
+     * @param hint the hint text to display or {@code null} to clear
      * @attr ref android.R.styleable#SearchView_queryHint
      */
-    public void setQueryHint(CharSequence hint) {
+    public void setQueryHint(@Nullable CharSequence hint) {
         mQueryHint = hint;
         updateQueryHint();
     }
 
     /**
-     * Gets the hint text to display in the query text field.
-     * @return the query hint text, if specified, null otherwise.
+     * Returns the hint text that will be displayed in the query text field.
+     * <p>
+     * The displayed query hint is chosen in the following order:
+     * <ol>
+     * <li>Non-null value set with {@link #setQueryHint(CharSequence)}
+     * <li>Value specified in XML using
+     *     {@link android.R.styleable#SearchView_queryHint android:queryHint}
+     * <li>Valid string resource ID exposed by the {@link SearchableInfo} via
+     *     {@link SearchableInfo#getHintId()}
+     * <li>Default hint provided by the theme against which the view was
+     *     inflated
+     * </ol>
      *
+     * @return the displayed query hint text, or {@code null} if none set
      * @attr ref android.R.styleable#SearchView_queryHint
      */
+    @Nullable
     public CharSequence getQueryHint() {
+        final CharSequence hint;
         if (mQueryHint != null) {
-            return mQueryHint;
-        } else if (mSearchable != null) {
-            CharSequence hint = null;
-            int hintId = mSearchable.getHintId();
-            if (hintId != 0) {
-                hint = getContext().getString(hintId);
-            }
-            return hint;
+            hint = mQueryHint;
+        } else if (mSearchable != null && mSearchable.getHintId() != 0) {
+            hint = getContext().getText(mSearchable.getHintId());
+        } else {
+            hint = mDefaultQueryHint;
         }
-        return null;
+        return hint;
     }
 
     /**
@@ -1113,20 +1126,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     }
 
     private void updateQueryHint() {
-        if (mQueryHint != null) {
-            mSearchSrcTextView.setHint(getDecoratedHint(mQueryHint));
-        } else if (mSearchable != null) {
-            CharSequence hint = null;
-            int hintId = mSearchable.getHintId();
-            if (hintId != 0) {
-                hint = getContext().getString(hintId);
-            }
-            if (hint != null) {
-                mSearchSrcTextView.setHint(getDecoratedHint(hint));
-            }
-        } else {
-            mSearchSrcTextView.setHint(getDecoratedHint(""));
-        }
+        final CharSequence hint = getQueryHint();
+        mSearchSrcTextView.setHint(getDecoratedHint(hint == null ? "" : hint));
     }
 
     /**

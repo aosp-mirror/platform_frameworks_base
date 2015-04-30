@@ -533,7 +533,7 @@ please see styles_device_defaults.xml.
         <item name="queryBackground">@empty</item>
         <item name="submitBackground">@empty</item>
         <item name="searchHintIcon">@empty</item>
-        <item name="queryHint">@string/search_hint</item>
+        <item name="defaultQueryHint">@string/search_hint</item>
     </style>
 
     <style name="Widget.Material.SegmentedButton" parent="SegmentedButton">

@@ -393,10 +393,11 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
      * @return String The string data associated with the resource,
-     * stripped of styled text information.
+     *         stripped of styled text information.
      */
+    @NonNull
     public String getString(@StringRes int id) throws NotFoundException {
-        CharSequence res = getText(id);
+        final CharSequence res = getText(id);
         if (res != null) {
             return res.toString();
         }
@@ -421,11 +422,11 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
      * @return String The string data associated with the resource,
-     * stripped of styled text information.
+     *         stripped of styled text information.
      */
-    public String getString(@StringRes int id, Object... formatArgs)
-            throws NotFoundException {
-        String raw = getString(id);
+    @NonNull
+    public String getString(@StringRes int id, Object... formatArgs) throws NotFoundException {
+        final String raw = getString(id);
         return String.format(mConfiguration.locale, raw, formatArgs);
     }
 

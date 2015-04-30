@@ -7430,6 +7430,10 @@
         <attr name="maxWidth" />
         <!-- An optional query hint string to be displayed in the empty query field. -->
         <attr name="queryHint" format="string" />
+        <!-- Default query hint used when {@code queryHint} is undefined and
+             the search view's {@code SearchableInfo} does not provide a hint.
+             @hide -->
+        <attr name="defaultQueryHint" format="string" />
         <!-- The IME options to set on the query text field. -->
         <attr name="imeOptions" />
         <!-- The input type to set on the query text field. -->
