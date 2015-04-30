@@ -45,7 +45,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         protected HmacBase(int keymasterDigest) {
             super(KeymasterDefs.KM_ALGORITHM_HMAC,
                     keymasterDigest,
-                    KeymasterUtils.getDigestOutputSizeBytes(keymasterDigest) * 8);
+                    KeymasterUtils.getDigestOutputSizeBits(keymasterDigest));
         }
     }
 
@@ -120,13 +120,6 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
         if (mKeymasterDigest != -1) {
             args.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
-            int digestOutputSizeBytes =
-                    KeymasterUtils.getDigestOutputSizeBytes(mKeymasterDigest);
-            if (digestOutputSizeBytes != -1) {
-                // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
-                // TODO: Switch to bits instead of bytes, once this is fixed in Keymaster
-                args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, digestOutputSizeBytes);
-            }
         }
         if (mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
             if (mKeymasterDigest == -1) {

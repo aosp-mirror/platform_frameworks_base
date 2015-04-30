@@ -67,7 +67,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
 
     private final KeyStore mKeyStore = KeyStore.getInstance();
     private final int mKeymasterDigest;
-    private final int mMacSizeBytes;
+    private final int mMacSizeBits;
 
     // Fields below are populated by engineInit and should be preserved after engineDoFinal.
     private KeyStoreSecretKey mKey;
@@ -79,12 +79,12 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
 
     protected KeyStoreHmacSpi(int keymasterDigest) {
         mKeymasterDigest = keymasterDigest;
-        mMacSizeBytes = KeymasterUtils.getDigestOutputSizeBytes(keymasterDigest);
+        mMacSizeBits = KeymasterUtils.getDigestOutputSizeBits(keymasterDigest);
     }
 
     @Override
     protected int engineGetMacLength() {
-        return mMacSizeBytes;
+        return (mMacSizeBits + 7) / 8;
     }
 
     @Override
@@ -158,14 +158,16 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         KeymasterArguments keymasterArgs = new KeymasterArguments();
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_HMAC);
         keymasterArgs.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
+        keymasterArgs.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, mMacSizeBits);
 
+        KeymasterArguments keymasterOutputArgs = new KeymasterArguments();
         OperationResult opResult = mKeyStore.begin(
                 mKey.getAlias(),
                 KeymasterDefs.KM_PURPOSE_SIGN,
                 true,
                 keymasterArgs,
-                null,
-                new KeymasterArguments());
+                null, // no additional entropy needed for HMAC because it's deterministic
+                keymasterOutputArgs);
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if ((opResult.resultCode != KeyStore.NO_ERROR)
