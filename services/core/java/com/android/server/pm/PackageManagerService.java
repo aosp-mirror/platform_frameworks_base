@@ -155,6 +155,7 @@ import android.os.storage.IMountService;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.os.storage.VolumeRecord;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.system.ErrnoException;
@@ -1557,6 +1558,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     updateExternalMediaStatus(false, false);
                 }
             }
+        }
+
+        @Override
+        public void onVolumeForgotten(String fsUuid) {
+            // TODO: remove all packages hosted on this uuid
         }
     };
 
@@ -14203,7 +14209,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             movePackageInternal(packageName, volumeUuid, moveId);
         } catch (PackageManagerException e) {
             Slog.d(TAG, "Failed to move " + packageName, e);
-            mMoveCallbacks.notifyStatusChanged(moveId, null,
+            mMoveCallbacks.notifyStatusChanged(moveId,
                     PackageManager.MOVE_FAILED_INTERNAL_ERROR);
         }
         return moveId;
@@ -14221,7 +14227,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String packageAbiOverride;
         final int appId;
         final String seinfo;
-        final String moveTitle;
+        final String label;
 
         // reader
         synchronized (mPackages) {
@@ -14251,8 +14257,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             packageAbiOverride = ps.cpuAbiOverrideString;
             appId = UserHandle.getAppId(pkg.applicationInfo.uid);
             seinfo = pkg.applicationInfo.seinfo;
-            moveTitle = String.valueOf(pm.getApplicationLabel(pkg.applicationInfo));
+            label = String.valueOf(pm.getApplicationLabel(pkg.applicationInfo));
         }
+
+        final Bundle extras = new Bundle();
+        extras.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
+        extras.putString(Intent.EXTRA_TITLE, label);
+        mMoveCallbacks.notifyCreated(moveId, extras);
 
         int installFlags;
         final boolean moveData;
@@ -14279,7 +14290,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         Slog.d(TAG, "Moving " + packageName + " from " + currentVolumeUuid + " to " + volumeUuid);
-        mMoveCallbacks.notifyStatusChanged(moveId, moveTitle, 10);
+        mMoveCallbacks.notifyStatusChanged(moveId, 10);
 
         if (moveData) {
             synchronized (mInstallLock) {
@@ -14299,7 +14310,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        mMoveCallbacks.notifyStatusChanged(moveId, moveTitle, 50);
+        mMoveCallbacks.notifyStatusChanged(moveId, 50);
 
         final IPackageInstallObserver2 installObserver = new IPackageInstallObserver2.Stub() {
             @Override
@@ -14326,15 +14337,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int status = PackageManager.installStatusToPublicStatus(returnCode);
                 switch (status) {
                     case PackageInstaller.STATUS_SUCCESS:
-                        mMoveCallbacks.notifyStatusChanged(moveId, moveTitle,
+                        mMoveCallbacks.notifyStatusChanged(moveId,
                                 PackageManager.MOVE_SUCCEEDED);
                         break;
                     case PackageInstaller.STATUS_FAILURE_STORAGE:
-                        mMoveCallbacks.notifyStatusChanged(moveId, moveTitle,
+                        mMoveCallbacks.notifyStatusChanged(moveId,
                                 PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE);
                         break;
                     default:
-                        mMoveCallbacks.notifyStatusChanged(moveId, moveTitle,
+                        mMoveCallbacks.notifyStatusChanged(moveId,
                                 PackageManager.MOVE_FAILED_INTERNAL_ERROR);
                         break;
                 }
@@ -14357,12 +14368,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
 
         final int realMoveId = mNextMoveId.getAndIncrement();
-        final String realTitle = null;
+        final Bundle extras = new Bundle();
+        extras.putString(VolumeRecord.EXTRA_FS_UUID, volumeUuid);
+        mMoveCallbacks.notifyCreated(realMoveId, extras);
 
         final IPackageMoveObserver callback = new IPackageMoveObserver.Stub() {
             @Override
-            public void onStatusChanged(int moveId, String title, int status, long estMillis) {
-                mMoveCallbacks.notifyStatusChanged(realMoveId, realTitle, status, estMillis);
+            public void onCreated(int moveId, Bundle extras) {
+                // Ignored
+            }
+
+            @Override
+            public void onStatusChanged(int moveId, int status, long estMillis) {
+                mMoveCallbacks.notifyStatusChanged(realMoveId, status, estMillis);
             }
         };
 
@@ -14717,6 +14735,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private static class MoveCallbacks extends Handler {
+        private static final int MSG_CREATED = 1;
         private static final int MSG_STATUS_CHANGED = 2;
 
         private final RemoteCallbackList<IPackageMoveObserver>
@@ -14754,26 +14773,37 @@ public class PackageManagerService extends IPackageManager.Stub {
         private void invokeCallback(IPackageMoveObserver callback, int what, SomeArgs args)
                 throws RemoteException {
             switch (what) {
+                case MSG_CREATED: {
+                    callback.onCreated(args.argi1, (Bundle) args.arg2);
+                    break;
+                }
                 case MSG_STATUS_CHANGED: {
-                    callback.onStatusChanged(args.argi1, (String) args.arg2, args.argi3,
-                            (long) args.arg4);
+                    callback.onStatusChanged(args.argi1, args.argi2, (long) args.arg3);
                     break;
                 }
             }
         }
 
-        private void notifyStatusChanged(int moveId, String moveTitle, int status) {
-            notifyStatusChanged(moveId, moveTitle, status, -1);
+        private void notifyCreated(int moveId, Bundle extras) {
+            Slog.v(TAG, "Move " + moveId + " created " + extras.toString());
+
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = moveId;
+            args.arg2 = extras;
+            obtainMessage(MSG_CREATED, args).sendToTarget();
         }
 
-        private void notifyStatusChanged(int moveId, String moveTitle, int status, long estMillis) {
+        private void notifyStatusChanged(int moveId, int status) {
+            notifyStatusChanged(moveId, status, -1);
+        }
+
+        private void notifyStatusChanged(int moveId, int status, long estMillis) {
             Slog.v(TAG, "Move " + moveId + " status " + status);
 
             final SomeArgs args = SomeArgs.obtain();
             args.argi1 = moveId;
-            args.arg2 = moveTitle;
-            args.argi3 = status;
-            args.arg4 = estMillis;
+            args.argi2 = status;
+            args.arg3 = estMillis;
             obtainMessage(MSG_STATUS_CHANGED, args).sendToTarget();
 
             synchronized (mLastStatus) {

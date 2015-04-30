@@ -129,6 +129,7 @@ public class VolumeInfo implements Parcelable {
     public String fsUuid;
     public String fsLabel;
     public String path;
+    public String internalPath;
 
     /** Framework state */
     public final int mtpIndex;
@@ -155,6 +156,7 @@ public class VolumeInfo implements Parcelable {
         fsUuid = parcel.readString();
         fsLabel = parcel.readString();
         path = parcel.readString();
+        internalPath = parcel.readString();
         mtpIndex = parcel.readInt();
     }
 
@@ -248,7 +250,11 @@ public class VolumeInfo implements Parcelable {
     }
 
     public File getPath() {
-        return new File(path);
+        return (path != null) ? new File(path) : null;
+    }
+
+    public File getInternalPath() {
+        return (internalPath != null) ? new File(internalPath) : null;
     }
 
     public File getPathForUser(int userId) {
@@ -335,14 +341,11 @@ public class VolumeInfo implements Parcelable {
         final Uri uri;
         if (type == VolumeInfo.TYPE_PUBLIC) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY, fsUuid);
-        } else if (VolumeInfo.ID_EMULATED_INTERNAL.equals(id)) {
+        } else if (type == VolumeInfo.TYPE_EMULATED && isPrimary()) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY,
                     DOCUMENT_ROOT_PRIMARY_EMULATED);
-        } else if (type == VolumeInfo.TYPE_EMULATED) {
-            // TODO: build intent once supported
-            uri = null;
         } else {
-            throw new IllegalArgumentException();
+            return null;
         }
 
         final Intent intent = new Intent(DocumentsContract.ACTION_BROWSE_DOCUMENT_ROOT);
@@ -372,6 +375,7 @@ public class VolumeInfo implements Parcelable {
         pw.printPair("fsLabel", fsLabel);
         pw.println();
         pw.printPair("path", path);
+        pw.printPair("internalPath", internalPath);
         pw.printPair("mtpIndex", mtpIndex);
         pw.decreaseIndent();
         pw.println();
@@ -437,6 +441,7 @@ public class VolumeInfo implements Parcelable {
         parcel.writeString(fsUuid);
         parcel.writeString(fsLabel);
         parcel.writeString(path);
+        parcel.writeString(internalPath);
         parcel.writeInt(mtpIndex);
     }
 }

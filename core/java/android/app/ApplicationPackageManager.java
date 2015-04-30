@@ -62,6 +62,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -1561,13 +1562,7 @@ final class ApplicationPackageManager extends PackageManager {
     public @Nullable VolumeInfo getPrimaryStorageCurrentVolume() {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         final String volumeUuid = storage.getPrimaryStorageUuid();
-        if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
-            return storage.findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL);
-        } else if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
-            return storage.getPrimaryPhysicalVolume();
-        } else {
-            return storage.findVolumeByUuid(volumeUuid);
-        }
+        return storage.findVolumeByQualifiedUuid(volumeUuid);
     }
 
     @Override
@@ -2055,7 +2050,8 @@ final class ApplicationPackageManager extends PackageManager {
     /** {@hide} */
     private static class MoveCallbackDelegate extends IPackageMoveObserver.Stub implements
             Handler.Callback {
-        private static final int MSG_STATUS_CHANGED = 1;
+        private static final int MSG_CREATED = 1;
+        private static final int MSG_STATUS_CHANGED = 2;
 
         final MoveCallback mCallback;
         final Handler mHandler;
@@ -2068,23 +2064,36 @@ final class ApplicationPackageManager extends PackageManager {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_STATUS_CHANGED:
+                case MSG_CREATED: {
                     final SomeArgs args = (SomeArgs) msg.obj;
-                    mCallback.onStatusChanged(args.argi1, (String) args.arg2, args.argi3,
-                            (long) args.arg4);
+                    mCallback.onCreated(args.argi1, (Bundle) args.arg2);
                     args.recycle();
                     return true;
+                }
+                case MSG_STATUS_CHANGED: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    mCallback.onStatusChanged(args.argi1, args.argi2, (long) args.arg3);
+                    args.recycle();
+                    return true;
+                }
             }
             return false;
         }
 
         @Override
-        public void onStatusChanged(int moveId, String moveTitle, int status, long estMillis) {
+        public void onCreated(int moveId, Bundle extras) {
             final SomeArgs args = SomeArgs.obtain();
             args.argi1 = moveId;
-            args.arg2 = moveTitle;
-            args.argi3 = status;
-            args.arg4 = estMillis;
+            args.arg2 = extras;
+            mHandler.obtainMessage(MSG_CREATED, args).sendToTarget();
+        }
+
+        @Override
+        public void onStatusChanged(int moveId, int status, long estMillis) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = moveId;
+            args.argi2 = status;
+            args.arg3 = estMillis;
             mHandler.obtainMessage(MSG_STATUS_CHANGED, args).sendToTarget();
         }
     }
