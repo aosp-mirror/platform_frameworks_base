@@ -561,9 +561,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             final int callingUid = Binder.getCallingUid();
             final DevicePolicyManagerInternal dpmi = LocalServices.getService(
                     DevicePolicyManagerInternal.class);
-            if (dpmi.isActiveAdminWithPolicy(callingUid, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER)
-                    || dpmi.isActiveAdminWithPolicy(callingUid,
-                            DeviceAdminInfo.USES_POLICY_DEVICE_OWNER)) {
+
+            // Device owners are also profile owners so it is enough to check for that.
+            if (dpmi != null && dpmi.isActiveAdminWithPolicy(callingUid,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER)) {
                 return;
             }
         }
