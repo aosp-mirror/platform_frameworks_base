@@ -4212,8 +4212,8 @@ public abstract class PackageManager {
 
     /** {@hide} */
     public static abstract class MoveCallback {
-        public abstract void onStatusChanged(int moveId, String moveTitle, int status,
-                long estMillis);
+        public void onCreated(int moveId, Bundle extras) {}
+        public abstract void onStatusChanged(int moveId, int status, long estMillis);
     }
 
     /** {@hide} */
