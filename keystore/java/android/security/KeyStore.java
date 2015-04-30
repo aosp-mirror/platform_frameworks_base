@@ -16,6 +16,8 @@
 
 package android.security;
 
+import android.app.ActivityThread;
+import android.app.Application;
 import com.android.org.conscrypt.NativeConstants;
 
 import android.content.Context;
@@ -625,16 +627,29 @@ public class KeyStore {
             return 0;
         }
 
+        String opPackageName = getMyOpPackageName();
+
         try {
             long deviceId = 0; // TODO: plumb hardware id to FPMS
-            if (!service.isHardwareDetected(deviceId)) {
+            if (!service.isHardwareDetected(deviceId, opPackageName)) {
                 return 0;
             }
 
-            return service.getAuthenticatorId();
+            return service.getAuthenticatorId(opPackageName);
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to communicate with fingerprint service", e);
         }
+    }
+
+    private static String getMyOpPackageName() {
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread != null) {
+            Application application = activityThread.getApplication();
+            if (application != null) {
+                return application.getOpPackageName();
+            }
+        }
+        throw new IllegalStateException("Cannot create AudioRecord outside of an app");
     }
 
     /**
