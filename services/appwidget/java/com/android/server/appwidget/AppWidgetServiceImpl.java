@@ -1492,7 +1492,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         // RemoteViewsService.
         final long token = Binder.clearCallingIdentity();
         try {
-            mContext.bindServiceAsUser(intent, conn, Context.BIND_AUTO_CREATE,
+            mContext.bindServiceAsUser(intent, conn,
+                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     widget.provider.info.getProfile());
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -2907,7 +2908,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             UserHandle userHandle) {
         final long token = Binder.clearCallingIdentity();
         try {
-            mContext.bindServiceAsUser(intent, connection, Context.BIND_AUTO_CREATE,
+            mContext.bindServiceAsUser(intent, connection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     userHandle);
         } finally {
             Binder.restoreCallingIdentity(token);

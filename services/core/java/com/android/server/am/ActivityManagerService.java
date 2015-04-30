@@ -10878,8 +10878,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                 ProcessRecord proc = mLruProcesses.get(i);
                 if (proc.notCachedSinceIdle) {
-                    if (proc.setProcState != ActivityManager.PROCESS_STATE_TOP
-                            && proc.setProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                    if (proc.setProcState != ActivityManager.PROCESS_STATE_TOP_SLEEPING
+                            && proc.setProcState >= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
                             && proc.setProcState <= ActivityManager.PROCESS_STATE_SERVICE) {
                         if (doKilling && proc.initialIdlePss != 0
                                 && proc.lastPss > ((proc.initialIdlePss*3)/2)) {
@@ -17038,7 +17038,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "instrumentation";
-            procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            procState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
         } else if ((queue = isReceivingBroadcast(app)) != null) {
             // An app that is currently receiving a broadcast also
             // counts as being in the foreground for OOM killer purposes.
@@ -17376,8 +17376,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     // processes).  These should not bring the current process
                                     // into the top state, since they are not on top.  Instead
                                     // give them the best state after that.
-                                    clientProcState =
-                                            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                                    if ((cr.flags&Context.BIND_FOREGROUND_SERVICE) != 0) {
+                                        clientProcState =
+                                                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+                                    } else if (mWakefulness
+                                                    == PowerManagerInternal.WAKEFULNESS_AWAKE &&
+                                            (cr.flags&Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE)
+                                                    != 0) {
+                                        clientProcState =
+                                                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+                                    } else {
+                                        clientProcState =
+                                                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                                    }
                                 }
                             }
                         } else {
@@ -17487,7 +17498,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // into the top state, since they are not on top.  Instead
                         // give them the best state after that.
                         clientProcState =
-                                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
                     }
                 }
                 if (procState > clientProcState) {
@@ -17527,7 +17538,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 case ActivityManager.PROCESS_STATE_SERVICE:
                     // These all are longer-term states, so pull them up to the top
                     // of the background states, but not all the way to the top state.
-                    procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                    procState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
                     break;
                 default:
                     // Otherwise, top is a better choice, so take it.

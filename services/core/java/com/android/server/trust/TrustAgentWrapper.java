@@ -276,7 +276,8 @@ public class TrustAgentWrapper {
         // Schedules a restart for when connecting times out. If the connection succeeds,
         // the restart is canceled in mCallback's onConnected.
         scheduleRestart();
-        mBound = context.bindServiceAsUser(intent, mConnection, Context.BIND_AUTO_CREATE, user);
+        mBound = context.bindServiceAsUser(intent, mConnection,
+                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE, user);
         if (mBound) {
             mContext.registerReceiver(mBroadcastReceiver, alarmFilter, PERMISSION, null);
         } else {
