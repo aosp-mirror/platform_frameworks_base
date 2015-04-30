@@ -299,7 +299,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_BOOTING = 1<<8;
     static final int SCAN_TRUSTED_OVERLAY = 1<<9;
     static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<10;
-    static final int SCAN_REPLACING = 1<<11;
     static final int SCAN_REQUIRE_KNOWN = 1<<12;
 
     static final int REMOVE_CHATTY = 1<<16;
@@ -2377,6 +2376,18 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         return PackageParser.generatePackageInfo(p, gids, flags,
                 ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId);
+    }
+
+    @Override
+    public boolean isPackageFrozen(String packageName) {
+        synchronized (mPackages) {
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps != null) {
+                return ps.frozen;
+            }
+        }
+        Slog.w(TAG, "Package " + packageName + " is missing; assuming frozen");
+        return true;
     }
 
     @Override
@@ -6480,14 +6491,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-        }
-
-        // Request the ActivityManager to kill the process(only for existing packages)
-        // so that we do not end up in a confused state while the user is still using the older
-        // version of the application while the new one gets installed.
-        if ((scanFlags & SCAN_REPLACING) != 0) {
-            killApplication(pkg.applicationInfo.packageName,
-                        pkg.applicationInfo.uid, "update pkg");
         }
 
         // Also need to kill any apps that are dependent on the library.
@@ -10797,16 +10800,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     private void replacePackageLI(PackageParser.Package pkg, int parseFlags, int scanFlags,
             UserHandle user, String installerPackageName, String volumeUuid,
             PackageInstalledInfo res) {
-        PackageParser.Package oldPackage;
-        String pkgName = pkg.packageName;
-        int[] allUsers;
-        boolean[] perUserInstalled;
+        final PackageParser.Package oldPackage;
+        final String pkgName = pkg.packageName;
+        final int[] allUsers;
+        final boolean[] perUserInstalled;
+        final boolean weFroze;
 
         // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
             if (DEBUG_INSTALL) Slog.d(TAG, "replacePackageLI: new=" + pkg + ", old=" + oldPackage);
-            PackageSetting ps = mSettings.mPackages.get(pkgName);
+            final PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (ps == null || !ps.keySetData.isUsingUpgradeKeySets() || ps.sharedUser != null) {
                 // default to original signature matching
                 if (compareSignatures(oldPackage.mSignatures, pkg.mSignatures)
@@ -10830,15 +10834,35 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (int i = 0; i < allUsers.length; i++) {
                 perUserInstalled[i] = ps != null ? ps.getInstalled(allUsers[i]) : false;
             }
+
+            // Mark the app as frozen to prevent launching during the upgrade
+            // process, and then kill all running instances
+            if (!ps.frozen) {
+                ps.frozen = true;
+                weFroze = true;
+            } else {
+                weFroze = false;
+            }
         }
 
-        boolean sysPkg = (isSystemApp(oldPackage));
-        if (sysPkg) {
-            replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
-                    user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
-        } else {
-            replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
-                    user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
+        // Now that we're guarded by frozen state, kill app during upgrade
+        killApplication(pkgName, oldPackage.applicationInfo.uid, "replace pkg");
+
+        try {
+            boolean sysPkg = (isSystemApp(oldPackage));
+            if (sysPkg) {
+                replaceSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
+                        user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
+            } else {
+                replaceNonSystemPackageLI(oldPackage, pkg, parseFlags, scanFlags,
+                        user, allUsers, perUserInstalled, installerPackageName, volumeUuid, res);
+            }
+        } finally {
+            // Regardless of success or failure of upgrade steps above, always
+            // unfreeze the package if we froze it
+            if (weFroze) {
+                unfreezePackage(pkgName);
+            }
         }
     }
 
@@ -10967,8 +10991,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
         }
-
-        killApplication(packageName, oldPkg.applicationInfo.uid, "replace sys pkg");
 
         res.removedInfo.uid = oldPkg.applicationInfo.uid;
         res.removedInfo.removedPackage = packageName;
@@ -11314,7 +11336,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         startIntentFilterVerifications(args.user.getIdentifier(), pkg);
 
         if (replace) {
-            replacePackageLI(pkg, parseFlags, scanFlags | SCAN_REPLACING, args.user,
+            replacePackageLI(pkg, parseFlags, scanFlags, args.user,
                     installerPackageName, volumeUuid, res);
         } else {
             installNewPackageLI(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
@@ -14200,6 +14222,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         sendResourcesChangedBroadcast(false, false, unloaded, null);
     }
 
+    private void unfreezePackage(String packageName) {
+        synchronized (mPackages) {
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps != null) {
+                ps.frozen = false;
+            }
+        }
+    }
+
     @Override
     public int movePackage(final String packageName, final String volumeUuid) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
@@ -14240,14 +14271,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkg.applicationInfo.isSystemApp()) {
                 throw new PackageManagerException(MOVE_FAILED_SYSTEM_PACKAGE,
                         "Cannot move system application");
-            } else if (pkg.mOperationPending) {
-                throw new PackageManagerException(MOVE_FAILED_OPERATION_PENDING,
-                        "Attempt to move package which has pending operations");
             }
 
-            // TODO: yell if already in desired location
+            if (Objects.equals(ps.volumeUuid, volumeUuid)) {
+                throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                        "Package already moved to " + volumeUuid);
+            }
 
-            pkg.mOperationPending = true;
+            if (ps.frozen) {
+                throw new PackageManagerException(MOVE_FAILED_OPERATION_PENDING,
+                        "Failed to move already frozen package");
+            }
+
+            ps.frozen = true;
 
             currentAsec = pkg.applicationInfo.isForwardLocked()
                     || pkg.applicationInfo.isExternalAsec();
@@ -14259,6 +14295,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             seinfo = pkg.applicationInfo.seinfo;
             label = String.valueOf(pm.getApplicationLabel(pkg.applicationInfo));
         }
+
+        // Now that we're guarded by frozen state, kill app during upgrade
+        killApplication(packageName, appId, "move pkg");
 
         final Bundle extras = new Bundle();
         extras.putString(Intent.EXTRA_PACKAGE_NAME, packageName);
@@ -14279,6 +14318,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             final VolumeInfo volume = storage.findVolumeByUuid(volumeUuid);
             if (volume == null || volume.getType() != VolumeInfo.TYPE_PRIVATE
                     || !volume.isMountedWritable()) {
+                unfreezePackage(packageName);
                 throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                         "Move location not mounted private volume");
             }
@@ -14297,15 +14337,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // TODO: split this into separate copy and delete operations
                 if (mInstaller.moveUserDataDirs(currentVolumeUuid, volumeUuid, packageName, appId,
                         seinfo) != 0) {
-                    synchronized (mPackages) {
-                        final PackageParser.Package pkg = mPackages.get(packageName);
-                        if (pkg != null) {
-                            pkg.mOperationPending = false;
-                        }
-                    }
-
+                    unfreezePackage(packageName);
                     throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
-                            "Failed to move private data");
+                            "Failed to move private data to " + volumeUuid);
                 }
             }
         }
@@ -14324,15 +14358,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.d(TAG, "Install result for move: "
                         + PackageManager.installStatusToString(returnCode, msg));
 
-                // We usually have a new package now after the install, but if
-                // we failed we need to clear the pending flag on the original
-                // package object.
-                synchronized (mPackages) {
-                    final PackageParser.Package pkg = mPackages.get(packageName);
-                    if (pkg != null) {
-                        pkg.mOperationPending = false;
-                    }
-                }
+                // Regardless of success or failure of the move operation,
+                // always unfreeze the package
+                unfreezePackage(packageName);
 
                 final int status = PackageManager.installStatusToPublicStatus(returnCode);
                 switch (status) {

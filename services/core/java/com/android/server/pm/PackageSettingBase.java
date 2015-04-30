@@ -108,6 +108,13 @@ abstract class PackageSettingBase extends SettingBase {
 
     int installStatus = PKG_INSTALL_COMPLETE;
 
+    /**
+     * Non-persisted value indicating this package has been temporarily frozen,
+     * usually during a critical section of the package update pipeline. The
+     * platform will refuse to launch packages in a frozen state.
+     */
+    boolean frozen = false;
+
     PackageSettingBase origPackage;
 
     /** Package name of the app that installed this package */
