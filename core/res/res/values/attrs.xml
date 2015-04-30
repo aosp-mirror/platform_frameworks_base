@@ -7305,8 +7305,8 @@
         <attr name="recognitionService" format="string" />
         <attr name="settingsActivity" />
         <!-- Flag indicating whether this voice interaction service is capable of handling the
-             assist gesture. -->
-        <attr name="supportsAssistGesture" format="boolean" />
+             assist action. -->
+        <attr name="supportsAssist" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>voice-enrollment-application</code>
