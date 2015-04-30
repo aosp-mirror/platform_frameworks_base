@@ -221,8 +221,10 @@ public class AppOpsManager {
     public static final int OP_USE_SIP = 53;
     /** @hide Intercept outgoing calls. */
     public static final int OP_PROCESS_OUTGOING_CALLS = 54;
+    /** @hide User the fingerprint API. */
+    public static final int OP_USE_FINGERPRINT = 55;
     /** @hide */
-    public static final int _NUM_OP = 55;
+    public static final int _NUM_OP = 56;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -357,7 +359,8 @@ public class AppOpsManager {
             OP_READ_PHONE_STATE,
             OP_ADD_VOICEMAIL,
             OP_USE_SIP,
-            OP_PROCESS_OUTGOING_CALLS
+            OP_PROCESS_OUTGOING_CALLS,
+            OP_USE_FINGERPRINT
     };
 
     /**
@@ -413,6 +416,7 @@ public class AppOpsManager {
             null,
             null,
             OPSTR_ACTIVATE_VPN,
+            null,
             null,
             null,
             null,
@@ -481,7 +485,8 @@ public class AppOpsManager {
             "OP_READ_PHONE_STATE",
             "ADD_VOICEMAIL",
             "USE_SIP",
-            "PROCESS_OUTGOING_CALLS"
+            "PROCESS_OUTGOING_CALLS",
+            "USE_FINGERPRINT"
     };
 
     /**
@@ -543,7 +548,8 @@ public class AppOpsManager {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.ADD_VOICEMAIL,
             Manifest.permission.USE_SIP,
-            Manifest.permission.PROCESS_OUTGOING_CALLS
+            Manifest.permission.PROCESS_OUTGOING_CALLS,
+            Manifest.permission.USE_FINGERPRINT
     };
 
     /**
@@ -606,7 +612,8 @@ public class AppOpsManager {
             null, // READ_PHONE_STATE
             null, // ADD_VOICEMAIL
             null, // USE_SIP
-            null  // PROCESS_OUTGOING_CALLS
+            null, // PROCESS_OUTGOING_CALLS
+            null  // USE_FINGERPRINT
     };
 
     /**
@@ -668,7 +675,8 @@ public class AppOpsManager {
             false, //READ_PHONE_STATE
             false, //ADD_VOICEMAIL
             false, // USE_SIP
-            false  // PROCESS_OUTGOING_CALLS
+            false, // PROCESS_OUTGOING_CALLS
+            false  // USE_FINGERPRINT
     };
 
     /**
@@ -729,6 +737,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED
     };
 
@@ -756,6 +765,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,
