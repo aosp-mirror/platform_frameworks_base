@@ -78,7 +78,7 @@ public class MidiFramer extends MidiReceiver {
                         // Log.i(TAG, "SysEx End");
                         if (mInSysEx) {
                             mReceiver.sendWithTimestamp(data, sysExStartOffset,
-                                offset - sysExStartOffset, timestamp);
+                                offset - sysExStartOffset + 1, timestamp);
                             mInSysEx = false;
                             sysExStartOffset = -1;
                         }
@@ -90,6 +90,11 @@ public class MidiFramer extends MidiReceiver {
                     }
                 } else { // real-time?
                     // Single byte message interleaved with other data.
+                    if (mInSysEx) {
+                        mReceiver.sendWithTimestamp(data, sysExStartOffset,
+                                offset - sysExStartOffset, timestamp);
+                        sysExStartOffset = offset + 1;
+                    }
                     mReceiver.sendWithTimestamp(data, offset, 1, timestamp);
                 }
             } else { // data byte
@@ -110,7 +115,7 @@ public class MidiFramer extends MidiReceiver {
         }
 
         // send any accumulatedSysEx data
-        if (sysExStartOffset >= 0) {
+        if (sysExStartOffset >= 0 && sysExStartOffset < offset) {
             mReceiver.sendWithTimestamp(data, sysExStartOffset,
                     offset - sysExStartOffset, timestamp);
         }
