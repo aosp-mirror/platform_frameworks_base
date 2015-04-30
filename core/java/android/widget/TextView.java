@@ -6633,8 +6633,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mHint.length(), mTextPaint, hintWidth)
                         .setAlignment(alignment)
                         .setTextDir(mTextDir)
-                        .setSpacingMult(mSpacingMult)
-                        .setSpacingAdd(mSpacingAdd)
+                        .setLineSpacing(mSpacingAdd, mSpacingMult)
                         .setIncludePad(mIncludePad)
                         .setBreakStrategy(mBreakStrategy);
                 if (mLeftIndents != null || mRightIndents != null) {
@@ -6723,8 +6722,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     0, mTransformed.length(), mTextPaint, wantWidth)
                     .setAlignment(alignment)
                     .setTextDir(mTextDir)
-                    .setSpacingMult(mSpacingMult)
-                    .setSpacingAdd(mSpacingAdd)
+                    .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
                     .setBreakStrategy(mBreakStrategy);
             if (mLeftIndents != null || mRightIndents != null) {
