@@ -3113,8 +3113,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         checkTime(startTime, "startProcess: done updating cpu stats");
 
         try {
-            int uid = app.uid;
+            try {
+                if (AppGlobals.getPackageManager().isPackageFrozen(app.info.packageName)) {
+                    // This is caught below as if we had failed to fork zygote
+                    throw new RuntimeException("Package " + app.info.packageName + " is frozen!");
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
 
+            int uid = app.uid;
             int[] gids = null;
             int mountExternal = Zygote.MOUNT_EXTERNAL_DEFAULT;
             if (!app.isolated) {
@@ -3124,7 +3132,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     permGids = AppGlobals.getPackageManager().getPackageGids(app.info.packageName,
                             app.userId);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Unable to retrieve gids", e);
+                    throw e.rethrowAsRuntimeException();
                 }
 
                 /*
