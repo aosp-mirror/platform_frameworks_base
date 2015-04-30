@@ -2652,6 +2652,7 @@
   <public type="id" name="accessibilityActionShowOnScreen" />
   <public type="id" name="accessibilityActionScrollToPosition" />
   <public type="id" name="shareText" />
+  <public type="id" name="accessibilityActionStylusButtonPress" />
 
   <public type="attr" name="allowUndo" />
   <public type="attr" name="colorBackgroundFloating" />
@@ -2678,4 +2679,5 @@
   <public type="attr" name="dynamicResources" />
 
   <public type="attr" name="assistBlocked" />
+  <public type="attr" name="stylusButtonPressable" />
 </resources>

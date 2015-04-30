@@ -100,4 +100,7 @@
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_TO_POSITION}. -->
   <item type="id" name="accessibilityActionScrollToPosition" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_STYLUS_BUTTON_PRESS}. -->
+  <item type="id" name="accessibilityActionStylusButtonPress" />
 </resources>
