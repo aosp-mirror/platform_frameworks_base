@@ -30,6 +30,7 @@ interface IAppOpsService {
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
     IBinder getToken(IBinder clientToken);
+    int permissionToOpCode(String permission);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
@@ -42,5 +43,4 @@ interface IAppOpsService {
 
     void setUserRestrictions(in Bundle restrictions, int userHandle);
     void removeUser(int userHandle);
-
 }
