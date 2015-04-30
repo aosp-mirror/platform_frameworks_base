@@ -1993,7 +1993,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (mHaveConnection && !mVisibleBound) {
                 bindCurrentInputMethodService(
                         mCurIntent, mVisibleConnection, Context.BIND_AUTO_CREATE
-                                | Context.BIND_TREAT_LIKE_ACTIVITY);
+                                | Context.BIND_TREAT_LIKE_ACTIVITY
+                                | Context.BIND_FOREGROUND_SERVICE);
                 mVisibleBound = true;
             }
             res = true;

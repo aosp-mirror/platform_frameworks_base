@@ -180,7 +180,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         if (mBound) {
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
-                        Context.BIND_AUTO_CREATE|Context.BIND_TREAT_LIKE_ACTIVITY,
+                        Context.BIND_AUTO_CREATE | Context.BIND_TREAT_LIKE_ACTIVITY
+                                | Context.BIND_FOREGROUND_SERVICE,
                         new UserHandle(mUser));
             }
             mShown = true;
