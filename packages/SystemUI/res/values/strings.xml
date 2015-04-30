@@ -752,22 +752,22 @@
     <!-- Shows when people have clicked at the right edge of the screen to explain how to open the phone. In right-to-left languages, this is the opposite direction. [CHAR LIMIT=60] -->
     <string name="camera_hint">Swipe left for camera</string>
 
-    <!-- Interruption level: None. [CHAR LIMIT=20] -->
+    <!-- Interruption level: None. [CHAR LIMIT=40] -->
     <string name="interruption_level_none">Total silence</string>
 
-    <!-- Interruption level: Priority. [CHAR LIMIT=20] -->
+    <!-- Interruption level: Priority. [CHAR LIMIT=40] -->
     <string name="interruption_level_priority">Priority only</string>
 
-    <!-- Interruption level: Alarms only. [CHAR LIMIT=20] -->
+    <!-- Interruption level: Alarms only. [CHAR LIMIT=40] -->
     <string name="interruption_level_alarms">Alarms only</string>
 
-    <!-- Interruption level: None.  Optimized for narrow two-line display. [CHAR LIMIT=20] -->
+    <!-- Interruption level: None.  Optimized for narrow two-line display. [CHAR LIMIT=40] -->
     <string name="interruption_level_none_twoline">Total\nsilence</string>
 
-    <!-- Interruption level: Priority.  Optimized for narrow two-line display. [CHAR LIMIT=20] -->
+    <!-- Interruption level: Priority.  Optimized for narrow two-line display. [CHAR LIMIT=40] -->
     <string name="interruption_level_priority_twoline">Priority\nonly</string>
 
-    <!-- Interruption level: Alarms only.  Optimized for narrow two-line display. [CHAR LIMIT=20] -->
+    <!-- Interruption level: Alarms only.  Optimized for narrow two-line display. [CHAR LIMIT=40] -->
     <string name="interruption_level_alarms_twoline">Alarms\nonly</string>
 
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=40]-->
