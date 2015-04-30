@@ -25,4 +25,7 @@ oneway interface IAudioPolicyCallback {
     // callbacks for audio focus
     void notifyAudioFocusGrant(in AudioFocusInfo afi, int requestResult);
     void notifyAudioFocusLoss(in AudioFocusInfo afi, boolean wasNotified);
+
+    // callback for mix activity status update
+    void notifyMixStateUpdate(in String regId, int state);
 }
