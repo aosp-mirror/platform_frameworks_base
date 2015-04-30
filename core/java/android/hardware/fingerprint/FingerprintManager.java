@@ -626,7 +626,13 @@ public class FingerprintManager {
         return 0;
     }
 
-    private Handler mHandler = new Handler() {
+    private Handler mHandler;
+
+    private class MyHandler extends Handler {
+        private MyHandler(Context context) {
+            super(context.getMainLooper());
+        }
+
         public void handleMessage(android.os.Message msg) {
             switch(msg.what) {
                 case MSG_ENROLL_RESULT:
@@ -711,6 +717,7 @@ public class FingerprintManager {
         if (mService == null) {
             Slog.v(TAG, "FingerprintManagerService was null");
         }
+        mHandler = new MyHandler(context);
     }
 
     private int getCurrentUserId() {
