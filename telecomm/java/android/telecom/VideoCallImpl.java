@@ -36,13 +36,6 @@ import com.android.internal.telecom.IVideoProvider;
  * {@hide}
  */
 public class VideoCallImpl extends VideoCall {
-    private static final int MSG_RECEIVE_SESSION_MODIFY_REQUEST = 1;
-    private static final int MSG_RECEIVE_SESSION_MODIFY_RESPONSE = 2;
-    private static final int MSG_HANDLE_CALL_SESSION_EVENT = 3;
-    private static final int MSG_CHANGE_PEER_DIMENSIONS = 4;
-    private static final int MSG_CHANGE_CALL_DATA_USAGE = 5;
-    private static final int MSG_CHANGE_CAMERA_CAPABILITIES = 6;
-    private static final int MSG_CHANGE_VIDEO_QUALITY = 7;
 
     private final IVideoProvider mVideoProvider;
     private final VideoCallListenerBinder mBinder;
@@ -61,7 +54,7 @@ public class VideoCallImpl extends VideoCall {
     private final class VideoCallListenerBinder extends IVideoCallback.Stub {
         @Override
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
-            mHandler.obtainMessage(MSG_RECEIVE_SESSION_MODIFY_REQUEST,
+            mHandler.obtainMessage(MessageHandler.MSG_RECEIVE_SESSION_MODIFY_REQUEST,
                     videoProfile).sendToTarget();
         }
 
@@ -72,12 +65,14 @@ public class VideoCallImpl extends VideoCall {
             args.arg1 = status;
             args.arg2 = requestProfile;
             args.arg3 = responseProfile;
-            mHandler.obtainMessage(MSG_RECEIVE_SESSION_MODIFY_RESPONSE, args).sendToTarget();
+            mHandler.obtainMessage(MessageHandler.MSG_RECEIVE_SESSION_MODIFY_RESPONSE, args)
+                    .sendToTarget();
         }
 
         @Override
         public void handleCallSessionEvent(int event) {
-            mHandler.obtainMessage(MSG_HANDLE_CALL_SESSION_EVENT, event).sendToTarget();
+            mHandler.obtainMessage(MessageHandler.MSG_HANDLE_CALL_SESSION_EVENT, event)
+                    .sendToTarget();
         }
 
         @Override
@@ -85,28 +80,42 @@ public class VideoCallImpl extends VideoCall {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = width;
             args.arg2 = height;
-            mHandler.obtainMessage(MSG_CHANGE_PEER_DIMENSIONS, args).sendToTarget();
+            mHandler.obtainMessage(MessageHandler.MSG_CHANGE_PEER_DIMENSIONS, args).sendToTarget();
         }
 
         @Override
         public void changeVideoQuality(int videoQuality) {
-            mHandler.obtainMessage(MSG_CHANGE_VIDEO_QUALITY, videoQuality, 0).sendToTarget();
+            mHandler.obtainMessage(MessageHandler.MSG_CHANGE_VIDEO_QUALITY, videoQuality, 0)
+                    .sendToTarget();
         }
 
         @Override
         public void changeCallDataUsage(long dataUsage) {
-            mHandler.obtainMessage(MSG_CHANGE_CALL_DATA_USAGE, dataUsage).sendToTarget();
+            mHandler.obtainMessage(MessageHandler.MSG_CHANGE_CALL_DATA_USAGE, dataUsage)
+                    .sendToTarget();
         }
 
         @Override
         public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
-            mHandler.obtainMessage(MSG_CHANGE_CAMERA_CAPABILITIES,
+            mHandler.obtainMessage(MessageHandler.MSG_CHANGE_CAMERA_CAPABILITIES,
                     cameraCapabilities).sendToTarget();
         }
     }
 
     /** Default handler used to consolidate binder method calls onto a single thread. */
-    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+    private final class MessageHandler extends Handler {
+        private static final int MSG_RECEIVE_SESSION_MODIFY_REQUEST = 1;
+        private static final int MSG_RECEIVE_SESSION_MODIFY_RESPONSE = 2;
+        private static final int MSG_HANDLE_CALL_SESSION_EVENT = 3;
+        private static final int MSG_CHANGE_PEER_DIMENSIONS = 4;
+        private static final int MSG_CHANGE_CALL_DATA_USAGE = 5;
+        private static final int MSG_CHANGE_CAMERA_CAPABILITIES = 6;
+        private static final int MSG_CHANGE_VIDEO_QUALITY = 7;
+
+        public MessageHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (mCallback == null) {
@@ -160,7 +169,8 @@ public class VideoCallImpl extends VideoCall {
         }
     };
 
-    /** {@hide} */
+    private Handler mHandler;
+
     VideoCallImpl(IVideoProvider videoProvider) throws RemoteException {
         mVideoProvider = videoProvider;
         mVideoProvider.asBinder().linkToDeath(mDeathRecipient, 0);
@@ -169,13 +179,31 @@ public class VideoCallImpl extends VideoCall {
         mVideoProvider.addVideoCallback(mBinder);
     }
 
-    /** {@inheritDoc} */
-    public void registerCallback(VideoCall.Callback callback) {
-        mCallback = callback;
+    public void destroy() {
+        unregisterCallback(mCallback);
     }
 
     /** {@inheritDoc} */
-    public void unregisterCallback() {
+    public void registerCallback(VideoCall.Callback callback) {
+        registerCallback(callback, null);
+    }
+
+    /** {@inheritDoc} */
+    public void registerCallback(VideoCall.Callback callback, Handler handler) {
+        mCallback = callback;
+        if (handler == null) {
+            mHandler = new MessageHandler(Looper.getMainLooper());
+        } else {
+            mHandler = new MessageHandler(handler.getLooper());
+        }
+    }
+
+    /** {@inheritDoc} */
+    public void unregisterCallback(VideoCall.Callback callback) {
+        if (callback != mCallback) {
+            return;
+        }
+
         mCallback = null;
         try {
             mVideoProvider.removeVideoCallback(mBinder);
