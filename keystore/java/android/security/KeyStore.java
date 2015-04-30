@@ -543,6 +543,8 @@ public class KeyStore {
                     return new KeyStoreException(errorCode, "Key not found");
                 case VALUE_CORRUPTED:
                     return new KeyStoreException(errorCode, "Key blob corrupted");
+                case OP_AUTH_NEEDED:
+                    return new KeyStoreException(errorCode, "Operation requires authorization");
                 default:
                     return new KeyStoreException(errorCode, String.valueOf(errorCode));
             }
@@ -572,6 +574,7 @@ public class KeyStore {
             case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
                 return new KeyNotYetValidException();
             case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
+            case OP_AUTH_NEEDED:
             {
                 // We now need to determine whether the key/operation can become usable if user
                 // authentication is performed, or whether it can never become usable again.

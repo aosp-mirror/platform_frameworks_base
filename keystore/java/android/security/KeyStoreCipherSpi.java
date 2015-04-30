@@ -298,7 +298,8 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mAdditionalEntropyForBegin = null;
         if (opResult == null) {
             throw new KeyStoreConnectException();
-        } else if (opResult.resultCode != KeyStore.NO_ERROR) {
+        } else if ((opResult.resultCode != KeyStore.NO_ERROR)
+                && (opResult.resultCode != KeyStore.OP_AUTH_NEEDED)) {
             switch (opResult.resultCode) {
                 case KeymasterDefs.KM_ERROR_INVALID_NONCE:
                     throw new InvalidAlgorithmParameterException("Invalid IV");
@@ -309,6 +310,8 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         if (opResult.token == null) {
             throw new IllegalStateException("Keystore returned null operation token");
         }
+        // The operation handle/token is now either valid for use immediately or needs to be
+        // authorized through user authentication (if the error code was OP_AUTH_NEEDED).
         mOperationToken = opResult.token;
         mOperationHandle = opResult.operationHandle;
         loadAlgorithmSpecificParametersFromBeginResult(keymasterOutputArgs);
