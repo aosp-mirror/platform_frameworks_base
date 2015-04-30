@@ -164,10 +164,6 @@ public class LayoutInflater_Delegate {
                                 com.android.internal.R.styleable.Include_id, View.NO_ID);
                         final int visibility = a.getInt(
                                 com.android.internal.R.styleable.Include_visibility, -1);
-                        final boolean hasWidth = a.hasValue(
-                                com.android.internal.R.styleable.Include_layout_width);
-                        final boolean hasHeight = a.hasValue(
-                                com.android.internal.R.styleable.Include_layout_height);
                         a.recycle();
 
                         // We try to load the layout params set in the <include /> tag. If
@@ -179,19 +175,17 @@ public class LayoutInflater_Delegate {
                         // successfully loaded layout params from the <include /> tag,
                         // false means we need to rely on the included layout params.
                         ViewGroup.LayoutParams params = null;
-                        if (hasWidth && hasHeight) {
-                            try {
-                                // ---- START CHANGES
-                                sIsInInclude = true;
-                                // ---- END CHANGES
+                        try {
+                            // ---- START CHANGES
+                            sIsInInclude = true;
+                            // ---- END CHANGES
 
-                                params = group.generateLayoutParams(attrs);
+                            params = group.generateLayoutParams(attrs);
 
-                            } finally {
-                                // ---- START CHANGES
-                                sIsInInclude = false;
-                                // ---- END CHANGES
-                            }
+                        } finally {
+                            // ---- START CHANGES
+                            sIsInInclude = false;
+                            // ---- END CHANGES
                         }
                         if (params == null) {
                             params = group.generateLayoutParams(childAttrs);
