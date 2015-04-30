@@ -58,6 +58,7 @@ import android.content.IntentSender;
  *  {@hide}
  */
 interface IPackageManager {
+    boolean isPackageFrozen(String packageName);
     boolean isPackageAvailable(String packageName, int userId);
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
     int getPackageUid(String packageName, int userId);
