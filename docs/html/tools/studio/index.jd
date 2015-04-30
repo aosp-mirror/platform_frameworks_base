@@ -243,7 +243,7 @@ Manager (HAXM) emulator accelerator and creates a default emulator for quick app
 
 
 
-<h3>Memory Monitor</h3>
+<h3 id="memory-monitor">Memory Monitor</h3>
 <p>Android Studio provides a memory monitor view so you can more easily monitor your
 app's memory usage to find deallocated objects, locate memory leaks and track the amount of
 memory the connected device is using. With your app running on a device or emulator, click the
