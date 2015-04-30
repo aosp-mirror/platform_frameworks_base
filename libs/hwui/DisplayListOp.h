@@ -1423,7 +1423,7 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("Draw RenderNode %p %s, flags %#x", mRenderNode, mRenderNode->getName());
+        OP_LOG("Draw RenderNode %p %s", mRenderNode, mRenderNode->getName());
         if (mRenderNode && (logFlags & kOpLogFlag_Recurse)) {
             mRenderNode->output(level + 1);
         }
