@@ -47,6 +47,8 @@ import android.view.animation.Interpolator;
 import android.widget.EdgeEffect;
 import android.widget.Scroller;
 
+import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -2720,10 +2722,12 @@ public class ViewPager extends ViewGroup {
 
         if (canScrollHorizontally(1)) {
             info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
+            info.addAction(AccessibilityAction.ACTION_SCROLL_RIGHT);
         }
 
         if (canScrollHorizontally(-1)) {
             info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
+            info.addAction(AccessibilityAction.ACTION_SCROLL_LEFT);
         }
     }
 
@@ -2735,12 +2739,14 @@ public class ViewPager extends ViewGroup {
 
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+            case R.id.accessibilityActionScrollRight:
                 if (canScrollHorizontally(1)) {
                     setCurrentItem(mCurItem + 1);
                     return true;
                 }
                 return false;
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+            case R.id.accessibilityActionScrollLeft:
                 if (canScrollHorizontally(-1)) {
                     setCurrentItem(mCurItem - 1);
                     return true;
