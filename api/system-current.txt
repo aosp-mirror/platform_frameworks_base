@@ -30630,6 +30630,12 @@ package android.security {
     method public android.security.KeyPairGeneratorSpec.Builder setUserAuthenticationValidityDurationSeconds(int);
   }
 
+  public class KeyPermanentlyInvalidatedException extends java.security.InvalidKeyException {
+    ctor public KeyPermanentlyInvalidatedException();
+    ctor public KeyPermanentlyInvalidatedException(java.lang.String);
+    ctor public KeyPermanentlyInvalidatedException(java.lang.String, java.lang.Throwable);
+  }
+
   public abstract class KeyStoreKeyProperties {
   }
 
@@ -30708,11 +30714,6 @@ package android.security {
   public class NetworkSecurityPolicy {
     method public static android.security.NetworkSecurityPolicy getInstance();
     method public boolean isCleartextTrafficPermitted();
-  }
-
-  public class NewFingerprintEnrolledException extends java.security.InvalidKeyException {
-    ctor public NewFingerprintEnrolledException();
-    ctor public NewFingerprintEnrolledException(java.lang.String);
   }
 
   public class UserNotAuthenticatedException extends java.security.InvalidKeyException {
