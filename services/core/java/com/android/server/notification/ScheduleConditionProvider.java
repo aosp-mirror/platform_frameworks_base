@@ -69,7 +69,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     }
 
     @Override
-    public boolean isValidConditionid(Uri id) {
+    public boolean isValidConditionId(Uri id) {
         return ZenModeConfig.isValidScheduleConditionId(id);
     }
 
