@@ -23,6 +23,10 @@ import java.io.IOException;
  */
 abstract public class MidiReceiver {
     /**
+     * Although public, this method should be considered a private implementation
+     * detail. Client code should call {@link #send} or {@link #sendWithTimestamp}
+     * instead.
+     *
      * Called to pass MIDI data to the receiver.
      * May fail if count exceeds {@link #getMaxMessageSize}.
      *
