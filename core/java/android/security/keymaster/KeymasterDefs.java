@@ -194,6 +194,9 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_UNSUPPORTED_EC_FIELD = -50;
     public static final int KM_ERROR_MISSING_NONCE = -51;
     public static final int KM_ERROR_INVALID_NONCE = -52;
+    public static final int KM_ERROR_UNSUPPORTED_CHUNK_LENGTH = -53;
+    public static final int KM_ERROR_RESCOPABLE_KEY_NOT_USABLE = -54;
+    public static final int KM_ERROR_CALLER_NONCE_PROHIBITED = -55;
     public static final int KM_ERROR_UNIMPLEMENTED = -100;
     public static final int KM_ERROR_VERSION_MISMATCH = -101;
     public static final int KM_ERROR_UNKNOWN_ERROR = -1000;
