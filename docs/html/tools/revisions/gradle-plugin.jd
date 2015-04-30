@@ -36,9 +36,77 @@ plugin you are using, check the version declaration in the project-level
 <p>For a summary of known issues in Android Plugin for Gradle, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
+
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.2.0</a> <em>(April 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+      <li>Enhanced support for running unit tests with Gradle.  </li>
+        <ul>
+          <li>Added support to include Java-style resources in the classpath when running unit
+            tests directly from Gradle.
+          </li>
+          <li>Added unit test dependency support for Android ARchive (AAR) artifacts.
+          </li>
+          <li>Added support for the <code>unitTestVariants</code> property so unit test variants
+            can be manipulated using the <code>build.gradle</code> file.
+          </li>
+          <li>Added the <code>unitTest.all</code> code block under <code>testOptions</code> to
+            configure customized tasks for unit test. The following sample code shows how to add
+            unit test configuration settings using this new option:
+<pre>
+android {
+  testOptions {
+    unitTest.all {
+      jvmArgs '-XX:MaxPermSize=256m' // Or any other gradle option.
+    }
+  }
+}
+</pre>
+           </li>
+          <li>Fixed the handling of enums and public instance fields in the packaging of the
+           <code>mockable-android.jar</code> file.
+          </li>
+          <li>Fixed library project task dependencies so test classes recompile after changes.
+          </li>
+          </ul>
+        <li>Added the <code>testProguardFile</code> property to apply
+          <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> files when minifying a test APK.
+        </li>
+        <li>Added the <code>timeOut</code> property to the <code>adbOptions</code> code block
+          for setting the maximum recording time for
+          <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> screen recording.
+        </li>
+        <li>Added support for 280 dpi resources.
+        </li>
+        <li>Improved performance during project evaluation.
+        </li>
+     </ul>
+    </dd>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.3</a> <em>(March 2015)</em>
   </p>
 
