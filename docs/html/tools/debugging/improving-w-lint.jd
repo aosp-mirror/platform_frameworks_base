@@ -22,6 +22,7 @@ parent.link=index.html
       <h2>See Also</h2>
           <ol>
               <li><a href="{@docRoot}tools/help/lint.html">lint (reference)</a></li>
+              <li><a href="{@docRoot}tools/degugging/annotations.html">Using Android Annotations</a></li>
           </ol>
     </div>
 </div>
