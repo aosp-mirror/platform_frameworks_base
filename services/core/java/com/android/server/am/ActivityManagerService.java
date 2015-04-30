@@ -413,6 +413,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     ActivityRecord mFocusedActivity = null;
 
     /**
+     * User id of the last activity mFocusedActivity was set to.
+     */
+    private int mLastFocusedUserId;
+
+    /**
      * List of intents that were used to start the most recent tasks.
      */
     private final RecentTasks mRecentTasks;
@@ -2562,19 +2567,32 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mWindowManager.setFocusedApp(r.appToken, true);
             }
             applyUpdateLockStateLocked(r);
-            if (last != null && last.userId != mFocusedActivity.userId) {
+            if (mFocusedActivity.userId != mLastFocusedUserId) {
                 mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
                 mHandler.sendMessage(mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG,
                                 mFocusedActivity.userId, 0));
+                mLastFocusedUserId = mFocusedActivity.userId;
             }
         }
-        EventLog.writeEvent(EventLogTags.AM_FOCUSED_ACTIVITY, mCurrentUserId,
+        EventLog.writeEvent(EventLogTags.AM_FOCUSED_ACTIVITY,
+                mFocusedActivity == null ? -1 : mFocusedActivity.userId,
                 mFocusedActivity == null ? "NULL" : mFocusedActivity.shortComponentName);
     }
 
     final void clearFocusedActivity(ActivityRecord r) {
         if (mFocusedActivity == r) {
+            ActivityStack stack = mStackSupervisor.getFocusedStack();
+            if (stack != null) {
+                ActivityRecord top = stack.topActivity();
+                if (top != null && top.userId != mLastFocusedUserId) {
+                    mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
+                    mHandler.sendMessage(mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG,
+                                    top.userId, 0));
+                    mLastFocusedUserId = top.userId;
+                }
+            }
             mFocusedActivity = null;
+            EventLog.writeEvent(EventLogTags.AM_FOCUSED_ACTIVITY, -1, "NULL");
         }
     }
 
