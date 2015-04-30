@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.crypto.Cipher;
+import javax.crypto.Mac;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
@@ -195,17 +196,25 @@ public class FingerprintManager {
 
     /**
      * A wrapper class for the crypto objects supported by FingerprintManager. Currently the
-     * framework supports {@link Signature} and {@link Cipher} objects.
+     * framework supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
      */
     public static class CryptoObject {
 
-        public CryptoObject(Signature signature) {
+        public CryptoObject(@NonNull Signature signature) {
             mSignature = signature;
             mCipher = null;
+            mMac = null;
         }
 
-        public CryptoObject(Cipher cipher) {
+        public CryptoObject(@NonNull Cipher cipher) {
             mCipher = cipher;
+            mSignature = null;
+            mMac = null;
+        }
+
+        public CryptoObject(@NonNull Mac mac) {
+            mMac = mac;
+            mCipher = null;
             mSignature = null;
         }
 
@@ -222,6 +231,12 @@ public class FingerprintManager {
         public Cipher getCipher() { return mCipher; }
 
         /**
+         * Get {@link Mac} object.
+         * @return {@link Mac} object or null if this doesn't contain one.
+         */
+        public Mac getMac() { return mMac; }
+
+        /**
          * @hide
          * @return the opId associated with this object or 0 if none
          */
@@ -230,12 +245,15 @@ public class FingerprintManager {
                 return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mSignature);
             } else if (mCipher != null) {
                 return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mCipher);
+            } else if (mMac != null) {
+                return AndroidKeyStoreProvider.getKeyStoreOperationHandle(mMac);
             }
             return 0;
         }
 
         private final Signature mSignature;
         private final Cipher mCipher;
+        private final Mac mMac;
     };
 
     /**
