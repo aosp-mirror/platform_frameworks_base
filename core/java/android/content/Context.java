@@ -252,6 +252,21 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
+     * @hide Flag for {@link #bindService}: Like {@link #BIND_FOREGROUND_SERVICE},
+     * but only applies while the device is awake.
+     */
+    public static final int BIND_FOREGROUND_SERVICE_WHILE_AWAKE = 0x02000000;
+
+    /**
+     * @hide Flag for {@link #bindService}: For only the case where the binding
+     * is coming from the system, set the process state to FOREGROUND_SERVICE
+     * instead of the normal maximum of IMPORTANT_FOREGROUND.  That is, this is
+     * saying that the process shouldn't participate in the normal power reduction
+     * modes (removing network access etc).
+     */
+    public static final int BIND_FOREGROUND_SERVICE = 0x04000000;
+
+    /**
      * @hide Flag for {@link #bindService}: Treat the binding as hosting
      * an activity, an unbinding as the activity going in the background.
      * That is, when unbinding, the process when empty will go on the activity

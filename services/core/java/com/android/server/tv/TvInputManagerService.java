@@ -529,7 +529,9 @@ public final class TvInputManagerService extends SystemService {
 
             Intent i = new Intent(TvInputService.SERVICE_INTERFACE).setComponent(component);
             serviceState.bound = mContext.bindServiceAsUser(
-                    i, serviceState.connection, Context.BIND_AUTO_CREATE, new UserHandle(userId));
+                    i, serviceState.connection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                    new UserHandle(userId));
         } else if (serviceState.service != null && !maintainConnection) {
             // This means that the service is already connected but its state indicates that we have
             // nothing to do with it. Then, disconnect the service.
