@@ -4,27 +4,29 @@ page.template=sdk
 header.hide=1
 page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
-studio.version=1.1.0
+studio.version=1.2.0
 
-studio.linux_bundle_download=android-studio-ide-135.1740770-linux.zip
-studio.linux_bundle_bytes=259336386
-studio.linux_bundle_checksum=e8d166559c50a484f83ebfec6731cc0e3f259208
+studio.linux_bundle_download=android-studio-ide-141.1890965-linux.zip
+studio.linux_bundle_bytes=259139652 
+studio.linux_bundle_checksum=72149f65911ca18d8f0d360e6b7a1e2dc57e9935
 
-studio.mac_bundle_download=android-studio-ide-135.1740770-mac.dmg
-studio.mac_bundle_bytes=261303345
-studio.mac_bundle_checksum=f9745d0fec1eefd498f6160a2d6a1b5247d4cda3
+studio.mac_bundle_download=android-studio-ide-141.1890965-mac.dmg
+studio.mac_bundle_bytes=260877150
+studio.mac_bundle_checksum=06fe5a2d9ab6c99bf42fb2014e519a073fc7e90d
 
-studio.win_bundle_exe_download=android-studio-bundle-135.1740770-windows.exe
-studio.win_bundle_exe_bytes=856233768
-studio.win_bundle_exe_checksum=7484b9989d2914e1de30995fbaa97a271a514b3f
+studio.win_bundle_download=android-studio-ide-141.1890965-windows.zip
+studio.win_bundle_bytes=261548058
+studio.win_bundle_checksum=29416e54ad074881a1e668e61e3d0c2316108dbe
 
-studio.win_notools_exe_download=android-studio-ide-135.1740770-windows.exe
-studio.win_notools_exe_bytes=242135128
-studio.win_notools_exe_checksum=5ea77661cd2300cea09e8e34f4a2219a0813911f
 
-studio.win_bundle_download=android-studio-ide-135.1740770-windows.zip
-studio.win_bundle_bytes=261667054
-studio.win_bundle_checksum=e903f17cc6a57c7e3d460c4555386e3e65c6b4eb
+studio.win_bundle_exe_download=android-studio-bundle-141.1890965-windows.exe
+studio.win_bundle_exe_bytes=928285584
+studio.win_bundle_exe_checksum=47be67749409f0d710c05b9a8f22d9191c47a9d0
+
+studio.win_notools_exe_download=android-studio-ide-141.1890965-windows.exe
+studio.win_notools_exe_bytes=243621072
+studio.win_notools_exe_checksum=760d45212bea42f52adb1cbeab2390156d49c74d
+
 
 
 
@@ -426,8 +428,7 @@ href="" >Download Android Studio</a>
 
 <p style="margin:0">
 For more details about features available in Android Studio,
-read the guide to <a href="{@docRoot}tools/studio/index.html"
-  >Android Studio Basics</a>.</p>
+read the overview at <a href="{@docRoot}tools/studio/index.html">Android Studio</a>.</p>
 </div>
 
 
