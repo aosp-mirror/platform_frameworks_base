@@ -18,6 +18,8 @@ package android.security;
 
 import com.android.org.conscrypt.NativeConstants;
 
+import android.content.Context;
+import android.hardware.fingerprint.IFingerprintService;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -31,6 +33,7 @@ import android.security.keymaster.OperationResult;
 import android.util.Log;
 
 import java.security.InvalidKeyException;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -490,7 +493,8 @@ public class KeyStore {
     /**
      * Check if the operation referenced by {@code token} is currently authorized.
      *
-     * @param token An operation token returned by a call to {@link KeyStore.begin}.
+     * @param token An operation token returned by a call to
+     * {@link #begin(String, int, boolean, KeymasterArguments, byte[], KeymasterArguments) begin}.
      */
     public boolean isOperationAuthorized(IBinder token) {
         try {
@@ -561,19 +565,72 @@ public class KeyStore {
      * Returns an {@link InvalidKeyException} corresponding to the provided
      * {@link KeyStoreException}.
      */
-    static InvalidKeyException getInvalidKeyException(KeyStoreException e) {
+    InvalidKeyException getInvalidKeyException(String keystoreKeyAlias, KeyStoreException e) {
         switch (e.getErrorCode()) {
             case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
                 return new KeyExpiredException();
             case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
                 return new KeyNotYetValidException();
             case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
-                return new UserNotAuthenticatedException();
-            // TODO: Handle TBD Keymaster error code "invalid key: new fingerprint enrolled"
-            // case KeymasterDefs.KM_ERROR_TBD
-            //     return new NewFingerprintEnrolledException();
+            {
+                // We now need to determine whether the key/operation can become usable if user
+                // authentication is performed, or whether it can never become usable again.
+                // User authentication requirements are contained in the key's characteristics. We
+                // need to check whether these requirements can be be satisfied by asking the user
+                // to authenticate.
+                KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
+                int getKeyCharacteristicsErrorCode =
+                        getKeyCharacteristics(keystoreKeyAlias, null, null, keyCharacteristics);
+                if (getKeyCharacteristicsErrorCode != NO_ERROR) {
+                    return new InvalidKeyException(
+                            "Failed to obtained key characteristics",
+                            getKeyStoreException(getKeyCharacteristicsErrorCode));
+                }
+                List<Long> keySids =
+                        keyCharacteristics.getLongs(KeymasterDefs.KM_TAG_USER_SECURE_ID);
+                if (keySids.isEmpty()) {
+                    // Key is not bound to any SIDs -- no amount of authentication will help here.
+                    return new KeyPermanentlyInvalidatedException();
+                }
+                long rootSid = GateKeeper.getSecureUserId();
+                if ((rootSid != 0) && (keySids.contains(Long.valueOf(rootSid)))) {
+                    // One of the key's SIDs is the current root SID -- user can be authenticated
+                    // against that SID.
+                    return new UserNotAuthenticatedException();
+                }
+
+                long fingerprintOnlySid = getFingerprintOnlySid();
+                if ((fingerprintOnlySid != 0)
+                        && (keySids.contains(Long.valueOf(fingerprintOnlySid)))) {
+                    // One of the key's SIDs is the current fingerprint SID -- user can be
+                    // authenticated against that SID.
+                    return new UserNotAuthenticatedException();
+                }
+
+                // None of the key's SIDs can ever be authenticated
+                return new KeyPermanentlyInvalidatedException();
+            }
             default:
                 return new InvalidKeyException("Keystore operation failed", e);
+        }
+    }
+
+    private static long getFingerprintOnlySid() {
+        IFingerprintService service = IFingerprintService.Stub.asInterface(
+                ServiceManager.getService(Context.FINGERPRINT_SERVICE));
+        if (service == null) {
+            return 0;
+        }
+
+        try {
+            long deviceId = 0; // TODO: plumb hardware id to FPMS
+            if (!service.isHardwareDetected(deviceId)) {
+                return 0;
+            }
+
+            return service.getAuthenticatorId();
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed to communicate with fingerprint service", e);
         }
     }
 
@@ -581,7 +638,7 @@ public class KeyStore {
      * Returns an {@link InvalidKeyException} corresponding to the provided keystore/keymaster error
      * code.
      */
-    static InvalidKeyException getInvalidKeyException(int errorCode) {
-        return getInvalidKeyException(getKeyStoreException(errorCode));
+    InvalidKeyException getInvalidKeyException(String keystoreKeyAlias, int errorCode) {
+        return getInvalidKeyException(keystoreKeyAlias, getKeyStoreException(errorCode));
     }
 }

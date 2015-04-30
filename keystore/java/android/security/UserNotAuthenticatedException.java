@@ -20,7 +20,7 @@ import java.security.InvalidKeyException;
 
 /**
  * Indicates that a cryptographic operation could not be performed because the user has not been
- * authenticated recently enough.
+ * authenticated recently enough. Authenticating the user will resolve this issue.
  */
 public class UserNotAuthenticatedException extends InvalidKeyException {
 
