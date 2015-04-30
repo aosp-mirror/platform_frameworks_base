@@ -114,6 +114,11 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * the Surface provided to prepare must not be used as a target of a CaptureRequest submitted
      * to this session.</p>
      *
+     * <p>{@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}
+     * devices cannot pre-allocate output buffers; for those devices,
+     * {@link StateCallback#onSurfacePrepared} will be immediately called, and no preallocation is
+     * done.</p>
+     *
      * @param surface the output Surface for which buffers should be pre-allocated. Must be one of
      * the output Surfaces used to create this session.
      *
