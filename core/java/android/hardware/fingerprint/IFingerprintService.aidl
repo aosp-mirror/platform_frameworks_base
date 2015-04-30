@@ -27,10 +27,10 @@ import java.util.List;
 interface IFingerprintService {
     // Authenticate the given sessionId with a fingerprint
     void authenticate(IBinder token, long sessionId, int groupId,
-            IFingerprintServiceReceiver receiver, int flags);
+            IFingerprintServiceReceiver receiver, int flags, String opPackageName);
 
     // Cancel authentication for the given sessionId
-    void cancelAuthentication(IBinder token);
+    void cancelAuthentication(IBinder token, String opPackageName);
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] cryptoToken, int groupId, IFingerprintServiceReceiver receiver,
@@ -46,16 +46,16 @@ interface IFingerprintService {
     void rename(int fingerId, int groupId, String name);
 
     // Get a list of enrolled fingerprints in the given group.
-    List<Fingerprint> getEnrolledFingerprints(int groupId);
+    List<Fingerprint> getEnrolledFingerprints(int groupId, String opPackageName);
 
     // Determine if HAL is loaded and ready
-    boolean isHardwareDetected(long deviceId);
+    boolean isHardwareDetected(long deviceId, String opPackageName);
 
     // Get a pre-enrollment authentication token
     long preEnroll(IBinder token);
 
     // Determine if a user has at least one enrolled fingerprint
-    boolean hasEnrolledFingerprints(int groupId);
+    boolean hasEnrolledFingerprints(int groupId, String opPackageName);
 
     // Gets the number of hardware devices
     // int getHardwareDeviceCount();
@@ -64,5 +64,5 @@ interface IFingerprintService {
     // long getHardwareDevice(int i);
 
     // Gets the authenticator ID for fingerprint
-    long getAuthenticatorId();
+    long getAuthenticatorId(String opPackageName);
 }
