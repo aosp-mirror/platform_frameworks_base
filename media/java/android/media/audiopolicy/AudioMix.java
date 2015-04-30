@@ -36,20 +36,30 @@ public class AudioMix {
     private int mRouteFlags;
     private String mRegistrationId;
     private int mMixType = MIX_TYPE_INVALID;
-    private int mMixState = MIX_STATE_DISABLED;
+    int mMixState = MIX_STATE_DISABLED;
+    int mCallbackFlags;
 
     /**
      * All parameters are guaranteed valid through the Builder.
      */
-    private AudioMix(AudioMixingRule rule, AudioFormat format, int routeFlags) {
+    private AudioMix(AudioMixingRule rule, AudioFormat format, int routeFlags, int callbackFlags) {
         mRule = rule;
         mFormat = format;
         mRouteFlags = routeFlags;
         mRegistrationId = null;
         mMixType = rule.getTargetMixType();
+        mCallbackFlags = callbackFlags;
     }
 
-    // ROUTE_FLAG_* values to keep in sync with frameworks/av/include/media/AudioPolicy.h
+    // CALLBACK_FLAG_* values: keep in sync with AudioMix::kCbFlag* values defined
+    // in frameworks/av/include/media/AudioPolicy.h
+    /** @hide */
+    public final static int CALLBACK_FLAG_NOTIFY_ACTIVITY = 0x1;
+    // when adding new MIX_FLAG_* flags, add them to this mask of authorized masks:
+    private final static int CALLBACK_FLAGS_ALL = CALLBACK_FLAG_NOTIFY_ACTIVITY;
+
+    // ROUTE_FLAG_* values: keep in sync with MIX_ROUTE_FLAG_* values defined
+    // in frameworks/av/include/media/AudioPolicy.h
     /**
      * An audio mix behavior where the output of the mix is sent to the original destination of
      * the audio signal, i.e. an output device for an output mix, or a recording for an input mix.
@@ -161,6 +171,7 @@ public class AudioMix {
         private AudioMixingRule mRule = null;
         private AudioFormat mFormat = null;
         private int mRouteFlags = 0;
+        private int mCallbackFlags = 0;
 
         /**
          * @hide
@@ -195,6 +206,22 @@ public class AudioMix {
                 throw new IllegalArgumentException("Illegal null AudioMixingRule argument");
             }
             mRule = rule;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Only used by AudioPolicyConfig, not a public API.
+         * @param callbackFlags which callbacks are called from native
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public Builder setCallbackFlags(int flags) throws IllegalArgumentException {
+            if ((flags != 0) && ((flags & CALLBACK_FLAGS_ALL) == 0)) {
+                throw new IllegalArgumentException("Illegal callback flags 0x"
+                        + Integer.toHexString(flags).toUpperCase());
+            }
+            mCallbackFlags = flags;
             return this;
         }
 
@@ -256,7 +283,7 @@ public class AudioMix {
                 }
                 mFormat = new AudioFormat.Builder().setSampleRate(rate).build();
             }
-            return new AudioMix(mRule, mFormat, mRouteFlags);
+            return new AudioMix(mRule, mFormat, mRouteFlags, mCallbackFlags);
         }
     }
 }
