@@ -32,5 +32,5 @@ public abstract class SystemConditionProviderService extends ConditionProviderSe
     abstract public void attachBase(Context context);
     abstract public IConditionProvider asInterface();
     abstract public ComponentName getComponent();
-    abstract public boolean isValidConditionid(Uri id);
+    abstract public boolean isValidConditionId(Uri id);
 }

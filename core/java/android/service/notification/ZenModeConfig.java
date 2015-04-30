@@ -95,7 +95,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String MANUAL_TAG = "manual";
     private static final String AUTOMATIC_TAG = "automatic";
 
-    private static final String RULE_ATT_ID = "id";
+    private static final String RULE_ATT_ID = "ruleId";
     private static final String RULE_ATT_ENABLED = "enabled";
     private static final String RULE_ATT_SNOOZING = "snoozing";
     private static final String RULE_ATT_NAME = "name";
@@ -279,6 +279,15 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    private static long tryParseLong(String value, long defValue) {
+        if (TextUtils.isEmpty(value)) return defValue;
+        try {
+            return Long.valueOf(value);
+        } catch (NumberFormatException e) {
+            return defValue;
+        }
+    }
+
     public static ZenModeConfig readXml(XmlPullParser parser, Migration migration)
             throws XmlPullParserException, IOException {
         int type = parser.getEventType();
@@ -367,7 +376,7 @@ public class ZenModeConfig implements Parcelable {
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
         rt.condition = readConditionXml(parser);
-        return rt.condition != null || !conditionRequired ? rt : null;
+        return rt;
     }
 
     public static void writeRuleXml(ZenRule rule, XmlSerializer out) throws IOException {
@@ -568,10 +577,12 @@ public class ZenModeConfig implements Parcelable {
                 Condition.FLAG_RELEVANT_NOW);
     }
 
-    // For built-in conditions
+    // ==== Built-in system conditions ====
+
     public static final String SYSTEM_AUTHORITY = "android";
 
-    // Built-in countdown conditions, e.g. condition://android/countdown/1399917958951
+    // ==== Built-in system condition: countdown ====
+
     public static final String COUNTDOWN_PATH = "countdown";
 
     public static Uri toCountdownConditionId(long time) {
@@ -598,8 +609,42 @@ public class ZenModeConfig implements Parcelable {
         return tryParseCountdownConditionId(conditionId) != 0;
     }
 
-    // built-in schedule conditions
+    // ==== Built-in system condition: schedule ====
+
     public static final String SCHEDULE_PATH = "schedule";
+
+    public static Uri toScheduleConditionId(ScheduleInfo schedule) {
+        return new Uri.Builder().scheme(Condition.SCHEME)
+                .authority(SYSTEM_AUTHORITY)
+                .appendPath(SCHEDULE_PATH)
+                .appendQueryParameter("days", toDayList(schedule.days))
+                .appendQueryParameter("start", schedule.startHour + "." + schedule.startMinute)
+                .appendQueryParameter("end", schedule.endHour + "." + schedule.endMinute)
+                .build();
+    }
+
+    public static boolean isValidScheduleConditionId(Uri conditionId) {
+        return tryParseScheduleConditionId(conditionId) != null;
+    }
+
+    public static ScheduleInfo tryParseScheduleConditionId(Uri conditionId) {
+        final boolean isSchedule =  conditionId != null
+                && conditionId.getScheme().equals(Condition.SCHEME)
+                && conditionId.getAuthority().equals(ZenModeConfig.SYSTEM_AUTHORITY)
+                && conditionId.getPathSegments().size() == 1
+                && conditionId.getPathSegments().get(0).equals(ZenModeConfig.SCHEDULE_PATH);
+        if (!isSchedule) return null;
+        final int[] start = tryParseHourAndMinute(conditionId.getQueryParameter("start"));
+        final int[] end = tryParseHourAndMinute(conditionId.getQueryParameter("end"));
+        if (start == null || end == null) return null;
+        final ScheduleInfo rt = new ScheduleInfo();
+        rt.days = tryParseDayList(conditionId.getQueryParameter("days"), "\\.");
+        rt.startHour = start[0];
+        rt.startMinute = start[1];
+        rt.endHour = end[0];
+        rt.endMinute = end[1];
+        return rt;
+    }
 
     public static class ScheduleInfo {
         public int[] days;
@@ -638,38 +683,75 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
-    public static Uri toScheduleConditionId(ScheduleInfo schedule) {
+    // ==== Built-in system condition: event ====
+
+    public static final String EVENT_PATH = "event";
+
+    public static Uri toEventConditionId(EventInfo event) {
         return new Uri.Builder().scheme(Condition.SCHEME)
                 .authority(SYSTEM_AUTHORITY)
-                .appendPath(SCHEDULE_PATH)
-                .appendQueryParameter("days", toDayList(schedule.days))
-                .appendQueryParameter("start", schedule.startHour + "." + schedule.startMinute)
-                .appendQueryParameter("end", schedule.endHour + "." + schedule.endMinute)
+                .appendPath(EVENT_PATH)
+                .appendQueryParameter("calendar", Long.toString(event.calendar))
+                .appendQueryParameter("attendance", Integer.toString(event.attendance))
+                .appendQueryParameter("reply", Integer.toString(event.reply))
                 .build();
     }
 
-    public static boolean isValidScheduleConditionId(Uri conditionId) {
-        return tryParseScheduleConditionId(conditionId) != null;
+    public static boolean isValidEventConditionId(Uri conditionId) {
+        return tryParseEventConditionId(conditionId) != null;
     }
 
-    public static ScheduleInfo tryParseScheduleConditionId(Uri conditionId) {
-        final boolean isSchedule =  conditionId != null
+    public static EventInfo tryParseEventConditionId(Uri conditionId) {
+        final boolean isEvent = conditionId != null
                 && conditionId.getScheme().equals(Condition.SCHEME)
                 && conditionId.getAuthority().equals(ZenModeConfig.SYSTEM_AUTHORITY)
                 && conditionId.getPathSegments().size() == 1
-                && conditionId.getPathSegments().get(0).equals(ZenModeConfig.SCHEDULE_PATH);
-        if (!isSchedule) return null;
-        final int[] start = tryParseHourAndMinute(conditionId.getQueryParameter("start"));
-        final int[] end = tryParseHourAndMinute(conditionId.getQueryParameter("end"));
-        if (start == null || end == null) return null;
-        final ScheduleInfo rt = new ScheduleInfo();
-        rt.days = tryParseDayList(conditionId.getQueryParameter("days"), "\\.");
-        rt.startHour = start[0];
-        rt.startMinute = start[1];
-        rt.endHour = end[0];
-        rt.endMinute = end[1];
+                && conditionId.getPathSegments().get(0).equals(EVENT_PATH);
+        if (!isEvent) return null;
+        final EventInfo rt = new EventInfo();
+        rt.calendar = tryParseLong(conditionId.getQueryParameter("calendar"), 0L);
+        rt.attendance = tryParseInt(conditionId.getQueryParameter("attendance"), 0);
+        rt.reply = tryParseInt(conditionId.getQueryParameter("reply"), 0);
         return rt;
     }
+
+    public static class EventInfo {
+        public static final int ATTENDANCE_REQUIRED_OR_OPTIONAL = 0;
+        public static final int ATTENDANCE_REQUIRED = 1;
+        public static final int ATTENDANCE_OPTIONAL = 2;
+
+        public static final int REPLY_ANY = 0;
+        public static final int REPLY_ANY_EXCEPT_NO = 1;
+        public static final int REPLY_YES = 2;
+
+        public long calendar;  // CalendarContract.Calendars._ID, or 0 for any
+        public int attendance;
+        public int reply;
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof EventInfo)) return false;
+            final EventInfo other = (EventInfo) o;
+            return calendar == other.calendar
+                    && attendance == other.attendance
+                    && reply == other.reply;
+        }
+
+        public EventInfo copy() {
+            final EventInfo rt = new EventInfo();
+            rt.calendar = calendar;
+            rt.attendance = attendance;
+            rt.reply = reply;
+            return rt;
+        }
+    }
+
+    // ==== End built-in system conditions ====
 
     private static int[] tryParseHourAndMinute(String value) {
         if (TextUtils.isEmpty(value)) return null;
