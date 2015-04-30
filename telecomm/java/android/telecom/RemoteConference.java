@@ -18,6 +18,7 @@ package android.telecom;
 
 import com.android.internal.telecom.IConnectionService;
 
+import android.os.Handler;
 import android.os.RemoteException;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public final class RemoteConference {
     private final String mId;
     private final IConnectionService mConnectionService;
 
-    private final Set<Callback> mCallbacks = new CopyOnWriteArraySet<>();
+    private final Set<CallbackRecord<Callback>> mCallbackRecords = new CopyOnWriteArraySet<>();
     private final List<RemoteConnection> mChildConnections = new CopyOnWriteArrayList<>();
     private final List<RemoteConnection> mUnmodifiableChildConnections =
             Collections.unmodifiableList(mChildConnections);
@@ -77,13 +78,20 @@ public final class RemoteConference {
         for (RemoteConnection connection : mChildConnections) {
             connection.setConference(null);
         }
-        for (Callback c : mCallbacks) {
-            c.onDestroyed(this);
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final RemoteConference conference = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onDestroyed(conference);
+                }
+            });
         }
     }
 
     /** {@hide} */
-    void setState(int newState) {
+    void setState(final int newState) {
         if (newState != Connection.STATE_ACTIVE &&
                 newState != Connection.STATE_HOLDING &&
                 newState != Connection.STATE_DISCONNECTED) {
@@ -93,42 +101,71 @@ public final class RemoteConference {
         }
 
         if (mState != newState) {
-            int oldState = mState;
+            final int oldState = mState;
             mState = newState;
-            for (Callback c : mCallbacks) {
-                c.onStateChanged(this, oldState, newState);
+            for (CallbackRecord<Callback> record : mCallbackRecords) {
+                final RemoteConference conference = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onStateChanged(conference, oldState, newState);
+                    }
+                });
             }
         }
     }
 
     /** {@hide} */
-    void addConnection(RemoteConnection connection) {
+    void addConnection(final RemoteConnection connection) {
         if (!mChildConnections.contains(connection)) {
             mChildConnections.add(connection);
             connection.setConference(this);
-            for (Callback c : mCallbacks) {
-                c.onConnectionAdded(this, connection);
+            for (CallbackRecord<Callback> record : mCallbackRecords) {
+                final RemoteConference conference = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onConnectionAdded(conference, connection);
+                    }
+                });
             }
         }
     }
 
     /** {@hide} */
-    void removeConnection(RemoteConnection connection) {
+    void removeConnection(final RemoteConnection connection) {
         if (mChildConnections.contains(connection)) {
             mChildConnections.remove(connection);
             connection.setConference(null);
-            for (Callback c : mCallbacks) {
-                c.onConnectionRemoved(this, connection);
+            for (CallbackRecord<Callback> record : mCallbackRecords) {
+                final RemoteConference conference = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onConnectionRemoved(conference, connection);
+                    }
+                });
             }
         }
     }
 
     /** {@hide} */
-    void setConnectionCapabilities(int connectionCapabilities) {
+    void setConnectionCapabilities(final int connectionCapabilities) {
         if (mConnectionCapabilities != connectionCapabilities) {
             mConnectionCapabilities = connectionCapabilities;
-            for (Callback c : mCallbacks) {
-                c.onConnectionCapabilitiesChanged(this, mConnectionCapabilities);
+            for (CallbackRecord<Callback> record : mCallbackRecords) {
+                final RemoteConference conference = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onConnectionCapabilitiesChanged(
+                                conference, mConnectionCapabilities);
+                    }
+                });
             }
         }
     }
@@ -137,18 +174,33 @@ public final class RemoteConference {
     void setConferenceableConnections(List<RemoteConnection> conferenceableConnections) {
         mConferenceableConnections.clear();
         mConferenceableConnections.addAll(conferenceableConnections);
-        for (Callback c : mCallbacks) {
-            c.onConferenceableConnectionsChanged(this, mUnmodifiableConferenceableConnections);
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final RemoteConference conference = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConferenceableConnectionsChanged(
+                            conference, mUnmodifiableConferenceableConnections);
+                }
+            });
         }
     }
 
     /** {@hide} */
-    void setDisconnected(DisconnectCause disconnectCause) {
+    void setDisconnected(final DisconnectCause disconnectCause) {
         if (mState != Connection.STATE_DISCONNECTED) {
             mDisconnectCause = disconnectCause;
             setState(Connection.STATE_DISCONNECTED);
-            for (Callback c : mCallbacks) {
-                c.onDisconnected(this, disconnectCause);
+            for (CallbackRecord<Callback> record : mCallbackRecords) {
+                final RemoteConference conference = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onDisconnected(conference, disconnectCause);
+                    }
+                });
             }
         }
     }
@@ -239,10 +291,24 @@ public final class RemoteConference {
     }
 
     public final void registerCallback(Callback callback) {
-        mCallbacks.add(callback);
+        registerCallback(callback, new Handler());
+    }
+
+    public final void registerCallback(Callback callback, Handler handler) {
+        unregisterCallback(callback);
+        if (callback != null && handler != null) {
+            mCallbackRecords.add(new CallbackRecord(callback, handler));
+        }
     }
 
     public final void unregisterCallback(Callback callback) {
-        mCallbacks.remove(callback);
+        if (callback != null) {
+            for (CallbackRecord<Callback> record : mCallbackRecords) {
+                if (record.getCallback() == callback) {
+                    mCallbackRecords.remove(record);
+                    break;
+                }
+            }
+        }
     }
 }
