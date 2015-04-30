@@ -22,6 +22,7 @@ import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 
 import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -298,38 +299,36 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mAdditionalEntropyForBegin = null;
         if (opResult == null) {
             throw new KeyStoreConnectException();
-        } else if ((opResult.resultCode != KeyStore.NO_ERROR)
-                && (opResult.resultCode != KeyStore.OP_AUTH_NEEDED)) {
-            switch (opResult.resultCode) {
-                case KeymasterDefs.KM_ERROR_INVALID_NONCE:
-                    throw new InvalidAlgorithmParameterException("Invalid IV");
-            }
-            throw mKeyStore.getInvalidKeyException(mKey.getAlias(), opResult.resultCode);
         }
 
-        if (opResult.token == null) {
-            throw new IllegalStateException("Keystore returned null operation token");
-        }
-        // The operation handle/token is now either valid for use immediately or needs to be
-        // authorized through user authentication (if the error code was OP_AUTH_NEEDED).
+        // Store operation token and handle regardless of the error code returned by KeyStore to
+        // ensure that the operation gets aborted immediately if the code below throws an exception.
         mOperationToken = opResult.token;
         mOperationHandle = opResult.operationHandle;
+
+        // If necessary, throw an exception due to KeyStore operation having failed.
+        GeneralSecurityException e = KeyStoreCryptoOperationUtils.getExceptionForCipherInit(
+                mKeyStore, mKey, opResult.resultCode);
+        if (e != null) {
+            if (e instanceof InvalidKeyException) {
+                throw (InvalidKeyException) e;
+            } else if (e instanceof InvalidAlgorithmParameterException) {
+                throw (InvalidAlgorithmParameterException) e;
+            } else {
+                throw new RuntimeException("Unexpected exception type", e);
+            }
+        }
+
+        if (mOperationToken == null) {
+            throw new IllegalStateException("Keystore returned null operation token");
+        }
+
         loadAlgorithmSpecificParametersFromBeginResult(keymasterOutputArgs);
         mFirstOperationInitiated = true;
         mIvHasBeenUsed = true;
         mMainDataStreamer = new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
                         mKeyStore, opResult.token));
-
-        if (opResult.resultCode != KeyStore.NO_ERROR) {
-            // The operation requires user authentication. Check whether such authentication is
-            // possible (e.g., the key may have been permanently invalidated).
-            InvalidKeyException e =
-                    mKeyStore.getInvalidKeyException(mKey.getAlias(), opResult.resultCode);
-            if (!(e instanceof UserNotAuthenticatedException)) {
-                throw e;
-            }
-        }
     }
 
     @Override
