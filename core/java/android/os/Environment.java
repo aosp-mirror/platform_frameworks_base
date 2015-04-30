@@ -758,7 +758,6 @@ public class Environment {
      * @hide
      */
     public static File maybeTranslateEmulatedPathToInternal(File path) {
-        // TODO: bring back this optimization
-        return path;
+        return StorageManager.maybeTranslateEmulatedPathToInternal(path);
     }
 }

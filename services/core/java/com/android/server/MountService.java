@@ -229,6 +229,7 @@ class MountService extends IMountService.Stub
         public static final int VOLUME_FS_UUID_CHANGED = 653;
         public static final int VOLUME_FS_LABEL_CHANGED = 654;
         public static final int VOLUME_PATH_CHANGED = 655;
+        public static final int VOLUME_INTERNAL_PATH_CHANGED = 656;
         public static final int VOLUME_DESTROYED = 659;
 
         public static final int MOVE_STATUS = 660;
@@ -661,6 +662,9 @@ class MountService extends IMountService.Stub
 
             try {
                 mConnector.execute("volume", "reset");
+                for (int userId : mStartedUsers) {
+                    mConnector.execute("volume", "start_user", userId);
+                }
             } catch (NativeDaemonConnectorException e) {
                 Slog.w(TAG, "Failed to reset vold", e);
             }
@@ -902,6 +906,14 @@ class MountService extends IMountService.Stub
                 }
                 break;
             }
+            case VoldResponseCode.VOLUME_INTERNAL_PATH_CHANGED: {
+                if (cooked.length != 3) break;
+                final VolumeInfo vol = mVolumes.get(cooked[1]);
+                if (vol != null) {
+                    vol.internalPath = cooked[2];
+                }
+                break;
+            }
             case VoldResponseCode.VOLUME_DESTROYED: {
                 if (cooked.length != 2) break;
                 mVolumes.remove(cooked[1]);
@@ -1076,7 +1088,7 @@ class MountService extends IMountService.Stub
 
         // TODO: estimate remaining time
         try {
-            mMoveCallback.onStatusChanged(-1, null, status, -1);
+            mMoveCallback.onStatusChanged(-1, status, -1);
         } catch (RemoteException ignored) {
         }
 
@@ -1433,10 +1445,11 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
+        Preconditions.checkNotNull(fsUuid);
         synchronized (mLock) {
             final VolumeRecord rec = mRecords.get(fsUuid);
             rec.nickname = nickname;
-            mCallbacks.notifyVolumeMetadataChanged(fsUuid);
+            mCallbacks.notifyVolumeRecordChanged(rec);
             writeSettingsLocked();
         }
     }
@@ -1446,10 +1459,11 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
+        Preconditions.checkNotNull(fsUuid);
         synchronized (mLock) {
             final VolumeRecord rec = mRecords.get(fsUuid);
             rec.userFlags = (rec.userFlags & ~mask) | (flags & mask);
-            mCallbacks.notifyVolumeMetadataChanged(fsUuid);
+            mCallbacks.notifyVolumeRecordChanged(rec);
             writeSettingsLocked();
         }
     }
@@ -1459,10 +1473,36 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
+        Preconditions.checkNotNull(fsUuid);
         synchronized (mLock) {
             mRecords.remove(fsUuid);
-            mCallbacks.notifyVolumeMetadataChanged(fsUuid);
+
+            // TODO: tell vold to forget keys
+
+            // If this had been primary storage, revert back to internal and
+            // reset vold so we bind into new volume into place.
+            if (Objects.equals(mPrimaryStorageUuid, fsUuid)) {
+                mPrimaryStorageUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+                resetIfReadyAndConnected();
+            }
+
+            mCallbacks.notifyVolumeForgotten(fsUuid);
             writeSettingsLocked();
+        }
+    }
+
+    private void forgetAll() {
+        synchronized (mLock) {
+            for (int i = 0; i < mRecords.size(); i++) {
+                final String fsUuid = mRecords.keyAt(i);
+                mCallbacks.notifyVolumeForgotten(fsUuid);
+            }
+
+            mRecords.clear();
+            writeSettingsLocked();
+
+            mPrimaryStorageUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+            resetIfReadyAndConnected();
         }
     }
 
@@ -2818,8 +2858,9 @@ class MountService extends IMountService.Stub
     private static class Callbacks extends Handler {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
-        private static final int MSG_VOLUME_METADATA_CHANGED = 3;
-        private static final int MSG_DISK_SCANNED = 4;
+        private static final int MSG_VOLUME_RECORD_CHANGED = 3;
+        private static final int MSG_VOLUME_FORGOTTEN = 4;
+        private static final int MSG_DISK_SCANNED = 5;
 
         private final RemoteCallbackList<IMountServiceListener>
                 mCallbacks = new RemoteCallbackList<>();
@@ -2863,8 +2904,12 @@ class MountService extends IMountService.Stub
                     callback.onVolumeStateChanged((VolumeInfo) args.arg1, args.argi2, args.argi3);
                     break;
                 }
-                case MSG_VOLUME_METADATA_CHANGED: {
-                    callback.onVolumeMetadataChanged((String) args.arg1);
+                case MSG_VOLUME_RECORD_CHANGED: {
+                    callback.onVolumeRecordChanged((VolumeRecord) args.arg1);
+                    break;
+                }
+                case MSG_VOLUME_FORGOTTEN: {
+                    callback.onVolumeForgotten((String) args.arg1);
                     break;
                 }
                 case MSG_DISK_SCANNED: {
@@ -2890,10 +2935,16 @@ class MountService extends IMountService.Stub
             obtainMessage(MSG_VOLUME_STATE_CHANGED, args).sendToTarget();
         }
 
-        private void notifyVolumeMetadataChanged(String fsUuid) {
+        private void notifyVolumeRecordChanged(VolumeRecord rec) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = rec.clone();
+            obtainMessage(MSG_VOLUME_RECORD_CHANGED, args).sendToTarget();
+        }
+
+        private void notifyVolumeForgotten(String fsUuid) {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = fsUuid;
-            obtainMessage(MSG_VOLUME_METADATA_CHANGED, args).sendToTarget();
+            obtainMessage(MSG_VOLUME_FORGOTTEN, args).sendToTarget();
         }
 
         private void notifyDiskScanned(DiskInfo disk, int volumeCount) {
@@ -2909,11 +2960,8 @@ class MountService extends IMountService.Stub
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
         for (String arg : args) {
-            if ("--clear".equals(arg)) {
-                synchronized (mLock) {
-                    mRecords.clear();
-                    writeSettingsLocked();
-                }
+            if ("--forget-all".equals(arg)) {
+                forgetAll();
             }
         }
 
