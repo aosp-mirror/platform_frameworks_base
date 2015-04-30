@@ -507,7 +507,8 @@ final class RemotePrintService implements DeathRecipient {
         }
         mBinding = true;
         mContext.bindServiceAsUser(mIntent, mServiceConnection,
-                Context.BIND_AUTO_CREATE, new UserHandle(mUserId));
+                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                new UserHandle(mUserId));
     }
 
     private void ensureUnbound() {
