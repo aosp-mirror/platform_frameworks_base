@@ -93,8 +93,9 @@ public class StorageManager {
             Handler.Callback {
         private static final int MSG_STORAGE_STATE_CHANGED = 1;
         private static final int MSG_VOLUME_STATE_CHANGED = 2;
-        private static final int MSG_VOLUME_METADATA_CHANGED = 3;
-        private static final int MSG_DISK_SCANNED = 4;
+        private static final int MSG_VOLUME_RECORD_CHANGED = 3;
+        private static final int MSG_VOLUME_FORGOTTEN = 4;
+        private static final int MSG_DISK_SCANNED = 5;
 
         final StorageEventListener mCallback;
         final Handler mHandler;
@@ -117,8 +118,12 @@ public class StorageManager {
                     mCallback.onVolumeStateChanged((VolumeInfo) args.arg1, args.argi2, args.argi3);
                     args.recycle();
                     return true;
-                case MSG_VOLUME_METADATA_CHANGED:
-                    mCallback.onVolumeMetadataChanged((String) args.arg1);
+                case MSG_VOLUME_RECORD_CHANGED:
+                    mCallback.onVolumeRecordChanged((VolumeRecord) args.arg1);
+                    args.recycle();
+                    return true;
+                case MSG_VOLUME_FORGOTTEN:
+                    mCallback.onVolumeForgotten((String) args.arg1);
                     args.recycle();
                     return true;
                 case MSG_DISK_SCANNED:
@@ -154,10 +159,17 @@ public class StorageManager {
         }
 
         @Override
-        public void onVolumeMetadataChanged(String fsUuid) {
+        public void onVolumeRecordChanged(VolumeRecord rec) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = rec;
+            mHandler.obtainMessage(MSG_VOLUME_RECORD_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void onVolumeForgotten(String fsUuid) {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = fsUuid;
-            mHandler.obtainMessage(MSG_VOLUME_METADATA_CHANGED, args).sendToTarget();
+            mHandler.obtainMessage(MSG_VOLUME_FORGOTTEN, args).sendToTarget();
         }
 
         @Override
@@ -246,8 +258,9 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    @Deprecated
     public static StorageManager from(Context context) {
-        return (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+        return context.getSystemService(StorageManager.class);
     }
 
     /**
@@ -536,6 +549,17 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public @Nullable VolumeInfo findVolumeByQualifiedUuid(String volumeUuid) {
+        if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, volumeUuid)) {
+            return findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL);
+        } else if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
+            return getPrimaryPhysicalVolume();
+        } else {
+            return findVolumeByUuid(volumeUuid);
+        }
+    }
+
+    /** {@hide} */
     public @NonNull List<VolumeInfo> getVolumes() {
         try {
             return Arrays.asList(mMountService.getVolumes(0));
@@ -555,6 +579,8 @@ public class StorageManager {
 
     /** {@hide} */
     public @Nullable String getBestVolumeDescription(VolumeInfo vol) {
+        if (vol == null) return null;
+
         // Nickname always takes precedence when defined
         if (!TextUtils.isEmpty(vol.fsUuid)) {
             final VolumeRecord rec = findRecordByUuid(vol.fsUuid);
@@ -859,6 +885,27 @@ public class StorageManager {
     public long getStorageFullBytes(File path) {
         return Settings.Global.getLong(mResolver, Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                 DEFAULT_FULL_THRESHOLD_BYTES);
+    }
+
+    /** {@hide} */
+    public static File maybeTranslateEmulatedPathToInternal(File path) {
+        final IMountService mountService = IMountService.Stub.asInterface(
+                ServiceManager.getService("mount"));
+        try {
+            final VolumeInfo[] vols = mountService.getVolumes(0);
+            for (VolumeInfo vol : vols) {
+                if ((vol.getType() == VolumeInfo.TYPE_EMULATED
+                        || vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.isMountedReadable()) {
+                    final File internalPath = FileUtils.rewriteAfterRename(vol.getPath(),
+                            vol.getInternalPath(), path);
+                    if (internalPath != null) {
+                        return internalPath;
+                    }
+                }
+            }
+        } catch (RemoteException ignored) {
+        }
+        return path;
     }
 
     /// Consts to match the password types in cryptfs.h
