@@ -2926,7 +2926,7 @@ public class DevicePolicyManager {
      *         the user has already been set up.
      */
     @SystemApi
-    public boolean setActiveProfileOwner(ComponentName admin, String ownerName)
+    public boolean setActiveProfileOwner(ComponentName admin, @Deprecated String ownerName)
             throws IllegalArgumentException {
         if (mService != null) {
             try {
@@ -2992,8 +2992,8 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if admin is null, the package isn't installed, or the
      * preconditions mentioned are not met.
      */
-    public boolean setProfileOwner(ComponentName admin, String ownerName, int userHandle)
-            throws IllegalArgumentException {
+    public boolean setProfileOwner(ComponentName admin, @Deprecated String ownerName,
+            int userHandle) throws IllegalArgumentException {
         if (admin == null) {
             throw new NullPointerException("admin cannot be null");
         }
