@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -94,19 +93,20 @@ final class FragmentState implements Parcelable {
         mSavedFragmentState = in.readBundle();
     }
 
-    public Fragment instantiate(Activity activity, Fragment parent) {
+    public Fragment instantiate(FragmentHostCallback host, Fragment parent) {
         if (mInstance != null) {
             return mInstance;
         }
 
+        final Context context = host.getContext();
         if (mArguments != null) {
-            mArguments.setClassLoader(activity.getClassLoader());
+            mArguments.setClassLoader(context.getClassLoader());
         }
 
-        mInstance = Fragment.instantiate(activity, mClassName, mArguments);
+        mInstance = Fragment.instantiate(context, mClassName, mArguments);
 
         if (mSavedFragmentState != null) {
-            mSavedFragmentState.setClassLoader(activity.getClassLoader());
+            mSavedFragmentState.setClassLoader(context.getClassLoader());
             mInstance.mSavedFragmentState = mSavedFragmentState;
         }
         mInstance.setIndex(mIndex, parent);
@@ -117,7 +117,7 @@ final class FragmentState implements Parcelable {
         mInstance.mTag = mTag;
         mInstance.mRetainInstance = mRetainInstance;
         mInstance.mDetached = mDetached;
-        mInstance.mFragmentManager = activity.mFragments;
+        mInstance.mFragmentManager = host.mFragmentManager;
         if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
                 "Instantiated fragment " + mInstance);
 
@@ -425,7 +425,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     FragmentManagerImpl mFragmentManager;
 
     // Activity this fragment is attached to.
-    Activity mActivity;
+    FragmentHostCallback mHost;
 
     // Private fragment manager for child fragments inside of this one.
     FragmentManagerImpl mChildFragmentManager;
@@ -775,20 +775,36 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
+     * Return the {@link Context} this fragment is currently associated with.
+     */
+    public Context getContext() {
+        return mHost == null ? null : mHost.getContext();
+    }
+
+    /**
      * Return the Activity this fragment is currently associated with.
      */
     final public Activity getActivity() {
-        return mActivity;
+        return mHost == null ? null : mHost.getActivity();
+    }
+
+    /**
+     * Return the host object of this fragment. May return {@code null} if the fragment
+     * isn't currently being hosted.
+     */
+    @Nullable
+    final public Object getHost() {
+        return mHost == null ? null : mHost.onGetHost();
     }
 
     /**
      * Return <code>getActivity().getResources()</code>.
      */
     final public Resources getResources() {
-        if (mActivity == null) {
+        if (mHost == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
-        return mActivity.getResources();
+        return mHost.getContext().getResources();
     }
 
     /**
@@ -870,7 +886,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * Return true if the fragment is currently added to its activity.
      */
     final public boolean isAdded() {
-        return mActivity != null && mAdded;
+        return mHost != null && mAdded;
     }
 
     /**
@@ -1037,11 +1053,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mLoaderManager != null) {
             return mLoaderManager;
         }
-        if (mActivity == null) {
+        if (mHost == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
         mCheckedForLoaderManager = true;
-        mLoaderManager = mActivity.getLoaderManager(mWho, mLoadersStarted, true);
+        mLoaderManager = mHost.getLoaderManager(mWho, mLoadersStarted, true);
         return mLoaderManager;
     }
 
@@ -1065,15 +1081,15 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * Context.startActivity(Intent, Bundle)} for more details.
      */
     public void startActivity(Intent intent, Bundle options) {
-        if (mActivity == null) {
+        if (mHost == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
         if (options != null) {
-            mActivity.startActivityFromFragment(this, intent, -1, options);
+            mHost.onStartActivityFromFragment(this, intent, -1, options);
         } else {
             // Note we want to go through this call for compatibility with
             // applications that may have overridden the method.
-            mActivity.startActivityFromFragment(this, intent, -1);
+            mHost.onStartActivityFromFragment(this, intent, -1, null /*options*/);
         }
     }
 
@@ -1090,10 +1106,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * containing Activity.
      */
     public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
-        if (mActivity == null) {
+        if (mHost == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
-        mActivity.startActivityFromFragment(this, intent, requestCode, options);
+        mHost.onStartActivityFromFragment(this, intent, requestCode, options);
     }
 
     /**
@@ -1181,11 +1197,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @see android.content.Context#checkSelfPermission(String)
      */
     public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
-        if (mActivity == null) {
+        if (mHost == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
-        Intent intent = mActivity.getPackageManager().buildRequestPermissionsIntent(permissions);
-        mActivity.startActivityFromFragment(this, intent, requestCode, null);
+        Intent intent =
+                mHost.getContext().getPackageManager().buildRequestPermissionsIntent(permissions);
+        mHost.onStartActivityFromFragment(this, intent, requestCode, null);
     }
 
     /**
@@ -1211,19 +1228,16 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * inflation.  Maybe this should become a public API. Note sure.
      */
     public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
-        // Newer platform versions use the child fragment manager's LayoutInflaterFactory.
-        if (mActivity.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
-            LayoutInflater result = mActivity.getLayoutInflater().cloneInContext(mActivity);
+        final LayoutInflater result = mHost.onGetLayoutInflater();
+        if (mHost.onUseFragmentManagerInflaterFactory()) {
             getChildFragmentManager(); // Init if needed; use raw implementation below.
             result.setPrivateFactory(mChildFragmentManager.getLayoutInflaterFactory());
-            return result;
-        } else {
-            return mActivity.getLayoutInflater();
         }
+        return result;
     }
 
     /**
-     * @deprecated Use {@link #onInflate(Activity, AttributeSet, Bundle)} instead.
+     * @deprecated Use {@link #onInflate(Context, AttributeSet, Bundle)} instead.
      */
     @Deprecated
     public void onInflate(AttributeSet attrs, Bundle savedInstanceState) {
@@ -1266,29 +1280,29 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentArguments.java
      *      create}
      *
-     * @param activity The Activity that is inflating this fragment.
+     * @param context The Context that is inflating this fragment.
      * @param attrs The attributes at the tag where the fragment is
      * being created.
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
-    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+    public void onInflate(Context context, AttributeSet attrs, Bundle savedInstanceState) {
         onInflate(attrs, savedInstanceState);
         mCalled = true;
 
-        TypedArray a = activity.obtainStyledAttributes(attrs,
+        TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.Fragment);
-        mEnterTransition = loadTransition(activity, a, mEnterTransition, null,
+        mEnterTransition = loadTransition(context, a, mEnterTransition, null,
                 com.android.internal.R.styleable.Fragment_fragmentEnterTransition);
-        mReturnTransition = loadTransition(activity, a, mReturnTransition, USE_DEFAULT_TRANSITION,
+        mReturnTransition = loadTransition(context, a, mReturnTransition, USE_DEFAULT_TRANSITION,
                 com.android.internal.R.styleable.Fragment_fragmentReturnTransition);
-        mExitTransition = loadTransition(activity, a, mExitTransition, null,
+        mExitTransition = loadTransition(context, a, mExitTransition, null,
                 com.android.internal.R.styleable.Fragment_fragmentExitTransition);
-        mReenterTransition = loadTransition(activity, a, mReenterTransition, USE_DEFAULT_TRANSITION,
+        mReenterTransition = loadTransition(context, a, mReenterTransition, USE_DEFAULT_TRANSITION,
                 com.android.internal.R.styleable.Fragment_fragmentReenterTransition);
-        mSharedElementEnterTransition = loadTransition(activity, a, mSharedElementEnterTransition,
+        mSharedElementEnterTransition = loadTransition(context, a, mSharedElementEnterTransition,
                 null, com.android.internal.R.styleable.Fragment_fragmentSharedElementEnterTransition);
-        mSharedElementReturnTransition = loadTransition(activity, a, mSharedElementReturnTransition,
+        mSharedElementReturnTransition = loadTransition(context, a, mSharedElementReturnTransition,
                 USE_DEFAULT_TRANSITION,
                 com.android.internal.R.styleable.Fragment_fragmentSharedElementReturnTransition);
         if (mAllowEnterTransitionOverlap == null) {
@@ -1303,9 +1317,30 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
-     * Called when a fragment is first attached to its activity.
+     * @deprecated Use {@link #onInflate(Context, AttributeSet, Bundle)} instead.
+     */
+    @Deprecated
+    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+        mCalled = true;
+    }
+
+    /**
+     * Called when a fragment is first attached to its context.
      * {@link #onCreate(Bundle)} will be called after this.
      */
+    public void onAttach(Context context) {
+        mCalled = true;
+        final Activity hostActivity = mHost == null ? null : mHost.getActivity();
+        if (hostActivity != null) {
+            mCalled = false;
+            onAttach(hostActivity);
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #onAttach(Context)} instead.
+     */
+    @Deprecated
     public void onAttach(Activity activity) {
         mCalled = true;
     }
@@ -1428,7 +1463,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             mLoadersStarted = true;
             if (!mCheckedForLoaderManager) {
                 mCheckedForLoaderManager = true;
-                mLoaderManager = mActivity.getLoaderManager(mWho, mLoadersStarted, false);
+                mLoaderManager = mHost.getLoaderManager(mWho, mLoadersStarted, false);
             }
             if (mLoaderManager != null) {
                 mLoaderManager.doStart();
@@ -1521,7 +1556,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         //        + " mLoaderManager=" + mLoaderManager);
         if (!mCheckedForLoaderManager) {
             mCheckedForLoaderManager = true;
-            mLoaderManager = mActivity.getLoaderManager(mWho, mLoadersStarted, false);
+            mLoaderManager = mHost.getLoaderManager(mWho, mLoadersStarted, false);
         }
         if (mLoaderManager != null) {
             mLoaderManager.doDestroy();
@@ -1546,7 +1581,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         mBackStackNesting = 0;
         mFragmentManager = null;
         mChildFragmentManager = null;
-        mActivity = null;
+        mHost = null;
         mFragmentId = 0;
         mContainerId = 0;
         mTag = null;
@@ -2034,9 +2069,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             writer.print(prefix); writer.print("mFragmentManager=");
             writer.println(mFragmentManager);
         }
-        if (mActivity != null) {
-            writer.print(prefix); writer.print("mActivity=");
-            writer.println(mActivity);
+        if (mHost != null) {
+            writer.print(prefix); writer.print("mHost=");
+            writer.println(mHost);
         }
         if (mParentFragment != null) {
             writer.print(prefix); writer.print("mParentFragment=");
@@ -2094,10 +2129,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     void instantiateChildFragmentManager() {
         mChildFragmentManager = new FragmentManagerImpl();
-        mChildFragmentManager.attachActivity(mActivity, new FragmentContainer() {
+        mChildFragmentManager.attachController(mHost, new FragmentContainer() {
             @Override
             @Nullable
-            public View findViewById(int id) {
+            public View onFindViewById(int id) {
                 if (mView == null) {
                     throw new IllegalStateException("Fragment does not have a view");
                 }
@@ -2105,7 +2140,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             }
 
             @Override
-            public boolean hasView() {
+            public boolean onHasView() {
                 return (mView != null);
             }
         }, this);
@@ -2319,13 +2354,13 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             mLoadersStarted = false;
             if (!mCheckedForLoaderManager) {
                 mCheckedForLoaderManager = true;
-                mLoaderManager = mActivity.getLoaderManager(mWho, mLoadersStarted, false);
+                mLoaderManager = mHost.getLoaderManager(mWho, mLoadersStarted, false);
             }
             if (mLoaderManager != null) {
-                if (mActivity == null || !mActivity.mChangingConfigurations) {
-                    mLoaderManager.doStop();
-                } else {
+                if (mRetaining) {
                     mLoaderManager.doRetain();
+                } else {
+                    mLoaderManager.doStop();
                 }
             }
         }
