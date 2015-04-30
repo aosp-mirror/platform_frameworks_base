@@ -320,6 +320,16 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mMainDataStreamer = new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
                         mKeyStore, opResult.token));
+
+        if (opResult.resultCode != KeyStore.NO_ERROR) {
+            // The operation requires user authentication. Check whether such authentication is
+            // possible (e.g., the key may have been permanently invalidated).
+            InvalidKeyException e =
+                    mKeyStore.getInvalidKeyException(mKey.getAlias(), opResult.resultCode);
+            if (!(e instanceof UserNotAuthenticatedException)) {
+                throw e;
+            }
+        }
     }
 
     @Override

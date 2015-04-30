@@ -183,6 +183,16 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         mChunkedStreamer = new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
                         mKeyStore, mOperationToken));
+
+        if (opResult.resultCode != KeyStore.NO_ERROR) {
+            // The operation requires user authentication. Check whether such authentication is
+            // possible (e.g., the key may have been permanently invalidated).
+            InvalidKeyException e =
+                    mKeyStore.getInvalidKeyException(mKey.getAlias(), opResult.resultCode);
+            if (!(e instanceof UserNotAuthenticatedException)) {
+                throw e;
+            }
+        }
     }
 
     @Override
