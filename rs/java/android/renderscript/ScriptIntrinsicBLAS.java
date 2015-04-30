@@ -1145,7 +1145,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         }
         mRS.nScriptIntrinsicBLAS_Double(getID(mRS), RsBlas_dsyrk, Trans, 0, 0, Uplo, 0, 0, C.getType().getX(), K, alpha, A.getID(mRS), 0, beta, C.getID(mRS), 0, 0, 0, 0);
     }
-    public void CSYRK(@Uplo int Uplo, @Transpose int Trans, float alphaX, float alphaY, Allocation A, float betaX, float betaY, Allocation C) {
+    public void CSYRK(@Uplo int Uplo, @Transpose int Trans, Float2 alpha, Allocation A, Float2 beta, Allocation C) {
         validateTranspose(Trans);
         validateUplo(Uplo);
         validateL3(Element.F32_2(mRS), Trans, 0, 0, A, null, C);
@@ -1155,10 +1155,10 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         } else {
             K = A.getType().getX();
         }
-        mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_csyrk, Trans, 0, 0, Uplo, 0, 0, C.getType().getX(), K, alphaX, alphaY, A.getID(mRS), 0, betaX, betaY,
+        mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_csyrk, Trans, 0, 0, Uplo, 0, 0, C.getType().getX(), K, alpha.x, alpha.y, A.getID(mRS), 0, beta.x, beta.y,
                                          C.getID(mRS), 0, 0, 0, 0);
     }
-    public void ZSYRK(@Uplo int Uplo, @Transpose int Trans, double alphaX, double alphaY, Allocation A, double betaX, double betaY, Allocation C) {
+    public void ZSYRK(@Uplo int Uplo, @Transpose int Trans, Double2 alpha, Allocation A, Double2 beta, Allocation C) {
         validateTranspose(Trans);
         validateUplo(Uplo);
         validateL3(Element.F64_2(mRS), Trans, 0, 0, A, null, C);
@@ -1168,7 +1168,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         } else {
             K = A.getType().getX();
         }
-        mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zsyrk, Trans, 0, 0, Uplo, 0, 0, C.getType().getX(), K, alphaX, alphaY, A.getID(mRS), 0, betaX, betaY,
+        mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zsyrk, Trans, 0, 0, Uplo, 0, 0, C.getType().getX(), K, alpha.x, alpha.y, A.getID(mRS), 0, beta.x, beta.y,
                                    C.getID(mRS), 0, 0, 0, 0);
     }
 
@@ -1379,17 +1379,17 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
             throw new RSRuntimeException("Called HEMM with mismatched B and C");
         }
     }
-    public void CHEMM(@Side int Side, @Uplo int Uplo, float alpha, Allocation A, Allocation B, float beta, Allocation C) {
+    public void CHEMM(@Side int Side, @Uplo int Uplo, Float2 alpha, Allocation A, Allocation B, Float2 beta, Allocation C) {
         validateUplo(Uplo);
         validateHEMM(Element.F32_2(mRS), Side, A, B, C);
         mRS.nScriptIntrinsicBLAS_Complex(getID(mRS), RsBlas_chemm, 0, 0, Side, Uplo, 0, C.getType().getY(), C.getType().getX(), 0,
-                                         alpha, 0, A.getID(mRS), B.getID(mRS), beta, 0, C.getID(mRS), 0, 0, 0, 0);
+                                         alpha.x, alpha.y, A.getID(mRS), B.getID(mRS), beta.x, beta.y, C.getID(mRS), 0, 0, 0, 0);
     }
-    public void ZHEMM(@Side int Side, @Uplo int Uplo, double alpha, Allocation A, Allocation B, double beta, Allocation C) {
+    public void ZHEMM(@Side int Side, @Uplo int Uplo, Double2 alpha, Allocation A, Allocation B, Double2 beta, Allocation C) {
         validateUplo(Uplo);
         validateHEMM(Element.F32_2(mRS), Side, A, B, C);
         mRS.nScriptIntrinsicBLAS_Z(getID(mRS), RsBlas_zhemm, 0, 0, Side, Uplo, 0, C.getType().getY(), C.getType().getX(), 0,
-                                   alpha, 0, A.getID(mRS), B.getID(mRS), beta, 0, C.getID(mRS), 0, 0, 0, 0);
+                                   alpha.x, alpha.y, A.getID(mRS), B.getID(mRS), beta.x, beta.y, C.getID(mRS), 0, 0, 0, 0);
     }
 
     static void validateHERK(Element e, @Transpose int Trans, Allocation A, Allocation C) {
