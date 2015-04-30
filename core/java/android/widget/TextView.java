@@ -6630,8 +6630,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // TODO: code duplication with makeSingleLayout()
             if (mHintLayout == null) {
                 StaticLayout.Builder builder = StaticLayout.Builder.obtain(mHint, 0,
-                        mHint.length(), hintWidth)
-                        .setPaint(mTextPaint)
+                        mHint.length(), mTextPaint, hintWidth)
                         .setAlignment(alignment)
                         .setTextDir(mTextDir)
                         .setSpacingMult(mSpacingMult)
@@ -6721,8 +6720,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         if (result == null) {
             StaticLayout.Builder builder = StaticLayout.Builder.obtain(mTransformed,
-                    0, mTransformed.length(), wantWidth)
-                    .setPaint(mTextPaint)
+                    0, mTransformed.length(), mTextPaint, wantWidth)
                     .setAlignment(alignment)
                     .setTextDir(mTextDir)
                     .setSpacingMult(mSpacingMult)
