@@ -29,9 +29,9 @@ everything you need to begin developing Android apps:</p>
 <p>For an introduction to Android Studio, read the
 <a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.</p>
 
-<p>Periodic updates are pushed to Android Studio without requiring you to update. To
-manually check for updates, select <strong>Help > Check for updates</strong> (on Mac, select
-<strong>Android Studio > Check for updates</strong>).</p>
+<p>Periodic updates are pushed to Android Studio without requiring you to update your Android
+project. To manually check for updates, select <strong>Help > Check for updates</strong> (on Mac,
+select <strong>Android Studio > Check for updates</strong>).</p>
 
 
 <h2 id="Revisions">Revisions</h2>
@@ -43,6 +43,53 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.2.0</a> <em>(April 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Various fixes and enhancements:</p>
+    <ul>
+      <li>Updated the Android runtime window to include the
+        <a href="{@docRoot}tools/studio/index.html#memory-monitor">Memory Monitor</a> tool
+        and added a tab for CPU performance monitoring.</li>
+      <li>Added a <em>Captures</em> tab in the left margin to display the captured memory and CPU
+        performance data files, such as CPU method tracking and memory heap snapshots.</li>
+      <li>Expanded <a href="{@docRoot}tools/debugging/annotations.html">annotation</a>
+          support with additional metadata annotations and inferred nullability. </li>
+      <li>Enhanced the Translations Editor with additional support for Best Current Practice
+          (BCP) 47, which uses 3-letter language and region codes.</li>
+      <li>Integrated IntelliJ 14 and 14.1 features for improved code analysis and performance:</li>
+         <ul>
+          <li>Enhanced debugging to show inline values for variables and referring objects,
+            as well as perform inline evaluation of lambda and operator expressions. </li>
+          <li>Added code style detection for tab and indent sizes. </li>
+          <li>Added scratch files for code experiments and prototyping without project files.</li>
+          <li>Added the simultaneous insertion of opening and closing tags in HTML and XML files.</li>
+          <li>Added a built-in Java class decompiler so you can look at what’s inside a library
+            for which the source code is not available. </li>
+         </ul>
+         <p>See
+         <a class="external-link" href="https://www.jetbrains.com/idea/whatsnew">What's New in IntelliJ</a>
+         for a complete description of the new features and enhancements.</p>
+       </li>
+      <li>Added additional <a href="{@docRoot}tools/studio/index.html#project-view">Project Views</a>
+        for <em>Scratches</em>, <em>Project Files</em>, <em>Problems</em>, <em>Production</em>,
+        and <em>Tests</em> to enhance project management and access. </li>
+      <li>Enhanced the <strong>File &gt; Settings</strong> menu and dialogs for improved settings
+          access and management. </li>
+      <li>Added support for high-density displays for Windows and Linux. </li>
+      <li>Added support for 280 dpi resources in the <code>res/drawable-280dpi/</code> folder.
+     </ul>
+    </ul>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.1.0</a> <em>(February 2015)</em>
   </p>
 
@@ -63,6 +110,7 @@ Android Studio, as denoted by revision number. </p>
       for region and language combinations, launcher icons, resource names, and other common
       code problems.</li>
       <li>Added support for Best Current Practice (BCP) language tag 47.  </li>
+    </ul>
   </div>
 </div>
 
@@ -85,6 +133,7 @@ Android Studio, as denoted by revision number. </p>
       updates, use <strong>File > Settings > Updates</strong> to change to the <strong>Stable</strong>
       update channel.
       </li>
+    </ul>
   </div>
 </div>
 
