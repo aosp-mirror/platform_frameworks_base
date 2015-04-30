@@ -302,8 +302,12 @@ public class RenderScript {
         long[] fieldIDs, long[] values, int[] sizes, long[] depClosures,
         long[] depFieldIDs) {
       validate();
-      return rsnClosureCreate(mContext, kernelID, returnValue, fieldIDs, values,
+      long c = rsnClosureCreate(mContext, kernelID, returnValue, fieldIDs, values,
           sizes, depClosures, depFieldIDs);
+      if (c == 0) {
+          throw new RSRuntimeException("Failed creating closure.");
+      }
+      return c;
     }
 
     native long rsnInvokeClosureCreate(long con, long invokeID, byte[] params,
@@ -311,8 +315,12 @@ public class RenderScript {
     synchronized long nInvokeClosureCreate(long invokeID, byte[] params,
         long[] fieldIDs, long[] values, int[] sizes) {
       validate();
-      return rsnInvokeClosureCreate(mContext, invokeID, params, fieldIDs,
+      long c = rsnInvokeClosureCreate(mContext, invokeID, params, fieldIDs,
           values, sizes);
+      if (c == 0) {
+          throw new RSRuntimeException("Failed creating closure.");
+      }
+      return c;
     }
 
     native void rsnClosureSetArg(long con, long closureID, int index,
@@ -337,7 +345,11 @@ public class RenderScript {
     synchronized long nScriptGroup2Create(String name, String cachePath,
                                           long[] closures) {
       validate();
-      return rsnScriptGroup2Create(mContext, name, cachePath, closures);
+      long g = rsnScriptGroup2Create(mContext, name, cachePath, closures);
+      if (g == 0) {
+          throw new RSRuntimeException("Failed creating script group.");
+      }
+      return g;
     }
 
     native void rsnScriptGroup2Execute(long con, long groupID);
