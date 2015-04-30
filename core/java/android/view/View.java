@@ -14551,11 +14551,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return !(mAttachInfo == null || mAttachInfo.mHardwareRenderer == null);
     }
 
-    private void updateDisplayListIfDirty() {
+    RenderNode updateDisplayListIfDirty() {
         final RenderNode renderNode = mRenderNode;
         if (!canHaveDisplayList()) {
             // can't populate RenderNode, don't try
-            return;
+            return renderNode;
         }
 
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
@@ -14569,7 +14569,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
                 dispatchGetDisplayList();
 
-                return; // no work needed
+                return renderNode; // no work needed
             }
 
             // If we got here, we're recreating it. Mark it as such to ensure that
@@ -14618,19 +14618,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
         }
-    }
-
-    /**
-     * Returns a RenderNode with View draw content recorded, which can be
-     * used to draw this view again without executing its draw method.
-     *
-     * @return A RenderNode ready to replay, or null if caching is not enabled.
-     *
-     * @hide
-     */
-    public RenderNode getDisplayList() {
-        updateDisplayListIfDirty();
-        return mRenderNode;
+        return renderNode;
     }
 
     private void resetDisplayList() {
@@ -15392,7 +15380,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (drawingWithRenderNode) {
             // Delay getting the display list until animation-driven alpha values are
             // set up and possibly passed on to the view
-            renderNode = getDisplayList();
+            renderNode = updateDisplayListIfDirty();
             if (!renderNode.isValid()) {
                 // Uncommon, but possible. If a view is removed from the hierarchy during the call
                 // to getDisplayList(), the display list will be marked invalid and we should not
