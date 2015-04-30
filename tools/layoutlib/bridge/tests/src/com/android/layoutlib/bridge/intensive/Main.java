@@ -319,16 +319,7 @@ public class Main {
                         mFrameworkRepo.getConfiguredResources(config),
                         "Theme.Material.Light.DarkActionBar", false);
 
-        return new SessionParams(
-                layoutParser,
-                RenderingMode.NORMAL,
-                null /*used for caching*/,
-                configGenerator.getHardwareConfig(),
-                resourceResolver,
-                layoutLibCallback,
-                0,
-                21, // TODO: Make it more configurable to run tests for various versions.
-                getLayoutLog());
+        return null;
     }
 
     private LayoutLog getLayoutLog() {
