@@ -416,14 +416,14 @@ final class BackStackRecord extends FragmentTransaction implements
 
     public CharSequence getBreadCrumbTitle() {
         if (mBreadCrumbTitleRes != 0) {
-            return mManager.mActivity.getText(mBreadCrumbTitleRes);
+            return mManager.mHost.getContext().getText(mBreadCrumbTitleRes);
         }
         return mBreadCrumbTitleText;
     }
 
     public CharSequence getBreadCrumbShortTitle() {
         if (mBreadCrumbShortTitleRes != 0) {
-            return mManager.mActivity.getText(mBreadCrumbShortTitleRes);
+            return mManager.mHost.getContext().getText(mBreadCrumbShortTitleRes);
         }
         return mBreadCrumbShortTitleText;
     }
@@ -868,7 +868,7 @@ final class BackStackRecord extends FragmentTransaction implements
      */
     private void calculateFragments(SparseArray<Fragment> firstOutFragments,
             SparseArray<Fragment> lastInFragments) {
-        if (!mManager.mContainer.hasView()) {
+        if (!mManager.mContainer.onHasView()) {
             return; // nothing to see, so no transitions
         }
         Op op = mHead;
@@ -926,7 +926,7 @@ final class BackStackRecord extends FragmentTransaction implements
      */
     public void calculateBackFragments(SparseArray<Fragment> firstOutFragments,
             SparseArray<Fragment> lastInFragments) {
-        if (!mManager.mContainer.hasView()) {
+        if (!mManager.mContainer.onHasView()) {
             return; // nothing to see, so no transitions
         }
         Op op = mHead;
@@ -1002,7 +1002,7 @@ final class BackStackRecord extends FragmentTransaction implements
         // Adding a non-existent target view makes sure that the transitions don't target
         // any views by default. They'll only target the views we tell add. If we don't
         // add any, then no views will be targeted.
-        state.nonExistentView = new View(mManager.mActivity);
+        state.nonExistentView = new View(mManager.mHost.getContext());
 
         // Go over all leaving fragments.
         for (int i = 0; i < firstOutFragments.size(); i++) {
@@ -1275,7 +1275,7 @@ final class BackStackRecord extends FragmentTransaction implements
      */
     private void configureTransitions(int containerId, TransitionState state, boolean isBack,
             SparseArray<Fragment> firstOutFragments, SparseArray<Fragment> lastInFragments) {
-        ViewGroup sceneRoot = (ViewGroup) mManager.mContainer.findViewById(containerId);
+        ViewGroup sceneRoot = (ViewGroup) mManager.mContainer.onFindViewById(containerId);
         if (sceneRoot != null) {
             Fragment inFragment = lastInFragments.get(containerId);
             Fragment outFragment = firstOutFragments.get(containerId);

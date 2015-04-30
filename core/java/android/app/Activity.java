@@ -108,6 +108,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -706,8 +707,6 @@ public class Activity extends ContextThemeWrapper
     /*package*/ ActivityThread mMainThread;
     Activity mParent;
     boolean mCalled;
-    boolean mCheckedForLoaderManager;
-    boolean mLoadersStarted;
     /*package*/ boolean mResumed;
     private boolean mStopped;
     boolean mFinished;
@@ -726,8 +725,8 @@ public class Activity extends ContextThemeWrapper
     static final class NonConfigurationInstances {
         Object activity;
         HashMap<String, Object> children;
-        ArrayList<Fragment> fragments;
-        ArrayMap<String, LoaderManagerImpl> loaders;
+        List<Fragment> fragments;
+        ArrayMap<String, LoaderManager> loaders;
         VoiceInteractor voiceInteractor;
     }
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
@@ -747,25 +746,12 @@ public class Activity extends ContextThemeWrapper
     private CharSequence mTitle;
     private int mTitleColor = 0;
 
-    final FragmentManagerImpl mFragments = new FragmentManagerImpl();
-    final FragmentContainer mContainer = new FragmentContainer() {
-        @Override
-        @Nullable
-        public View findViewById(int id) {
-            return Activity.this.findViewById(id);
-        }
-        @Override
-        public boolean hasView() {
-            Window window = Activity.this.getWindow();
-            return (window != null && window.peekDecorView() != null);
-        }
-    };
+    // we must have a handler before the FragmentController is constructed
+    final Handler mHandler = new Handler();
+    final FragmentController mFragments = FragmentController.createController(new HostCallbacks());
 
     // Most recent call to requestVisibleBehind().
     boolean mVisibleBehind;
-
-    ArrayMap<String, LoaderManagerImpl> mAllLoaderManagers;
-    LoaderManagerImpl mLoaderManager;
 
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
@@ -802,7 +788,6 @@ public class Activity extends ContextThemeWrapper
     private final Object mInstanceTracker = StrictMode.trackActivity(this);
 
     private Thread mUiThread;
-    final Handler mHandler = new Handler();
 
     ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
     SharedElementCallback mEnterTransitionListener = SharedElementCallback.NULL_CALLBACK;
@@ -863,28 +848,7 @@ public class Activity extends ContextThemeWrapper
      * Return the LoaderManager for this activity, creating it if needed.
      */
     public LoaderManager getLoaderManager() {
-        if (mLoaderManager != null) {
-            return mLoaderManager;
-        }
-        mCheckedForLoaderManager = true;
-        mLoaderManager = getLoaderManager("(root)", mLoadersStarted, true);
-        return mLoaderManager;
-    }
-
-    LoaderManagerImpl getLoaderManager(String who, boolean started, boolean create) {
-        if (mAllLoaderManagers == null) {
-            mAllLoaderManagers = new ArrayMap<String, LoaderManagerImpl>();
-        }
-        LoaderManagerImpl lm = mAllLoaderManagers.get(who);
-        if (lm == null) {
-            if (create) {
-                lm = new LoaderManagerImpl(who, this, started);
-                mAllLoaderManagers.put(who, lm);
-            }
-        } else {
-            lm.updateActivity(this);
-        }
-        return lm;
+        return mFragments.getLoaderManager();
     }
 
     /**
@@ -931,7 +895,7 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
         if (mLastNonConfigurationInstances != null) {
-            mAllLoaderManagers = mLastNonConfigurationInstances.loaders;
+            mFragments.restoreLoaderNonConfig(mLastNonConfigurationInstances.loaders);
         }
         if (mActivityInfo.parentActivityName != null) {
             if (mActionBar == null) {
@@ -1172,15 +1136,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStart " + this);
         mCalled = true;
 
-        if (!mLoadersStarted) {
-            mLoadersStarted = true;
-            if (mLoaderManager != null) {
-                mLoaderManager.doStart();
-            } else if (!mCheckedForLoaderManager) {
-                mLoaderManager = getLoaderManager("(root)", mLoadersStarted, false);
-            }
-            mCheckedForLoaderManager = true;
-        }
+        mFragments.doLoaderStart();
 
         getApplication().dispatchActivityStarted(this);
     }
@@ -1873,27 +1829,9 @@ public class Activity extends ContextThemeWrapper
     NonConfigurationInstances retainNonConfigurationInstances() {
         Object activity = onRetainNonConfigurationInstance();
         HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
-        ArrayList<Fragment> fragments = mFragments.retainNonConfig();
-        boolean retainLoaders = false;
-        if (mAllLoaderManagers != null) {
-            // prune out any loader managers that were already stopped and so
-            // have nothing useful to retain.
-            final int N = mAllLoaderManagers.size();
-            LoaderManagerImpl loaders[] = new LoaderManagerImpl[N];
-            for (int i=N-1; i>=0; i--) {
-                loaders[i] = mAllLoaderManagers.valueAt(i);
-            }
-            for (int i=0; i<N; i++) {
-                LoaderManagerImpl lm = loaders[i];
-                if (lm.mRetaining) {
-                    retainLoaders = true;
-                } else {
-                    lm.doDestroy();
-                    mAllLoaderManagers.remove(lm.mWho);
-                }
-            }
-        }
-        if (activity == null && children == null && fragments == null && !retainLoaders
+        List<Fragment> fragments = mFragments.retainNonConfig();
+        ArrayMap<String, LoaderManager> loaders = mFragments.retainLoaderNonConfig();
+        if (activity == null && children == null && fragments == null && loaders == null
                 && mVoiceInteractor == null) {
             return null;
         }
@@ -1902,7 +1840,7 @@ public class Activity extends ContextThemeWrapper
         nci.activity = activity;
         nci.children = children;
         nci.fragments = fragments;
-        nci.loaders = mAllLoaderManagers;
+        nci.loaders = loaders;
         nci.voiceInteractor = mVoiceInteractor;
         return nci;
     }
@@ -1924,18 +1862,7 @@ public class Activity extends ContextThemeWrapper
      * with this activity.
      */
     public FragmentManager getFragmentManager() {
-        return mFragments;
-    }
-
-    void invalidateFragment(String who) {
-        //Log.v(TAG, "invalidateFragmentIndex: index=" + index);
-        if (mAllLoaderManagers != null) {
-            LoaderManagerImpl lm = mAllLoaderManagers.get(who);
-            if (lm != null && !lm.mRetaining) {
-                lm.doDestroy();
-                mAllLoaderManagers.remove(who);
-            }
-        }
+        return mFragments.getFragmentManager();
     }
 
     /**
@@ -2518,7 +2445,7 @@ public class Activity extends ContextThemeWrapper
             return;
         }
 
-        if (!mFragments.popBackStackImmediate()) {
+        if (!mFragments.getFragmentManager().popBackStackImmediate()) {
             finishAfterTransition();
         }
     }
@@ -5518,21 +5445,13 @@ public class Activity extends ContextThemeWrapper
                 writer.print(mResumed); writer.print(" mStopped=");
                 writer.print(mStopped); writer.print(" mFinished=");
                 writer.println(mFinished);
-        writer.print(innerPrefix); writer.print("mLoadersStarted=");
-                writer.println(mLoadersStarted);
         writer.print(innerPrefix); writer.print("mChangingConfigurations=");
                 writer.println(mChangingConfigurations);
         writer.print(innerPrefix); writer.print("mCurrentConfig=");
                 writer.println(mCurrentConfig);
 
-        if (mLoaderManager != null) {
-            writer.print(prefix); writer.print("Loader Manager ");
-                    writer.print(Integer.toHexString(System.identityHashCode(mLoaderManager)));
-                    writer.println(":");
-            mLoaderManager.dump(prefix + "  ", fd, writer, args);
-        }
-
-        mFragments.dump(prefix, fd, writer, args);
+        mFragments.dumpLoaders(innerPrefix, fd, writer, args);
+        mFragments.getFragmentManager().dump(innerPrefix, fd, writer, args);
 
         if (getWindow() != null &&
                 getWindow().peekDecorView() != null &&
@@ -6128,7 +6047,7 @@ public class Activity extends ContextThemeWrapper
             Configuration config, String referrer, IVoiceInteractor voiceInteractor) {
         attachBaseContext(context);
 
-        mFragments.attachActivity(this, mContainer, null);
+        mFragments.attachHost(null /*parent*/);
 
         mWindow = new PhoneWindow(this);
         mWindow.setCallback(this);
@@ -6211,18 +6130,7 @@ public class Activity extends ContextThemeWrapper
                 " did not call through to super.onStart()");
         }
         mFragments.dispatchStart();
-        if (mAllLoaderManagers != null) {
-            final int N = mAllLoaderManagers.size();
-            LoaderManagerImpl loaders[] = new LoaderManagerImpl[N];
-            for (int i=N-1; i>=0; i--) {
-                loaders[i] = mAllLoaderManagers.valueAt(i);
-            }
-            for (int i=0; i<N; i++) {
-                LoaderManagerImpl lm = loaders[i];
-                lm.finishRetain();
-                lm.doReportStart();
-            }
-        }
+        mFragments.reportLoaderStart();
         mActivityTransitionState.enterReady(this);
     }
 
@@ -6328,16 +6236,7 @@ public class Activity extends ContextThemeWrapper
 
     final void performStop() {
         mDoReportFullyDrawn = false;
-        if (mLoadersStarted) {
-            mLoadersStarted = false;
-            if (mLoaderManager != null) {
-                if (!mChangingConfigurations) {
-                    mLoaderManager.doStop();
-                } else {
-                    mLoaderManager.doRetain();
-                }
-            }
-        }
+        mFragments.doLoaderStop(mChangingConfigurations /*retain*/);
 
         if (!mStopped) {
             if (mWindow != null) {
@@ -6379,9 +6278,7 @@ public class Activity extends ContextThemeWrapper
         mWindow.destroy();
         mFragments.dispatchDestroy();
         onDestroy();
-        if (mLoaderManager != null) {
-            mLoaderManager.doDestroy();
-        }
+        mFragments.doLoaderDestroy();
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
         }
@@ -6540,5 +6437,75 @@ public class Activity extends ContextThemeWrapper
     private static boolean isRequestPermissionResult(Intent intent) {
         return intent != null
                 && PackageManager.ACTION_REQUEST_PERMISSIONS.equals(intent.getAction());
+    }
+
+    class HostCallbacks extends FragmentHostCallback<Activity> {
+        public HostCallbacks() {
+            super(Activity.this /*activity*/);
+        }
+
+        @Override
+        public void onDump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+            Activity.this.dump(prefix, fd, writer, args);
+        }
+
+        @Override
+        public boolean onShouldSaveFragmentState(Fragment fragment) {
+            return !isFinishing();
+        }
+
+        @Override
+        public LayoutInflater onGetLayoutInflater() {
+            final LayoutInflater result = Activity.this.getLayoutInflater();
+            if (onUseFragmentManagerInflaterFactory()) {
+                return result.cloneInContext(Activity.this);
+            }
+            return result;
+        }
+
+        @Override
+        public boolean onUseFragmentManagerInflaterFactory() {
+            // Newer platform versions use the child fragment manager's LayoutInflaterFactory.
+            return getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP;
+        }
+
+        @Override
+        public Activity onGetHost() {
+            return Activity.this;
+        }
+
+        @Override
+        public void onInvalidateOptionsMenu() {
+            Activity.this.invalidateOptionsMenu();
+        }
+
+        @Override
+        public void onStartActivityFromFragment(Fragment fragment, Intent intent, int requestCode,
+                Bundle options) {
+            Activity.this.startActivityFromFragment(fragment, intent, requestCode, options);
+        }
+
+        @Override
+        public boolean onHasWindowAnimations() {
+            return getWindow() != null;
+        }
+
+        @Override
+        public int onGetWindowAnimations() {
+            final Window w = getWindow();
+            return (w == null) ? 0 : w.getAttributes().windowAnimations;
+        }
+
+        @Nullable
+        @Override
+        public View onFindViewById(int id) {
+            return Activity.this.findViewById(id);
+        }
+
+        @Override
+        public boolean onHasView() {
+            final Window w = getWindow();
+            return (w != null && w.peekDecorView() != null);
+        }
     }
 }

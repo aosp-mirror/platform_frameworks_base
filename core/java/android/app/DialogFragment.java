@@ -410,7 +410,7 @@ public class DialogFragment extends Fragment
             return (LayoutInflater)mDialog.getContext().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
         }
-        return (LayoutInflater)mActivity.getSystemService(
+        return (LayoutInflater) mHost.getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
     }
     
