@@ -154,7 +154,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#silenceRinger
      */
-    void silenceRinger();
+    void silenceRinger(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#isInCall
@@ -184,22 +184,23 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#cancelMissedCallsNotification
      */
-    void cancelMissedCallsNotification();
+    void cancelMissedCallsNotification(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#handleMmi
      */
-    boolean handlePinMmi(String dialString);
+    boolean handlePinMmi(String dialString, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#handleMmi
      */
-    boolean handlePinMmiForPhoneAccount(in PhoneAccountHandle accountHandle, String dialString);
+    boolean handlePinMmiForPhoneAccount(in PhoneAccountHandle accountHandle, String dialString,
+            String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getAdnUriForPhoneAccount
      */
-    Uri getAdnUriForPhoneAccount(in PhoneAccountHandle accountHandle);
+    Uri getAdnUriForPhoneAccount(in PhoneAccountHandle accountHandle, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#isTtySupported
