@@ -3759,6 +3759,10 @@ final class Settings {
             pw.print(Integer.toHexString(System.identityHashCode(ps)));
             pw.println("):");
 
+        if (ps.frozen) {
+            pw.print(prefix); pw.println("  FROZEN!");
+        }
+
         if (ps.realName != null) {
             pw.print(prefix); pw.print("  compat name=");
             pw.println(ps.name);
@@ -3790,9 +3794,6 @@ final class Settings {
             pw.print(prefix); pw.print("  priavateFlags="); printFlags(pw,
                     ps.pkg.applicationInfo.privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
             pw.print(prefix); pw.print("  dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
-            if (ps.pkg.mOperationPending) {
-                pw.print(prefix); pw.println("  mOperationPending=true");
-            }
             pw.print(prefix); pw.print("  supportsScreens=[");
             boolean first = true;
             if ((ps.pkg.applicationInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {

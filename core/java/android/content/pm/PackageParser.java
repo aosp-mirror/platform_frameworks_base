@@ -4315,9 +4315,6 @@ public class PackageParser {
         // Additional data supplied by callers.
         public Object mExtras;
 
-        // Whether an operation is currently pending on this package
-        public boolean mOperationPending;
-
         // Applications hardware preferences
         public ArrayList<ConfigurationInfo> configPreferences = null;
 
