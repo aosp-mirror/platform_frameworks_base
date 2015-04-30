@@ -264,15 +264,17 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
-    public int moveUserDataDirs(String fromUuid, String toUuid, String packageName, int appId,
-            String seinfo) {
-        StringBuilder builder = new StringBuilder("mvuserdata");
+    public int moveCompleteApp(String fromUuid, String toUuid, String packageName,
+            String dataAppName, int appId, String seinfo) {
+        StringBuilder builder = new StringBuilder("mvcompleteapp");
         builder.append(' ');
         builder.append(escapeNull(fromUuid));
         builder.append(' ');
         builder.append(escapeNull(toUuid));
         builder.append(' ');
         builder.append(packageName);
+        builder.append(' ');
+        builder.append(dataAppName);
         builder.append(' ');
         builder.append(appId);
         builder.append(' ');
