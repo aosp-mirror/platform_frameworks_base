@@ -274,7 +274,8 @@ android.view.View#post(java.lang.Runnable) View.post(Runnable)} method:</p>
 public void onClick(View v) {
     new Thread(new Runnable() {
         public void run() {
-            final Bitmap bitmap = loadImageFromNetwork("http://example.com/image.png");
+            final Bitmap bitmap =
+                    loadImageFromNetwork("http://example.com/image.png");
             mImageView.post(new Runnable() {
                 public void run() {
                     mImageView.setImageBitmap(bitmap);
@@ -323,7 +324,7 @@ private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
     protected Bitmap doInBackground(String... urls) {
         return loadImageFromNetwork(urls[0]);
     }
-    
+
     /** The system calls this to perform work in the UI thread and delivers
       * the result from doInBackground() */
     protected void onPostExecute(Bitmap result) {
