@@ -39,7 +39,7 @@ public class StatusBar extends CustomBar {
 
     private final int mSimulatedPlatformVersion;
     /** Status bar background color attribute name. */
-    private static final String ATTR_COLOR = "colorPrimaryDark";
+    private static final String ATTR_COLOR = "statusBarColor";
 
     public StatusBar(BridgeContext context, Density density, int direction, boolean RtlEnabled,
             int simulatedPlatformVersion) throws XmlPullParserException {
@@ -50,6 +50,7 @@ public class StatusBar extends CustomBar {
 
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
+
         int color = getThemeAttrColor(ATTR_COLOR, true);
         setBackgroundColor(color == 0 ? Config.getStatusBarColor(simulatedPlatformVersion) : color);
 
