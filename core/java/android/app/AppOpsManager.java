@@ -221,8 +221,7 @@ public class AppOpsManager {
     public static final int _NUM_OP = 53;
 
     /** Access to coarse location information. */
-    public static final String OPSTR_COARSE_LOCATION =
-            "android:coarse_location";
+    public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
     /** Access to fine location information. */
     public static final String OPSTR_FINE_LOCATION =
             "android:fine_location";
@@ -237,7 +236,59 @@ public class AppOpsManager {
             = "android:get_usage_stats";
     /** Activate a VPN connection without user intervention. @hide */
     @SystemApi
-    public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
+    public static final String OPSTR_ACTIVATE_VPN
+            = "android:activate_vpn";
+    /** @hide Allows an application to read the user's contacts data. */
+    public static final String OPSTR_READ_CONTACTS
+            = "android:read_contacts";
+    /** @hide Allows an application to write to the user's contacts data. */
+    public static final String OPSTR_WRITE_CONTACTS
+            = "android:write_contacts";
+    /** @hide Allows an application to read the user's call log. */
+    public static final String OPSTR_READ_CALL_LOG
+            = "android:read_call_log";
+    /** @hide Allows an application to write to the user's call log. */
+    public static final String OPSTR_WRITE_CALL_LOG
+            = "android:write_call_log";
+    /** @hide Allows an application to read the user's calendar data. */
+    public static final String OPSTR_READ_CALENDAR
+            = "android:read_calendar";
+    /** @hide Allows an application to write to the user's calendar data. */
+    public static final String OPSTR_WRITE_CALENDAR
+            = "android:write_calendar";
+    /** @hide Allows an application to initiate a phone call. */
+    public static final String OPSTR_CALL_PHONE
+            = "android:call_phone";
+    /** @hide Allows an application to read SMS messages. */
+    public static final String OPSTR_READ_SMS
+            = "android:read_sms";
+    /** @hide Allows an application to receive SMS messages. */
+    public static final String OPSTR_RECEIVE_SMS
+            = "android:receive_sms";
+    /** @hide Allows an application to receive MMS messages. */
+    public static final String OPSTR_RECEIVE_MMS
+            = "android:receive_mms";
+    /** @hide Allows an application to receive WAP push messages. */
+    public static final String OPSTR_RECEIVE_WAP_PUSH
+            = "android:receive_wap_push";
+    /** @hide Allows an application to send SMS messages. */
+    public static final String OPSTR_SEND_SMS
+            = "android:send_sms";
+    /** @hide Allows an application to add system alert windows. */
+    public static final String OPSTR_SYSTEM_ALERT_WINDOW
+            = "android:system_alert_window";
+    /** @hide Required to be able to access the camera device. */
+    public static final String OPSTR_CAMERA
+            = "android:camera";
+    /** @hide Required to be able to access the microphone device. */
+    public static final String OPSTR_RECORD_AUDIO
+            = "android:record_audio";
+    /** @hide Required to access phone state related information. */
+    public static final String OPSTR_READ_PHONE_STATE
+            = "android:read_phone_state";
+    /** @hide Required to access phone state related information. */
+    public static final String OPSTR_ADD_VOICEMAIL
+            = "android:add_voicemail";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -734,6 +785,23 @@ public class AppOpsManager {
         sPermToOp.put(Manifest.permission.ACCESS_COARSE_LOCATION, OPSTR_COARSE_LOCATION);
         sPermToOp.put(Manifest.permission.ACCESS_FINE_LOCATION, OPSTR_FINE_LOCATION);
         sPermToOp.put(Manifest.permission.PACKAGE_USAGE_STATS, OPSTR_GET_USAGE_STATS);
+        sPermToOp.put(Manifest.permission.READ_CONTACTS, OPSTR_READ_CONTACTS);
+        sPermToOp.put(Manifest.permission.WRITE_CONTACTS, OPSTR_WRITE_CONTACTS);
+        sPermToOp.put(Manifest.permission.READ_CALL_LOG, OPSTR_READ_CALL_LOG);
+        sPermToOp.put(Manifest.permission.WRITE_CALL_LOG, OPSTR_WRITE_CALL_LOG);
+        sPermToOp.put(Manifest.permission.READ_CALENDAR, OPSTR_READ_CALENDAR);
+        sPermToOp.put(Manifest.permission.WRITE_CALENDAR, OPSTR_WRITE_CALENDAR);
+        sPermToOp.put(Manifest.permission.CALL_PHONE, OPSTR_CALL_PHONE);
+        sPermToOp.put(Manifest.permission.READ_SMS, OPSTR_READ_SMS);
+        sPermToOp.put(Manifest.permission.RECEIVE_SMS, OPSTR_RECEIVE_SMS);
+        sPermToOp.put(Manifest.permission.RECEIVE_MMS, OPSTR_RECEIVE_MMS);
+        sPermToOp.put(Manifest.permission.RECEIVE_WAP_PUSH, OPSTR_RECEIVE_WAP_PUSH);
+        sPermToOp.put(Manifest.permission.SEND_SMS, OPSTR_SEND_SMS);
+        sPermToOp.put(Manifest.permission.SYSTEM_ALERT_WINDOW, OPSTR_SYSTEM_ALERT_WINDOW);
+        sPermToOp.put(Manifest.permission.CAMERA, OPSTR_CAMERA);
+        sPermToOp.put(Manifest.permission.RECORD_AUDIO, OPSTR_RECORD_AUDIO);
+        sPermToOp.put(Manifest.permission.READ_PHONE_STATE, OPSTR_READ_PHONE_STATE);
+        sPermToOp.put(Manifest.permission.ADD_VOICEMAIL, OPSTR_ADD_VOICEMAIL);
     }
 
     private static HashMap<String, Integer> sOpStrToOp = new HashMap<String, Integer>();
