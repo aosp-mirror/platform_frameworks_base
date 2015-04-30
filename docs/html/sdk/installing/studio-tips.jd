@@ -22,8 +22,8 @@ enhancements. </p>
      <h2>Smart Rendering</h2>
      <p>With smart rendering, Android Studio displays links for quick fixes to rendering errors.
      For example, if you add a button to the layout without specifying the <em>width</em> and
-     <em>height</em> atttributes, Android Studio displays the rendering message <em>Automatically
-     add all missing attributs</em>. Clicking the message adds the missing attributes to the layout.</p>
+     <em>height</em> attributes, Android Studio displays the rendering message <em>Automatically
+     add all missing attributes</em>. Clicking the message adds the missing attributes to the layout.</p>
 
 
      <h2> Bitmap rendering in the debugger</h2>
@@ -39,7 +39,6 @@ enhancements. </p>
      locate messages of interest.</p>
      <img src="{@docRoot}images/tools/studio-outputwindowmsgfiltering.png" style="width:200px"style="width:200px" />
      <p class="img-caption"><strong>Figure 14.</strong> Filter Build Messages</p>
-
 
 
     <h2>Hierarchical parent setting</h2>
@@ -69,7 +68,47 @@ enhancements. </p>
     with a layout hierarchy and a list of properties for each view in the layout.</p>
 
 
-     <h2 id="intellij">Working with IntelliJ</h3>
+   <h3>Annotations</h3>
+   <p>Android Studio provides coding assistance for using annotations from the
+   {@link android.support.annotation Support-Annotations} library, part of the
+   Support Repository. Adding a dependency for this library enables you to decorate your code with
+   annotations to help catch bugs, such as null pointer exceptions and resource type conflicts.
+   You can also create enumerated annotations to, for example, check that a passed parameter value
+   matches a value from a defined set of constants. For more information, see
+   <a href="{@docRoot}tools/debugging/annotations.html#annotations">Improving Code Inspection with
+   Annotations</a>. </p>
+
+
+   <h3>Java class decompiling</h3>
+   <p>Android Studio allows you to look at what’s inside Java libraries when you don’t have access
+   to the source code. </p>
+
+   <p>The decompiler is built into Android Studio for easy access. To use this feature, right-click
+   a class, method, or field from a library for which you do not have source file access and select
+   <strong>decompile</strong>.</p> The decompiled source code appears. </p>
+
+   <p>To adjust the Java decompiler settings, select
+   <strong>File > Settings > Other Settings > Java Decompiler</strong>. </p>
+
+
+   <h3>Debugging and performance enhancements</h3>
+   <p>Android Studio offers debugging and performance enhancements such as:</p>
+   <ul>
+    <li>Auto detect an expanded set of code styles. To modify the current code style, choose
+      <strong>File &gt; Settings &gt; Code Styles</strong>.  </li>
+    <li>Support for high density (Retina) displays on Windows and Linux.  </li>
+    <li>Scratch files for quick prototyping without creating any project files.
+      <p>Choose <strong>Tools &gt; New Scratch File</strong> to open a scratch file to quickly
+      build and run code prototypes. Together with Android Studio coding assistance, scratch
+      files allow you to quickly run and debug code updates with the support of all file operations.
+      By embedding code created with scripting languages, you can run your code from within the
+      scratch file.</p> 
+    </li>
+  </ul>
+
+
+
+<h2 id="intellij">Working with IntelliJ-based Coding Practices</h2>
 
      <p>This section list just a few of the code editing
      practices you should consider using when creating Android Studio apps. </p>
@@ -77,8 +116,6 @@ enhancements. </p>
      <p>For complete user documentation for the IntelliJ IDEA interface (upon which Android Studio
      is based), refer to the
      <a href="http://www.jetbrains.com/idea/documentation/index.jsp">IntelliJ IDEA documentation</a>.</p>
-
-
 
      <h3><em>Alt + Enter</em> key binding</h3>
      <p>For quick fixes to coding errors, the IntelliJ powered IDE implements the <em>Alt + Enter</em>
@@ -108,18 +145,16 @@ enhancements. </p>
     of a string as not null.</p>
 
 
-
     <h3>Injecting languages</h3>
     <p>With language injection, the Android Studio IDE allows you to work with islands of different
     languages embedded in the source code. This extends the syntax, error highlighting and coding
     assistance to the embedded language. This can be especially useful for checking regular expression
-    values inline, and validating XML and SQL statments.</p>
-
+    values inline, and validating XML and SQL statements.</p>
 
     <h3>Code folding</h3>
     <p>This allows you to selectively hide and display sections of the code for readability. For
     example, resource expressions or code for a nested class can be folded or hidden in to one line
-    to make the outer class structure easier to read. The inner clas can be later expanded for
+    to make the outer class structure easier to read. The inner class can be later expanded for
     updates. </p>
 
 
@@ -138,6 +173,7 @@ enhancements. </p>
     <p>If you invoke <strong> View > Quick Documentation</strong> (usually bound to F1) on the theme
     attribute <em>?android:textAppearanceLarge</em>, you will see the theme inheritance hierarchy and
     resolved values for the various attributes that are pulled in.</p>
+
 
 
      <h3>New Allocation Tracker integration in the Android/DDMS window</h3>

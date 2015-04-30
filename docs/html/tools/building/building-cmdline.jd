@@ -34,9 +34,9 @@ parent.link=index.html
     </div>
   </div>
 
-  <p>By default, there are two build types to build your application using the gradle.build settings:
+  <p>By default, there are two build types to build your application using the Gradle build settings:
   one for debugging your application &mdash; <em>debug</em> &mdash; and one for building your
-  final package for release &mdash; <em>release mode</em>. Regardless of which way you build type
+  final package for release &mdash; <em>release mode</em>. Regardless of which build type
   your modules use, the app must be signed before it can install on an emulator or device&mdash;with
   a debug key when building in debug mode and with your own private key when building in release mode.</p>
 
@@ -48,23 +48,24 @@ parent.link=index.html
   development device. You cannot distribute an application that is signed with a debug key.
   When you build using the release build type, the .apk file is <em>unsigned</em>, so you
   must manually sign it with your own private key, using Keytool and Jarsigner settings in the
-  module's gradle.build file.</p>
+  module's <code>build.gradle</code> file.</p>
 
   <p>It's important that you read and understand <a href=
   "{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a>, particularly once
   you're ready to release your application and share it with end-users. That document describes the
-  procedure for generating a private key and then using it to sign your .apk file. If you're just
+  procedure for generating a private key and then using it to sign your APK file. If you're just
   getting started, however, you can quickly run your applications on an emulator or your own
   development device by building in debug mode.</p>
 
   <p>If you don't have <a href="http://www.gradle.org/">Gradle</a>, you can obtain it from the <a href="http://gradle.org/">Gradle
-  home page</a>. Install it and make sure it is in your executable PATH. Before calling Ant, you
+  home page</a>. Install it and make sure it is in your executable PATH. Before calling Gradle, you
   need to declare the JAVA_HOME environment variable to specify the path to where the JDK is
   installed.</p>
 
-  <p class="note"><strong>Note:</strong> When installing JDK on Windows, the default is to install
-  in the "Program Files" directory. This location will cause <code>ant</code> to fail, because of
-  the space. To fix the problem, you can specify the JAVA_HOME variable like this:
+  <p class="note"><strong>Note:</strong> When using <code>ant</code> and installing JDK on Windows,
+  the default is to install in the "Program Files" directory. This location will cause
+  <code>ant</code> to fail, because of the space. To fix the problem, you can specify the JAVA_HOME
+  variable like this:
   <pre>set JAVA_HOME=c:\Progra~1\Java\&lt;jdkdir&gt;</pre>
 
   <p>The easiest solution, however, is to install JDK in a non-space directory, for example:</p>
