@@ -486,6 +486,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             HdmiLogger.debug("Input not ready for device: %X; buffering the command", info.getId());
             mDelayedMessageBuffer.add(message);
         } else {
+            updateDevicePowerStatus(logicalAddress, HdmiControlManager.POWER_STATUS_ON);
             ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
             ActiveSourceHandler.create(this, null).process(activeSource, info.getDeviceType());
         }
@@ -1613,6 +1614,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         super.disableDevice(initiatedByCec, callback);
         clearDeviceInfoList();
+        getActiveSource().invalidate();
+        setActivePath(Constants.INVALID_PHYSICAL_ADDRESS);
         checkIfPendingActionsCleared();
     }
 
