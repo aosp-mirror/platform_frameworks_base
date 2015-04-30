@@ -91,6 +91,7 @@ import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.ViewMediatorCallback;
@@ -691,6 +692,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDismissView.setOnButtonClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MetricsLogger.action(mContext, MetricsLogger.ACTION_DISMISS_ALL_NOTES);
                 clearAllNotifications();
             }
         });
