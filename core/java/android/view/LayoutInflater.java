@@ -946,25 +946,21 @@ public abstract class LayoutInflater {
                                 attrs, R.styleable.Include);
                         final int id = a.getResourceId(R.styleable.Include_id, View.NO_ID);
                         final int visibility = a.getInt(R.styleable.Include_visibility, -1);
-                        final boolean hasWidth = a.hasValue(R.styleable.Include_layout_width);
-                        final boolean hasHeight = a.hasValue(R.styleable.Include_layout_height);
                         a.recycle();
 
-                        // We try to load the layout params set in the <include /> tag. If
-                        // they don't exist, we will rely on the layout params set in the
-                        // included XML file.
-                        // During a layoutparams generation, a runtime exception is thrown
-                        // if either layout_width or layout_height is missing. We catch
-                        // this exception and set localParams accordingly: true means we
-                        // successfully loaded layout params from the <include /> tag,
-                        // false means we need to rely on the included layout params.
+                        // We try to load the layout params set in the <include /> tag.
+                        // If the parent can't generate layout params (ex. missing width
+                        // or height for the framework ViewGroups, though this is not
+                        // necessarily true of all ViewGroups) then we expect it to throw
+                        // a runtime exception.
+                        // We catch this exception and set localParams accordingly: true
+                        // means we successfully loaded layout params from the <include>
+                        // tag, false means we need to rely on the included layout params.
                         ViewGroup.LayoutParams params = null;
-                        if (hasWidth && hasHeight) {
-                            try {
-                                params = group.generateLayoutParams(attrs);
-                            } catch (RuntimeException e) {
-                                // Ignore, just fail over to child attrs.
-                            }
+                        try {
+                            params = group.generateLayoutParams(attrs);
+                        } catch (RuntimeException e) {
+                            // Ignore, just fail over to child attrs.
                         }
                         if (params == null) {
                             params = group.generateLayoutParams(childAttrs);
