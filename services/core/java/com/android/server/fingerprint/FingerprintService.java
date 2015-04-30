@@ -16,14 +16,15 @@
 
 package com.android.server.fingerprint;
 
+import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.RemoteException;
-import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -39,6 +40,7 @@ import static android.Manifest.permission.USE_FINGERPRINT;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,6 +56,8 @@ public class FingerprintService extends SystemService {
     private ClientMonitor mAuthClient = null;
     private ClientMonitor mEnrollClient = null;
     private ClientMonitor mRemoveClient = null;
+
+    private final AppOpsManager mAppOps;
 
     private static final int MSG_NOTIFY = 10;
 
@@ -96,6 +100,7 @@ public class FingerprintService extends SystemService {
     public FingerprintService(Context context) {
         super(context);
         mContext = context;
+        mAppOps = context.getSystemService(AppOpsManager.class);
         nativeInit(Looper.getMainLooper().getQueue(), this);
     }
 
@@ -361,6 +366,13 @@ public class FingerprintService extends SystemService {
                 "Must have " + permission + " permission.");
     }
 
+    private boolean canUserFingerPrint(String opPackageName) {
+        checkPermission(USE_FINGERPRINT);
+
+        return mAppOps.noteOp(AppOpsManager.OP_USE_FINGERPRINT, Binder.getCallingUid(),
+                opPackageName) == AppOpsManager.MODE_ALLOWED;
+    }
+
     private class ClientMonitor implements IBinder.DeathRecipient {
         IBinder token;
         IFingerprintServiceReceiver receiver;
@@ -522,8 +534,11 @@ public class FingerprintService extends SystemService {
         @Override
         // Binder call
         public void authenticate(final IBinder token, final long opId, final int groupId,
-                final IFingerprintServiceReceiver receiver, final int flags) {
+                final IFingerprintServiceReceiver receiver, final int flags, String opPackageName) {
             checkPermission(USE_FINGERPRINT);
+            if (!canUserFingerPrint(opPackageName)) {
+                return;
+            }
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -535,8 +550,10 @@ public class FingerprintService extends SystemService {
         @Override
 
         // Binder call
-        public void cancelAuthentication(final IBinder token) {
-            checkPermission(USE_FINGERPRINT);
+        public void cancelAuthentication(final IBinder token, String opPackageName) {
+            if (!canUserFingerPrint(opPackageName)) {
+                return;
+            }
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -561,8 +578,10 @@ public class FingerprintService extends SystemService {
 
         @Override
         // Binder call
-        public boolean isHardwareDetected(long deviceId) {
-            checkPermission(USE_FINGERPRINT);
+        public boolean isHardwareDetected(long deviceId, String opPackageName) {
+            if (!canUserFingerPrint(opPackageName)) {
+                return false;
+            }
             return mHalDeviceId != 0; // TODO
         }
 
@@ -580,21 +599,27 @@ public class FingerprintService extends SystemService {
 
         @Override
         // Binder call
-        public List<Fingerprint> getEnrolledFingerprints(int groupId) {
-            checkPermission(USE_FINGERPRINT);
+        public List<Fingerprint> getEnrolledFingerprints(int groupId, String opPackageName) {
+            if (!canUserFingerPrint(opPackageName)) {
+                return Collections.emptyList();
+            }
             return FingerprintService.this.getEnrolledFingerprints(groupId);
         }
 
         @Override
         // Binder call
-        public boolean hasEnrolledFingerprints(int groupId) {
-            checkPermission(USE_FINGERPRINT);
+        public boolean hasEnrolledFingerprints(int groupId, String opPackageName) {
+            if (!canUserFingerPrint(opPackageName)) {
+                return false;
+            }
             return FingerprintService.this.hasEnrolledFingerprints(groupId);
         }
 
         @Override
-        public long getAuthenticatorId() {
-            checkPermission(USE_FINGERPRINT);
+        public long getAuthenticatorId(String opPackageName) {
+            if (!canUserFingerPrint(opPackageName)) {
+                return 0;
+            }
             return nativeGetAuthenticatorId();
         }
     }

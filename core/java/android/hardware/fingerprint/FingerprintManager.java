@@ -434,7 +434,8 @@ public class FingerprintManager {
             mAuthenticationCallback = callback;
             mCryptoObject = crypto;
             long sessionId = crypto != null ? crypto.getOpId() : 0;
-            mService.authenticate(mToken, sessionId, userId, mServiceReceiver, flags);
+            mService.authenticate(mToken, sessionId, userId, mServiceReceiver, flags,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception while authenticating: ", e);
             if (callback != null) {
@@ -555,7 +556,7 @@ public class FingerprintManager {
      */
     public List<Fingerprint> getEnrolledFingerprints(int userId) {
         if (mService != null) try {
-            return mService.getEnrolledFingerprints(userId);
+            return mService.getEnrolledFingerprints(userId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
         }
@@ -579,7 +580,8 @@ public class FingerprintManager {
      */
     public boolean hasEnrolledFingerprints() {
         if (mService != null) try {
-            return mService.hasEnrolledFingerprints(UserHandle.myUserId());
+            return mService.hasEnrolledFingerprints(UserHandle.myUserId(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
         }
@@ -595,7 +597,7 @@ public class FingerprintManager {
         if (mService != null) {
             try {
                 long deviceId = 0; /* TODO: plumb hardware id to FPMS */
-                return mService.isHardwareDetected(deviceId);
+                return mService.isHardwareDetected(deviceId, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.v(TAG, "Remote exception in isFingerprintHardwareDetected(): ", e);
             }
@@ -614,7 +616,7 @@ public class FingerprintManager {
     public long getAuthenticatorId() {
         if (mService != null) {
             try {
-                return mService.getAuthenticatorId();
+                return mService.getAuthenticatorId(mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.v(TAG, "Remote exception in getAuthenticatorId(): ", e);
             }
@@ -736,7 +738,7 @@ public class FingerprintManager {
 
     private void cancelAuthentication(CryptoObject cryptoObject) {
         if (mService != null) try {
-            mService.cancelAuthentication(mToken);
+            mService.cancelAuthentication(mToken, mContext.getOpPackageName());
         } catch (RemoteException e) {
             if (DEBUG) Log.w(TAG, "Remote exception while canceling enrollment");
         }
