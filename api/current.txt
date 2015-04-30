@@ -28171,12 +28171,12 @@ package android.renderscript {
   public final class ScriptIntrinsicBLAS extends android.renderscript.ScriptIntrinsic {
     method public void BNNM(android.renderscript.Allocation, int, android.renderscript.Allocation, int, android.renderscript.Allocation, int, int);
     method public void CGEMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
-    method public void CHEMM(int, int, float, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
+    method public void CHEMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
     method public void CHER2K(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, float, android.renderscript.Allocation);
     method public void CHERK(int, int, float, android.renderscript.Allocation, float, android.renderscript.Allocation);
     method public void CSYMM(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
     method public void CSYR2K(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
-    method public void CSYRK(int, int, float, float, android.renderscript.Allocation, float, float, android.renderscript.Allocation);
+    method public void CSYRK(int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Float2, android.renderscript.Allocation);
     method public void CTRMM(int, int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation);
     method public void CTRSM(int, int, int, int, android.renderscript.Float2, android.renderscript.Allocation, android.renderscript.Allocation);
     method public void DGEMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
@@ -28192,12 +28192,12 @@ package android.renderscript {
     method public void STRMM(int, int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation);
     method public void STRSM(int, int, int, int, float, android.renderscript.Allocation, android.renderscript.Allocation);
     method public void ZGEMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
-    method public void ZHEMM(int, int, double, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
+    method public void ZHEMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
     method public void ZHER2K(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, double, android.renderscript.Allocation);
     method public void ZHERK(int, int, double, android.renderscript.Allocation, double, android.renderscript.Allocation);
     method public void ZSYMM(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
     method public void ZSYR2K(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
-    method public void ZSYRK(int, int, double, double, android.renderscript.Allocation, double, double, android.renderscript.Allocation);
+    method public void ZSYRK(int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Double2, android.renderscript.Allocation);
     method public void ZTRMM(int, int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation);
     method public void ZTRSM(int, int, int, int, android.renderscript.Double2, android.renderscript.Allocation, android.renderscript.Allocation);
     method public static android.renderscript.ScriptIntrinsicBLAS create(android.renderscript.RenderScript);
