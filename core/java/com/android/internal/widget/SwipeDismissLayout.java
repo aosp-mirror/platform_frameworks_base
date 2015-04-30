@@ -216,6 +216,8 @@ public class SwipeDismissLayout extends FrameLayout {
         if (mVelocityTracker == null) {
             return super.onTouchEvent(ev);
         }
+        // offset because the view is translated during swipe
+        ev.offsetLocation(mTranslationX, 0);
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_UP:
                 updateDismiss(ev);
