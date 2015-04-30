@@ -38,20 +38,19 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     private final ConditionProviders mConditionProviders;
     private final ArrayMap<Uri, ComponentName> mSubscriptions = new ArrayMap<>();
 
-    private CountdownConditionProvider mCountdown;
-    private ScheduleConditionProvider mSchedule;
     private boolean mFirstEvaluation = true;
 
     public ZenModeConditions(ZenModeHelper helper, ConditionProviders conditionProviders) {
         mHelper = helper;
         mConditionProviders = conditionProviders;
         if (mConditionProviders.isSystemProviderEnabled(ZenModeConfig.COUNTDOWN_PATH)) {
-            mCountdown = new CountdownConditionProvider();
-            mConditionProviders.addSystemProvider(mCountdown);
+            mConditionProviders.addSystemProvider(new CountdownConditionProvider());
         }
         if (mConditionProviders.isSystemProviderEnabled(ZenModeConfig.SCHEDULE_PATH)) {
-            mSchedule = new ScheduleConditionProvider();
-            mConditionProviders.addSystemProvider(mSchedule);
+            mConditionProviders.addSystemProvider(new ScheduleConditionProvider());
+        }
+        if (mConditionProviders.isSystemProviderEnabled(ZenModeConfig.EVENT_PATH)) {
+            mConditionProviders.addSystemProvider(new EventConditionProvider());
         }
         mConditionProviders.setCallback(this);
     }
@@ -128,7 +127,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         final Uri id = rule.conditionId;
         boolean isSystemCondition = false;
         for (SystemConditionProviderService sp : mConditionProviders.getSystemProviders()) {
-            if (sp.isValidConditionid(id)) {
+            if (sp.isValidConditionId(id)) {
                 mConditionProviders.ensureRecordExists(sp.getComponent(), id, sp.asInterface());
                 rule.component = sp.getComponent();
                 isSystemCondition = true;
