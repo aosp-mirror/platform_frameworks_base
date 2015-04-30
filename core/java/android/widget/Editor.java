@@ -2422,7 +2422,8 @@ public class Editor {
         public PinnedPopupWindow() {
             createPopupWindow();
 
-            mPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+            mPopupWindow.setWindowLayoutType(
+                    WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL);
             mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
             mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
 
