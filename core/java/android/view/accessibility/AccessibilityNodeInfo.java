@@ -520,6 +520,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00010000;
 
+    private static final int BOOLEAN_PROPERTY_STYLUS_BUTTON_PRESSABLE = 0x00020000;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -1930,6 +1932,30 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Gets whether this node is stylus button pressable.
+     *
+     * @return True if the node is stylus button pressable.
+     */
+    public boolean isStylusButtonPressable() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_STYLUS_BUTTON_PRESSABLE);
+    }
+
+    /**
+     * Sets whether this node is stylus button pressable.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}. This class is made immutable
+     * before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param stylusButtonPressable True if the node is stylus button pressable.
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setStylusButtonPressable(boolean stylusButtonPressable) {
+        setBooleanProperty(BOOLEAN_PROPERTY_STYLUS_BUTTON_PRESSABLE, stylusButtonPressable);
+    }
+
+    /**
      * Gets the node's live region mode.
      * <p>
      * A live region is a node that contains information that is important for
@@ -3117,6 +3143,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; selected: ").append(isSelected());
         builder.append("; clickable: ").append(isClickable());
         builder.append("; longClickable: ").append(isLongClickable());
+        builder.append("; stylusButtonPressable: ").append(isStylusButtonPressable());
         builder.append("; enabled: ").append(isEnabled());
         builder.append("; password: ").append(isPassword());
         builder.append("; scrollable: ").append(isScrollable());
@@ -3496,6 +3523,11 @@ public class AccessibilityNodeInfo implements Parcelable {
          public static final AccessibilityAction ACTION_SCROLL_RIGHT =
                 new AccessibilityAction(R.id.accessibilityActionScrollRight, null);
 
+        /**
+         * Action that stylus button presses the node.
+         */
+        public static final AccessibilityAction ACTION_STYLUS_BUTTON_PRESS =
+                new AccessibilityAction(R.id.accessibilityActionStylusButtonPress, null);
 
         private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<>();
         static {
@@ -3527,6 +3559,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             sStandardActions.add(ACTION_SCROLL_LEFT);
             sStandardActions.add(ACTION_SCROLL_DOWN);
             sStandardActions.add(ACTION_SCROLL_RIGHT);
+            sStandardActions.add(ACTION_STYLUS_BUTTON_PRESS);
         }
 
         private final int mActionId;

@@ -684,6 +684,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_WINDOWS_CHANGED = 0x00400000;
 
     /**
+     * Represents the event of a stylus button press on a {@link android.view.View}.
+     */
+    public static final int TYPE_VIEW_STYLUS_BUTTON_PRESSED = 0x00800000;
+
+    /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
      * The type of change is not defined.
      */
@@ -731,6 +736,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_TOUCH_INTERACTION_START
      * @see #TYPE_TOUCH_INTERACTION_END
      * @see #TYPE_WINDOWS_CHANGED
+     * @see #TYPE_VIEW_STYLUS_BUTTON_PRESSED
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -1396,6 +1402,14 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     builder.append("TYPE_WINDOWS_CHANGED");
                     eventTypeCount++;
                 } break;
+                case TYPE_VIEW_STYLUS_BUTTON_PRESSED: {
+                    if (eventTypeCount > 0) {
+                        builder.append(", ");
+                    }
+                    builder.append("TYPE_VIEW_STYLUS_BUTTON_PRESSED");
+                    eventTypeCount++;
+                }
+                    break;
             }
         }
         if (eventTypeCount > 1) {
