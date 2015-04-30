@@ -236,7 +236,7 @@ public final class ScanSettings implements Parcelable {
         private int mScanResultType = SCAN_RESULT_TYPE_FULL;
         private long mReportDelayMillis = 0;
         private int mMatchMode = MATCH_MODE_AGGRESSIVE;
-        private int mNumOfMatchesPerFilter  = MATCH_NUM_ONE_ADVERTISEMENT;
+        private int mNumOfMatchesPerFilter  = MATCH_NUM_MAX_ADVERTISEMENT;
         /**
          * Set scan mode for Bluetooth LE scan.
          *
