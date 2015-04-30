@@ -338,7 +338,7 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
     return static_cast<SkColorType>(gConfig2ColorType[legacyConfig]);
 }
 
-SkBitmap* GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap) {
+SkBitmap* GraphicsJNI::getSkBitmapDeprecated(JNIEnv* env, jobject bitmap) {
     SkASSERT(env);
     SkASSERT(bitmap);
     SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
@@ -346,6 +346,19 @@ SkBitmap* GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap) {
     SkBitmap* b = reinterpret_cast<SkBitmap*>(bitmapHandle);
     SkASSERT(b);
     return b;
+}
+
+void GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap, SkBitmap* outBitmap) {
+    // TODO: We have to copy from the existing bitmap due to rowBytes not
+    // being updated on the SkPixelRef at reconfigure time. This is a short term
+    // problem that will be fixed with the specialized wrapper
+    *outBitmap = *getSkBitmapDeprecated(env, bitmap);
+}
+
+SkPixelRef* GraphicsJNI::getSkPixelRef(JNIEnv* env, jobject bitmap) {
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_skBitmapPtr);
+    SkBitmap* b = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    return b->pixelRef();
 }
 
 SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) {
