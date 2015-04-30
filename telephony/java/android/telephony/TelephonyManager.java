@@ -3703,7 +3703,7 @@ public class TelephonyManager {
     @SystemApi
     public void silenceRinger() {
         try {
-            getTelecomService().silenceRinger();
+            getTelecomService().silenceRinger(mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#silenceRinger", e);
         }
