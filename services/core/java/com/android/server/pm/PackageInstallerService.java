@@ -969,8 +969,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                 Bundle extras) {
             if (PackageManager.INSTALL_SUCCEEDED == returnCode && mShowNotification) {
+                boolean update = (extras != null) && extras.getBoolean(Intent.EXTRA_REPLACING);
                 Notification notification = buildSuccessNotification(mContext,
-                        mContext.getResources().getString(R.string.package_installed_device_owner),
+                        mContext.getResources()
+                                .getString(update ? R.string.package_updated_device_owner :
+                                        R.string.package_installed_device_owner),
                         basePackageName,
                         mUserId);
                 if (notification != null) {
@@ -980,6 +983,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 }
             }
             final Intent fillIn = new Intent();
+            fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, basePackageName);
             fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                     PackageManager.installStatusToPublicStatus(returnCode));
@@ -1030,6 +1034,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                         R.color.system_notification_accent_color))
                 .setContentTitle(packageLabel)
                 .setContentText(contentText)
+                .setStyle(new Notification.BigTextStyle().bigText(contentText))
                 .setLargeIcon(packageIcon)
                 .build();
     }
