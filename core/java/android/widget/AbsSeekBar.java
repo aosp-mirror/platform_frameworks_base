@@ -748,22 +748,45 @@ public abstract class AbsSeekBar extends ProgressBar {
             return false;
         }
 
-        if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
-                || action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
-            int increment = Math.max(1, Math.round((float) getMax() / 5));
-            if (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
-                increment = -increment;
+        switch (action) {
+            case R.id.accessibilityActionSetProgress: {
+                if (!canUserSetProgress()) {
+                    return false;
+                }
+                if (arguments == null || !arguments.containsKey(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_PROGRESS_VALUE)) {
+                    return false;
+                }
+                float value = arguments.getFloat(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_PROGRESS_VALUE);
+                return setProgress((int) value, true);
             }
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                if (!canUserSetProgress()) {
+                    return false;
+                }
+                int increment = Math.max(1, Math.round((float) getMax() / 5));
+                if (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
+                    increment = -increment;
+                }
 
-            // Let progress bar handle clamping values.
-            if (setProgress(getProgress() + increment, true)) {
-                onKeyChange();
-                return true;
+                // Let progress bar handle clamping values.
+                if (setProgress(getProgress() + increment, true)) {
+                    onKeyChange();
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
-
         return false;
+    }
+
+    /**
+     * @return whether user can change progress on the view
+     */
+    boolean canUserSetProgress() {
+        return !isIndeterminate() && isEnabled();
     }
 
     @Override

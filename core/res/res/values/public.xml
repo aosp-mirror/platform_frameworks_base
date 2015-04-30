@@ -2655,6 +2655,7 @@
   <public type="id" name="accessibilityActionScrollLeft" />
   <public type="id" name="accessibilityActionScrollDown" />
   <public type="id" name="accessibilityActionScrollRight" />
+  <public type="id" name="accessibilityActionSetProgress" />
   <public type="id" name="shareText" />
   <public type="id" name="accessibilityActionStylusButtonPress" />
 

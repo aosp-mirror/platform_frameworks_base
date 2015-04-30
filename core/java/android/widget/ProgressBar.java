@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.Nullable;
 import android.graphics.PorterDuff;
 
+import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.internal.R;
 
 import android.annotation.InterpolatorRes;
@@ -1875,6 +1876,18 @@ public class ProgressBar extends View {
         super.onInitializeAccessibilityEventInternal(event);
         event.setItemCount(mMax);
         event.setCurrentItemIndex(mProgress);
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+
+        if (!isIndeterminate()) {
+            AccessibilityNodeInfo.RangeInfo rangeInfo = AccessibilityNodeInfo.RangeInfo.obtain(
+                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT, 0, getMax(), getProgress());
+            info.setRangeInfo(rangeInfo);
+        }
     }
 
     /**

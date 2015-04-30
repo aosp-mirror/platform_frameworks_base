@@ -445,6 +445,20 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_COLUMN_INT =
             "android.view.accessibility.action.ARGUMENT_COLUMN_INT";
 
+    /**
+     * Argument for specifying the progress value to set.
+     * <p>
+     * <strong>Type:</strong> float<br>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_SET_PROGRESS}</li>
+     * </ul>
+     *
+     * @see AccessibilityAction#ACTION_SET_PROGRESS
+     */
+    public static final String ACTION_ARGUMENT_PROGRESS_VALUE =
+            "android.view.accessibility.action.ARGUMENT_PROGRESS_VALUE";
+
     // Focus types
 
     /**
@@ -3520,7 +3534,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Action to scroll the node content right.
          */
-         public static final AccessibilityAction ACTION_SCROLL_RIGHT =
+        public static final AccessibilityAction ACTION_SCROLL_RIGHT =
                 new AccessibilityAction(R.id.accessibilityActionScrollRight, null);
 
         /**
@@ -3528,6 +3542,19 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static final AccessibilityAction ACTION_STYLUS_BUTTON_PRESS =
                 new AccessibilityAction(R.id.accessibilityActionStylusButtonPress, null);
+
+        /**
+         * Action that sets progress between {@link  RangeInfo#getMin() RangeInfo.getMin()} and
+         * {@link  RangeInfo#getMax() RangeInfo.getMax()}. It should use the same value type as
+         * {@link RangeInfo#getType() RangeInfo.getType()}
+         * <p>
+         * <strong>Arguments:</strong>
+         * {@link AccessibilityNodeInfo#ACTION_ARGUMENT_PROGRESS_VALUE}
+         *
+         * @see RangeInfo
+         */
+        public static final AccessibilityAction ACTION_SET_PROGRESS =
+                new AccessibilityAction(R.id.accessibilityActionSetProgress, null);
 
         private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<>();
         static {
@@ -3560,6 +3587,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             sStandardActions.add(ACTION_SCROLL_DOWN);
             sStandardActions.add(ACTION_SCROLL_RIGHT);
             sStandardActions.add(ACTION_STYLUS_BUTTON_PRESS);
+            sStandardActions.add(ACTION_SET_PROGRESS);
         }
 
         private final int mActionId;
