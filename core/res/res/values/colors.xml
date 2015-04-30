@@ -174,8 +174,4 @@
     <color name="Pink_800">#ffad1457</color>
     <color name="Red_700">#ffc53929</color>
     <color name="Red_800">#ffb93221</color>
-
-    <!-- Floating toolbar colors -->
-    <color name="floating_toolbar_text_color">#DD000000</color>
-    <color name="floating_toolbar_background_color">#FAFAFA</color>
 </resources>
