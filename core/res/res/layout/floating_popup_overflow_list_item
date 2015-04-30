@@ -31,5 +31,5 @@
     android:ellipsize="end"
     android:fontFamily="sans-serif"
     android:textSize="@dimen/floating_toolbar_text_size"
-    android:textColor="@color/floating_toolbar_text_color"
+    android:textColor="?attr/colorForeground"
     android:textAllCaps="true" />
