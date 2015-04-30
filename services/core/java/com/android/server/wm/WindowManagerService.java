@@ -340,6 +340,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mHasPermanentDpad;
     final long mDrawLockTimeoutMillis;
+    final boolean mAllowAnimationsInLowPowerMode;
 
     final boolean mAllowBootMessages;
 
@@ -844,6 +845,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_defaultInTouchMode);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
+        mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings();
@@ -869,7 +872,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void onLowPowerModeChanged(boolean enabled) {
                 synchronized (mWindowMap) {
-                    if (mAnimationsDisabled != enabled) {
+                    if (mAnimationsDisabled != enabled && !mAllowAnimationsInLowPowerMode) {
                         mAnimationsDisabled = enabled;
                         dispatchNewAnimatorScaleLocked(null);
                     }
