@@ -303,7 +303,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
                 case KeymasterDefs.KM_ERROR_INVALID_NONCE:
                     throw new InvalidAlgorithmParameterException("Invalid IV");
             }
-            throw KeyStore.getInvalidKeyException(opResult.resultCode);
+            throw mKeyStore.getInvalidKeyException(mKey.getAlias(), opResult.resultCode);
         }
 
         if (opResult.token == null) {

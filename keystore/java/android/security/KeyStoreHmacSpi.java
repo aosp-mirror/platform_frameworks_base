@@ -169,7 +169,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
-            throw KeyStore.getInvalidKeyException(opResult.resultCode);
+            throw mKeyStore.getInvalidKeyException(mKey.getAlias(), opResult.resultCode);
         }
         if (opResult.token == null) {
             throw new IllegalStateException("Keystore returned null operation token");
