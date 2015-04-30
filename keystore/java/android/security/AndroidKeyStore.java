@@ -486,16 +486,6 @@ public class AndroidKeyStore extends KeyStoreSpi {
             }
         }
         args.addInts(KeymasterDefs.KM_TAG_DIGEST, keymasterDigests);
-        if (keymasterDigests.length > 0) {
-            // TODO: Remove MAC length constraint once Keymaster API no longer requires it.
-            // This code will blow up if mode than one digest is specified.
-            int digestOutputSizeBytes =
-                    KeymasterUtils.getDigestOutputSizeBytes(keymasterDigests[0]);
-            if (digestOutputSizeBytes != -1) {
-                // TODO: Switch to bits instead of bytes, once this is fixed in Keymaster
-                args.addInt(KeymasterDefs.KM_TAG_MAC_LENGTH, digestOutputSizeBytes);
-            }
-        }
         if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
             if (keymasterDigests.length == 0) {
                 throw new KeyStoreException("At least one digest algorithm must be specified"
