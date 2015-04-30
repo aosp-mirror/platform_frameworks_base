@@ -65,6 +65,7 @@ import android.media.SoundPool;
 import android.media.VolumePolicy;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.IAudioPolicyCallback;
@@ -206,6 +207,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_PERSIST_MUSIC_ACTIVE_MS = 22;
     private static final int MSG_PERSIST_MICROPHONE_MUTE = 23;
     private static final int MSG_UNMUTE_STREAM = 24;
+    private static final int MSG_DYN_POLICY_MIX_STATE_UPDATE = 25;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -4337,6 +4339,9 @@ public class AudioService extends IAudioService.Stub {
                 case MSG_UNMUTE_STREAM:
                     onUnmuteStream(msg.arg1, msg.arg2);
                     break;
+                case MSG_DYN_POLICY_MIX_STATE_UPDATE:
+                    onDynPolicyMixStateUpdate((String) msg.obj, msg.arg1);
+                    break;
             }
         }
     }
@@ -5758,6 +5763,8 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     public String registerAudioPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb,
             boolean hasFocusListener) {
+        AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
+
         if (DEBUG_AP) Log.d(TAG, "registerAudioPolicy for " + pcb.asBinder()
                 + " with config:" + policyConfig);
         String regId = null;
@@ -5853,6 +5860,39 @@ public class AudioService extends IAudioService.Stub {
     }
 
     //======================
+    // Audio policy callback from AudioSystem
+    //======================
+    private final AudioSystem.DynamicPolicyCallback mDynPolicyCallback =
+            new AudioSystem.DynamicPolicyCallback() {
+        public void onDynamicPolicyMixStateUpdate(String regId, int state) {
+            if (!TextUtils.isEmpty(regId)) {
+                sendMsg(mAudioHandler, MSG_DYN_POLICY_MIX_STATE_UPDATE, SENDMSG_QUEUE,
+                        state /*arg1*/, 0 /*arg2 ignored*/, regId /*obj*/, 0 /*delay*/);
+            }
+        }
+    };
+
+    private void onDynPolicyMixStateUpdate(String regId, int state) {
+        if (DEBUG_AP) Log.d(TAG, "onDynamicPolicyMixStateUpdate("+ regId + ", " + state +")");
+        synchronized (mAudioPolicies) {
+            for (AudioPolicyProxy policy : mAudioPolicies.values()) {
+                for (AudioMix mix : policy.getMixes()) {
+                    if (mix.getRegistration().equals(regId)) {
+                        try {
+                            policy.mPolicyCallback.notifyMixStateUpdate(regId, state);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Can't call notifyMixStateUpdate() on IAudioPolicyCallback "
+                                    + policy.mPolicyCallback.asBinder(), e);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
+    }
+
+    //======================
     // Audio policy proxy
     //======================
     /**
@@ -5861,8 +5901,7 @@ public class AudioService extends IAudioService.Stub {
      */
     public class AudioPolicyProxy extends AudioPolicyConfig implements IBinder.DeathRecipient {
         private static final String TAG = "AudioPolicyProxy";
-        AudioPolicyConfig mConfig;
-        IAudioPolicyCallback mPolicyToken;
+        IAudioPolicyCallback mPolicyCallback;
         boolean mHasFocusListener;
         /**
          * Audio focus ducking behavior for an audio policy.
@@ -5877,19 +5916,19 @@ public class AudioService extends IAudioService.Stub {
                 boolean hasFocusListener) {
             super(config);
             setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
-            mPolicyToken = token;
+            mPolicyCallback = token;
             mHasFocusListener = hasFocusListener;
             if (mHasFocusListener) {
-                mMediaFocusControl.addFocusFollower(mPolicyToken);
+                mMediaFocusControl.addFocusFollower(mPolicyCallback);
             }
             connectMixes();
         }
 
         public void binderDied() {
             synchronized (mAudioPolicies) {
-                Log.i(TAG, "audio policy " + mPolicyToken + " died");
+                Log.i(TAG, "audio policy " + mPolicyCallback + " died");
                 release();
-                mAudioPolicies.remove(mPolicyToken.asBinder());
+                mAudioPolicies.remove(mPolicyCallback.asBinder());
             }
         }
 
@@ -5902,7 +5941,7 @@ public class AudioService extends IAudioService.Stub {
                 mMediaFocusControl.setDuckingInExtPolicyAvailable(false);
             }
             if (mHasFocusListener) {
-                mMediaFocusControl.removeFocusFollower(mPolicyToken);
+                mMediaFocusControl.removeFocusFollower(mPolicyCallback);
             }
             AudioSystem.registerPolicyMixes(mMixes, false);
         }

@@ -111,6 +111,7 @@ static struct {
     jfieldID    mRouteFlags;
     jfieldID    mRegistrationId;
     jfieldID    mMixType;
+    jfieldID    mCallbackFlags;
 } gAudioMixFields;
 
 static jclass gAudioFormatClass;
@@ -149,6 +150,10 @@ static struct {
     jmethodID    postEventFromNative;
 } gAudioPortEventHandlerMethods;
 
+static struct {
+    jmethodID postDynPolicyEventFromNative;
+} gDynPolicyEventHandlerMethods;
+
 static Mutex gLock;
 
 enum AudioError {
@@ -166,7 +171,7 @@ enum  {
 #define MAX_PORT_GENERATION_SYNC_ATTEMPTS 5
 
 // ----------------------------------------------------------------------------
-// ref-counted object for callbacks
+// ref-counted object for audio port callbacks
 class JNIAudioPortCallback: public AudioSystem::AudioPortCallback
 {
 public:
@@ -359,6 +364,26 @@ android_media_AudioSystem_error_callback(status_t err)
                               check_AudioSystem_Command(err));
 
     env->DeleteLocalRef(clazz);
+}
+
+static void
+android_media_AudioSystem_dyn_policy_callback(int event, String8 regId, int val)
+{
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        return;
+    }
+
+    jclass clazz = env->FindClass(kClassPathName);
+    const char* zechars = regId.string();
+    jstring zestring = env->NewStringUTF(zechars);
+
+    env->CallStaticVoidMethod(clazz, gDynPolicyEventHandlerMethods.postDynPolicyEventFromNative,
+            event, zestring, val);
+
+    env->ReleaseStringUTFChars(zestring, zechars);
+    env->DeleteLocalRef(clazz);
+
 }
 
 static jint
@@ -1402,7 +1427,11 @@ android_media_AudioSystem_getAudioHwSyncForSession(JNIEnv *env, jobject thiz, ji
     return (jint)AudioSystem::getAudioHwSyncForSession((audio_session_t)sessionId);
 }
 
-
+static void
+android_media_AudioSystem_registerDynPolicyCallback(JNIEnv *env, jobject thiz)
+{
+    AudioSystem::setDynPolicyCallback(android_media_AudioSystem_dyn_policy_callback);
+}
 
 
 static jint convertAudioMixToNative(JNIEnv *env,
@@ -1418,6 +1447,8 @@ static jint convertAudioMixToNative(JNIEnv *env,
     nAudioMix->mRegistrationId = String8(nRegistrationId);
     env->ReleaseStringUTFChars(jRegistrationId, nRegistrationId);
     env->DeleteLocalRef(jRegistrationId);
+
+    nAudioMix->mCbFlags = env->GetIntField(jAudioMix, gAudioMixFields.mCallbackFlags);
 
     jobject jFormat = env->GetObjectField(jAudioMix, gAudioMixFields.mFormat);
     nAudioMix->mFormat.sample_rate = env->GetIntField(jFormat,
@@ -1567,7 +1598,8 @@ static JNINativeMethod gMethods[] = {
                                     (void *)android_media_AudioSystem_getAudioHwSyncForSession},
     {"registerPolicyMixes",    "(Ljava/util/ArrayList;Z)I",
                                             (void *)android_media_AudioSystem_registerPolicyMixes},
-
+    {"native_register_dynamic_policy_callback", "()V",
+                                    (void *)android_media_AudioSystem_registerDynPolicyCallback},
 };
 
 
@@ -1670,6 +1702,10 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gEventHandlerFields.mJniCallback = GetFieldIDOrDie(env,
                                                     eventHandlerClass, "mJniCallback", "J");
 
+    gDynPolicyEventHandlerMethods.postDynPolicyEventFromNative =
+            GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
+                    "dynamicPolicyCallbackFromNative", "(ILjava/lang/String;I)V");
+
     jclass audioMixClass = FindClassOrDie(env, "android/media/audiopolicy/AudioMix");
     gAudioMixClass = MakeGlobalRefOrDie(env, audioMixClass);
     gAudioMixFields.mRule = GetFieldIDOrDie(env, audioMixClass, "mRule",
@@ -1680,6 +1716,7 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioMixFields.mRegistrationId = GetFieldIDOrDie(env, audioMixClass, "mRegistrationId",
                                                       "Ljava/lang/String;");
     gAudioMixFields.mMixType = GetFieldIDOrDie(env, audioMixClass, "mMixType", "I");
+    gAudioMixFields.mCallbackFlags = GetFieldIDOrDie(env, audioMixClass, "mCallbackFlags", "I");
 
     jclass audioFormatClass = FindClassOrDie(env, "android/media/AudioFormat");
     gAudioFormatClass = MakeGlobalRefOrDie(env, audioFormatClass);

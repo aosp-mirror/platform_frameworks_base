@@ -189,6 +189,12 @@ public class AudioPolicy {
 
         @SystemApi
         public AudioPolicy build() {
+            if (mStatusListener != null) {
+                // the AudioPolicy status listener includes updates on each mix activity state
+                for (AudioMix mix : mMixes) {
+                    mix.mCallbackFlags |= AudioMix.CALLBACK_FLAG_NOTIFY_ACTIVITY;
+                }
+            }
             return new AudioPolicy(new AudioPolicyConfig(mMixes), mContext, mLooper,
                     mFocusListener, mStatusListener);
         }
@@ -432,6 +438,18 @@ public class AudioPolicy {
                         + afi.getClientId() + "wasNotified=" + wasNotified);
             }
         }
+
+        public void notifyMixStateUpdate(String regId, int state) {
+            for (AudioMix mix : mConfig.getMixes()) {
+                if (mix.getRegistration().equals(regId)) {
+                    mix.mMixState = state;
+                    sendMsg(MSG_MIX_STATE_UPDATE, mix, 0/*ignored*/);
+                    if (DEBUG) {
+                        Log.v(TAG, "notifyMixStateUpdate: regId=" + regId + " state=" + state);
+                    }
+                }
+            }
+        }
     };
 
     //==================================================
@@ -440,6 +458,7 @@ public class AudioPolicy {
     private final static int MSG_POLICY_STATUS_CHANGE = 0;
     private final static int MSG_FOCUS_GRANT = 1;
     private final static int MSG_FOCUS_LOSS = 2;
+    private final static int MSG_MIX_STATE_UPDATE = 3;
 
     private class EventHandler extends Handler {
         public EventHandler(AudioPolicy ap, Looper looper) {
@@ -462,6 +481,11 @@ public class AudioPolicy {
                     if (mFocusListener != null) {
                         mFocusListener.onAudioFocusLoss(
                                 (AudioFocusInfo) msg.obj, msg.arg1 != 0);
+                    }
+                    break;
+                case MSG_MIX_STATE_UPDATE:
+                    if (mStatusListener != null) {
+                        mStatusListener.onMixStateUpdate((AudioMix) msg.obj);
                     }
                     break;
                 default:
