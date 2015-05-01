@@ -58,7 +58,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintUtils;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
-import android.service.trust.TrustAgentService;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
@@ -154,6 +153,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SubscriptionManager mSubscriptionManager;
     private List<SubscriptionInfo> mSubscriptionInfo;
     private boolean mFingerprintDetectionRunning;
+    private TrustManager mTrustManager;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -784,8 +784,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             e.printStackTrace();
         }
 
-        TrustManager trustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
-        trustManager.registerTrustListener(this);
+        mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
+        mTrustManager.registerTrustListener(this);
 
         mFpm = (FingerprintManager) context.getSystemService(Context.FINGERPRINT_SERVICE);
         updateFingerprintListeningState();
@@ -801,7 +801,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return mScreenOn && mKeyguardIsVisible && !mSwitchingUser;
+        return mScreenOn && mKeyguardIsVisible && !mSwitchingUser
+                && mTrustManager.hasUserAuthenticatedSinceBoot(ActivityManager.getCurrentUser());
     }
 
     private void startListeningForFingerprint() {
