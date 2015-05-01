@@ -113,7 +113,7 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../../assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="../../../../../assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -397,6 +397,7 @@ type="text/css">
                 <li><a href="../../../../../distribute/users/index.html">Get Users</a></li>
                 <li><a href="../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="../../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../../distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="../../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="../../../../../distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -412,19 +413,6 @@ type="text/css">
         <div class="wrap" style="position:relative;z-index:1">
 
         
-        
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card" 
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=dac&utm_medium=banner&utm_campaign=android_provider_banner3" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help Android Wear and TV developers<br/>
-                    <span id="helpoutsLinkText" class="link-color" 
-                    style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
         
         
 
@@ -526,6 +514,10 @@ type="text/css">
   <a href="../../../../../reference/android/support/wearable/activity/package-summary.html">android.support.wearable.activity</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/wearable/companion/package-summary.html">android.support.wearable.companion</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/wearable/input/package-summary.html">android.support.wearable.input</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/wearable/media/package-summary.html">android.support.wearable.media</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/wearable/provider/package-summary.html">android.support.wearable.provider</a></li>
     <li class="api apilevel-">
@@ -851,6 +843,98 @@ Summary:
         <td class="jd-typecol"><nobr>
             
             
+            
+            
+            
+            EGLConfig</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#chooseEglConfig(android.opengl.EGLDisplay)">chooseEglConfig</a></span>(EGLDisplay eglDisplay)</nobr>
+        
+          <div class="jd-descrdiv">
+            Returns the desired EGL config to use.
+            
+    
+
+          </div>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            EGLContext</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#createEglContext(android.opengl.EGLDisplay, android.opengl.EGLConfig)">createEglContext</a></span>(EGLDisplay eglDisplay, EGLConfig eglConfig)</nobr>
+        
+          <div class="jd-descrdiv">
+            Creates the EGL context and returns it.
+            
+    
+
+          </div>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            EGLSurface</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#createWindowSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, android.view.SurfaceHolder)">createWindowSurface</a></span>(EGLDisplay eglDisplay, EGLConfig eglConfig, SurfaceHolder surfaceHolder)</nobr>
+        
+          <div class="jd-descrdiv">
+            Creates and returns a new EGL window surface for <code>surfaceHolder</code>.
+            
+    
+
+          </div>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            EGLDisplay</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#initializeEglDisplay()">initializeEglDisplay</a></span>()</nobr>
+        
+          <div class="jd-descrdiv">
+            Initializes the display.
+            
+    
+
+          </div>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
             final
             
             
@@ -859,13 +943,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#invalidate()">invalidate</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Schedules a call to <code><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#onDraw()">onDraw()</a></code> to draw the next frame.
-          
+          <div class="jd-descrdiv">
+            Schedules a call to <code><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#onDraw()">onDraw()</a></code> to draw the next frame.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -930,13 +1014,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#onDraw()">onDraw</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Draws the watch face.
-          
+          <div class="jd-descrdiv">
+            Draws the watch face.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -953,13 +1037,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#onGlContextCreated()">onGlContextCreated</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Called when a new GL context is created.
-          
+          <div class="jd-descrdiv">
+            Called when a new GL context is created.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -976,13 +1060,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#onGlSurfaceCreated(int, int)">onGlSurfaceCreated</a></span>(int width, int height)</nobr>
         
-        <div class="jd-descrdiv">
-          Called when a new GL surface is created.
-          
+          <div class="jd-descrdiv">
+            Called when a new GL surface is created.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1047,13 +1131,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#postInvalidate()">postInvalidate</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Posts a message to schedule a call to <code><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#onDraw()">onDraw()</a></code> to draw the next frame.
-          
+          <div class="jd-descrdiv">
+            Posts a message to schedule a call to <code><a href="../../../../../reference/android/support/wearable/watchface/Gles2WatchFaceService.Engine.html#onDraw()">onDraw()</a></code> to draw the next frame.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1104,13 +1188,13 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Returns interruption filter selected by the user.
-          
+          <div class="jd-descrdiv">
+            Returns interruption filter selected by the user.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1127,13 +1211,13 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getPeekCardPosition()">getPeekCardPosition</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Returns the location of the first peeking card.
-          
+          <div class="jd-descrdiv">
+            Returns the location of the first peeking card.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1150,13 +1234,13 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getUnreadCount()">getUnreadCount</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Returns the number of unread notification cards in the stream.
-          
+          <div class="jd-descrdiv">
+            Returns the number of unread notification cards in the stream.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1173,13 +1257,13 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#isInAmbientMode()">isInAmbientMode</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Returns whether the watch face is in ambient mode.
-          
+          <div class="jd-descrdiv">
+            Returns whether the watch face is in ambient mode.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1196,13 +1280,13 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onAmbientModeChanged(boolean)">onAmbientModeChanged</a></span>(boolean inAmbientMode)</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the device enters or exits ambient mode.
-          
+          <div class="jd-descrdiv">
+            Called when the device enters or exits ambient mode.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1249,20 +1333,36 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged</a></span>(int interruptionFilter)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onDestroy()">onDestroy</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the user changes interruption filter.
-          
-    
-
-        </div>
-  
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged</a></span>(int interruptionFilter)</nobr>
+        
+          <div class="jd-descrdiv">
+            Called when the user changes interruption filter.
+            
+    
+
+          </div>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1274,18 +1374,18 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onPeekCardPositionUpdate(android.graphics.Rect)">onPeekCardPositionUpdate</a></span>(Rect rect)</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the first, peeking card positions itself on the screen.
-          
+          <div class="jd-descrdiv">
+            Called when the first, peeking card positions itself on the screen.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1297,18 +1397,18 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onPropertiesChanged(android.os.Bundle)">onPropertiesChanged</a></span>(Bundle properties)</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the properties of the device are determined.
-          
+          <div class="jd-descrdiv">
+            Called when the properties of the device are determined.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1320,36 +1420,13 @@ From class
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onTimeTick()">onTimeTick</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Called periodically in ambient mode to update the time shown by the watch face.
-          
+          <div class="jd-descrdiv">
+            Called periodically to update the time shown by the watch face.
+            
     
 
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onUnreadCountChanged(int)">onUnreadCountChanged</a></span>(int count)</nobr>
+          </div>
         
-        <div class="jd-descrdiv">
-          Called when the number of unread notification cards in the stream has changed.
-          
-    
-
-        </div>
-  
   </td></tr>
 
 
@@ -1364,15 +1441,15 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onVisibilityChanged(boolean)">onVisibilityChanged</a></span>(boolean visible)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onUnreadCountChanged(int)">onUnreadCountChanged</a></span>(int count)</nobr>
         
-        <div class="jd-descrdiv">
-          Called to inform you of the watch face becoming visible or hidden.
-          
+          <div class="jd-descrdiv">
+            Called when the number of unread notification cards in the stream has changed.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1387,15 +1464,38 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#setWatchFaceStyle(android.support.wearable.watchface.WatchFaceStyle)">setWatchFaceStyle</a></span>(<a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html">WatchFaceStyle</a> watchFaceStyle)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onVisibilityChanged(boolean)">onVisibilityChanged</a></span>(boolean visible)</nobr>
         
-        <div class="jd-descrdiv">
-          Sets the watch face style.
-          
+          <div class="jd-descrdiv">
+            Called to inform you of the watch face becoming visible or hidden.
+            
     
 
-        </div>
-  
+          </div>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#setWatchFaceStyle(android.support.wearable.watchface.WatchFaceStyle)">setWatchFaceStyle</a></span>(<a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html">WatchFaceStyle</a> watchFaceStyle)</nobr>
+        
+          <div class="jd-descrdiv">
+            Sets the watch face style.
+            
+    
+
+          </div>
+        
   </td></tr>
 
 
@@ -2032,6 +2132,173 @@ From class
 
 <h2>Public Methods</h2>
 
+
+
+<A NAME="chooseEglConfig(android.opengl.EGLDisplay)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        EGLConfig
+      </span>
+      <span class="sympad">chooseEglConfig</span>
+      <span class="normal">(EGLDisplay eglDisplay)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the desired EGL config to use. By default, uses a config that:<ul>
+ <li>supports OpenGL ES 2.0 contexts
+ <li>has at least 8 bits for each of red, green, blue, and alpha
+ </ul>If there are multiple matches, the one with the most bits for red, green, blue, and
+ alpha is chosen.
+
+ <p>Watch faces can override this method to call <code><a href="../../../../../reference/android/opengl/EGL14.html#eglChooseConfig(android.opengl.EGLDisplay, int[], int, android.opengl.EGLConfig[], int, int, int[], int)">eglChooseConfig(EGLDisplay, int[], int, EGLConfig[], int, int, int[], int)</a></code> with
+ different attributes. By passing in a large array, <code>eglChooseConfig</code> can return
+ multiple matching configs and the watch face can choose among them by using
+ <code><a href="../../../../../reference/android/opengl/EGL14.html#eglGetConfigAttrib(android.opengl.EGLDisplay, android.opengl.EGLConfig, int, int[], int)">eglGetConfigAttrib(EGLDisplay, EGLConfig, int, int[], int)</a></code> to fetch their attributes.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>eglDisplay</td>
+          <td>the EGL display to use</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the EGL config to use
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="createEglContext(android.opengl.EGLDisplay, android.opengl.EGLConfig)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        EGLContext
+      </span>
+      <span class="sympad">createEglContext</span>
+      <span class="normal">(EGLDisplay eglDisplay, EGLConfig eglConfig)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Creates the EGL context and returns it. By default, creates an EGL 2.0 context using
+ <code><a href="../../../../../reference/android/opengl/EGL14.html#eglCreateContext(android.opengl.EGLDisplay, android.opengl.EGLConfig, android.opengl.EGLContext, int[], int)">eglCreateContext(EGLDisplay, EGLConfig, EGLContext, int[], int)</a></code>.
+
+ <p>Watch faces can override this method to call <code><a href="../../../../../reference/android/opengl/EGL14.html#eglCreateContext(android.opengl.EGLDisplay, android.opengl.EGLConfig, android.opengl.EGLContext, int[], int)">eglCreateContext(EGLDisplay, EGLConfig, EGLContext, int[], int)</a></code> with
+ different attributes.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="createWindowSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, android.view.SurfaceHolder)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        EGLSurface
+      </span>
+      <span class="sympad">createWindowSurface</span>
+      <span class="normal">(EGLDisplay eglDisplay, EGLConfig eglConfig, SurfaceHolder surfaceHolder)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Creates and returns a new EGL window surface for <code>surfaceHolder</code>. By default, this
+ surface has no attributes.
+
+ <p>Watch faces can override this method to call <code><a href="../../../../../reference/android/opengl/EGL14.html#eglCreateWindowSurface(android.opengl.EGLDisplay, android.opengl.EGLConfig, java.lang.Object, int[], int)">eglCreateWindowSurface(EGLDisplay, EGLConfig, Object, int[], int)</a></code> with
+ different attributes.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="initializeEglDisplay()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        EGLDisplay
+      </span>
+      <span class="sympad">initializeEglDisplay</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Initializes the display. Calls <code><a href="../../../../../reference/android/opengl/EGL14.html#eglGetDisplay(int)">eglGetDisplay(int)</a></code> and
+ <code><a href="../../../../../reference/android/opengl/EGL14.html#eglInitialize(android.opengl.EGLDisplay, int[], int, int[], int)">eglInitialize(EGLDisplay, int[], int, int[], int)</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the initialized EGLDisplay to use
+</li></ul>
+  </div>
+
+    </div>
+</div>
 
 
 <A NAME="invalidate()"></A>

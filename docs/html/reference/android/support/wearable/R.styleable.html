@@ -113,7 +113,7 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="../../../../assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -397,6 +397,7 @@ type="text/css">
                 <li><a href="../../../../distribute/users/index.html">Get Users</a></li>
                 <li><a href="../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="../../../../distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -412,19 +413,6 @@ type="text/css">
         <div class="wrap" style="position:relative;z-index:1">
 
         
-        
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card" 
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=dac&utm_medium=banner&utm_campaign=android_provider_banner3" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help Android Wear and TV developers<br/>
-                    <span id="helpoutsLinkText" class="link-color" 
-                    style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
         
         
 
@@ -527,6 +515,10 @@ type="text/css">
     <li class="api apilevel-">
   <a href="../../../../reference/android/support/wearable/companion/package-summary.html">android.support.wearable.companion</a></li>
     <li class="api apilevel-">
+  <a href="../../../../reference/android/support/wearable/input/package-summary.html">android.support.wearable.input</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../reference/android/support/wearable/media/package-summary.html">android.support.wearable.media</a></li>
+    <li class="api apilevel-">
   <a href="../../../../reference/android/support/wearable/provider/package-summary.html">android.support.wearable.provider</a></li>
     <li class="api apilevel-">
   <a href="../../../../reference/android/support/wearable/view/package-summary.html">android.support.wearable.view</a></li>
@@ -547,12 +539,16 @@ type="text/css">
     <li><h2>Classes</h2>
       <ul>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.html">R</a></li>
+          <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.anim.html">R.anim</a></li>
+          <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.animator.html">R.animator</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.attr.html">R.attr</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.color.html">R.color</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.dimen.html">R.dimen</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.drawable.html">R.drawable</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.id.html">R.id</a></li>
+          <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.interpolator.html">R.interpolator</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.layout.html">R.layout</a></li>
+          <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.string.html">R.string</a></li>
           <li class="api apilevel-"><a href="../../../../reference/android/support/wearable/R.style.html">R.style</a></li>
           <li class="selected api apilevel-"><a href="../../../../reference/android/support/wearable/R.styleable.html">R.styleable</a></li>
       </ul>
@@ -718,7 +714,6 @@ Summary:
 
 
 
-
 </div><!-- jd-descr -->
 
 
@@ -769,6 +764,531 @@ Summary:
           static
           final
           int[]</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a ActionLabel.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_fontFamily">ActionLabel_android_fontFamily</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#fontFamily">fontFamily</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_gravity">ActionLabel_android_gravity</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#gravity">gravity</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_lineSpacingExtra">ActionLabel_android_lineSpacingExtra</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#lineSpacingExtra">lineSpacingExtra</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_lineSpacingMultiplier">ActionLabel_android_lineSpacingMultiplier</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#lineSpacingMultiplier">lineSpacingMultiplier</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_maxLines">ActionLabel_android_maxLines</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#maxLines">maxLines</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_text">ActionLabel_android_text</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#text">text</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_textColor">ActionLabel_android_textColor</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#textColor">textColor</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_textStyle">ActionLabel_android_textStyle</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#textStyle">textStyle</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_typeface">ActionLabel_android_typeface</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#typeface">typeface</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_maxTextSize">ActionLabel_maxTextSize</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#maxTextSize">maxTextSize</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_minTextSize">ActionLabel_minTextSize</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#minTextSize">minTextSize</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a ActionPage.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_color">ActionPage_android_color</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#color">color</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_elevation">ActionPage_android_elevation</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#elevation">elevation</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_fontFamily">ActionPage_android_fontFamily</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#fontFamily">fontFamily</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_gravity">ActionPage_android_gravity</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#gravity">gravity</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_lineSpacingExtra">ActionPage_android_lineSpacingExtra</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#lineSpacingExtra">lineSpacingExtra</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_lineSpacingMultiplier">ActionPage_android_lineSpacingMultiplier</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#lineSpacingMultiplier">lineSpacingMultiplier</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_maxLines">ActionPage_android_maxLines</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#maxLines">maxLines</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_src">ActionPage_android_src</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#src">src</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_stateListAnimator">ActionPage_android_stateListAnimator</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#stateListAnimator">stateListAnimator</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_text">ActionPage_android_text</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#text">text</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_textColor">ActionPage_android_textColor</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#textColor">textColor</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_textStyle">ActionPage_android_textStyle</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#textStyle">textStyle</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_typeface">ActionPage_android_typeface</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#typeface">typeface</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_imageScaleMode">ActionPage_imageScaleMode</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#imageScaleMode">imageScaleMode</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_maxTextSize">ActionPage_maxTextSize</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#maxTextSize">maxTextSize</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_minTextSize">ActionPage_minTextSize</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#minTextSize">minTextSize</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_pressedTranslationZ">ActionPage_pressedTranslationZ</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#pressedTranslationZ">pressedTranslationZ</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_rippleColor">ActionPage_rippleColor</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#rippleColor">rippleColor</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
           <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#BoxInsetLayout_Layout">BoxInsetLayout_Layout</a></td>
           <td class="jd-descrcol" width="100%">
             Attributes that can be used with a BoxInsetLayout_Layout.
@@ -779,7 +1299,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -796,7 +1316,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -812,7 +1332,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -829,7 +1349,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -846,7 +1366,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -863,7 +1383,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -880,7 +1400,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -897,7 +1417,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -914,7 +1434,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -931,7 +1451,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -948,7 +1468,142 @@ Summary:
       </tr>
       
     
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a CircularButton.
+            
+    
+
+          </td>
+      </tr>
+      
+    
       <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_color">CircularButton_android_color</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#color">color</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_elevation">CircularButton_android_elevation</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#elevation">elevation</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_src">CircularButton_android_src</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#src">src</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_stateListAnimator">CircularButton_android_stateListAnimator</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#stateListAnimator">stateListAnimator</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_imageScaleMode">CircularButton_imageScaleMode</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#imageScaleMode">imageScaleMode</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_pressedTranslationZ">CircularButton_pressedTranslationZ</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#pressedTranslationZ">pressedTranslationZ</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_rippleColor">CircularButton_rippleColor</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#rippleColor">rippleColor</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -964,7 +1619,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -981,7 +1636,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -997,7 +1652,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1014,7 +1669,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1031,7 +1686,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1048,7 +1703,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1065,7 +1720,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1082,7 +1737,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1099,7 +1754,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1116,7 +1771,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1133,7 +1788,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1150,7 +1805,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1167,7 +1822,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1184,7 +1839,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1201,7 +1856,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1218,7 +1873,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1234,7 +1889,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1251,7 +1906,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
@@ -1261,6 +1916,226 @@ Summary:
           <td class="jd-descrcol" width="100%">
             <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#roundLayout">roundLayout</a></code>
           attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WatchViewStub">WatchViewStub</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          int[]</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a WearableFrameLayout.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foreground">WearableFrameLayout_android_foreground</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#foreground">foreground</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foregroundGravity">WearableFrameLayout_android_foregroundGravity</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#foregroundGravity">foregroundGravity</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foregroundTint">WearableFrameLayout_android_foregroundTint</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#foregroundTint">foregroundTint</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_measureAllChildren">WearableFrameLayout_android_measureAllChildren</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#measureAllChildren">measureAllChildren</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_gravityRound">WearableFrameLayout_layout_gravityRound</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_gravityRound">layout_gravityRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_heightRound">WearableFrameLayout_layout_heightRound</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_heightRound">layout_heightRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginBottomRound">WearableFrameLayout_layout_marginBottomRound</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginBottomRound">layout_marginBottomRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginLeftRound">WearableFrameLayout_layout_marginLeftRound</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginLeftRound">layout_marginLeftRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginRightRound">WearableFrameLayout_layout_marginRightRound</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginRightRound">layout_marginRightRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginRound">WearableFrameLayout_layout_marginRound</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginRound">layout_marginRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginTopRound">WearableFrameLayout_layout_marginTopRound</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginTopRound">layout_marginTopRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_widthRound">WearableFrameLayout_layout_widthRound</a></td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_widthRound">layout_widthRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
             
     
 
@@ -1597,6 +2472,1114 @@ From class
 <!-- ========= FIELD DETAIL ======== -->
 <h2>Fields</h2>
 
+
+
+
+<A NAME="ActionLabel"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int[]
+      </span>
+        ActionLabel
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a ActionLabel.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_fontFamily">android:fontFamily</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_gravity">android:gravity</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_lineSpacingExtra">android:lineSpacingExtra</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_lineSpacingMultiplier">android:lineSpacingMultiplier</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_maxLines">android:maxLines</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_text">android:text</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_textColor">android:textColor</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_textStyle">android:textStyle</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_typeface">android:typeface</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_maxTextSize">android.support.wearable:maxTextSize</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_minTextSize">android.support.wearable:minTextSize</a></code></code></td><td></td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_fontFamily">ActionLabel_android_fontFamily</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_gravity">ActionLabel_android_gravity</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_lineSpacingExtra">ActionLabel_android_lineSpacingExtra</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_lineSpacingMultiplier">ActionLabel_android_lineSpacingMultiplier</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_maxLines">ActionLabel_android_maxLines</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_text">ActionLabel_android_text</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_textColor">ActionLabel_android_textColor</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_textStyle">ActionLabel_android_textStyle</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_android_typeface">ActionLabel_android_typeface</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_maxTextSize">ActionLabel_maxTextSize</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel_minTextSize">ActionLabel_minTextSize</a></code></li>
+      </ul>
+  </div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_fontFamily"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_fontFamily
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#fontFamily">fontFamily</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_gravity"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_gravity
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#gravity">gravity</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_lineSpacingExtra"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_lineSpacingExtra
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#lineSpacingExtra">lineSpacingExtra</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_lineSpacingMultiplier"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_lineSpacingMultiplier
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#lineSpacingMultiplier">lineSpacingMultiplier</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_maxLines"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_maxLines
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#maxLines">maxLines</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_text"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_text
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#text">text</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_textColor"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_textColor
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#textColor">textColor</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_textStyle"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_textStyle
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#textStyle">textStyle</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_android_typeface"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_android_typeface
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#typeface">typeface</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_maxTextSize"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_maxTextSize
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#maxTextSize">maxTextSize</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionLabel_minTextSize"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionLabel_minTextSize
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#minTextSize">minTextSize</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionLabel">ActionLabel</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int[]
+      </span>
+        ActionPage
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a ActionPage.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_color">android:color</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_elevation">android:elevation</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_fontFamily">android:fontFamily</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_gravity">android:gravity</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_lineSpacingExtra">android:lineSpacingExtra</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_lineSpacingMultiplier">android:lineSpacingMultiplier</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_maxLines">android:maxLines</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_src">android:src</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_stateListAnimator">android:stateListAnimator</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_text">android:text</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_textColor">android:textColor</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_textStyle">android:textStyle</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_typeface">android:typeface</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_imageScaleMode">android.support.wearable:imageScaleMode</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_maxTextSize">android.support.wearable:maxTextSize</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_minTextSize">android.support.wearable:minTextSize</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_pressedTranslationZ">android.support.wearable:pressedTranslationZ</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_rippleColor">android.support.wearable:rippleColor</a></code></code></td><td></td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_color">ActionPage_android_color</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_elevation">ActionPage_android_elevation</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_fontFamily">ActionPage_android_fontFamily</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_gravity">ActionPage_android_gravity</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_lineSpacingExtra">ActionPage_android_lineSpacingExtra</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_lineSpacingMultiplier">ActionPage_android_lineSpacingMultiplier</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_maxLines">ActionPage_android_maxLines</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_src">ActionPage_android_src</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_stateListAnimator">ActionPage_android_stateListAnimator</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_text">ActionPage_android_text</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_textColor">ActionPage_android_textColor</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_textStyle">ActionPage_android_textStyle</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_android_typeface">ActionPage_android_typeface</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_imageScaleMode">ActionPage_imageScaleMode</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_maxTextSize">ActionPage_maxTextSize</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_minTextSize">ActionPage_minTextSize</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_pressedTranslationZ">ActionPage_pressedTranslationZ</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage_rippleColor">ActionPage_rippleColor</a></code></li>
+      </ul>
+  </div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_color"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_color
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#color">color</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_elevation"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_elevation
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#elevation">elevation</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_fontFamily"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_fontFamily
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#fontFamily">fontFamily</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_gravity"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_gravity
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#gravity">gravity</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_lineSpacingExtra"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_lineSpacingExtra
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#lineSpacingExtra">lineSpacingExtra</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_lineSpacingMultiplier"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_lineSpacingMultiplier
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#lineSpacingMultiplier">lineSpacingMultiplier</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_maxLines"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_maxLines
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#maxLines">maxLines</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_src"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_src
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#src">src</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_stateListAnimator"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_stateListAnimator
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#stateListAnimator">stateListAnimator</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_text"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_text
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#text">text</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_textColor"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_textColor
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#textColor">textColor</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_textStyle"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_textStyle
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#textStyle">textStyle</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_android_typeface"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_android_typeface
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#typeface">typeface</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_imageScaleMode"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_imageScaleMode
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#imageScaleMode">imageScaleMode</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>fit</code></td><td>0</td><td></td></tr>
+<tr><td><code>center</code></td><td>1</td><td></td></tr>
+</table></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_maxTextSize"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_maxTextSize
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#maxTextSize">maxTextSize</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_minTextSize"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_minTextSize
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#minTextSize">minTextSize</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_pressedTranslationZ"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_pressedTranslationZ
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#pressedTranslationZ">pressedTranslationZ</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="ActionPage_rippleColor"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        ActionPage_rippleColor
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#rippleColor">rippleColor</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#ActionPage">ActionPage</a></code> array.
+
+
+          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+<p>May be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".</p></div>
+
+    
+    </div>
+</div>
 
 
 
@@ -2056,6 +4039,306 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="CircularButton"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int[]
+      </span>
+        CircularButton
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a CircularButton.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_color">android:color</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_elevation">android:elevation</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_src">android:src</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_stateListAnimator">android:stateListAnimator</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_imageScaleMode">android.support.wearable:imageScaleMode</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_pressedTranslationZ">android.support.wearable:pressedTranslationZ</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_rippleColor">android.support.wearable:rippleColor</a></code></code></td><td></td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_color">CircularButton_android_color</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_elevation">CircularButton_android_elevation</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_src">CircularButton_android_src</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_android_stateListAnimator">CircularButton_android_stateListAnimator</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_imageScaleMode">CircularButton_imageScaleMode</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_pressedTranslationZ">CircularButton_pressedTranslationZ</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton_rippleColor">CircularButton_rippleColor</a></code></li>
+      </ul>
+  </div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="CircularButton_android_color"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        CircularButton_android_color
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#color">color</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="CircularButton_android_elevation"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        CircularButton_android_elevation
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#elevation">elevation</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="CircularButton_android_src"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        CircularButton_android_src
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#src">src</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="CircularButton_android_stateListAnimator"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        CircularButton_android_stateListAnimator
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#stateListAnimator">stateListAnimator</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="CircularButton_imageScaleMode"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        CircularButton_imageScaleMode
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#imageScaleMode">imageScaleMode</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+
+
+          <p>Must be one of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>fit</code></td><td>0</td><td></td></tr>
+<tr><td><code>center</code></td><td>1</td><td></td></tr>
+</table></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="CircularButton_pressedTranslationZ"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        CircularButton_pressedTranslationZ
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#pressedTranslationZ">pressedTranslationZ</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="CircularButton_rippleColor"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        CircularButton_rippleColor
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#rippleColor">rippleColor</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#CircularButton">CircularButton</a></code> array.
+
+
+          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+<p>May be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".</p></div>
 
     
     </div>
@@ -2845,6 +5128,537 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int[]
+      </span>
+        WearableFrameLayout
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a WearableFrameLayout.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foreground">android:foreground</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foregroundGravity">android:foregroundGravity</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foregroundTint">android:foregroundTint</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_measureAllChildren">android:measureAllChildren</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_gravityRound">android.support.wearable:layout_gravityRound</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_heightRound">android.support.wearable:layout_heightRound</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginBottomRound">android.support.wearable:layout_marginBottomRound</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginLeftRound">android.support.wearable:layout_marginLeftRound</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginRightRound">android.support.wearable:layout_marginRightRound</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginRound">android.support.wearable:layout_marginRound</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginTopRound">android.support.wearable:layout_marginTopRound</a></code></code></td><td></td></tr>
+           <tr><td><code><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_widthRound">android.support.wearable:layout_widthRound</a></code></code></td><td></td></tr>
+           </table></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foreground">WearableFrameLayout_android_foreground</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foregroundGravity">WearableFrameLayout_android_foregroundGravity</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_foregroundTint">WearableFrameLayout_android_foregroundTint</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_android_measureAllChildren">WearableFrameLayout_android_measureAllChildren</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_gravityRound">WearableFrameLayout_layout_gravityRound</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_heightRound">WearableFrameLayout_layout_heightRound</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginBottomRound">WearableFrameLayout_layout_marginBottomRound</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginLeftRound">WearableFrameLayout_layout_marginLeftRound</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginRightRound">WearableFrameLayout_layout_marginRightRound</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginRound">WearableFrameLayout_layout_marginRound</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_marginTopRound">WearableFrameLayout_layout_marginTopRound</a></code></li><li><code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout_layout_widthRound">WearableFrameLayout_layout_widthRound</a></code></li>
+      </ul>
+  </div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_android_foreground"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_android_foreground
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#foreground">foreground</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_android_foregroundGravity"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_android_foregroundGravity
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#foregroundGravity">foregroundGravity</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_android_foregroundTint"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_android_foregroundTint
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#foregroundTint">foregroundTint</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_android_measureAllChildren"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_android_measureAllChildren
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/R.attr.html#measureAllChildren">measureAllChildren</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_layout_gravityRound"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_layout_gravityRound
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_gravityRound">layout_gravityRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+
+
+          <p>Must be one or more (separated by '|') of the following constant values.</p>
+<table>
+<colgroup align="left" />
+<colgroup align="left" />
+<colgroup align="left" />
+<tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+<tr><td><code>top</code></td><td>0x30</td><td></td></tr>
+<tr><td><code>bottom</code></td><td>0x50</td><td></td></tr>
+<tr><td><code>left</code></td><td>0x03</td><td></td></tr>
+<tr><td><code>right</code></td><td>0x05</td><td></td></tr>
+<tr><td><code>center_vertical</code></td><td>0x10</td><td></td></tr>
+<tr><td><code>fill_vertical</code></td><td>0x70</td><td></td></tr>
+<tr><td><code>center_horizontal</code></td><td>0x01</td><td></td></tr>
+<tr><td><code>fill_horizontal</code></td><td>0x07</td><td></td></tr>
+<tr><td><code>center</code></td><td>0x11</td><td></td></tr>
+<tr><td><code>fill</code></td><td>0x77</td><td></td></tr>
+<tr><td><code>clip_vertical</code></td><td>0x80</td><td></td></tr>
+<tr><td><code>clip_horizontal</code></td><td>0x08</td><td></td></tr>
+<tr><td><code>start</code></td><td>0x00800003</td><td></td></tr>
+<tr><td><code>end</code></td><td>0x00800005</td><td></td></tr>
+</table></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_layout_heightRound"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_layout_heightRound
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_heightRound">layout_heightRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_layout_marginBottomRound"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_layout_marginBottomRound
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginBottomRound">layout_marginBottomRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_layout_marginLeftRound"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_layout_marginLeftRound
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginLeftRound">layout_marginLeftRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_layout_marginRightRound"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_layout_marginRightRound
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginRightRound">layout_marginRightRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_layout_marginRound"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_layout_marginRound
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginRound">layout_marginRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_layout_marginTopRound"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_layout_marginTopRound
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_marginTopRound">layout_marginTopRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="WearableFrameLayout_layout_widthRound"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        WearableFrameLayout_layout_widthRound
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="../../../../reference/android/support/wearable/R.attr.html#layout_widthRound">layout_widthRound</a></code>
+          attribute's value can be found in the <code><a href="../../../../reference/android/support/wearable/R.styleable.html#WearableFrameLayout">WearableFrameLayout</a></code> array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.</p></div>
 
     
     </div>

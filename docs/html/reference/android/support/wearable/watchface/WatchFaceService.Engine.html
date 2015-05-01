@@ -113,7 +113,7 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../../assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="../../../../../assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -397,6 +397,7 @@ type="text/css">
                 <li><a href="../../../../../distribute/users/index.html">Get Users</a></li>
                 <li><a href="../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="../../../../../distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="../../../../../distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="../../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="../../../../../distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -412,19 +413,6 @@ type="text/css">
         <div class="wrap" style="position:relative;z-index:1">
 
         
-        
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card" 
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=dac&utm_medium=banner&utm_campaign=android_provider_banner3" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help Android Wear and TV developers<br/>
-                    <span id="helpoutsLinkText" class="link-color" 
-                    style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
         
         
 
@@ -526,6 +514,10 @@ type="text/css">
   <a href="../../../../../reference/android/support/wearable/activity/package-summary.html">android.support.wearable.activity</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/wearable/companion/package-summary.html">android.support.wearable.companion</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/wearable/input/package-summary.html">android.support.wearable.input</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/wearable/media/package-summary.html">android.support.wearable.media</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/wearable/provider/package-summary.html">android.support.wearable.provider</a></li>
     <li class="api apilevel-">
@@ -889,13 +881,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getInterruptionFilter()">getInterruptionFilter</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Returns interruption filter selected by the user.
-          
+          <div class="jd-descrdiv">
+            Returns interruption filter selected by the user.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -912,13 +904,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getPeekCardPosition()">getPeekCardPosition</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Returns the location of the first peeking card.
-          
+          <div class="jd-descrdiv">
+            Returns the location of the first peeking card.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -935,13 +927,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#getUnreadCount()">getUnreadCount</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Returns the number of unread notification cards in the stream.
-          
+          <div class="jd-descrdiv">
+            Returns the number of unread notification cards in the stream.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -958,13 +950,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#isInAmbientMode()">isInAmbientMode</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Returns whether the watch face is in ambient mode.
-          
+          <div class="jd-descrdiv">
+            Returns whether the watch face is in ambient mode.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -981,13 +973,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onAmbientModeChanged(boolean)">onAmbientModeChanged</a></span>(boolean inAmbientMode)</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the device enters or exits ambient mode.
-          
+          <div class="jd-descrdiv">
+            Called when the device enters or exits ambient mode.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1034,20 +1026,36 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged</a></span>(int interruptionFilter)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onDestroy()">onDestroy</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the user changes interruption filter.
-          
-    
-
-        </div>
-  
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onInterruptionFilterChanged(int)">onInterruptionFilterChanged</a></span>(int interruptionFilter)</nobr>
+        
+          <div class="jd-descrdiv">
+            Called when the user changes interruption filter.
+            
+    
+
+          </div>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1059,18 +1067,18 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onPeekCardPositionUpdate(android.graphics.Rect)">onPeekCardPositionUpdate</a></span>(Rect rect)</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the first, peeking card positions itself on the screen.
-          
+          <div class="jd-descrdiv">
+            Called when the first, peeking card positions itself on the screen.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1082,18 +1090,18 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onPropertiesChanged(android.os.Bundle)">onPropertiesChanged</a></span>(Bundle properties)</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the properties of the device are determined.
-          
+          <div class="jd-descrdiv">
+            Called when the properties of the device are determined.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1105,36 +1113,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onTimeTick()">onTimeTick</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Called periodically in ambient mode to update the time shown by the watch face.
-          
+          <div class="jd-descrdiv">
+            Called periodically to update the time shown by the watch face.
+            
     
 
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onUnreadCountChanged(int)">onUnreadCountChanged</a></span>(int count)</nobr>
+          </div>
         
-        <div class="jd-descrdiv">
-          Called when the number of unread notification cards in the stream has changed.
-          
-    
-
-        </div>
-  
   </td></tr>
 
 
@@ -1149,15 +1134,15 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onVisibilityChanged(boolean)">onVisibilityChanged</a></span>(boolean visible)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onUnreadCountChanged(int)">onUnreadCountChanged</a></span>(int count)</nobr>
         
-        <div class="jd-descrdiv">
-          Called to inform you of the watch face becoming visible or hidden.
-          
+          <div class="jd-descrdiv">
+            Called when the number of unread notification cards in the stream has changed.
+            
     
 
-        </div>
-  
+          </div>
+        
   </td></tr>
 
 
@@ -1172,15 +1157,38 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#setWatchFaceStyle(android.support.wearable.watchface.WatchFaceStyle)">setWatchFaceStyle</a></span>(<a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html">WatchFaceStyle</a> watchFaceStyle)</nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onVisibilityChanged(boolean)">onVisibilityChanged</a></span>(boolean visible)</nobr>
         
-        <div class="jd-descrdiv">
-          Sets the watch face style.
-          
+          <div class="jd-descrdiv">
+            Called to inform you of the watch face becoming visible or hidden.
+            
     
 
-        </div>
-  
+          </div>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#setWatchFaceStyle(android.support.wearable.watchface.WatchFaceStyle)">setWatchFaceStyle</a></span>(<a href="../../../../../reference/android/support/wearable/watchface/WatchFaceStyle.html">WatchFaceStyle</a> watchFaceStyle)</nobr>
+        
+          <div class="jd-descrdiv">
+            Sets the watch face style.
+            
+    
+
+          </div>
+        
   </td></tr>
 
 
@@ -2066,6 +2074,38 @@ From class
 </div>
 
 
+<A NAME="onDestroy()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">onDestroy</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 <A NAME="onInterruptionFilterChanged(int)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2208,8 +2248,12 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Called periodically in ambient mode to update the time shown by the watch face. This
- method is called at least once per minute.
+  <div class="jd-tagdata jd-tagdescr"><p>Called periodically to update the time shown by the watch face. This method is
+ called:<ul>
+ <li>at least once per minute in both ambient and interactive modes</li>
+ <li>when date or time has changed</li>
+ <li>when timezone has changed</li>
+ </ul>
 </p></div>
 
     </div>
