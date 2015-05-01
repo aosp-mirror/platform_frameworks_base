@@ -26,6 +26,10 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.text.TextUtils;
+import libcore.util.ZoneInfoDB;
+
+import java.io.IOException;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -151,6 +155,7 @@ public class AlarmManager
 
     private final IAlarmManager mService;
     private final boolean mAlwaysExact;
+    private final int mTargetSdkVersion;
 
 
     /**
@@ -159,8 +164,8 @@ public class AlarmManager
     AlarmManager(IAlarmManager service, Context ctx) {
         mService = service;
 
-        final int sdkVersion = ctx.getApplicationInfo().targetSdkVersion;
-        mAlwaysExact = (sdkVersion < Build.VERSION_CODES.KITKAT);
+        mTargetSdkVersion = ctx.getApplicationInfo().targetSdkVersion;
+        mAlwaysExact = (mTargetSdkVersion < Build.VERSION_CODES.KITKAT);
     }
 
     private long legacyExactLength() {
@@ -585,12 +590,38 @@ public class AlarmManager
     }
 
     /**
-     * Set the system default time zone.
-     * Requires the permission android.permission.SET_TIME_ZONE.
+     * Sets the system's persistent default time zone. This is the time zone for all apps, even
+     * after a reboot. Use {@link java.util.TimeZone#setDefault} if you just want to change the
+     * time zone within your app, and even then prefer to pass an explicit
+     * {@link java.util.TimeZone} to APIs that require it rather than changing the time zone for
+     * all threads.
      *
-     * @param timeZone in the format understood by {@link java.util.TimeZone}
+     * <p> On android M and above, it is an error to pass in a non-Olson timezone to this
+     * function. Note that this is a bad idea on all Android releases because POSIX and
+     * the {@code TimeZone} class have opposite interpretations of {@code '+'} and {@code '-'}
+     * in the same non-Olson ID.
+     *
+     * @param timeZone one of the Olson ids from the list returned by
+     *     {@link java.util.TimeZone#getAvailableIDs}
      */
     public void setTimeZone(String timeZone) {
+        if (TextUtils.isEmpty(timeZone)) {
+            return;
+        }
+
+        // Reject this timezone if it isn't an Olson zone we recognize.
+        if (mTargetSdkVersion >= Build.VERSION_CODES.MNC) {
+            boolean hasTimeZone = false;
+            try {
+                hasTimeZone = ZoneInfoDB.getInstance().hasTimeZone(timeZone);
+            } catch (IOException ignored) {
+            }
+
+            if (!hasTimeZone) {
+                throw new IllegalArgumentException("Timezone: " + timeZone + " is not an Olson ID");
+            }
+        }
+
         try {
             mService.setTimeZone(timeZone);
         } catch (RemoteException ex) {
