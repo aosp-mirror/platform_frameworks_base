@@ -1053,6 +1053,20 @@ public class AppWidgetManager {
         }
     }
 
+    /**
+     * @hide
+     */
+    public boolean isBoundWidgetPackage(String packageName, int userId) {
+        if (mService == null) {
+            return false;
+        }
+        try {
+            return mService.isBoundWidgetPackage(packageName, userId);
+        } catch (RemoteException re) {
+            throw new RuntimeException("system server dead?", re);
+        }
+    }
+
     private boolean bindAppWidgetIdIfAllowed(int appWidgetId, int profileId,
             ComponentName provider, Bundle options) {
         if (mService == null) {
