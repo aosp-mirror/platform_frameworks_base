@@ -48,19 +48,18 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_STATUS = "status";
 
-    private ArrayList<String> mDomains;
+    private ArraySet<String> mDomains = new ArraySet<>();
     private String mPackageName;
     private int mMainStatus;
 
     public IntentFilterVerificationInfo() {
         mPackageName = null;
-        mDomains = new ArrayList<>();
         mMainStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 
     public IntentFilterVerificationInfo(String packageName, ArrayList<String> domains) {
         mPackageName = packageName;
-        mDomains = domains;
+        mDomains.addAll(domains);
         mMainStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 
@@ -71,14 +70,6 @@ public final class IntentFilterVerificationInfo implements Parcelable {
 
     public IntentFilterVerificationInfo(Parcel source) {
         readFromParcel(source);
-    }
-
-    public ArrayList<String> getDomains() {
-        return mDomains;
-    }
-
-    public ArraySet<String> getDomainsSet() {
-        return new ArraySet<>(mDomains);
     }
 
     public String getPackageName() {
@@ -96,6 +87,14 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         } else {
             Log.w(TAG, "Trying to set a non supported status: " + s);
         }
+    }
+
+    public ArraySet<String> getDomains() {
+        return mDomains;
+    }
+
+    public void setDomains(ArrayList<String> list) {
+        mDomains = new ArraySet<>(list);
     }
 
     public String getDomainsString() {
@@ -145,7 +144,6 @@ public final class IntentFilterVerificationInfo implements Parcelable {
         }
         mMainStatus = status;
 
-        mDomains = new ArrayList<>();
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -201,15 +199,16 @@ public final class IntentFilterVerificationInfo implements Parcelable {
     private void readFromParcel(Parcel source) {
         mPackageName = source.readString();
         mMainStatus = source.readInt();
-        mDomains = new ArrayList<>();
-        source.readStringList(mDomains);
+        ArrayList<String> list = new ArrayList<>();
+        source.readStringList(list);
+        mDomains.addAll(list);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mPackageName);
         dest.writeInt(mMainStatus);
-        dest.writeStringList(mDomains);
+        dest.writeStringList(new ArrayList<>(mDomains));
     }
 
     public static final Creator<IntentFilterVerificationInfo> CREATOR =
@@ -221,5 +220,4 @@ public final class IntentFilterVerificationInfo implements Parcelable {
                     return new IntentFilterVerificationInfo[size];
                 }
             };
-
 }
