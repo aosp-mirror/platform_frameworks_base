@@ -156,9 +156,9 @@ public final class SystemServer {
     private boolean mFirstBoot;
 
     /**
-     * Called to initialize native system services.
+     * Start the sensor service.
      */
-    private static native void nativeInit();
+    private static native void startSensorService();
 
     /**
      * The main entry point from zygote.
@@ -233,7 +233,6 @@ public final class SystemServer {
 
         // Initialize native services.
         System.loadLibrary("android_servers");
-        nativeInit();
 
         // Check whether we failed to shut down last time we tried.
         // This call may not return.
@@ -359,6 +358,10 @@ public final class SystemServer {
 
         // Set up the Application instance for the system process and get started.
         mActivityManagerService.setSystemProcess();
+
+        // The sensor service needs access to package manager service, app ops
+        // service, and permissions service, therefore we start it after them.
+        startSensorService();
     }
 
     /**

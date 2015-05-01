@@ -25,7 +25,7 @@
 
 namespace android {
 
-static void android_server_SystemServer_nativeInit(JNIEnv* /* env */, jobject /* clazz */) {
+static void android_server_SystemServer_startSensorService(JNIEnv* /* env */, jobject /* clazz */) {
     char propBuf[PROPERTY_VALUE_MAX];
     property_get("system_init.startsensorservice", propBuf, "1");
     if (strcmp(propBuf, "1") == 0) {
@@ -39,7 +39,7 @@ static void android_server_SystemServer_nativeInit(JNIEnv* /* env */, jobject /*
  */
 static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeInit", "()V", (void*) android_server_SystemServer_nativeInit },
+    { "startSensorService", "()V", (void*) android_server_SystemServer_startSensorService },
 };
 
 int register_android_server_SystemServer(JNIEnv* env)
