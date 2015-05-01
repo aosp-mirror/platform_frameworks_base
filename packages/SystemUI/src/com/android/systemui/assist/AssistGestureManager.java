@@ -196,7 +196,7 @@ public class AssistGestureManager {
 
     private boolean getVoiceInteractorSupportsAssistGesture() {
         try {
-            return mVoiceInteractionManagerService.activeServiceSupportsAssistGesture();
+            return mVoiceInteractionManagerService.activeServiceSupportsAssist();
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call activeServiceSupportsAssistGesture", e);
             return false;

@@ -2667,7 +2667,7 @@
   <public type="attr" name="autoVerify" />
   <public type="attr" name="breakStrategy" />
 
-  <public type="attr" name="supportsAssistGesture" />
+  <public type="attr" name="supportsAssist" />
   <public type="attr" name="thumbPosition" />
 
   <!-- Placeholder for a removed attribute. Remove this before M release. -->
