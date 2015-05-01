@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import android.app.ActivityThread;
 import android.os.Build;
@@ -119,14 +120,13 @@ public final class ActiveServices {
     // at the same time.
     final int mMaxStartingBackground;
 
-    final SparseArray<ServiceMap> mServiceMap = new SparseArray<ServiceMap>();
+    final SparseArray<ServiceMap> mServiceMap = new SparseArray<>();
 
     /**
      * All currently bound service connections.  Keys are the IBinder of
      * the client's IServiceConnection.
      */
-    final ArrayMap<IBinder, ArrayList<ConnectionRecord>> mServiceConnections
-            = new ArrayMap<IBinder, ArrayList<ConnectionRecord>>();
+    final ArrayMap<IBinder, ArrayList<ConnectionRecord>> mServiceConnections = new ArrayMap<>();
 
     /**
      * List of services that we have been asked to start,
@@ -134,20 +134,20 @@ public final class ActiveServices {
      * while waiting for their corresponding application thread to get
      * going.
      */
-    final ArrayList<ServiceRecord> mPendingServices
-            = new ArrayList<ServiceRecord>();
+    final ArrayList<ServiceRecord> mPendingServices = new ArrayList<>();
 
     /**
      * List of services that are scheduled to restart following a crash.
      */
-    final ArrayList<ServiceRecord> mRestartingServices
-            = new ArrayList<ServiceRecord>();
+    final ArrayList<ServiceRecord> mRestartingServices = new ArrayList<>();
 
     /**
      * List of services that are in the process of being destroyed.
      */
-    final ArrayList<ServiceRecord> mDestroyingServices
-            = new ArrayList<ServiceRecord>();
+    final ArrayList<ServiceRecord> mDestroyingServices = new ArrayList<>();
+
+    /** Temporary list for holding the results of calls to {@link #collectPackageServicesLocked} */
+    private ArrayList<ServiceRecord> mTmpCollectionResults = null;
 
     /** Amount of time to allow a last ANR message to exist before freeing the memory. */
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
@@ -161,10 +161,6 @@ public final class ActiveServices {
             }
         }
     };
-
-    static final class DelayingProcess extends ArrayList<ServiceRecord> {
-        long timeoout;
-    }
 
     /**
      * Information about services for a single user.
@@ -2076,14 +2072,16 @@ public final class ActiveServices {
         }
     }
 
-    private boolean collectForceStopServicesLocked(String name, int userId,
-            boolean evenPersistent, boolean doit,
-            ArrayMap<ComponentName, ServiceRecord> services,
-            ArrayList<ServiceRecord> result) {
+    private boolean collectPackageServicesLocked(String packageName, Set<String> filterByClasses,
+            boolean evenPersistent, boolean doit, ArrayMap<ComponentName, ServiceRecord> services) {
         boolean didSomething = false;
-        for (int i=0; i<services.size(); i++) {
+        for (int i = services.size() - 1; i >= 0; i--) {
             ServiceRecord service = services.valueAt(i);
-            if ((name == null || service.packageName.equals(name))
+            final boolean sameComponent = packageName == null
+                    || (service.packageName.equals(packageName)
+                        && (filterByClasses == null
+                            || filterByClasses.contains(service.name.getClassName())));
+            if (sameComponent
                     && (service.app == null || evenPersistent || !service.app.persistent)) {
                 if (!doit) {
                     return true;
@@ -2098,19 +2096,27 @@ public final class ActiveServices {
                 }
                 service.app = null;
                 service.isolatedProc = null;
-                result.add(service);
+                if (mTmpCollectionResults == null) {
+                    mTmpCollectionResults = new ArrayList<>();
+                }
+                mTmpCollectionResults.add(service);
             }
         }
         return didSomething;
     }
 
-    boolean forceStopLocked(String name, int userId, boolean evenPersistent, boolean doit) {
+    boolean bringDownDisabledPackageServicesLocked(String packageName, Set<String> filterByClasses,
+            int userId, boolean evenPersistent, boolean doit) {
         boolean didSomething = false;
-        ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
+
+        if (mTmpCollectionResults != null) {
+            mTmpCollectionResults.clear();
+        }
+
         if (userId == UserHandle.USER_ALL) {
-            for (int i=0; i<mServiceMap.size(); i++) {
-                didSomething |= collectForceStopServicesLocked(name, userId, evenPersistent,
-                        doit, mServiceMap.valueAt(i).mServicesByName, services);
+            for (int i = mServiceMap.size() - 1; i >= 0; i--) {
+                didSomething |= collectPackageServicesLocked(packageName, filterByClasses,
+                        evenPersistent, doit, mServiceMap.valueAt(i).mServicesByName);
                 if (!doit && didSomething) {
                     return true;
                 }
@@ -2119,22 +2125,24 @@ public final class ActiveServices {
             ServiceMap smap = mServiceMap.get(userId);
             if (smap != null) {
                 ArrayMap<ComponentName, ServiceRecord> items = smap.mServicesByName;
-                didSomething = collectForceStopServicesLocked(name, userId, evenPersistent,
-                        doit, items, services);
+                didSomething = collectPackageServicesLocked(packageName, filterByClasses,
+                        evenPersistent, doit, items);
             }
         }
 
-        int N = services.size();
-        for (int i=0; i<N; i++) {
-            bringDownServiceLocked(services.get(i));
+        if (mTmpCollectionResults != null) {
+            for (int i = mTmpCollectionResults.size() - 1; i >= 0; i--) {
+                bringDownServiceLocked(mTmpCollectionResults.get(i));
+            }
+            mTmpCollectionResults.clear();
         }
         return didSomething;
     }
 
     void cleanUpRemovedTaskLocked(TaskRecord tr, ComponentName component, Intent baseIntent) {
-        ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
+        ArrayList<ServiceRecord> services = new ArrayList<>();
         ArrayMap<ComponentName, ServiceRecord> alls = getServices(tr.userId);
-        for (int i=0; i<alls.size(); i++) {
+        for (int i = alls.size() - 1; i >= 0; i--) {
             ServiceRecord sr = alls.valueAt(i);
             if (sr.packageName.equals(component.getPackageName())) {
                 services.add(sr);
@@ -2142,7 +2150,7 @@ public final class ActiveServices {
         }
 
         // Take care of any running services associated with the app.
-        for (int i=0; i<services.size(); i++) {
+        for (int i = services.size() - 1; i >= 0; i--) {
             ServiceRecord sr = services.get(i);
             if (sr.startRequested) {
                 if ((sr.serviceInfo.flags&ServiceInfo.FLAG_STOP_WITH_TASK) != 0) {

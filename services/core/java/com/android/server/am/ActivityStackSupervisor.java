@@ -118,6 +118,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public final class ActivityStackSupervisor implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
@@ -2507,14 +2508,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /**
      * @return true if some activity was finished (or would have finished if doit were true).
      */
-    boolean forceStopPackageLocked(String name, boolean doit, boolean evenPersistent, int userId) {
+    boolean finishDisabledPackageActivitiesLocked(String packageName, Set<String> filterByClasses,
+            boolean doit, boolean evenPersistent, int userId) {
         boolean didSomething = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                if (stack.forceStopPackageLocked(name, doit, evenPersistent, userId)) {
+                if (stack.finishDisabledPackageActivitiesLocked(
+                        packageName, filterByClasses, doit, evenPersistent, userId)) {
                     didSomething = true;
                 }
             }
