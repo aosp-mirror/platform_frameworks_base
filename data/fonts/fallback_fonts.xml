@@ -402,12 +402,12 @@
     </family>
     <family>
         <fileset>
-            <file lang="zh-Hans">NotoSansHans-Regular.otf</file>
+            <file lang="zh-Hans">NotoSansSC-Regular.otf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file lang="zh-Hant">NotoSansHant-Regular.otf</file>
+            <file lang="zh-Hant">NotoSansTC-Regular.otf</file>
         </fileset>
     </family>
     <family>
