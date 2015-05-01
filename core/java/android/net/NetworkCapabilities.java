@@ -37,6 +37,11 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     public NetworkCapabilities() {
+        clearAll();
+        mNetworkCapabilities =
+                (1 << NET_CAPABILITY_NOT_RESTRICTED) |
+                (1 << NET_CAPABILITY_TRUSTED) |
+                (1 << NET_CAPABILITY_NOT_VPN);
     }
 
     public NetworkCapabilities(NetworkCapabilities nc) {
@@ -50,11 +55,21 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
+     * Completely clears the contents of this object, removing even the capabilities that are set
+     * by default when the object is constructed.
+     * @hide
+     */
+    public void clearAll() {
+        mNetworkCapabilities = mTransportTypes = 0;
+        mLinkUpBandwidthKbps = mLinkDownBandwidthKbps = 0;
+        mNetworkSpecifier = null;
+    }
+
+    /**
      * Represents the network's capabilities.  If any are specified they will be satisfied
      * by any Network that matches all of them.
      */
-    private long mNetworkCapabilities = (1 << NET_CAPABILITY_NOT_RESTRICTED) |
-            (1 << NET_CAPABILITY_TRUSTED) | (1 << NET_CAPABILITY_NOT_VPN);
+    private long mNetworkCapabilities;
 
     /**
      * Indicates this is a network that has the ability to reach the
