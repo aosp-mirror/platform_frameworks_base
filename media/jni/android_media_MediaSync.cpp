@@ -21,6 +21,7 @@
 #include "android_media_MediaSync.h"
 
 #include "android_media_AudioTrack.h"
+#include "android_media_PlaybackSettings.h"
 #include "android_media_SyncSettings.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
@@ -29,6 +30,7 @@
 
 #include <gui/Surface.h>
 
+#include <media/AudioResamplerPublic.h>
 #include <media/AudioTrack.h>
 #include <media/stagefright/MediaClock.h>
 #include <media/stagefright/MediaSync.h>
@@ -47,6 +49,7 @@ struct fields_t {
 };
 
 static fields_t gFields;
+static PlaybackSettings::fields_t gPlaybackSettingsFields;
 static SyncSettings::fields_t gSyncSettingsFields;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,10 +65,8 @@ status_t JMediaSync::configureSurface(const sp<IGraphicBufferProducer> &bufferPr
     return mSync->configureSurface(bufferProducer);
 }
 
-status_t JMediaSync::configureAudioTrack(
-        const sp<AudioTrack> &audioTrack,
-        int32_t nativeSampleRateInHz) {
-    return mSync->configureAudioTrack(audioTrack, nativeSampleRateInHz);
+status_t JMediaSync::configureAudioTrack(const sp<AudioTrack> &audioTrack) {
+    return mSync->configureAudioTrack(audioTrack);
 }
 
 status_t JMediaSync::createInputSurface(
@@ -73,12 +74,32 @@ status_t JMediaSync::createInputSurface(
     return mSync->createInputSurface(bufferProducer);
 }
 
-status_t JMediaSync::setPlaybackRate(float rate) {
-    return mSync->setPlaybackRate(rate);
-}
-
 sp<const MediaClock> JMediaSync::getMediaClock() {
     return mSync->getMediaClock();
+}
+
+status_t JMediaSync::setPlaybackSettings(const AudioPlaybackRate& rate) {
+    return mSync->setPlaybackSettings(rate);
+}
+
+void JMediaSync::getPlaybackSettings(AudioPlaybackRate* rate /* nonnull */) {
+    mSync->getPlaybackSettings(rate);
+}
+
+status_t JMediaSync::setSyncSettings(const AVSyncSettings& syncSettings) {
+    return mSync->setSyncSettings(syncSettings);
+}
+
+void JMediaSync::getSyncSettings(AVSyncSettings* syncSettings /* nonnull */) {
+    mSync->getSyncSettings(syncSettings);
+}
+
+status_t JMediaSync::setVideoFrameRateHint(float rate) {
+    return mSync->setVideoFrameRateHint(rate);
+}
+
+float JMediaSync::getVideoFrameRate() {
+    return mSync->getVideoFrameRate();
 }
 
 status_t JMediaSync::updateQueuedAudioData(
@@ -176,7 +197,7 @@ static void android_media_MediaSync_native_configureSurface(
 }
 
 static void android_media_MediaSync_native_configureAudioTrack(
-        JNIEnv *env, jobject thiz, jobject jaudioTrack, jint nativeSampleRateInHz) {
+        JNIEnv *env, jobject thiz, jobject jaudioTrack) {
     ALOGV("android_media_MediaSync_configureAudioTrack");
 
     sp<JMediaSync> sync = getMediaSync(env, thiz);
@@ -194,7 +215,7 @@ static void android_media_MediaSync_native_configureAudioTrack(
         }
     }
 
-    status_t err = sync->configureAudioTrack(audioTrack, nativeSampleRateInHz);
+    status_t err = sync->configureAudioTrack(audioTrack);
 
     if (err == INVALID_OPERATION) {
         throwExceptionAsNecessary(
@@ -287,29 +308,132 @@ static jlong android_media_MediaSync_native_getPlayTimeForPendingAudioFrames(
     return (jlong)playTimeUs;
 }
 
-static void
-android_media_MediaSync_setSyncSettings(JNIEnv *env, jobject thiz, jobject settings)
-{
+static jfloat android_media_MediaSync_setPlaybackSettings(
+        JNIEnv *env, jobject thiz, jobject settings) {
     sp<JMediaSync> sync = getMediaSync(env, thiz);
     if (sync == NULL) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
-        return;
+        return (jfloat)0.f;
+    }
+
+    PlaybackSettings pbs;
+    pbs.fillFromJobject(env, gPlaybackSettingsFields, settings);
+    ALOGV("setPlaybackSettings: %d:%f %d:%f %d:%u %d:%u",
+            pbs.speedSet, pbs.audioRate.mSpeed,
+            pbs.pitchSet, pbs.audioRate.mPitch,
+            pbs.audioFallbackModeSet, pbs.audioRate.mFallbackMode,
+            pbs.audioStretchModeSet, pbs.audioRate.mStretchMode);
+
+    AudioPlaybackRate rate;
+    sync->getPlaybackSettings(&rate);
+    bool updatedRate = false;
+    if (pbs.speedSet) {
+        rate.mSpeed = pbs.audioRate.mSpeed;
+        updatedRate = true;
+    }
+    if (pbs.pitchSet) {
+        rate.mPitch = pbs.audioRate.mPitch;
+        updatedRate = true;
+    }
+    if (pbs.audioFallbackModeSet) {
+        rate.mFallbackMode = pbs.audioRate.mFallbackMode;
+        updatedRate = true;
+    }
+    if (pbs.audioStretchModeSet) {
+        rate.mStretchMode = pbs.audioRate.mStretchMode;
+        updatedRate = true;
+    }
+    if (updatedRate) {
+        status_t err = sync->setPlaybackSettings(rate);
+        if (err != OK) {
+            throwExceptionAsNecessary(env, err);
+            return (jfloat)0.f;
+        }
+    }
+
+    sp<const MediaClock> mediaClock = sync->getMediaClock();
+    if (mediaClock == NULL) {
+        return (jfloat)0.f;
+    }
+
+    return (jfloat)mediaClock->getPlaybackRate();
+}
+
+static jobject android_media_MediaSync_getPlaybackSettings(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaSync> sync = getMediaSync(env, thiz);
+    if (sync == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return NULL;
+    }
+
+    PlaybackSettings pbs;
+    AudioPlaybackRate &audioRate = pbs.audioRate;
+    sync->getPlaybackSettings(&audioRate);
+    ALOGV("getPlaybackSettings: %f %f %d %d",
+            audioRate.mSpeed, audioRate.mPitch, audioRate.mFallbackMode, audioRate.mStretchMode);
+
+    pbs.speedSet = true;
+    pbs.pitchSet = true;
+    pbs.audioFallbackModeSet = true;
+    pbs.audioStretchModeSet = true;
+
+    return pbs.asJobject(env, gPlaybackSettingsFields);
+}
+
+static jfloat android_media_MediaSync_setSyncSettings(
+        JNIEnv *env, jobject thiz, jobject settings) {
+    sp<JMediaSync> sync = getMediaSync(env, thiz);
+    if (sync == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return (jfloat)0.f;
     }
 
     SyncSettings scs;
     scs.fillFromJobject(env, gSyncSettingsFields, settings);
     ALOGV("setSyncSettings: %d:%d %d:%d %d:%f %d:%f",
-            scs.syncSourceSet, scs.syncSource,
-            scs.audioAdjustModeSet, scs.audioAdjustMode,
-            scs.toleranceSet, scs.tolerance,
+            scs.syncSourceSet, scs.sync.mSource,
+            scs.audioAdjustModeSet, scs.sync.mAudioAdjustMode,
+            scs.toleranceSet, scs.sync.mTolerance,
             scs.frameRateSet, scs.frameRate);
 
-    // TODO: pass sync settings to mediasync when it supports it
+    AVSyncSettings avsync;
+    sync->getSyncSettings(&avsync);
+    bool updatedSync = false;
+    status_t err = OK;
+    if (scs.syncSourceSet) {
+        avsync.mSource = scs.sync.mSource;
+        updatedSync = true;
+    }
+    if (scs.audioAdjustModeSet) {
+        avsync.mAudioAdjustMode = scs.sync.mAudioAdjustMode;
+        updatedSync = true;
+    }
+    if (scs.toleranceSet) {
+        avsync.mTolerance = scs.sync.mTolerance;
+        updatedSync = true;
+    }
+    if (updatedSync) {
+        err = sync->setSyncSettings(avsync);
+    }
+
+    if (scs.frameRateSet && err == OK) {
+        err = sync->setVideoFrameRateHint(scs.frameRate);
+    }
+    if (err != OK) {
+        throwExceptionAsNecessary(env, err);
+        return (jfloat)0.f;
+    }
+
+    sp<const MediaClock> mediaClock = sync->getMediaClock();
+    if (mediaClock == NULL) {
+        return (jfloat)0.f;
+    }
+
+    return (jfloat)mediaClock->getPlaybackRate();
 }
 
-static jobject
-android_media_MediaSync_getSyncSettings(JNIEnv *env, jobject thiz)
-{
+static jobject android_media_MediaSync_getSyncSettings(JNIEnv *env, jobject thiz) {
     sp<JMediaSync> sync = getMediaSync(env, thiz);
     if (sync == NULL) {
         throwExceptionAsNecessary(env, INVALID_OPERATION);
@@ -317,21 +441,25 @@ android_media_MediaSync_getSyncSettings(JNIEnv *env, jobject thiz)
     }
 
     SyncSettings scs;
-    scs.syncSource = 0; // SYNC_SOURCE_DEFAULT
-    scs.audioAdjustMode = 0; // AUDIO_ADJUST_MODE_DEFAULT
-    scs.tolerance = 0.f;
-    scs.frameRate = 0.f;
+    sync->getSyncSettings(&scs.sync);
+    scs.frameRate = sync->getVideoFrameRate();
 
-    // TODO: get this from mediaplayer when it supports it
-    // process_media_player_call(
-    //        env, thiz, mp->getSyncSettings(&scs), NULL, NULL);
     ALOGV("getSyncSettings: %d %d %f %f",
-            scs.syncSource, scs.audioAdjustMode, scs.tolerance, scs.frameRate);
+            scs.sync.mSource, scs.sync.mAudioAdjustMode, scs.sync.mTolerance, scs.frameRate);
+
+    // sanity check settings
+    if (scs.sync.mSource >= AVSYNC_SOURCE_MAX
+            || scs.sync.mAudioAdjustMode >= AVSYNC_AUDIO_ADJUST_MODE_MAX
+            || scs.sync.mTolerance < 0.f
+            || scs.sync.mTolerance >= AVSYNC_TOLERANCE_MAX) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return NULL;
+    }
 
     scs.syncSourceSet = true;
     scs.audioAdjustModeSet = true;
     scs.toleranceSet = true;
-    scs.frameRateSet = false;
+    scs.frameRateSet = scs.frameRate >= 0.f;
 
     return scs.asJobject(env, gSyncSettingsFields);
 }
@@ -359,27 +487,13 @@ static void android_media_MediaSync_native_init(JNIEnv *env) {
     CHECK(gFields.mediaTimestampClockRateID != NULL);
 
     gSyncSettingsFields.init(env);
+    gPlaybackSettingsFields.init(env);
 }
 
 static void android_media_MediaSync_native_setup(JNIEnv *env, jobject thiz) {
     sp<JMediaSync> sync = new JMediaSync();
 
     setMediaSync(env, thiz, sync);
-}
-
-static void android_media_MediaSync_native_setPlaybackRate(
-        JNIEnv *env, jobject thiz, jfloat rate) {
-    sp<JMediaSync> sync = getMediaSync(env, thiz);
-    if (sync == NULL) {
-        throwExceptionAsNecessary(env, INVALID_OPERATION);
-        return;
-    }
-
-    status_t err = sync->setPlaybackRate(rate);
-    if (err != NO_ERROR) {
-        throwExceptionAsNecessary(env, err);
-        return;
-    }
 }
 
 static void android_media_MediaSync_native_finalize(JNIEnv *env, jobject thiz) {
@@ -416,11 +530,17 @@ static JNINativeMethod gMethods[] = {
 
     { "native_release", "()V", (void *)android_media_MediaSync_release },
 
-    { "native_setPlaybackRate", "(F)V", (void *)android_media_MediaSync_native_setPlaybackRate },
+    { "native_setPlaybackSettings", "(Landroid/media/PlaybackSettings;)F",
+      (void *)android_media_MediaSync_setPlaybackSettings },
 
-    { "setSyncSettings", "(Landroid/media/SyncSettings;)V", (void *)android_media_MediaSync_setSyncSettings},
+    { "getPlaybackSettings", "()Landroid/media/PlaybackSettings;",
+      (void *)android_media_MediaSync_getPlaybackSettings },
 
-    { "getSyncSettings", "()Landroid/media/SyncSettings;", (void *)android_media_MediaSync_getSyncSettings},
+    { "native_setSyncSettings", "(Landroid/media/SyncSettings;)F",
+      (void *)android_media_MediaSync_setSyncSettings },
+
+    { "getSyncSettings", "()Landroid/media/SyncSettings;",
+      (void *)android_media_MediaSync_getSyncSettings },
 
     { "native_finalize", "()V", (void *)android_media_MediaSync_native_finalize },
 };

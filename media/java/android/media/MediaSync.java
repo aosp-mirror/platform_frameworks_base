@@ -199,6 +199,7 @@ final public class MediaSync {
     private final Object mAudioLock = new Object();
     private AudioTrack mAudioTrack = null;
     private List<AudioBuffer> mAudioBuffers = new LinkedList<AudioBuffer>();
+    // this is only used for paused/running decisions, so it is not affected by clock drift
     private float mPlaybackRate = 0.0f;
 
     private long mNativeContext;
@@ -459,36 +460,11 @@ final public class MediaSync {
      * @throws IllegalArgumentException if the settings are not supported.
      */
     public void setPlaybackSettings(@NonNull PlaybackSettings settings) {
-        float rate;
-        try {
-            rate = settings.getSpeed();
-
-            // rate is specified
-            if (mAudioTrack != null) {
-                try {
-                    if (rate == 0.0) {
-                        mAudioTrack.pause();
-                    } else {
-                        mAudioTrack.setPlaybackSettings(settings);
-                        mAudioTrack.play();
-                    }
-                } catch (IllegalStateException e) {
-                    throw e;
-                }
-            }
-
-            synchronized(mAudioLock) {
-                mPlaybackRate = rate;
-            }
-            if (mPlaybackRate != 0.0 && mAudioThread != null) {
-                postRenderAudio(0);
-            }
-            native_setPlaybackRate(mPlaybackRate);
-        } catch (IllegalStateException e) {
-            // rate is not specified; still, propagate settings to audio track
-            if (mAudioTrack != null) {
-                mAudioTrack.setPlaybackSettings(settings);
-            }
+        synchronized(mAudioLock) {
+            mPlaybackRate = native_setPlaybackSettings(settings);;
+        }
+        if (mPlaybackRate != 0.0 && mAudioThread != null) {
+            postRenderAudio(0);
         }
     }
 
@@ -501,18 +477,9 @@ final public class MediaSync {
      *     been initialized.
      */
     @NonNull
-    public PlaybackSettings getPlaybackSettings() {
-        if (mAudioTrack != null) {
-            return mAudioTrack.getPlaybackSettings();
-        } else {
-            PlaybackSettings settings = new PlaybackSettings();
-            settings.allowDefaults();
-            settings.setSpeed(mPlaybackRate);
-            return settings;
-        }
-    }
+    public native PlaybackSettings getPlaybackSettings();
 
-    private native final void native_setPlaybackRate(float rate);
+    private native float native_setPlaybackSettings(@NonNull PlaybackSettings settings);
 
     /**
      * Sets A/V sync mode.
@@ -523,7 +490,16 @@ final public class MediaSync {
      * initialized.
      * @throws IllegalArgumentException if settings are not supported.
      */
-    public native void setSyncSettings(@NonNull SyncSettings settings);
+    public void setSyncSettings(@NonNull SyncSettings settings) {
+        synchronized(mAudioLock) {
+            mPlaybackRate = native_setSyncSettings(settings);;
+        }
+        if (mPlaybackRate != 0.0 && mAudioThread != null) {
+            postRenderAudio(0);
+        }
+    }
+
+    private native float native_setSyncSettings(@NonNull SyncSettings settings);
 
     /**
      * Gets the A/V sync mode.
