@@ -105,5 +105,5 @@ interface IVoiceInteractionManagerService {
      * Indicates whether the currently active voice interaction service is capable of handling the
      * assist gesture.
      */
-    boolean activeServiceSupportsAssistGesture();
+    boolean activeServiceSupportsAssist();
 }
