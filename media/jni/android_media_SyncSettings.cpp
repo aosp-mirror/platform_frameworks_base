@@ -57,9 +57,9 @@ void SyncSettings::fields_t::exit(JNIEnv *env) {
 }
 
 void SyncSettings::fillFromJobject(JNIEnv *env, const fields_t& fields, jobject settings) {
-    syncSource = env->GetIntField(settings, fields.sync_source);
-    audioAdjustMode = env->GetIntField(settings, fields.audio_adjust_mode);
-    tolerance = env->GetFloatField(settings, fields.tolerance);
+    sync.mSource = (AVSyncSource)env->GetIntField(settings, fields.sync_source);
+    sync.mAudioAdjustMode = (AVSyncAudioAdjustMode)env->GetIntField(settings, fields.audio_adjust_mode);
+    sync.mTolerance = env->GetFloatField(settings, fields.tolerance);
     frameRate = env->GetFloatField(settings, fields.frame_rate);
     int set = env->GetIntField(settings, fields.set);
 
@@ -74,9 +74,9 @@ jobject SyncSettings::asJobject(JNIEnv *env, const fields_t& fields) {
     if (settings == NULL) {
         return NULL;
     }
-    env->SetIntField(settings, fields.sync_source, (jint)syncSource);
-    env->SetIntField(settings, fields.audio_adjust_mode, (jint)audioAdjustMode);
-    env->SetFloatField(settings, fields.tolerance, (jfloat)tolerance);
+    env->SetIntField(settings, fields.sync_source, (jint)sync.mSource);
+    env->SetIntField(settings, fields.audio_adjust_mode, (jint)sync.mAudioAdjustMode);
+    env->SetFloatField(settings, fields.tolerance, (jfloat)sync.mTolerance);
     env->SetFloatField(settings, fields.frame_rate, (jfloat)frameRate);
     env->SetIntField(
             settings, fields.set,
