@@ -389,7 +389,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public static final String ACTION_BLE_STATE_CHANGED =
-        "anrdoid.bluetooth.adapter.action.BLE_STATE_CHANGED";
+        "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
 
     /**
      * Broadcast Action: The notifys Bluetooth ACL connected event. This will be
