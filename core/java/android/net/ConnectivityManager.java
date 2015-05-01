@@ -341,7 +341,8 @@ public class ConnectivityManager {
      * one.  This is used by applications needing to talk to the carrier's
      * Multimedia Messaging Service servers.
      *
-     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     * @deprecated Applications should instead use
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         provides the {@link NetworkCapabilities#NET_CAPABILITY_MMS} capability.
      */
     public static final int TYPE_MOBILE_MMS  = 2;
@@ -351,7 +352,8 @@ public class ConnectivityManager {
      * one.  This is used by applications needing to talk to the carrier's
      * Secure User Plane Location servers for help locating the device.
      *
-     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     * @deprecated Applications should instead use
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         provides the {@link NetworkCapabilities#NET_CAPABILITY_SUPL} capability.
      */
     public static final int TYPE_MOBILE_SUPL = 3;
@@ -367,7 +369,8 @@ public class ConnectivityManager {
      * same network interface as {@link #TYPE_MOBILE} but the routing setup
      * is different.
      *
-     * @deprecated Applications should instead use {@link #requestNetwork} to request a network that
+     * @deprecated Applications should instead use
+     *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         uses the {@link NetworkCapabilities#TRANSPORT_CELLULAR} transport.
      */
     public static final int TYPE_MOBILE_HIPRI = 5;
@@ -910,7 +913,8 @@ public class ConnectivityManager {
      * implementation+feature combination, except that the value {@code -1}
      * always indicates failure.
      *
-     * @deprecated Deprecated in favor of the cleaner {@link #requestNetwork} api.
+     * @deprecated Deprecated in favor of the cleaner
+     *             {@link #requestNetwork(NetworkRequest, NetworkCallback)} API.
      * @removed
      */
     public int startUsingNetworkFeature(int networkType, String feature) {
@@ -958,7 +962,7 @@ public class ConnectivityManager {
      * implementation+feature combination, except that the value {@code -1}
      * always indicates failure.
      *
-     * @deprecated Deprecated in favor of the cleaner {@link #requestNetwork} api.
+     * @deprecated Deprecated in favor of the cleaner {@link unregisterNetworkCallback} API.
      * @removed
      */
     public int stopUsingNetworkFeature(int networkType, String feature) {
@@ -1236,8 +1240,9 @@ public class ConnectivityManager {
      * @param hostAddress the IP address of the host to which the route is desired
      * @return {@code true} on success, {@code false} on failure
      *
-     * @deprecated Deprecated in favor of the {@link #requestNetwork},
-     *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} api.
+     * @deprecated Deprecated in favor of the
+     *             {@link #requestNetwork(NetworkRequest, NetworkCallback)},
+     *             {@link #bindProcessToNetwork} and {@link Network#getSocketFactory} API.
      * @removed
      */
     public boolean requestRouteToHost(int networkType, int hostAddress) {
@@ -1256,7 +1261,7 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} on failure
      * @hide
      * @deprecated Deprecated in favor of the {@link #requestNetwork} and
-     *             {@link #bindProcessToNetwork} api.
+     *             {@link #bindProcessToNetwork} API.
      * @removed
      */
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
@@ -2144,14 +2149,22 @@ public class ConnectivityManager {
         public static final int CANCELED     = 8;
 
         /**
-         * @hide
-         * Called whenever the framework connects to a network that it may use to
-         * satisfy this request
+         * Called when the framework connects to a new network to evaluate whether it satisfies this
+         * request. If evaluation succeeds, this callback may be followed by an {@link #onAvailable}
+         * callback. There is no guarantee that this new network will satisfy any requests, or that
+         * the network will stay connected for longer than the time necessary to evaluate it.
+         * <p>
+         * Most applications <b>should not</b> act on this callback, and should instead use
+         * {@link #onAvailable}. This callback is intended for use by applications that can assist
+         * the framework in properly evaluating the network &mdash; for example, an application that
+         * can automatically log in to a captive portal without user intervention.
+         *
+         * @param network The {@link Network} of the network that is being evaluated.
          */
         public void onPreCheck(Network network) {}
 
         /**
-         * Called when the framework connects and has declared new network ready for use.
+         * Called when the framework connects and has declared a new network ready for use.
          * This callback may be called more than once if the {@link Network} that is
          * satisfying the request changes.
          *
@@ -2251,116 +2264,82 @@ public class ConnectivityManager {
         @Override
         public void handleMessage(Message message) {
             Log.d(TAG, "CM callback handler got msg " + message.what);
+            NetworkRequest request = (NetworkRequest) getObject(message, NetworkRequest.class);
+            Network network = (Network) getObject(message, Network.class);
             switch (message.what) {
                 case CALLBACK_PRECHECK: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        callbacks.onPreCheck((Network)getObject(message, Network.class));
-                    } else {
-                        Log.e(TAG, "callback not found for PRECHECK message");
+                    NetworkCallback callback = getCallback(request, "PRECHECK");
+                    if (callback != null) {
+                        callback.onPreCheck(network);
                     }
                     break;
                 }
                 case CALLBACK_AVAILABLE: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        callbacks.onAvailable((Network)getObject(message, Network.class));
-                    } else {
-                        Log.e(TAG, "callback not found for AVAILABLE message");
+                    NetworkCallback callback = getCallback(request, "AVAILABLE");
+                    if (callback != null) {
+                        callback.onAvailable(network);
                     }
                     break;
                 }
                 case CALLBACK_LOSING: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        callbacks.onLosing((Network)getObject(message, Network.class),
-                                message.arg1);
-                    } else {
-                        Log.e(TAG, "callback not found for LOSING message");
+                    NetworkCallback callback = getCallback(request, "LOSING");
+                    if (callback != null) {
+                        callback.onLosing(network, message.arg1);
                     }
                     break;
                 }
                 case CALLBACK_LOST: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        callbacks.onLost((Network)getObject(message, Network.class));
-                    } else {
-                        Log.e(TAG, "callback not found for LOST message");
+                    NetworkCallback callback = getCallback(request, "LOST");
+                    if (callback != null) {
+                        callback.onLost(network);
                     }
                     break;
                 }
                 case CALLBACK_UNAVAIL: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = null;
-                    synchronized(mCallbackMap) {
-                        callbacks = mCallbackMap.get(request);
-                    }
-                    if (callbacks != null) {
-                        callbacks.onUnavailable();
-                    } else {
-                        Log.e(TAG, "callback not found for UNAVAIL message");
+                    NetworkCallback callback = getCallback(request, "UNAVAIL");
+                    if (callback != null) {
+                        callback.onUnavailable();
                     }
                     break;
                 }
                 case CALLBACK_CAP_CHANGED: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        Network network = (Network)getObject(message, Network.class);
+                    NetworkCallback callback = getCallback(request, "CAP_CHANGED");
+                    if (callback != null) {
                         NetworkCapabilities cap = (NetworkCapabilities)getObject(message,
                                 NetworkCapabilities.class);
 
-                        callbacks.onCapabilitiesChanged(network, cap);
-                    } else {
-                        Log.e(TAG, "callback not found for CAP_CHANGED message");
+                        callback.onCapabilitiesChanged(network, cap);
                     }
                     break;
                 }
                 case CALLBACK_IP_CHANGED: {
-                    NetworkRequest request = (NetworkRequest)getObject(message,
-                            NetworkRequest.class);
-                    NetworkCallback callbacks = getCallbacks(request);
-                    if (callbacks != null) {
-                        Network network = (Network)getObject(message, Network.class);
+                    NetworkCallback callback = getCallback(request, "IP_CHANGED");
+                    if (callback != null) {
                         LinkProperties lp = (LinkProperties)getObject(message,
                                 LinkProperties.class);
 
-                        callbacks.onLinkPropertiesChanged(network, lp);
-                    } else {
-                        Log.e(TAG, "callback not found for IP_CHANGED message");
+                        callback.onLinkPropertiesChanged(network, lp);
                     }
                     break;
                 }
                 case CALLBACK_RELEASED: {
-                    NetworkRequest req = (NetworkRequest)getObject(message, NetworkRequest.class);
-                    NetworkCallback callbacks = null;
+                    NetworkCallback callback = null;
                     synchronized(mCallbackMap) {
-                        callbacks = mCallbackMap.remove(req);
+                        callback = mCallbackMap.remove(request);
                     }
-                    if (callbacks != null) {
+                    if (callback != null) {
                         synchronized(mRefCount) {
                             if (mRefCount.decrementAndGet() == 0) {
                                 getLooper().quit();
                             }
                         }
                     } else {
-                        Log.e(TAG, "callback not found for CANCELED message");
+                        Log.e(TAG, "callback not found for RELEASED message");
                     }
                     break;
                 }
                 case CALLBACK_EXIT: {
-                    Log.d(TAG, "Listener quiting");
+                    Log.d(TAG, "Listener quitting");
                     getLooper().quit();
                     break;
                 }
@@ -2374,10 +2353,16 @@ public class ConnectivityManager {
         private Object getObject(Message msg, Class c) {
             return msg.getData().getParcelable(c.getSimpleName());
         }
-        private NetworkCallback getCallbacks(NetworkRequest req) {
+
+        private NetworkCallback getCallback(NetworkRequest req, String name) {
+            NetworkCallback callback;
             synchronized(mCallbackMap) {
-                return mCallbackMap.get(req);
+                callback = mCallbackMap.get(req);
             }
+            if (callback == null) {
+                Log.e(TAG, "callback not found for " + name + " message");
+            }
+            return callback;
         }
     }
 
@@ -2601,10 +2586,10 @@ public class ConnectivityManager {
 
     /**
      * Unregisters callbacks about and possibly releases networks originating from
-     * {@link #requestNetwork} and {@link #registerNetworkCallback} calls.  If the
-     * given {@code NetworkCallback} had previously been used with {@code #requestNetwork},
-     * any networks that had been connected to only to satisfy that request will be
-     * disconnected.
+     * {@link #requestNetwork(NetworkRequest, NetworkCallback)} and {@link #registerNetworkCallback}
+     * calls.  If the given {@code NetworkCallback} had previously been used with
+     * {@code #requestNetwork}, any networks that had been connected to only to satisfy that request
+     * will be disconnected.
      *
      * @param networkCallback The {@link NetworkCallback} used when making the request.
      */
