@@ -3180,6 +3180,18 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         return (getButtonState() & button) == button;
     }
 
+    /**
+     * Checks if a stylus is being used and if the first stylus button is
+     * pressed.
+     *
+     * @return True if the tool is a stylus and if the first stylus button is
+     *         pressed.
+     * @see #BUTTON_SECONDARY
+     */
+    public final boolean isStylusButtonPressed() {
+        return (isButtonPressed(BUTTON_SECONDARY) && getToolType(0) == TOOL_TYPE_STYLUS);
+    }
+
     public static final Parcelable.Creator<MotionEvent> CREATOR
             = new Parcelable.Creator<MotionEvent>() {
         public MotionEvent createFromParcel(Parcel in) {

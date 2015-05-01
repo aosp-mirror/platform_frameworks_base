@@ -52,6 +52,11 @@ public class HapticFeedbackConstants {
     public static final int CALENDAR_DATE = 5;
 
     /**
+     * The user has touched the screen with a stylus and pressed the stylus button.
+     */
+    public static final int STYLUS_BUTTON_PRESS = 6;
+
+    /**
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */

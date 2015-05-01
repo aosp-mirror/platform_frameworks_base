@@ -989,6 +989,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int DUPLICATE_PARENT_STATE = 0x00400000;
 
+    /**
+     * <p>
+     * Indicates this view can be stylus button pressed. When stylus button
+     * pressable, a View reacts to stylus button presses by notifiying
+     * the OnStylusButtonPressListener.
+     * </p>
+     * {@hide}
+     */
+    static final int STYLUS_BUTTON_PRESSABLE = 0x00800000;
+
+
     /** @hide */
     @IntDef({
         SCROLLBARS_INSIDE_OVERLAY,
@@ -3272,6 +3283,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         protected OnLongClickListener mOnLongClickListener;
 
         /**
+         * Listener used to dispatch stylus touch and button press events. This field should be made
+         * private, so it is hidden from the SDK.
+         * {@hide}
+         */
+        protected OnStylusButtonPressListener mOnStylusButtonPressListener;
+
+        /**
          * Listener used to build the context menu.
          * This field should be made private, so it is hidden from the SDK.
          * {@hide}
@@ -3360,6 +3378,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * should not be invoked.
      */
     private boolean mHasPerformedLongPress;
+
+    /**
+     * Whether the stylus button is currently pressed down. This is true when
+     * the stylus is touching the screen and the button has been pressed, this
+     * is false once the stylus has been lifted.
+     */
+    private boolean mInStylusButtonPress = false;
 
     /**
      * The minimum height of the view. We'll try our best to have the height
@@ -3877,6 +3902,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         viewFlagMasks |= LONG_CLICKABLE;
                     }
                     break;
+                case com.android.internal.R.styleable.View_stylusButtonPressable:
+                    if (a.getBoolean(attr, false)) {
+                        viewFlagValues |= STYLUS_BUTTON_PRESSABLE;
+                        viewFlagMasks |= STYLUS_BUTTON_PRESSABLE;
+                    }
+                    break;
                 case com.android.internal.R.styleable.View_saveEnabled:
                     if (!a.getBoolean(attr, true)) {
                         viewFlagValues |= SAVE_DISABLED;
@@ -4342,6 +4373,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         out.append((mViewFlags&SCROLLBARS_VERTICAL) != 0 ? 'V' : '.');
         out.append((mViewFlags&CLICKABLE) != 0 ? 'C' : '.');
         out.append((mViewFlags&LONG_CLICKABLE) != 0 ? 'L' : '.');
+        out.append((mViewFlags & STYLUS_BUTTON_PRESSABLE) != 0 ? 'S' : '.');
         out.append(' ');
         out.append((mPrivateFlags&PFLAG_IS_ROOT_NAMESPACE) != 0 ? 'R' : '.');
         out.append((mPrivateFlags&PFLAG_FOCUSED) != 0 ? 'F' : '.');
@@ -4837,6 +4869,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Register a callback to be invoked when this view is touched with a stylus and the button is
+     * pressed.
+     *
+     * @param l The callback that will run
+     * @see #setStylusButtonPressable(boolean)
+     */
+    public void setOnStylusButtonPressListener(@Nullable OnStylusButtonPressListener l) {
+        if (!isStylusButtonPressable()) {
+            setStylusButtonPressable(true);
+        }
+        getListenerInfo().mOnStylusButtonPressListener = l;
+    }
+
+    /**
      * Register a callback to be invoked when the context menu for this view is
      * being built. If this view is not long clickable, it becomes long clickable.
      *
@@ -4911,6 +4957,46 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         }
         return handled;
+    }
+
+    /**
+     * Call this view's OnStylusButtonPressListener, if it is defined.
+     *
+     * @return True if there was an assigned OnStylusButtonPressListener that consumed the event,
+     *         false otherwise.
+     */
+    public boolean performStylusButtonPress() {
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_STYLUS_BUTTON_PRESSED);
+
+        boolean handled = false;
+        ListenerInfo li = mListenerInfo;
+        if (li != null && li.mOnStylusButtonPressListener != null) {
+            handled = li.mOnStylusButtonPressListener.onStylusButtonPress(View.this);
+        }
+        if (handled) {
+            performHapticFeedback(HapticFeedbackConstants.STYLUS_BUTTON_PRESS);
+        }
+        return handled;
+    }
+
+    /**
+     * Checks for a stylus button press and calls the listener.
+     *
+     * @param event The event.
+     * @return True if the event was consumed.
+     */
+    private boolean performStylusActionOnButtonPress(MotionEvent event) {
+        if (isStylusButtonPressable() && !mInStylusButtonPress
+                && !mHasPerformedLongPress && event.isStylusButtonPressed()) {
+            if (performStylusButtonPress()) {
+                mInStylusButtonPress = true;
+                setPressed(true, event.getX(), event.getY());
+                removeTapCallback();
+                removeLongPressCallback();
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -5703,6 +5789,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>{@link AccessibilityNodeInfo#setFocused(boolean)},</li>
      *   <li>{@link AccessibilityNodeInfo#setLongClickable(boolean)},</li>
      *   <li>{@link AccessibilityNodeInfo#setSelected(boolean)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setStylusButtonPressable(boolean)}</li>
      * </ul>
      * <p>
      * Subclasses should override this method, call the super implementation,
@@ -5854,6 +5941,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setChecked(true);
             }
         }
+        if (isStylusButtonPressable()) {
+            structure.setStylusButtonPressable(true);
+        }
         structure.setClassName(getAccessibilityClassName().toString());
         structure.setContentDescription(getContentDescription());
     }
@@ -5910,6 +6000,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (info.isChecked()) {
                 structure.setChecked(true);
             }
+        }
+        if (info.isStylusButtonPressable()) {
+            structure.setStylusButtonPressable(true);
         }
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
@@ -6040,6 +6133,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setAccessibilityFocused(isAccessibilityFocused());
         info.setSelected(isSelected());
         info.setLongClickable(isLongClickable());
+        info.setStylusButtonPressable(isStylusButtonPressable());
         info.setLiveRegion(getAccessibilityLiveRegion());
 
         // TODO: These make sense only if we are in an AdapterView but all
@@ -6068,6 +6162,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (isLongClickable() && isEnabled()) {
             info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+        }
+
+        if (isStylusButtonPressable() && isEnabled()) {
+            info.addAction(AccessibilityAction.ACTION_STYLUS_BUTTON_PRESS);
         }
 
         CharSequence text = getIterableTextForAccessibility();
@@ -7444,6 +7542,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Indicates whether this view reacts to stylus button press events or not.
+     *
+     * @return true if the view is stylus button pressable, false otherwise
+     * @see #setStylusButtonPressable(boolean)
+     * @attr ref android.R.styleable#View_stylusButtonPressable
+     */
+    public boolean isStylusButtonPressable() {
+        return (mViewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE;
+    }
+
+    /**
+     * Enables or disables stylus button press events for this view. When a view is stylus button
+     * pressable it reacts to the user touching the screen with a stylus and pressing the first
+     * stylus button. This event can launch the listener.
+     *
+     * @param stylusButtonPressable true to make the view react to a stylus button press, false
+     *            otherwise
+     * @see #isStylusButtonPressable()
+     * @attr ref android.R.styleable#View_stylusButtonPressable
+     */
+    public void setStylusButtonPressable(boolean stylusButtonPressable) {
+        setFlags(stylusButtonPressable ? STYLUS_BUTTON_PRESSABLE : 0, STYLUS_BUTTON_PRESSABLE);
+    }
+
+    /**
      * Sets the pressed state for this view and provides a touch coordinate for
      * animation hinting.
      *
@@ -7858,7 +7981,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void addTouchables(ArrayList<View> views) {
         final int viewFlags = mViewFlags;
 
-        if (((viewFlags & CLICKABLE) == CLICKABLE || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
+        if (((viewFlags & CLICKABLE) == CLICKABLE || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE
+                || (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE)
                 && (viewFlags & ENABLED_MASK) == ENABLED) {
             views.add(this);
         }
@@ -8575,6 +8699,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     final Rect r = mAttachInfo.mTmpInvalRect;
                     getDrawingRect(r);
                     return requestRectangleOnScreen(r, true);
+                }
+            } break;
+            case R.id.accessibilityActionStylusButtonPress: {
+                if (isStylusButtonPressable()) {
+                    performStylusButtonPress();
+                    return true;
                 }
             } break;
         }
@@ -9734,7 +9864,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return (viewFlags & CLICKABLE) == CLICKABLE
-                || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE;
+                || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE
+                || (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE;
     }
 
     /**
@@ -9817,15 +9948,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final float x = event.getX();
         final float y = event.getY();
         final int viewFlags = mViewFlags;
+        final int action = event.getAction();
 
         if ((viewFlags & ENABLED_MASK) == DISABLED) {
-            if (event.getAction() == MotionEvent.ACTION_UP && (mPrivateFlags & PFLAG_PRESSED) != 0) {
+            if (action == MotionEvent.ACTION_UP && (mPrivateFlags & PFLAG_PRESSED) != 0) {
                 setPressed(false);
             }
             // A disabled view that is clickable still consumes the touch
             // events, it just doesn't respond to them.
-            return (((viewFlags & CLICKABLE) == CLICKABLE ||
-                    (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE));
+            return (((viewFlags & CLICKABLE) == CLICKABLE
+                    || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
+                    || (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE);
         }
 
         if (mTouchDelegate != null) {
@@ -9835,9 +9968,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (((viewFlags & CLICKABLE) == CLICKABLE ||
-                (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)) {
-            switch (event.getAction()) {
+                (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) ||
+                (viewFlags & STYLUS_BUTTON_PRESSABLE) == STYLUS_BUTTON_PRESSABLE) {
+            switch (action) {
                 case MotionEvent.ACTION_UP:
+                    if (mInStylusButtonPress) {
+                        mInStylusButtonPress = false;
+                        mHasPerformedLongPress = false;
+                    }
                     boolean prepressed = (mPrivateFlags & PFLAG_PREPRESSED) != 0;
                     if ((mPrivateFlags & PFLAG_PRESSED) != 0 || prepressed) {
                         // take focus if we don't have it already and we should in
@@ -9891,6 +10029,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                 case MotionEvent.ACTION_DOWN:
                     mHasPerformedLongPress = false;
+                    mInStylusButtonPress = false;
+
+                    if (performStylusActionOnButtonPress(event)) {
+                        break;
+                    }
 
                     if (performButtonActionOnTouchDown(event)) {
                         break;
@@ -9920,6 +10063,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     setPressed(false);
                     removeTapCallback();
                     removeLongPressCallback();
+                    if (mInStylusButtonPress) {
+                        mInStylusButtonPress = false;
+                        mHasPerformedLongPress = false;
+                    }
                     break;
 
                 case MotionEvent.ACTION_MOVE:
@@ -9935,6 +10082,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                             setPressed(false);
                         }
+                    } else if (performStylusActionOnButtonPress(event)) {
+                        // Check for stylus button press if we're within the view.
+                        break;
                     }
                     break;
             }
@@ -10222,7 +10372,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (accessibilityEnabled) {
             if ((changed & FOCUSABLE_MASK) != 0 || (changed & VISIBILITY_MASK) != 0
-                    || (changed & CLICKABLE) != 0 || (changed & LONG_CLICKABLE) != 0) {
+                    || (changed & CLICKABLE) != 0 || (changed & LONG_CLICKABLE) != 0
+                    || (changed & STYLUS_BUTTON_PRESSABLE) != 0) {
                 if (oldIncludeForAccessibility != includeForAccessibility()) {
                     notifySubtreeAccessibilityStateChangedIfNeeded();
                 } else {
@@ -20785,6 +20936,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * @param v The view that was clicked.
          */
         void onClick(View v);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when a view is touched with a stylus while
+     * the stylus button is pressed.
+     */
+    public interface OnStylusButtonPressListener {
+        /**
+         * Called when a view is touched with a stylus while the stylus button is pressed.
+         *
+         * @param v The view that was touched.
+         * @return true if the callback consumed the stylus button press, false otherwise.
+         */
+        boolean onStylusButtonPress(View v);
     }
 
     /**

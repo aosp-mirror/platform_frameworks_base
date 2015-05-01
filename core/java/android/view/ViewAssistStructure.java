@@ -40,6 +40,8 @@ public abstract class ViewAssistStructure {
 
     public abstract void setLongClickable(boolean state);
 
+    public abstract void setStylusButtonPressable(boolean state);
+
     public abstract void setFocusable(boolean state);
 
     public abstract void setFocused(boolean state);
