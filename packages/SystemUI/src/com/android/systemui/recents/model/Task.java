@@ -124,6 +124,7 @@ public class Task {
     public boolean isLaunchTarget;
     public Drawable applicationIcon;
     public Drawable activityIcon;
+    public String contentDescription;
     public String activityLabel;
     public int colorPrimary;
     public boolean useLightOnPrimaryColor;
@@ -140,8 +141,8 @@ public class Task {
     }
 
     public Task(TaskKey key, boolean isActive, int taskAffiliation, int taskAffiliationColor,
-                String activityTitle, Drawable activityIcon, int colorPrimary,
-                boolean lockToThisTask, boolean lockToTaskEnabled, Bitmap icon,
+                String activityTitle, String contentDescription, Drawable activityIcon,
+                int colorPrimary, boolean lockToThisTask, boolean lockToTaskEnabled, Bitmap icon,
                 String iconFilename) {
         boolean isInAffiliationGroup = (taskAffiliation != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
@@ -149,6 +150,7 @@ public class Task {
         this.taskAffiliation = taskAffiliation;
         this.taskAffiliationColor = taskAffiliationColor;
         this.activityLabel = activityTitle;
+        this.contentDescription = contentDescription;
         this.activityIcon = activityIcon;
         this.colorPrimary = hasAffiliationGroupColor ? taskAffiliationColor : colorPrimary;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
@@ -166,6 +168,7 @@ public class Task {
         this.taskAffiliation = o.taskAffiliation;
         this.taskAffiliationColor = o.taskAffiliationColor;
         this.activityLabel = o.activityLabel;
+        this.contentDescription = o.contentDescription;
         this.activityIcon = o.activityIcon;
         this.colorPrimary = o.colorPrimary;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
