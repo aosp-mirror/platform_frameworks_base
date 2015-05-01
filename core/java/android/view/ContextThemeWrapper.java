@@ -87,9 +87,12 @@ public class ContextThemeWrapper extends ContextWrapper {
         }
     }
     
-    @Override public void setTheme(int resid) {
-        mThemeResource = resid;
-        initializeTheme();
+    @Override
+    public void setTheme(int resid) {
+        if (mThemeResource != resid) {
+            mThemeResource = resid;
+            initializeTheme();
+        }
     }
     
     /** @hide */
