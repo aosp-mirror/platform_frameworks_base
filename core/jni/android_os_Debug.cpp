@@ -270,49 +270,10 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
 
             if ((strstr(name, "[heap]") == name)) {
                 whichHeap = HEAP_NATIVE;
-            } else if (strncmp(name, "/dev/ashmem", 11) == 0) {
-                if (strncmp(name, "/dev/ashmem/dalvik-", 19) == 0) {
-                    whichHeap = HEAP_DALVIK_OTHER;
-                    if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
-                        subHeap = HEAP_DALVIK_LINEARALLOC;
-                    } else if ((strstr(name, "/dev/ashmem/dalvik-alloc space") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-main space") == name)) {
-                        // This is the regular Dalvik heap.
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_NORMAL;
-                    } else if (strstr(name, "/dev/ashmem/dalvik-large object space") == name) {
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_LARGE;
-                    } else if (strstr(name, "/dev/ashmem/dalvik-non moving space") == name) {
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_NON_MOVING;
-                    } else if (strstr(name, "/dev/ashmem/dalvik-zygote space") == name) {
-                        whichHeap = HEAP_DALVIK;
-                        subHeap = HEAP_DALVIK_ZYGOTE;
-                    } else if (strstr(name, "/dev/ashmem/dalvik-indirect ref") == name) {
-                        subHeap = HEAP_DALVIK_INDIRECT_REFERENCE_TABLE;
-                    } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
-                        subHeap = HEAP_DALVIK_CODE_CACHE;
-                    } else {
-                        subHeap = HEAP_DALVIK_ACCOUNTING;  // Default to accounting.
-                    }
-                } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
-                    whichHeap = HEAP_CURSOR;
-                } else if (strncmp(name, "/dev/ashmem/libc malloc", 23) == 0) {
-                    whichHeap = HEAP_NATIVE;
-                } else {
-                    whichHeap = HEAP_ASHMEM;
-                }
             } else if (strncmp(name, "[anon:libc_malloc]", 18) == 0) {
                 whichHeap = HEAP_NATIVE;
             } else if (strncmp(name, "[stack", 6) == 0) {
                 whichHeap = HEAP_STACK;
-            } else if (strncmp(name, "/dev/", 5) == 0) {
-                if (strncmp(name, "/dev/kgsl-3d0", 13) == 0) {
-                    whichHeap = HEAP_GL_DEV;
-                } else {
-                    whichHeap = HEAP_UNKNOWN_DEV;
-                }
             } else if (nameLen > 3 && strcmp(name+nameLen-3, ".so") == 0) {
                 whichHeap = HEAP_SO;
                 is_swappable = true;
@@ -325,7 +286,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".ttf") == 0) {
                 whichHeap = HEAP_TTF;
                 is_swappable = true;
-            } else if ((nameLen > 4 && strcmp(name+nameLen-4, ".dex") == 0) ||
+            } else if ((nameLen > 4 && strstr(name, ".dex") != NULL) ||
                        (nameLen > 5 && strcmp(name+nameLen-5, ".odex") == 0)) {
                 whichHeap = HEAP_DEX;
                 is_swappable = true;
@@ -335,6 +296,45 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".art") == 0) {
                 whichHeap = HEAP_ART;
                 is_swappable = true;
+            } else if (strncmp(name, "/dev/", 5) == 0) {
+                if (strncmp(name, "/dev/kgsl-3d0", 13) == 0) {
+                    whichHeap = HEAP_GL_DEV;
+                } else if (strncmp(name, "/dev/ashmem", 11) == 0) {
+                    if (strncmp(name, "/dev/ashmem/dalvik-", 19) == 0) {
+                        whichHeap = HEAP_DALVIK_OTHER;
+                        if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
+                            subHeap = HEAP_DALVIK_LINEARALLOC;
+                        } else if ((strstr(name, "/dev/ashmem/dalvik-alloc space") == name) ||
+                                   (strstr(name, "/dev/ashmem/dalvik-main space") == name)) {
+                            // This is the regular Dalvik heap.
+                            whichHeap = HEAP_DALVIK;
+                            subHeap = HEAP_DALVIK_NORMAL;
+                        } else if (strstr(name, "/dev/ashmem/dalvik-large object space") == name) {
+                            whichHeap = HEAP_DALVIK;
+                            subHeap = HEAP_DALVIK_LARGE;
+                        } else if (strstr(name, "/dev/ashmem/dalvik-non moving space") == name) {
+                            whichHeap = HEAP_DALVIK;
+                            subHeap = HEAP_DALVIK_NON_MOVING;
+                        } else if (strstr(name, "/dev/ashmem/dalvik-zygote space") == name) {
+                            whichHeap = HEAP_DALVIK;
+                            subHeap = HEAP_DALVIK_ZYGOTE;
+                        } else if (strstr(name, "/dev/ashmem/dalvik-indirect ref") == name) {
+                            subHeap = HEAP_DALVIK_INDIRECT_REFERENCE_TABLE;
+                        } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
+                            subHeap = HEAP_DALVIK_CODE_CACHE;
+                        } else {
+                            subHeap = HEAP_DALVIK_ACCOUNTING;  // Default to accounting.
+                        }
+                    } else if (strncmp(name, "/dev/ashmem/CursorWindow", 24) == 0) {
+                        whichHeap = HEAP_CURSOR;
+                    } else if (strncmp(name, "/dev/ashmem/libc malloc", 23) == 0) {
+                        whichHeap = HEAP_NATIVE;
+                    } else {
+                        whichHeap = HEAP_ASHMEM;
+                    }
+                } else {
+                    whichHeap = HEAP_UNKNOWN_DEV;
+                }
             } else if (strncmp(name, "[anon:", 6) == 0) {
                 whichHeap = HEAP_UNKNOWN;
             } else if (nameLen > 0) {
