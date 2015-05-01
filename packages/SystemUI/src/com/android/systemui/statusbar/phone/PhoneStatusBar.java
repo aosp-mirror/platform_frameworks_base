@@ -91,6 +91,7 @@ import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.ViewMediatorCallback;
@@ -297,7 +298,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int mTrackingPosition; // the position of the top of the tracking view.
 
     // Tracking finger for opening/closing.
-    int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
     boolean mTracking;
     VelocityTracker mVelocityTracker;
 
@@ -691,6 +691,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDismissView.setOnButtonClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MetricsLogger.action(mContext, MetricsLogger.ACTION_DISMISS_ALL_NOTES);
                 clearAllNotifications();
             }
         });
@@ -723,8 +724,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
                         R.id.keyguard_indication_text));
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
-
-        mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
         // set the inital view visibility
         setAreThereNotifications();
@@ -2817,8 +2816,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mNaturalBarHeight = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
-
-        mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
         mRowMinHeight =  res.getDimensionPixelSize(R.dimen.notification_min_height);
         mRowMaxHeight =  res.getDimensionPixelSize(R.dimen.notification_max_height);
