@@ -723,10 +723,7 @@ SDK Manager page. </p>
 a variety of locales to the app's translation file. With
 <a href="https://tools.ietf.org/html/bcp47">BCP 47</a> support, the editor combines language and
 region codes into a single selection for targeted localizations. Color codes indicate whether a
-locale is complete or still missing string translations. You can also use the plugin to export
-your strings to the
-<a href="{@docRoot}distribute/googleplay/developer-console.html">Google Play Developer Console</a>
-for translation, then download and import your translations back into your project. </p>
+locale is complete or still missing string translations. </p>
 
 <p>To access the Translations Editor, open a <code>strings.xml</code> file and click the
 <strong>Open Editor</strong> link.  </p>
