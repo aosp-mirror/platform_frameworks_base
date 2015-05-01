@@ -46,9 +46,9 @@ public class ProjectionActivity extends Activity {
         }
 
         private void setProject(boolean value) {
-            RenderNode displayList = getDisplayList();
-            if (displayList != null) {
-                displayList.setProjectBackwards(value);
+            RenderNode renderNode = updateDisplayListIfDirty();
+            if (renderNode != null) {
+                renderNode.setProjectBackwards(value);
             }
             // NOTE: we can't invalidate ProjectedView for the redraw because:
             // 1) the view won't preserve displayList properties that it doesn't know about
