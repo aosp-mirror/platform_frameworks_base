@@ -1,0 +1,406 @@
+page.title=Keeping Your App Visible
+page.tags=wear
+helpoutsWidget=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#EnableAmbient">Enable Ambient Mode in a Wearable App</a></li>
+  <li><a href="#UpdateContent">Update Content in Ambient Mode</a></li>
+  <li><a href="#BackwardCompatibility">Maintain Backward-compatibility</a></li>
+</ol>
+<h2>You should also read</h2>
+  <ul>
+    <li><a href="{@docRoot}design/wear/structure.html">App Structure for Android Wear</a></li>
+  </ul>
+<h2>Related Samples</h2>
+  <ul>
+    <li><a href="//github.com/googlesamples/android-AlwaysOn">AlwaysOn</a></li>
+  </ul>
+</div>
+</div>
+
+<p>Some Wear apps are most useful when they are constantly visible to the user. For example, users
+out on a run can glance at their wearable to see the distance covered and time elapsed, or after
+recording a grocery list on their wearable, users can quickly see which items are remaining on the
+list as they shop at the market. Making an app constantly visible has an impact on battery life,
+so you should carefully consider that impact when adding this feature to your app.
+</p>
+
+<p>Android Wear devices running Android version 5.1 or higher allow apps to remain in the
+foreground while saving battery power. Android Wear apps can control what’s displayed on the
+wearable device screen while the device is in a low-power ambient mode. Wear apps that run in both
+ambient and interactive mode are called <i>always-on</i> apps.
+</p>
+
+<p>This lesson describes how to enable your wearable app to be always-on, update the screen
+while in ambient mode, and maintain backwards compatibility.
+</p>
+
+<h2 id="EnableAmbient">Enable Ambient Mode in a Wearable App</h2>
+
+<p>For new and existing projects, you can add ambient mode support to your Wear app by updating
+your development project configuration. After you complete the project configuration, extend the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html"><code>WearableActivity</code></a>
+class, which provides all the methods you need to enable ambient mode in your app. The following
+sections describe these steps in detail.</p>
+
+<h3 id="ConfigureProject">Configure your development project</h3>
+
+<p>In order to support ambient mode in your Wear app, you must update your Android SDK and configure
+your development project. Follow these steps to make the necessary changes:</p>
+
+<ul>
+  <li>Update your SDK to include the Android 5.1 (API 22) or higher platform, which provides the
+  APIs to allow activities to go into ambient mode. For more information on how to update your SDK,
+  see
+  <a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">Adding SDK Packages</a>.
+  </li>
+  <li> Create a project or modify an existing project to target Android 5.1 or higher. This means
+  you must set the manifest
+  <a href="{@docRoot}topics/manifest/uses-sdk-element.html"><code>targetSdkVersion</code></a> to 22
+  or higher.</li>
+  <li>Set the manifest
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>minSdkVersion</code></a> to
+  20 or higher, if you want to support devices on versions prior to Android 5.1. For more
+  information on backwards compatibility, see
+  <a href="#BackwardCompatibility">Maintain Backward-compatibility</a>.</li>
+  </li>
+  <li>Add or update the following dependencies to your <code>build.gradle</code> file:
+<pre>
+dependencies {
+    ...
+    compile 'com.google.android.support:wearable:1.2.0'
+    provided 'com.google.android.wearable:wearable:1.0.0'
+}
+</pre>
+<p class="note"><b>Note:</b> The <code>provided</code> dependency ensures that the classes loaded at
+run-time to support ambient mode are also available at compile-time.
+</p>
+</li>
+  <li>Add the wearable shared library entry into the wearable app manifest:
+<pre>
+&lt;application>
+  &lt;uses-library android:name="com.google.android.wearable"
+                android:required="false" />
+  ...
+&lt;/application>
+</pre>
+  </li>
+  <li>Add the
+  <a href="{@docRoot}reference/android/Manifest.permission.html#WAKE_LOCK"><code>WAKE_LOCK</code></a>
+  permission to the handheld and wearable app manifest:
+<pre>
+&lt;uses-permission android:name="android.permission.WAKE_LOCK" />
+</pre>
+  </li>
+</ul>
+
+<h3 id="CreateActivity">Create an activity that supports ambient mode</h3>
+
+<p>To enable ambient mode in your activity, use the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html"><code>WearableActivity</code></a>
+class and methods.
+</p>
+
+<ol>
+  <li>Create an activity that extends
+  <a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html"><code>WearableActivity</code></a>.</li>
+  <li>In the
+  <a href="{@docRoot}reference/android/app/Activity.html#onCreate(android.os.Bundle)"><code>onCreate()</code></a>
+  method of your activity, call the
+  <a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#setAmbientEnabled()"><code>setAmbientEnabled()</code></a>
+  method.</li>
+</ol>
+
+<p>Enable ambient mode in your activity as follows:</p>
+
+<pre>
+public class MainActivity extends WearableActivity {
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    <strong>setAmbientEnabled();</strong>
+    ...
+}
+</pre>
+
+<h3 id="EnableDisable">Handle transitions between modes</h3>
+
+<p>If the user does not interact with your app for a period of time while it is displayed, or if
+the user covers the screen with their palm, the system switches the activity to ambient mode.
+After the app switches to ambient mode, update the activity UI to a more basic layout to reduce
+power consumption. You should use a black background with minimal white graphics and text. To
+ease a user into the transition from interactive to ambient mode, try to maintain similar placement
+of items on the screen. For more information on presenting content on an ambient screen, see the
+<a href="{@docRoot}design/wear/watchfaces.html#DisplayModes">Watch Faces for Android Wear</a>
+design guide.
+</p>
+
+<p class="note"><b>Note:</b> In ambient mode, disable any interactive elements on the
+screen, such as buttons. For more information on how to design user interactions for an always-on
+app, see the
+<a href="{@docRoot}design/wear/structure.html#AlwaysOn">App Structure for Android Wear</a> design
+guide.
+</p>
+
+<p>When the activity switches to ambient mode, the system calls the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#onEnterAmbient(android.os.Bundle)"><code>onEnterAmbient()</code></a>
+method in your wearable activity. The following code snippet shows how to change the text color to
+white and disable anti-aliasing after the system switches to ambient mode:
+</p>
+
+<pre>
+&#64;Override
+public void onEnterAmbient(Bundle ambientDetails) {
+    super.onEnterAmbient(ambientDetails);
+
+    mStateTextView.setTextColor(Color.WHITE);
+    mStateTextView.getPaint().setAntiAlias(false);
+}
+</pre>
+
+<p>When the user taps the screen or brings up their wrist, the activity switches from ambient mode
+to interactive mode. The system calls the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#onExitAmbient()"><code>onExitAmbient()</code></a>
+method. Override this method to update the UI layout so that your app displays in a full-color,
+interactive state.</p>
+
+<p>The following code snippet shows how to change the text color to green and enable anti-aliasing
+when the system switches to interactive mode:</p>
+
+<pre>
+&#64;Override
+public void onExitAmbient() {
+    super.onExitAmbient();
+
+    mStateTextView.setTextColor(Color.GREEN);
+    mStateTextView.getPaint().setAntiAlias(true);
+}
+</pre>
+
+<h2 id="UpdateContent">Update Content in Ambient Mode</h2>
+
+<p>Ambient mode allows you to update the screen with new information for the user, but you must
+carefully balance display updates against the battery life. You should strongly consider only
+overriding the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#onUpdateAmbient()"><code>onUpdateAmbient()</code></a>
+method to update the screen once a minute in ambient mode. If your app requires more frequent
+updates, take into consideration that there is a trade-off between battery life and the frequency of
+updates. To realize battery savings, updates should be no more than once every 10 seconds. In
+practice, however, you should update your app less frequently than that.
+</p>
+
+<h3 id="StandardRefresh">Update once a minute</h3>
+
+<p>In order to preserve battery power, most wear apps should not frequently update the screen while
+in ambient mode. We recommend designing your app to update the screen once per minute while
+in this mode. The system provides a callback method,
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#onUpdateAmbient()"><code>onUpdateAmbient()</code></a>,
+that allows you to update the screen at this recommended frequency.</p>
+
+<p>To update your app content, override the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#onUpdateAmbient()"><code>onUpdateAmbient()</code></a>
+method in your wearable activity:
+</p>
+
+<pre>
+&#64;Override
+public void onUpdateAmbient() {
+    super.onUpdateAmbient();
+
+    // Update the content
+}
+</pre>
+
+<h3 id="CustomRefresh">Update more frequently</h3>
+
+<p>For apps that require more frequent updates, such as a fitness, time-keeping, and travel
+information apps, use an
+<a href="{@docRoot}reference/android/app/AlarmManager.html"><code>AlarmManager</code></a>
+object to wake the processor and update the screen more frequently.</p>
+
+<p>To implement an alarm that updates content more frequently in ambient mode, follow these steps:
+</p>
+
+<ol>
+  <li>Prepare the alarm manager.</li>
+  <li>Set the frequency of the updates.</li>
+  <li>Schedule the next update when the activity switches to ambient mode or is currently in ambient
+      mode.</li>
+  <li>Cancel the alarm when the activity switches to interactive mode or the activity is stopped
+  </li>
+</ol>
+
+<p class="note"><b>Note:</b> The alarm manager may create new instances of your activity as they are
+triggered. To prevent this situation, ensure that your activity is declared with the
+<code>android:launchMode="singleInstance"</code> parameter in the manifest.</p>
+
+<p>The following sections describe these steps in detail.</p>
+
+<h4 id="PrepareAlarm">Prepare the alarm manager</h4>
+
+<p>The alarm manager launches a pending intent that updates the screen and schedules the next alarm.
+The following example shows how to declare the alarm manager and the pending intent in the
+<a href="{@docRoot}reference/android/app/Activity.html#onCreate(android.os.Bundle)"><code>onCreate()</code></a>
+method of your activity:</p>
+
+<pre>
+private AlarmManager mAmbientStateAlarmManager;
+private PendingIntent mAmbientStatePendingIntent;
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    setAmbientEnabled();
+
+    mAmbientStateAlarmManager =
+        (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+    Intent ambientStateIntent =
+        new Intent(getApplicationContext(), MainActivity.class);
+
+    mAmbientStatePendingIntent = PendingIntent.getActivity(
+        getApplicationContext(),
+        0,
+        ambientStateIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT);
+    ...
+}
+</pre>
+
+<p>When the alarm triggers and launches the pending intent, update the screen and schedule the next
+alarm by overriding the
+<a href="{@docRoot}reference/android/app/Activity.html#onNewIntent(android.content.Intent)"><code>onNewIntent()</code></a>
+method:
+</p>
+
+<pre>
+&#64;Override
+public void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+
+    setIntent(intent);
+
+    // Described in the following section
+    refreshDisplayAndSetNextUpdate();
+}
+</pre>
+
+<h4 id="ScheduleUpdates">Update screen and schedule data updates</h4>
+
+<p>In this example activity, the alarm manager triggers every 20 seconds in ambient mode. When
+the timer ticks, the alarm triggers the intent to update the screen and then sets the delay for the
+next update.
+</p>
+
+<p>The following example shows how to update information on the screen and set the alarm for the
+next update:
+</p>
+
+<pre>
+// Milliseconds between waking processor/screen for updates
+private static final long AMBIENT_INTERVAL_MS = TimeUnit.SECONDS.toMillis(20);
+
+private void refreshDisplayAndSetNextUpdate() {
+
+    if (isAmbient()) {
+        // Implement data retrieval and update the screen for ambient mode
+    } else {
+        // Implement data retrieval and update the screen for interactive mode
+    }
+
+    long timeMs = System.currentTimeMillis();
+
+    // Schedule a new alarm
+    if (isAmbient()) {
+        // Calculate the next trigger time
+        long delayMs = AMBIENT_INTERVAL_MS - (timeMs % AMBIENT_INTERVAL_MS);
+        long triggerTimeMs = timeMs + delayMs;
+
+        mAmbientStateAlarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            triggerTimeMs,
+            mAmbientStatePendingIntent);
+
+    } else {
+        // Calculate the next trigger time for interactive mode
+    }
+}
+</pre>
+
+<h4 id="ScheduleNext">Schedule the next alarm</h4>
+
+<p>Schedule the alarm to update the screen when the activity is entering ambient mode or when the
+activity is already in ambient mode by overriding the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#onEnterAmbient(android.os.Bundle)"><code>onEnterAmbient()</code></a>
+method and the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#onUpdateAmbient()"><code>onUpdateAmbient()</code></a>
+method:</p>
+
+<pre>
+&#64;Override
+public void onEnterAmbient(Bundle ambientDetails) {
+    super.onEnterAmbient(ambientDetails);
+
+    refreshDisplayAndSetNextUpdate();
+}
+
+&#64;Override
+public void onUpdateAmbient() {
+    super.onUpdateAmbient();
+
+    refreshDisplayAndSetNextUpdate();
+}
+</pre>
+
+<p class="note"><b>Note:</b> In this example, the <code>refreshDisplayAndSetNextUpdate()</code>
+method is called whenever the screen needs to be updated. For more examples of when to call this
+method, see the <a href="//github.com/googlesamples/android-AlwaysOn">AlwaysOn</a> sample.
+</p>
+
+<h4 id="CancelAlarm">Cancel the alarm</h4>
+
+<p>When the device switches to interactive mode, cancel the alarm in the
+<a href="{@docRoot}reference/android/support/wearable/activity/WearableActivity.html#onExitAmbient()"><code>onExitAmbient()</code></a>
+method:</p>
+
+<pre>
+&#64;Override
+public void onExitAmbient() {
+    super.onExitAmbient();
+
+    mAmbientStateAlarmManager.cancel(mAmbientStatePendingIntent);
+}
+</pre>
+
+<p>When the user exits or stops your activity, cancel the alarm in the
+<a href="{@docRoot}reference/android/app/Activity.html#onDestroy()"><code>onDestroy()</code></a>
+method of your activity:</p>
+
+<pre>
+&#64;Override
+public void onDestroy() {
+    mAmbientStateAlarmManager.cancel(mAmbientStatePendingIntent);
+    super.onDestroy();
+}
+</pre>
+
+<h2 id="BackwardCompatibility">Maintain Backward-compatibility</h2>
+
+<p>Activities that support ambient mode automatically fall back to normal activities on Wear devices
+that are on Android versions prior to 5.1 (API level 22). No special app code is required to support
+devices on these versions of Android. When the device switches to ambient mode, the device returns
+to the home screen and exits your activity.</p>
+
+<p>If your app should not be installed or updated on devices with Android versions prior to 5.1,
+update your manifest with the following:</p>
+
+<pre>
+&lt;uses-library android:name="com.google.android.wearable" android:required="true" />
+</pre>
