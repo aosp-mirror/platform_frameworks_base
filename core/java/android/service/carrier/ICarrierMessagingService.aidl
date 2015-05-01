@@ -48,9 +48,10 @@ oneway interface ICarrierMessagingService {
      * @param text the text to send
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
+     * @param sendSmsFlag flag for sending SMS
      * @param callback the callback to notify upon completion
      */
-    void sendTextSms(String text, int subId, String destAddress,
+    void sendTextSms(String text, int subId, String destAddress, int sendSmsFlag,
             in ICarrierMessagingCallback callback);
 
     /**
@@ -62,10 +63,11 @@ oneway interface ICarrierMessagingService {
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
      * @param destPort port number of the recipient of the message
+     * @param sendSmsFlag flag for sending SMS
      * @param callback the callback to notify upon completion
      */
     void sendDataSms(in byte[] data, int subId, String destAddress, int destPort,
-            in ICarrierMessagingCallback callback);
+            int sendSmsFlag, in ICarrierMessagingCallback callback);
 
     /**
      * Request sending a new multi-part text SMS from the device.
@@ -75,10 +77,11 @@ oneway interface ICarrierMessagingService {
      * @param parts the parts of the multi-part text SMS to send
      * @param subId SMS subscription ID of the SIM
      * @param destAddress phone number of the recipient of the message
+     * @param sendSmsFlag flag for sending SMS
      * @param callback the callback to notify upon completion
      */
     void sendMultipartTextSms(in List<String> parts, int subId, String destAddress,
-            in ICarrierMessagingCallback callback);
+            int sendSmsFlag, in ICarrierMessagingCallback callback);
 
     /**
      * Request sending a new MMS PDU from the device.

@@ -56,6 +56,8 @@ oneway interface IConnectionServiceAdapter {
 
     void setIsConferenced(String callId, String conferenceCallId);
 
+    void setConferenceMergeFailed(String callId);
+
     void addConferenceCall(String callId, in ParcelableConference conference);
 
     void removeCall(String callId);

@@ -38,6 +38,10 @@ public class DelayedDiskWrite {
     }
 
     public void write(final String filePath, final Writer w) {
+        write(filePath, w, true);
+    }
+
+    public void write(final String filePath, final Writer w, final boolean open) {
         if (TextUtils.isEmpty(filePath)) {
             throw new IllegalArgumentException("empty file path");
         }
@@ -54,16 +58,18 @@ public class DelayedDiskWrite {
         mDiskWriteHandler.post(new Runnable() {
             @Override
             public void run() {
-                doWrite(filePath, w);
+                doWrite(filePath, w, open);
             }
         });
     }
 
-    private void doWrite(String filePath, Writer w) {
+    private void doWrite(String filePath, Writer w, boolean open) {
         DataOutputStream out = null;
         try {
-            out = new DataOutputStream(new BufferedOutputStream(
+            if (open) {
+                out = new DataOutputStream(new BufferedOutputStream(
                         new FileOutputStream(filePath)));
+            }
             w.onWriteCalled(out);
         } catch (IOException e) {
             loge("Error writing data file " + filePath);

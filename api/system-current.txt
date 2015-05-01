@@ -20885,6 +20885,7 @@ package android.net.wifi {
     field public static final int REASON_INVALID_LISTENER = -3; // 0xfffffffd
     field public static final int REASON_INVALID_REQUEST = -4; // 0xfffffffc
     field public static final int REASON_NOT_AVAILABLE = -2; // 0xfffffffe
+    field public static final int REASON_PERMISSION_DENIED = -5; // 0xfffffffb
     field public static final int REASON_UNSPECIFIED = -1; // 0xffffffff
     field public static final int RTT_BW_10_SUPPORT = 2; // 0x2
     field public static final int RTT_BW_160_SUPPORT = 32; // 0x20
@@ -30896,13 +30897,17 @@ package android.service.carrier {
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onDownloadMms(android.net.Uri, int, android.net.Uri, android.service.carrier.CarrierMessagingService.ResultCallback<java.lang.Integer>);
     method public void onFilterSms(android.service.carrier.MessagePdu, java.lang.String, int, int, android.service.carrier.CarrierMessagingService.ResultCallback<java.lang.Boolean>);
-    method public void onSendDataSms(byte[], int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public deprecated void onSendDataSms(byte[], int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public void onSendDataSms(byte[], int, java.lang.String, int, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
     method public void onSendMms(android.net.Uri, int, android.net.Uri, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMmsResult>);
-    method public void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
-    method public void onSendTextSms(java.lang.String, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public deprecated void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
+    method public void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
+    method public deprecated void onSendTextSms(java.lang.String, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public void onSendTextSms(java.lang.String, int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
     field public static final int DOWNLOAD_STATUS_ERROR = 2; // 0x2
     field public static final int DOWNLOAD_STATUS_OK = 0; // 0x0
     field public static final int DOWNLOAD_STATUS_RETRY_ON_CARRIER_NETWORK = 1; // 0x1
+    field public static final int SEND_FLAG_REQUEST_DELIVERY_STATUS = 1; // 0x1
     field public static final int SEND_STATUS_ERROR = 2; // 0x2
     field public static final int SEND_STATUS_OK = 0; // 0x0
     field public static final int SEND_STATUS_RETRY_ON_CARRIER_NETWORK = 1; // 0x1
@@ -32982,6 +32987,7 @@ package android.telecom {
     method public static boolean isPaused(int);
     method public static boolean isReceptionEnabled(int);
     method public static boolean isTransmissionEnabled(int);
+    method public static java.lang.String videoStateToString(int);
     field public static final int AUDIO_ONLY = 0; // 0x0
     field public static final int BIDIRECTIONAL = 3; // 0x3
     field public static final int PAUSED = 4; // 0x4
@@ -33404,7 +33410,8 @@ package android.telephony {
   public class SmsMessage {
     method public static int[] calculateLength(java.lang.CharSequence, boolean);
     method public static int[] calculateLength(java.lang.String, boolean);
-    method public static android.telephony.SmsMessage createFromPdu(byte[]);
+    method public static deprecated android.telephony.SmsMessage createFromPdu(byte[]);
+    method public static android.telephony.SmsMessage createFromPdu(byte[], java.lang.String);
     method public java.lang.String getDisplayMessageBody();
     method public java.lang.String getDisplayOriginatingAddress();
     method public java.lang.String getEmailBody();
