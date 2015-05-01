@@ -34,6 +34,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.ClipData;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -502,16 +503,7 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
-            final ArrayList<DocumentInfo> docs = Lists.newArrayList();
-            final int size = checked.size();
-            for (int i = 0; i < size; i++) {
-                if (checked.valueAt(i)) {
-                    final Cursor cursor = mAdapter.getItem(checked.keyAt(i));
-                    final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-                    docs.add(doc);
-                }
-            }
+            final List<DocumentInfo> docs = getSelectedDocuments();
 
             final int id = item.getItemId();
             if (id == R.id.menu_open) {
@@ -1197,5 +1189,77 @@ public class DirectoryFragment extends Fragment {
         }
 
         return MimePredicate.mimeMatches(state.acceptMimes, docMimeType);
+    }
+
+    public List<DocumentInfo> getSelectedDocuments() {
+        final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
+        final List<DocumentInfo> docs = Lists.newArrayList();
+        final int size = checked.size();
+        for (int i = 0; i < size; i++) {
+            if (checked.valueAt(i)) {
+                final Cursor cursor = mAdapter.getItem(checked.keyAt(i));
+                final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
+                docs.add(doc);
+            }
+        }
+        return docs;
+    }
+
+    private void copyFromClipData(ClipData clipData, DocumentInfo dstDir) {
+        final List<DocumentInfo> srcDocs = getDocumentsFromClipData(clipData);
+
+        if (srcDocs.isEmpty())
+            return;
+
+        final DocumentStack curStack = getDisplayState(this).stack;
+        DocumentStack tmpStack = new DocumentStack();
+        if (dstDir != null) {
+            tmpStack.push(dstDir);
+            tmpStack.addAll(curStack);
+        } else {
+            tmpStack = curStack;
+        }
+
+        CopyService.start(getActivity(), srcDocs, tmpStack);
+    }
+
+    private List<DocumentInfo> getDocumentsFromClipData(ClipData clipData) {
+        final List<DocumentInfo> srcDocs = Lists.newArrayList();
+
+        Context context = getActivity();
+        final ContentResolver resolver = context.getContentResolver();
+
+        int itemCount = clipData.getItemCount();
+        for (int i = 0; i < itemCount; ++i) {
+            ClipData.Item item = clipData.getItemAt(i);
+            Uri itemUri = item.getUri();
+            if (itemUri != null && DocumentsContract.isDocumentUri(context, itemUri)) {
+                try {
+                    Cursor cursor = resolver.query(itemUri, null, null, null, null);
+                    cursor.moveToPosition(0);
+                    srcDocs.add(DocumentInfo.fromCursor(cursor, itemUri.getAuthority()));
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+        }
+
+        return srcDocs;
+    }
+
+    private ClipData getClipDataFromDocuments(List<DocumentInfo> docs) {
+        Context context = getActivity();
+        final ContentResolver resolver = context.getContentResolver();
+        ClipData clipData = null;
+        for (DocumentInfo doc : docs) {
+            final Uri uri = DocumentsContract.buildDocumentUri(doc.authority, doc.documentId);
+            if (clipData == null) {
+                clipData = ClipData.newUri(resolver, "", uri);
+            } else {
+                // TODO: update list of mime types in ClipData.
+                clipData.addItem(new ClipData.Item(uri));
+            }
+        }
+        return clipData;
     }
 }
