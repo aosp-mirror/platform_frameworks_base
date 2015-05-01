@@ -187,7 +187,7 @@ public final class ScanSettings implements Parcelable {
         mScanResultType = scanResultType;
         mReportDelayMillis = reportDelayMillis;
         mNumOfMatchesPerFilter = numOfMatchesPerFilter;
-        mMatchMode = numOfMatchesPerFilter;
+        mMatchMode = matchMode;
     }
 
     private ScanSettings(Parcel in) {
