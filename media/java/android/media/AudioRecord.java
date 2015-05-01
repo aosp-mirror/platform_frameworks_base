@@ -27,7 +27,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
-import android.app.Application;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -380,7 +379,7 @@ public class AudioRecord
         int initResult = native_setup( new WeakReference<AudioRecord>(this),
                 mAudioAttributes, mSampleRate, mChannelMask, mChannelIndexMask,
                 mAudioFormat, mNativeBufferSizeInBytes,
-                session, getMyOpPackageName());
+                session, ActivityThread.currentOpPackageName());
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
             return; // with mState == STATE_UNINITIALIZED
@@ -1499,16 +1498,5 @@ public class AudioRecord
 
     private static void loge(String msg) {
         Log.e(TAG, msg);
-    }
-
-    private static String getMyOpPackageName() {
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
-        if (activityThread != null) {
-            Application application = activityThread.getApplication();
-            if (application != null) {
-                return application.getOpPackageName();
-            }
-        }
-        throw new IllegalStateException("Cannot create AudioRecord outside of an app");
     }
 }
