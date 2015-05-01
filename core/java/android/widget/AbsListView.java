@@ -3638,11 +3638,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         startNestedScroll(SCROLL_AXIS_VERTICAL);
 
-        if (mFastScroll != null) {
-            boolean intercepted = mFastScroll.onTouchEvent(ev);
-            if (intercepted) {
-                return true;
-            }
+        if (mFastScroll != null && mFastScroll.onTouchEvent(ev)) {
+            return true;
         }
 
         initVelocityTrackerIfNotExists();
