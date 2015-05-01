@@ -20,6 +20,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
@@ -240,6 +241,15 @@ public class Environment {
      */
     public static File getDataDirectory() {
         return DATA_DIRECTORY;
+    }
+
+    /** {@hide} */
+    public static File getDataAppDirectory(String volumeUuid) {
+        if (TextUtils.isEmpty(volumeUuid)) {
+            return new File("/data/app");
+        } else {
+            return new File("/mnt/expand/" + volumeUuid + "/app");
+        }
     }
 
     /**
