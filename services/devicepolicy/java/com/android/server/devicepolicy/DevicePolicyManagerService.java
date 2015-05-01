@@ -4065,11 +4065,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         synchronized (this) {
-            if (mDeviceOwner != null) {
-                return mDeviceOwner.getDeviceOwnerName();
+            if (mDeviceOwner == null || !mDeviceOwner.hasDeviceOwner()) {
+                return null;
             }
+            String deviceOwnerPackage = mDeviceOwner.getDeviceOwnerPackageName();
+            return getApplicationLabel(deviceOwnerPackage, UserHandle.USER_OWNER);
         }
-        return null;
     }
 
     // Returns the active device owner or null if there is no device owner.
@@ -4426,7 +4427,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (profileOwner == null) {
             return null;
         }
-
         DevicePolicyData policy = getUserData(userHandle);
         final int n = policy.mAdminList.size();
         for (int i = 0; i < n; i++) {
@@ -4444,13 +4444,37 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
-
-        synchronized (this) {
-            if (mDeviceOwner != null) {
-                return mDeviceOwner.getProfileOwnerName(userHandle);
-            }
+        ComponentName profileOwner = getProfileOwner(userHandle);
+        if (profileOwner == null) {
+            return null;
         }
-        return null;
+        return getApplicationLabel(profileOwner.getPackageName(), userHandle);
+    }
+
+    /**
+     * Canonical name for a given package.
+     */
+    private String getApplicationLabel(String packageName, int userHandle) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            final Context userContext;
+            try {
+                UserHandle handle = new UserHandle(userHandle);
+                userContext = mContext.createPackageContextAsUser(packageName, 0, handle);
+            } catch (PackageManager.NameNotFoundException nnfe) {
+                Log.w(LOG_TAG, packageName + " is not installed for user " + userHandle, nnfe);
+                return null;
+            }
+            ApplicationInfo appInfo = userContext.getApplicationInfo();
+            CharSequence result = null;
+            if (appInfo != null) {
+                PackageManager pm = userContext.getPackageManager();
+                result = pm.getApplicationLabel(appInfo);
+            }
+            return result != null ? result.toString() : null;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
