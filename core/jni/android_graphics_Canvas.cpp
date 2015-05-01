@@ -42,7 +42,7 @@ static void finalizer(JNIEnv* env, jobject clazz, jlong canvasHandle) {
 static jlong initRaster(JNIEnv* env, jobject, jobject jbitmap) {
     SkBitmap* bitmap = nullptr;
     if (jbitmap != NULL) {
-        bitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
+        bitmap = GraphicsJNI::getSkBitmapDeprecated(env, jbitmap);
     }
     return reinterpret_cast<jlong>(Canvas::create_canvas(
             bitmap ? *bitmap : SkBitmap()));
@@ -53,7 +53,7 @@ static jlong initRaster(JNIEnv* env, jobject, jobject jbitmap) {
 static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap) {
     SkBitmap* bitmap = nullptr;
     if (jbitmap != NULL) {
-        bitmap = GraphicsJNI::getSkBitmap(env, jbitmap);
+        bitmap = GraphicsJNI::getSkBitmapDeprecated(env, jbitmap);
     }
     get_canvas(canvasHandle)->setBitmap(bitmap ? *bitmap : SkBitmap());
 }
