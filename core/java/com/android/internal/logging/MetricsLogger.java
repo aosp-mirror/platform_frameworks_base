@@ -32,6 +32,7 @@ public class MetricsLogger implements MetricsConstants {
     public static final int NOTIFICATION_ZEN_MODE_EXTERNAL_RULE = 145;
     public static final int ACTION_BAN_APP_NOTES = 146;
     public static final int NOTIFICATION_ZEN_MODE_EVENT_RULE = 147;
+    public static final int ACTION_DISMISS_ALL_NOTES = 148;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
