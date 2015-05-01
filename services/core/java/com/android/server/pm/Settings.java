@@ -3603,8 +3603,8 @@ final class Settings {
         return pkg.getCurrentEnabledStateLPr(classNameStr, userId);
     }
 
-    boolean setPackageStoppedStateLPw(String packageName, boolean stopped,
-            boolean allowedByPermission, int uid, int userId) {
+    boolean setPackageStoppedStateLPw(PackageManagerService yucky, String packageName,
+            boolean stopped, boolean allowedByPermission, int uid, int userId) {
         int appId = UserHandle.getAppId(uid);
         final PackageSetting pkgSetting = mPackages.get(packageName);
         if (pkgSetting == null) {
@@ -3628,7 +3628,7 @@ final class Settings {
             // pkgSetting.pkg.mSetStopped = stopped;
             if (pkgSetting.getNotLaunched(userId)) {
                 if (pkgSetting.installerPackageName != null) {
-                    PackageManagerService.sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH,
+                    yucky.sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH,
                             pkgSetting.name, null,
                             pkgSetting.installerPackageName, null, new int[] {userId});
                 }
