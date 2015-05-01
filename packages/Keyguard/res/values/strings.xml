@@ -96,8 +96,6 @@
     <string name="keyguard_widget_24_hours_format" translatable="false">kk\uee01mm</string>
 
     <string name="keyguard_accessibility_pattern_unlock">Pattern unlock.</string>
-    <!-- Accessibility description of the face unlock. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_face_unlock">Face unlock.</string>
     <!-- Accessibility description of the pin lock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pin_unlock">Pin unlock.</string>
     <!-- Accessibility description of the password lock. [CHAR_LIMIT=none] -->
