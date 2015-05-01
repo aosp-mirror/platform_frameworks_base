@@ -2804,4 +2804,17 @@ public class WifiManager {
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Get Network object of current wifi network
+     * @return Get Network object of current wifi network
+     * @hide
+     */
+    public Network getCurrentNetwork() {
+        try {
+            return mService.getCurrentNetwork();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
 }

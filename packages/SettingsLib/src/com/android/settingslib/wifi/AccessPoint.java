@@ -17,9 +17,13 @@
 package com.android.settingslib.wifi;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
+import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
@@ -27,6 +31,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -697,6 +703,25 @@ public class AccessPoint implements Comparable<AccessPoint> {
             } else if (isEphemeral) {
                 // Special case for connected + ephemeral networks.
                 return context.getString(R.string.connected_via_wfa);
+            }
+        }
+
+        // Case when there is wifi connected without internet connectivity.
+        final ConnectivityManager cm = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (state == DetailedState.CONNECTED) {
+            IWifiManager wifiManager = IWifiManager.Stub.asInterface(
+                    ServiceManager.getService(Context.WIFI_SERVICE));
+            Network nw;
+
+            try {
+                nw = wifiManager.getCurrentNetwork();
+            } catch (RemoteException e) {
+                nw = null;
+            }
+            NetworkCapabilities nc = cm.getNetworkCapabilities(nw);
+            if (nc != null && !nc.hasCapability(nc.NET_CAPABILITY_VALIDATED)) {
+                return context.getString(R.string.wifi_connected_no_internet);
             }
         }
 
