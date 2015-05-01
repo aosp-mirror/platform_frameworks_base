@@ -238,6 +238,8 @@ public final class KeymasterDefs {
         sErrorCodeToString.put(KM_ERROR_UNSUPPORTED_EC_FIELD, "Unsupported EC field");
         sErrorCodeToString.put(KM_ERROR_MISSING_NONCE, "Required IV missing");
         sErrorCodeToString.put(KM_ERROR_INVALID_NONCE, "Invalid IV");
+        sErrorCodeToString.put(KM_ERROR_CALLER_NONCE_PROHIBITED,
+                "Caller-provided IV not permitted");
         sErrorCodeToString.put(KM_ERROR_UNIMPLEMENTED, "Not implemented");
         sErrorCodeToString.put(KM_ERROR_UNKNOWN_ERROR, "Unknown error");
     }

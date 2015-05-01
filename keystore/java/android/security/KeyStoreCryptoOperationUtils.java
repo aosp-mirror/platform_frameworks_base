@@ -74,6 +74,8 @@ abstract class KeyStoreCryptoOperationUtils {
         switch (beginOpResultCode) {
             case KeymasterDefs.KM_ERROR_INVALID_NONCE:
                 return new InvalidAlgorithmParameterException("Invalid IV");
+            case KeymasterDefs.KM_ERROR_CALLER_NONCE_PROHIBITED:
+                return new InvalidAlgorithmParameterException("Caller-provided IV not permitted");
         }
 
         // General cases
