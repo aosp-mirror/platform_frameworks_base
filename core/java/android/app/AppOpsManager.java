@@ -223,8 +223,10 @@ public class AppOpsManager {
     public static final int OP_PROCESS_OUTGOING_CALLS = 54;
     /** @hide User the fingerprint API. */
     public static final int OP_USE_FINGERPRINT = 55;
+    /** @hide Access to body sensors such as heart rate, etc. */
+    public static final int OP_BODY_SENSORS = 56;
     /** @hide */
-    public static final int _NUM_OP = 56;
+    public static final int _NUM_OP = 57;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -280,9 +282,6 @@ public class AppOpsManager {
     /** @hide Allows an application to send SMS messages. */
     public static final String OPSTR_SEND_SMS
             = "android:send_sms";
-    /** @hide Allows an application to add system alert windows. */
-    public static final String OPSTR_SYSTEM_ALERT_WINDOW
-            = "android:system_alert_window";
     /** @hide Required to be able to access the camera device. */
     public static final String OPSTR_CAMERA
             = "android:camera";
@@ -295,6 +294,15 @@ public class AppOpsManager {
     /** @hide Required to access phone state related information. */
     public static final String OPSTR_ADD_VOICEMAIL
             = "android:add_voicemail";
+    /** @hide Access APIs for SIP calling over VOIP or WiFi */
+    public static final String OPSTR_USE_SIP
+            = "android:use_sip";
+    /** @hide Use the fingerprint API. */
+    public static final String OPSTR_USE_FINGERPRINT
+            = "android:use_fingerprint";
+    /** @hide Access to body sensors such as heart rate, etc. */
+    public static final String OPSTR_BODY_SENSORS
+            = "android:body_sensors";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -360,7 +368,8 @@ public class AppOpsManager {
             OP_ADD_VOICEMAIL,
             OP_USE_SIP,
             OP_PROCESS_OUTGOING_CALLS,
-            OP_USE_FINGERPRINT
+            OP_USE_FINGERPRINT,
+            OP_BODY_SENSORS
     };
 
     /**
@@ -372,30 +381,30 @@ public class AppOpsManager {
             OPSTR_FINE_LOCATION,
             null,
             null,
+            OPSTR_READ_CONTACTS,
+            OPSTR_WRITE_CONTACTS,
+            OPSTR_READ_CALL_LOG,
+            OPSTR_WRITE_CALL_LOG,
+            OPSTR_READ_CALENDAR,
+            OPSTR_WRITE_CALENDAR,
+            null,
+            null,
+            null,
+            OPSTR_CALL_PHONE,
+            OPSTR_READ_SMS,
+            null,
+            OPSTR_RECEIVE_SMS,
+            null,
+            OPSTR_RECEIVE_MMS,
+            OPSTR_RECEIVE_WAP_PUSH,
+            OPSTR_SEND_SMS,
             null,
             null,
             null,
             null,
             null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
+            OPSTR_CAMERA,
+            OPSTR_RECORD_AUDIO,
             null,
             null,
             null,
@@ -419,11 +428,12 @@ public class AppOpsManager {
             null,
             null,
             null,
+            OPSTR_READ_PHONE_STATE,
+            OPSTR_ADD_VOICEMAIL,
+            OPSTR_USE_SIP,
             null,
-            null,
-            null,
-            null,
-            null
+            OPSTR_USE_FINGERPRINT,
+            OPSTR_BODY_SENSORS
     };
 
     /**
@@ -486,7 +496,8 @@ public class AppOpsManager {
             "ADD_VOICEMAIL",
             "USE_SIP",
             "PROCESS_OUTGOING_CALLS",
-            "USE_FINGERPRINT"
+            "USE_FINGERPRINT",
+            "BODY_SENSORS"
     };
 
     /**
@@ -549,7 +560,8 @@ public class AppOpsManager {
             Manifest.permission.ADD_VOICEMAIL,
             Manifest.permission.USE_SIP,
             Manifest.permission.PROCESS_OUTGOING_CALLS,
-            Manifest.permission.USE_FINGERPRINT
+            Manifest.permission.USE_FINGERPRINT,
+            Manifest.permission.BODY_SENSORS
     };
 
     /**
@@ -613,7 +625,8 @@ public class AppOpsManager {
             null, // ADD_VOICEMAIL
             null, // USE_SIP
             null, // PROCESS_OUTGOING_CALLS
-            null  // USE_FINGERPRINT
+            null, // USE_FINGERPRINT
+            null  // BODY_SENSORS
     };
 
     /**
@@ -676,7 +689,8 @@ public class AppOpsManager {
             false, //ADD_VOICEMAIL
             false, // USE_SIP
             false, // PROCESS_OUTGOING_CALLS
-            false  // USE_FINGERPRINT
+            false, // USE_FINGERPRINT
+            false  // BODY_SENSORS
     };
 
     /**
@@ -731,6 +745,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA
             AppOpsManager.MODE_IGNORED, // OP_ACTIVATE_VPN
+            AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
@@ -804,37 +819,19 @@ public class AppOpsManager {
             false,
             false,
             false,
+            false,
             false
     };
 
     /**
-     * This is a mapping from a permission name to public app op name.
+     * Mapping from an app op name to the app op code.
      */
-    private static final ArrayMap<String, String> sPermToOp = new ArrayMap<>();
-    static {
-        sPermToOp.put(Manifest.permission.ACCESS_COARSE_LOCATION, OPSTR_COARSE_LOCATION);
-        sPermToOp.put(Manifest.permission.ACCESS_FINE_LOCATION, OPSTR_FINE_LOCATION);
-        sPermToOp.put(Manifest.permission.PACKAGE_USAGE_STATS, OPSTR_GET_USAGE_STATS);
-        sPermToOp.put(Manifest.permission.READ_CONTACTS, OPSTR_READ_CONTACTS);
-        sPermToOp.put(Manifest.permission.WRITE_CONTACTS, OPSTR_WRITE_CONTACTS);
-        sPermToOp.put(Manifest.permission.READ_CALL_LOG, OPSTR_READ_CALL_LOG);
-        sPermToOp.put(Manifest.permission.WRITE_CALL_LOG, OPSTR_WRITE_CALL_LOG);
-        sPermToOp.put(Manifest.permission.READ_CALENDAR, OPSTR_READ_CALENDAR);
-        sPermToOp.put(Manifest.permission.WRITE_CALENDAR, OPSTR_WRITE_CALENDAR);
-        sPermToOp.put(Manifest.permission.CALL_PHONE, OPSTR_CALL_PHONE);
-        sPermToOp.put(Manifest.permission.READ_SMS, OPSTR_READ_SMS);
-        sPermToOp.put(Manifest.permission.RECEIVE_SMS, OPSTR_RECEIVE_SMS);
-        sPermToOp.put(Manifest.permission.RECEIVE_MMS, OPSTR_RECEIVE_MMS);
-        sPermToOp.put(Manifest.permission.RECEIVE_WAP_PUSH, OPSTR_RECEIVE_WAP_PUSH);
-        sPermToOp.put(Manifest.permission.SEND_SMS, OPSTR_SEND_SMS);
-        sPermToOp.put(Manifest.permission.SYSTEM_ALERT_WINDOW, OPSTR_SYSTEM_ALERT_WINDOW);
-        sPermToOp.put(Manifest.permission.CAMERA, OPSTR_CAMERA);
-        sPermToOp.put(Manifest.permission.RECORD_AUDIO, OPSTR_RECORD_AUDIO);
-        sPermToOp.put(Manifest.permission.READ_PHONE_STATE, OPSTR_READ_PHONE_STATE);
-        sPermToOp.put(Manifest.permission.ADD_VOICEMAIL, OPSTR_ADD_VOICEMAIL);
-    }
+    private static HashMap<String, Integer> sOpStrToOp = new HashMap<>();
 
-    private static HashMap<String, Integer> sOpStrToOp = new HashMap<String, Integer>();
+    /**
+     * Mapping from a permission to the corresponding app op.
+     */
+    private static HashMap<String, Integer> sPermToOp = new HashMap<>();
 
     static {
         if (sOpToSwitch.length != _NUM_OP) {
@@ -872,6 +869,11 @@ public class AppOpsManager {
         for (int i=0; i<_NUM_OP; i++) {
             if (sOpToString[i] != null) {
                 sOpStrToOp.put(sOpToString[i], i);
+            }
+        }
+        for (int i=0; i<_NUM_OP; i++) {
+            if (sOpPerms[i] != null) {
+                sPermToOp.put(sOpPerms[i], i);
             }
         }
     }
@@ -919,6 +921,14 @@ public class AppOpsManager {
      */
     public static String opToRestriction(int op) {
         return sOpRestrictions[op];
+    }
+
+    /**
+     * Retrieve the app op code for a permission, or null if there is not one.
+     * @hide
+     */
+    public static int permissionToOpCode(String permission) {
+        return sPermToOp.get(permission);
     }
 
     /**
@@ -1185,7 +1195,11 @@ public class AppOpsManager {
      */
     @SystemApi
     public static String permissionToOp(String permission) {
-        return sPermToOp.get(permission);
+        final Integer opCode = sPermToOp.get(permission);
+        if (opCode == null) {
+            return null;
+        }
+        return sOpToString[opCode];
     }
 
     /**

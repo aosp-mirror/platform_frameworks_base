@@ -47,6 +47,7 @@ import android.app.ProfilerInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.content.pm.PermissionInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -6618,6 +6619,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         public String[] getPackagesForUid(int uid) {
             return mActivityManagerService.mContext.getPackageManager()
                     .getPackagesForUid(uid);
+        }
+
+        @Override
+        public boolean isRuntimePermission(String permission) {
+            try {
+                PermissionInfo info = mActivityManagerService.mContext.getPackageManager()
+                        .getPermissionInfo(permission, 0);
+                return info.protectionLevel == PermissionInfo.PROTECTION_DANGEROUS;
+            } catch (NameNotFoundException nnfe) {
+                Slog.e(TAG, "No such permission: "+ permission, nnfe);
+            }
+            return false;
         }
     }
 

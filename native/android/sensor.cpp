@@ -38,11 +38,6 @@ using android::String8;
 
 /*****************************************************************************/
 
-ASensorManager* ASensorManager_getInstance()
-{
-    return &SensorManager::getInstance();
-}
-
 int ASensorManager_getSensorList(ASensorManager* manager,
         ASensorList* list)
 {
