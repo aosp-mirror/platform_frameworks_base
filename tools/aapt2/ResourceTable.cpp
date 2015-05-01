@@ -299,15 +299,11 @@ bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId res
 
     type->publicStatus.isPublic = true;
     entry->publicStatus.isPublic = true;
+    entry->publicStatus.source = source;
 
     if (resId.isValid()) {
         type->typeId = resId.typeId();
         entry->entryId = resId.entryId();
-    }
-
-    if (entry->values.empty()) {
-        entry->values.push_back(ResourceConfigValue{ {}, source, {},
-                                    util::make_unique<Sentinel>() });
     }
     return true;
 }

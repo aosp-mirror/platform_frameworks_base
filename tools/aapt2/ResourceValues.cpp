@@ -217,25 +217,6 @@ void BinaryPrimitive::print(std::ostream& out) const {
     }
 }
 
-bool Sentinel::isWeak() const {
-    return true;
-}
-
-bool Sentinel::flatten(android::Res_value& outValue) const {
-    outValue.dataType = ExtendedTypes::TYPE_SENTINEL;
-    outValue.data = 0;
-    return true;
-}
-
-Sentinel* Sentinel::clone(StringPool* /*newPool*/) const {
-    return new Sentinel();
-}
-
-void Sentinel::print(std::ostream& out) const {
-    out << "(sentinel)";
-    return;
-}
-
 Attribute::Attribute(bool w, uint32_t t) : weak(w), typeMask(t) {
 }
 

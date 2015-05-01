@@ -396,6 +396,12 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
             }
             break;
 
+        case RES_TABLE_PUBLIC_TYPE:
+            if (!parsePublic(parser.getChunk())) {
+                return false;
+            }
+            break;
+
         default:
             Logger::warn(mSource)
                     << "unexpected chunk of type "
@@ -425,6 +431,55 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
                 configValue.value->accept(visitor, {});
             }
         }
+    }
+    return true;
+}
+
+bool BinaryResourceParser::parsePublic(const ResChunk_header* chunk) {
+    const Public_header* header = convertTo<Public_header>(chunk);
+
+    if (header->typeId == 0) {
+        Logger::error(mSource)
+                << "invalid type ID " << header->typeId << std::endl;
+        return false;
+    }
+
+    const ResourceType* parsedType = parseResourceType(util::getString(mTypePool,
+                                                                       header->typeId - 1));
+    if (!parsedType) {
+        Logger::error(mSource)
+                << "invalid type " << util::getString(mTypePool, header->typeId - 1) << std::endl;
+        return false;
+    }
+
+    const uintptr_t chunkEnd = reinterpret_cast<uintptr_t>(chunk) + chunk->size;
+    const Public_entry* entry = reinterpret_cast<const Public_entry*>(
+            getChunkData(header->header));
+    for (uint32_t i = 0; i < header->count; i++) {
+        if (reinterpret_cast<uintptr_t>(entry) + sizeof(*entry) > chunkEnd) {
+            Logger::error(mSource)
+                    << "Public_entry extends beyond chunk."
+                    << std::endl;
+            return false;
+        }
+
+        const ResourceId resId = { mTable->getPackageId(), header->typeId, entry->entryId };
+        const ResourceName name = {
+                mTable->getPackage(),
+                *parsedType,
+                util::getString(mKeyPool, entry->key.index).toString() };
+
+        SourceLine source;
+        if (mSourcePool.getError() == NO_ERROR) {
+            source.path = util::utf16ToUtf8(util::getString(mSourcePool, entry->source.index));
+            source.line = entry->sourceLine;
+        }
+
+        if (!mTable->markPublic(name, resId, source)) {
+            return false;
+        }
+
+        entry++;
     }
     return true;
 }
@@ -634,10 +689,6 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
         nullType.dataType = Res_value::TYPE_NULL;
         nullType.data = Res_value::DATA_NULL_UNDEFINED;
         return util::make_unique<BinaryPrimitive>(nullType);
-    }
-
-    if (value->dataType == ExtendedTypes::TYPE_SENTINEL) {
-        return util::make_unique<Sentinel>();
     }
 
     if (value->dataType == ExtendedTypes::TYPE_RAW_STRING) {
