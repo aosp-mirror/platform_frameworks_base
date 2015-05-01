@@ -81,10 +81,6 @@ public class Canvas {
      */
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
 
-    // Used by native code
-    @SuppressWarnings("UnusedDeclaration")
-    private int mSurfaceFormat;
-
     // Maximum bitmap size as defined in Skia's native code
     // (see SkCanvas.cpp, SkDraw.cpp)
     private static final int MAXMIMUM_BITMAP_SIZE = 32766;

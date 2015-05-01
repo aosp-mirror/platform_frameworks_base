@@ -64,7 +64,8 @@ namespace android {
 static jboolean com_android_server_AssetAtlasService_upload(JNIEnv* env, jobject,
         jobject graphicBuffer, jobject bitmapHandle) {
 
-    SkBitmap& bitmap = *GraphicsJNI::getSkBitmapDeprecated(env, bitmapHandle);
+    SkBitmap bitmap;
+    GraphicsJNI::getSkBitmap(env, bitmapHandle, &bitmap);
     SkAutoLockPixels alp(bitmap);
 
     // The goal of this method is to copy the bitmap into the GraphicBuffer

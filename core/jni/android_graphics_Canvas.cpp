@@ -40,22 +40,21 @@ static void finalizer(JNIEnv* env, jobject clazz, jlong canvasHandle) {
 
 // Native wrapper constructor used by Canvas(Bitmap)
 static jlong initRaster(JNIEnv* env, jobject, jobject jbitmap) {
-    SkBitmap* bitmap = nullptr;
+    SkBitmap bitmap;
     if (jbitmap != NULL) {
-        bitmap = GraphicsJNI::getSkBitmapDeprecated(env, jbitmap);
+        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     }
-    return reinterpret_cast<jlong>(Canvas::create_canvas(
-            bitmap ? *bitmap : SkBitmap()));
+    return reinterpret_cast<jlong>(Canvas::create_canvas(bitmap));
 }
 
 // Set the given bitmap as the new draw target (wrapped in a new SkCanvas),
 // optionally copying canvas matrix & clip state.
 static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap) {
-    SkBitmap* bitmap = nullptr;
+    SkBitmap bitmap;
     if (jbitmap != NULL) {
-        bitmap = GraphicsJNI::getSkBitmapDeprecated(env, jbitmap);
+        GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     }
-    get_canvas(canvasHandle)->setBitmap(bitmap ? *bitmap : SkBitmap());
+    get_canvas(canvasHandle)->setBitmap(bitmap);
 }
 
 static jboolean isOpaque(JNIEnv*, jobject, jlong canvasHandle) {
