@@ -162,6 +162,7 @@ package android {
     field public static final java.lang.String READ_USER_DICTIONARY = "android.permission.READ_USER_DICTIONARY";
     field public static final java.lang.String READ_VOICEMAIL = "com.android.voicemail.permission.READ_VOICEMAIL";
     field public static final java.lang.String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
+    field public static final java.lang.String READ_WRITE_CONTACT_METADATA = "android.permission.READ_WRITE_CONTACT_METADATA";
     field public static final java.lang.String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_BOOT_COMPLETED = "android.permission.RECEIVE_BOOT_COMPLETED";
