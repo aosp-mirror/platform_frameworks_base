@@ -21,7 +21,7 @@ import android.app.Application;
 import com.android.org.conscrypt.NativeConstants;
 
 import android.content.Context;
-import android.hardware.fingerprint.IFingerprintService;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -79,11 +79,27 @@ public class KeyStore {
     private int mError = NO_ERROR;
 
     private final IKeystoreService mBinder;
+    private final Context mContext;
 
     private IBinder mToken;
 
     private KeyStore(IKeystoreService binder) {
         mBinder = binder;
+        mContext = getContext();
+    }
+
+    private static Context getContext() {
+        ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            throw new IllegalStateException(
+                    "Failed to obtain application Context: no ActivityThread");
+        }
+        Application application = activityThread.getApplication();
+        if (application == null) {
+            throw new IllegalStateException(
+                    "Failed to obtain application Context: no Application");
+        }
+        return application;
     }
 
     public static KeyStore getInstance() {
@@ -620,36 +636,18 @@ public class KeyStore {
         }
     }
 
-    private static long getFingerprintOnlySid() {
-        IFingerprintService service = IFingerprintService.Stub.asInterface(
-                ServiceManager.getService(Context.FINGERPRINT_SERVICE));
-        if (service == null) {
+    private long getFingerprintOnlySid() {
+        FingerprintManager fingerprintManager =
+                mContext.getSystemService(FingerprintManager.class);
+        if (fingerprintManager == null) {
             return 0;
         }
 
-        String opPackageName = getMyOpPackageName();
-
-        try {
-            long deviceId = 0; // TODO: plumb hardware id to FPMS
-            if (!service.isHardwareDetected(deviceId, opPackageName)) {
-                return 0;
-            }
-
-            return service.getAuthenticatorId(opPackageName);
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Failed to communicate with fingerprint service", e);
+        if (!fingerprintManager.isHardwareDetected()) {
+            return 0;
         }
-    }
 
-    private static String getMyOpPackageName() {
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
-        if (activityThread != null) {
-            Application application = activityThread.getApplication();
-            if (application != null) {
-                return application.getOpPackageName();
-            }
-        }
-        throw new IllegalStateException("Cannot create AudioRecord outside of an app");
+        return fingerprintManager.getAuthenticatorId();
     }
 
     /**
