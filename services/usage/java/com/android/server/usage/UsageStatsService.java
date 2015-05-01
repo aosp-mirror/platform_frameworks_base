@@ -28,6 +28,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
+import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -56,6 +57,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemConfig;
@@ -96,6 +98,7 @@ public class UsageStatsService extends SystemService implements
     Handler mHandler;
     AppOpsManager mAppOps;
     UserManager mUserManager;
+    AppWidgetManager mAppWidgetManager;
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
     private File mUsageStatsDir;
@@ -158,6 +161,7 @@ public class UsageStatsService extends SystemService implements
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             // Observe changes to the threshold
             new SettingsObserver(mHandler).registerObserver();
+            mAppWidgetManager = getContext().getSystemService(AppWidgetManager.class);
         } else if (phase == PHASE_BOOT_COMPLETED) {
             setAppIdleParoled(getContext().getSystemService(BatteryManager.class).isCharging());
         }
@@ -497,6 +501,11 @@ public class UsageStatsService extends SystemService implements
         }
         // TODO: Optimize this check
         if (isActiveDeviceAdmin(packageName, userId)) {
+            return false;
+        }
+
+        if (mAppWidgetManager != null
+                && mAppWidgetManager.isBoundWidgetPackage(packageName, userId)) {
             return false;
         }
 
