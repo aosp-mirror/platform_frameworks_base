@@ -3526,9 +3526,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void recreateChildDisplayList(View child) {
-        child.mRecreateDisplayList = (child.mPrivateFlags & PFLAG_INVALIDATED) != 0;
+        child.mRecreateDisplayList = (child.mPrivateFlags & PFLAG_INVALIDATED)
+                == PFLAG_INVALIDATED;
         child.mPrivateFlags &= ~PFLAG_INVALIDATED;
-        child.updateDisplayListIfDirty();
+        child.getDisplayList();
         child.mRecreateDisplayList = false;
     }
 
