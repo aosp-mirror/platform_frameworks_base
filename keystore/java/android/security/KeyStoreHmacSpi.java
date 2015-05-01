@@ -170,31 +170,27 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
                 keymasterOutputArgs);
         if (opResult == null) {
             throw new KeyStoreConnectException();
-        } else if ((opResult.resultCode != KeyStore.NO_ERROR)
-                && (opResult.resultCode != KeyStore.OP_AUTH_NEEDED)) {
-            throw mKeyStore.getInvalidKeyException(mKey.getAlias(), opResult.resultCode);
         }
 
-        if (opResult.token == null) {
-            throw new IllegalStateException("Keystore returned null operation token");
-        }
-        // The operation handle/token is now either valid for use immediately or needs to be
-        // authorized through user authentication (if the error code was OP_AUTH_NEEDED).
+        // Store operation token and handle regardless of the error code returned by KeyStore to
+        // ensure that the operation gets aborted immediately if the code below throws an exception.
         mOperationToken = opResult.token;
         mOperationHandle = opResult.operationHandle;
+
+        // If necessary, throw an exception due to KeyStore operation having failed.
+        InvalidKeyException e = KeyStoreCryptoOperationUtils.getInvalidKeyExceptionForInit(
+                mKeyStore, mKey, opResult.resultCode);
+        if (e != null) {
+            throw e;
+        }
+
+        if (mOperationToken == null) {
+            throw new IllegalStateException("Keystore returned null operation token");
+        }
+
         mChunkedStreamer = new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
                         mKeyStore, mOperationToken));
-
-        if (opResult.resultCode != KeyStore.NO_ERROR) {
-            // The operation requires user authentication. Check whether such authentication is
-            // possible (e.g., the key may have been permanently invalidated).
-            InvalidKeyException e =
-                    mKeyStore.getInvalidKeyException(mKey.getAlias(), opResult.resultCode);
-            if (!(e instanceof UserNotAuthenticatedException)) {
-                throw e;
-            }
-        }
     }
 
     @Override
