@@ -3381,7 +3381,7 @@ public class AudioManager {
      * @param ports An AudioPort ArrayList where the list will be returned.
      * @hide
      */
-    public int listAudioPorts(ArrayList<AudioPort> ports) {
+    public static int listAudioPorts(ArrayList<AudioPort> ports) {
         return updateAudioPortCache(ports, null);
     }
 
@@ -3390,7 +3390,7 @@ public class AudioManager {
      * @see listAudioPorts(ArrayList<AudioPort>)
      * @hide
      */
-    public int listAudioDevicePorts(ArrayList<AudioDevicePort> devices) {
+    public static int listAudioDevicePorts(ArrayList<AudioDevicePort> devices) {
         ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
         int status = updateAudioPortCache(ports, null);
         if (status == SUCCESS) {
@@ -3427,7 +3427,7 @@ public class AudioManager {
      *         patch[0] contains the newly created patch
      * @hide
      */
-    public int createAudioPatch(AudioPatch[] patch,
+    public static int createAudioPatch(AudioPatch[] patch,
                                  AudioPortConfig[] sources,
                                  AudioPortConfig[] sinks) {
         return AudioSystem.createAudioPatch(patch, sources, sinks);
@@ -3444,7 +3444,7 @@ public class AudioManager {
      *         - {@link #ERROR} if patch cannot be released for any other reason.
      * @hide
      */
-    public int releaseAudioPatch(AudioPatch patch) {
+    public static int releaseAudioPatch(AudioPatch patch) {
         return AudioSystem.releaseAudioPatch(patch);
     }
 
@@ -3453,7 +3453,7 @@ public class AudioManager {
      * @param patches An AudioPatch array where the list will be returned.
      * @hide
      */
-    public int listAudioPatches(ArrayList<AudioPatch> patches) {
+    public static int listAudioPatches(ArrayList<AudioPatch> patches) {
         return updateAudioPortCache(null, patches);
     }
 
@@ -3462,7 +3462,7 @@ public class AudioManager {
      * AudioGain.buildConfig()
      * @hide
      */
-    public int setAudioPortGain(AudioPort port, AudioGainConfig gain) {
+    public static int setAudioPortGain(AudioPort port, AudioGainConfig gain) {
         if (port == null || gain == null) {
             return ERROR_BAD_VALUE;
         }
