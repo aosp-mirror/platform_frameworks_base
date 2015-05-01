@@ -21,4 +21,4 @@
     android:sessionService="com.android.test.voiceinteraction.MainInteractionSessionService"
     android:recognitionService="com.android.test.voiceinteraction.MainRecognitionService"
     android:settingsActivity="com.android.test.voiceinteraction.SettingsActivity"
-    android:supportsAssistGesture="true" />
+    android:supportsAssist="true" />
