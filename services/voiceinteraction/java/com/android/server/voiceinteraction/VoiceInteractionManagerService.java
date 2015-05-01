@@ -734,10 +734,10 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public boolean activeServiceSupportsAssistGesture() {
+        public boolean activeServiceSupportsAssist() {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
-                return mImpl != null && mImpl.mInfo.getSupportsAssistGesture();
+                return mImpl != null && mImpl.mInfo.getSupportsAssist();
             }
         }
 
