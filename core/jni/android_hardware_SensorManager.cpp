@@ -134,13 +134,21 @@ getInternedString(JNIEnv *env, const String8* string) {
     return internedString;
 }
 
-static jint
-nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
+static jlong
+nativeCreate
+(JNIEnv *env, jclass clazz, jstring opPackageName)
 {
-    SensorManager& mgr(SensorManager::getInstance());
+    ScopedUtfChars opPackageNameUtf(env, opPackageName);
+    return (jlong) new SensorManager(String16(opPackageNameUtf.c_str()));
+}
+
+static jint
+nativeGetNextSensor(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sensor, jint next)
+{
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
 
     Sensor const* const* sensorList;
-    size_t count = mgr.getSensorList(&sensorList);
+    size_t count = mgr->getSensorList(&sensorList);
     if (size_t(next) >= count) {
         return -1;
     }
@@ -174,9 +182,10 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     return size_t(next) < count ? next : 0;
 }
 
-static int nativeEnableDataInjection(JNIEnv *_env, jclass _this, jboolean enable) {
-     SensorManager& mgr(SensorManager::getInstance());
-     return mgr.enableDataInjection(enable);
+static int nativeEnableDataInjection(JNIEnv *_env, jclass _this, jlong sensorManager,
+        jboolean enable) {
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    return mgr->enableDataInjection(enable);
 }
 
 //----------------------------------------------------------------------------
@@ -281,12 +290,12 @@ private:
     }
 };
 
-static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQWeak, jobject msgQ,
-        jfloatArray scratch, jstring packageName, jint mode) {
-    SensorManager& mgr(SensorManager::getInstance());
+static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jlong sensorManager,
+        jobject eventQWeak, jobject msgQ, jfloatArray scratch, jstring packageName, jint mode) {
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
     ScopedUtfChars packageUtf(env, packageName);
     String8 clientName(packageUtf.c_str());
-    sp<SensorEventQueue> queue(mgr.createEventQueue(clientName, mode));
+    sp<SensorEventQueue> queue(mgr->createEventQueue(clientName, mode));
 
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, msgQ);
     if (messageQueue == NULL) {
@@ -339,20 +348,23 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
     {"nativeClassInit",
             "()V",
             (void*)nativeClassInit },
+    {"nativeCreate",
+             "(Ljava/lang/String;)J",
+             (void*)nativeCreate },
 
     {"nativeGetNextSensor",
-            "(Landroid/hardware/Sensor;I)I",
+            "(JLandroid/hardware/Sensor;I)I",
             (void*)nativeGetNextSensor },
 
     {"nativeEnableDataInjection",
-            "(Z)I",
+            "(JZ)I",
             (void*)nativeEnableDataInjection },
 };
 
 static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
-     "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;[FLjava/lang/String;I)J",
-     (void*)nativeInitSensorEventQueue },
+             "(JLjava/lang/ref/WeakReference;Landroid/os/MessageQueue;[FLjava/lang/String;ILjava/lang/String;)J",
+             (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
             "(JIII)I",
