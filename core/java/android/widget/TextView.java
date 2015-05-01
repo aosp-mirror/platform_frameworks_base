@@ -8812,31 +8812,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
-                boolean handled = false;
-
-                // Simulate View.onTouchEvent for an ACTION_UP event.
-                if (isClickable() || isLongClickable()) {
-                    if (isFocusable() && !isFocused()) {
-                        requestFocus();
-                    }
-
-                    performClick();
-                    handled = true;
-                }
-
-                // Simulate TextView.onTouchEvent for an ACTION_UP event.
-                if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
-                        && mText instanceof Spannable && mLayout != null
-                        && (isTextEditable() || isTextSelectable()) && isFocused()) {
-                    // Show the IME, except when selecting in read-only text.
-                    final InputMethodManager imm = InputMethodManager.peekInstance();
-                    viewClicked(imm);
-                    if (!isTextSelectable() && mEditor.mShowSoftInputOnFocus && imm != null) {
-                        handled |= imm.showSoftInput(this, 0);
-                    }
-                }
-
-                return handled;
+                return performAccessibilityActionClick(arguments);
             }
             case AccessibilityNodeInfo.ACTION_COPY: {
                 if (isFocused() && canCopy()) {
@@ -8898,6 +8874,80 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    private boolean performAccessibilityActionClick(Bundle arguments) {
+        boolean handled = false;
+        boolean processed = false;
+
+        if (!isEnabled()) {
+            return false;
+        }
+
+        if (arguments != null && arguments.containsKey(
+                AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT)) {
+            int spanIndex = arguments.getInt(
+                    AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_SPAN_INDEX_INT, -1);
+            if (spanIndex >= 0 && hasSpannableText()) {
+                ClickableSpan[] spans = ((Spannable) mText).getSpans(0,
+                        mText.length(), ClickableSpan.class);
+                if (spans != null && spans.length > spanIndex && spans[spanIndex] != null) {
+                    // Simulate View.onTouchEvent for an ACTION_UP event
+                    if (isFocusable() && !isFocused()) {
+                        requestFocus();
+                    }
+                    spans[spanIndex].onClick(this);
+                    handled = true;
+                }
+            }
+            processed = true;
+        }
+
+        if (!processed && arguments != null &&  arguments.containsKey(
+                AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT)) {
+            int characterIndex = arguments.getInt(
+                    AccessibilityNodeInfo.ACTION_ARGUMENT_CLICK_CHARACTER_INDEX_INT, -1);
+            if (characterIndex >= 0 && hasSpannableText()) {
+                ClickableSpan[] spans = ((Spannable) mText).getSpans(characterIndex,
+                        characterIndex, ClickableSpan.class);
+                // click only on the first span to keep parity with onTouch() implementation
+                if (spans != null && spans.length > 0 && spans[0] != null) {
+                    // Simulate View.onTouchEvent for an ACTION_UP event
+                    if (isFocusable() && !isFocused()) {
+                        requestFocus();
+                    }
+                    spans[0].onClick(this);
+                    handled = true;
+                }
+            }
+            processed = true;
+        }
+
+        if (!processed && (isClickable() || isLongClickable())) {
+            // Simulate View.onTouchEvent for an ACTION_UP event
+            if (isFocusable() && !isFocused()) {
+                requestFocus();
+            }
+
+            performClick();
+            handled = true;
+        }
+
+        // Show the IME, except when selecting in read-only text.
+        if ((mMovement != null || onCheckIsTextEditor()) && hasSpannableText() && mLayout != null
+                && (isTextEditable() || isTextSelectable()) && isFocused()) {
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            viewClicked(imm);
+            if (!isTextSelectable() && mEditor.mShowSoftInputOnFocus && imm != null) {
+                handled |= imm.showSoftInput(this, 0);
+            }
+        }
+
+        return handled;
+    }
+
+    private boolean hasSpannableText() {
+        return mText != null && mText instanceof Spannable;
+    }
+
     /** @hide */
     @Override
     public void sendAccessibilityEventInternal(int eventType) {
@@ -8928,7 +8978,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
             int fromIndex, int removedCount, int addedCount) {
         AccessibilityEvent event =
-            AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+                AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
         event.setFromIndex(fromIndex);
         event.setRemovedCount(removedCount);
         event.setAddedCount(addedCount);
