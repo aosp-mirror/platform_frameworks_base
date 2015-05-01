@@ -985,6 +985,13 @@ final class Settings {
         if (ivi == null) {
             ivi = new IntentFilterVerificationInfo(packageName, domains);
             ps.setIntentFilterVerificationInfo(ivi);
+            Slog.d(PackageManagerService.TAG,
+                    "Creating new IntentFilterVerificationInfo for packageName: " + packageName);
+        } else {
+            ivi.setDomains(domains);
+            Slog.d(PackageManagerService.TAG,
+                    "Setting domains to existing IntentFilterVerificationInfo for packageName: " +
+                            packageName + " and with domains: " + ivi.getDomainsString());
         }
         return ivi;
     }
@@ -1021,7 +1028,7 @@ final class Settings {
 
         // Then, if we set a ALWAYS status, then put NEVER status for Apps whose IntentFilter
         // domains overlap the domains of the current package
-        ArraySet<String> currentDomains = current.getIntentFilterVerificationInfo().getDomainsSet();
+        ArraySet<String> currentDomains = current.getIntentFilterVerificationInfo().getDomains();
         if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
             for (PackageSetting ps : mPackages.values()) {
                 if (ps == null || ps.pkg.packageName.equals(packageName)) continue;
@@ -1029,7 +1036,7 @@ final class Settings {
                 if (ivi == null) {
                     continue;
                 }
-                ArraySet<String> set = ivi.getDomainsSet();
+                ArraySet<String> set = ivi.getDomains();
                 set.retainAll(currentDomains);
                 if (set.size() > 0) {
                     ps.setDomainVerificationStatusForUser(
