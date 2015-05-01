@@ -53,8 +53,10 @@ public abstract class ScanCallback {
     /**
      * Callback when a BLE advertisement has been found.
      *
-     * @param callbackType Determines how this callback was triggered. Could be of
-     *            {@link ScanSettings#CALLBACK_TYPE_ALL_MATCHES}
+     * @param callbackType Determines how this callback was triggered. Could be one of
+     *            {@link ScanSettings#CALLBACK_TYPE_ALL_MATCHES},
+     *            {@link ScanSettings#CALLBACK_TYPE_FIRST_MATCH} or
+     *            {@link ScanSettings#CALLBACK_TYPE_MATCH_LOST}
      * @param result A Bluetooth LE scan result.
      */
     public void onScanResult(int callbackType, ScanResult result) {

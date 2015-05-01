@@ -7242,7 +7242,14 @@ package android.bluetooth.le {
     method public int getScanResultType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALLBACK_TYPE_ALL_MATCHES = 1; // 0x1
+    field public static final int CALLBACK_TYPE_FIRST_MATCH = 2; // 0x2
+    field public static final int CALLBACK_TYPE_MATCH_LOST = 4; // 0x4
     field public static final android.os.Parcelable.Creator<android.bluetooth.le.ScanSettings> CREATOR;
+    field public static final int MATCH_MODE_AGGRESSIVE = 1; // 0x1
+    field public static final int MATCH_MODE_STICKY = 2; // 0x2
+    field public static final int MATCH_NUM_FEW_ADVERTISEMENT = 2; // 0x2
+    field public static final int MATCH_NUM_MAX_ADVERTISEMENT = 3; // 0x3
+    field public static final int MATCH_NUM_ONE_ADVERTISEMENT = 1; // 0x1
     field public static final int SCAN_MODE_BALANCED = 1; // 0x1
     field public static final int SCAN_MODE_LOW_LATENCY = 2; // 0x2
     field public static final int SCAN_MODE_LOW_POWER = 0; // 0x0
@@ -7252,6 +7259,8 @@ package android.bluetooth.le {
   public static final class ScanSettings.Builder {
     ctor public ScanSettings.Builder();
     method public android.bluetooth.le.ScanSettings build();
+    method public android.bluetooth.le.ScanSettings.Builder setMatchMode(int);
+    method public android.bluetooth.le.ScanSettings.Builder setNumOfMatches(int);
     method public android.bluetooth.le.ScanSettings.Builder setReportDelay(long);
     method public android.bluetooth.le.ScanSettings.Builder setScanMode(int);
   }
