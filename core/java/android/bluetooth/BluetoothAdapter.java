@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.app.ActivityThread;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.os.Binder;
 import android.util.Log;
 import android.util.Pair;
@@ -632,24 +633,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Returns true if LE only mode is enabled, that is apps
-     * have authorization to turn only BT ON and the calling
-     * app has privilage to do so
-     */
-    private boolean isLEAlwaysOnEnabled() {
-        boolean ret = false;
-        if (SystemProperties.getBoolean("ro.bluetooth.blealwayson", true) == true) {
-            Log.v(TAG, "LE always on mode is enabled");
-            // TODO: System API authorization check
-            ret = true;
-        } else {
-            Log.v(TAG, "LE always on mode is disabled");
-            ret = false;
-        }
-        return ret;
-    }
-
-    /**
      * Turns off Bluetooth LE which was earlier turned on by calling EnableBLE().
      *
      * <p> If the internal Adapter state is STATE_BLE_ON, this would trigger the transition
@@ -676,7 +659,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public boolean disableBLE() {
-        if (isLEAlwaysOnEnabled() != true) return false;
+        if (!isBleScanAlwaysAvailable()) return false;
 
         int state = getLeState();
         if (state == BluetoothAdapter.STATE_ON) {
@@ -738,7 +721,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public boolean enableBLE() {
-        if (isLEAlwaysOnEnabled() != true) return false;
+        if (!isBleScanAlwaysAvailable()) return false;
 
         if (isLeEnabled() == true) {
             if (DBG) Log.d(TAG, "enableBLE(): BT is already enabled..!");
@@ -1243,8 +1226,12 @@ public final class BluetoothAdapter {
      */
     @SystemApi
     public boolean isBleScanAlwaysAvailable() {
-        // TODO: implement after Settings UI change.
-        return false;
+        try {
+            return mManagerService.isBleScanAlwaysAvailable();
+        } catch (RemoteException e) {
+            Log.e(TAG, "remote expection when calling isBleScanAlwaysAvailable", e);
+            return false;
+        }
     }
 
     /**
