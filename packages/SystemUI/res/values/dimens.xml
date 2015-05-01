@@ -16,9 +16,6 @@
 */
 -->
 <resources>
-    <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
-    <dimen name="status_bar_edge_ignore">5dp</dimen>
-
     <!-- Recent Applications parameters -->
     <!-- Upper width limit for application icon -->
     <dimen name="status_bar_recents_app_icon_max_width">48dp</dimen>
