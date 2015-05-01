@@ -11097,25 +11097,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * <p>Sets the opacity of the view. This is a value from 0 to 1, where 0 means the view is
-     * completely transparent and 1 means the view is completely opaque.</p>
+     * Sets the opacity of the view to a value from 0 to 1, where 0 means the view is
+     * completely transparent and 1 means the view is completely opaque.
      *
-     * <p> Note that setting alpha to a translucent value (0 < alpha < 1) can have significant
-     * performance implications, especially for large views. It is best to use the alpha property
-     * sparingly and transiently, as in the case of fading animations.</p>
+     * <p class="note"><strong>Note:</strong> setting alpha to a translucent value (0 < alpha < 1)
+     * can have significant performance implications, especially for large views. It is best to use
+     * the alpha property sparingly and transiently, as in the case of fading animations.</p>
      *
      * <p>For a view with a frequently changing alpha, such as during a fading animation, it is
      * strongly recommended for performance reasons to either override
-     * {@link #hasOverlappingRendering()} to return false if appropriate, or setting a
-     * {@link #setLayerType(int, android.graphics.Paint) layer type} on the view.</p>
+     * {@link #hasOverlappingRendering()} to return <code>false</code> if appropriate, or setting a
+     * {@link #setLayerType(int, android.graphics.Paint) layer type} on the view for the duration
+     * of the animation. On versions {@link android.os.Build.VERSION_CODES#MNC} and below,
+     * the default path for rendering an unlayered View with alpha could add multiple milliseconds
+     * of rendering cost, even for simple or small views. Starting with
+     * {@link android.os.Build.VERSION_CODES#MNC}, {@link #LAYER_TYPE_HARDWARE} is automatically
+     * applied to the view at the rendering level.</p>
      *
      * <p>If this view overrides {@link #onSetAlpha(int)} to return true, then this view is
      * responsible for applying the opacity itself.</p>
      *
-     * <p>Note that if the view is backed by a
-     * {@link #setLayerType(int, android.graphics.Paint) layer} and is associated with a
-     * {@link #setLayerPaint(android.graphics.Paint) layer paint}, setting an alpha value less than
-     * 1.0 will supersede the alpha of the layer paint.</p>
+     * <p>On versions {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1} and below, note that if
+     * the view is backed by a {@link #setLayerType(int, android.graphics.Paint) layer} and is
+     * associated with a {@link #setLayerPaint(android.graphics.Paint) layer paint}, setting an
+     * alpha value less than 1.0 will supersede the alpha of the layer paint.</p>
+     *
+     * <p>Starting with {@link android.os.Build.VERSION_CODES#MNC}, setting a translucent alpha
+     * value will clip a View to its bounds, unless the View returns <code>false</code> from
+     * {@link #hasOverlappingRendering}.</p>
      *
      * @param alpha The opacity of the view.
      *
