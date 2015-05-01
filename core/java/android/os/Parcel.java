@@ -502,7 +502,25 @@ public final class Parcel {
      * {@SystemApi}
      */
     public final void writeBlob(byte[] b) {
-        nativeWriteBlob(mNativePtr, b, 0, (b != null) ? b.length : 0);
+        writeBlob(b, 0, (b != null) ? b.length : 0);
+    }
+
+    /**
+     * Write a blob of data into the parcel at the current {@link #dataPosition},
+     * growing {@link #dataCapacity} if needed.
+     * @param b Bytes to place into the parcel.
+     * @param offset Index of first byte to be written.
+     * @param len Number of bytes to write.
+     * {@hide}
+     * {@SystemApi}
+     */
+    public final void writeBlob(byte[] b, int offset, int len) {
+        if (b == null) {
+            writeInt(-1);
+            return;
+        }
+        Arrays.checkOffsetAndCount(b.length, offset, len);
+        nativeWriteBlob(mNativePtr, b, offset, len);
     }
 
     /**
