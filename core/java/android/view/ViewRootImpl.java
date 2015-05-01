@@ -2322,10 +2322,8 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     void outputDisplayList(View view) {
-        RenderNode renderNode = view.getDisplayList();
-        if (renderNode != null) {
-            renderNode.output();
-        }
+        RenderNode renderNode = view.updateDisplayListIfDirty();
+        renderNode.output();
     }
 
     /**
