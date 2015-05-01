@@ -77,8 +77,8 @@ public final class CameraManager {
     }
 
     /**
-     * Return the list of currently connected camera devices by
-     * identifier.
+     * Return the list of currently connected camera devices by identifier, including
+     * cameras that may be in use by other camera API clients.
      *
      * <p>Non-removable cameras use integers starting at 0 for their
      * identifiers, while removable cameras have a unique identifier for each
@@ -102,6 +102,11 @@ public final class CameraManager {
      *
      * <p>The first time a callback is registered, it is immediately called
      * with the availability status of all currently known camera devices.</p>
+     *
+     * <p>{@link AvailabilityCallback#onCameraUnavailable(String)} will be called whenever a camera
+     * device is opened by any camera API client. As of API level 23, other camera API clients may
+     * still be able to open such a camera device, evicting the existing client if they have higher
+     * priority than the existing client of a camera device. See open() for more details.</p>
      *
      * <p>Since this callback will be registered with the camera service, remember to unregister it
      * once it is no longer needed; otherwise the callback will continue to receive events
@@ -259,14 +264,14 @@ public final class CameraManager {
     }
 
     /**
-     * Helper for openning a connection to a camera with the given ID.
+     * Helper for opening a connection to a camera with the given ID.
      *
      * @param cameraId The unique identifier of the camera device to open
      * @param callback The callback for the camera. Must not be null.
      * @param handler  The handler to invoke the callback on. Must not be null.
      *
      * @throws CameraAccessException if the camera is disabled by device policy,
-     * or too many camera devices are already open, or the cameraId does not match
+     * too many camera devices are already open, or the cameraId does not match
      * any currently available camera device.
      *
      * @throws SecurityException if the application does not have permission to
@@ -330,7 +335,8 @@ public final class CameraManager {
                         deviceImpl.setRemoteFailure(e);
 
                         if (e.getReason() == CameraAccessException.CAMERA_DISABLED ||
-                                e.getReason() == CameraAccessException.CAMERA_DISCONNECTED) {
+                                e.getReason() == CameraAccessException.CAMERA_DISCONNECTED ||
+                                e.getReason() == CameraAccessException.CAMERA_IN_USE) {
                             // Per API docs, these failures call onError and throw
                             throw e.asChecked();
                         }
@@ -369,7 +375,19 @@ public final class CameraManager {
      * <p>Use {@link #getCameraIdList} to get the list of available camera
      * devices. Note that even if an id is listed, open may fail if the device
      * is disconnected between the calls to {@link #getCameraIdList} and
-     * {@link #openCamera}.</p>
+     * {@link #openCamera}, or if a higher-priority camera API client begins using the
+     * camera device.</p>
+     *
+     * <p>As of API level 23, devices for which the
+     * {@link AvailabilityCallback#onCameraUnavailable(String)} callback has been called due to the
+     * device being in use by a lower-priority, background camera API client can still potentially
+     * be opened by calling this method when the calling camera API client has a higher priority
+     * than the current camera API client using this device.  In general, if the top, foreground
+     * activity is running within your application process, your process will be given the highest
+     * priority when accessing the camera, and this method will succeed even if the camera device is
+     * in use by another camera API client. Any lower-priority application that loses control of the
+     * camera in this way will receive an
+     * {@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected} callback.</p>
      *
      * <p>Once the camera is successfully opened, {@link CameraDevice.StateCallback#onOpened} will
      * be invoked with the newly opened {@link CameraDevice}. The camera device can then be set up
@@ -401,7 +419,7 @@ public final class CameraManager {
      *             {@code null} to use the current thread's {@link android.os.Looper looper}.
      *
      * @throws CameraAccessException if the camera is disabled by device policy,
-     * or the camera has become or was disconnected.
+     * has been disconnected, or is being used by a higher-priority camera API client.
      *
      * @throws IllegalArgumentException if cameraId or the callback was null,
      * or the cameraId does not match any currently or previously available
@@ -477,8 +495,7 @@ public final class CameraManager {
     }
 
     /**
-     * A callback for camera devices becoming available or
-     * unavailable to open.
+     * A callback for camera devices becoming available or unavailable to open.
      *
      * <p>Cameras become available when they are no longer in use, or when a new
      * removable camera is connected. They become unavailable when some
