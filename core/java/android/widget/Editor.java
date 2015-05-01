@@ -578,7 +578,12 @@ public class Editor {
     }
 
     private void hideCursorControllers() {
-        if (mSuggestionsPopupWindow != null && !mSuggestionsPopupWindow.isShowingUp()) {
+        // When mTextView is not ExtractEditText, we need to distinguish two kinds of focus-lost.
+        // One is the true focus lost where suggestions pop-up (if any) should be dismissed, and the
+        // other is an side effect of showing the suggestions pop-up itself. We use isShowingUp()
+        // to distinguish one from the other.
+        if (mSuggestionsPopupWindow != null && ((mTextView instanceof ExtractEditText) ||
+                !mSuggestionsPopupWindow.isShowingUp())) {
             // Should be done before hide insertion point controller since it triggers a show of it
             mSuggestionsPopupWindow.hide();
         }
