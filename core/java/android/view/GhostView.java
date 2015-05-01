@@ -41,7 +41,7 @@ public class GhostView extends View {
         final ViewGroup parent = (ViewGroup) mView.getParent();
         setGhostedVisibility(View.INVISIBLE);
         parent.mRecreateDisplayList = true;
-        parent.updateDisplayListIfDirty();
+        parent.getDisplayList();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class GhostView extends View {
         if (canvas instanceof DisplayListCanvas) {
             DisplayListCanvas dlCanvas = (DisplayListCanvas) canvas;
             mView.mRecreateDisplayList = true;
-            RenderNode renderNode = mView.updateDisplayListIfDirty();
+            RenderNode renderNode = mView.getDisplayList();
             if (renderNode.isValid()) {
                 dlCanvas.insertReorderBarrier(); // enable shadow for this rendernode
                 dlCanvas.drawRenderNode(renderNode);
@@ -84,7 +84,7 @@ public class GhostView extends View {
             final ViewGroup parent = (ViewGroup) mView.getParent();
             if (parent != null) {
                 parent.mRecreateDisplayList = true;
-                parent.updateDisplayListIfDirty();
+                parent.getDisplayList();
             }
         }
     }
