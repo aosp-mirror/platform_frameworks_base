@@ -686,6 +686,16 @@
     <!-- INSTALLTIME PERMISSIONS                                                -->
     <!-- ====================================================================== -->
 
+`   <!-- =========================================== -->
+    <!-- Permissions for accessing contact metadata -->
+    <!-- =========================================== -->
+    <eat-comment />
+
+    <!-- @SystemApi Allows an application to read/write contact metadata.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_WRITE_CONTACT_METADATA"
+        android:protectionLevel="signature|system" />
+
     <!-- ================================== -->
     <!-- Permissions for accessing messages -->
     <!-- ================================== -->
