@@ -19911,6 +19911,7 @@ package android.net {
     method public void onLinkPropertiesChanged(android.net.Network, android.net.LinkProperties);
     method public void onLosing(android.net.Network, int);
     method public void onLost(android.net.Network);
+    method public void onPreCheck(android.net.Network);
   }
 
   public static abstract interface ConnectivityManager.OnNetworkActiveListener {
