@@ -245,6 +245,19 @@ status_t JMediaCodec::configure(
     return mCodec->configure(format, mSurfaceTextureClient, crypto, flags);
 }
 
+status_t JMediaCodec::setSurface(
+        const sp<IGraphicBufferProducer> &bufferProducer) {
+    sp<Surface> client;
+    if (bufferProducer != NULL) {
+        client = new Surface(bufferProducer, true /* controlledByApp */);
+    }
+    status_t err = mCodec->setSurface(client);
+    if (err == OK) {
+        mSurfaceTextureClient = client;
+    }
+    return err;
+}
+
 status_t JMediaCodec::createInputSurface(
         sp<IGraphicBufferProducer>* bufferProducer) {
     return mCodec->createInputSurface(bufferProducer);
@@ -797,6 +810,10 @@ static jint throwExceptionAsNecessary(
             jniThrowException(env, "java/lang/IllegalStateException", msg);
             return 0;
 
+        case BAD_VALUE:
+            jniThrowException(env, "java/lang/IllegalArgumentException", msg);
+            return 0;
+
         default:
             if (isCryptoError(err)) {
                 throwCryptoException(env, err, msg);
@@ -866,6 +883,35 @@ static void android_media_MediaCodec_native_configure(
 
     err = codec->configure(format, bufferProducer, crypto, flags);
 
+    throwExceptionAsNecessary(env, err);
+}
+
+static void android_media_MediaCodec_native_setSurface(
+        JNIEnv *env,
+        jobject thiz,
+        jobject jsurface) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    sp<IGraphicBufferProducer> bufferProducer;
+    if (jsurface != NULL) {
+        sp<Surface> surface(android_view_Surface_getSurface(env, jsurface));
+        if (surface != NULL) {
+            bufferProducer = surface->getIGraphicBufferProducer();
+        } else {
+            jniThrowException(
+                    env,
+                    "java/lang/IllegalArgumentException",
+                    "The surface has been released");
+            return;
+        }
+    }
+
+    status_t err = codec->setSurface(bufferProducer);
     throwExceptionAsNecessary(env, err);
 }
 
@@ -1529,6 +1575,10 @@ static JNINativeMethod gMethods[] = {
       "([Ljava/lang/String;[Ljava/lang/Object;Landroid/view/Surface;"
       "Landroid/media/MediaCrypto;I)V",
       (void *)android_media_MediaCodec_native_configure },
+
+    { "native_setSurface",
+      "(Landroid/view/Surface;)V",
+      (void *)android_media_MediaCodec_native_setSurface },
 
     { "createInputSurface", "()Landroid/view/Surface;",
       (void *)android_media_MediaCodec_createInputSurface },

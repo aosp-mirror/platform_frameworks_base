@@ -664,10 +664,10 @@ final public class MediaCodec {
         if (!mHasSurface) {
             throw new IllegalStateException("codec was not configured for an output surface");
         }
-
-        // TODO implement this
-        throw new IllegalArgumentException("codec does not support this surface");
+        native_setSurface(surface);
     }
+
+    private native void native_setSurface(@NonNull Surface surface);
 
     /**
      * Create a persistent input surface that can be used with codecs that normally have an input
