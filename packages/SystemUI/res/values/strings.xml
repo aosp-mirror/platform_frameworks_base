@@ -400,6 +400,8 @@
     <string name="accessibility_recents_all_items_dismissed">All recent applications dismissed.</string>
     <!-- Content description to tell the user an application has been launched from recents -->
     <string name="accessibility_recents_item_launched">Starting <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
+    <!-- Content description of individual recents task. -->
+    <string name="accessibility_recents_task_header"><xliff:g id="app" example="Chrome">%1$s</xliff:g> <xliff:g id="activity_label" example="www.google.com">%2$s</xliff:g></string>
     <!-- Content description to tell the user a notification has been removed from the notification shade -->
     <string name="accessibility_notification_dismissed">Notification dismissed.</string>
 

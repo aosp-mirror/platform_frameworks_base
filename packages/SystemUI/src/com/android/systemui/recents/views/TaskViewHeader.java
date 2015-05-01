@@ -190,10 +190,12 @@ public class TaskViewHeader extends FrameLayout {
         } else if (t.applicationIcon != null) {
             mApplicationIcon.setImageDrawable(t.applicationIcon);
         }
-        mApplicationIcon.setContentDescription(t.activityLabel);
+        mApplicationIcon.setContentDescription(t.contentDescription);
         if (!mActivityDescription.getText().toString().equals(t.activityLabel)) {
             mActivityDescription.setText(t.activityLabel);
         }
+        mActivityDescription.setContentDescription(t.contentDescription);
+
         // Try and apply the system ui tint
         int existingBgColor = getBackgroundColor();
         if (existingBgColor != t.colorPrimary) {
@@ -207,7 +209,7 @@ public class TaskViewHeader extends FrameLayout {
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(String.format(mDismissContentDescription,
-                t.activityLabel));
+                t.contentDescription));
         mMoveTaskButton.setVisibility((mConfig.multiStackEnabled) ? View.VISIBLE : View.INVISIBLE);
         if (mConfig.multiStackEnabled) {
             updateResizeTaskBarIcon(t);

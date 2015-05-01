@@ -130,6 +130,8 @@ public class RecentsTaskLoadPlan {
             // Load the label, icon, and color
             String activityLabel = loader.getAndUpdateActivityLabel(taskKey, t.taskDescription,
                     mSystemServicesProxy, infoHandle);
+            String contentDescription = loader.getAndUpdateContentDescription(taskKey,
+                    activityLabel, mSystemServicesProxy, res);
             Drawable activityIcon = loader.getAndUpdateActivityIcon(taskKey, t.taskDescription,
                     mSystemServicesProxy, res, infoHandle, false);
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription, mConfig);
@@ -148,9 +150,9 @@ public class RecentsTaskLoadPlan {
 
             // Add the task to the stack
             Task task = new Task(taskKey, (t.id != RecentsTaskLoader.INVALID_TASK_ID),
-                    t.affiliatedTaskId, t.affiliatedTaskColor, activityLabel, activityIcon,
-                    activityColor, (i == (taskCount - 1)), mConfig.lockToAppEnabled, icon,
-                    iconFilename);
+                    t.affiliatedTaskId, t.affiliatedTaskColor, activityLabel, contentDescription,
+                    activityIcon, activityColor, (i == (taskCount - 1)), mConfig.lockToAppEnabled,
+                    icon, iconFilename);
             task.thumbnail = loader.getAndUpdateThumbnail(taskKey, mSystemServicesProxy, false);
             if (DEBUG) Log.d(TAG, "\tthumbnail: " + taskKey + ", " + task.thumbnail);
 
