@@ -19,10 +19,12 @@ package android.telecom;
 import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -608,7 +610,7 @@ public final class Call {
     private final List<String> mChildrenIds = new ArrayList<>();
     private final List<Call> mChildren = new ArrayList<>();
     private final List<Call> mUnmodifiableChildren = Collections.unmodifiableList(mChildren);
-    private final List<Callback> mCallbacks = new CopyOnWriteArrayList<>();
+    private final List<CallbackRecord<Callback>> mCallbackRecords = new CopyOnWriteArrayList<>();
     private final List<Call> mConferenceableCalls = new ArrayList<>();
     private final List<Call> mUnmodifiableConferenceableCalls =
             Collections.unmodifiableList(mConferenceableCalls);
@@ -850,7 +852,20 @@ public final class Call {
      * @param callback A {@code Callback}.
      */
     public void registerCallback(Callback callback) {
-        mCallbacks.add(callback);
+        registerCallback(callback, new Handler());
+    }
+
+    /**
+     * Registers a callback to this {@code Call}.
+     *
+     * @param callback A {@code Callback}.
+     * @param handler A handler which command and status changes will be delivered to.
+     */
+    public void registerCallback(Callback callback, Handler handler) {
+        unregisterCallback(callback);
+        if (callback != null && handler != null) {
+            mCallbackRecords.add(new CallbackRecord<Callback>(callback, handler));
+        }
     }
 
     /**
@@ -860,7 +875,12 @@ public final class Call {
      */
     public void unregisterCallback(Callback callback) {
         if (callback != null) {
-            mCallbacks.remove(callback);
+            for (CallbackRecord<Callback> record : mCallbackRecords) {
+                if (record.getCallback() == callback) {
+                    mCallbackRecords.remove(record);
+                    break;
+                }
+            }
         }
     }
 
@@ -1021,57 +1041,120 @@ public final class Call {
         }
     }
 
-    private void fireStateChanged(int newState) {
-        for (Callback callback : mCallbacks) {
-            callback.onStateChanged(this, newState);
+    private void fireStateChanged(final int newState) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onStateChanged(call, newState);
+                }
+            });
         }
     }
 
-    private void fireParentChanged(Call newParent) {
-        for (Callback callback : mCallbacks) {
-            callback.onParentChanged(this, newParent);
+    private void fireParentChanged(final Call newParent) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onParentChanged(call, newParent);
+                }
+            });
         }
     }
 
-    private void fireChildrenChanged(List<Call> children) {
-        for (Callback callback : mCallbacks) {
-            callback.onChildrenChanged(this, children);
+    private void fireChildrenChanged(final List<Call> children) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onChildrenChanged(call, children);
+                }
+            });
         }
     }
 
-    private void fireDetailsChanged(Details details) {
-        for (Callback callback : mCallbacks) {
-            callback.onDetailsChanged(this, details);
+    private void fireDetailsChanged(final Details details) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onDetailsChanged(call, details);
+                }
+            });
         }
     }
 
-    private void fireCannedTextResponsesLoaded(List<String> cannedTextResponses) {
-        for (Callback callback : mCallbacks) {
-            callback.onCannedTextResponsesLoaded(this, cannedTextResponses);
+    private void fireCannedTextResponsesLoaded(final List<String> cannedTextResponses) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onCannedTextResponsesLoaded(call, cannedTextResponses);
+                }
+            });
         }
     }
 
-    private void fireVideoCallChanged(InCallService.VideoCall videoCall) {
-        for (Callback callback : mCallbacks) {
-            callback.onVideoCallChanged(this, videoCall);
+    private void fireVideoCallChanged(final InCallService.VideoCall videoCall) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onVideoCallChanged(call, videoCall);
+                }
+            });
         }
     }
 
-    private void firePostDialWait(String remainingPostDialSequence) {
-        for (Callback callback : mCallbacks) {
-            callback.onPostDialWait(this, remainingPostDialSequence);
+    private void firePostDialWait(final String remainingPostDialSequence) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onPostDialWait(call, remainingPostDialSequence);
+                }
+            });
         }
     }
 
     private void fireCallDestroyed() {
-        for (Callback callback : mCallbacks) {
-            callback.onCallDestroyed(this);
+        for (CallbackRecord<Callback> record: mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onCallDestroyed(call);
+                }
+            });
         }
     }
 
     private void fireConferenceableCallsChanged() {
-        for (Callback callback : mCallbacks) {
-            callback.onConferenceableCallsChanged(this, mUnmodifiableConferenceableCalls);
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConferenceableCallsChanged(call, mUnmodifiableConferenceableCalls);
+                }
+            });
         }
     }
 }
