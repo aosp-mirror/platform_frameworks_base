@@ -246,6 +246,9 @@ public class TextureView extends View {
             mSurface = null;
             mLayer = null;
 
+            // Make sure if/when new layer gets re-created, transform matrix will
+            // be re-applied.
+            mMatrixChanged = true;
             mHadSurface = true;
         }
     }
