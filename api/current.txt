@@ -28562,7 +28562,7 @@ package android.telecom {
     method public void handleCallSessionEvent(int);
     method public abstract void onRequestCameraCapabilities();
     method public abstract void onRequestConnectionDataUsage();
-    method public abstract void onSendSessionModifyRequest(android.telecom.VideoProfile);
+    method public abstract void onSendSessionModifyRequest(android.telecom.VideoProfile, android.telecom.VideoProfile);
     method public abstract void onSendSessionModifyResponse(android.telecom.VideoProfile);
     method public abstract void onSetCamera(java.lang.String);
     method public abstract void onSetDeviceOrientation(int);

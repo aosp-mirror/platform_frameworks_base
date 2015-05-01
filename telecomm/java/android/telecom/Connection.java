@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
@@ -471,9 +472,16 @@ public abstract class Connection implements IConferenceable {
                     case MSG_SET_ZOOM:
                         onSetZoom((Float) msg.obj);
                         break;
-                    case MSG_SEND_SESSION_MODIFY_REQUEST:
-                        onSendSessionModifyRequest((VideoProfile) msg.obj);
+                    case MSG_SEND_SESSION_MODIFY_REQUEST: {
+                        SomeArgs args = (SomeArgs) msg.obj;
+                        try {
+                            onSendSessionModifyRequest((VideoProfile) args.arg1,
+                                    (VideoProfile) args.arg2);
+                        } finally {
+                            args.recycle();
+                        }
                         break;
+                    }
                     case MSG_SEND_SESSION_MODIFY_RESPONSE:
                         onSendSessionModifyResponse((VideoProfile) msg.obj);
                         break;
@@ -527,9 +535,11 @@ public abstract class Connection implements IConferenceable {
                 mMessageHandler.obtainMessage(MSG_SET_ZOOM, value).sendToTarget();
             }
 
-            public void sendSessionModifyRequest(VideoProfile requestProfile) {
-                mMessageHandler.obtainMessage(
-                        MSG_SEND_SESSION_MODIFY_REQUEST, requestProfile).sendToTarget();
+            public void sendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = fromProfile;
+                args.arg2 = toProfile;
+                mMessageHandler.obtainMessage(MSG_SEND_SESSION_MODIFY_REQUEST, args).sendToTarget();
             }
 
             public void sendSessionModifyResponse(VideoProfile responseProfile) {
@@ -606,9 +616,11 @@ public abstract class Connection implements IConferenceable {
          * Some examples of session modification requests: upgrade connection from audio to video,
          * downgrade connection from video to audio, pause video.
          *
-         * @param requestProfile The requested connection video properties.
+         * @param fromProfile The video properties prior to the request.
+         * @param toProfile The video properties with the requested changes made.
          */
-        public abstract void onSendSessionModifyRequest(VideoProfile requestProfile);
+        public abstract void onSendSessionModifyRequest(VideoProfile fromProfile,
+                VideoProfile toProfile);
 
         /**te
          * Provides a response to a request to change the current connection session video

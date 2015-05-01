@@ -39,7 +39,7 @@ oneway interface IVideoProvider {
 
     void setZoom(float value);
 
-    void sendSessionModifyRequest(in VideoProfile reqProfile);
+    void sendSessionModifyRequest(in VideoProfile fromProfile, in VideoProfile toProfile);
 
     void sendSessionModifyResponse(in VideoProfile responseProfile);
 

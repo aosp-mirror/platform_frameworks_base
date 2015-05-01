@@ -349,9 +349,9 @@ public final class RemoteConnection {
             }
         }
 
-        public void sendSessionModifyRequest(VideoProfile reqProfile) {
+        public void sendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
             try {
-                mVideoProviderBinder.sendSessionModifyRequest(reqProfile);
+                mVideoProviderBinder.sendSessionModifyRequest(fromProfile, toProfile);
             } catch (RemoteException e) {
             }
         }

@@ -925,9 +925,9 @@ public final class Call {
         }
 
         boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
-                !Objects.equals(mVideoCall, parcelableCall.getVideoCall());
+                !Objects.equals(mVideoCall, parcelableCall.getVideoCall(this));
         if (videoCallChanged) {
-            mVideoCall = parcelableCall.getVideoCall();
+            mVideoCall = parcelableCall.getVideoCall(this);
         }
 
         int state = stateFromParcelableCallState(parcelableCall.getState());
