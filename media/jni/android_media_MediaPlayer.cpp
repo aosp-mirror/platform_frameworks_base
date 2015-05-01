@@ -174,6 +174,8 @@ static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStat
     } else {  // Throw exception!
         if ( opStatus == (status_t) INVALID_OPERATION ) {
             jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        } else if ( opStatus == (status_t) BAD_VALUE ) {
+            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         } else if ( opStatus == (status_t) PERMISSION_DENIED ) {
             jniThrowException(env, "java/lang/SecurityException", NULL);
         } else if ( opStatus != (status_t) OK ) {
@@ -442,8 +444,33 @@ android_media_MediaPlayer_setPlaybackSettings(JNIEnv *env, jobject thiz, jobject
             pbs.audioFallbackModeSet, pbs.audioRate.mFallbackMode,
             pbs.audioStretchModeSet, pbs.audioRate.mStretchMode);
 
-    // TODO: pass playback settings to mediaplayer when audiotrack supports it
-    process_media_player_call(env, thiz, mp->setPlaybackRate(pbs.audioRate.mSpeed), NULL, NULL);
+    AudioPlaybackRate rate;
+    status_t err = mp->getPlaybackSettings(&rate);
+    if (err == OK) {
+        bool updatedRate = false;
+        if (pbs.speedSet) {
+            rate.mSpeed = pbs.audioRate.mSpeed;
+            updatedRate = true;
+        }
+        if (pbs.pitchSet) {
+            rate.mPitch = pbs.audioRate.mPitch;
+            updatedRate = true;
+        }
+        if (pbs.audioFallbackModeSet) {
+            rate.mFallbackMode = pbs.audioRate.mFallbackMode;
+            updatedRate = true;
+        }
+        if (pbs.audioStretchModeSet) {
+            rate.mStretchMode = pbs.audioRate.mStretchMode;
+            updatedRate = true;
+        }
+        if (updatedRate) {
+            err = mp->setPlaybackSettings(rate);
+        }
+    }
+    process_media_player_call(
+            env, thiz, err,
+            "java/lang/IllegalStateException", "unexpected error");
 }
 
 static jobject
@@ -457,15 +484,9 @@ android_media_MediaPlayer_getPlaybackSettings(JNIEnv *env, jobject thiz)
 
     PlaybackSettings pbs;
     AudioPlaybackRate &audioRate = pbs.audioRate;
-
-    audioRate.mSpeed = 1.0f;
-    audioRate.mPitch = 1.0f;
-    audioRate.mFallbackMode = AUDIO_TIMESTRETCH_FALLBACK_DEFAULT;
-    audioRate.mStretchMode = AUDIO_TIMESTRETCH_STRETCH_DEFAULT;
-
-    // TODO: get this from mediaplayer when audiotrack supports it
-    // process_media_player_call(
-    //        env, thiz, mp->getPlaybackSettings(&audioRate), NULL, NULL);
+    process_media_player_call(
+            env, thiz, mp->getPlaybackSettings(&audioRate),
+            "java/lang/IllegalStateException", "unexpected error");
     ALOGV("getPlaybackSettings: %f %f %d %d",
             audioRate.mSpeed, audioRate.mPitch, audioRate.mFallbackMode, audioRate.mStretchMode);
 
@@ -489,13 +510,35 @@ android_media_MediaPlayer_setSyncSettings(JNIEnv *env, jobject thiz, jobject set
     SyncSettings scs;
     scs.fillFromJobject(env, gSyncSettingsFields, settings);
     ALOGV("setSyncSettings: %d:%d %d:%d %d:%f %d:%f",
-            scs.syncSourceSet, scs.syncSource,
-            scs.audioAdjustModeSet, scs.audioAdjustMode,
-            scs.toleranceSet, scs.tolerance,
-            scs.frameRateSet, scs.frameRate);
+          scs.syncSourceSet, scs.sync.mSource,
+          scs.audioAdjustModeSet, scs.sync.mAudioAdjustMode,
+          scs.toleranceSet, scs.sync.mTolerance,
+          scs.frameRateSet, scs.frameRate);
 
-    // TODO: pass sync settings to mediaplayer when it supports it
-    // process_media_player_call(env, thiz, mp->setSyncSettings(scs), NULL, NULL);
+    AVSyncSettings avsync;
+    float videoFrameRate;
+    status_t err = mp->getSyncSettings(&avsync, &videoFrameRate);
+    if (err == OK) {
+        bool updatedSync = scs.frameRateSet;
+        if (scs.syncSourceSet) {
+            avsync.mSource = scs.sync.mSource;
+            updatedSync = true;
+        }
+        if (scs.audioAdjustModeSet) {
+            avsync.mAudioAdjustMode = scs.sync.mAudioAdjustMode;
+            updatedSync = true;
+        }
+        if (scs.toleranceSet) {
+            avsync.mTolerance = scs.sync.mTolerance;
+            updatedSync = true;
+        }
+        if (updatedSync) {
+            err = mp->setSyncSettings(avsync, scs.frameRateSet ? scs.frameRate : -1.f);
+        }
+    }
+    process_media_player_call(
+            env, thiz, err,
+            "java/lang/IllegalStateException", "unexpected error");
 }
 
 static jobject
@@ -508,21 +551,27 @@ android_media_MediaPlayer_getSyncSettings(JNIEnv *env, jobject thiz)
     }
 
     SyncSettings scs;
-    scs.syncSource = 0; // SYNC_SOURCE_DEFAULT
-    scs.audioAdjustMode = 0; // AUDIO_ADJUST_MODE_DEFAULT
-    scs.tolerance = 0.f;
-    scs.frameRate = 0.f;
+    scs.frameRate = -1.f;
+    process_media_player_call(
+            env, thiz, mp->getSyncSettings(&scs.sync, &scs.frameRate),
+            "java/lang/IllegalStateException", "unexpected error");
 
-    // TODO: get this from mediaplayer when it supports it
-    // process_media_player_call(
-    //        env, thiz, mp->getSyncSettings(&scs), NULL, NULL);
     ALOGV("getSyncSettings: %d %d %f %f",
-            scs.syncSource, scs.audioAdjustMode, scs.tolerance, scs.frameRate);
+            scs.sync.mSource, scs.sync.mAudioAdjustMode, scs.sync.mTolerance, scs.frameRate);
+
+    // sanity check settings
+    if (scs.sync.mSource >= AVSYNC_SOURCE_MAX
+            || scs.sync.mAudioAdjustMode >= AVSYNC_AUDIO_ADJUST_MODE_MAX
+            || scs.sync.mTolerance < 0.f
+            || scs.sync.mTolerance >= AVSYNC_TOLERANCE_MAX) {
+        jniThrowException(env,  "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
 
     scs.syncSourceSet = true;
     scs.audioAdjustModeSet = true;
     scs.toleranceSet = true;
-    scs.frameRateSet = false;
+    scs.frameRateSet = scs.frameRate >= 0.f;
 
     return scs.asJobject(env, gSyncSettingsFields);
 }

@@ -19,13 +19,12 @@
 
 #include "jni.h"
 
+#include <media/stagefright/MediaSync.h>
+
 namespace android {
 
 struct SyncSettings {
-    // keep this here until it is implemented
-    int syncSource;
-    int audioAdjustMode;
-    float tolerance;
+    AVSyncSettings sync;
     float frameRate;
 
     bool syncSourceSet;
