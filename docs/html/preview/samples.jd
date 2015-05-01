@@ -1,0 +1,37 @@
+page.title=Samples
+
+@jd:body
+
+<p>
+  The following code samples are provided for the M Developer Preview. You can download them in the
+  Android SDK Manager under the <b>SDK Samples</b> component for the M Developer Preview.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> These downloadable projects are designed
+   for use with Gradle and Android Studio.
+</p>
+
+
+<h3 id="id">Sample 1</h3>
+
+<p>
+  This sample demonstrates how to turducken frankfurter boudin, ham brisket alcatra kielbasa pork
+  loin pork. Jowl kielbasa kevin, sausage landjaeger corned beef cow spare ribs pastrami leberkas
+  drumstick.
+</p>
+
+<p><a href="#">Get it on GitHub</a></p>
+
+
+<h3 id="id">Sample 2</h3>
+
+<p>
+  This sample demonstrates how to turducken frankfurter boudin, ham brisket alcatra kielbasa pork
+  loin pork. Jowl kielbasa kevin, sausage landjaeger corned beef cow spare ribs pastrami leberkas
+  drumstick.
+</p>
+
+<p><a href="#">Get it on GitHub</a></p>
+
+
