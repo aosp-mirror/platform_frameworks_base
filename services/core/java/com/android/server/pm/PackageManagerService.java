@@ -2161,6 +2161,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.mFingerprint = Build.FINGERPRINT;
             }
 
+            primeDomainVerificationsLPw(false);
+
             // All the changes are done during package scanning.
             mSettings.updateInternalDatabaseVersion();
 
@@ -2177,8 +2179,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
             mIntentFilterVerifier = new IntentVerifierProxy(mContext,
                     mIntentFilterVerifierComponent);
-
-            primeDomainVerificationsLPw(false);
 
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
@@ -2277,9 +2277,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void primeDomainVerificationsLPw(boolean logging) {
-        Slog.d(TAG, "Start priming domain verification");
+        Slog.d(TAG, "Start priming domain verifications");
         boolean updated = false;
-        ArrayList<String> allHosts = new ArrayList<>();
+        ArraySet<String> allHostsSet = new ArraySet<>();
         for (PackageParser.Package pkg : mPackages.values()) {
             final String packageName = pkg.packageName;
             if (!hasDomainURLs(pkg)) {
@@ -2299,18 +2299,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             for (PackageParser.Activity a : pkg.activities) {
                 for (ActivityIntentInfo filter : a.intents) {
                     if (hasValidDomains(filter, false)) {
-                        allHosts.addAll(filter.getHostsList());
+                        allHostsSet.addAll(filter.getHostsList());
                     }
                 }
             }
-            if (allHosts.size() == 0) {
-                allHosts.add("*");
+            if (allHostsSet.size() == 0) {
+                allHostsSet.add("*");
             }
+            ArrayList<String> allHostsList = new ArrayList<>(allHostsSet);
             IntentFilterVerificationInfo ivi =
-                    mSettings.createIntentFilterVerificationIfNeededLPw(packageName, allHosts);
+                    mSettings.createIntentFilterVerificationIfNeededLPw(packageName, allHostsList);
             if (ivi != null) {
                 // We will always log this
-                Slog.d(TAG, "Priming domain verifications for package: " + packageName);
+                Slog.d(TAG, "Priming domain verifications for package: " + packageName +
+                        " with hosts:" + ivi.getDomainsString());
                 ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS);
                 updated = true;
             }
@@ -2319,12 +2321,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.d(TAG, "No priming domain verifications for package: " + packageName);
                 }
             }
-            allHosts.clear();
+            allHostsSet.clear();
         }
         if (updated) {
-            scheduleWriteSettingsLocked();
+            if (logging) {
+                Slog.d(TAG, "Will need to write primed domain verifications");
+            }
         }
-        Slog.d(TAG, "End priming domain verification");
+        Slog.d(TAG, "End priming domain verifications");
     }
 
     @Override
