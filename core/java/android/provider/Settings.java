@@ -7395,6 +7395,18 @@ public final class Settings {
                 "sms_short_codes_metadata_url";
 
         /**
+         * URL for apn_db updates
+         * @hide
+         */
+        public static final String APN_DB_UPDATE_CONTENT_URL = "apn_db_content_url";
+
+        /**
+         * URL for apn_db update metadata
+         * @hide
+         */
+        public static final String APN_DB_UPDATE_METADATA_URL = "apn_db_metadata_url";
+
+        /**
          * URL for cert pinlist updates
          * @hide
          */
