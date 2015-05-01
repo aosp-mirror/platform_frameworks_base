@@ -744,6 +744,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    @Override
+    public int permissionToOpCode(String permission) {
+        return AppOpsManager.permissionToOpCode(permission);
+    }
+
     void finishOperationLocked(Op op) {
         if (op.nesting <= 1) {
             if (op.nesting == 1) {
