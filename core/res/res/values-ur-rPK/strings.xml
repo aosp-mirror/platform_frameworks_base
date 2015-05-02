@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"ترتیب دیں"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"خارج کریں"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"دریافت کریں"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> غائب ہے"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"اس آلہ کو دوبارہ داخل کریں"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> کو منتقل کیا جا رہا ہے"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"ڈیٹا منتقل کیا جا رہا ہے…"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"منتقل کرنا مکمل ہوگیا"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"ڈیٹا کو <xliff:g id="NAME">%s</xliff:g> پر منتقل کر دیا گیا"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ڈیٹا منتقل نہیں کیا جا سکا"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ڈیٹا اصل جگہ پر باقی ہے"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"کوئی مماثل سرگرمیاں نہیں ملیں۔"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"میڈیا آؤٹ پٹ کی سمت طے کریں"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"کسی ایپلیکیشن کو دوسرے خارجی آلات تک میڈیا آؤٹ پٹ کا راستہ بنانے کی اجازت دیتا ہے۔"</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"پن ہٹانے سے پہلے غیر مقفل کرنے کا پیٹرن طلب کریں"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"پن ہٹانے سے پہلے پاس ورڈ طلب کریں"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"آپ کے منتظم کی جانب سے انسٹال کر دیا گیا"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"آپ کے منتظم کی جانب سے حذف کر دیا گیا"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"بیٹری کی میعاد بہتر کرنے میں مدد کرنے کیلئے، بیٹری کی بچت آپ کے آلہ کی کارکردگی کم کر دیتی ہے اور وائبریشن، مقام کی سروسز اور پس منظر کا بیشتر ڈیٹا محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر مبنی دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری کی بچت خود بخود آف ہو جاتی ہے۔"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

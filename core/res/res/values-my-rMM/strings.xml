@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"စဖွင့်သတ်မှတ်ရန်"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ထုတ်မည်"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"စူးစမ်းရန်"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ပျောက်နေသည်"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"ဤစက်ပစ္စည်းအား ပြန်ထည့်ရန်"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ရွှေ့နေစဉ်"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"ဒေတာများ ရွှေ့နေစဉ်"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ရွှေ့ပြီး၏"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> သို့ ဒေတာ ရွှေ့ခဲ့၏"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ဒေတာမရွှေ့နိုင်ပါ"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"မူရင်းနေရာတွင် ဒေတာ ကျန်ခဲ့၏"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"တိုက်ဆိုင်သော ပြုလုပ်ချက် ရှာမတွေ့ပါ"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"မီဒီယာထွက်ပေါက်အား လမ်းလွှဲပြောင်းခြင်း"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"အပလီကေးရှင်းအား မီဒီယာ ထုတ်လွှတ်မှုကို အခြားပြင်ပ စက်ပစ္စည်းများသို့ လွှဲပြောင်းခွင့်ပြုပါ"</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ပင်မဖြုတ်မီမှာ သော့ဖွင့် ရေးဆွဲမှုပုံစံကို မေးကြည့်ရန်"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ပင်မဖြုတ်မီမှာ စကားဝှက်ကို မေးကြည့်ရန်"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"သင့် အက်ဒမင်မှ သွင်းယူထား၏"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"သင့် အက်ဒမင်အား ဖျက်ပစ်ရန်"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန်၊ ဘက်ထရီအားထိန်းသည် သင့်ကိရိယာ၏ ဆောင်ရွက်ချက်ကို  လျှော့ပေးပြီး တုန်ခါမှု၊ တည်နေရာဝန်ဆောင်မှုများနှင့်၊ နောက်ခံဒေတာအများစုကို ကန့်သတ်ပေး၏။ စင့်လုပ်ပေးရလေ့ရှိသည့် အီးမေး၊ စာပို့ခြင်းနှင့်၊ အခြားအပလီကေးရှင်းများကို ၎င်းတို့အား သင် ဖွင့်မှသာ အဆင့်မြှင့်မွမ်းမံမည်ဖြစ်၏။ \n\n ကိရိယာအား အားသွင်းနေစဉ် ဘက်ထရီအားထိန်းအား အလိုအလျောက် ပိတ်ထားသည်။"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

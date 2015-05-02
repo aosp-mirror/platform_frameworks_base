@@ -1080,22 +1080,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"ដំឡើង"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ដកចេញ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"រុករក"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"បាត់ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"បញ្ចូលឧបករណ៍នេះឡើងវិញ"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"កំពុងផ្លាស់ទី <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"កំពុងផ្លាស់ទីទិន្នន័យ…"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ផ្លាស់ទីទាំងស្រុង"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"ទិន្នន័យបានផ្លាស់ទីទៅ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"មិនអាចផ្លាស់ទីទិន្នន័យបានទេ"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ទិន្នន័យនៅក្នុងទីតាំងដើមដដែល"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"រក​មិន​ឃើញ​សកម្មភាព​ផ្គូផ្គង។"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ឲ្យ​កម្មវិធី​នាំ​ផ្លូវ​លទ្ធផល​មេឌៀ​ទៅ​ឧបករណ៍​​ខាង​ក្រៅ​ផ្សេង។"</string>
@@ -1468,6 +1460,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេល​ផ្ដាច់"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"បានដំឡើងដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"បានលុបដោយអ្នកគ្រប់គ្រងរបស់អ្នក"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ដើម្បីជួយឲ្យថាមពលថ្មប្រសើរឡើង កម្មវិធីសន្សំសំចៃថាមពលថ្មកាត់បន្ថយប្រតិបត្តិការឧបករណ៍របស់អ្នក និងកម្រិតភាពញ័រ សេវាកម្មទីតាំង និងទិន្នន័យផ្ទៃខាងក្រោយស្ទើរតែទាំងអស់។ ការផ្ញើសារអ៊ីម៉ែល និងកម្មវិធីផ្សេងទៀតដែលពឹងផ្អែកលើការធ្វើសមកាលកម្មអាចនឹងមិនធ្វើបច្ចុប្បន្នភាពទេ លុះត្រាតែអ្នកបើកពួកវា។\n\nកម្មវិធីសន្សំសំចៃបិទដោយស្វ័យប្រវត្តិ នៅពេលដែលឧបករណ៍របស់អ្នកកំពុងសាកថ្ម។"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

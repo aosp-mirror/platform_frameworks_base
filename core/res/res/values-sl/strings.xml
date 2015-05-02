@@ -1092,22 +1092,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Nastavitev"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izvrzite"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Raziščite"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Ni shrambe <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Znova vstavite to napravo"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Premikanje aplikacije <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Premikanje podatkov"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Premik je dokončan"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Podatki so premaknjeni v shrambo <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Premik podatkov ni uspel"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Podatki so ostali na izvirni lokaciji"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Ni ustreznih dejavnosti."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Preusmeritev predstavnosti"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Aplikaciji omogoča preusmerjanje predstavnosti v druge zunanje naprave."</string>
@@ -1484,6 +1476,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred odpenjanjem vprašaj za vzorec za odklepanje"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred odpenjanjem vprašaj za geslo"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Namestil skrbnik"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisal skrbnik"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Varčevanje z energijo akumulatorja podaljša čas njegovega delovanja tako, da zmanjša zmogljivost delovanja naprave in omeji vibriranje, lokacijske storitve ter prenos večine podatkov v ozadju. Aplikacije za e-pošto, sporočanje in drugo, ki uporabljajo sinhroniziranje, se morda ne posodabljajo, razen če jih odprete.\n\nVarčevanje z energijo akumulatorja se samodejno izklopi med polnjenjem akumulatorja naprave."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

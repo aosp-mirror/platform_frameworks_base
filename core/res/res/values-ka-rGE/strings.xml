@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"დაყენება"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"გამოღება"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"დათვალიერება"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> აკლია"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"ხელახლა შეაერთეთ ეს მოწყობილობა"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"მიმდინარეობს <xliff:g id="NAME">%s</xliff:g>-ის გადატანა"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"მიმდინარეობს მონაცემთა გადატანა"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"გადატანა დასრულდა"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"მონაცემები გადატანილი იქნა <xliff:g id="NAME">%s</xliff:g>-ში"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"მონაცემების გადატანა ვერ მოხერხდა"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"მონაცემები დარჩა თავდაპირველ მდებარეობაში"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"შესატყვისი აქტივობები არ არის."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"მულტიმედია მონაცემების გადამისამართება"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"აპლიკაციას შეეძლება გადაამისამართოს მულტიმედია მონაცემები სხვა გარე მოწყობილობებისკენ."</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ფიქსაციის მოხსნამდე განბლოკვის ნიმუშის მოთხოვნა"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ფიქსაციის მოხსნამდე პაროლის მოთხოვნა"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"თქვენი ადმინისტრატორის მიერ დაყენებული"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"თქვენი ადმინისტრატორის მიერ წაშლილი"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის შესრულებას და ზღუდავს ვიბრაციას, ადგილმდებარეობის მომსახურებებს და ძირითად ფონურ მონაცემებს. ელ-ფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპლიკაციების განახლება არ მოხდება მათ გახსნეამდე. \n\n ელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

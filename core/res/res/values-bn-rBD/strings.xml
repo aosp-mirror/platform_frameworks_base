@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"সেটআপ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"বের করে নিন"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ঘুরে দেখুন"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> অনুপস্থিত"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"এই ডিভাইসটিকে পুনরায় সন্নিবেশ করান"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> সরানো হচ্ছে"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"ডেটা সরানো হচ্ছে"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"সরানো সম্পূর্ণ হয়েছে"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"ডেটা <xliff:g id="NAME">%s</xliff:g> এ সরানো হয়েছে"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ডেটা সরানো যায়নি"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"মূল অবস্থানে ডেটা রাখুন"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"কোনো সমরূপ কার্যকলাপ খুঁজে পাওয়া যায়নি৷"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"মিডিয়া আউটপুট রুট করুন"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"অ্যাপ্লিকেশানটিকে অন্যান্য বহিরাগত ডিভাইসে মিডিয়া আউটপুট রুট করার অনুমতি দেয়৷"</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"আনপিন করার আগে আনলক প্যাটার্ন চান"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"আনপিন করার আগে পাসওয়ার্ড চান"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"আপনার প্রশাসক দ্বারা ইনস্টল করা হয়েছে"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"আপনার প্রশাসক দ্বারা মুছে ফেলা হয়েছে"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ব্যাটরির লাইফ উন্নত করতে সহায়তা করতে, ব্যাটারি সাশ্রয়কারী আপনার ডিভাইসের কার্যসম্পাদনা হ্রাস করে এবং কম্পন, অবস্থান পরিষেবাসমূহ এবং অধিকাংশ ব্যাকগ্রাউন্ড ডেটা সীমিত করে৷ ইমেল, বার্তাপ্রেরণ এবং অন্যান্য অ্যাপ্লিকেশানগুলিকে যেগুলি সিঙ্কের উপর নির্ভর করে সেগুলিকে আপনি না খোলা পর্যন্ত নাও আপডেট হতে পারে৷\n\nআপনার ডিভাইসটিকে যখন চার্জ করা হয় তখন ব্যাটারি সাশ্রয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়৷"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
