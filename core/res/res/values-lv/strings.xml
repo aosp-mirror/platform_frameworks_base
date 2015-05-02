@@ -1085,22 +1085,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Iestatīt"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izstumt"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Izpētīt"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Nav ierīces <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Vēlreiz ievietojiet ierīci."</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Notiek lietotnes <xliff:g id="NAME">%s</xliff:g> pārvietošana"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Notiek datu pārvietošana"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Pārvietošana ir pabeigta"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Dati ir pārvietoti uz ierīci <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Nevarēja pārvietot datus"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Dati tika atstāti sākotnējā atrašanās vietā"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nav atrasta neviena atbilstoša darbība."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Multivides datu izejas maršrutēšana"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ļauj lietojumprogrammai maršrutēt multivides datu izeju uz citām ārējām ierīcēm."</string>
@@ -1475,6 +1467,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atslēgu"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pirms atspraušanas pieprasīt paroli"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalēja jūsu administrators"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izdzēsa jūsu administrators"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Lai paildzinātu akumulatora darbību, akumulatora jaudas taupīšanas režīmā tiek samazināta ierīces veiktspēja un tiek ierobežota vibrācija, atrašanās vietu pakalpojumi un lielākā daļa fona datu. E-pasta, ziņojumapmaiņas un cita veida lietotnes, kuru darbības pamatā ir datu sinhronizācija, var netikt atjauninātas, ja tās neatverat.\n\nTiklīdz tiek sākta ierīces uzlāde, akumulatora jaudas taupīšanas režīms automātiski tiek izslēgts."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

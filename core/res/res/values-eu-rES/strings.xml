@@ -275,7 +275,7 @@
     <string name="permlab_getTasks" msgid="6466095396623933906">"Eskuratu abian diren aplikazioak"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Unean edo duela gutxi exekutatutako zereginei buruzko informazioa lortzeko baimena ematen die aplikazioei. Horrela, aplikazioak gailuan erabiltzen ari diren aplikazioei buruzko informazioa ezagut dezake."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Kudeatu profilen eta gailuen jabeak"</string>
-    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Profilaren eta gailuaren jabeak zehazteko baimena ematen die aplikazioei"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Profilaren eta gailuaren jabeak zehazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"Ordenatu abian diren aplikazioak"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Zereginak aurreko eta atzeko planora eramateko baimena ematen die aplikazioei. Aplikazioak zuk ezer egin gabe egin dezake hori."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"gaitu auto modua"</string>
@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Konfigurazioa"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Atera"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Arakatu"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Ez dago <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Sartu gailua berriro"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> mugitzen"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Datuak mugitzen"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Mugitu dira datuak"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Mugitu dira datuak <xliff:g id="NAME">%s</xliff:g> gailura"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Ezin izan dira mugitu datuak"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Jatorrizko tokian utzi dira datuak"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Ez da bat datorren jarduerarik aurkitu."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Multimedia-irteera bideratzea"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Multimedia elementuak kanpoko gailuetara bideratzeko baimena ematen die aplikazioei."</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Eskatu desblokeatzeko eredua aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Eskatu pasahitza aingura kendu aurretik"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Administratzaileak instalatu du"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratzaileak ezabatu du"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren funtzionamendua, dardara,  kokapen-zerbitzuak eta atzeko planoko datuen erabilera gehiena mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzen ezarri orduko desaktibatzen da bateria-aurrezlea."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
