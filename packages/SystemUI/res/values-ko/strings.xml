@@ -162,6 +162,8 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g>이(가) 제거되었습니다."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"최근 사용한 애플리케이션을 모두 닫았습니다."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g>을(를) 시작하는 중입니다."</string>
+    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
+    <skip />
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"알림이 제거되었습니다."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"알림 세부정보"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"빠른 설정"</string>
@@ -180,7 +182,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"비행기 모드가 사용 중지되었습니다."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"비행기 모드를 사용합니다."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"알림 일시중지 사용, 중요 알림만 수신"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"알림 일시중지 사용, 방해 금지"</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"알림 일시중지 사용, 모두 차단"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"알림 일시중지 사용, 알람만 수신"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"알림 일시중지 사용 중지"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"알림 일시중지가 사용 중지되었습니다."</string>
@@ -235,7 +237,7 @@
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"알림 일시중지"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"중요 알림만"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"알람만 수신"</string>
-    <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"방해 금지"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"모두 차단"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"블루투스"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"블루투스(<xliff:g id="NUMBER">%d</xliff:g>개의 기기)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"블루투스 사용 안함"</string>
@@ -302,26 +304,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"검색"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"어떤 방해도 받지 않습니다. 알람도 울리지 않습니다."</string>
-    <string name="zen_priority_introduction" msgid="7253045784560169993">"지정한 알람, 알림, 이벤트, 발신자를 제외하고 소리와 진동을 끕니다."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"지정한 알람, 알림, 이벤트, 발신자를 제외하고 소리와 진동을 끕니다."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"맞춤설정"</string>
-    <string name="zen_no_interruptions" msgid="7970973750143632592">"모든 알림 차단"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"최우선 알림만 수신"</string>
-    <string name="zen_alarms" msgid="5055668280767657759">"알람만 수신"</string>
-    <string name="zen_alarm_information_time" msgid="5235772206174372272">"다음 알람 시각: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
-    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"다음 알람 일시: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
-    <string name="zen_alarm_warning" msgid="6873910860111498041">"<xliff:g id="ALARM_TIME">%s</xliff:g>에 알람을 들을 수 없습니다."</string>
+    <string name="zen_silence_introduction" msgid="575422795504098868">"알람, 음악, 동영상, 게임을 포함하여 모든 소리와 진동을 끕니다. 전화는 걸 수 있습니다."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"다시 터치하여 열기"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"위로 스와이프하여 잠금 해제"</string>
     <string name="phone_hint" msgid="3101468054914424646">"전화 기능을 사용하려면 오른쪽으로 스와이프하세요."</string>
     <string name="camera_hint" msgid="5241441720959174226">"카메라를 사용하려면 왼쪽으로 스와이프하세요."</string>
-    <string name="interruption_level_none" msgid="8284541443482072628">"방해 금지"</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"모두 차단"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"중요 알림만"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"알람만 수신"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"모두 수신"</string>
-    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"방해\n금지"</string>
+    <string name="interruption_level_none_twoline" msgid="3957581548190765889">"모두\n차단"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"중요 알림만\n허용"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"알람만\n수신"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"충전 중(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> 후 충전 완료)"</string>
@@ -363,12 +358,23 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN 사용 중지"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN 연결 해제"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"이 기기는 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자는 설정, 기업 액세스, 앱, 기기와 관련된 데이터, 기기의 위치 정보를 모니터링하고 관리할 수 있습니다. 자세한 내용은 관리자에게 문의하세요."</string>
-    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자는 이메일, 앱, 보안 웹사이트를 포함한 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"기기 관리자:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\n직장 프로필 관리자:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 네트워크 활동과 기기를 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
-    <string name="monitoring_description_vpn" msgid="912328761766161919">"VPN 연결을 설정할 수 있는 권한을 앱에 부여했습니다.\n\n이 앱에서 이메일, 앱, 보안 웹사이트 등의 네트워크 활동과 기기를 모니터링할 수 있습니다."</string>
+    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"이 기기는 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자는 설정, 기업 액세스, 앱, 기기와 관련된 데이터, 기기의 위치 정보를 모니터링하고 관리할 수 있습니다.\n\nVPN에 연결되어 있으므로 VPN 업체에서 이메일, 앱, 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"직장 프로필은 <xliff:g id="ORGANIZATION">%1$s</xliff:g>에서 관리합니다.\n\n관리자는 이메일, 앱, 보안 웹사이트를 포함한 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요.\n\n또한 현재 VPN에 연결되어 있으므로 VPN 업체에서도 내 네트워크 활동을 모니터링할 수 있습니다."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"기기 관리자: <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>. \n직장 프로필 관리자:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\n관리자는 이메일, 앱, 보안 웹사이트를 비롯한 내 네트워크 활동을 모니터링할 수 있습니다.\n\n자세한 내용은 관리자에게 문의하세요.\n\n또한 현재 VPN에 연결되어 있으므로 VPN 업체에서도 내 네트워크 활동을 모니터링할 수 있습니다."</string>
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
+    <skip />
+    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"수동으로 잠금 해제할 때까지 기기가 잠금 상태로 유지됩니다."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"알림을 더욱 빠르게 받기"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"잠금 해제하기 전에 알림을 봅니다."</string>
@@ -377,6 +383,7 @@
     <string name="notification_expand_button_text" msgid="1037425494153780718">"모두 보기"</string>
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"모두 숨기기"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="volume_zen_end_now" msgid="3179845345429841822">"지금 종료"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"화면 고정됨"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"고정 해제하기 전까지 계속 표시됩니다. 고정 해제하려면 뒤로와 최근 사용을 동시에 길게 터치합니다."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"고정 해제하기 전까지 계속 표시됩니다. 고정 해제하려면 최근 사용을 길게 터치합니다."</string>
