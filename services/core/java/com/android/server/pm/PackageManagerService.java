@@ -9115,7 +9115,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public boolean setDefaultBrowserPackageName(String packageName, int userId) {
         synchronized (mPackages) {
-            return mSettings.setDefaultBrowserPackageNameLPr(packageName, userId);
+            boolean result = mSettings.setDefaultBrowserPackageNameLPr(packageName, userId);
+            result |= updateIntentVerificationStatus(packageName,
+                    PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
+                    UserHandle.myUserId());
+            return result;
         }
     }
 
