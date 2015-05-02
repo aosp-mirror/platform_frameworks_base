@@ -164,6 +164,8 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Rexeitouse <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Rexeitáronse todas as aplicacións recentes."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Iniciando <xliff:g id="APP">%s</xliff:g>."</string>
+    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
+    <skip />
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificación rexeitada"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Sombra de notificación"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuración rápida"</string>
@@ -182,7 +184,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Desactivouse o modo avión."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Activouse o modo avión."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Non molestar activado, só prioridade."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"Non molestar activado, sen interrupcións."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Non molestar activado, silencio total."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Non molestar activado, só alarmas."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"A opción Non molestar está desactivada."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Desactivouse a opción Non molestar."</string>
@@ -237,7 +239,7 @@
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Non molestar"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Só prioridade"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Só alarmas"</string>
-    <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"Sen interrupcións"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Silencio total"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositivos)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth desactivado"</string>
@@ -304,26 +306,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"Buscar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Pasa o dedo cara arriba para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Pasa o dedo cara a esquerda para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Non hai interrupcións nin alarmas."</string>
-    <string name="zen_priority_introduction" msgid="7253045784560169993">"Non te molestará ningún son nin vibración, agás os procedentes de alarmas, recordatorios, eventos de emisores de chamada especificados."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Non te molestará ningún son nin vibración, agás os procedentes de alarmas, recordatorios, eventos de emisores de chamada especificados."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizar"</string>
-    <string name="zen_no_interruptions" msgid="7970973750143632592">"Sen interrupcións"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"Só interrupcións prioritarias"</string>
-    <string name="zen_alarms" msgid="5055668280767657759">"Só alarmas"</string>
-    <string name="zen_alarm_information_time" msgid="5235772206174372272">"A túa próxima alarma ten lugar ás <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
-    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"A túa próxima alarma ten lugar o <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
-    <string name="zen_alarm_warning" msgid="6873910860111498041">"Non escoitarás a túa alarma ás <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="zen_silence_introduction" msgid="575422795504098868">"Esta acción bloquea TODOS os sons e vibracións, incluídos os das alarmas, música, vídeos e xogos. Aínda podes facer chamadas de teléfono."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacións menos urxentes abaixo"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Toca outra vez para abrir o elemento"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Pasa o dedo cara arriba para desbloquear"</string>
     <string name="phone_hint" msgid="3101468054914424646">"Pasa o dedo cara á dereita para acceder ao teléfono"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Pasa o dedo cara á esquerda para abrir a cámara"</string>
-    <string name="interruption_level_none" msgid="8284541443482072628">"Sen interrupcións"</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"Silencio total"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Só prioridade"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Só alarmas"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"Todas"</string>
-    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"Ningunha\ninterrupción"</string>
+    <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silencio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Só\nprioridade"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Só\nalarmas"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Cargando (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> para finalizar a carga)"</string>
@@ -365,12 +360,23 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Desactivar VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Desconectar VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"O teu dispositivo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO teu administrador pode supervisar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información de localización do teu dispositivo. Para obter máis información, ponte en contacto co teu administrador."</string>
-    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"O teu perfil de traballo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO teu administrador é capaz de supervisar a actividade da túa rede, incluídos os correos electrónicos, as aplicacións e os sitios web seguros.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"O teu dispositivo está xestionado por:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nO teu perfil de traballo está xestionado por:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nO teu administrador pode supervisar o teu dispositivo e a actividade da rede, incluídos os correos electrónicos, as aplicacións e os sitios web seguros.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
-    <string name="monitoring_description_vpn" msgid="912328761766161919">"Outorgaches permiso a unha aplicación para configurar unha conexión VPN.\n\nEsta aplicación pode controlar a actividade da rede e do dispositivo, incluídos os correos electrónicos, as aplicacións e os sitios web seguros."</string>
+    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"O teu dispositivo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO teu administrador pode supervisar e xestionar a configuración, o acceso corporativo, as aplicacións, os datos asociados co teu dispositivo e a información de localización do teu dispositivo.\n\nEstás conectado a unha VPN, que pode supervisar a túa actividade de rede, incluídos os correos electrónicos, as aplicacións e os sitios web.\n\nPara obter máis información, ponte en contacto co teu administrador."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"O teu perfil de traballo está xestionado por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO teu administrador é capaz de supervisar a actividade da túa rede, incluídos os correos electrónicos, as aplicacións e os sitios web seguros.\n\nPara obter máis información, ponte en contacto co teu administrador.\n\nTamén estás conectado a unha VPN, que pode supervisar a túa actividade na rede."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"O teu dispositivo está xestionado por <xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nO teu perfil de traballo está xestionado por:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nO teu administrador pode supervisar a túa actividade da rede, incluídos os correos electrónicos, as aplicacións e os sitios web seguros.\n\nPara obter máis información, ponte en contacto co teu administrador.\n\nTamén estás conectado a unha VPN, que pode supervisar a túa actividade da rede persoal"</string>
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
+    <skip />
+    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"O dispositivo permanecerá bloqueado ata que o desbloquees manualmente"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recibir notificacións máis rápido"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Consúltaas antes de desbloquear"</string>
@@ -379,6 +385,7 @@
     <string name="notification_expand_button_text" msgid="1037425494153780718">"Ver todo"</string>
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Ocultar todo"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="volume_zen_end_now" msgid="3179845345429841822">"Finalizar agora"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"A pantalla está fixada"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"A pantalla manterase visible ata que anules a fixación. Para facelo, mantén premido Atrás e Visión xeral ao mesmo tempo."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"A pantalla manterase visible ata que anules a fixación. Para facelo, mantén premido Visión xeral."</string>

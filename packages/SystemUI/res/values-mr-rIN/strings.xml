@@ -162,6 +162,8 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> डिसमिस केला."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"अलीकडील सर्व अनुप्रयोग डिसमिस झाले."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ करीत आहे."</string>
+    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
+    <skip />
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना डिसमिस केल्या."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"द्रुत सेटिंग्ज."</string>
@@ -180,7 +182,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"विमान मोड बंद केला."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"विमान मोड चालू केला."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"व्यत्यय आणू नका चालू, केवळ प्राधान्य."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"व्यत्यय आणू नका चालू, कोणताही व्यत्यय नाही."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"व्यत्यय आणू नका चालू, संपूर्ण शांतता."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"व्यत्यय आणू नका चालू, केवळ अलार्म."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"व्यत्यय आणू नका बंद."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"व्यत्यय आणू नका बंद करा"</string>
@@ -235,7 +237,7 @@
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"व्यत्यय आणू नका"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"केवळ प्राधान्य"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"केवळ अलार्म"</string>
-    <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"कोणतेही व्यत्यय नाही"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"संपूर्ण शांतता"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लूटुथ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब (<xliff:g id="NUMBER">%d</xliff:g> डिव्हाइसेस)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब बंद"</string>
@@ -302,26 +304,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"शोध"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी वर स्लाइड करा."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी डावीकडे स्लाइड करा."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"कोणतेही व्यत्यय नाहीत. अगदी अलार्मचे देखील नाहीत."</string>
-    <string name="zen_priority_introduction" msgid="7253045784560169993">"आपण निर्दिष्‍ट करता ते अलार्म, स्मरणपत्रे, इव्हेंट आणि कॉलर व्यतिरिक्त आपल्याला आवाज आणि कंपनांमुळे व्यत्यय येणार नाही."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"आपण निर्दिष्‍ट करता ते अलार्म, स्मरणपत्रे, इव्हेंट आणि कॉलर व्यतिरिक्त, आपल्याला आवाज आणि कंपनांमुळे व्यत्यय येणार नाही."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"सानुकूलित करा"</string>
-    <string name="zen_no_interruptions" msgid="7970973750143632592">"कोणतेही व्यत्यय नाही"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"केवळ प्राधान्य दिलेले व्‍यत्यय"</string>
-    <string name="zen_alarms" msgid="5055668280767657759">"केवळ अलार्म"</string>
-    <string name="zen_alarm_information_time" msgid="5235772206174372272">"आपला पुढील अलार्म <xliff:g id="ALARM_TIME">%s</xliff:g> वाजता आहे"</string>
-    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"आपला पुढील अलार्म <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g> आहे"</string>
-    <string name="zen_alarm_warning" msgid="6873910860111498041">"आपण आपला अलार्म <xliff:g id="ALARM_TIME">%s</xliff:g> वाजता ऐकणार नाही"</string>
+    <string name="zen_silence_introduction" msgid="575422795504098868">"हे अलार्म, संगीत, व्हिडिओ आणि गेम यासह, सर्व आवाज आणि कंपने अवरोधित करते. आपण तरीही फोन कॉल करण्यात सक्षम व्हाल."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"खाली कमी तातडीच्या सूचना"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"उघडण्यासाठी पुन्हा स्पर्श करा"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करण्यासाठी स्वाइप करा"</string>
     <string name="phone_hint" msgid="3101468054914424646">"फोन साठी उजवीकडे स्वाइप करा"</string>
     <string name="camera_hint" msgid="5241441720959174226">"कॅमेर्‍यासाठी डावीकडे स्वाइप करा"</string>
-    <string name="interruption_level_none" msgid="8284541443482072628">"कोणतेही व्यत्यय नाहीत"</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"संपूर्ण शांतता"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"केवळ प्राधान्य"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"केवळ अलार्म"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"सर्व"</string>
-    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"कोणतेही व्यत्यय\nनाही"</string>
+    <string name="interruption_level_none_twoline" msgid="3957581548190765889">"संपूर्ण\nशांतता"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"केवळ\nप्राधान्य"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"केवळ\nअलार्म"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण होईपर्यंत) चार्ज होत आहे"</string>
@@ -363,12 +358,23 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN अक्षम करा"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN डिस्कनेक्ट करा"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"आपले डिव्हाइस <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केलेले आहे.\n\nआपला प्रशासक आपल्या डिव्हाइसशी संबंधित सेटिंग्ज, कॉर्पोरेट प्रवेश, अॅप्स, डेटा आणि आपल्या डिव्हाइसच्या स्थान माहितीचे परीक्षण करू शकतो. अधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
-    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"आपला कार्य प्रोफाईल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केलेला आहे.\n\nआपला प्रशासक आपल्या ईमेल, अॅप्स आणि सुरक्षित वेबसाइटसह आपल्या नेटवर्क क्रियाकलापांचे परीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"आपले डिव्हाइस याद्वारे व्यवस्थापित केले आहे:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nआपला प्रोफाईल याद्वारे व्यवस्थापित केला आहे:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nआपला प्रशासक ईमेल, अॅप्स आणि सुरक्षित वेबसाइटसह, आपल्या डिव्हाइसचे आणि नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
-    <string name="monitoring_description_vpn" msgid="912328761766161919">"आपण VPN कनेक्शन सेट करण्यासाठी एखाद्या अॅपला परवानगी दिली आहे.\n\nहा अॅप ईमेल, अॅप्स आणि सुरक्षित वेबसाइट यासह, आपल्या डिव्हाइस आणि नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
+    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"आपले डिव्हाइस <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केलेले आहे.\n\nआपला प्रशासक आपल्या डिव्हाइसशी संबंधित सेटिंग्ज, कॉर्पोरेट प्रवेश, अॅप्स, डेटा आणि आपल्या डिव्हाइसच्या स्थान माहितीचे परीक्षण करू शकतो. अधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा.\n\nआपण एका VPN शी देखील कनेक्ट केलेले आहे जो आपल्या ईमेल, अॅप्स आणि वेबसाइटसह आपल्या वैयक्तिक नेटवर्क क्रियाकलापाचे देखील परीक्षण करू शकतो.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"आपला कार्य प्रोफाईल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केलेला आहे.\n\nआपला प्रशासक आपल्या ईमेल, अॅप्स आणि सुरक्षित वेबसाइटसह आपल्या नेटवर्क क्रियाकलापांचे परीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा.\n\nआपण एका VPN शी देखील कनेक्ट केलेले आहे जो आपल्या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"आपले डिव्हाइस <xliff:g id="ORGANIZATION_0">%1$s</xliff:g> द्वारे व्यवस्थापित केलेले आहे.\nआपला कार्य प्रोफाईल याद्वारे व्यवस्थापित केलेला आहे: \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nआपला प्रशासक आपल्या ईमेल, अॅप्स आणि सुरक्षित वेबसाइटसह आपल्या नेटवर्क क्रियाकलापांचे परीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा.\n\nआपण एका VPN शी देखील कनेक्ट केलेले आहे जो आपल्या वैयक्तिक नेटवर्क क्रियाकलापाचे देखील परीक्षण करू शकतो."</string>
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
+    <skip />
+    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"आपण व्यक्तिचलितपणे अनलॉक करेपर्यंत डिव्हाइस लॉक केलेले राहील"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचना अधिक जलद मिळवा"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपण अनलॉक करण्‍यापूर्वी त्यांना पहा"</string>
@@ -377,6 +383,7 @@
     <string name="notification_expand_button_text" msgid="1037425494153780718">"सर्व पहा"</string>
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"सर्व लपवा"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="volume_zen_end_now" msgid="3179845345429841822">"आता समाप्त करा"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्क्रीन पिन केलेली आहे"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"हे आपण अनपिन करेपर्यंत दृश्यामध्ये ते ठेवते. अनपिन करण्यासाठी एकाच वेळी परत आणि अलीकडील ला स्पर्श करा आणि धरून ठेवा आणि विहंगावलोकन करा."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"हे आपण अनपिन करेपर्यंत दृश्यामध्ये ते ठेवते. अनपिन करण्यासाठी स्पर्श करा आणि धरून ठेवा."</string>
