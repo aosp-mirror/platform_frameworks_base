@@ -290,8 +290,7 @@ public class DynamicLayout extends Layout
                 .setPaint(getPaint())
                 .setWidth(getWidth())
                 .setTextDir(getTextDirectionHeuristic())
-                .setSpacingMult(getSpacingMultiplier())
-                .setSpacingAdd(getSpacingAdd())
+                .setLineSpacing(getSpacingAdd(), getSpacingMultiplier())
                 .setEllipsizedWidth(mEllipsizedWidth)
                 .setEllipsize(mEllipsizeAt)
                 .setBreakStrategy(mBreakStrategy);
