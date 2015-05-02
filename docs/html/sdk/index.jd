@@ -4,7 +4,7 @@ page.template=sdk
 header.hide=1
 page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
-studio.version=1.2.0
+studio.version=1.2.0.12
 
 studio.linux_bundle_download=android-studio-ide-141.1890965-linux.zip
 studio.linux_bundle_bytes=259139652 
