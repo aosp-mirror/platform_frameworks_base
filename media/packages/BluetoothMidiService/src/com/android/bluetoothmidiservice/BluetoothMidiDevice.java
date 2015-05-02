@@ -47,6 +47,7 @@ import java.util.UUID;
 public final class BluetoothMidiDevice {
 
     private static final String TAG = "BluetoothMidiDevice";
+    private static final boolean DEBUG = false;
 
     private static final int MAX_PACKET_SIZE = 20;
 
@@ -152,8 +153,10 @@ public final class BluetoothMidiDevice {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-//            logByteArray("Received ", characteristic.getValue(), 0,
-//                    characteristic.getValue().length);
+            if (DEBUG) {
+                logByteArray("Received ", characteristic.getValue(), 0,
+                        characteristic.getValue().length);
+            }
             mPacketDecoder.decodePacket(characteristic.getValue(), mOutputReceiver);
         }
     };
@@ -182,8 +185,10 @@ public final class BluetoothMidiDevice {
             byte[] writeBuffer = mWriteBuffers[count];
             System.arraycopy(buffer, 0, writeBuffer, 0, count);
             mCharacteristic.setValue(writeBuffer);
-//            logByteArray("Sent ", mCharacteristic.getValue(), 0,
-//                    mCharacteristic.getValue().length);
+            if (DEBUG) {
+                logByteArray("Sent ", mCharacteristic.getValue(), 0,
+                       mCharacteristic.getValue().length);
+            }
             mBluetoothGatt.writeCharacteristic(mCharacteristic);
         }
     }
@@ -259,14 +264,7 @@ public final class BluetoothMidiDevice {
     private static void logByteArray(String prefix, byte[] value, int offset, int count) {
         StringBuilder builder = new StringBuilder(prefix);
         for (int i = offset; i < count; i++) {
-            String hex = Integer.toHexString(value[i]);
-            int length = hex.length();
-            if (length == 1) {
-                hex = "0x" + hex;
-            } else {
-                hex = hex.substring(length - 2, length);
-            }
-            builder.append(hex);
+            builder.append(String.format("0x%02X", value[i]));
             if (i != value.length - 1) {
                 builder.append(", ");
             }
