@@ -283,7 +283,7 @@ public class DynamicLayout extends Layout
 
         if (reflowed == null) {
             reflowed = new StaticLayout(null);
-            b = StaticLayout.Builder.obtain(text, where, where + after, getWidth());
+            b = StaticLayout.Builder.obtain(text, where, where + after, getPaint(), getWidth());
         }
 
         b.setText(text, where, where + after)
