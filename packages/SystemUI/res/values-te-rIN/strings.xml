@@ -162,6 +162,8 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> తీసివేయబడింది."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"అన్ని ఇటీవలి అనువర్తనాలు తీసివేయబడ్డాయి."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g>ని ప్రారంభిస్తోంది."</string>
+    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
+    <skip />
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"నోటిఫికేషన్ తీసివేయబడింది."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"నోటిఫికేషన్ షేడ్."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"శీఘ్ర సెట్టింగ్‌లు."</string>
@@ -180,7 +182,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ఎయిర్‌ప్లైన్ మోడ్ ఆఫ్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ఎయిర్‌ప్లైన్ మోడ్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, ప్రాధాన్యత మాత్రమే."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, అంతరాయాలు ఉండవు."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, మొత్తం నిశ్శబ్దం."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, అలారాలు మాత్రమే."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"అంతరాయం కలిగించవద్దు ఆఫ్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"అంతరాయం కలిగించవద్దు ఆఫ్ చేయబడింది."</string>
@@ -235,7 +237,7 @@
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"అంతరాయం కలిగించవద్దు"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ప్రాధాన్యత మాత్రమే"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"అలారాలు మాత్రమే"</string>
-    <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"అంతరాయాలు ఉండవు"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"మొత్తం నిశ్శబ్దం"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"బ్లూటూత్"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"బ్లూటూత్ (<xliff:g id="NUMBER">%d</xliff:g> పరికరాలు)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"బ్లూటూత్ ఆఫ్‌లో ఉంది"</string>
@@ -302,26 +304,19 @@
     <string name="description_target_search" msgid="3091587249776033139">"శోధించండి"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం పైకి స్లైడ్ చేయండి."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> కోసం ఎడమవైపుకు స్లైడ్ చేయండి."</string>
-    <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"అంతరాయాలు లేవు. అలారాలు కూడా లేవు."</string>
-    <string name="zen_priority_introduction" msgid="7253045784560169993">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"అనుకూలీకరించు"</string>
-    <string name="zen_no_interruptions" msgid="7970973750143632592">"అంతరాయాలు లేకుండా"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"ప్రాధాన్య అంతరాయాలు మాత్రమే"</string>
-    <string name="zen_alarms" msgid="5055668280767657759">"అలారాలు మాత్రమే"</string>
-    <string name="zen_alarm_information_time" msgid="5235772206174372272">"మీ తదుపరి అలారం <xliff:g id="ALARM_TIME">%s</xliff:g>కి ఉంది"</string>
-    <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"మీ తదుపరి అలారం <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
-    <string name="zen_alarm_warning" msgid="6873910860111498041">"మీరు <xliff:g id="ALARM_TIME">%s</xliff:g>కి సెట్ చేసిన అలారం మీకు వినిపించదు"</string>
+    <string name="zen_silence_introduction" msgid="575422795504098868">"ఇది అలారాలు, సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా అన్ని ధ్వనులు మరియు వైబ్రేషన్‌లను బ్లాక్ చేస్తుంది. మీరు ఇప్పటికీ ఫోన్ కాల్‌లు చేయగలుగుతారు."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"తక్కువ అత్యవసర నోటిఫికేషన్‌లు దిగువన"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"తెరవడానికి మళ్లీ తాకండి"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"అన్‌లాక్ చేయడానికి ఎగువకు స్వైప్ చేయండి"</string>
     <string name="phone_hint" msgid="3101468054914424646">"ఫోన్ కోసం కుడివైపుకి స్వైప్ చేయండి"</string>
     <string name="camera_hint" msgid="5241441720959174226">"కెమెరా కోసం ఎడమవైపుకి స్వైప్ చేయండి"</string>
-    <string name="interruption_level_none" msgid="8284541443482072628">"అంతరాయాలు ఉండవు"</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"మొత్తం నిశ్శబ్దం"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ప్రాధాన్యత మాత్రమే"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"అలారాలు మాత్రమే"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"అన్నిటికీ"</string>
-    <string name="interruption_level_none_twoline" msgid="3942121050170227056">"అంతరాయాలు\nఉండకూడదు"</string>
+    <string name="interruption_level_none_twoline" msgid="3957581548190765889">"మొత్తం\nనిశ్శబ్దం"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ప్రాధాన్యమైనవి\nమాత్రమే"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"అలారాలు\nమాత్రమే"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ఛార్జ్ అవుతోంది (పూర్తిగా నిండటానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -363,12 +358,23 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPNని నిలిపివేయి"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPNను డిస్‌కనెక్ట్ చేయి"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"మీ పరికరం <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది.\n\nమీ నిర్వాహకుడు సెట్టింగ్‌లు, కార్పొరేట్ ప్రాప్యత, అనువర్తనాలు, మీ పరికరంతో అనుబంధించబడిన డేటా మరియు మీ పరికరం స్థాన సమాచారాన్ని పర్యవేక్షించగలరు మరియు నిర్వహించగలరు. మరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి."</string>
-    <string name="monitoring_description_profile_owned" msgid="8110044290898637925">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది.\n\nమీ నిర్వాహకుడు ఇమెయిల్‌లు, అనువర్తనాలు మరియు సురక్షిత వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలరు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి."</string>
-    <string name="monitoring_description_device_and_profile_owned" msgid="1664428184778531249">"మీ పరికరం ఈ సంస్థ నిర్వహణలో ఉంది:\n<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>.\nమీ కార్యాలయ ప్రొఫైల్ ఈ సంస్థ నిర్వహణలో ఉంది:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nమీ నిర్వాహకుడు ఇమెయిల్‌లు, అనువర్తనాలు మరియు సురక్షిత వెబ్‌సైట్‌లతో సహా మీ పరికర మరియు నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలరు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి."</string>
-    <string name="monitoring_description_vpn" msgid="912328761766161919">"మీరు VPN కనెక్షన్‌ను సెటప్ చేయడానికి అనువర్తనానికి అనుమతి ఇచ్చారు.\n\nఈ అనువర్తనం ఇమెయిల్‌లు, అనువర్తనాలు మరియు సురక్షిత వెబ్‌సైట్‌లతో సహా మీ పరికరం మరియు నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
+    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
+    <skip />
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"మీ పరికరం <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది.\n\nమీ నిర్వాహకుడు సెట్టింగ్‌లు, కార్పొరేట్ ప్రాప్యత, అనువర్తనాలు, మీ పరికరంతో అనుబంధించబడిన డేటా మరియు పరికరం స్థాన సమాచారాన్ని పర్యవేక్షించగలరు మరియు నిర్వహించగలరు.\n\nమీరు VPNకి కనెక్ట్ చేయబడ్డారు, ఇది ఇమెయిల్‌లు, అనువర్తనాలు మరియు వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"మీ కార్యాలయ ప్రొఫైల్ <xliff:g id="ORGANIZATION">%1$s</xliff:g> నిర్వహణలో ఉంది.\n\nమీ నిర్వాహకుడు ఇమెయిల్‌లు, అనువర్తనాలు మరియు సురక్షిత వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలరు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి.\n\nమీరు VPNకి కూడా కనెక్ట్ చేయబడ్డారు, ఇది మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు."</string>
-    <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"మీ పరికరం <xliff:g id="ORGANIZATION_0">%1$s</xliff:g> నిర్వహణలో ఉంది.\nమీ కార్యాలయ ప్రొఫైల్ ఈ సంస్థ నిర్వహణలో ఉంది:\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>.\n\nమీ నిర్వాహకుడు ఇమెయిల్‌లు, అనువర్తనాలు మరియు సురక్షిత వెబ్‌సైట్‌లతో సహా మీ నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలరు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకుడిని సంప్రదించండి.\n\nమీరు VPNకి కూడా కనెక్ట్ చేయబడ్డారు, ఇది మీ వ్యక్తిగత నెట్‌వర్క్ కార్యాచరణను పర్యవేక్షించగలదు"</string>
+    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
+    <skip />
+    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"మీరు మాన్యువల్‌గా అన్‌లాక్ చేస్తే మినహా పరికరం లాక్ చేయబడి ఉంటుంది"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"నోటిఫికేషన్‌లను వేగంగా పొందండి"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"వీటిని మీరు అన్‌లాక్ చేయకముందే చూడండి"</string>
@@ -377,6 +383,7 @@
     <string name="notification_expand_button_text" msgid="1037425494153780718">"అన్నీ చూడండి"</string>
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"అన్నీ దాచిపెట్టు"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="volume_zen_end_now" msgid="3179845345429841822">"ఇప్పుడే ముగించు"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"స్క్రీన్ పిన్ చేయబడింది"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"ఇది మీరు అన్‌పిన్ చేసే వరకు దీన్ని వీక్షణలో ఉంచుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు మరియు స్థూలదృష్టిని ఒకేసారి తాకి, ఉంచండి."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"ఇది మీరు అన్‌పిన్ చేసే వరకు దీన్ని వీక్షణలో ఉంచుతుంది. అన్‌పిన్ చేయడానికి స్థూలదృష్టిని తాకి, ఉంచండి."</string>
