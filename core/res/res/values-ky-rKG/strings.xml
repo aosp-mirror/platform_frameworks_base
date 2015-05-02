@@ -1883,6 +1883,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун кулпуну ачкан үлгү суралсын"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Администраторуңуз тарабынан орнотулган"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Администраторуңуз тарабынан жок кылынган"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареянын өмүрүн узартуу үчүн, батареяны үнөмдөгүч түзмөгүңүздүн ишинин майнаптуулугун азайтып, дирилдөө, жайгашкан жерди аныктоо кызматтары жана фондук дайындардын көпчүлүгүн чектеп коёт. Электрондук почта, билдирүү жазышуу жана башка шайкештештирүүгө байланыштуу колдонмолор ачылмайынча жаңыртылбай калышы мүмкүн.\n\nБатарея үнөмдөгүч түзмөгүңүз кубатталып жатканда автоматтык түрдө өчүп калат."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

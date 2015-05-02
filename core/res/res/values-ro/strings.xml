@@ -1085,22 +1085,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Configurați"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Scoateți"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorați"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> lipsește"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Reintroduceți dispozitivul"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Se mută <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Se mută datele"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Mutare finalizată"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Date mutate pe <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Nu s-au putut muta datele"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Au rămas date în locația inițială"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nu s-a găsit nicio activitate potrivită."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Direcţionează rezultatele media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite unei aplicații să direcţioneze rezultate media către alte dispozitive externe."</string>
@@ -1475,6 +1467,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicită modelul pentru deblocare înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicită parola înainte de a anula fixarea"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalat de administrator"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Șters de administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pentru a îmbunătăți autonomia bateriei, funcția de economisire a energiei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nFuncția de economisire a energiei se dezactivează automat când dispozitivul se încarcă."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

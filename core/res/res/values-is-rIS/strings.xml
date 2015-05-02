@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Uppsetning"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Fjarlægja"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Kanna"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> vantar"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Settu þetta tæki aftur í"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Flytur <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Flytur gögn"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Flutningi lokið"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Gögn flutt á <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Ekki var hægt að færa gögnin"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Gögn eftir á upprunalega staðnum"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Engar aðgerðir með samsvörun fundust."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Beina margmiðlunarúttaki"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Leyfir forriti að beina margmiðlunarúttaki til annarra ytri tækja."</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Biðja um opnunarmynstur til að losa"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Biðja um aðgangsorð til að losa"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Uppsett af kerfisstjóra"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eytt af kerfisstjóra"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Til að auka endingu rafhlöðunnar mun orkusparnaður draga úr afköstum tækisins og takmarka titring, staðsetningarþjónustu og megnið af bakgrunnsgögnum. Ekki er víst að tölvupóstur, skilaboð og önnur forrit sem reiða sig á samstillingu uppfærist nema þú opnir þau.\n\nSjálfkrafa er slökkt á orkusparnaði þegar tækið er í hleðslu."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

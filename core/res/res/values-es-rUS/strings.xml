@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Configuración"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Expulsar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorar"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"No se encuentra dispositivo <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Volver a insertar dispositivo"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Transfiriendo la aplicación <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Transfiriendo los datos"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Transferencia completa"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Se transfirieron los datos a <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"No se pudieron transferir datos."</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Los datos quedaron en la ubicación original"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"No se encontraron actividades coincidentes."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Dirigir salida de medios"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que la aplicación dirija salidas de medios a otros dispositivos externos."</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar patrón de desbloqueo para quitar fijación"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar contraseña para quitar fijación"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Lo instaló el administrador."</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Lo eliminó el administrador."</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, el ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayoría de los datos en segundo plano. Es posible que el correo electrónico, la mensajería y otras aplicaciones que se basan en la sincronización no puedan actualizarse, a menos que los abras.\n\nEl ahorro de batería se desactiva de forma automática cuando el dispositivo se está cargando."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

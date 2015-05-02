@@ -274,8 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Membenarkan apl menerima dan memproses mesej WAP. Kebenaran ini termasuk keupayaan untuk memantau atau memadam mesej yang dihantar kepada anda tanpa menunjukkannya kepada anda."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dapatkan semula apl yang sedang dijalankan"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Membenarkan apl mengambil maklumat tentang tugasan yang sedang dan baru berjalan. Ini boleh membenarkan apl untuk menemui maklumat tentang apl mana yang digunakan pada peranti."</string>
-    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Urus profil dan pemilik peranti"</string>
-    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Membenarkan apl menetapkan profil pemilik dan pemilik peranti."</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Urus pemilik profil dan peranti"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Membenarkan apl menetapkan pemilik profil dan pemilik peranti."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"susun semula tertib apl yang dijalankan"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Membenarkan apl memindahkan tugasan ke latar depan dan latar belakang. Apl boleh melakukan ini tanpa input anda."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"dayakan mod kereta"</string>
@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Persediaan"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Tanggalkan"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Teroka"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> tiada"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Sisipkan semula peranti ini"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Mengalihkan <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Mengalihkan data"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Pengalihan selesai"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Data dipindahkan ke <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Tidak dapat memindahkan data"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Data dibiarkan di lokasi asal"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Tiada aktiviti yang sepadan ditemui."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Buat laluan output media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Membenarkan apl untuk membuat laluan output media ke peranti luaran lain."</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Minta corak buka kunci sebelum menyahsemat"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Minta kata laluan sebelum menyahsemat"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Dipasang oleh pentadbir anda"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Dipadamkan oleh pentadbir anda"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan menghadkan getaran, perkhidmatan lokasi dan kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak mengemas kini, melainkan anda membuka apl itu.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda sedang dicas."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
