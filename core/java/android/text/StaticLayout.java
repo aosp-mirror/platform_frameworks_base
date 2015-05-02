@@ -57,7 +57,8 @@ public class StaticLayout extends Layout {
             mNativePtr = nNewBuilder();
         }
 
-        public static Builder obtain(CharSequence source, int start, int end, int width) {
+        public static Builder obtain(CharSequence source, int start, int end, TextPaint paint,
+                int width) {
             Builder b = sPool.acquire();
             if (b == null) {
                 b = new Builder();
@@ -67,6 +68,7 @@ public class StaticLayout extends Layout {
             b.mText = source;
             b.mStart = start;
             b.mEnd = end;
+            b.mPaint = paint;
             b.mWidth = width;
             b.mAlignment = Alignment.ALIGN_NORMAL;
             b.mTextDir = TextDirectionHeuristics.FIRSTSTRONG_LTR;
@@ -327,8 +329,7 @@ public class StaticLayout extends Layout {
                     : new Ellipsizer(source),
               paint, outerwidth, align, textDir, spacingmult, spacingadd);
 
-        Builder b = Builder.obtain(source, bufstart, bufend, outerwidth)
-            .setPaint(paint)
+        Builder b = Builder.obtain(source, bufstart, bufend, paint, outerwidth)
             .setAlignment(align)
             .setTextDir(textDir)
             .setSpacingMult(spacingmult)
