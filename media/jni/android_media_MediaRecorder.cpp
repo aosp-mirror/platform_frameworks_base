@@ -29,6 +29,7 @@
 #include <camera/ICameraService.h>
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>
+#include <media/stagefright/PersistentSurface.h>
 #include <utils/threads.h>
 
 #include <ScopedUtfChars.h>
@@ -48,6 +49,8 @@ using namespace android;
 
 // helper function to extract a native Camera object from a Camera Java object
 extern sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, struct JNICameraContext** context);
+extern sp<PersistentSurface>
+android_media_MediaCodec_getPersistentInputSurface(JNIEnv* env, jobject object);
 
 struct fields_t {
     jfieldID    context;
@@ -113,6 +116,12 @@ static sp<Surface> get_surface(JNIEnv* env, jobject clazz)
 {
     ALOGV("get_surface");
     return android_view_Surface_getSurface(env, clazz);
+}
+
+static sp<PersistentSurface> get_persistentSurface(JNIEnv* env, jobject object)
+{
+    ALOGV("get_persistentSurface");
+    return android_media_MediaCodec_getPersistentInputSurface(env, object);
 }
 
 // Returns true if it throws an exception.
@@ -487,6 +496,18 @@ android_media_MediaRecorder_native_finalize(JNIEnv *env, jobject thiz)
     android_media_MediaRecorder_release(env, thiz);
 }
 
+void android_media_MediaRecorder_usePersistentSurface(
+        JNIEnv* env, jobject thiz, jobject object) {
+    ALOGV("android_media_MediaRecorder_usePersistentSurface");
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+
+    sp<PersistentSurface> persistentSurface = get_persistentSurface(env, object);
+
+    process_media_recorder_call(env, mr->usePersistentSurface(persistentSurface),
+            "java/lang/IllegalArgumentException", "native_usePersistentSurface failed.");
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -513,6 +534,7 @@ static JNINativeMethod gMethods[] = {
     {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V",
                                                                 (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
+    {"native_usePersistentSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_usePersistentSurface },
 };
 
 // This function only registers the native methods, and is called from

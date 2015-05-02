@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -142,21 +143,27 @@ public class MediaRecorder
 
     /**
      * Configures the recorder to use a persistent surface when using SURFACE video source.
-     * <p> May only be called after {@link #prepare} in lieu of {@link #getSurface}.
-     * Frames rendered to the Surface before {@link #start} will be discarded.</p>
+     * <p> May only be called before {@link #prepare}. If called, {@link #getSurface} should
+     * not be used and will throw IllegalStateException. Frames rendered to the Surface
+     * before {@link #start} will be discarded.</p>
 
      * @param surface a persistent input surface created by
      *           {@link MediaCodec#createPersistentInputSurface}
-     * @throws IllegalStateException if it is called before {@link #prepare}, after
-     * {@link #stop}, or is called when VideoSource is not set to SURFACE.
+     * @throws IllegalStateException if it is called after {@link #prepare} and before
+     * {@link #stop}.
      * @throws IllegalArgumentException if the surface was not created by
      *           {@link MediaCodec#createPersistentInputSurface}.
      * @see MediaCodec#createPersistentInputSurface
      * @see MediaRecorder.VideoSource
      */
-    public void usePersistentSurface(Surface surface) {
-        throw new IllegalArgumentException("not implemented");
+    public void usePersistentSurface(@NonNull Surface surface) {
+        if (!(surface instanceof MediaCodec.PersistentSurface)) {
+            throw new IllegalArgumentException("not a PersistentSurface");
+        }
+        native_usePersistentSurface(surface);
     }
+
+    private native final void native_usePersistentSurface(@NonNull Surface surface);
 
     /**
      * Sets a Surface to show a preview of recorded media (video). Calls this
