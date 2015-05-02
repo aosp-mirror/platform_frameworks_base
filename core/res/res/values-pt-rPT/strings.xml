@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Configuração"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Ejetar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorar"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> em falta"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Reinserir este dispositivo"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"A mover <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"A mover dados"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Transferência concluída"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Os dados foram movidos para <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Não foi possível mover os dados"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Os dados permaneceram na localização original"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Não foi encontrada nenhuma atividade correspondente."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Encaminhar saída de som multimédia"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite que a aplicação encaminhe a saída de som multimédia para outros dispositivos externos."</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pedir sequência de desbloqueio antes de soltar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir palavra-passe antes de soltar"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalado pelo administrador"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado pelo administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ajudar a melhorar a autonomia da bateria, a poupança de bateria reduz o desempenho do seu dispositivo e limita a vibração, os serviços de localização e a maioria dos dados em segundo plano. O email, as mensagens e outras aplicações que dependem da sincronização não podem ser atualizados exceto se os abrir.\n\nA poupança de bateria desliga-se automaticamente quando o dispositivo está a carregar."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"सेटअप"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"बाहेर काढा"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"एक्सप्लोर करा"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> गहाळ आहे"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"हे डिव्हाइस पुन्हा घाला"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> हलवित आहे"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"डेटा हलवित आहे"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"हलविणे पूर्ण"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> वर डेटा हलविला"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"डेटा हलविणे शक्य झाले नाही"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"मूळ स्थानावर डेटा सोडला"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"कोणतेही जुळणारे क्रियाकलाप आढळले नाहीत."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"मीडिया आउटपुट मार्गस्थ करा"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"अन्य बाह्य डिव्हाइसेसवरील रूट मीडिया आउटपुट वर अनुप्रयोगास अनुमती देते."</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"आपल्या प्रशासकाद्वारे स्थापित केले आहे"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"आपल्या प्रशासकाद्वारे हटविले आहे"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"बॅटरीचे आयुष्य सुधारित करण्‍यात मदत करण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अ‍ॅप्स आपण उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

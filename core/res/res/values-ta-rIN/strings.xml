@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"அமைவு"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"வெளியேற்று"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"உலாவுக"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> இல்லை"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"சாதனத்தை மீண்டும் செருகவும்"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>ஐ நகர்த்துகிறது"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"தரவு நகர்த்தப்படுகிறது"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"நகர்த்தப்பட்டது"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g>க்குத் தரவு நகர்த்தப்பட்டது"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"தரவை நகர்த்த முடியவில்லை"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"அசல் இடத்திலிருந்து தரவு நகர்த்தப்பட்டது"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"பொருந்தும் செயல்பாடுகள் கண்டறியப்படவில்லை."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"மீடியா அவுட்புட்டை வழிசெலுத்துதல்"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"மீடியாவைப் பிற வெளிப்புறச் சாதனங்களுக்கு வெளியீடாக வழிகாட்ட பயன்பாட்டை அனுமதிக்கிறது."</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"நிர்வாகி நிறுவினார்"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"நிர்வாகி நீக்கிவிட்டார்"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகளானது அவற்றைத் திறக்கும்வரையில் புதுப்பிக்கப்படாமல் போகக்கூடும்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

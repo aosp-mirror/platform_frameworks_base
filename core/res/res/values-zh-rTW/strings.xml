@@ -1078,22 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"設定"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"退出"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"探索"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"找不到 <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"重新插入這部裝置"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"正在移動「<xliff:g id="NAME">%s</xliff:g>」"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"正在移動資料"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"移動完成"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"資料已移動至「<xliff:g id="NAME">%s</xliff:g>」"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"無法移動資料"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"資料留在原來的位置"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"找不到相符的活動。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"轉送媒體輸出"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允許應用程式將媒體輸出轉送至其他外部裝置。"</string>
@@ -1466,6 +1458,8 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖形"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理員安裝"</string>
+    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
+    <skip />
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已遭管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約耗電量模式會透過降低裝置效能、震動限制、定位服務限制和大多數背景資料運作限制等方式，延長電池續航力。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當您為裝置充電時，節約耗電量模式會自動關閉。"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
