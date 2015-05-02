@@ -44,7 +44,7 @@ public class BluetoothPacketEncoder extends PacketEncoder {
     // timestamp for first message in current packet
     private int mPacketTimestamp;
     // current running status, or zero if none
-    private int mRunningStatus;
+    private byte mRunningStatus;
 
     private boolean mWritePending;
 
@@ -56,12 +56,28 @@ public class BluetoothPacketEncoder extends PacketEncoder {
         public void onReceive(byte[] msg, int offset, int count, long timestamp)
                 throws IOException {
 
-            int milliTimestamp = (int)(timestamp / MILLISECOND_NANOS) & MILLISECOND_MASK;
-            int status = msg[0] & 0xFF;
-
             synchronized (mLock) {
+                int milliTimestamp = (int)(timestamp / MILLISECOND_NANOS) & MILLISECOND_MASK;
+                byte status = msg[offset];
+                boolean isSysExStart = (status == MidiConstants.STATUS_SYSTEM_EXCLUSIVE);
+                boolean isSysExContinuation = ((status & 0x80) == 0);
+
+                int bytesNeeded;
+                if (isSysExStart || isSysExContinuation) {
+                    // SysEx messages can be split into multiple packets
+                    bytesNeeded = 1;
+                } else {
+                    bytesNeeded = count;
+                }
+
                 boolean needsTimestamp = (milliTimestamp != mPacketTimestamp);
-                int bytesNeeded = count;
+                if (isSysExStart) {
+                    // SysEx start byte must be preceded by a timestamp
+                    needsTimestamp = true;
+                } else if (isSysExContinuation) {
+                    // SysEx continuation packets must not have timestamp byte
+                    needsTimestamp = false;
+                }
                 if (needsTimestamp) bytesNeeded++;  // add one for timestamp byte
                 if (status == mRunningStatus) bytesNeeded--;    // subtract one for status byte
 
@@ -71,15 +87,12 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                     flushLocked(true);
                 }
 
-                // write header if we are starting a new packet
-                if (mAccumulatedBytes == 0) {
-                    // header byte with timestamp bits 7 - 12
-                    mAccumulationBuffer[mAccumulatedBytes++] = (byte)(0x80 | (milliTimestamp >> 7));
-                    mPacketTimestamp = milliTimestamp;
-                    needsTimestamp = true;
+                // write the header if necessary
+                if (appendHeader(milliTimestamp)) {
+                     needsTimestamp = !isSysExContinuation;
                 }
 
-                // write new timestamp byte and status byte if necessary
+                // write new timestamp byte if necessary
                 if (needsTimestamp) {
                     // timestamp byte with bits 0 - 6 of timestamp
                     mAccumulationBuffer[mAccumulatedBytes++] =
@@ -87,26 +100,73 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                     mPacketTimestamp = milliTimestamp;
                 }
 
-                if (status != mRunningStatus) {
-                    mAccumulationBuffer[mAccumulatedBytes++] = (byte)status;
-                    if (MidiConstants.allowRunningStatus(status)) {
-                        mRunningStatus = status;
-                    } else if (MidiConstants.allowRunningStatus(status)) {
-                        mRunningStatus = 0;
-                    }
-                }
+                if (isSysExStart || isSysExContinuation) {
+                    // MidiFramer will end the packet with SysEx End if there is one in the buffer
+                    boolean hasSysExEnd =
+                            (msg[offset + count - 1] == MidiConstants.STATUS_END_SYSEX);
+                    int remaining = (hasSysExEnd ? count - 1 : count);
 
-                // now copy data bytes
-                int dataLength = count - 1;
-                System.arraycopy(msg, 1, mAccumulationBuffer, mAccumulatedBytes, dataLength);
-                // FIXME - handle long SysEx properly
-                mAccumulatedBytes += dataLength;
+                    while (remaining > 0) {
+                        if (mAccumulatedBytes == mAccumulationBuffer.length) {
+                            // write out our data if there is no more room
+                            // if necessary, block until previous packet is sent
+                            flushLocked(true);
+                            appendHeader(milliTimestamp);
+                        }
+
+                        int copy = mAccumulationBuffer.length - mAccumulatedBytes;
+                        if (copy > remaining) copy = remaining;
+                        System.arraycopy(msg, offset, mAccumulationBuffer, mAccumulatedBytes, copy);
+                        mAccumulatedBytes += copy;
+                        offset += copy;
+                        remaining -= copy;
+                    }
+
+                    if (hasSysExEnd) {
+                        // SysEx End command must be preceeded by a timestamp byte
+                        if (mAccumulatedBytes + 2 > mAccumulationBuffer.length) {
+                            // write out our data if there is no more room
+                            // if necessary, block until previous packet is sent
+                            flushLocked(true);
+                            appendHeader(milliTimestamp);
+                        }
+                        mAccumulationBuffer[mAccumulatedBytes++] = (byte)(0x80 | (milliTimestamp & 0x7F));
+                        mAccumulationBuffer[mAccumulatedBytes++] = MidiConstants.STATUS_END_SYSEX;
+                    }
+                } else {
+                    // Non-SysEx message
+                    if (status != mRunningStatus) {
+                        mAccumulationBuffer[mAccumulatedBytes++] = status;
+                        if (MidiConstants.allowRunningStatus(status)) {
+                            mRunningStatus = status;
+                        } else if (MidiConstants.cancelsRunningStatus(status)) {
+                            mRunningStatus = 0;
+                        }
+                    }
+
+                    // now copy data bytes
+                    int dataLength = count - 1;
+                    System.arraycopy(msg, offset + 1, mAccumulationBuffer, mAccumulatedBytes, dataLength);
+                    mAccumulatedBytes += dataLength;
+                }
 
                 // write the packet if possible, but do not block
                 flushLocked(false);
             }
         }
     };
+
+    private boolean appendHeader(int milliTimestamp) {
+        // write header if we are starting a new packet
+        if (mAccumulatedBytes == 0) {
+            // header byte with timestamp bits 7 - 12
+            mAccumulationBuffer[mAccumulatedBytes++] = (byte)(0x80 | ((milliTimestamp >> 7) & 0x3F));
+            mPacketTimestamp = milliTimestamp;
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     // MidiFramer for normalizing incoming data
     private final MidiFramer mMidiFramer = new MidiFramer(mFramedDataReceiver);
