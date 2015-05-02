@@ -39,7 +39,7 @@
 #include <media/stagefright/foundation/AMessage.h>
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/MediaErrors.h>
-
+#include <media/stagefright/PersistentSurface.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include <system/window.h>
@@ -75,6 +75,14 @@ static struct ExceptionReason {
     jint reasonReclaimed;
 } gExceptionReason;
 
+static struct {
+    jclass clazz;
+    jfieldID mLock;
+    jfieldID mPersistentObject;
+    jmethodID ctor;
+    jmethodID setNativeObjectLocked;
+} gPersistentSurfaceClassInfo;
+
 struct fields_t {
     jfieldID context;
     jmethodID postEventFromNativeID;
@@ -87,6 +95,7 @@ struct fields_t {
 };
 
 static fields_t gFields;
+static const void *sRefBaseOwner;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -248,6 +257,11 @@ status_t JMediaCodec::configure(
 status_t JMediaCodec::createInputSurface(
         sp<IGraphicBufferProducer>* bufferProducer) {
     return mCodec->createInputSurface(bufferProducer);
+}
+
+status_t JMediaCodec::usePersistentInputSurface(
+        const sp<PersistentSurface> &surface) {
+    return mCodec->usePersistentInputSurface(surface);
 }
 
 status_t JMediaCodec::start() {
@@ -869,6 +883,120 @@ static void android_media_MediaCodec_native_configure(
     throwExceptionAsNecessary(env, err);
 }
 
+sp<PersistentSurface> android_media_MediaCodec_getPersistentInputSurface(
+        JNIEnv* env, jobject object) {
+    sp<PersistentSurface> persistentSurface;
+
+    jobject lock = env->GetObjectField(
+            object, gPersistentSurfaceClassInfo.mLock);
+    if (env->MonitorEnter(lock) == JNI_OK) {
+        persistentSurface = reinterpret_cast<PersistentSurface *>(
+                env->GetLongField(object,
+                        gPersistentSurfaceClassInfo.mPersistentObject));
+        env->MonitorExit(lock);
+    }
+    env->DeleteLocalRef(lock);
+
+    return persistentSurface;
+}
+
+static jobject android_media_MediaCodec_createPersistentInputSurface(
+        JNIEnv* env, jclass /* clazz */) {
+    ALOGV("android_media_MediaCodec_createPersistentInputSurface");
+    sp<PersistentSurface> persistentSurface =
+        MediaCodec::CreatePersistentInputSurface();
+
+    if (persistentSurface == NULL) {
+        return NULL;
+    }
+
+    sp<Surface> surface = new Surface(
+            persistentSurface->getBufferProducer(), true);
+    if (surface == NULL) {
+        return NULL;
+    }
+
+    jobject object = env->NewObject(
+            gPersistentSurfaceClassInfo.clazz,
+            gPersistentSurfaceClassInfo.ctor);
+
+    if (object == NULL) {
+        if (env->ExceptionCheck()) {
+            ALOGE("Could not create PersistentSurface.");
+            env->ExceptionClear();
+        }
+        return NULL;
+    }
+
+    jobject lock = env->GetObjectField(
+            object, gPersistentSurfaceClassInfo.mLock);
+    if (env->MonitorEnter(lock) == JNI_OK) {
+        env->CallVoidMethod(
+                object,
+                gPersistentSurfaceClassInfo.setNativeObjectLocked,
+                (jlong)surface.get());
+        env->SetLongField(
+                object,
+                gPersistentSurfaceClassInfo.mPersistentObject,
+                (jlong)persistentSurface.get());
+        env->MonitorExit(lock);
+    } else {
+        env->DeleteLocalRef(object);
+        object = NULL;
+    }
+    env->DeleteLocalRef(lock);
+
+    if (object != NULL) {
+        surface->incStrong(&sRefBaseOwner);
+        persistentSurface->incStrong(&sRefBaseOwner);
+    }
+
+    return object;
+}
+
+static void android_media_MediaCodec_releasePersistentInputSurface(
+        JNIEnv* env, jclass /* clazz */, jobject object) {
+    sp<PersistentSurface> persistentSurface;
+
+    jobject lock = env->GetObjectField(
+            object, gPersistentSurfaceClassInfo.mLock);
+    if (env->MonitorEnter(lock) == JNI_OK) {
+        persistentSurface = reinterpret_cast<PersistentSurface *>(
+            env->GetLongField(
+                    object, gPersistentSurfaceClassInfo.mPersistentObject));
+        env->SetLongField(
+                object,
+                gPersistentSurfaceClassInfo.mPersistentObject,
+                (jlong)0);
+        env->MonitorExit(lock);
+    }
+    env->DeleteLocalRef(lock);
+
+    if (persistentSurface != NULL) {
+        persistentSurface->decStrong(&sRefBaseOwner);
+    }
+    // no need to release surface as it will be released by Surface's jni
+}
+
+static void android_media_MediaCodec_usePersistentInputSurface(
+        JNIEnv* env, jobject thiz, jobject object) {
+    ALOGV("android_media_MediaCodec_usePersistentInputSurface");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    if (codec == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    sp<PersistentSurface> persistentSurface =
+        android_media_MediaCodec_getPersistentInputSurface(env, object);
+
+    status_t err = codec->usePersistentInputSurface(persistentSurface);
+    if (err != NO_ERROR) {
+        throwExceptionAsNecessary(env, err);
+    }
+}
+
 static jobject android_media_MediaCodec_createInputSurface(JNIEnv* env,
         jobject thiz) {
     ALOGV("android_media_MediaCodec_createInputSurface");
@@ -1471,6 +1599,29 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     CHECK(field != NULL);
     gExceptionReason.reasonReclaimed =
         env->GetStaticIntField(clazz.get(), field);
+
+    clazz.reset(env->FindClass("android/view/Surface"));
+    CHECK(clazz.get() != NULL);
+
+    field = env->GetFieldID(clazz.get(), "mLock", "Ljava/lang/Object;");
+    CHECK(field != NULL);
+    gPersistentSurfaceClassInfo.mLock = field;
+
+    jmethodID method = env->GetMethodID(clazz.get(), "setNativeObjectLocked", "(J)V");
+    CHECK(method != NULL);
+    gPersistentSurfaceClassInfo.setNativeObjectLocked = method;
+
+    clazz.reset(env->FindClass("android/media/MediaCodec$PersistentSurface"));
+    CHECK(clazz.get() != NULL);
+    gPersistentSurfaceClassInfo.clazz = (jclass)env->NewGlobalRef(clazz.get());
+
+    method = env->GetMethodID(clazz.get(), "<init>", "()V");
+    CHECK(method != NULL);
+    gPersistentSurfaceClassInfo.ctor = method;
+
+    field = env->GetFieldID(clazz.get(), "mPersistentObject", "J");
+    CHECK(field != NULL);
+    gPersistentSurfaceClassInfo.mPersistentObject = field;
 }
 
 static void android_media_MediaCodec_native_setup(
@@ -1520,6 +1671,17 @@ static JNINativeMethod gMethods[] = {
     { "native_release", "()V", (void *)android_media_MediaCodec_release },
 
     { "native_reset", "()V", (void *)android_media_MediaCodec_reset },
+
+    { "native_releasePersistentInputSurface",
+      "(Landroid/view/Surface;)V",
+       (void *)android_media_MediaCodec_releasePersistentInputSurface},
+
+    { "native_createPersistentInputSurface",
+      "()Landroid/media/MediaCodec$PersistentSurface;",
+      (void *)android_media_MediaCodec_createPersistentInputSurface },
+
+    { "native_usePersistentInputSurface", "(Landroid/view/Surface;)V",
+      (void *)android_media_MediaCodec_usePersistentInputSurface },
 
     { "native_setCallback",
       "(Landroid/media/MediaCodec$Callback;)V",
