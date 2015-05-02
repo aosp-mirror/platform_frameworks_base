@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.hardware.Camera;
+import android.media.MediaCodec;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -225,10 +226,12 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
 
     private boolean recordVideoFromSurface(
             int frameRate, int captureRate, int width, int height,
-            int videoFormat, int outFormat, String outFile, boolean videoOnly) {
+            int videoFormat, int outFormat, String outFile, boolean videoOnly,
+            Surface persistentSurface) {
         Log.v(TAG,"recordVideoFromSurface");
         MediaRecorder recorder = new MediaRecorder();
         int sleepTime = 33; // normal capture at 33ms / frame
+        Surface surface = null;
         try {
             if (!videoOnly) {
                 recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -246,8 +249,15 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             if (!videoOnly) {
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             }
+            if (persistentSurface != null) {
+                Log.v(TAG, "using persistent surface");
+                surface = persistentSurface;
+                recorder.usePersistentSurface(surface);
+            }
             recorder.prepare();
-            Surface surface = recorder.getSurface();
+            if (persistentSurface == null) {
+                surface = recorder.getSurface();
+            }
 
             Paint paint = new Paint();
             paint.setTextSize(16);
@@ -283,11 +293,15 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
 
             Log.v(TAG, "stop");
             recorder.stop();
-            recorder.release();
         } catch (Exception e) {
-            Log.v("record video failed ", e.toString());
-            recorder.release();
+            Log.v(TAG, "record video failed: " + e.toString());
             return false;
+        } finally {
+            recorder.release();
+            // release surface if not using persistent surface
+            if (persistentSurface == null && surface != null) {
+                surface.release();
+            }
         }
         return true;
     }
@@ -550,7 +564,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
 
                 success = recordVideoFromSurface(frameRate, 0, 352, 288, codec,
                         MediaRecorder.OutputFormat.THREE_GPP, filename,
-                        k == 0 ? true : false /* videoOnly */);
+                        k == 0 ? true : false /* videoOnly */, null);
                 if (success) {
                     success = validateVideo(filename, 352, 288);
                 }
@@ -562,6 +576,40 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             Log.v(TAG, e.toString());
         }
         assertTrue("testSurfaceRecording", noOfFailure == 0);
+    }
+
+    public void testPersistentSurfaceRecording() {
+        boolean success = false;
+        int noOfFailure = 0;
+        Surface surface = null;
+        try {
+            int codec = MediaRecorder.VideoEncoder.H264;
+            int frameRate = MediaProfileReader.getMaxFrameRateForCodec(codec);
+            surface = MediaCodec.createPersistentInputSurface();
+            for (int k = 0; k < 2; k++) {
+                String filename = "/sdcard/surface_persistent" + k + ".3gp";
+
+                Log.v(TAG, "test persistent surface - round " + k);
+                success = recordVideoFromSurface(frameRate, 0, 352, 288, codec,
+                        MediaRecorder.OutputFormat.THREE_GPP, filename,
+                        true /* videoOnly */, surface);
+                if (success) {
+                    success = validateVideo(filename, 352, 288);
+                }
+                if (!success) {
+                    noOfFailure++;
+                }
+            }
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+        } finally {
+            if (surface != null) {
+                Log.v(TAG, "releasing persistent surface");
+                surface.release();
+                surface = null;
+            }
+        }
+        assertTrue("testPersistentSurfaceRecording", noOfFailure == 0);
     }
 
     // Test recording from surface source with/without audio
@@ -583,7 +631,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
                 success = recordVideoFromSurface(
                         frameRate, captureRate, 352, 288, codec,
                         MediaRecorder.OutputFormat.THREE_GPP,
-                        filename, false /* videoOnly */);
+                        filename, false /* videoOnly */, null);
                 if (success) {
                     success = validateVideo(filename, 352, 288);
                     if (success) {
