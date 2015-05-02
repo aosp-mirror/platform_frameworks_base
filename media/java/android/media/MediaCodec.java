@@ -681,12 +681,20 @@ final public class MediaCodec {
      */
     @NonNull
     public static Surface createPersistentInputSurface() {
-        // TODO implement this
-        return new PersistentSurface();
+        return native_createPersistentInputSurface();
     }
 
     static class PersistentSurface extends Surface {
-        PersistentSurface() {}
+        @SuppressWarnings("unused")
+        PersistentSurface() {} // used by native
+
+        @Override
+        public void release() {
+            native_releasePersistentInputSurface(this);
+            super.release();
+        }
+
+        private long mPersistentObject;
     };
 
     /**
@@ -700,8 +708,16 @@ final public class MediaCodec {
      *           {@link #createPersistentInputSurface}.
      */
     public void usePersistentInputSurface(@NonNull Surface surface) {
-        throw new IllegalArgumentException("not implemented");
+        if (!(surface instanceof PersistentSurface)) {
+            throw new IllegalArgumentException("not a PersistentSurface");
+        }
+        native_usePersistentInputSurface(surface);
     }
+
+    @NonNull
+    private static native final PersistentSurface native_createPersistentInputSurface();
+    private static native final void native_releasePersistentInputSurface(@NonNull Surface surface);
+    private native final void native_usePersistentInputSurface(@NonNull Surface surface);
 
     private native final void native_setCallback(@Nullable Callback cb);
 

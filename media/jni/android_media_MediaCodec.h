@@ -33,6 +33,7 @@ struct AString;
 struct ICrypto;
 struct IGraphicBufferProducer;
 struct MediaCodec;
+struct PersistentSurface;
 class Surface;
 
 struct JMediaCodec : public AHandler {
@@ -54,6 +55,7 @@ struct JMediaCodec : public AHandler {
             int flags);
 
     status_t createInputSurface(sp<IGraphicBufferProducer>* bufferProducer);
+    status_t usePersistentInputSurface(const sp<PersistentSurface> &surface);
 
     status_t start();
     status_t stop();
