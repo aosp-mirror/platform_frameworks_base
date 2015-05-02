@@ -2138,4 +2138,7 @@
 
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices. -->
     <bool name="config_forceEnableVoiceInteractionService">false</bool>
+
+    <!-- This config is ued to determine whether animations are allowed in low power mode. -->
+    <bool name="config_allowAnimationsInLowPowerMode">false</bool>
 </resources>
