@@ -1,6 +1,7 @@
 page.title=Download Android Studio and SDK Tools
 page.tags=sdk, android studio
 page.template=sdk
+page.image=images/cards/android-studio_2x.png
 header.hide=1
 page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
@@ -63,7 +64,7 @@ sdk.win_installer_checksum=e764ea93aa72766737f9be3b9fb3e42d879ab599
   }
   .feature-blurb {
   margin:0px; font-size:16px; font-weight:300;
-  padding:40px 0 0 0;
+  padding-top:40px;
   }
 
   .landing-button.green {
@@ -284,7 +285,7 @@ This is the Android Software Development Kit License Agreement
 
 <img src="{@docRoot}images/tools/studio-hero.png"
 srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x"
-width="760" height="400" alt="" style="margin-bottom:80px" />
+width="760" height="400" alt="" style="margin-bottom:100px" />
 
 <div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
 
@@ -293,7 +294,7 @@ width="760" height="400" alt="" style="margin-bottom:80px" />
 <p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
 width: 400px;text-align: center;">The official Android IDE</p>
 
-<ul style="font-size:12px">
+<ul style="font-size:12px;line-height:19px;">
 <li>Android Studio IDE</li>
 <li>Android SDK tools</li>
 <li>Android 5.0 (Lollipop) Platform</li>
@@ -322,10 +323,10 @@ target="_blank">Take a Survey</a></li>
 
 
 
+<div class="cols">
+<h2 class="feature norule col-13">Intelligent code editor</h2>
 
-<h2 class="feature norule" >Intelligent code editor</h2>
-
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-code.png"
 srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
@@ -340,9 +341,9 @@ srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tool
 
 
 
-<h2 class="feature norule">Code templates and GitHub integration</h2>
+<h2 class="feature norule col-13">Code templates and GitHub integration</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-import.png"
 srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
@@ -357,9 +358,9 @@ srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/to
 
 
 
-<h2 class="feature norule">Multi-screen app development</h2>
+<h2 class="feature norule col-13">Multi-screen app development</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-screens.png"
 srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
@@ -374,9 +375,9 @@ srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/t
 
 
 
-<h2 class="feature norule">Virtual devices for all shapes and sizes</h2>
+<h2 class="feature norule col-13">Virtual devices for all shapes and sizes</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-avds.png"
 srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
@@ -390,10 +391,10 @@ srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tool
 
 
 
-<h2 class="feature norule">
+<h2 class="feature norule col-13">
 Android builds evolved, with Gradle</h2>
 
-<div class="col-9" style="margin:0 20px 0 0">
+<div class="col-9">
   <img src="{@docRoot}images/tools/studio-hero-gradle.png"
 srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->

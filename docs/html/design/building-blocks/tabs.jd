@@ -27,14 +27,14 @@ aspects of your app, or to browse categorized data sets.</p>
 <h2 id="scrollable">Scrollable Tabs</h2>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <p>Scrolling tab controls can contain a larger number of items than a standard tab control. To navigate
 to the next/previous view, swipe left or right.</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <video width="400" class="with-shadow play-on-hover" autoplay>
       <source src="{@docRoot}design/media/tabs_scrolly.mp4" type="video/mp4">

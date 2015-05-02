@@ -62,13 +62,13 @@ user to adjust settings or enter text.</p>
 proceeding. They differ slightly in appearance based upon the severity and impact of the message
 conveyed.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-8">
+<div class="cols">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/dialogs_w_no_title.png">
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <h4>Alerts without title bars</h4>
 <p>Most alerts don't need titles. Usually the decision doesn't have a severe impact and can be summed
@@ -79,13 +79,13 @@ this conversation?") or make a clear statement whose relationship to the action 
 </div>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-8">
+<div class="cols">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/dialogs_w_title.png">
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <h4>Alerts with title bars</h4>
 <p>Use alerts with title bars sparingly. They are appropriate only when a high-risk operation involving
@@ -99,8 +99,8 @@ available based on the title and the text of the action buttons.</p>
 </div>
 <p>When crafting a confirmation dialog, make the title meaningful by echoing the requested action.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
     <div class="do-dont-label bad">Don't</div>
       <table class="ui-table bad">
       <thead>
@@ -112,7 +112,7 @@ available based on the title and the text of the action buttons.</p>
       </thead>
       </table>
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <div class="do-dont-label bad">Don't</div>
       <table class="ui-table bad">
       <thead>
@@ -124,7 +124,7 @@ available based on the title and the text of the action buttons.</p>
       </thead>
       </table>
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
     <div class="do-dont-label good">Do</div>
       <table class="ui-table good">
       <thead>
@@ -151,8 +151,8 @@ advances the workflow, and simply touching outside the popup dismisses it.</p>
 <h2 id="toasts">Toasts</h2>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
     <div class="vspace size-3"></div>
 
@@ -177,7 +177,7 @@ continue editing later. Toasts automatically disappear after a timeout.</p>
 </a>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/dialogs_toasts.png">
 
