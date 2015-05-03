@@ -2421,8 +2421,8 @@ public class PackageParser {
         if (allowBackup) {
             ai.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
 
-            // backupAgent, killAfterRestore, and restoreAnyVersion are only relevant
-            // if backup is possible for the given application.
+            // backupAgent, killAfterRestore, fullBackupContent and restoreAnyVersion are only
+            // relevant if backup is possible for the given application.
             String backupAgent = sa.getNonConfigurationString(
                     com.android.internal.R.styleable.AndroidManifestApplication_backupAgent,
                     Configuration.NATIVE_CONFIG_VERSION);
@@ -2448,6 +2448,20 @@ public class PackageParser {
                         false)) {
                     ai.flags |= ApplicationInfo.FLAG_FULL_BACKUP_ONLY;
                 }
+            }
+
+            TypedValue v = sa.peekValue(
+                    com.android.internal.R.styleable.AndroidManifestApplication_fullBackupContent);
+            if (v != null && (ai.fullBackupContent = v.resourceId) == 0) {
+                if (DEBUG_BACKUP) {
+                    Slog.v(TAG, "fullBackupContent specified as boolean=" +
+                            (v.data == 0 ? "false" : "true"));
+                }
+                // "false" => -1, "true" => 0
+                ai.fullBackupContent = (v.data == 0 ? -1 : 0);
+            }
+            if (DEBUG_BACKUP) {
+                Slog.v(TAG, "fullBackupContent=" + ai.fullBackupContent + " for " + pkgName);
             }
         }
 
