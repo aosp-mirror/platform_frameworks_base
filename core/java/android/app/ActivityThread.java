@@ -1638,6 +1638,12 @@ public final class ActivityThread {
         return sCurrentActivityThread;
     }
 
+    public static String currentOpPackageName() {
+        ActivityThread am = currentActivityThread();
+        return (am != null && am.getApplication() != null)
+                ? am.getApplication().getOpPackageName() : null;
+    }
+
     public static String currentPackageName() {
         ActivityThread am = currentActivityThread();
         return (am != null && am.mBoundApplication != null)
