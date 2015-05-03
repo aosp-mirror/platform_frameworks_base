@@ -33,14 +33,20 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Provides the central interface between an
@@ -164,7 +170,6 @@ public abstract class BackupAgent extends ContextWrapper {
      * to do one-time initialization before the actual backup or restore operation
      * is begun.
      * <p>
-     * Agents do not need to override this method.
      */
     public void onCreate() {
     }
@@ -268,19 +273,41 @@ public abstract class BackupAgent extends ContextWrapper {
      * listed above.  Apps only need to override this method if they need to impose special
      * limitations on which files are being stored beyond the control that
      * {@link #getNoBackupFilesDir()} offers.
+     * Alternatively they can provide an xml resource to specify what data to include or exclude.
+     *
      *
      * @param data A structured wrapper pointing to the backup destination.
      * @throws IOException
      *
      * @see Context#getNoBackupFilesDir()
+     * @see ApplicationInfo#fullBackupContent
      * @see #fullBackupFile(File, FullBackupDataOutput)
      * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
      */
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
-        ApplicationInfo appInfo = getApplicationInfo();
+        FullBackup.BackupScheme backupScheme = FullBackup.getBackupScheme(this);
+        if (!backupScheme.isFullBackupContentEnabled()) {
+            return;
+        }
 
-        // Note that we don't need to think about the no_backup dir because it's outside
-        // all of the ones we will be traversing
+        Map<String, Set<String>> manifestIncludeMap;
+        ArraySet<String> manifestExcludeSet;
+        try {
+            manifestIncludeMap =
+                    backupScheme.maybeParseAndGetCanonicalIncludePaths();
+            manifestExcludeSet = backupScheme.maybeParseAndGetCanonicalExcludePaths();
+        } catch (IOException | XmlPullParserException e) {
+            if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
+                Log.v(FullBackup.TAG_XML_PARSER,
+                        "Exception trying to parse fullBackupContent xml file!"
+                                + " Aborting full backup.", e);
+            }
+            return;
+        }
+
+        final String packageName = getPackageName();
+        final ApplicationInfo appInfo = getApplicationInfo();
+
         String rootDir = new File(appInfo.dataDir).getCanonicalPath();
         String filesDir = getFilesDir().getCanonicalPath();
         String nobackupDir = getNoBackupFilesDir().getCanonicalPath();
@@ -292,34 +319,49 @@ public abstract class BackupAgent extends ContextWrapper {
                 ? new File(appInfo.nativeLibraryDir).getCanonicalPath()
                 : null;
 
-        // Filters, the scan queue, and the set of resulting entities
-        HashSet<String> filterSet = new HashSet<String>();
-        String packageName = getPackageName();
+        // Maintain a set of excluded directories so that as we traverse the tree we know we're not
+        // going places we don't expect, and so the manifest includes can't take precedence over
+        // what the framework decides is not to be included.
+        final ArraySet<String> traversalExcludeSet = new ArraySet<String>();
 
-        // Okay, start with the app's root tree, but exclude all of the canonical subdirs
+        // Add the directories we always exclude.
+        traversalExcludeSet.add(cacheDir);
+        traversalExcludeSet.add(codeCacheDir);
+        traversalExcludeSet.add(nobackupDir);
         if (libDir != null) {
-            filterSet.add(libDir);
+            traversalExcludeSet.add(libDir);
         }
-        filterSet.add(cacheDir);
-        filterSet.add(codeCacheDir);
-        filterSet.add(databaseDir);
-        filterSet.add(sharedPrefsDir);
-        filterSet.add(filesDir);
-        filterSet.add(nobackupDir);
-        fullBackupFileTree(packageName, FullBackup.ROOT_TREE_TOKEN, rootDir, filterSet, data);
 
-        // Now do the same for the files dir, db dir, and shared prefs dir
-        filterSet.add(rootDir);
-        filterSet.remove(filesDir);
-        fullBackupFileTree(packageName, FullBackup.DATA_TREE_TOKEN, filesDir, filterSet, data);
+        traversalExcludeSet.add(databaseDir);
+        traversalExcludeSet.add(sharedPrefsDir);
+        traversalExcludeSet.add(filesDir);
 
-        filterSet.add(filesDir);
-        filterSet.remove(databaseDir);
-        fullBackupFileTree(packageName, FullBackup.DATABASE_TREE_TOKEN, databaseDir, filterSet, data);
+        // Root dir first.
+        applyXmlFiltersAndDoFullBackupForDomain(
+                packageName, FullBackup.ROOT_TREE_TOKEN, manifestIncludeMap,
+                manifestExcludeSet, traversalExcludeSet, data);
+        traversalExcludeSet.add(rootDir);
 
-        filterSet.add(databaseDir);
-        filterSet.remove(sharedPrefsDir);
-        fullBackupFileTree(packageName, FullBackup.SHAREDPREFS_TREE_TOKEN, sharedPrefsDir, filterSet, data);
+        // Data dir next.
+        traversalExcludeSet.remove(filesDir);
+        applyXmlFiltersAndDoFullBackupForDomain(
+                packageName, FullBackup.DATA_TREE_TOKEN, manifestIncludeMap,
+                manifestExcludeSet, traversalExcludeSet, data);
+        traversalExcludeSet.add(filesDir);
+
+        // Database directory.
+        traversalExcludeSet.remove(databaseDir);
+        applyXmlFiltersAndDoFullBackupForDomain(
+                packageName, FullBackup.DATABASE_TREE_TOKEN, manifestIncludeMap,
+                manifestExcludeSet, traversalExcludeSet, data);
+        traversalExcludeSet.add(databaseDir);
+
+        // SharedPrefs.
+        traversalExcludeSet.remove(sharedPrefsDir);
+        applyXmlFiltersAndDoFullBackupForDomain(
+                packageName, FullBackup.SHAREDPREFS_TREE_TOKEN, manifestIncludeMap,
+                manifestExcludeSet, traversalExcludeSet, data);
+        traversalExcludeSet.add(sharedPrefsDir);
 
         // getExternalFilesDir() location associated with this app.  Technically there should
         // not be any files here if the app does not properly have permission to access
@@ -331,8 +373,36 @@ public abstract class BackupAgent extends ContextWrapper {
         if (Process.myUid() != Process.SYSTEM_UID) {
             File efLocation = getExternalFilesDir(null);
             if (efLocation != null) {
-                fullBackupFileTree(packageName, FullBackup.MANAGED_EXTERNAL_TREE_TOKEN,
-                        efLocation.getCanonicalPath(), null, data);
+                applyXmlFiltersAndDoFullBackupForDomain(
+                        packageName, FullBackup.MANAGED_EXTERNAL_TREE_TOKEN, manifestIncludeMap,
+                        manifestExcludeSet, traversalExcludeSet, data);
+            }
+
+        }
+    }
+
+    /**
+     * Check whether the xml yielded any <include/> tag for the provided <code>domainToken</code>.
+     * If so, perform a {@link #fullBackupFileTree} which backs up the file or recurses if the path
+     * is a directory.
+     */
+    private void applyXmlFiltersAndDoFullBackupForDomain(String packageName, String domainToken,
+                                                         Map<String, Set<String>> includeMap,
+                                                         ArraySet<String> filterSet,
+                                                         ArraySet<String> traversalExcludeSet,
+                                                         FullBackupDataOutput data)
+            throws IOException {
+        if (includeMap == null || includeMap.size() == 0) {
+            // Do entire sub-tree for the provided token.
+            fullBackupFileTree(packageName, domainToken,
+                    FullBackup.getBackupScheme(this).tokenToDirectoryPath(domainToken),
+                    filterSet, traversalExcludeSet, data);
+        } else if (includeMap.get(domainToken) != null) {
+            // This will be null if the xml parsing didn't yield any rules for
+            // this domain (there may still be rules for other domains).
+            for (String includeFile : includeMap.get(domainToken)) {
+                fullBackupFileTree(packageName, domainToken, includeFile, filterSet,
+                        traversalExcludeSet, data);
             }
         }
     }
@@ -430,21 +500,31 @@ public abstract class BackupAgent extends ContextWrapper {
         // without transmitting any file data.
         if (DEBUG) Log.i(TAG, "backupFile() of " + filePath + " => domain=" + domain
                 + " rootpath=" + rootpath);
-        
+
         FullBackup.backupToTar(getPackageName(), domain, null, rootpath, filePath, output);
     }
 
     /**
      * Scan the dir tree (if it actually exists) and process each entry we find.  If the
-     * 'excludes' parameter is non-null, it is consulted each time a new file system entity
+     * 'excludes' parameters are non-null, they are consulted each time a new file system entity
      * is visited to see whether that entity (and its subtree, if appropriate) should be
      * omitted from the backup process.
      *
+     * @param systemExcludes An optional list of excludes.
      * @hide
      */
-    protected final void fullBackupFileTree(String packageName, String domain, String rootPath,
-            HashSet<String> excludes, FullBackupDataOutput output) {
-        File rootFile = new File(rootPath);
+    protected final void fullBackupFileTree(String packageName, String domain, String startingPath,
+                                            ArraySet<String> manifestExcludes,
+                                            ArraySet<String> systemExcludes,
+            FullBackupDataOutput output) {
+        // Pull out the domain and set it aside to use when making the tarball.
+        String domainPath = FullBackup.getBackupScheme(this).tokenToDirectoryPath(domain);
+        if (domainPath == null) {
+            // Should never happen.
+            return;
+        }
+
+        File rootFile = new File(startingPath);
         if (rootFile.exists()) {
             LinkedList<File> scanQueue = new LinkedList<File>();
             scanQueue.add(rootFile);
@@ -456,7 +536,10 @@ public abstract class BackupAgent extends ContextWrapper {
                     filePath = file.getCanonicalPath();
 
                     // prune this subtree?
-                    if (excludes != null && excludes.contains(filePath)) {
+                    if (manifestExcludes != null && manifestExcludes.contains(filePath)) {
+                        continue;
+                    }
+                    if (systemExcludes != null && systemExcludes.contains(filePath)) {
                         continue;
                     }
 
@@ -475,14 +558,20 @@ public abstract class BackupAgent extends ContextWrapper {
                     }
                 } catch (IOException e) {
                     if (DEBUG) Log.w(TAG, "Error canonicalizing path of " + file);
+                    if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
+                        Log.v(FullBackup.TAG_XML_PARSER, "Error canonicalizing path of " + file);
+                    }
                     continue;
                 } catch (ErrnoException e) {
                     if (DEBUG) Log.w(TAG, "Error scanning file " + file + " : " + e);
+                    if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
+                        Log.v(FullBackup.TAG_XML_PARSER, "Error scanning file " + file + " : " + e);
+                    }
                     continue;
                 }
 
                 // Finally, back this file up (or measure it) before proceeding
-                FullBackup.backupToTar(packageName, domain, null, rootPath, filePath, output);
+                FullBackup.backupToTar(packageName, domain, null, domainPath, filePath, output);
             }
         }
     }
@@ -516,7 +605,88 @@ public abstract class BackupAgent extends ContextWrapper {
     public void onRestoreFile(ParcelFileDescriptor data, long size,
             File destination, int type, long mode, long mtime)
             throws IOException {
+        FullBackup.BackupScheme bs = FullBackup.getBackupScheme(this);
+        if (!bs.isFullBackupContentEnabled()) {
+            if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
+                Log.v(FullBackup.TAG_XML_PARSER,
+                        "onRestoreFile \"" + destination.getCanonicalPath()
+                                + "\" : fullBackupContent not enabled for " + getPackageName());
+            }
+            return;
+        }
+        Map<String, Set<String>> includes = null;
+        ArraySet<String> excludes = null;
+        final String destinationCanonicalPath = destination.getCanonicalPath();
+        try {
+            includes = bs.maybeParseAndGetCanonicalIncludePaths();
+            excludes = bs.maybeParseAndGetCanonicalExcludePaths();
+        } catch (XmlPullParserException e) {
+            if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
+                Log.v(FullBackup.TAG_XML_PARSER,
+                        "onRestoreFile \"" + destinationCanonicalPath
+                                + "\" : Exception trying to parse fullBackupContent xml file!"
+                                + " Aborting onRestoreFile.", e);
+            }
+            return;
+        }
+
+        if (excludes != null &&
+                isFileSpecifiedInPathList(destination, excludes)) {
+            if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
+                Log.v(FullBackup.TAG_XML_PARSER,
+                        "onRestoreFile: \"" + destinationCanonicalPath + "\": listed in"
+                                + " excludes; skipping.");
+            }
+            return;
+        }
+
+        if (includes != null && !includes.isEmpty()) {
+            // Rather than figure out the <include/> domain based on the path (a lot of code, and
+            // it's a small list), we'll go through and look for it.
+            boolean explicitlyIncluded = false;
+            for (Set<String> domainIncludes : includes.values()) {
+                explicitlyIncluded |= isFileSpecifiedInPathList(destination, domainIncludes);
+                if (explicitlyIncluded) {
+                    break;
+                }
+            }
+            if (!explicitlyIncluded) {
+                if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
+                    Log.v(FullBackup.TAG_XML_PARSER,
+                            "onRestoreFile: Trying to restore \""
+                                    + destinationCanonicalPath + "\" but it isn't specified"
+                                    + " in the included files; skipping.");
+                }
+                return;
+            }
+        }
         FullBackup.restoreFile(data, size, type, mode, mtime, destination);
+    }
+
+    /**
+     * @return True if the provided file is either directly in the provided list, or the provided
+     * file is within a directory in the list.
+     */
+    private boolean isFileSpecifiedInPathList(File file, Collection<String> canonicalPathList)
+            throws IOException {
+        for (String canonicalPath : canonicalPathList) {
+            File fileFromList = new File(canonicalPath);
+            if (fileFromList.isDirectory()) {
+                if (file.isDirectory()) {
+                    // If they are both directories check exact equals.
+                    return file.equals(fileFromList);
+                } else {
+                    // O/w we have to check if the file is within the directory from the list.
+                    return file.getCanonicalPath().startsWith(canonicalPath);
+                }
+            } else {
+                if (file.equals(fileFromList)) {
+                    // Need to check the explicit "equals" so we don't end up with substrings.
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -533,31 +703,9 @@ public abstract class BackupAgent extends ContextWrapper {
                 + " domain=" + domain + " relpath=" + path + " mode=" + mode
                 + " mtime=" + mtime);
 
-        // Parse out the semantic domains into the correct physical location
-        if (domain.equals(FullBackup.DATA_TREE_TOKEN)) {
-            basePath = getFilesDir().getCanonicalPath();
-        } else if (domain.equals(FullBackup.DATABASE_TREE_TOKEN)) {
-            basePath = getDatabasePath("foo").getParentFile().getCanonicalPath();
-        } else if (domain.equals(FullBackup.ROOT_TREE_TOKEN)) {
-            basePath = new File(getApplicationInfo().dataDir).getCanonicalPath();
-        } else if (domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)) {
-            basePath = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
-        } else if (domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
-            basePath = getCacheDir().getCanonicalPath();
-        } else if (domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)) {
-            // make sure we can try to restore here before proceeding
-            if (Process.myUid() != Process.SYSTEM_UID) {
-                File efLocation = getExternalFilesDir(null);
-                if (efLocation != null) {
-                    basePath = getExternalFilesDir(null).getCanonicalPath();
-                    mode = -1;  // < 0 is a token to skip attempting a chmod()
-                }
-            }
-        } else if (domain.equals(FullBackup.NO_BACKUP_TREE_TOKEN)) {
-            basePath = getNoBackupFilesDir().getCanonicalPath();
-        } else {
-            // Not a supported location
-            Log.i(TAG, "Unrecognized domain " + domain);
+        basePath = FullBackup.getBackupScheme(this).tokenToDirectoryPath(domain);
+        if (domain.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)) {
+            mode = -1;  // < 0 is a token to skip attempting a chmod()
         }
 
         // Now that we've figured out where the data goes, send it on its way

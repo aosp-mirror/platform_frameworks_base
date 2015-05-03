@@ -96,6 +96,21 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String backupAgentName;
 
     /**
+     * An optional attribute that indicates the app supports automatic backup of app data.
+     * <p>0 is the default and means the app's entire data folder + managed external storage will
+     * be backed up;
+     * Any negative value indicates the app does not support full-data backup, though it may still
+     * want to participate via the traditional key/value backup API;
+     * A positive number specifies an xml resource in which the application has defined its backup
+     * include/exclude criteria.
+     * <p>If android:allowBackup is set to false, this attribute is ignored.
+     *
+     * @see {@link android.content.Context#getNoBackupFilesDir}
+     * @see {@link #FLAG_ALLOW_BACKUP}
+     */
+    public int fullBackupContent = 0;
+
+    /**
      * The default extra UI options for activities in this application.
      * Set from the {@link android.R.attr#uiOptions} attribute in the
      * activity's manifest.
@@ -686,6 +701,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             pw.println(prefix + "uiOptions=0x" + Integer.toHexString(uiOptions));
         }
         pw.println(prefix + "supportsRtl=" + (hasRtlSupport() ? "true" : "false"));
+        if (fullBackupContent > 0) {
+            pw.println(prefix + "fullBackupContent=@xml/" + fullBackupContent);
+        } else {
+            pw.println(prefix + "fullBackupContent=" + (fullBackupContent < 0 ? "false" : "true"));
+        }
         super.dumpBack(pw, prefix);
     }
 
@@ -763,6 +783,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uiOptions = orig.uiOptions;
         backupAgentName = orig.backupAgentName;
         hardwareAccelerated = orig.hardwareAccelerated;
+        fullBackupContent = orig.fullBackupContent;
     }
 
 
@@ -816,6 +837,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(descriptionRes);
         dest.writeInt(uiOptions);
         dest.writeInt(hardwareAccelerated ? 1 : 0);
+        dest.writeInt(fullBackupContent);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -868,6 +890,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = source.readInt();
         uiOptions = source.readInt();
         hardwareAccelerated = source.readInt() != 0;
+        fullBackupContent = source.readInt();
     }
 
     /**
