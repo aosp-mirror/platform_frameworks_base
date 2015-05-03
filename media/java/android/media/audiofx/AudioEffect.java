@@ -19,7 +19,6 @@ package android.media.audiofx;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.ActivityThread;
-import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -397,7 +396,7 @@ public class AudioEffect {
         // native initialization
         int initResult = native_setup(new WeakReference<AudioEffect>(this),
                 type.toString(), uuid.toString(), priority, audioSession, id,
-                desc, getMyOpPackageName());
+                desc, ActivityThread.currentOpPackageName());
         if (initResult != SUCCESS && initResult != ALREADY_EXISTS) {
             Log.e(TAG, "Error code " + initResult
                     + " when initializing AudioEffect.");
@@ -1358,16 +1357,5 @@ public class AudioEffect {
             offs += a.length;
         }
         return b;
-    }
-
-    private static String getMyOpPackageName() {
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
-        if (activityThread != null) {
-            Application application = activityThread.getApplication();
-            if (application != null) {
-                return application.getOpPackageName();
-            }
-        }
-        throw new IllegalStateException("Cannot create AudioEffect outside of an app");
     }
 }

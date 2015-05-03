@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
-import android.app.Application;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Looper;
@@ -113,7 +112,8 @@ public class MediaRecorder
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaRecorder>(this), packageName, getMyOpPackageName());
+        native_setup(new WeakReference<MediaRecorder>(this), packageName,
+                ActivityThread.currentOpPackageName());
     }
 
     /**
@@ -1096,15 +1096,4 @@ public class MediaRecorder
 
     @Override
     protected void finalize() { native_finalize(); }
-
-    private static String getMyOpPackageName() {
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
-        if (activityThread != null) {
-            Application application = activityThread.getApplication();
-            if (application != null) {
-                return application.getOpPackageName();
-            }
-        }
-        throw new IllegalStateException("Cannot create AudioRecord outside of an app");
-    }
 }
