@@ -225,8 +225,10 @@ public class AppOpsManager {
     public static final int OP_USE_FINGERPRINT = 55;
     /** @hide Access to body sensors such as heart rate, etc. */
     public static final int OP_BODY_SENSORS = 56;
+    /** @hide Read previously received cell broadcast messages. */
+    public static final int OP_READ_CELL_BROADCASTS = 57;
     /** @hide */
-    public static final int _NUM_OP = 57;
+    public static final int _NUM_OP = 58;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -303,6 +305,9 @@ public class AppOpsManager {
     /** @hide Access to body sensors such as heart rate, etc. */
     public static final String OPSTR_BODY_SENSORS
             = "android:body_sensors";
+    /** @hide Read previously received cell broadcast messages. */
+    public static final String OPSTR_READ_CELL_BROADCASTS
+            = "android:read_cell_broadcasts";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -369,7 +374,8 @@ public class AppOpsManager {
             OP_USE_SIP,
             OP_PROCESS_OUTGOING_CALLS,
             OP_USE_FINGERPRINT,
-            OP_BODY_SENSORS
+            OP_BODY_SENSORS,
+            OP_READ_CELL_BROADCASTS
     };
 
     /**
@@ -433,7 +439,8 @@ public class AppOpsManager {
             OPSTR_USE_SIP,
             null,
             OPSTR_USE_FINGERPRINT,
-            OPSTR_BODY_SENSORS
+            OPSTR_BODY_SENSORS,
+            OPSTR_READ_CELL_BROADCASTS
     };
 
     /**
@@ -497,7 +504,8 @@ public class AppOpsManager {
             "USE_SIP",
             "PROCESS_OUTGOING_CALLS",
             "USE_FINGERPRINT",
-            "BODY_SENSORS"
+            "BODY_SENSORS",
+            "READ_CELL_BROADCASTS"
     };
 
     /**
@@ -561,7 +569,8 @@ public class AppOpsManager {
             Manifest.permission.USE_SIP,
             Manifest.permission.PROCESS_OUTGOING_CALLS,
             Manifest.permission.USE_FINGERPRINT,
-            Manifest.permission.BODY_SENSORS
+            Manifest.permission.BODY_SENSORS,
+            Manifest.permission.READ_CELL_BROADCASTS
     };
 
     /**
@@ -626,7 +635,8 @@ public class AppOpsManager {
             null, // USE_SIP
             null, // PROCESS_OUTGOING_CALLS
             null, // USE_FINGERPRINT
-            null  // BODY_SENSORS
+            null, // BODY_SENSORS
+            null  // READ_CELL_BROADCASTS
     };
 
     /**
@@ -690,7 +700,8 @@ public class AppOpsManager {
             false, // USE_SIP
             false, // PROCESS_OUTGOING_CALLS
             false, // USE_FINGERPRINT
-            false  // BODY_SENSORS
+            false, // BODY_SENSORS
+            false  // READ_CELL_BROADCASTS
     };
 
     /**
@@ -753,6 +764,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED
     };
 
@@ -780,6 +792,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,
