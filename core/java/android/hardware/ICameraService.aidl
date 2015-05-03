@@ -38,13 +38,13 @@ interface ICameraService
     int getCameraInfo(int cameraId, out CameraInfo info);
 
     int connect(ICameraClient client, int cameraId,
-                    String clientPackageName,
+                    String opPackageName,
                     int clientUid,
                     // Container for an ICamera object
                     out BinderHolder device);
 
     int connectDevice(ICameraDeviceCallbacks callbacks, int cameraId,
-                              String clientPackageName,
+                              String opPackageName,
                               int clientUid,
                               // Container for an ICameraDeviceUser object
                               out BinderHolder device);
@@ -69,7 +69,7 @@ interface ICameraService
 
     int connectLegacy(ICameraClient client, int cameraId,
                     int halVersion,
-                    String clientPackageName,
+                    String opPackageName,
                     int clientUid,
                     // Container for an ICamera object
                     out BinderHolder device);
