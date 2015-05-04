@@ -53,18 +53,21 @@ public class SignalClusterView
 
     private boolean mNoSimsVisible = false;
     private boolean mVpnVisible = false;
+    private boolean mEthernetVisible = false;
+    private int mEthernetIconId = 0;
     private boolean mWifiVisible = false;
     private int mWifiStrengthId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
     private int mAirplaneContentDescription;
     private String mWifiDescription;
+    private String mEthernetDescription;
     private ArrayList<PhoneState> mPhoneStates = new ArrayList<PhoneState>();
     private int mIconTint = Color.WHITE;
     private float mDarkIntensity;
 
-    ViewGroup mWifiGroup;
-    ImageView mVpn, mWifi, mAirplane, mNoSims, mWifiDark, mNoSimsDark;
+    ViewGroup mEthernetGroup, mWifiGroup;
+    ImageView mVpn, mEthernet, mWifi, mAirplane, mNoSims, mEthernetDark, mWifiDark, mNoSimsDark;
     View mWifiAirplaneSpacer;
     View mWifiSignalSpacer;
     LinearLayout mMobileSignalGroup;
@@ -116,6 +119,9 @@ public class SignalClusterView
         super.onAttachedToWindow();
 
         mVpn            = (ImageView) findViewById(R.id.vpn);
+        mEthernetGroup  = (ViewGroup) findViewById(R.id.ethernet_combo);
+        mEthernet       = (ImageView) findViewById(R.id.ethernet);
+        mEthernetDark   = (ImageView) findViewById(R.id.ethernet_dark);
         mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
         mWifi           = (ImageView) findViewById(R.id.wifi_signal);
         mWifiDark       = (ImageView) findViewById(R.id.wifi_signal_dark);
@@ -136,6 +142,8 @@ public class SignalClusterView
     @Override
     protected void onDetachedFromWindow() {
         mVpn            = null;
+        mEthernetGroup  = null;
+        mEthernet       = null;
         mWifiGroup      = null;
         mWifi           = null;
         mAirplane       = null;
@@ -178,6 +186,15 @@ public class SignalClusterView
         state.mMobileDescription = contentDescription;
         state.mMobileTypeDescription = typeContentDescription;
         state.mIsMobileTypeIconWide = isTypeIconWide;
+
+        apply();
+    }
+
+    @Override
+    public void setEthernetIndicators(boolean visible, int icon, String contentDescription) {
+        mEthernetVisible = visible;
+        mEthernetIconId = icon;
+        mEthernetDescription = contentDescription;
 
         apply();
     }
@@ -234,6 +251,9 @@ public class SignalClusterView
     public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         // Standard group layout onPopulateAccessibilityEvent() implementations
         // ignore content description, so populate manually
+        if (mEthernetVisible && mEthernetGroup != null &&
+                mEthernetGroup.getContentDescription() != null)
+            event.getText().add(mEthernetGroup.getContentDescription());
         if (mWifiVisible && mWifiGroup != null && mWifiGroup.getContentDescription() != null)
             event.getText().add(mWifiGroup.getContentDescription());
         for (PhoneState state : mPhoneStates) {
@@ -245,6 +265,10 @@ public class SignalClusterView
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
+
+        if (mEthernet != null) {
+            mEthernet.setImageDrawable(null);
+        }
 
         if (mWifi != null) {
             mWifi.setImageDrawable(null);
@@ -277,6 +301,21 @@ public class SignalClusterView
 
         mVpn.setVisibility(mVpnVisible ? View.VISIBLE : View.GONE);
         if (DEBUG) Log.d(TAG, String.format("vpn: %s", mVpnVisible ? "VISIBLE" : "GONE"));
+
+        if (mEthernetVisible) {
+            mEthernet.setImageResource(mEthernetIconId);
+            mEthernetDark.setImageResource(mEthernetIconId);
+            mEthernetGroup.setContentDescription(mEthernetDescription);
+            mEthernetGroup.setVisibility(View.VISIBLE);
+        } else {
+            mEthernetGroup.setVisibility(View.GONE);
+        }
+
+        if (DEBUG) Log.d(TAG,
+                String.format("ethernet: %s",
+                    (mEthernetVisible ? "VISIBLE" : "GONE")));
+
+
         if (mWifiVisible) {
             mWifi.setImageResource(mWifiStrengthId);
             mWifiDark.setImageResource(mWifiStrengthId);
@@ -327,7 +366,7 @@ public class SignalClusterView
         mNoSimsDark.setVisibility(mNoSimsVisible ? View.VISIBLE : View.GONE);
 
         boolean anythingVisible = mNoSimsVisible || mWifiVisible || mIsAirplaneMode
-                || anyMobileVisible || mVpnVisible;
+                || anyMobileVisible || mVpnVisible || mEthernetVisible;
         setPaddingRelative(0, 0, anythingVisible ? mEndPadding : mEndPaddingNothingVisible, 0);
     }
 
@@ -345,6 +384,7 @@ public class SignalClusterView
         setTint(mAirplane, mIconTint);
         applyDarkIntensity(mDarkIntensity, mNoSims, mNoSimsDark);
         applyDarkIntensity(mDarkIntensity, mWifi, mWifiDark);
+        applyDarkIntensity(mDarkIntensity, mEthernet, mEthernetDark);
         for (int i = 0; i < mPhoneStates.size(); i++) {
             mPhoneStates.get(i).setIconTint(mIconTint, mDarkIntensity);
         }
