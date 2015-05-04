@@ -153,7 +153,11 @@ public abstract class SignalController<T extends SignalController.State,
                 return getIcons().mSbDarkIcons[mCurrentState.inetCondition][mCurrentState.level];
             }
         } else if (mCurrentState.enabled) {
-            return getIcons().mSbDiscState;
+            if (light) {
+                return getIcons().mSbDiscState;
+            } else {
+                return getIcons().mSbDarkDiscState;
+            }
         } else {
             return getIcons().mSbNullState;
         }
