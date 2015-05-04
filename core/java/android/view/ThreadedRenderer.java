@@ -460,8 +460,6 @@ public class ThreadedRenderer extends HardwareRenderer {
                     if (buffer != null) {
                         long[] map = atlas.getMap();
                         if (map != null) {
-                            // TODO Remove after fixing b/15425820
-                            validateMap(context, map);
                             nSetAtlas(renderProxy, buffer, map);
                         }
                         // If IAssetAtlas is not the same class as the IBinder
@@ -474,32 +472,6 @@ public class ThreadedRenderer extends HardwareRenderer {
                 }
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, "Could not acquire atlas", e);
-            }
-        }
-
-        private static void validateMap(Context context, long[] map) {
-            Log.d("Atlas", "Validating map...");
-            HashSet<Long> preloadedPointers = new HashSet<Long>();
-
-            // We only care about drawables that hold bitmaps
-            final Resources resources = context.getResources();
-            final LongSparseArray<Drawable.ConstantState> drawables = resources.getPreloadedDrawables();
-
-            final int count = drawables.size();
-            ArrayList<Bitmap> tmpList = new ArrayList<Bitmap>();
-            for (int i = 0; i < count; i++) {
-                drawables.valueAt(i).addAtlasableBitmaps(tmpList);
-                for (int j = 0; j < tmpList.size(); j++) {
-                    preloadedPointers.add(tmpList.get(j).getSkBitmap());
-                }
-                tmpList.clear();
-            }
-
-            for (int i = 0; i < map.length; i += 4) {
-                if (!preloadedPointers.contains(map[i])) {
-                    Log.w("Atlas", String.format("Pointer 0x%X, not in getPreloadedDrawables?", map[i]));
-                    map[i] = 0;
-                }
             }
         }
     }
