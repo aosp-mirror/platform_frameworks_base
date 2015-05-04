@@ -1314,6 +1314,12 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                     com.android.internal.R.styleable.Fragment_fragmentAllowReturnTransitionOverlap, true);
         }
         a.recycle();
+
+        final Activity hostActivity = mHost == null ? null : mHost.getActivity();
+        if (hostActivity != null) {
+            mCalled = false;
+            onInflate(hostActivity, attrs, savedInstanceState);
+        }
     }
 
     /**
