@@ -30,6 +30,8 @@ namespace aapt {
  * future collisions.
  */
 enum {
+    RES_TABLE_PUBLIC_TYPE = 0x000d,
+
     /**
      * A chunk that holds the string pool
      * for source entries (path/to/source:line).
@@ -51,18 +53,43 @@ enum {
 struct ExtendedTypes {
     enum {
         /**
-         * A sentinel value used when a resource is defined as
-         * public but it has no defined value yet. If we don't
-         * flatten it with some value, we will lose its name.
-         */
-        TYPE_SENTINEL = 0xff,
-
-        /**
          * A raw string value that hasn't had its escape sequences
          * processed nor whitespace removed.
          */
         TYPE_RAW_STRING = 0xfe
     };
+};
+
+struct Public_header {
+    android::ResChunk_header header;
+
+    /**
+     * The ID of the type this structure refers to.
+     */
+    uint8_t typeId;
+
+    /**
+     * Reserved. Must be 0.
+     */
+    uint8_t res0;
+
+    /**
+     * Reserved. Must be 0.
+     */
+    uint16_t res1;
+
+    /**
+     * Number of public entries.
+     */
+    uint32_t count;
+};
+
+struct Public_entry {
+    uint16_t entryId;
+    uint16_t res0;
+    android::ResStringPool_ref key;
+    android::ResStringPool_ref source;
+    uint32_t sourceLine;
 };
 
 /**
