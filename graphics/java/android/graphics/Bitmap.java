@@ -1573,6 +1573,15 @@ public final class Bitmap implements Parcelable {
         return mSkBitmapPtr;
     }
 
+    /**
+     * Refs the underlying SkPixelRef and returns a pointer to it.
+     *
+     * @hide
+     * */
+    public final long refSkPixelRef() {
+        return nativeRefPixelRef(mSkBitmapPtr);
+    }
+
     private static class BitmapFinalizer {
         private long mNativeBitmap;
 
@@ -1661,4 +1670,5 @@ public final class Bitmap implements Parcelable {
     private static native boolean nativeHasMipMap(long nativeBitmap);
     private static native void nativeSetHasMipMap(long nativeBitmap, boolean hasMipMap);
     private static native boolean nativeSameAs(long nativeBitmap0, long nativeBitmap1);
+    private static native long nativeRefPixelRef(long nativeBitmap);
 }
