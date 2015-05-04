@@ -25,6 +25,7 @@ import android.net.wifi.WifiChannel;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConnectionStatistics;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.net.Network;
 
 import android.net.DhcpInfo;
 
@@ -168,5 +169,7 @@ interface IWifiManager
     void disableEphemeralNetwork(String SSID);
 
     void factoryReset();
+
+    Network getCurrentNetwork();
 }
 
