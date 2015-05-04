@@ -31,25 +31,24 @@ import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TimeUtils;
 
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
-import java.util.Date;
 import java.util.TimeZone;
 
 /**
  * Built-in zen condition provider for daily scheduled time-based conditions.
  */
 public class ScheduleConditionProvider extends SystemConditionProviderService {
-    private static final String TAG = "ConditionProviders";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String TAG = "ConditionProviders.SCP";
+    private static final boolean DEBUG = Log.isLoggable("ConditionProviders", Log.DEBUG);
 
     public static final ComponentName COMPONENT =
             new ComponentName("android", ScheduleConditionProvider.class.getName());
     private static final String NOT_SHOWN = "...";
-    private static final String ACTION_EVALUATE = TAG + ".EVALUATE";
+    private static final String SIMPLE_NAME = ScheduleConditionProvider.class.getSimpleName();
+    private static final String ACTION_EVALUATE =  SIMPLE_NAME + ".EVALUATE";
     private static final int REQUEST_CODE_EVALUATE = 1;
     private static final String EXTRA_TIME = "time";
 
@@ -60,7 +59,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     private boolean mRegistered;
 
     public ScheduleConditionProvider() {
-        if (DEBUG) Slog.d(TAG, "new ScheduleConditionProvider()");
+        if (DEBUG) Slog.d(TAG, "new " + SIMPLE_NAME + "()");
     }
 
     @Override
@@ -75,7 +74,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
 
     @Override
     public void dump(PrintWriter pw, DumpFilter filter) {
-        pw.println("    ScheduleConditionProvider:");
+        pw.print("    "); pw.print(SIMPLE_NAME); pw.println(":");
         pw.print("      mConnected="); pw.println(mConnected);
         pw.print("      mRegistered="); pw.println(mRegistered);
         pw.println("      mSubscriptions=");
@@ -91,6 +90,11 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     public void onConnected() {
         if (DEBUG) Slog.d(TAG, "onConnected");
         mConnected = true;
+    }
+
+    @Override
+    public void onBootComplete() {
+        // noop
     }
 
     @Override
@@ -173,16 +177,6 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         } else {
             if (DEBUG) Slog.d(TAG, "Not scheduling evaluate");
         }
-    }
-
-    private static String ts(long time) {
-        return new Date(time) + " (" + time + ")";
-    }
-
-    private static String formatDuration(long millis) {
-        final StringBuilder sb = new StringBuilder();
-        TimeUtils.formatDuration(millis, sb);
-        return sb.toString();
     }
 
     private static boolean meetsSchedule(Uri conditionId, long time) {
