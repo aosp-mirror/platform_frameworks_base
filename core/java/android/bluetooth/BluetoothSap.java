@@ -28,13 +28,41 @@ import android.os.IBinder;
 import android.os.ServiceManager;
 import android.util.Log;
 
-
+/**
+ * This class provides the APIs to control the Bluetooth SIM
+ * Access Profile (SAP).
+ *
+ * <p>BluetoothSap is a proxy object for controlling the Bluetooth
+ * Service via IPC. Use {@link BluetoothAdapter#getProfileProxy} to get
+ * the BluetoothSap proxy object.
+ *
+ * <p>Each method is protected with its appropriate permission.
+ * @hide
+ */
 public final class BluetoothSap implements BluetoothProfile {
 
     private static final String TAG = "BluetoothSap";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
+    /**
+     * Intent used to broadcast the change in connection state of the profile.
+     *
+     * <p>This intent will have 4 extras:
+     * <ul>
+     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     * </ul>
+     *
+     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
+     * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     * @hide
+     */
     public static final String ACTION_CONNECTION_STATE_CHANGED =
         "android.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED";
 
@@ -43,12 +71,22 @@ public final class BluetoothSap implements BluetoothProfile {
     private ServiceListener mServiceListener;
     private BluetoothAdapter mAdapter;
 
-    /** There was an error trying to obtain the state */
-    public static final int STATE_ERROR        = -1;
+    /**
+     * There was an error trying to obtain the state.
+     * @hide
+     */
+    public static final int STATE_ERROR = -1;
 
-    public static final int RESULT_FAILURE = 0;
+    /**
+     * Connection state change succceeded.
+     * @hide
+     */
     public static final int RESULT_SUCCESS = 1;
-    /** Connection canceled before completion. */
+
+    /**
+     * Connection canceled before completion.
+     * @hide
+     */
     public static final int RESULT_CANCELED = 2;
 
     final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
@@ -124,6 +162,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * Other public functions of BluetoothSap will return default error
      * results once close() has been called. Multiple invocations of close()
      * are ok.
+     * @hide
      */
     public synchronized void close() {
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
@@ -152,6 +191,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * Get the current state of the BluetoothSap service.
      * @return One of the STATE_ return codes, or STATE_ERROR if this proxy
      *         object is currently not connected to the Sap service.
+     * @hide
      */
     public int getState() {
         if (VDBG) log("getState()");
@@ -171,6 +211,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return The remote Bluetooth device, or null if not in connected or
      *         connecting state, or if this proxy object is not connected to
      *         the Sap service.
+     * @hide
      */
     public BluetoothDevice getClient() {
         if (VDBG) log("getClient()");
@@ -189,6 +230,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * Returns true if the specified Bluetooth device is connected.
      * Returns false if not connected, or if this proxy object is not
      * currently connected to the Sap service.
+     * @hide
      */
     public boolean isConnected(BluetoothDevice device) {
         if (VDBG) log("isConnected(" + device + ")");
@@ -206,6 +248,7 @@ public final class BluetoothSap implements BluetoothProfile {
     /**
      * Initiate connection. Initiation of outgoing connections is not
      * supported for SAP server.
+     * @hide
      */
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")" + "not supported for SAPS");
@@ -218,6 +261,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @param device Remote Bluetooth Device
      * @return false on error,
      *               true otherwise
+     * @hide
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
@@ -238,6 +282,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * Get the list of connected devices. Currently at most one.
      *
      * @return list of connected devices
+     * @hide
      */
     public List<BluetoothDevice> getConnectedDevices() {
         if (DBG) log("getConnectedDevices()");
@@ -257,6 +302,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * Get the list of devices matching specified states. Currently at most one.
      *
      * @return list of matching devices
+     * @hide
      */
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (DBG) log("getDevicesMatchingStates()");
@@ -276,6 +322,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * Get connection state of device
      *
      * @return device connection state
+     * @hide
      */
     public int getConnectionState(BluetoothDevice device) {
         if (DBG) log("getConnectionState(" + device + ")");
@@ -300,6 +347,7 @@ public final class BluetoothSap implements BluetoothProfile {
      * @param device Paired bluetooth device
      * @param priority
      * @return true if priority is set, false on error
+     * @hide
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
@@ -325,6 +373,7 @@ public final class BluetoothSap implements BluetoothProfile {
      *
      * @param device Bluetooth device
      * @return priority of the device
+     * @hide
      */
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");

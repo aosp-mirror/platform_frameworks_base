@@ -7004,25 +7004,6 @@ package android.bluetooth {
     method public abstract void onServiceDisconnected(int);
   }
 
-  public final class BluetoothSap implements android.bluetooth.BluetoothProfile {
-    method public synchronized void close();
-    method public boolean connect(android.bluetooth.BluetoothDevice);
-    method public boolean disconnect(android.bluetooth.BluetoothDevice);
-    method public android.bluetooth.BluetoothDevice getClient();
-    method public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method public int getConnectionState(android.bluetooth.BluetoothDevice);
-    method public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(int[]);
-    method public int getPriority(android.bluetooth.BluetoothDevice);
-    method public int getState();
-    method public boolean isConnected(android.bluetooth.BluetoothDevice);
-    method public boolean setPriority(android.bluetooth.BluetoothDevice, int);
-    field public static final java.lang.String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.sap.profile.action.CONNECTION_STATE_CHANGED";
-    field public static final int RESULT_CANCELED = 2; // 0x2
-    field public static final int RESULT_FAILURE = 0; // 0x0
-    field public static final int RESULT_SUCCESS = 1; // 0x1
-    field public static final int STATE_ERROR = -1; // 0xffffffff
-  }
-
   public final class BluetoothServerSocket implements java.io.Closeable {
     method public android.bluetooth.BluetoothSocket accept() throws java.io.IOException;
     method public android.bluetooth.BluetoothSocket accept(int) throws java.io.IOException;
