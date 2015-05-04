@@ -1494,8 +1494,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"المطالبة بنقش إلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"تم تثبيت الحزمة عن طريق المشرف"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"للمساعدة في تحسين عمر البطارية، يساعد موفر البطارية في تقليل أداء الجهاز ويفرض قيدًا على الاهتزاز وخدمات الموقع ومعظم بيانات الخلفية. قد لا يتم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم تفتحها.\n\nيتم إيقاف موفر البطارية تلقائيًا أثناء شحن الجهاز."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
