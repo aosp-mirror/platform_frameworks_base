@@ -98,7 +98,7 @@ public class NinePatch {
     public NinePatch(Bitmap bitmap, byte[] chunk, String srcName) {
         mBitmap = bitmap;
         mSrcName = srcName;
-        mNativeChunk = validateNinePatchChunk(mBitmap.getSkBitmap(), chunk);
+        mNativeChunk = validateNinePatchChunk(chunk);
     }
 
     /**
@@ -199,12 +199,12 @@ public class NinePatch {
     }
 
     void drawSoftware(Canvas canvas, RectF location, Paint paint) {
-        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.getSkBitmap(), mNativeChunk,
+        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap, mNativeChunk,
                 paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
     }
 
     void drawSoftware(Canvas canvas, Rect location, Paint paint) {
-        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap.getSkBitmap(), mNativeChunk,
+        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap, mNativeChunk,
                 paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
     }
 
@@ -252,7 +252,7 @@ public class NinePatch {
      * that are transparent.
      */
     public final Region getTransparentRegion(Rect bounds) {
-        long r = nativeGetTransparentRegion(mBitmap.getSkBitmap(), mNativeChunk, bounds);
+        long r = nativeGetTransparentRegion(mBitmap, mNativeChunk, bounds);
         return r != 0 ? new Region(r) : null;
     }
 
@@ -271,11 +271,11 @@ public class NinePatch {
      * If validation is successful, this method returns a native Res_png_9patch*
      * object used by the renderers.
      */
-    private static native long validateNinePatchChunk(long bitmap, byte[] chunk);
+    private static native long validateNinePatchChunk(byte[] chunk);
     private static native void nativeFinalize(long chunk);
-    private static native void nativeDraw(long canvas_instance, RectF loc, long bitmap_instance,
+    private static native void nativeDraw(long canvas_instance, RectF loc, Bitmap bitmap_instance,
             long c, long paint_instance_or_null, int destDensity, int srcDensity);
-    private static native void nativeDraw(long canvas_instance, Rect loc, long bitmap_instance,
+    private static native void nativeDraw(long canvas_instance, Rect loc, Bitmap bitmap_instance,
             long c, long paint_instance_or_null, int destDensity, int srcDensity);
-    private static native long nativeGetTransparentRegion(long bitmap, long chunk, Rect location);
+    private static native long nativeGetTransparentRegion(Bitmap bitmap, long chunk, Rect location);
 }

@@ -218,7 +218,7 @@ void DisplayListCanvas::drawLayer(DeferredLayerUpdater* layerHandle, float x, fl
 }
 
 void DisplayListCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
-    bitmap = refBitmap(bitmap);
+    bitmap = refBitmap(*bitmap);
     paint = refPaint(paint);
 
     addDrawOp(new (alloc()) DrawBitmapOp(bitmap, paint));
@@ -284,7 +284,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float 
                 dstRight = srcRight - srcLeft;
                 dstBottom = srcBottom - srcTop;
 
-                addDrawOp(new (alloc()) DrawBitmapRectOp(refBitmap(&bitmap),
+                addDrawOp(new (alloc()) DrawBitmapRectOp(refBitmap(bitmap),
                         srcLeft, srcTop, srcRight, srcBottom,
                         dstLeft, dstTop, dstRight, dstBottom, paint));
                 restore();
@@ -292,7 +292,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float 
             }
         }
 
-        addDrawOp(new (alloc()) DrawBitmapRectOp(refBitmap(&bitmap),
+        addDrawOp(new (alloc()) DrawBitmapRectOp(refBitmap(bitmap),
                 srcLeft, srcTop, srcRight, srcBottom,
                 dstLeft, dstTop, dstRight, dstBottom, paint));
     }
@@ -305,17 +305,17 @@ void DisplayListCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, in
     paint = refPaint(paint);
     colors = refBuffer<int>(colors, vertexCount); // 1 color per vertex
 
-    addDrawOp(new (alloc()) DrawBitmapMeshOp(refBitmap(&bitmap), meshWidth, meshHeight,
+    addDrawOp(new (alloc()) DrawBitmapMeshOp(refBitmap(bitmap), meshWidth, meshHeight,
            vertices, colors, paint));
 }
 
-void DisplayListCanvas::drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+void DisplayListCanvas::drawPatch(const SkBitmap& bitmap, const Res_png_9patch* patch,
         float left, float top, float right, float bottom, const SkPaint* paint) {
-    bitmap = refBitmap(bitmap);
+    const SkBitmap* bitmapPtr = refBitmap(bitmap);
     patch = refPatch(patch);
     paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawPatchOp(bitmap, patch, left, top, right, bottom, paint));
+    addDrawOp(new (alloc()) DrawPatchOp(bitmapPtr, patch, left, top, right, bottom, paint));
 }
 
 void DisplayListCanvas::drawColor(int color, SkXfermode::Mode mode) {
