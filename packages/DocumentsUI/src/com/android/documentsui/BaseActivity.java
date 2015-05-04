@@ -101,6 +101,41 @@ abstract class BaseActivity extends Activity {
         return showMenu;
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean shown = super.onPrepareOptionsMenu(menu);
+
+        final RootInfo root = getCurrentRoot();
+        final DocumentInfo cwd = getCurrentDirectory();
+
+        final MenuItem sort = menu.findItem(R.id.menu_sort);
+        final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
+        final MenuItem grid = menu.findItem(R.id.menu_grid);
+        final MenuItem list = menu.findItem(R.id.menu_list);
+
+        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
+        final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
+
+        mSearchManager.update(root);
+
+        // Search uses backend ranking; no sorting
+        sort.setVisible(cwd != null && !mSearchManager.isSearching());
+
+        State state = getDisplayState();
+        grid.setVisible(state.derivedMode != State.MODE_GRID);
+        list.setVisible(state.derivedMode != State.MODE_LIST);
+
+        // Only sort by size when visible
+        sortSize.setVisible(state.showSize);
+
+        advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
+                ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
+        fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
+                ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
+
+        return shown;
+    }
+
     void onStackRestored(boolean restored, boolean external) {}
 
     void onRootPicked(RootInfo root) {
