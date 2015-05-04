@@ -1,0 +1,91 @@
+page.title=Supporting Swipe-to-Refresh
+trainingnavtop=true
+startpage=true
+
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 1.6 (API level 4) or later
+  </li>
+
+  <li>Latest version of the Android v4 <a href=
+  "{@docRoot}tools/support-library/index.html">Support Library</a>
+  </li>
+</ul>
+
+<h2>Sample Apps</h2>
+
+<ul>
+    <li><a href="{@docRoot}samples/SwipeRefreshLayoutBasic/index.html">
+            SwipeRefreshLayoutBasic</a></li>
+    <li><a href="{@docRoot}samples/SwipeRefreshListFragment/index.html">
+            SwipeRefreshListFragment</a></li>
+    <li><a href="{@docRoot}samples/SwipeRefreshMultipleViews/index.html">
+            SwipeRefreshMultipleViews</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>
+  Even if your app automatically updates its content on a regular basis, you
+  can allow users to request manual updates as well. For example, a weather
+  forecasting app can allow users get the latest forecasts on demand. To
+  provide a standard user experience for requesting updates, the Android
+  platform includes the swipe-to-refresh design pattern, which allows users
+  to trigger an update with a vertical swipe.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> This class requires the latest version of the Android
+  v4 Support Library APIs. If you have not used the Support Library before,
+  follow the instructions in the <a href=
+  "{@docRoot}tools/support-library/setup.html">Support Library Setup</a>
+  document.
+</p>
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt>
+    <b><a href="add-swipe-interface.html">Adding Swipe-to-Refresh To Your
+    App</a></b>
+  </dt>
+
+  <dd>
+    <div style="width:290px;margin-right:35px;float:right">
+      <div class="framed-nexus5-port-span-5">
+        <video class="play-on-hover" autoplay alt=
+        "When the user performs a swipe gesture, the SwipeRefreshLayout widget displays a progress indicator until your app finishes updating its data.">
+        <!-- Preferred video size 216x384 (portrait) -->
+          <source src="images/swipe.mp4">
+        </video>
+      </div>
+
+      <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+        <em>To replay the movie, click on the device screen</em>
+      </div>
+    </div>
+  </dd>
+
+  <dd>
+    Learn how to provide swipe-to-refresh support in a {@link
+    android.widget.ListView} or {@link android.widget.GridView}, and how to
+    provide an accessible refresh option using the action bar.
+  </dd>
+
+  <dt>
+    <b><a href="respond-refresh-request.html">Responding to a Refresh
+    Request</a></b>
+  </dt>
+
+  <dd>
+    Learn how to respond to the swipe-to-refresh gesture, and how to perform the
+    same update from an action bar action.
+  </dd>
+</dl>
