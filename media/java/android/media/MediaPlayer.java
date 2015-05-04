@@ -42,6 +42,7 @@ import android.system.OsConstants;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.widget.VideoView;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaFormat;
@@ -2126,6 +2127,43 @@ public class MediaPlayer implements SubtitleController.Listener
         mSubtitleController.setAnchor(anchor);
     }
 
+    /**
+     * The private version of setSubtitleAnchor is used internally to set mSubtitleController if
+     * necessary when clients don't provide their own SubtitleControllers using the public version
+     * {@link #setSubtitleAnchor(SubtitleController, Anchor)} (e.g. {@link VideoView} provides one).
+     */
+    private synchronized void setSubtitleAnchor() {
+        if (mSubtitleController == null) {
+            final HandlerThread thread = new HandlerThread("SetSubtitleAnchorThread");
+            thread.start();
+            Handler handler = new Handler(thread.getLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Context context = ActivityThread.currentApplication();
+                    mSubtitleController = new SubtitleController(context, mTimeProvider, MediaPlayer.this);
+                    mSubtitleController.setAnchor(new Anchor() {
+                        @Override
+                        public void setSubtitleWidget(RenderingWidget subtitleWidget) {
+                        }
+
+                        @Override
+                        public Looper getSubtitleLooper() {
+                            return Looper.getMainLooper();
+                        }
+                    });
+                    thread.getLooper().quitSafely();
+                }
+            });
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.w(TAG, "failed to join SetSubtitleAnchorThread");
+            }
+        }
+    }
+
     private final Object mInbandSubtitleLock = new Object();
     private SubtitleTrack[] mInbandSubtitleTracks;
     private int mSelectedSubtitleTrackIndex = -1;
@@ -2386,24 +2424,14 @@ public class MediaPlayer implements SubtitleController.Listener
         fFormat.setString(MediaFormat.KEY_MIME, mime);
         fFormat.setInteger(MediaFormat.KEY_IS_TIMED_TEXT, 1);
 
-        Context context = ActivityThread.currentApplication();
         // A MediaPlayer created by a VideoView should already have its mSubtitleController set.
         if (mSubtitleController == null) {
-            mSubtitleController = new SubtitleController(context, mTimeProvider, this);
-            mSubtitleController.setAnchor(new Anchor() {
-                @Override
-                public void setSubtitleWidget(RenderingWidget subtitleWidget) {
-                }
-
-                @Override
-                public Looper getSubtitleLooper() {
-                    return Looper.getMainLooper();
-                }
-            });
+            setSubtitleAnchor();
         }
 
         if (!mSubtitleController.hasRendererFor(fFormat)) {
             // test and add not atomic
+            Context context = ActivityThread.currentApplication();
             mSubtitleController.registerRenderer(new SRTRenderer(context, mEventHandler));
         }
         final SubtitleTrack track = mSubtitleController.addTrack(fFormat);
