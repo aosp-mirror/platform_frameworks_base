@@ -1460,8 +1460,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ගැලවීමට පෙර අගුළු අරින රටාව සඳහා අසන්න"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ගැලවීමට පෙර මුරපදය විමසන්න"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ඔබගේ පරිපාලක විසින් ස්ථාපනය කරන ලද"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"ඔබගේ පරිපාලක විසින් යාවත්කාලීන කරන ලදී"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ඔබගේ පරිපාලක විසින් මකන ලද"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
