@@ -91,9 +91,13 @@ public final class BluetoothSocket implements Closeable {
     public static final int MAX_RFCOMM_CHANNEL = 30;
     /*package*/ static final int MAX_L2CAP_PACKAGE_SIZE = 0xFFFF;
 
-    /** Keep TYPE_ fields in sync with BluetoothSocket.cpp */
+    /** RFCOMM socket */
     public static final int TYPE_RFCOMM = 1;
+
+    /** SCO socket */
     public static final int TYPE_SCO = 2;
+
+    /** L2CAP socket */
     public static final int TYPE_L2CAP = 3;
 
     /*package*/ static final int EBADFD = 77;
@@ -578,8 +582,8 @@ public final class BluetoothSocket implements Closeable {
     }
 
     /**
-     * Get the type of the underlying connection
-     * @return one of TYPE_
+     * Get the type of the underlying connection.
+     * @return one of {@link #TYPE_RFCOMM}, {@link #TYPE_SCO} or {@link #TYPE_L2CAP}
      */
     public int getConnectionType() {
         return mType;
