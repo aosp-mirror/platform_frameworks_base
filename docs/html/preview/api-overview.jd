@@ -1,0 +1,120 @@
+page.title=API Overview
+excludeFromSuggestions=true
+sdk.platform.apiLevel=22
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document
+    <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">show more</span>
+        <span class="less" style="display:none">show less</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#">Important Behavior Changes</a>
+    <ol>
+      <li><a href="#">change 1</a></li>
+      <li><a href="#">change 2</a></li>
+    </ol>
+  </li>
+  <li><a href="#">Feature Group 1</a>
+    <ol>
+      <li><a href="#">change 1</a></li>
+      <li><a href="#">change 2</a></li>
+    </ol>
+  </li>
+  <li><a href="#">Feature Group 2</a>
+    <ol>
+      <li><a href="#">change 1</a></li>
+      <li><a href="#">change 2</a></li>
+    </ol>
+  </li>
+</ol>
+
+</div>
+</div>
+
+<p>The M Developer Preview gives you an advance look at the upcoming release
+for the Android platform, which offers new features for users and app
+developers. This document provides an introduction to the most notable APIs.</p>
+
+<p>The M Developer Preview is intended for <strong>developer early
+adopters</strong> and <strong>testers</strong>. If you are interested in
+influencing the direction of the Android framework,
+<a href="{@docRoot}preview/setup-sdk.html">give the M Developer Preview a
+try</a> and send us your feedback!</p>
+
+<p class="caution"><strong>Caution:</strong> Do not not publish apps
+that use the M Developer Preview to the Google Play store.</p>
+
+<p class="note"><strong>Note:</strong> This document often refers to classes and
+methods that do not yet have reference material available on <a
+href="{@docRoot}">developer.android.com</a>. These API elements are
+formatted in {@code code style} in this document (without hyperlinks). For the
+preliminary API documentation for these elements, download the <a
+href="http://storage.googleapis.com/androiddevelopers/preview/l-developer-preview-reference.zip">preview
+reference</a>.</p>
+
+<h2 id="Behaviors">Important Behavior Changes</h2>
+
+<p>If you have previously published an app for Android, be aware that your app
+  might be affected by changes in the upcoming release.</p>
+
+<h3 id="id">Behavior Change 1</h3>
+
+<p>
+  Bacon ipsum dolor amet biltong picanha t-bone, jowl salami tri-tip jerky kielbasa sirloin boudin
+  porchetta fatback cow meatloaf capicola. Short ribs kielbasa pig drumstick rump boudin jowl chuck
+  beef ribs doner tenderloin biltong swine.
+</p>
+
+
+
+<h2 id="id">Feature Group 1</h2>
+
+<h3 id="id">Feature item 1</h3>
+
+<p>
+  Bacon ipsum dolor amet landjaeger capicola tail sausage shank swine biltong pork andouille t-bone
+  alcatra chicken. Strip steak bacon tongue beef bresaola landjaeger. Shankle boudin pork belly
+  jowl pig. Rump swine ham hock frankfurter pork shankle. Shank corned beef alcatra doner flank
+  turducken. Tongue brisket ham shoulder:
+</p>
+
+<h3 id="id">Feature item 2</h3>
+
+<p>
+  Bacon ipsum dolor amet landjaeger capicola tail sausage shank swine biltong pork andouille t-bone
+  alcatra chicken. Strip steak bacon tongue beef bresaola landjaeger. Shankle boudin pork belly
+  jowl pig. Rump swine ham hock frankfurter pork shankle. Shank corned beef alcatra doner flank
+  turducken. Tongue brisket ham shoulder:
+</p>
+
+<h2 id="id">Feature Group 2</h2>
+
+<h3 id="id">Feature item 1</h3>
+
+<p>
+  Bacon ipsum dolor amet landjaeger capicola tail sausage shank swine biltong pork andouille t-bone
+  alcatra chicken. Strip steak bacon tongue beef bresaola landjaeger. Shankle boudin pork belly
+  jowl pig. Rump swine ham hock frankfurter pork shankle. Shank corned beef alcatra doner flank
+  turducken. Tongue brisket ham shoulder:
+</p>
+
+<h3 id="id">Feature item 2</h3>
+
+<p>
+  Bacon ipsum dolor amet landjaeger capicola tail sausage shank swine biltong pork andouille t-bone
+  alcatra chicken. Strip steak bacon tongue beef bresaola landjaeger. Shankle boudin pork belly
+  jowl pig. Rump swine ham hock frankfurter pork shankle. Shank corned beef alcatra doner flank
+  turducken. Tongue brisket ham shoulder:
+</p>
+
+
+
+<p class="note">
+  For a detailed view of all API changes in the M Developer Preview, see the <a href=
+  "{@docRoot}preview/reference.html">API Differences Report</a>.
+</p>
