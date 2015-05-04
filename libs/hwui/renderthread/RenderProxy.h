@@ -90,6 +90,7 @@ public:
 
     ANDROID_API void destroyHardwareResources();
     ANDROID_API static void trimMemory(int level);
+    ANDROID_API static void overrideProperty(const char* name, const char* value);
 
     ANDROID_API void fence();
     ANDROID_API void stopDrawing();

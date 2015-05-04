@@ -28,6 +28,7 @@
 #include "DeferredDisplayList.h"
 #include "DisplayListOp.h"
 #include "OpenGLRenderer.h"
+#include "Properties.h"
 #include "utils/MathUtils.h"
 
 #if DEBUG_DEFER
@@ -502,7 +503,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
         resetBatchingState();
     }
 
-    if (CC_UNLIKELY(renderer.getCaches().drawReorderDisabled)) {
+    if (CC_UNLIKELY(Properties::drawReorderDisabled)) {
         // TODO: elegant way to reuse batches?
         DrawBatch* b = new DrawBatch(deferInfo);
         b->add(op, state, deferInfo.opaqueOverBounds);

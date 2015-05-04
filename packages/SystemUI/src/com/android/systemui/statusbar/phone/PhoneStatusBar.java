@@ -76,6 +76,7 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ThreadedRenderer;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -856,6 +857,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
+
+        // disable profiling bars, since they overlap and clutter the output on app windows
+        ThreadedRenderer.overrideProperty("disableProfileBars", "true");
+
+        // Private API call to make the shadows look better for Recents
+        ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
 
         return mStatusBarView;
     }

@@ -57,14 +57,8 @@ Caches::Caches(RenderState& renderState)
     init();
     initFont();
     initConstraints();
-    initProperties();
     initStaticProperties();
     initExtensions();
-    initTempProperties();
-
-    mDebugLevel = readDebugLevel();
-    ALOGD_IF(mDebugLevel != kDebugDisabled,
-            "Enabling debug mode %d", mDebugLevel);
 }
 
 bool Caches::init() {
@@ -76,10 +70,6 @@ bool Caches::init() {
     mProgram = nullptr;
 
     mFunctorsCount = 0;
-
-    debugLayersUpdates = false;
-    debugOverdraw = false;
-    debugStencilClip = kStencilHide;
 
     patchCache.init();
 
@@ -122,66 +112,6 @@ void Caches::initStaticProperties() {
             gpuPixelBuffersEnabled = !strcmp(property, "true");
         }
     }
-}
-
-bool Caches::initProperties() {
-    bool prevDebugLayersUpdates = debugLayersUpdates;
-    bool prevDebugOverdraw = debugOverdraw;
-    StencilClipDebug prevDebugStencilClip = debugStencilClip;
-
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG_LAYERS_UPDATES, property, nullptr) > 0) {
-        INIT_LOGD("  Layers updates debug enabled: %s", property);
-        debugLayersUpdates = !strcmp(property, "true");
-    } else {
-        debugLayersUpdates = false;
-    }
-
-    debugOverdraw = false;
-    if (property_get(PROPERTY_DEBUG_OVERDRAW, property, nullptr) > 0) {
-        INIT_LOGD("  Overdraw debug enabled: %s", property);
-        if (!strcmp(property, "show")) {
-            debugOverdraw = true;
-            mOverdrawDebugColorSet = kColorSet_Default;
-        } else if (!strcmp(property, "show_deuteranomaly")) {
-            debugOverdraw = true;
-            mOverdrawDebugColorSet = kColorSet_Deuteranomaly;
-        }
-    }
-
-    // See Properties.h for valid values
-    if (property_get(PROPERTY_DEBUG_STENCIL_CLIP, property, nullptr) > 0) {
-        INIT_LOGD("  Stencil clip debug enabled: %s", property);
-        if (!strcmp(property, "hide")) {
-            debugStencilClip = kStencilHide;
-        } else if (!strcmp(property, "highlight")) {
-            debugStencilClip = kStencilShowHighlight;
-        } else if (!strcmp(property, "region")) {
-            debugStencilClip = kStencilShowRegion;
-        }
-    } else {
-        debugStencilClip = kStencilHide;
-    }
-
-    if (property_get(PROPERTY_DISABLE_DRAW_DEFER, property, "false")) {
-        drawDeferDisabled = !strcasecmp(property, "true");
-        INIT_LOGD("  Draw defer %s", drawDeferDisabled ? "disabled" : "enabled");
-    } else {
-        drawDeferDisabled = false;
-        INIT_LOGD("  Draw defer enabled");
-    }
-
-    if (property_get(PROPERTY_DISABLE_DRAW_REORDER, property, "false")) {
-        drawReorderDisabled = !strcasecmp(property, "true");
-        INIT_LOGD("  Draw reorder %s", drawReorderDisabled ? "disabled" : "enabled");
-    } else {
-        drawReorderDisabled = false;
-        INIT_LOGD("  Draw reorder enabled");
-    }
-
-    return (prevDebugLayersUpdates != debugLayersUpdates)
-            || (prevDebugOverdraw != debugOverdraw)
-            || (prevDebugStencilClip != debugStencilClip);
 }
 
 void Caches::terminate() {
@@ -231,7 +161,9 @@ uint32_t Caches::getOverdrawColor(uint32_t amount) const {
     };
     if (amount < 1) amount = 1;
     if (amount > 4) amount = 4;
-    return sOverdrawColors[mOverdrawDebugColorSet][amount - 1];
+
+    int overdrawColorIndex = static_cast<int>(Properties::overdrawColorSet);
+    return sOverdrawColors[overdrawColorIndex][amount - 1];
 }
 
 void Caches::dumpMemoryUsage() {
@@ -351,13 +283,13 @@ void Caches::flush(FlushMode mode) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard) {
-    if (mExtensions.hasTiledRendering() && !debugOverdraw) {
+    if (mExtensions.hasTiledRendering() && !Properties::debugOverdraw) {
         glStartTilingQCOM(x, y, width, height, (discard ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM));
     }
 }
 
 void Caches::endTiling() {
-    if (mExtensions.hasTiledRendering() && !debugOverdraw) {
+    if (mExtensions.hasTiledRendering() && !Properties::debugOverdraw) {
         glEndTilingQCOM(GL_COLOR_BUFFER_BIT0_QCOM);
     }
 }
@@ -394,45 +326,6 @@ TextureVertex* Caches::getRegionMesh() {
 ///////////////////////////////////////////////////////////////////////////////
 // Temporary Properties
 ///////////////////////////////////////////////////////////////////////////////
-
-void Caches::initTempProperties() {
-    propertyLightRadius = -1.0f;
-    propertyLightPosY = -1.0f;
-    propertyLightPosZ = -1.0f;
-    propertyAmbientRatio = -1.0f;
-    propertyAmbientShadowStrength = -1;
-    propertySpotShadowStrength = -1;
-}
-
-void Caches::setTempProperty(const char* name, const char* value) {
-    ALOGD("setting property %s to %s", name, value);
-    if (!strcmp(name, "ambientRatio")) {
-        propertyAmbientRatio = fmin(fmax(atof(value), 0.0), 10.0);
-        ALOGD("ambientRatio = %.2f", propertyAmbientRatio);
-        return;
-    } else if (!strcmp(name, "lightRadius")) {
-        propertyLightRadius = fmin(fmax(atof(value), 0.0), 3000.0);
-        ALOGD("lightRadius = %.2f", propertyLightRadius);
-        return;
-    } else if (!strcmp(name, "lightPosY")) {
-        propertyLightPosY = fmin(fmax(atof(value), 0.0), 3000.0);
-        ALOGD("lightPos Y = %.2f", propertyLightPosY);
-        return;
-    } else if (!strcmp(name, "lightPosZ")) {
-        propertyLightPosZ = fmin(fmax(atof(value), 0.0), 3000.0);
-        ALOGD("lightPos Z = %.2f", propertyLightPosZ);
-        return;
-    } else if (!strcmp(name, "ambientShadowStrength")) {
-        propertyAmbientShadowStrength = atoi(value);
-        ALOGD("ambient shadow strength = 0x%x out of 0xff", propertyAmbientShadowStrength);
-        return;
-    } else if (!strcmp(name, "spotShadowStrength")) {
-        propertySpotShadowStrength = atoi(value);
-        ALOGD("spot shadow strength = 0x%x out of 0xff", propertySpotShadowStrength);
-        return;
-    }
-    ALOGD("    failed");
-}
 
 }; // namespace uirenderer
 }; // namespace android
