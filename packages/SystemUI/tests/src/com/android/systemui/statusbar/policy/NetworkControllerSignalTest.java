@@ -396,4 +396,65 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
               false /* dataOut */);
 
     }
+
+    public void testCarrierNetworkChange_carrierNetworkChangeWhileConnected() {
+      int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
+
+      setupDefaultSignal();
+      setLevel(strength);
+
+      // API call is made
+      setCarrierNetworkChange(true /* enabled */);
+
+      // Boolean value is set, but we still have a signal, should be showing normal
+      verifyLastMobileDataIndicators(true /* visible */,
+              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */);
+
+      // Lose voice but still have data
+      setVoiceRegState(ServiceState.STATE_OUT_OF_SERVICE);
+      verifyLastMobileDataIndicators(true /* visible */,
+              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */);
+
+      // Voice but no data
+      setVoiceRegState(ServiceState.STATE_IN_SERVICE);
+      setDataRegState(ServiceState.STATE_OUT_OF_SERVICE);
+      verifyLastMobileDataIndicators(true /* visible */,
+              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */);
+    }
+
+    public void testCarrierNetworkChange_carrierNetworkChangeWhileDisconnected() {
+      int strength = SignalStrength.SIGNAL_STRENGTH_GREAT;
+
+      setupDefaultSignal();
+      setLevel(strength);
+
+      // Verify baseline
+      verifyLastMobileDataIndicators(true /* visible */,
+              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */);
+
+      // API call is made and all connectivity lost
+      setCarrierNetworkChange(true /* enabled */);
+      setVoiceRegState(ServiceState.STATE_OUT_OF_SERVICE);
+      setDataRegState(ServiceState.STATE_OUT_OF_SERVICE);
+
+      // Out of service and carrier network change is true, show special indicator
+      verifyLastMobileDataIndicators(true /* visible */,
+              TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE[0][0] /* strengthIcon */,
+              TelephonyIcons.TELEPHONY_CARRIER_NETWORK_CHANGE_DARK[0][0] /* darkStrengthIcon */,
+              0 /* typeIcon */);
+
+      // Revert back
+      setCarrierNetworkChange(false /* enabled */);
+      setVoiceRegState(ServiceState.STATE_IN_SERVICE);
+      setDataRegState(ServiceState.STATE_IN_SERVICE);
+
+      // Verify back in previous state
+      verifyLastMobileDataIndicators(true /* visible */,
+              TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][strength] /* strengthIcon */,
+              DEFAULT_ICON /* typeIcon */);
+    }
 }
