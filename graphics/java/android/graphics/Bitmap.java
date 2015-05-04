@@ -1568,11 +1568,6 @@ public final class Bitmap implements Parcelable {
         nativePrepareToDraw(mSkBitmapPtr);
     }
 
-    /** @hide */
-    public final long getSkBitmap() {
-        return mSkBitmapPtr;
-    }
-
     /**
      * Refs the underlying SkPixelRef and returns a pointer to it.
      *

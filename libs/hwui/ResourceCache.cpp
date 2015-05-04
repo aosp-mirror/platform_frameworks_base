@@ -59,13 +59,13 @@ void ResourceCache::unlock() {
     mLock.unlock();
 }
 
-const SkBitmap* ResourceCache::insert(const SkBitmap* bitmapResource) {
+const SkBitmap* ResourceCache::insert(const SkBitmap& bitmapResource) {
     Mutex::Autolock _l(mLock);
 
     BitmapKey bitmapKey(bitmapResource);
     ssize_t index = mBitmapCache.indexOfKey(bitmapKey);
     if (index == NAME_NOT_FOUND) {
-        SkBitmap* cachedBitmap = new SkBitmap(*bitmapResource);
+        SkBitmap* cachedBitmap = new SkBitmap(bitmapResource);
         index = mBitmapCache.add(bitmapKey, cachedBitmap);
         return cachedBitmap;
     }
@@ -121,7 +121,7 @@ void ResourceCache::decrementRefcountLocked(void* resource) {
 }
 
 void ResourceCache::decrementRefcountLocked(const SkBitmap* bitmapResource) {
-    BitmapKey bitmapKey(bitmapResource);
+    BitmapKey bitmapKey(*bitmapResource);
     ssize_t index = mBitmapCache.indexOfKey(bitmapKey);
 
     LOG_ALWAYS_FATAL_IF(index == NAME_NOT_FOUND,

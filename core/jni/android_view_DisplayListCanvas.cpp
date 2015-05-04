@@ -132,10 +132,10 @@ static jint android_view_DisplayListCanvas_getMaxTextureHeight(JNIEnv* env, jobj
 // ----------------------------------------------------------------------------
 
 static void android_view_DisplayListCanvas_drawPatch(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong bitmapPtr, jlong patchPtr,
+        jlong rendererPtr, jobject jbitmap, jlong patchPtr,
         float left, float top, float right, float bottom, jlong paintPtr) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
-
+    SkBitmap bitmap;
+    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
     Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(patchPtr);
     Paint* paint = reinterpret_cast<Paint*>(paintPtr);
@@ -273,7 +273,7 @@ static JNINativeMethod gMethods[] = {
 
     { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_DisplayListCanvas_callDrawGLFunction },
 
-    { "nDrawPatch",         "(JJJFFFFJ)V",     (void*) android_view_DisplayListCanvas_drawPatch },
+    { "nDrawPatch",         "(JLandroid/graphics/Bitmap;JFFFFJ)V",     (void*) android_view_DisplayListCanvas_drawPatch },
 
     { "nDrawRects",         "(JJJ)V",          (void*) android_view_DisplayListCanvas_drawRegionAsRects },
     { "nDrawRoundRect",     "(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
