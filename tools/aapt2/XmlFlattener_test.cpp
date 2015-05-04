@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "Resolver.h"
+#include "MockResolver.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "SourceXmlPullParser.h"
@@ -33,55 +33,11 @@ namespace aapt {
 
 constexpr const char* kXmlPreamble = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 
-struct MockResolver : public IResolver {
-    MockResolver(const StringPiece16& defaultPackage,
-                 const std::map<ResourceName, ResourceId>& items) :
-            mPackage(defaultPackage.toString()), mAttr(false, ResTable_map::TYPE_ANY),
-            mItems(items) {
-    }
-
-    virtual const std::u16string& getDefaultPackage() const override {
-        return mPackage;
-    }
-
-    virtual Maybe<ResourceId> findId(const ResourceName& name) override {
-        const auto iter = mItems.find(name);
-        if (iter != mItems.end()) {
-            return iter->second;
-        }
-        return {};
-    }
-
-    virtual Maybe<Entry> findAttribute(const ResourceName& name) override {
-        Maybe<ResourceId> result = findId(name);
-        if (result) {
-            if (name.type == ResourceType::kAttr) {
-                return Entry{ result.value(), &mAttr };
-            } else {
-                return Entry{ result.value() };
-            }
-        }
-        return {};
-    }
-
-    virtual Maybe<ResourceName> findName(ResourceId resId) override {
-        for (auto& p : mItems) {
-            if (p.second == resId) {
-                return p.first;
-            }
-        }
-        return {};
-    }
-
-    std::u16string mPackage;
-    Attribute mAttr;
-    std::map<ResourceName, ResourceId> mItems;
-};
-
 class XmlFlattenerTest : public ::testing::Test {
 public:
     virtual void SetUp() override {
-        std::shared_ptr<IResolver> resolver = std::make_shared<MockResolver>(u"android",
+        std::shared_ptr<IResolver> resolver = std::make_shared<MockResolver>(
+                std::make_shared<ResourceTable>(),
                 std::map<ResourceName, ResourceId>({
                         { ResourceName{ u"android", ResourceType::kAttr, u"attr" },
                           ResourceId{ 0x01010000u } },

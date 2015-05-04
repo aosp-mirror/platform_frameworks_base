@@ -45,8 +45,6 @@ public:
 
     ResourceTableResolver(const ResourceTableResolver&) = delete; // Not copyable.
 
-    virtual const std::u16string& getDefaultPackage() const override;
-
     virtual Maybe<ResourceId> findId(const ResourceName& name) override;
 
     virtual Maybe<Entry> findAttribute(const ResourceName& name) override;
@@ -68,10 +66,6 @@ private:
     std::map<ResourceName, CacheEntry> mCache;
     std::unordered_set<std::u16string> mIncludedPackages;
 };
-
-inline const std::u16string& ResourceTableResolver::getDefaultPackage() const {
-    return mTable->getPackage();
-}
 
 inline const android::ResTable& ResourceTableResolver::getResTable() const {
     return mSources->getResources(false);
