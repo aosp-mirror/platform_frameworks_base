@@ -234,6 +234,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mPhoneStateListener.onDataActivity(dataActivity);
     }
 
+    public void setCarrierNetworkChange(boolean enable) {
+        Log.d(TAG, "setCarrierNetworkChange(" + enable + ")");
+        mPhoneStateListener.onCarrierNetworkChange(enable);
+    }
+
     protected void verifyHasNoSims(boolean hasNoSimsVisible) {
         ArgumentCaptor<Boolean> hasNoSimsArg = ArgumentCaptor.forClass(Boolean.class);
 
@@ -273,19 +278,29 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon) {
-        ArgumentCaptor<Integer> iconArg = ArgumentCaptor.forClass(Integer.class);
+        verifyLastMobileDataIndicators(visible, icon, icon, typeIcon);
+    }
+
+    protected void verifyLastMobileDataIndicators(boolean visible, int strengthIcon,
+            int darkStrengthIcon, int typeIcon) {
+        ArgumentCaptor<Integer> strengthIconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> darkStrengthIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Boolean> visibleArg = ArgumentCaptor.forClass(Boolean.class);
 
         // TODO: Verify all fields.
         Mockito.verify(mSignalCluster, Mockito.atLeastOnce()).setMobileDataIndicators(
-                visibleArg.capture(), iconArg.capture(), iconArg.capture(), typeIconArg.capture(),
+                visibleArg.capture(), strengthIconArg.capture(), darkStrengthIconArg.capture(),
+                typeIconArg.capture(),
                 ArgumentCaptor.forClass(String.class).capture(),
                 ArgumentCaptor.forClass(String.class).capture(),
                 ArgumentCaptor.forClass(Boolean.class).capture(),
                 ArgumentCaptor.forClass(Integer.class).capture());
 
-        assertEquals("Signal icon in status bar", icon, (int) iconArg.getValue());
+        assertEquals("Signal strength icon in status bar", strengthIcon,
+                (int) strengthIconArg.getValue());
+        assertEquals("Signal strength icon (dark mode) in status bar", darkStrengthIcon,
+                (int) darkStrengthIconArg.getValue());
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
         assertEquals("Visibility in status bar", visible, (boolean) visibleArg.getValue());
     }
