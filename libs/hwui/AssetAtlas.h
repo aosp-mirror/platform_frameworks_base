@@ -48,24 +48,8 @@ public:
      * Entry representing the position and rotation of a
      * bitmap inside the atlas.
      */
-    struct Entry {
-        /**
-         * The bitmap that generated this atlas entry.
-         */
-        SkBitmap* bitmap;
-
-        /**
-         * Location of the bitmap inside the atlas, in pixels.
-         */
-        int x;
-        int y;
-
-        /**
-         * If set, the bitmap is rotated 90 degrees (clockwise)
-         * inside the atlas.
-         */
-        bool rotated;
-
+    class Entry {
+    public:
         /*
          * A "virtual texture" object that represents the texture
          * this entry belongs to. This texture should never be
@@ -80,11 +64,6 @@ public:
         const UvMapper uvMapper;
 
         /**
-         * Atlas this entry belongs to.
-         */
-        const AssetAtlas& atlas;
-
-        /**
          * Unique identifier used to merge bitmaps and 9-patches stored
          * in the atlas.
          */
@@ -93,10 +72,37 @@ public:
         }
 
     private:
-        Entry(SkBitmap* bitmap, int x, int y, bool rotated,
-                Texture* texture, const UvMapper& mapper, const AssetAtlas& atlas):
-                bitmap(bitmap), x(x), y(y), rotated(rotated),
-                texture(texture), uvMapper(mapper), atlas(atlas) {
+        /**
+         * The pixel ref that generated this atlas entry.
+         */
+        SkPixelRef* pixelRef;
+
+        /**
+         * Location of the bitmap inside the atlas, in pixels.
+         */
+        int x;
+        int y;
+
+        /**
+         * If set, the bitmap is rotated 90 degrees (clockwise)
+         * inside the atlas.
+         */
+        bool rotated;
+
+        /**
+         * Atlas this entry belongs to.
+         */
+        const AssetAtlas& atlas;
+
+        Entry(SkPixelRef* pixelRef, int x, int y, bool rotated,
+                    Texture* texture, const UvMapper& mapper, const AssetAtlas& atlas)
+                : texture(texture)
+                , uvMapper(mapper)
+                , pixelRef(pixelRef)
+                , x(x)
+                , y(y)
+                , rotated(rotated)
+                , atlas(atlas) {
         }
 
         ~Entry() {
@@ -178,7 +184,7 @@ private:
     const bool mBlendKey;
     const bool mOpaqueKey;
 
-    KeyedVector<const SkBitmap*, Entry*> mEntries;
+    KeyedVector<const SkPixelRef*, Entry*> mEntries;
 }; // class AssetAtlas
 
 }; // namespace uirenderer
