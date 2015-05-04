@@ -442,31 +442,15 @@ public class DocumentsActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        final FragmentManager fm = getFragmentManager();
-
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem sort = menu.findItem(R.id.menu_sort);
-        final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
-
-        sort.setVisible(cwd != null);
-        grid.setVisible(mState.derivedMode != State.MODE_GRID);
-        list.setVisible(mState.derivedMode != State.MODE_LIST);
-
-        mSearchManager.update(root);
-
-        // Search uses backend ranking; no sorting
-        sort.setVisible(mSearchManager.isSearching());
-
-        // Only sort by size when visible
-        sortSize.setVisible(mState.showSize);
 
         boolean fileSizeVisible = !(mState.action == ACTION_MANAGE
                 || mState.action == ACTION_BROWSE);
@@ -482,16 +466,12 @@ public class DocumentsActivity extends BaseActivity {
             }
 
             if (mState.action == ACTION_CREATE) {
+                final FragmentManager fm = getFragmentManager();
                 SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
             }
         } else {
             createDir.setVisible(false);
         }
-
-        advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
-                ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
-        fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
-                ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
         advanced.setVisible(!(mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE));
         fileSize.setVisible(fileSizeVisible);
