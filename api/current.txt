@@ -4495,6 +4495,7 @@ package android.app {
 
   public abstract class FragmentHostCallback extends android.app.FragmentContainer {
     ctor public FragmentHostCallback(android.content.Context, android.os.Handler, int);
+    method public void onAttachFragment(android.app.Fragment);
     method public void onDump(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public android.view.View onFindViewById(int);
     method public abstract E onGetHost();
