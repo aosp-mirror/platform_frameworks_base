@@ -16,6 +16,8 @@
 
 package android.accounts;
 
+import android.annotation.RequiresPermission;
+import android.annotation.Size;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -48,6 +50,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static android.Manifest.permission.AUTHENTICATE_ACCOUNTS;
+import static android.Manifest.permission.GET_ACCOUNTS;
+import static android.Manifest.permission.MANAGE_ACCOUNTS;
+import static android.Manifest.permission.USE_CREDENTIALS;
 
 /**
  * This class provides access to a centralized registry of the user's
@@ -319,6 +326,7 @@ public class AccountManager {
      * @param account The account to query for a password
      * @return The account's password, null if none or if the account doesn't exist
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public String getPassword(final Account account) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -344,6 +352,7 @@ public class AccountManager {
      * @param account The account to query for user data
      * @return The user data, null if the account or key doesn't exist
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public String getUserData(final Account account, final String key) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (key == null) throw new IllegalArgumentException("key is null");
@@ -409,6 +418,7 @@ public class AccountManager {
      * @return An array of {@link Account}, one for each account.  Empty
      *     (never null) if no accounts have been added.
      */
+    @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccounts() {
         try {
             return mService.getAccounts(null);
@@ -431,6 +441,7 @@ public class AccountManager {
      * @return An array of {@link Account}, one for each account.  Empty
      *     (never null) if no accounts have been added.
      */
+    @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccountsAsUser(int userId) {
         try {
             return mService.getAccountsAsUser(null, userId);
@@ -490,6 +501,7 @@ public class AccountManager {
      * @return An array of {@link Account}, one per matching account.  Empty
      *     (never null) if no accounts of the specified type have been added.
      */
+    @RequiresPermission(GET_ACCOUNTS)
     public Account[] getAccountsByType(String type) {
         return getAccountsByTypeAsUser(type, Process.myUserHandle());
     }
@@ -576,6 +588,7 @@ public class AccountManager {
      * @return An {@link AccountManagerFuture} which resolves to a Boolean,
      * true if the account exists and has all of the specified features.
      */
+    @RequiresPermission(GET_ACCOUNTS)
     public AccountManagerFuture<Boolean> hasFeatures(final Account account,
             final String[] features,
             AccountManagerCallback<Boolean> callback, Handler handler) {
@@ -621,6 +634,7 @@ public class AccountManager {
      *     {@link Account}, one per account of the specified type which
      *     matches the requested features.
      */
+    @RequiresPermission(GET_ACCOUNTS)
     public AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(
             final String type, final String[] features,
             AccountManagerCallback<Account[]> callback, Handler handler) {
@@ -659,6 +673,7 @@ public class AccountManager {
      * @return True if the account was successfully added, false if the account
      *     already exists, the account is null, or another error occurs.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -684,6 +699,7 @@ public class AccountManager {
      *
      * @param account The {@link Account} to be updated.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public boolean notifyAccountAuthenticated(Account account) {
         if (account == null)
             throw new IllegalArgumentException("account is null");
@@ -715,9 +731,10 @@ public class AccountManager {
      *     after the name change. If successful the account's name will be the
      *     specified new name.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public AccountManagerFuture<Account> renameAccount(
             final Account account,
-            final String newName,
+            @Size(min = 1) final String newName,
             AccountManagerCallback<Account> callback,
             Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null.");
@@ -783,6 +800,7 @@ public class AccountManager {
      *     {@link #removeAccount(Account, Activity, AccountManagerCallback, Handler)}
      *     instead
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     @Deprecated
     public AccountManagerFuture<Boolean> removeAccount(final Account account,
             AccountManagerCallback<Boolean> callback, Handler handler) {
@@ -837,6 +855,7 @@ public class AccountManager {
      *      adding accounts (of this type) has been disabled by policy
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> removeAccount(final Account account,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
@@ -909,6 +928,7 @@ public class AccountManager {
      *         account did not exist, the account is null, or another error
      *         occurs.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public boolean removeAccountExplicitly(Account account) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -935,6 +955,7 @@ public class AccountManager {
      * @param accountType The account type of the auth token to invalidate, must not be null
      * @param authToken The auth token to invalidate, may be null
      */
+    @RequiresPermission(anyOf = {MANAGE_ACCOUNTS, USE_CREDENTIALS})
     public void invalidateAuthToken(final String accountType, final String authToken) {
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         try {
@@ -964,6 +985,7 @@ public class AccountManager {
      * @return The cached auth token for this account and type, or null if
      *     no auth token is cached or the account does not exist.
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public String peekAuthToken(final Account account, final String authTokenType) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
@@ -990,6 +1012,7 @@ public class AccountManager {
      * @param account The account to set a password for
      * @param password The password to set, null to clear the password
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public void setPassword(final Account account, final String password) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -1014,6 +1037,7 @@ public class AccountManager {
      *
      * @param account The account whose password to clear
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public void clearPassword(final Account account) {
         if (account == null) throw new IllegalArgumentException("account is null");
         try {
@@ -1039,6 +1063,7 @@ public class AccountManager {
      * @param key The userdata key to set.  Must not be null
      * @param value The value to set, null to clear this userdata key
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public void setUserData(final Account account, final String key, final String value) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (key == null) throw new IllegalArgumentException("key is null");
@@ -1066,6 +1091,7 @@ public class AccountManager {
      * @param authTokenType The type of the auth token, see {#getAuthToken}
      * @param authToken The auth token to add to the cache
      */
+    @RequiresPermission(AUTHENTICATE_ACCOUNTS)
     public void setAuthToken(Account account, final String authTokenType, final String authToken) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
@@ -1100,6 +1126,7 @@ public class AccountManager {
      * @throws java.io.IOException if the authenticator experienced an I/O problem
      *     creating a new auth token, usually because of network trouble
      */
+    @RequiresPermission(USE_CREDENTIALS)
     public String blockingGetAuthToken(Account account, String authTokenType,
             boolean notifyAuthFailure)
             throws OperationCanceledException, IOException, AuthenticatorException {
@@ -1174,6 +1201,7 @@ public class AccountManager {
      * authenticator-dependent.  The caller should verify the validity of the
      * account before requesting an auth token.
      */
+    @RequiresPermission(USE_CREDENTIALS)
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType, final Bundle options,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
@@ -1264,6 +1292,7 @@ public class AccountManager {
      * boolean, AccountManagerCallback, android.os.Handler)} instead
      */
     @Deprecated
+    @RequiresPermission(USE_CREDENTIALS)
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType,
             final boolean notifyAuthFailure,
@@ -1342,6 +1371,7 @@ public class AccountManager {
      * authenticator-dependent.  The caller should verify the validity of the
      * account before requesting an auth token.
      */
+    @RequiresPermission(USE_CREDENTIALS)
     public AccountManagerFuture<Bundle> getAuthToken(
             final Account account, final String authTokenType, final Bundle options,
             final boolean notifyAuthFailure,
@@ -1411,6 +1441,7 @@ public class AccountManager {
      *      creating a new account, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> addAccount(final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final Bundle addAccountOptions,
@@ -1598,6 +1629,7 @@ public class AccountManager {
      *      verifying the password, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> confirmCredentials(final Account account,
             final Bundle options,
             final Activity activity,
@@ -1674,6 +1706,7 @@ public class AccountManager {
      *      verifying the password, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> updateCredentials(final Account account,
             final String authTokenType,
             final Bundle options, final Activity activity,
@@ -1725,6 +1758,7 @@ public class AccountManager {
      *      updating settings, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> editProperties(final String accountType,
             final Activity activity, final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
@@ -2258,6 +2292,7 @@ public class AccountManager {
      *      updating settings, usually because of network trouble
      * </ul>
      */
+    @RequiresPermission(MANAGE_ACCOUNTS)
     public AccountManagerFuture<Bundle> getAuthTokenByFeatures(
             final String accountType, final String authTokenType, final String[] features,
             final Activity activity, final Bundle addAccountOptions,
@@ -2382,6 +2417,7 @@ public class AccountManager {
      * @throws IllegalArgumentException if listener is null
      * @throws IllegalStateException if listener was already added
      */
+    @RequiresPermission(GET_ACCOUNTS)
     public void addOnAccountsUpdatedListener(final OnAccountsUpdateListener listener,
             Handler handler, boolean updateImmediately) {
         if (listener == null) {
