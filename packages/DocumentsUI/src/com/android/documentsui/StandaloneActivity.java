@@ -185,29 +185,15 @@ public class StandaloneActivity extends BaseActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
+        boolean shown = super.onPrepareOptionsMenu(menu);
 
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem sort = menu.findItem(R.id.menu_sort);
-        final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
-        final MenuItem grid = menu.findItem(R.id.menu_grid);
-        final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
-
-        grid.setVisible(mState.derivedMode != State.MODE_GRID);
-        list.setVisible(mState.derivedMode != State.MODE_LIST);
-
-        mSearchManager.update(root);
-
-        sort.setVisible(cwd != null && !mSearchManager.isSearching());
-
-        // Only sort by size when visible
-        sortSize.setVisible(mState.showSize);
 
         createDir.setVisible(cwd != null
                 && cwd.isCreateSupported()
@@ -217,14 +203,9 @@ public class StandaloneActivity extends BaseActivity {
         fileSize.setVisible(cwd != null);
         advanced.setVisible(cwd != null);
 
-        advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
-                ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
-        fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
-                ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
-
         settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
 
-        return true;
+        return shown;
     }
 
     @Override
