@@ -792,6 +792,9 @@ public abstract class Transition implements Cloneable {
      * views are ignored and only the ids are used).
      */
     boolean isValidTarget(View target) {
+        if (target == null) {
+            return false;
+        }
         int targetId = target.getId();
         if (mTargetIdExcludes != null && mTargetIdExcludes.contains(targetId)) {
             return false;
