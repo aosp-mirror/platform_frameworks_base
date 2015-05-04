@@ -34,6 +34,25 @@
         android:src="@drawable/stat_sys_vpn_ic"
         />
     <FrameLayout
+        android:id="@+id/ethernet_combo"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        >
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:theme="@style/DualToneLightTheme"
+            android:id="@+id/ethernet"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            />
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:theme="@style/DualToneDarkTheme"
+            android:id="@+id/ethernet_dark"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:alpha="0.0"
+            />
+    </FrameLayout>
+    <FrameLayout
         android:id="@+id/wifi_combo"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
