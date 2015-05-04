@@ -73,6 +73,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
     // Subcontrollers.
     @VisibleForTesting
     final WifiSignalController mWifiSignalController;
+
+    @VisibleForTesting
+    final EthernetSignalController mEthernetSignalController;
+
     @VisibleForTesting
     final Map<Integer, MobileSignalController> mMobileSignalControllers =
             new HashMap<Integer, MobileSignalController>();
@@ -153,6 +157,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         });
         mWifiSignalController = new WifiSignalController(mContext, mHasMobileDataFeature,
                 mSignalsChangedCallbacks, mSignalClusters, this);
+
+        mEthernetSignalController = new EthernetSignalController(mContext, mSignalsChangedCallbacks,
+                mSignalClusters, this);
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
@@ -281,6 +288,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 R.string.accessibility_airplane_mode);
         cluster.setNoSims(mHasNoSims);
         mWifiSignalController.notifyListeners();
+        mEthernetSignalController.notifyListeners();
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.notifyListeners();
         }
@@ -291,6 +299,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         cb.onAirplaneModeChanged(mAirplaneMode);
         cb.onNoSimVisibleChanged(mHasNoSims);
         mWifiSignalController.notifyListeners();
+        mEthernetSignalController.notifyListeners();
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.notifyListeners();
         }
@@ -501,6 +510,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mobileSignalController.notifyListeners();
         }
         mWifiSignalController.notifyListeners();
+        mEthernetSignalController.notifyListeners();
     }
 
     /**
@@ -560,6 +570,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
         mWifiSignalController.setInetCondition(
                 mValidatedTransports.get(mWifiSignalController.getTransportType()) ? 1 : 0);
+
+        mEthernetSignalController.setConnected(
+                mConnectedTransports.get(mEthernetSignalController.getTransportType()));
+        mEthernetSignalController.setInetCondition(
+                mValidatedTransports.get(mEthernetSignalController.getTransportType()) ? 1 : 0);
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -585,6 +600,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mobileSignalController.dump(pw);
         }
         mWifiSignalController.dump(pw);
+
+        mEthernetSignalController.dump(pw);
 
         mAccessPoints.dump(pw);
     }
@@ -730,6 +747,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 boolean isTypeIconWide, int subId);
         void setSubs(List<SubscriptionInfo> subs);
         void setNoSims(boolean show);
+
+        void setEthernetIndicators(boolean visible, int icon, String contentDescription);
 
         void setIsAirplaneMode(boolean is, int airplaneIcon, int contentDescription);
     }
