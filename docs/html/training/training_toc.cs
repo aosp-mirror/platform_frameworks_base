@@ -1195,7 +1195,24 @@ include the action bar on devices running Android 2.1 or higher."
               </li>
           </ul>
       </li>
-
+      <li class="nav-section">
+        <div class="nav-section-header">
+            <a href="<?cs var:toroot ?>training/swipe/index.html"
+            description=
+            "How to modify your app's layout to support manual content updates triggered by the
+             swipe-to-refresh gesture."
+            >Supporting Swipe-to-Refresh</a>
+        </div>
+        <ul>
+            <li>
+                <a href="<?cs var:toroot ?>training/swipe/add-swipe-interface.html"
+                >Adding Swipe-to-Refresh To Your App</a></li>
+            <li>
+                <a href="<?cs var:toroot ?>training/swipe/respond-refresh-request.html"
+                >Responding to a Refresh Gesture</a>
+            </li>
+        </ul>
+      </li>
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/search/index.html"
