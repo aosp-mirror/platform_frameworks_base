@@ -1458,8 +1458,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Cela iphethini yokuvula ngaphambi kokususa ukuphina"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Cela iphasiwedi ngaphambi kokususa ukuphina"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Ifakwe ngumlawuli wakho"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Ibuyekezwe ngumqondisi wakho"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Isuswe ngumlawuli wakho"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Ukusiza ukuthuthukisa impilo yebhethri, isilondoloze sebhethri sehlisa ukusebenza kwedivayisi yakho futhi sikhawulele ukudlidliza, amasevisi wendawo, nedatha eningi yangasemuva. I-imeyili, imilayezo, nezinye izinhlelo zokusebenza ezincike ekuvumelaniseni zingahle zingabuyekezwa ngaphandle kokuthi uzivule.\n\nIsilondolozi sebhethri siyavaleka ngokuzenzakalelayo uma idivayisi yakho ishaja."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
