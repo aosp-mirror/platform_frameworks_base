@@ -15,8 +15,8 @@
  */
 
 #include "Linker.h"
-#include "Resolver.h"
 #include "ResourceTable.h"
+#include "ResourceTableResolver.h"
 #include "ResourceValues.h"
 #include "Util.h"
 
@@ -31,7 +31,7 @@ struct LinkerTest : public ::testing::Test {
         mTable = std::make_shared<ResourceTable>();
         mTable->setPackage(u"android");
         mTable->setPackageId(0x01);
-        mLinker = std::make_shared<Linker>(mTable, std::make_shared<Resolver>(
+        mLinker = std::make_shared<Linker>(mTable, std::make_shared<ResourceTableResolver>(
                 mTable, std::make_shared<android::AssetManager>()));
 
         // Create a few attributes for use in the tests.

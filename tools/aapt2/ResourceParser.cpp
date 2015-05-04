@@ -175,23 +175,16 @@ bool ResourceParser::parseStyleParentReference(const StringPiece16& str, Referen
 }
 
 std::unique_ptr<Reference> ResourceParser::tryParseReference(const StringPiece16& str,
-                                                             const StringPiece16& defaultPackage,
                                                              bool* outCreate) {
     ResourceNameRef ref;
     bool privateRef = false;
     if (tryParseReference(str, &ref, outCreate, &privateRef)) {
-        if (ref.package.empty()) {
-            ref.package = defaultPackage;
-        }
         std::unique_ptr<Reference> value = util::make_unique<Reference>(ref);
         value->privateReference = privateRef;
         return value;
     }
 
     if (tryParseAttributeReference(str, &ref)) {
-        if (ref.package.empty()) {
-            ref.package = defaultPackage;
-        }
         *outCreate = false;
         return util::make_unique<Reference>(ref, Reference::Type::kAttribute);
     }
@@ -330,7 +323,7 @@ std::unique_ptr<BinaryPrimitive> ResourceParser::tryParseBool(const StringPiece1
     StringPiece16 trimmedStr(util::trimWhitespace(str));
     uint32_t data = 0;
     if (trimmedStr == u"true" || trimmedStr == u"TRUE") {
-        data = 1;
+        data = 0xffffffffu;
     } else if (trimmedStr != u"false" && trimmedStr != u"FALSE") {
         return {};
     }
@@ -397,7 +390,7 @@ uint32_t ResourceParser::androidTypeToAttributeTypeMask(uint16_t type) {
 }
 
 std::unique_ptr<Item> ResourceParser::parseItemForAttribute(
-        const StringPiece16& value, uint32_t typeMask, const StringPiece16& defaultPackage,
+        const StringPiece16& value, uint32_t typeMask,
         std::function<void(const ResourceName&)> onCreateReference) {
     std::unique_ptr<BinaryPrimitive> nullOrEmpty = tryParseNullOrEmpty(value);
     if (nullOrEmpty) {
@@ -405,7 +398,7 @@ std::unique_ptr<Item> ResourceParser::parseItemForAttribute(
     }
 
     bool create = false;
-    std::unique_ptr<Reference> reference = tryParseReference(value, defaultPackage, &create);
+    std::unique_ptr<Reference> reference = tryParseReference(value, &create);
     if (reference) {
         if (create && onCreateReference) {
             onCreateReference(reference->name);
@@ -457,11 +450,10 @@ std::unique_ptr<Item> ResourceParser::parseItemForAttribute(
  * allows.
  */
 std::unique_ptr<Item> ResourceParser::parseItemForAttribute(
-        const StringPiece16& str, const Attribute& attr, const StringPiece16& defaultPackage,
+        const StringPiece16& str, const Attribute& attr,
         std::function<void(const ResourceName&)> onCreateReference) {
     const uint32_t typeMask = attr.typeMask;
-    std::unique_ptr<Item> value = parseItemForAttribute(str, typeMask, defaultPackage,
-                                                        onCreateReference);
+    std::unique_ptr<Item> value = parseItemForAttribute(str, typeMask, onCreateReference);
     if (value) {
         return value;
     }
@@ -770,14 +762,25 @@ std::unique_ptr<Item> ResourceParser::parseXml(XmlPullParser* parser, uint32_t t
     }
 
     auto onCreateReference = [&](const ResourceName& name) {
+        // name.package can be empty here, as it will assume the package name of the table.
         mTable->addResource(name, {}, mSource.line(beginXmlLine), util::make_unique<Id>());
     };
 
     // Process the raw value.
     std::unique_ptr<Item> processedItem = parseItemForAttribute(rawValue, typeMask,
-                                                                mTable->getPackage(),
                                                                 onCreateReference);
     if (processedItem) {
+        // Fix up the reference.
+        visitFunc<Reference>(*processedItem, [&](Reference& ref) {
+            if (!ref.name.package.empty()) {
+                // The package name was set, so lookup its alias.
+                parser->applyPackageAlias(&ref.name.package, mTable->getPackage());
+            } else {
+                // The package name was left empty, so it assumes the default package
+                // without alias lookup.
+                ref.name.package = mTable->getPackage();
+            }
+        });
         return processedItem;
     }
 
@@ -1093,7 +1096,7 @@ bool ResourceParser::parseEnumOrFlagItem(XmlPullParser* parser, const StringPiec
     return true;
 }
 
-static bool parseXmlAttributeName(StringPiece16 str, ResourceNameRef* outRef) {
+static bool parseXmlAttributeName(StringPiece16 str, ResourceName* outName) {
     str = util::trimWhitespace(str);
     const char16_t* const start = str.data();
     const char16_t* const end = start + str.size();
@@ -1110,12 +1113,12 @@ static bool parseXmlAttributeName(StringPiece16 str, ResourceNameRef* outRef) {
         p++;
     }
 
-    outRef->package = package;
-    outRef->type = ResourceType::kAttr;
+    outName->package = package.toString();
+    outName->type = ResourceType::kAttr;
     if (name.size() == 0) {
-        outRef->entry = str;
+        outName->entry = str.toString();
     } else {
-        outRef->entry = name;
+        outName->entry = name.toString();
     }
     return true;
 }
@@ -1130,8 +1133,8 @@ bool ResourceParser::parseUntypedItem(XmlPullParser* parser, Style& style) {
         return false;
     }
 
-    ResourceNameRef keyRef;
-    if (!parseXmlAttributeName(nameAttrIter->value, &keyRef)) {
+    ResourceName key;
+    if (!parseXmlAttributeName(nameAttrIter->value, &key)) {
         mLogger.error(parser->getLineNumber())
                 << "invalid attribute name '"
                 << nameAttrIter->value
@@ -1140,13 +1143,14 @@ bool ResourceParser::parseUntypedItem(XmlPullParser* parser, Style& style) {
         return false;
     }
 
-    if (keyRef.package.empty()) {
-        keyRef.package = mTable->getPackage();
+    if (!key.package.empty()) {
+        // We have a package name set, so lookup its alias.
+        parser->applyPackageAlias(&key.package, mTable->getPackage());
+    } else {
+        // The package name was omitted, so use the default package name with
+        // no alias lookup.
+        key.package = mTable->getPackage();
     }
-
-    // Create a copy instead of a reference because we
-    // are about to invalidate keyRef when advancing the parser.
-    ResourceName key = keyRef.toResourceName();
 
     std::unique_ptr<Item> value = parseXml(parser, 0, kAllowRawString);
     if (!value) {
@@ -1170,7 +1174,11 @@ bool ResourceParser::parseStyle(XmlPullParser* parser, const ResourceNameRef& re
             return false;
         }
 
-        if (style->parent.name.package.empty()) {
+        if (!style->parent.name.package.empty()) {
+            // Try to interpret the package name as an alias. These take precedence.
+            parser->applyPackageAlias(&style->parent.name.package, mTable->getPackage());
+        } else {
+            // If no package is specified, this can not be an alias and is the local package.
             style->parent.name.package = mTable->getPackage();
         }
     }

@@ -29,6 +29,7 @@
 #include "Png.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
+#include "ResourceTableResolver.h"
 #include "ResourceValues.h"
 #include "SdkConstants.h"
 #include "SourceXmlPullParser.h"
@@ -271,6 +272,7 @@ struct LinkItem {
     ConfigDescription config;
     std::string originalPath;
     ZipFile* apk;
+    std::u16string originalPackage;
 };
 
 template <typename TChar>
@@ -371,6 +373,8 @@ bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>
     XmlFlattener flattener(table, {});
 
     XmlFlattener::Options xmlOptions;
+    xmlOptions.defaultPackage = table->getPackage();
+
     if (options.versionStylesAndLayouts) {
         // We strip attributes that do not belong in this version of the resource.
         // Non-version qualified resources have an implicit version 1 requirement.
@@ -432,7 +436,7 @@ bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>
     return true;
 }
 
-bool linkXml(const AaptOptions& options, const std::shared_ptr<Resolver>& resolver,
+bool linkXml(const AaptOptions& options, const std::shared_ptr<IResolver>& resolver,
              const LinkItem& item, const void* data, size_t dataLen, ZipFile* outApk) {
     std::shared_ptr<android::ResXMLTree> tree = std::make_shared<android::ResXMLTree>();
     if (tree->setTo(data, dataLen, false) != android::NO_ERROR) {
@@ -443,7 +447,10 @@ bool linkXml(const AaptOptions& options, const std::shared_ptr<Resolver>& resolv
 
     BigBuffer outBuffer(1024);
     XmlFlattener flattener({}, resolver);
-    if (!flattener.flatten(item.source, xmlParser, &outBuffer, {})) {
+
+    XmlFlattener::Options xmlOptions;
+    xmlOptions.defaultPackage = item.originalPackage;
+    if (!flattener.flatten(item.source, xmlParser, &outBuffer, xmlOptions)) {
         return false;
     }
 
@@ -490,8 +497,8 @@ bool copyFile(const AaptOptions& options, const CompileItem& item, ZipFile* outA
     return true;
 }
 
-bool compileManifest(const AaptOptions& options, const std::shared_ptr<Resolver>& resolver,
-                     ZipFile* outApk) {
+bool compileManifest(const AaptOptions& options,
+                     const std::shared_ptr<ResourceTableResolver>& resolver, ZipFile* outApk) {
     if (options.verbose) {
         Logger::note(options.manifest) << "compiling AndroidManifest.xml." << std::endl;
     }
@@ -506,7 +513,9 @@ bool compileManifest(const AaptOptions& options, const std::shared_ptr<Resolver>
     std::shared_ptr<XmlPullParser> xmlParser = std::make_shared<SourceXmlPullParser>(in);
     XmlFlattener flattener({}, resolver);
 
-    if (!flattener.flatten(options.manifest, xmlParser, &outBuffer, {})) {
+    XmlFlattener::Options xmlOptions;
+    xmlOptions.defaultPackage = options.appInfo.package;
+    if (!flattener.flatten(options.manifest, xmlParser, &outBuffer, xmlOptions)) {
         return false;
     }
 
@@ -640,8 +649,12 @@ static void addApkFilesToLinkQueue(const std::u16string& package, const Source& 
             for (auto& value : entry->values) {
                 visitFunc<FileReference>(*value.value, [&](FileReference& ref) {
                     std::string pathUtf8 = util::utf16ToUtf8(*ref.path);
+                    Source newSource = source;
+                    newSource.path += "/";
+                    newSource.path += pathUtf8;
                     outLinkQueue->push(LinkItem{
-                            source, name, value.config, pathUtf8, apk.get() });
+                            newSource, name, value.config, pathUtf8, apk.get(),
+                            table->getPackage() });
                     // Now rewrite the file path.
                     if (mangle) {
                         ref.path = table->getValueStringPool().makeRef(util::utf8ToUtf16(
@@ -657,9 +670,20 @@ static void addApkFilesToLinkQueue(const std::u16string& package, const Source& 
 static constexpr int kOpenFlags = ZipFile::kOpenCreate | ZipFile::kOpenTruncate |
         ZipFile::kOpenReadWrite;
 
+struct DeleteMalloc {
+    void operator()(void* ptr) {
+        free(ptr);
+    }
+};
+
+struct StaticLibraryData {
+    Source source;
+    std::unique_ptr<ZipFile> apk;
+};
+
 bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outTable,
-          const std::shared_ptr<Resolver>& resolver) {
-    std::map<std::shared_ptr<ResourceTable>, std::unique_ptr<ZipFile>> apkFiles;
+          const std::shared_ptr<ResourceTableResolver>& resolver) {
+    std::map<std::shared_ptr<ResourceTable>, StaticLibraryData> apkFiles;
     std::unordered_set<std::u16string> linkedPackages;
 
     // Populate the linkedPackages with our own.
@@ -681,19 +705,18 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
             return false;
         }
 
-        void* uncompressedData = zipFile->uncompress(entry);
+        std::unique_ptr<void, DeleteMalloc> uncompressedData = std::unique_ptr<void, DeleteMalloc>(
+                zipFile->uncompress(entry));
         assert(uncompressedData);
 
-        BinaryResourceParser parser(table, resolver, source, uncompressedData,
+        BinaryResourceParser parser(table, resolver, source, uncompressedData.get(),
                                     entry->getUncompressedLen());
         if (!parser.parse()) {
-            free(uncompressedData);
             return false;
         }
-        free(uncompressedData);
 
         // Keep track of where this table came from.
-        apkFiles[table] = std::move(zipFile);
+        apkFiles[table] = StaticLibraryData{ source, std::move(zipFile) };
 
         // Add the package to the set of linked packages.
         linkedPackages.insert(table->getPackage());
@@ -704,7 +727,8 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
         const std::shared_ptr<ResourceTable>& inTable = p.first;
 
         // Collect all FileReferences and add them to the queue for processing.
-        addApkFilesToLinkQueue(options.appInfo.package, Source{}, inTable, p.second, &linkQueue);
+        addApkFilesToLinkQueue(options.appInfo.package, p.second.source, inTable, p.second.apk,
+                               &linkQueue);
 
         // Merge the tables.
         if (!outTable->merge(std::move(*inTable))) {
@@ -746,6 +770,7 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
     for (; !linkQueue.empty(); linkQueue.pop()) {
         const LinkItem& item = linkQueue.front();
 
+        assert(!item.originalPackage.empty());
         ZipEntry* entry = item.apk->getEntryByName(item.originalPath.data());
         if (!entry) {
             Logger::error(item.source) << "failed to find '" << item.originalPath << "'."
@@ -811,6 +836,20 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
         }
     }
 
+    outTable->getValueStringPool().prune();
+    outTable->getValueStringPool().sort(
+            [](const StringPool::Entry& a, const StringPool::Entry& b) -> bool {
+                if (a.context.priority < b.context.priority) {
+                    return true;
+                }
+
+                if (a.context.priority > b.context.priority) {
+                    return false;
+                }
+                return a.value < b.value;
+            });
+
+
     // Flatten the resource table.
     TableFlattener::Options flattenerOptions;
     flattenerOptions.useExtendedChunks = false;
@@ -823,7 +862,7 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
 }
 
 bool compile(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
-             const std::shared_ptr<Resolver>& resolver) {
+             const std::shared_ptr<IResolver>& resolver) {
     std::queue<CompileItem> compileQueue;
     bool error = false;
 
@@ -1073,7 +1112,8 @@ int main(int argc, char** argv) {
     }
 
     // Make the resolver that will cache IDs for us.
-    std::shared_ptr<Resolver> resolver = std::make_shared<Resolver>(table, libraries);
+    std::shared_ptr<ResourceTableResolver> resolver = std::make_shared<ResourceTableResolver>(
+            table, libraries);
 
     if (options.phase == AaptOptions::Phase::Compile) {
         if (!compile(options, table, resolver)) {

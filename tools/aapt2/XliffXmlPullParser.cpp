@@ -85,6 +85,11 @@ const std::u16string& XliffXmlPullParser::getNamespaceUri() const {
     return mParser->getNamespaceUri();
 }
 
+bool XliffXmlPullParser::applyPackageAlias(std::u16string* package,
+                                           const std::u16string& defaultPackage) const {
+    return mParser->applyPackageAlias(package, defaultPackage);
+}
+
 const std::u16string& XliffXmlPullParser::getElementNamespace() const {
     return mParser->getElementNamespace();
 }

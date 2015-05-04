@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:lib="http://schemas.android.com/apk/res/android.appcompat">
     <style name="App" parent="android.appcompat:Platform.AppCompat">
         <item name="android:background">@color/primary</item>
         <item name="android:colorPrimary">@color/primary</item>
@@ -9,6 +9,7 @@
     <attr name="custom" format="reference" />
     <style name="Pop">
         <item name="custom">@drawable/image</item>
+        <item name="android:focusable">@lib:bool/allow</item>
     </style>
     <string name="yo">@string/wow</string>
 

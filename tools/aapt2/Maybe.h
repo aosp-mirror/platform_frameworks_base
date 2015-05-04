@@ -34,53 +34,67 @@ public:
     /**
      * Construct Nothing.
      */
-    inline Maybe();
+    Maybe();
 
-    inline ~Maybe();
+    ~Maybe();
 
-    template <typename U>
-    inline Maybe(const Maybe<U>& rhs);
-
-    template <typename U>
-    inline Maybe(Maybe<U>&& rhs);
+    Maybe(const Maybe& rhs);
 
     template <typename U>
-    inline Maybe& operator=(const Maybe<U>& rhs);
+    Maybe(const Maybe<U>& rhs);
+
+    Maybe(Maybe&& rhs);
 
     template <typename U>
-    inline Maybe& operator=(Maybe<U>&& rhs);
+    Maybe(Maybe<U>&& rhs);
+
+    Maybe& operator=(const Maybe& rhs);
+
+    template <typename U>
+    Maybe& operator=(const Maybe<U>& rhs);
+
+    Maybe& operator=(Maybe&& rhs);
+
+    template <typename U>
+    Maybe& operator=(Maybe<U>&& rhs);
 
     /**
      * Construct a Maybe holding a value.
      */
-    inline Maybe(const T& value);
+    Maybe(const T& value);
 
     /**
      * Construct a Maybe holding a value.
      */
-    inline Maybe(T&& value);
+    Maybe(T&& value);
 
     /**
      * True if this holds a value, false if
      * it holds Nothing.
      */
-    inline operator bool() const;
+    operator bool() const;
 
     /**
      * Gets the value if one exists, or else
      * panics.
      */
-    inline T& value();
+    T& value();
 
     /**
      * Gets the value if one exists, or else
      * panics.
      */
-    inline const T& value() const;
+    const T& value() const;
 
 private:
     template <typename U>
     friend class Maybe;
+
+    template <typename U>
+    Maybe& copy(const Maybe<U>& rhs);
+
+    template <typename U>
+    Maybe& move(Maybe<U>&& rhs);
 
     void destroy();
 
@@ -102,11 +116,31 @@ Maybe<T>::~Maybe() {
 }
 
 template <typename T>
+Maybe<T>::Maybe(const Maybe& rhs)
+: mNothing(rhs.mNothing) {
+    if (!rhs.mNothing) {
+        new (&mStorage) T(reinterpret_cast<const T&>(rhs.mStorage));
+    }
+}
+
+template <typename T>
 template <typename U>
 Maybe<T>::Maybe(const Maybe<U>& rhs)
 : mNothing(rhs.mNothing) {
     if (!rhs.mNothing) {
         new (&mStorage) T(reinterpret_cast<const U&>(rhs.mStorage));
+    }
+}
+
+template <typename T>
+Maybe<T>::Maybe(Maybe&& rhs)
+: mNothing(rhs.mNothing) {
+    if (!rhs.mNothing) {
+        rhs.mNothing = true;
+
+        // Move the value from rhs.
+        new (&mStorage) T(std::move(reinterpret_cast<T&>(rhs.mStorage)));
+        rhs.destroy();
     }
 }
 
@@ -119,16 +153,25 @@ Maybe<T>::Maybe(Maybe<U>&& rhs)
 
         // Move the value from rhs.
         new (&mStorage) T(std::move(reinterpret_cast<U&>(rhs.mStorage)));
-
-        // Since the value in rhs is now Nothing,
-        // run the destructor for the value.
         rhs.destroy();
     }
 }
 
 template <typename T>
+inline Maybe<T>& Maybe<T>::operator=(const Maybe& rhs) {
+    // Delegate to the actual assignment.
+    return copy(rhs);
+}
+
+template <typename T>
 template <typename U>
-Maybe<T>& Maybe<T>::operator=(const Maybe<U>& rhs) {
+inline Maybe<T>& Maybe<T>::operator=(const Maybe<U>& rhs) {
+    return copy(rhs);
+}
+
+template <typename T>
+template <typename U>
+Maybe<T>& Maybe<T>::copy(const Maybe<U>& rhs) {
     if (mNothing && rhs.mNothing) {
         // Both are nothing, nothing to do.
         return *this;
@@ -150,8 +193,20 @@ Maybe<T>& Maybe<T>::operator=(const Maybe<U>& rhs) {
 }
 
 template <typename T>
+inline Maybe<T>& Maybe<T>::operator=(Maybe&& rhs) {
+    // Delegate to the actual assignment.
+    return move(std::forward<Maybe<T>>(rhs));
+}
+
+template <typename T>
 template <typename U>
-Maybe<T>& Maybe<T>::operator=(Maybe<U>&& rhs) {
+inline Maybe<T>& Maybe<T>::operator=(Maybe<U>&& rhs) {
+    return move(std::forward<Maybe<U>>(rhs));
+}
+
+template <typename T>
+template <typename U>
+Maybe<T>& Maybe<T>::move(Maybe<U>&& rhs) {
     if (mNothing && rhs.mNothing) {
         // Both are nothing, nothing to do.
         return *this;
@@ -162,14 +217,15 @@ Maybe<T>& Maybe<T>::operator=(Maybe<U>&& rhs) {
         rhs.destroy();
     } else if (mNothing) {
         // We are nothing but rhs is something.
-        mNothing = rhs.mNothing;
+        mNothing = false;
+        rhs.mNothing = true;
 
         // Move the value from rhs.
         new (&mStorage) T(std::move(reinterpret_cast<U&>(rhs.mStorage)));
         rhs.destroy();
     } else {
         // We are something but rhs is nothing, so destroy our value.
-        mNothing = rhs.mNothing;
+        mNothing = true;
         destroy();
     }
     return *this;
