@@ -260,7 +260,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (DEBUG) Log.d(TAG, "reportFailedPatternAttempt: #" + failedAttempts);
 
         SecurityMode mode = mSecurityModel.getSecurityMode();
-        final boolean usingPattern = mode == KeyguardSecurityModel.SecurityMode.Pattern;
         final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
         final DevicePolicyManager dpm = mLockPatternUtils.getDevicePolicyManager();
         final int failedAttemptsBeforeWipe =
