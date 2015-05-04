@@ -2095,6 +2095,7 @@ public class Notification implements Parcelable
 
                 try {
                     Constructor<? extends Style> constructor = styleClass.getConstructor();
+                    constructor.setAccessible(true);
                     style = constructor.newInstance();
                     style.restoreFromExtras(extras);
                 } catch (Throwable t) {
