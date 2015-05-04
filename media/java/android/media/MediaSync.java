@@ -312,13 +312,13 @@ final public class MediaSync {
      * @throws IllegalArgumentException if the surface has been released, is invalid,
      *     or can not be connected.
      * @throws IllegalStateException if setting the surface is not supported, e.g.
-     *     not in the Initialized state, or another surface has already been configured.
+     *     not in the Initialized state, or another surface has already been set.
      */
     public void setSurface(@Nullable Surface surface) {
-        native_configureSurface(surface);
+        native_setSurface(surface);
     }
 
-    private native final void native_configureSurface(@Nullable Surface surface);
+    private native final void native_setSurface(@Nullable Surface surface);
 
     /**
      * Sets the audio track for MediaSync.
@@ -328,21 +328,17 @@ final public class MediaSync {
      * @param audioTrack Specify an AudioTrack through which to render the audio data.
      * @throws IllegalArgumentException if the audioTrack has been released, or is invalid.
      * @throws IllegalStateException if setting the audio track is not supported, e.g.
-     *     not in the Initialized state, or another audio track has already been configured.
+     *     not in the Initialized state, or another audio track has already been set.
      */
     public void setAudioTrack(@Nullable AudioTrack audioTrack) {
-        // AudioTrack has sanity check for configured sample rate.
-        int nativeSampleRateInHz = (audioTrack == null ? 0 : audioTrack.getSampleRate());
-
-        native_configureAudioTrack(audioTrack, nativeSampleRateInHz);
+        native_setAudioTrack(audioTrack);
         mAudioTrack = audioTrack;
         if (audioTrack != null && mAudioThread == null) {
             createAudioThread();
         }
     }
 
-    private native final void native_configureAudioTrack(
-            @Nullable AudioTrack audioTrack, int nativeSampleRateInHz);
+    private native final void native_setAudioTrack(@Nullable AudioTrack audioTrack);
 
     /**
      * Requests a Surface to use as the input. This may only be called after
@@ -350,7 +346,7 @@ final public class MediaSync {
      * <p>
      * The application is responsible for calling release() on the Surface when
      * done.
-     * @throws IllegalStateException if not configured, or another input surface has
+     * @throws IllegalStateException if not set, or another input surface has
      *     already been created.
      */
     @NonNull
@@ -574,7 +570,7 @@ final public class MediaSync {
      * @param sizeInBytes number of bytes to queue.
      * @param presentationTimeUs the presentation timestamp in microseconds for the first frame
      *     in the buffer.
-     * @throws IllegalStateException if audio track is not configured or internal configureation
+     * @throws IllegalStateException if audio track is not set or internal configureation
      *     has not been done correctly.
      */
     public void queueAudio(
@@ -582,7 +578,7 @@ final public class MediaSync {
             long presentationTimeUs) {
         if (mAudioTrack == null || mAudioThread == null) {
             throw new IllegalStateException(
-                    "AudioTrack is NOT configured or audio thread is not created");
+                    "AudioTrack is NOT set or audio thread is not created");
         }
 
         synchronized(mAudioLock) {
