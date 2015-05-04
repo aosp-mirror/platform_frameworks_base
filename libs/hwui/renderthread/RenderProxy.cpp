@@ -135,7 +135,7 @@ void RenderProxy::setName(const char* name) {
     SETUP_TASK(setName);
     args->context = mContext;
     args->name = name;
-    post(task);
+    postAndWait(task);
 }
 
 CREATE_BRIDGE2(initialize, CanvasContext* context, ANativeWindow* window) {
