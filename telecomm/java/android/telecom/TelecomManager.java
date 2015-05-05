@@ -1143,8 +1143,12 @@ public class TelecomManager {
     public void placeCall(Uri address, Bundle extras) {
         ITelecomService service = getTelecomService();
         if (service != null) {
+            if (address == null) {
+                Log.w(TAG, "Cannot place call to empty address.");
+            }
             try {
-                service.placeCall(address, extras, mContext.getOpPackageName());
+                service.placeCall(address, extras == null ? new Bundle() : extras,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#placeCall", e);
             }
