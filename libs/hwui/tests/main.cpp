@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-
 #include <cutils/log.h>
 #include <gui/Surface.h>
 #include <ui/PixelFormat.h>
@@ -27,6 +25,9 @@
 #include <renderthread/RenderTask.h>
 
 #include "TestContext.h"
+
+#include <stdio.h>
+#include <unistd.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -93,16 +94,27 @@ public:
         animation.createContent(width, height, renderer);
         endRecording(renderer, rootNode);
 
-        for (int i = 0; i < animation.getFrameCount(); i++) {
-#if !HWUI_NULL_GPU
+        // Do a few cold runs then reset the stats so that the caches are all hot
+        for (int i = 0; i < 3; i++) {
             testContext.waitForVsync();
-#endif
+            proxy->syncAndDrawFrame();
+        }
+        proxy->resetProfileInfo();
 
+        for (int i = 0; i < animation.getFrameCount(); i++) {
+            testContext.waitForVsync();
+
+            // workaround b/20853441
+            proxy->fence();
             ATRACE_NAME("UI-Draw Frame");
+            nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+            UiFrameInfoBuilder(proxy->frameInfo())
+                    .setVsync(vsync, vsync);
             animation.doFrame(i);
             proxy->syncAndDrawFrame();
         }
 
+        proxy->dumpProfileInfo(STDOUT_FILENO, 0);
         rootNode->decStrong(nullptr);
     }
 };
