@@ -2148,6 +2148,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             primeDomainVerificationsLPw(false);
+            checkDefaultBrowser();
 
             // All the changes are done during package scanning.
             mSettings.updateInternalDatabaseVersion();
@@ -2315,6 +2316,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         Slog.d(TAG, "End priming domain verifications");
+    }
+
+    private void checkDefaultBrowser() {
+        final int myUserId = UserHandle.myUserId();
+        final String packageName = getDefaultBrowserPackageName(myUserId);
+        PackageInfo info = getPackageInfo(packageName, 0, myUserId);
+        if (info == null) {
+            Slog.w(TAG, "Clearing default Browser as its package is no more installed: " +
+                    packageName);
+            setDefaultBrowserPackageName(null, myUserId);
+        }
     }
 
     @Override
