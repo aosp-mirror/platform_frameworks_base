@@ -339,8 +339,7 @@ public final class Settings {
             "android.settings.WIFI_DISPLAY_SETTINGS";
 
     /**
-     * Activity Action: Show settings to allow configuration of
-     * {@link android.media.routing.MediaRouteService media route providers}.
+     * Activity Action: Show settings to allow configuration of cast endpoints.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
