@@ -323,8 +323,16 @@ struct AaptOptions {
         Compile,
     };
 
+    enum class PackageType {
+        StandardApp,
+        StaticLibrary,
+    };
+
     // The phase to process.
     Phase phase;
+
+    // The type of package to produce.
+    PackageType packageType = PackageType::StandardApp;
 
     // Details about the app.
     AppInfo appInfo;
@@ -800,7 +808,11 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
 
     // Generate the Java class file.
     if (options.generateJavaClass) {
-        JavaClassGenerator generator(outTable, {});
+        JavaClassGenerator::Options javaOptions;
+        if (options.packageType == AaptOptions::PackageType::StaticLibrary) {
+            javaOptions.useFinal = false;
+        }
+        JavaClassGenerator generator(outTable, javaOptions);
 
         for (const std::u16string& package : linkedPackages) {
             Source outPath = options.generateJavaClass.value();
@@ -852,7 +864,10 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
 
     // Flatten the resource table.
     TableFlattener::Options flattenerOptions;
-    flattenerOptions.useExtendedChunks = false;
+    if (options.packageType == AaptOptions::PackageType::StaticLibrary) {
+        flattenerOptions.useExtendedChunks = true;
+    }
+
     if (!writeResourceTable(options, outTable, flattenerOptions, &outApk)) {
         return false;
     }
@@ -999,6 +1014,7 @@ static AaptOptions prepareArgs(int argc, char** argv) {
         printCommandsAndDie();
     }
 
+    bool isStaticLib = false;
     if (options.phase == AaptOptions::Phase::Compile) {
         flag::requiredFlag("--package", "Android package name",
                 [&options](const StringPiece& arg) {
@@ -1026,6 +1042,8 @@ static AaptOptions prepareArgs(int argc, char** argv) {
                 [&options](const StringPiece& arg) {
                     options.generateJavaClass = Source{ arg.toString() };
                 });
+        flag::optionalSwitch("--static-lib", "generate a static Android library", true,
+                             &isStaticLib);
     }
 
     // Common flags for all steps.
@@ -1047,6 +1065,10 @@ static AaptOptions prepareArgs(int argc, char** argv) {
 
     if (help) {
         flag::usageAndDie(fullCommand);
+    }
+
+    if (isStaticLib) {
+        options.packageType = AaptOptions::PackageType::StaticLibrary;
     }
 
     // Copy all the remaining arguments.
