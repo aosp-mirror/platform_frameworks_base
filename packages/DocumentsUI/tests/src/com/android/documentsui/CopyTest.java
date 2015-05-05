@@ -16,23 +16,21 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.model.DocumentInfo.getCursorString;
-
-import android.app.NotificationManager;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.ProviderInfo;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.Document;
 import android.test.MoreAsserts;
 import android.test.ServiceTestCase;
+import android.test.mock.MockContentResolver;
 import android.util.Log;
 
 import com.android.documentsui.model.DocumentInfo;
@@ -43,40 +41,93 @@ import com.google.common.collect.Lists;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
-import org.mockito.Mockito;
-
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class CopyTest extends ServiceTestCase<CopyService> {
+
+    /**
+     * A test resolver that enables this test suite to listen for notifications that mark when copy
+     * operations are done.
+     */
+    class TestContentResolver extends MockContentResolver {
+        private CountDownLatch mReadySignal;
+        private CountDownLatch mNotificationSignal;
+
+        public TestContentResolver() {
+            mReadySignal = new CountDownLatch(1);
+        }
+
+        /**
+         * Wait for the given number of files to be copied to destination. Times out after 1 sec.
+         */
+        public void waitForChanges(int count) throws Exception {
+            // Wait for no more than 1 second by default.
+            waitForChanges(count, 1000);
+        }
+
+        /**
+         * Wait for files to be copied to destination.
+         *
+         * @param count Number of files to wait for.
+         * @param timeOut Timeout in ms. TimeoutException will be thrown if this function times out.
+         */
+        public void waitForChanges(int count, int timeOut) throws Exception {
+            mNotificationSignal = new CountDownLatch(count);
+            // Signal that the test is now waiting for files.
+            mReadySignal.countDown();
+            if (!mNotificationSignal.await(timeOut, TimeUnit.MILLISECONDS)) {
+                throw new TimeoutException("Timed out waiting for files to be copied.");
+            }
+        }
+
+        @Override
+        public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
+            // Wait until the test is ready to receive file notifications.
+            try {
+                mReadySignal.await();
+            } catch (InterruptedException e) {
+                Log.d(TAG, "Interrupted while waiting for file copy readiness");
+                Thread.currentThread().interrupt();
+            }
+            if (DocumentsContract.isDocumentUri(mContext, uri)) {
+                Log.d(TAG, "Notification: " + uri);
+                // Watch for document URI change notifications - this signifies the end of a copy.
+                mNotificationSignal.countDown();
+            }
+        }
+    };
 
     public CopyTest() {
         super(CopyService.class);
     }
 
-    private static String TAG = "CopyTest";
-    // This must match the authority for the StubProvider.
     private static String AUTHORITY = "com.android.documentsui.stubprovider";
+    private static String DST = "sd1";
+    private static String SRC = "sd0";
+    private static String TAG = "CopyTest";
     private List<RootInfo> mRoots;
     private Context mContext;
-    private ContentResolver mResolver;
+    private TestContentResolver mResolver;
     private ContentProviderClient mClient;
-    private NotificationManager mNotificationManager;
+    private StubProvider mStorage;
+    private Context mSystemContext;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        setupTestContext();
 
-        mResolver = mContext.getContentResolver();
+        setupTestContext();
         mClient = mResolver.acquireContentProviderClient(AUTHORITY);
 
         // Reset the stub provider's storage.
-        mClient.call("clear", "", null);
+        mStorage.clearCacheAndBuildRoots();
 
         mRoots = Lists.newArrayList();
         Uri queryUri = DocumentsContract.buildRootsUri(AUTHORITY);
@@ -84,9 +135,7 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         try {
             cursor = mClient.query(queryUri, null, null, null, null);
             while (cursor.moveToNext()) {
-                final RootInfo root = RootInfo.fromRootsCursor(AUTHORITY, cursor);
-                final String id = root.rootId;
-                mRoots.add(root);
+                mRoots.add(RootInfo.fromRootsCursor(AUTHORITY, cursor));
             }
         } finally {
             IoUtils.closeQuietly(cursor);
@@ -100,66 +149,92 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         super.tearDown();
     }
 
-    public List<Uri> setupTestFiles() throws Exception {
-        Uri rootUri = DocumentsContract.buildDocumentUri(AUTHORITY, mRoots.get(0).documentId);
-        List<Uri> testFiles = Lists.newArrayList(
-                DocumentsContract.createDocument(mClient, rootUri, "text/plain", "test0.txt"),
-                DocumentsContract.createDocument(mClient, rootUri, "text/plain", "test1.txt"),
-                DocumentsContract.createDocument(mClient, rootUri, "text/plain", "test2.txt")
-        );
-        String testContent[] = {
-                "The five boxing wizards jump quickly",
-                "The quick brown fox jumps over the lazy dog",
-                "Jackdaws love my big sphinx of quartz"
-        };
-        for (int i = 0; i < testFiles.size(); ++i) {
-            ParcelFileDescriptor pfd = null;
-            OutputStream out = null;
-            try {
-                pfd = mClient.openFile(testFiles.get(i), "w");
-                out = new ParcelFileDescriptor.AutoCloseOutputStream(pfd);
-                out.write(testContent[i].getBytes());
-            } finally {
-                IoUtils.closeQuietly(out);
-            }
-        }
-        return testFiles;
-    }
-
     /**
      * Test copying a single file.
      */
     public void testCopyFile() throws Exception {
-        Uri testFile = setupTestFiles().get(0);
+        String srcPath = "/test0.txt";
+        Uri testFile = mStorage.createFile(SRC, srcPath, "text/plain",
+                "The five boxing wizards jump quickly".getBytes());
 
-        // Just copy one file.
+        assertDstFileCountEquals(0);
+
         copyToDestination(Lists.newArrayList(testFile));
 
-        // A call to NotificationManager.cancel marks the end of the copy operation.
-        Mockito.verify(mNotificationManager, Mockito.timeout(1000)).cancel(Mockito.anyString(),
-                Mockito.anyInt());
+        // 2 operations: file creation, then writing data.
+        mResolver.waitForChanges(2);
 
         // Verify that one file was copied; check file contents.
         assertDstFileCountEquals(1);
-        assertCopied(testFile);
+        assertCopied(srcPath);
     }
 
     /**
      * Test copying multiple files.
      */
     public void testCopyMultipleFiles() throws Exception {
-        List<Uri> testFiles = setupTestFiles();
+        String testContent[] = {
+                "The five boxing wizards jump quickly",
+                "The quick brown fox jumps over the lazy dog",
+                "Jackdaws love my big sphinx of quartz"
+        };
+        String srcPaths[] = {
+                "/test0.txt",
+                "/test1.txt",
+                "/test2.txt"
+        };
+        List<Uri> testFiles = Lists.newArrayList(
+                mStorage.createFile(SRC, srcPaths[0], "text/plain", testContent[0].getBytes()),
+                mStorage.createFile(SRC, srcPaths[1], "text/plain", testContent[1].getBytes()),
+                mStorage.createFile(SRC, srcPaths[2], "text/plain", testContent[2].getBytes()));
+
+        assertDstFileCountEquals(0);
+
         // Copy all the test files.
         copyToDestination(testFiles);
 
-        // A call to NotificationManager.cancel marks the end of the copy operation.
-        Mockito.verify(mNotificationManager, Mockito.timeout(1000)).cancel(Mockito.anyString(),
-                Mockito.anyInt());
+        // 3 file creations, 3 file writes.
+        mResolver.waitForChanges(6);
 
         assertDstFileCountEquals(3);
-        for (Uri testFile : testFiles) {
-            assertCopied(testFile);
+        for (String path : srcPaths) {
+            assertCopied(path);
         }
+    }
+
+    public void testCopyEmptyDir() throws Exception {
+        String srcPath = "/emptyDir";
+        Uri testDir = mStorage.createFile(SRC, srcPath, DocumentsContract.Document.MIME_TYPE_DIR,
+                null);
+
+        assertDstFileCountEquals(0);
+
+        copyToDestination(Lists.newArrayList(testDir));
+
+        // Just 1 operation: Directory creation.
+        mResolver.waitForChanges(1);
+
+        assertDstFileCountEquals(1);
+
+        File dst = mStorage.getFile(DST, srcPath);
+        assertTrue(dst.isDirectory());
+    }
+
+    public void testReadErrors() throws Exception {
+        String srcPath = "/test0.txt";
+        Uri testFile = mStorage.createFile(SRC, srcPath, "text/plain",
+                "The five boxing wizards jump quickly".getBytes());
+
+        assertDstFileCountEquals(0);
+
+        mStorage.simulateReadErrors(true);
+
+        copyToDestination(Lists.newArrayList(testFile));
+
+        // 3 operations: file creation, writing, then deletion (due to failed copy).
+        mResolver.waitForChanges(3);
+
+        assertDstFileCountEquals(0);
     }
 
     /**
@@ -200,82 +275,55 @@ public class CopyTest extends ServiceTestCase<CopyService> {
         assertEquals("Incorrect file count after copy", expected, count);
     }
 
-    /**
-     * Verifies that the file pointed to by the given URI was correctly copied to the destination.
-     */
-    private void assertCopied(Uri src) throws Exception {
-        Cursor cursor = null;
-        String srcName = null;
+    private void assertCopied(String path) throws Exception {
+        File srcFile = mStorage.getFile(SRC, path);
+        File dstFile = mStorage.getFile(DST, path);
+        assertNotNull(dstFile);
+
+        FileInputStream src = null;
+        FileInputStream dst = null;
         try {
-            cursor = mClient.query(src, null, null, null, null);
-            if (cursor.moveToFirst()) {
-                srcName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-            }
+            src = new FileInputStream(srcFile);
+            dst = new FileInputStream(dstFile);
+            byte[] srcbuf = Streams.readFully(src);
+            byte[] dstbuf = Streams.readFully(dst);
+
+            MoreAsserts.assertEquals(srcbuf, dstbuf);
         } finally {
-            IoUtils.closeQuietly(cursor);
+            IoUtils.closeQuietly(src);
+            IoUtils.closeQuietly(dst);
         }
-        Uri dst = getDstFileUri(srcName);
-
-        InputStream in0 = null;
-        InputStream in1 = null;
-        try {
-            in0 = new ParcelFileDescriptor.AutoCloseInputStream(mClient.openFile(src, "r"));
-            in1 = new ParcelFileDescriptor.AutoCloseInputStream(mClient.openFile(dst, "r"));
-
-            byte[] buffer0 = Streams.readFully(in0);
-            byte[] buffer1 = Streams.readFully(in1);
-
-            MoreAsserts.assertEquals(buffer0, buffer1);
-        } finally {
-            IoUtils.closeQuietly(in0);
-            IoUtils.closeQuietly(in1);
-        }
-    }
-
-    /**
-     * Generates a file URI from a given filename. This assumes the file already exists in the
-     * destination root.
-     */
-    private Uri getDstFileUri(String filename) throws RemoteException {
-        final Uri dstFileQuery = DocumentsContract.buildChildDocumentsUri(AUTHORITY,
-                mRoots.get(1).documentId);
-        Cursor cursor = null;
-        try {
-            // StubProvider doesn't seem to support query strings; filter the results manually.
-            cursor = mClient.query(dstFileQuery, null, null, null, null);
-            while (cursor.moveToNext()) {
-                if (filename.equals(getCursorString(cursor, Document.COLUMN_DISPLAY_NAME))) {
-                    return DocumentsContract.buildDocumentUri(AUTHORITY,
-                            getCursorString(cursor, Document.COLUMN_DOCUMENT_ID));
-                }
-            }
-        } finally {
-            IoUtils.closeQuietly(cursor);
-        }
-        return null;
     }
 
     /**
      * Sets up a ContextWrapper that substitutes a stub NotificationManager. This allows the test to
      * listen for notification events, to gauge copy progress.
+     *
+     * @throws FileNotFoundException
      */
-    private void setupTestContext() {
-        mContext = getSystemContext();
-        System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
+    private void setupTestContext() throws FileNotFoundException {
+        mSystemContext = getSystemContext();
 
-        mNotificationManager = Mockito.spy((NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE));
-
-        // Insert a stub NotificationManager that enables us to listen for when copying is complete.
-        setContext(new ContextWrapper(mContext) {
+        // Set up the context with the test content resolver.
+        mResolver = new TestContentResolver();
+        mContext = new ContextWrapper(mSystemContext) {
             @Override
-            public Object getSystemService(String name) {
-                if (Context.NOTIFICATION_SERVICE.equals(name)) {
-                    return mNotificationManager;
-                } else {
-                    return super.getSystemService(name);
-                }
+            public ContentResolver getContentResolver() {
+                return mResolver;
             }
-        });
+        };
+        setContext(mContext);
+
+        // Create a local stub provider and add it to the content resolver.
+        ProviderInfo info = new ProviderInfo();
+        info.authority = AUTHORITY;
+        info.exported = true;
+        info.grantUriPermissions = true;
+        info.readPermission = android.Manifest.permission.MANAGE_DOCUMENTS;
+        info.writePermission = android.Manifest.permission.MANAGE_DOCUMENTS;
+
+        mStorage = new StubProvider();
+        mStorage.attachInfo(mContext, info);
+        mResolver.addProvider(AUTHORITY, mStorage);
     }
 }
