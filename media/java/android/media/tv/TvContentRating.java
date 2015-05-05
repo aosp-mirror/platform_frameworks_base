@@ -783,10 +783,15 @@ public final class TvContentRating {
     private final int mHashCode;
 
     /**
-     * Rating constant denoting unrated content.
+     * Rating constant denoting unrated content. Used to handle the case where the content rating
+     * information is missing.
+     *
+     * <p>TV input services can call {@link TvInputManager#isRatingBlocked} with this constant to
+     * determine whether they should block unrated content. The subsequent call to
+     * {@link TvInputService.Session#notifyContentBlocked} with the same constant notifies
+     * applications that the current program content is blocked by parental controls.
      */
-    public static final TvContentRating UNRATED = new TvContentRating("com.android.tv", "",
-            "UNRATED", null);
+    public static final TvContentRating UNRATED = new TvContentRating("null", "null", "null", null);
 
     /**
      * Creates a {@code TvContentRating} object with predefined content rating strings.
