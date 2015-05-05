@@ -61,12 +61,12 @@ JMediaSync::JMediaSync() {
 JMediaSync::~JMediaSync() {
 }
 
-status_t JMediaSync::configureSurface(const sp<IGraphicBufferProducer> &bufferProducer) {
-    return mSync->configureSurface(bufferProducer);
+status_t JMediaSync::setSurface(const sp<IGraphicBufferProducer> &bufferProducer) {
+    return mSync->setSurface(bufferProducer);
 }
 
-status_t JMediaSync::configureAudioTrack(const sp<AudioTrack> &audioTrack) {
-    return mSync->configureAudioTrack(audioTrack);
+status_t JMediaSync::setAudioTrack(const sp<AudioTrack> &audioTrack) {
+    return mSync->setAudioTrack(audioTrack);
 }
 
 status_t JMediaSync::createInputSurface(
@@ -163,9 +163,9 @@ static void throwExceptionAsNecessary(
     }
 }
 
-static void android_media_MediaSync_native_configureSurface(
+static void android_media_MediaSync_native_setSurface(
         JNIEnv *env, jobject thiz, jobject jsurface) {
-    ALOGV("android_media_MediaSync_configureSurface");
+    ALOGV("android_media_MediaSync_setSurface");
 
     sp<JMediaSync> sync = getMediaSync(env, thiz);
     if (sync == NULL) {
@@ -184,7 +184,7 @@ static void android_media_MediaSync_native_configureSurface(
         }
     }
 
-    status_t err = sync->configureSurface(bufferProducer);
+    status_t err = sync->setSurface(bufferProducer);
 
     if (err == INVALID_OPERATION) {
         throwExceptionAsNecessary(
@@ -196,9 +196,9 @@ static void android_media_MediaSync_native_configureSurface(
     }
 }
 
-static void android_media_MediaSync_native_configureAudioTrack(
+static void android_media_MediaSync_native_setAudioTrack(
         JNIEnv *env, jobject thiz, jobject jaudioTrack) {
-    ALOGV("android_media_MediaSync_configureAudioTrack");
+    ALOGV("android_media_MediaSync_setAudioTrack");
 
     sp<JMediaSync> sync = getMediaSync(env, thiz);
     if (sync == NULL) {
@@ -215,7 +215,7 @@ static void android_media_MediaSync_native_configureAudioTrack(
         }
     }
 
-    status_t err = sync->configureAudioTrack(audioTrack);
+    status_t err = sync->setAudioTrack(audioTrack);
 
     if (err == INVALID_OPERATION) {
         throwExceptionAsNecessary(
@@ -501,13 +501,13 @@ static void android_media_MediaSync_native_finalize(JNIEnv *env, jobject thiz) {
 }
 
 static JNINativeMethod gMethods[] = {
-    { "native_configureSurface",
+    { "native_setSurface",
       "(Landroid/view/Surface;)V",
-      (void *)android_media_MediaSync_native_configureSurface },
+      (void *)android_media_MediaSync_native_setSurface },
 
-    { "native_configureAudioTrack",
-      "(Landroid/media/AudioTrack;I)V",
-      (void *)android_media_MediaSync_native_configureAudioTrack },
+    { "native_setAudioTrack",
+      "(Landroid/media/AudioTrack;)V",
+      (void *)android_media_MediaSync_native_setAudioTrack },
 
     { "createInputSurface", "()Landroid/view/Surface;",
       (void *)android_media_MediaSync_createInputSurface },
