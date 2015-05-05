@@ -23,8 +23,8 @@ handle multi-select and contextual actions in your apps.</p>
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <h4>What has changed?</h4>
 <p>In previous versions of Android, the long press gesture was universally used to display contextual
@@ -34,7 +34,7 @@ contextual actions and selection management functions for selected data into a n
 the contextual action bar (CAB).</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/selection_context_menu.png">
     <div class="figure-caption">
@@ -52,8 +52,8 @@ is selected. It appears after the user long-presses on a selectable data item.</
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <p>From here the user can:</p>
 <ul>
@@ -65,15 +65,15 @@ is selected. It appears after the user long-presses on a selectable data item.</
 </ul>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/selection_cab_example.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <h4>Selecting CAB actions</h4>
 <p>You can decide which actions and elements appear in the CAB. Use the guidelines in the <a href="actionbar.html">Action Bar
@@ -85,7 +85,7 @@ the selection. Actions that apply to a single selected data item don't necessari
 selected data items of the same kind.</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/selection_adjusting_actions.png">
     <div class="figure-caption">

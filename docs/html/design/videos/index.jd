@@ -7,60 +7,60 @@ page.title=Videos
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326368573">Enchant, Simplify, Amaze: Android's Design Principles</a></h3>
     <p>Want to enchant people, simplify their lives, and make them feel amazing with your app? Learn how Android's Design Principles can help you create products that resonate with people. Find out about the meaning and research behind the principles. See real-world examples and practices from the Android Design team. Discover techniques for applying the principles in your daily work. No design experience necessary.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/s0HIP8EdlnE" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326301704">Structure in Android App Design</a></h3>
     <p>Life is simple when your app is simple. But when your apps gets more complex, how do you choose between spinners, tabs, and drawers for navigation? Members of the Android Design team look at techniques for making your app predictable and pleasing to use.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/XpqyiBR0lJ4" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326425499">Fireside Chat with the Android Team</a></h3>
     <p>Pull up a chair and join the Android platform team for a fireside chat. It's your opportunity to ask us about the platform and learn a little bit more about why things work the way they do, from the people who built it. </p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/A5OOJDIrYls" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326483138">Agile UX Research Practice in Android</a></h3>
     <p>In the Android UX team, it is critical to get user feedback frequently and consistently so that we are able to iterate and develop the best-in-class designs for our users. We will discuss how the team applied "Pulse Studies" (iterative research sessions) in order to put new ideas, designs, and concepts in front of users on a regular basis; it requires minimal advance planning, it can have an immediate product impact, and it can meet urgent needs. </p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/6MOeVNbh9cY" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="design-for-success"><a href="https://developers.google.com/events/io/2013/sessions/326460111">Cognitive Science and Design</a></h3>
     <p>This session will provide an in-depth look at human perception and cognition, and its implications for interactive and visual design. The human brain is purely treated as an information processing machine, and we will teach the audience its attributes, its advantages, its limitations, and generally how to hack it. </p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/z2exxj4COhU" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
@@ -69,60 +69,60 @@ page.title=Videos
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="design-for-success"><a href="https://developers.google.com/events/io/sessions/gooio2012/112/">Android Design for Success</a></h3>
     <p>You have a great idea for an Android app. You want it to stand out among hundreds of thousands. You want your users to love it and tell everyone they know. The Android User Experience team is here to help. We talk about the Android Design guide and other tricks of the trade for creating apps that delight users and help them accomplish their goals. No design background is required.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/2NL_83EG0no" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="design-for-engineers"><a href="https://developers.google.com/events/io/sessions/gooio2012/1204/">Android Design for Engineers</a></h3>
     <p>Design isn't black magic, it's a field that people can learn. In this talk two elite designers from Google give you an advanced crash course in interactive and visual design. Topics include mental models, natural mappings, metaphors, mode errors, visual hierarchies, typography and gestalt principles. Correctly applied, this knowledge can drastically improve the quality of your work.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/iJDoxOTyMdk" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="navigation-in-android"><a href="https://developers.google.com/events/io/sessions/gooio2012/114/">Navigation in Android</a></h3>
     <p>An app is useless if people can't find their way around it. Android introduced big navigation-support changes in 3.0 and 4.0. The Action Bar offers a convenient control for Up navigation, the Back key's behavior became more consistent within tasks, and the Recent Tasks UI got an overhaul. In this talk, we discuss how and why we got where we are today, how to think about navigation when designing your app's user experience, and how to write apps that offer effortless navigation in multiple Android versions.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/XwGHJJYBs0Q" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="now-what"><a href="https://developers.google.com/events/io/sessions/gooio2012/115/">So You've Read the Design Guide&#59; Now What?</a></h3>
     <p>The Android Design Guide describes how to design beautiful Android apps, but not how to build them. In this talk we give practical tips for how to apply fit &amp; finish as you implement your design, we show you how to avoid some common pitfalls, we describe some useful patterns, and show how tools can help.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/2jCVmfCse1E" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <h3 id="playing-with-patterns"><a href="https://developers.google.com/events/io/sessions/gooio2012/131/">Playing with Patterns</a></h3>
     <p>Best-in-class application designers and developers talk about their experience in developing for Android, showing screenshots from their app, exploring the challenges they faced, and offering creative solutions congruent with the Android Design guide. Guests are invited to show examples of visual and interaction patterns in their application that manage to keep it simultaneously consistent and personal.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <iframe width="355" height="200" src="//www.youtube.com/embed/8iUbr8RZKtg" frameborder="0" allowfullscreen=""></iframe>
   </div>
 </div>
