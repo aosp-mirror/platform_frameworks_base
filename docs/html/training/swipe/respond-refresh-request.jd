@@ -1,0 +1,158 @@
+page.title=Responding to a Refresh Request
+
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#RespondRefresh">Respond to the Refresh Gesture</a></li>
+  <li><a href="#RespondAction">Respond to the Refresh Action</a>
+</ol>
+
+<h2>Sample App</h2>
+
+<ul>
+    <li><a href="{@docRoot}samples/SwipeRefreshLayoutBasic/index.html">
+            SwipeRefreshLayoutBasic</a></li>
+</ul>
+
+
+</div>
+</div>
+
+<p>
+  This lesson shows you how to update your app when the user requests a manual
+  refresh, whether the user triggers the refresh with a swipe gesture or by
+  using the action bar refresh action.
+</p>
+
+<h2 id="RespondRefresh">Respond to the Refresh Gesture</h2>
+
+<p>
+  When the user makes a swipe gesture, the system displays the progress
+  indicator and calls your app's callback method. Your callback method is
+  responsible for actually updating the app's data.
+</p>
+
+<p>
+  To respond to the refresh gesture in your app, implement the {@link
+  android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener} interface and
+  its {@link
+  android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener#onRefresh
+  onRefresh()} method. The {@link
+  android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener#onRefresh
+  onRefresh()} method is invoked when the user performs a swipe gesture.
+</p>
+
+<p>
+  You should put the code for the actual update
+  operation in a separate method, and call that update method from your {@link
+  android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener#onRefresh
+  onRefresh()} implementation. That way, you can use the same update method to
+  perform the update when the user triggers a refresh from the action bar.
+</p>
+
+<p>
+  Your update method calls {@link
+  android.support.v4.widget.SwipeRefreshLayout#setRefreshing
+  setRefreshing(false)} when it has finished updating the data. Calling this
+  method instructs the {@link android.support.v4.widget.SwipeRefreshLayout} to
+  remove the progress indicator and update the view contents.
+</p>
+
+<p>
+  For example, the following code implements {@link
+  android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener#onRefresh
+  onRefresh()} and invokes the method {@code myUpdateOperation()} to update the
+  data displayed by the {@link android.widget.ListView}:
+</p>
+
+<pre>/*
+ * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+ * performs a swipe-to-refresh gesture.
+ */
+mySwipeRefreshLayout.setOnRefreshListener(
+    new SwipeRefreshLayout.OnRefreshListener() {
+        &#64;Override
+        public void onRefresh() {
+            Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout");
+
+            // This method performs the actual data-refresh operation.
+            // The method calls setRefreshing(false) when it's finished.
+            myUpdateOperation();
+        }
+    }
+);</pre>
+
+<h2 id="RespondAction">Respond to the Refresh Action</h2>
+
+<p>
+  If the user requests a refresh by using the action bar, the system calls the
+  {@link android.support.v4.app.Fragment#onOptionsItemSelected
+  onOptionsItemSelected()} method. Your app should respond to this call by
+  displaying the progress indicator and refreshing the app's data.
+</p>
+
+<p>
+  To respond to the refresh action, override {@link
+  android.support.v4.app.Fragment#onOptionsItemSelected
+  onOptionsItemSelected()}. In your override method, trigger the {@link
+  android.support.v4.widget.SwipeRefreshLayout} progress indicator by calling
+  {@link android.support.v4.widget.SwipeRefreshLayout#setRefreshing
+  setRefreshing()} with the value {@code true}, then perform the update
+  operation. Once again, you should be doing the actual update in a separate
+  method, so the same method can be called whether the user triggers the update
+  with a swipe or by using the action bar. When the update has finished, call
+  {@link android.support.v4.widget.SwipeRefreshLayout#setRefreshing
+  setRefreshing(false)} to remove the refresh progress indicator.
+</p>
+
+<p>The following code shows how to respond to the request action:
+</p>
+
+<pre>/*
+ * Listen for option item selections so that we receive a notification
+ * when the user requests a refresh by selecting the refresh action bar item.
+ */
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+
+        // Check if user triggered a refresh:
+        case R.id.menu_refresh:
+            Log.i(LOG_TAG, "Refresh menu item selected");
+
+            // Signal SwipeRefreshLayout to start the progress indicator
+            mySwipeRefreshLayout.setRefreshing(true);
+
+            // Start the refresh background task.
+            // This method calls setRefreshing(false) when it's finished.
+            myUpdateOperation();
+
+            return true;
+    }
+
+    // User didn't trigger a refresh, let the superclass handle this action
+    return super.onOptionsItemSelected(item);
+
+}</pre>
+
+<p class="note">
+  <strong>Note:</strong> When the user triggers a refresh with a swipe action as
+  described in <a href="#RespondRefresh">Respond to the Refresh Gesture</a>,
+  you do not need to call {@link
+  android.support.v4.widget.SwipeRefreshLayout#setRefreshing setRefreshing()}.
+  The {@link
+  android.support.v4.widget.SwipeRefreshLayout} widget takes care of displaying
+  the progress indicator and removing it when the update has finished. However,
+  if the update is triggered by any means <em>other than</em> a swipe gesture,
+  you need to explicitly turn the progress indicator on with {@link
+  android.support.v4.widget.SwipeRefreshLayout#setRefreshing setRefreshing()}.
+  The method which actually refreshes the data calls {@link
+  android.support.v4.widget.SwipeRefreshLayout#setRefreshing
+  setRefreshing(false)} to signal that the update is finished.
+</p>
