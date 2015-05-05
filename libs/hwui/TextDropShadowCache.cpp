@@ -123,7 +123,7 @@ TextDropShadowCache::~TextDropShadowCache() {
 
 void TextDropShadowCache::init() {
     mCache.setOnEntryRemovedListener(this);
-    mDebugEnabled = readDebugLevel() & kDebugMoreCaches;
+    mDebugEnabled = Properties::debugLevel & kDebugMoreCaches;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

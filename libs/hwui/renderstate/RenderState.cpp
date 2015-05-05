@@ -154,7 +154,7 @@ void RenderState::resumeFromFunctorInvoke() {
 }
 
 void RenderState::debugOverdraw(bool enable, bool clear) {
-    if (mCaches->debugOverdraw && mFramebuffer == 0) {
+    if (Properties::debugOverdraw && mFramebuffer == 0) {
         if (clear) {
             scissor().setEnabled(false);
             stencil().clear();

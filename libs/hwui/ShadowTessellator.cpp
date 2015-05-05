@@ -20,11 +20,13 @@
 #include <math.h>
 #include <utils/Log.h>
 #include <utils/Trace.h>
+#include <utils/Vector.h>
 
 #include "AmbientShadow.h"
-#include "Caches.h"
+#include "Properties.h"
 #include "ShadowTessellator.h"
 #include "SpotShadow.h"
+#include "Vector.h"
 
 namespace android {
 namespace uirenderer {
@@ -40,9 +42,8 @@ void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
     float heightFactor = 1.0f / 128;
     const float geomFactor = 64;
 
-    Caches& caches = Caches::getInstance();
-    if (CC_UNLIKELY(caches.propertyAmbientRatio > 0.0f)) {
-        heightFactor *= caches.propertyAmbientRatio;
+    if (CC_UNLIKELY(Properties::overrideAmbientRatio > 0.0f)) {
+        heightFactor *= Properties::overrideAmbientRatio;
     }
 
     Rect ambientShadowBounds(casterBounds);
@@ -66,14 +67,12 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
         const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
-    Caches& caches = Caches::getInstance();
-
     Vector3 adjustedLightCenter(lightCenter);
-    if (CC_UNLIKELY(caches.propertyLightPosY > 0)) {
-        adjustedLightCenter.y = - caches.propertyLightPosY; // negated since this shifts up
+    if (CC_UNLIKELY(Properties::overrideLightPosY > 0)) {
+        adjustedLightCenter.y = - Properties::overrideLightPosY; // negated since this shifts up
     }
-    if (CC_UNLIKELY(caches.propertyLightPosZ > 0)) {
-        adjustedLightCenter.z = caches.propertyLightPosZ;
+    if (CC_UNLIKELY(Properties::overrideLightPosZ > 0)) {
+        adjustedLightCenter.z = Properties::overrideLightPosZ;
     }
 
 #if DEBUG_SHADOW
@@ -87,8 +86,8 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
     reverseReceiverTransform.loadInverse(receiverTransform);
     reverseReceiverTransform.mapPoint3d(adjustedLightCenter);
 
-    if (CC_UNLIKELY(caches.propertyLightRadius > 0)) {
-        lightRadius = caches.propertyLightRadius;
+    if (CC_UNLIKELY(Properties::overrideLightRadius > 0)) {
+        lightRadius = Properties::overrideLightRadius;
     }
 
     // Now light and caster are both in local space, we will check whether

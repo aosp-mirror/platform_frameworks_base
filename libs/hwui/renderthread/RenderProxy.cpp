@@ -112,9 +112,9 @@ void RenderProxy::setSwapBehavior(SwapBehavior swapBehavior) {
 CREATE_BRIDGE1(loadSystemProperties, CanvasContext* context) {
     bool needsRedraw = false;
     if (Caches::hasInstance()) {
-        needsRedraw = Caches::getInstance().initProperties();
+        needsRedraw = Properties::load();
     }
-    if (args->context->profiler().loadSystemProperties()) {
+    if (args->context->profiler().consumeProperties()) {
         needsRedraw = true;
     }
     return (void*) needsRedraw;
@@ -135,7 +135,7 @@ void RenderProxy::setName(const char* name) {
     SETUP_TASK(setName);
     args->context = mContext;
     args->name = name;
-    postAndWait(task);
+    postAndWait(task); // block since name/value pointers owned by caller
 }
 
 CREATE_BRIDGE2(initialize, CanvasContext* context, ANativeWindow* window) {
@@ -331,7 +331,7 @@ void RenderProxy::destroyHardwareResources() {
     post(task);
 }
 
-CREATE_BRIDGE2(timMemory, RenderThread* thread, int level) {
+CREATE_BRIDGE2(trimMemory, RenderThread* thread, int level) {
     CanvasContext::trimMemory(*args->thread, args->level);
     return nullptr;
 }
@@ -340,11 +340,24 @@ void RenderProxy::trimMemory(int level) {
     // Avoid creating a RenderThread to do a trimMemory.
     if (RenderThread::hasInstance()) {
         RenderThread& thread = RenderThread::getInstance();
-        SETUP_TASK(timMemory);
+        SETUP_TASK(trimMemory);
         args->thread = &thread;
         args->level = level;
         thread.queue(task);
     }
+}
+
+CREATE_BRIDGE2(overrideProperty, const char* name, const char* value) {
+    Properties::overrideProperty(args->name, args->value);
+    return nullptr;
+}
+
+void RenderProxy::overrideProperty(const char* name, const char* value) {
+    RenderThread& thread = RenderThread::getInstance();
+    SETUP_TASK(overrideProperty);
+    args->name = name;
+    args->value = value;
+    staticPostAndWait(task); // expensive, but block here since name/value pointers owned by caller
 }
 
 CREATE_BRIDGE0(fence) {

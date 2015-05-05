@@ -18,12 +18,11 @@
 #include <cutils/compiler.h>
 
 #include "OpenGLRenderer.h"
-#include "Properties.h"
 
 #define DEFAULT_MAX_FRAMES 128
 
-#define RETURN_IF_PROFILING_DISABLED() if (CC_LIKELY(mType == kNone)) return
-#define RETURN_IF_DISABLED() if (CC_LIKELY(mType == kNone && !mShowDirtyRegions)) return
+#define RETURN_IF_PROFILING_DISABLED() if (CC_LIKELY(mType == ProfileType::None)) return
+#define RETURN_IF_DISABLED() if (CC_LIKELY(mType == ProfileType::None && !mShowDirtyRegions)) return
 
 #define NANOS_TO_MILLIS_FLOAT(nanos) ((nanos) * 0.000001f)
 
@@ -56,18 +55,7 @@ static int dpToPx(int dp, float density) {
     return (int) (dp * density + 0.5f);
 }
 
-DrawProfiler::DrawProfiler()
-        : mType(kNone)
-        , mDensity(0)
-        , mData(nullptr)
-        , mDataSize(0)
-        , mCurrentFrame(-1)
-        , mPreviousTime(0)
-        , mVerticalUnit(0)
-        , mHorizontalUnit(0)
-        , mThresholdStroke(0)
-        , mShowDirtyRegions(false)
-        , mFlashToggle(false) {
+DrawProfiler::DrawProfiler() {
     setDensity(1);
 }
 
@@ -135,7 +123,7 @@ void DrawProfiler::draw(OpenGLRenderer* canvas) {
         }
     }
 
-    if (mType == kBars) {
+    if (mType == ProfileType::Bars) {
         prepareShapes(canvas->getViewportHeight());
         drawGraph(canvas);
         drawCurrentFrame(canvas);
@@ -217,32 +205,20 @@ void DrawProfiler::drawThreshold(OpenGLRenderer* canvas) {
     canvas->drawLines(pts, 4, &paint);
 }
 
-DrawProfiler::ProfileType DrawProfiler::loadRequestedProfileType() {
-    ProfileType type = kNone;
-    char buf[PROPERTY_VALUE_MAX] = {'\0',};
-    if (property_get(PROPERTY_PROFILE, buf, "") > 0) {
-        if (!strcmp(buf, PROPERTY_PROFILE_VISUALIZE_BARS)) {
-            type = kBars;
-        } else if (!strcmp(buf, "true")) {
-            type = kConsole;
-        }
-    }
-    return type;
-}
-
-bool DrawProfiler::loadSystemProperties() {
+bool DrawProfiler::consumeProperties() {
     bool changed = false;
-    ProfileType newType = loadRequestedProfileType();
+    ProfileType newType = Properties::getProfileType();
     if (newType != mType) {
         mType = newType;
-        if (mType == kNone) {
+        if (mType == ProfileType::None) {
             destroyData();
         } else {
             createData();
         }
         changed = true;
     }
-    bool showDirty = property_get_bool(PROPERTY_DEBUG_SHOW_DIRTY_REGIONS, false);
+
+    bool showDirty = Properties::showDirtyRegions;
     if (showDirty != mShowDirtyRegions) {
         mShowDirtyRegions = showDirty;
         changed = true;

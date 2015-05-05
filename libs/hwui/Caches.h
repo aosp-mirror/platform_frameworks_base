@@ -80,7 +80,7 @@ public:
     }
 
     static bool hasInstance() {
-        return sInstance != 0;
+        return sInstance != nullptr;
     }
 private:
     Caches(RenderState& renderState);
@@ -99,11 +99,6 @@ public:
     bool init();
 
     /**
-     * Initialize global system properties.
-     */
-    bool initProperties();
-
-    /**
      * Flush the cache.
      *
      * @param mode Indicates how much of the cache should be flushed
@@ -115,14 +110,6 @@ public:
      * be called after a flush(kFlushMode_Full).
      */
     void terminate();
-
-    /**
-     * Indicates whether the renderer is in debug mode.
-     * This debug mode provides limited information to app developers.
-     */
-    DebugLevel getDebugLevel() const {
-        return mDebugLevel;
-    }
 
     /**
      * Returns a non-premultiplied ARGB color for the specified
@@ -162,22 +149,9 @@ public:
     void registerFunctors(uint32_t functorCount);
     void unregisterFunctors(uint32_t functorCount);
 
-    bool drawDeferDisabled;
-    bool drawReorderDisabled;
-
     // Misc
     GLint maxTextureSize;
 
-    // Debugging
-    bool debugLayersUpdates;
-    bool debugOverdraw;
-
-    enum StencilClipDebug {
-        kStencilHide,
-        kStencilShowHighlight,
-        kStencilShowRegion
-    };
-    StencilClipDebug debugStencilClip;
 private:
     // Declared before gradientCache and programCache which need this to initialize.
     // TODO: cleanup / move elsewhere
@@ -207,17 +181,6 @@ public:
     PFNGLPUSHGROUPMARKEREXTPROC startMark;
     PFNGLPOPGROUPMARKEREXTPROC endMark;
 
-    // TEMPORARY properties
-    void initTempProperties();
-    void setTempProperty(const char* name, const char* value);
-
-    float propertyLightRadius;
-    float propertyLightPosY;
-    float propertyLightPosZ;
-    float propertyAmbientRatio;
-    int propertyAmbientShadowStrength;
-    int propertySpotShadowStrength;
-
     void setProgram(const ProgramDescription& description);
     void setProgram(Program* program);
 
@@ -227,10 +190,6 @@ public:
     TextureState& textureState() { return *mTextureState; }
 
 private:
-    enum OverdrawColorSet {
-        kColorSet_Default = 0,
-        kColorSet_Deuteranomaly
-    };
 
     void initFont();
     void initExtensions();
@@ -249,12 +208,9 @@ private:
     mutable Mutex mGarbageLock;
     Vector<Layer*> mLayerGarbage;
 
-    DebugLevel mDebugLevel;
     bool mInitialized;
 
     uint32_t mFunctorsCount;
-
-    OverdrawColorSet mOverdrawDebugColorSet;
 
     // TODO: move below to RenderState
     PixelBufferState* mPixelBufferState = nullptr;

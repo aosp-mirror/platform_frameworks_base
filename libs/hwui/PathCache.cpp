@@ -153,7 +153,7 @@ PathCache::PathCache():
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
     mMaxTextureSize = maxTextureSize;
 
-    mDebugEnabled = readDebugLevel() & kDebugCaches;
+    mDebugEnabled = Properties::debugLevel & kDebugCaches;
 }
 
 PathCache::~PathCache() {
