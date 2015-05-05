@@ -55,7 +55,6 @@ public class CalendarTracker {
         Attendees.EVENT_ID,
         Attendees.ATTENDEE_EMAIL,
         Attendees.ATTENDEE_STATUS,
-        Attendees.ATTENDEE_TYPE,
     };
 
     private static final String ATTENDEE_SELECTION = Attendees.EVENT_ID + " = ? AND "
@@ -191,16 +190,13 @@ public class CalendarTracker {
                 final long rowEventId = cursor.getLong(0);
                 final String rowEmail = cursor.getString(1);
                 final int status = cursor.getInt(2);
-                final int type = cursor.getInt(3);
                 final boolean meetsReply = meetsReply(filter.reply, status);
-                final boolean meetsAttendance = meetsAttendance(filter.attendance, type);
                 if (DEBUG) Log.d(TAG, (DEBUG_ATTENDEES ? String.format(
                         "rowEventId=%s, rowEmail=%s, ", rowEventId, rowEmail) : "") +
-                        String.format("status=%s, type=%s, meetsReply=%s, meetsAttendance=%s",
-                        attendeeStatusToString(status), attendeeTypeToString(type), meetsReply,
-                        meetsAttendance));
+                        String.format("status=%s, meetsReply=%s",
+                        attendeeStatusToString(status), meetsReply));
                 final boolean eventMeets = rowEventId == eventId && Objects.equals(rowEmail, email)
-                        && meetsReply && meetsAttendance;
+                        && meetsReply;
                 rt |= eventMeets;
             }
             return rt;
@@ -232,35 +228,17 @@ public class CalendarTracker {
         }
     }
 
-    private static String attendeeTypeToString(int type) {
-        switch (type) {
-            case Attendees.TYPE_NONE: return "TYPE_NONE";
-            case Attendees.TYPE_REQUIRED: return "TYPE_REQUIRED";
-            case Attendees.TYPE_OPTIONAL: return "TYPE_OPTIONAL";
-            case Attendees.TYPE_RESOURCE: return "TYPE_RESOURCE";
-            default: return "TYPE_" + type;
-        }
-    }
-
-    private static boolean meetsAttendance(int attendance, int attendeeType) {
-        switch (attendance) {
-            case EventInfo.ATTENDANCE_OPTIONAL:
-                return attendeeType == Attendees.TYPE_OPTIONAL;
-            case EventInfo.ATTENDANCE_REQUIRED:
-                return attendeeType == Attendees.TYPE_REQUIRED;
-            default: // EventInfo.ATTENDANCE_REQUIRED_OR_OPTIONAL
-                return true;
-        }
-    }
-
     private static boolean meetsReply(int reply, int attendeeStatus) {
         switch (reply) {
             case EventInfo.REPLY_YES:
                 return attendeeStatus == Attendees.ATTENDEE_STATUS_ACCEPTED;
+            case EventInfo.REPLY_YES_OR_MAYBE:
+                return attendeeStatus == Attendees.ATTENDEE_STATUS_ACCEPTED
+                        || attendeeStatus == Attendees.ATTENDEE_STATUS_TENTATIVE;
             case EventInfo.REPLY_ANY_EXCEPT_NO:
                 return attendeeStatus != Attendees.ATTENDEE_STATUS_DECLINED;
-            default: // EventInfo.REPLY_ANY
-                return true;
+            default:
+                return false;
         }
     }
 

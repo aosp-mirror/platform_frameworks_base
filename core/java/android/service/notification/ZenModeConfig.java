@@ -692,7 +692,6 @@ public class ZenModeConfig implements Parcelable {
                 .authority(SYSTEM_AUTHORITY)
                 .appendPath(EVENT_PATH)
                 .appendQueryParameter("calendar", Long.toString(event.calendar))
-                .appendQueryParameter("attendance", Integer.toString(event.attendance))
                 .appendQueryParameter("reply", Integer.toString(event.reply))
                 .build();
     }
@@ -710,22 +709,16 @@ public class ZenModeConfig implements Parcelable {
         if (!isEvent) return null;
         final EventInfo rt = new EventInfo();
         rt.calendar = tryParseLong(conditionId.getQueryParameter("calendar"), 0L);
-        rt.attendance = tryParseInt(conditionId.getQueryParameter("attendance"), 0);
         rt.reply = tryParseInt(conditionId.getQueryParameter("reply"), 0);
         return rt;
     }
 
     public static class EventInfo {
-        public static final int ATTENDANCE_REQUIRED_OR_OPTIONAL = 0;
-        public static final int ATTENDANCE_REQUIRED = 1;
-        public static final int ATTENDANCE_OPTIONAL = 2;
-
-        public static final int REPLY_ANY = 0;
-        public static final int REPLY_ANY_EXCEPT_NO = 1;
+        public static final int REPLY_ANY_EXCEPT_NO = 0;
+        public static final int REPLY_YES_OR_MAYBE = 1;
         public static final int REPLY_YES = 2;
 
         public long calendar;  // CalendarContract.Calendars._ID, or 0 for any
-        public int attendance;
         public int reply;
 
         @Override
@@ -738,14 +731,12 @@ public class ZenModeConfig implements Parcelable {
             if (!(o instanceof EventInfo)) return false;
             final EventInfo other = (EventInfo) o;
             return calendar == other.calendar
-                    && attendance == other.attendance
                     && reply == other.reply;
         }
 
         public EventInfo copy() {
             final EventInfo rt = new EventInfo();
             rt.calendar = calendar;
-            rt.attendance = attendance;
             rt.reply = reply;
             return rt;
         }
