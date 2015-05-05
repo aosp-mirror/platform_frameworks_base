@@ -57,6 +57,10 @@ sp<Surface> TestContext::surface() {
 }
 
 void TestContext::waitForVsync() {
+#if HWUI_NULL_GPU
+    return;
+#endif
+
     // Request vsync
     mDisplayEventReceiver.requestNextVsync();
 
@@ -71,4 +75,3 @@ void TestContext::waitForVsync() {
 } // namespace test
 } // namespace uirenderer
 } // namespace android
-
