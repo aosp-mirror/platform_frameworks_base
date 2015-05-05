@@ -21,26 +21,26 @@ href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>WatchViewS
 
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
   <img src="{@docRoot}design/media/wear/assets_specifics.png" width="300"
     style="margin:32px 0 20px;">
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
   <h2 id="Assets" style="clear:both">Specific Assets Required</h2>
 
   <p>A core set of standard assets may need to be provided depending on your card design: app icon, background image or images, action icons, and action confirmation animations. Of course, your specific design may necessitate other assets. Background images should be provided in landscape format at least 600px width for notifications that include pages of cards, since the system automatically adds a parallaxing effect.</p>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
   <h2 id="PeekCard" style="clear:both">Peek Card Readability</h2>
 
   <p>Test your card layout to ensure that useful information is conveyed in the peek state on the Home screen. The main message of the card should be readable in the peek state, particularly for contextual cards. Content that requires an interaction to be read, for example a long message, should be cropped appropriately to provide an affordance to the user to swipe the card to read more.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
   <img src="{@docRoot}design/media/wear/peek-card.png" width="300"
     style="margin:12px 0 0 20px">

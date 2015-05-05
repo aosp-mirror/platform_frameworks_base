@@ -23,15 +23,15 @@ everyone else's. In Android, your app can shine as an extension of your brand. <
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <img src="{@docRoot}design/media/branding_wallet.png" style="width:94%">
     <div class="figure-caption">
       The four colors of the Google Wallet logo provide a playful accent to the four dots
       that appear as the user enters a PIN.
     </div>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <img src="{@docRoot}design/media/branding_googlemusic.png" style="width:94%">
     <div class="figure-caption">
       The Google Play Music app has an orange theme color, which is used for emphasis
@@ -56,15 +56,15 @@ and app name in the action bar.</p>
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6" style="padding-top:24px;">
+<div class="cols">
+  <div class="col-6" style="padding-top:24px;">
         <img src="{@docRoot}design/media/branding_launcher_icon.png" style="width:60px;float:left;padding-right:1em;">
     <div class="figure-caption" style="width:290px;margin-left:20px;">
     Google+ reinforces its brand by carrying its launcher icon through to the action bar.
     </div>
         <img src="{@docRoot}design/media/branding_logo_icon_action_bar.png" style="width:320px;float:left;padding-right:1em;">
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <img src="{@docRoot}design/media/yourbranding_app.png" style="width:320px;">
     <div class="figure-caption" style="width:320px;">
       Example of a the logo in the action bar. This works well in cases where the brand's logo matches the name of the app.
@@ -87,8 +87,8 @@ Android app as well. <strong>If you take this approach, make sure your brand sty
 applied to every single icon in your app.</strong></p>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <p>One exception: For any icon in your existing set where the symbol is different from
     Android's, use Android's symbol but give it your brand's styling. That way, users will
     understand what the purpose of the icon is based on what they've learned in other
@@ -99,20 +99,20 @@ applied to every single icon in your app.</strong></p>
 
   </div>
 
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <img src="{@docRoot}design/media/yourbranding_in-app-icons.png" style="width:300px;margin:12px 48px 0 16px;">
     </div>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <p><strong>Example</strong>:<br />
     </p>
     <p>The brand's normal icon for sharing on other platforms is a right arrow.
   </div>
 
-  <div class="layout-content-col span-6 lasyout-with-list-item-margins">
+  <div class="col-6 lasyout-with-list-item-margins">
 
     <div style="margin-bottom:1em;">
       <span class="do-dont-label bad" style="margin-left:12px">Don't</span>

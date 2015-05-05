@@ -15,13 +15,13 @@ well as drilldown navigation.</p>
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row clearfix">
-  <div class="layout-content-col span-9">
+<div class="cols clearfix">
+  <div class="col-9">
 
     <img src="{@docRoot}design/media/lists_main.png">
 
   </div>
-  <div class="layout-content-col span-4 with-callouts">
+  <div class="col-4 with-callouts">
 
 <ol style="margin-bottom: 60px;">
 <li>

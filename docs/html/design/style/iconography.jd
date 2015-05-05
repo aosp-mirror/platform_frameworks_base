@@ -53,26 +53,26 @@ effectively down-scales your HDPI assets by 1/2 to match the expected size.</p>
 user can change the Home screen's wallpaper, make sure that your launcher icon is clearly visible on
 any type of background.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_launcher_size.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_launcher_focal.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_launcher_style.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <h4>Sizes &amp; scale</h4>
 
@@ -84,7 +84,7 @@ any type of background.</p>
     </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <h4>Proportions</h4>
 
@@ -95,7 +95,7 @@ any type of background.</p>
     </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <h4>Style</h4>
 <p>Use a distinct silhouette. Three-dimensional, front view, with a slight perspective as if viewed
@@ -105,11 +105,11 @@ from above, so that users perceive some depth.</p>
 </div>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
     &nbsp;
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/iconography_launcher_example.png">
 
@@ -117,8 +117,8 @@ from above, so that users perceive some depth.</p>
   <!-- 2 free columns -->
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-12">
+<div class="cols">
+  <div class="col-12">
 
     <img src="{@docRoot}design/media/iconography_launcher_example2.png">
 
@@ -160,26 +160,26 @@ files for further customization.
    href="{@docRoot}downloads/design/Android_Design_Icons_20131106.zip">Download the Action Bar Icon Pack</a>
 </p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_actionbar_size.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_actionbar_focal.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_actionbar_style.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <h4>Sizes &amp; scale</h4>
 
@@ -189,7 +189,7 @@ files for further customization.
     </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <h4>Focal area &amp; proportions</h4>
 
@@ -201,7 +201,7 @@ files for further customization.
     </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <h4>Style</h4>
 <p>Pictographic, flat, not too detailed, with smooth curves or sharp shapes. If the graphic is thin,
@@ -212,8 +212,8 @@ spaces should be a minimum of 2 dp.</p>
 </div>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Colors</h4>
 <p>Colors: <strong>#333333</strong><br />
@@ -226,7 +226,7 @@ Enabled: <strong>80%</strong> opacity<br />
 Disabled: <strong>30%</strong> opacity</p>
 
   </div>
-  <div class="layout-content-col span-9">
+  <div class="col-9">
 
     <img src="{@docRoot}design/media/iconography_actionbar_colors.png">
 
@@ -249,26 +249,26 @@ items. For example, in the Gmail app, each message has a star icon that marks th
 important.</p>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_small_size.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_small_focal.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_small_style.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <h4>Sizes &amp; scale</h4>
 
@@ -278,7 +278,7 @@ important.</p>
     </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <h4>Focal area &amp; proportions</h4>
 
@@ -290,7 +290,7 @@ important.</p>
     </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <h4>Style</h4>
 <p>Neutral, flat, and simple. Filled shapes are easier to see than thin strokes. Use a single visual
@@ -300,8 +300,8 @@ metaphor so that a user can easily recognize and understand its purpose.</p>
 </div>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_small_colors.png">
 
@@ -313,7 +313,7 @@ to indicate a bookmarked message. If an icon is actionable, choose a color that 
 the background.</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/iconography_small_example.png">
 
@@ -337,26 +337,26 @@ the background.</p>
 whenever a new notification is available.</p>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_notification_size.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_notification_focal.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/iconography_notification_style.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <h4>Sizes &amp; scale</h4>
 
@@ -366,7 +366,7 @@ whenever a new notification is available.</p>
     </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <h4>Focal area &amp; proportions</h4>
 
@@ -378,7 +378,7 @@ whenever a new notification is available.</p>
     </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <h4>Style</h4>
 <p>Keep the style flat and simple, using the same single, visual metaphor as your launcher icon.</p>
@@ -387,14 +387,14 @@ whenever a new notification is available.</p>
 </div>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
 <h4>Colors</h4>
 <p>Notification icons must be entirely white. Also, the system may scale down and/or darken the icons.</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/iconography_notification_example.png">
 

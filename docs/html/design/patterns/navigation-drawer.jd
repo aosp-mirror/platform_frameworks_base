@@ -112,8 +112,8 @@ likely visit often and make those navigation hubs as well.</p>
   screens as well as important lower-level screens.
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-8">
+<div class="cols">
+  <div class="col-8">
   <p> To facilitate access to the navigation drawer on navigation hubs, all screens that
   correspond to an entry in your navigation drawer should show the navigation drawer indicator
   next to the application icon in the action bar. Touching the app icon causes the navigation
@@ -121,7 +121,7 @@ likely visit often and make those navigation hubs as well.</p>
   <p> All other lower-level screens show the traditional Up indicator next to the application
   icon. The drawer is still accessible with an edge-swipe, but is not featured in the action bar.</p>
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
     <img src="{@docRoot}design/media/navigation_drawer_indicator_big.png">
     <div class="figure-caption">
     App icon with navigation drawer indicator.
@@ -135,8 +135,8 @@ likely visit often and make those navigation hubs as well.</p>
 <p> Keep the content of the navigation drawer focused on app navigation. Expose the navigation
 hubs of your app as list items inside the navigation drawer - one item per row.
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-8">
+<div class="cols">
+  <div class="col-8">
   <h4>Titles, icons, and counters</h4>
   <p> You can structure navigation targets by adding titles. The titles are not interactive,
   but just organize navigation targets into functional topics. If you have many navigation
@@ -144,7 +144,7 @@ hubs of your app as list items inside the navigation drawer - one item per row.
   <p> Navigation targets can have optional leading icons as well as trailing counters. Use
   the counters to inform users about a changed state of data in the corresponding view.</p>
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
   <img src="{@docRoot}design/media/navigation_drawer_titles_icons.png">
   <div class="figure-caption">
     Use titles and icons to organize your drawer.
@@ -152,15 +152,15 @@ hubs of your app as list items inside the navigation drawer - one item per row.
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-8">
+<div class="cols">
+  <div class="col-8">
   <img src="{@docRoot}design/media/navigation_drawer_collapse.png">
   <div class="figure-caption">
     Collapsible navigation items are split. Use the left side for navigation and the right
     to collapse and expand items.
     </div>
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
   <h4>Collapsible navigation items</h4>
   <p>If you have many views with some subordinate to others, consider collapsing them into one
   expandable item to conserve space.
@@ -201,27 +201,27 @@ is fully expanded:</p>
 </div>
 
 <h4>Actions</h4>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
   <img src="{@docRoot}design/media/navigation_drawer_nav_and_actions.png">
     <div class="figure-caption">
     Keep actions on the right side of the action bar and in the overflow
   </div>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
   <p> Don’t place actions in the navigation drawer. Actions belong in the action bar, and the
   user expects to see them there. Keep in mind that not all applications use the navigation
   drawer pattern. It may be tempting to expose all your app’s capabilities in a single place,
   but keep the bigger picture in mind. Place your actions where all apps display them.</p>
   </div>
 </div>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
   <p> This also applies to common navigation targets, such as access to Help or the app’s
   Settings. As per style guide convention Help and Settings are always located in the action
   overflow.</p>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
   <img src="{@docRoot}design/media/navigation_drawer_settings_help.png">
     <div class="figure-caption">
     Keep Help and Settings in the overflow.

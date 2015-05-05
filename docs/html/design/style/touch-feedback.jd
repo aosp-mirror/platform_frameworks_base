@@ -2,8 +2,8 @@ page.title=Touch Feedback
 page.tags=input,button
 @jd:body
 
-<div class="layout-content-row" style="margin-bottom: -100px">
-<div class="layout-content-col span-7">
+<div class="cols" style="margin-bottom: -100px">
+<div class="col-7">
 
 <a class="notice-designers-material"
   href="http://www.google.com/design/spec/animation/responsive-interaction.html">
@@ -31,7 +31,7 @@ easier because the default touch feedback works with whatever hue you choose.</l
 
 </div>
 
-<div class="layout-content-col span-6" style="float:right;">
+<div class="col-6" style="float:right;">
   <video  class="play-on-hover" width="268" height="442" autoplay style="border:1px solid #ddd;background-color:#f9f9f9;" poster="">
     <source src="{@docRoot}design/media/touch_feedback.mp4" type="video/mp4">
     <source src="{@docRoot}design/media/touch_feedback.webm" type="video/webm">
@@ -55,8 +55,8 @@ easier because the default touch feedback works with whatever hue you choose.</l
 
 <div class="vspace size-3">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
     <h4>Communication</h4>
 <p>When your objects react to more complex gestures, help users
@@ -66,7 +66,7 @@ understand what the outcome will be.</p>
 begins to dim. This helps the user understand that swiping will cause the
 item to be removed.</p>
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/touch_feedback_manipulation.png">
 
@@ -74,8 +74,8 @@ item to be removed.</p>
 </div>
 <div class="vspace size-3">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/touch_feedback_communication.png">
     <p><em>If a user attempts to scroll past the last home screen panel, the screen
@@ -83,7 +83,7 @@ item to be removed.</p>
     isn’t possible.</em></p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
 <h4>Boundaries</h4>
 <p>
