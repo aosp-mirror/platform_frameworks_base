@@ -584,7 +584,7 @@ public class StorageManager {
         // Nickname always takes precedence when defined
         if (!TextUtils.isEmpty(vol.fsUuid)) {
             final VolumeRecord rec = findRecordByUuid(vol.fsUuid);
-            if (!TextUtils.isEmpty(rec.nickname)) {
+            if (rec != null && !TextUtils.isEmpty(rec.nickname)) {
                 return rec.nickname;
             }
         }
