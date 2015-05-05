@@ -35,6 +35,7 @@ namespace aapt {
  */
 struct Public {
     bool isPublic = false;
+    SourceLine source;
     std::u16string comment;
 };
 

@@ -206,18 +206,6 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
     void print(std::ostream& out) const override;
 };
 
-/**
- * Sentinel value that should be ignored in the final output.
- * Mainly used as a placeholder for public entries with no
- * values defined yet.
- */
-struct Sentinel : public BaseItem<Sentinel> {
-    bool isWeak() const override;
-    bool flatten(android::Res_value& outValue) const override;
-    Sentinel* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
-};
-
 struct Attribute : public BaseValue<Attribute> {
     struct Symbol {
         Reference symbol;
@@ -332,10 +320,6 @@ struct ValueVisitor {
         visitItem(primitive, args);
     }
 
-    virtual void visit(Sentinel& sentinel, ValueVisitorArgs& args) {
-        visitItem(sentinel, args);
-    }
-
     virtual void visit(Attribute& attr, ValueVisitorArgs& args) {}
     virtual void visit(Style& style, ValueVisitorArgs& args) {}
     virtual void visit(Array& array, ValueVisitorArgs& args) {}
@@ -375,10 +359,6 @@ struct ConstValueVisitor {
 
     virtual void visit(const BinaryPrimitive& primitive, ValueVisitorArgs& args) {
         visitItem(primitive, args);
-    }
-
-    virtual void visit(const Sentinel& sentinel, ValueVisitorArgs& args) {
-        visitItem(sentinel, args);
     }
 
     virtual void visit(const Attribute& attr, ValueVisitorArgs& args) {}

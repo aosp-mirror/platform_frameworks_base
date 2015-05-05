@@ -67,13 +67,21 @@ bool Linker::linkAndValidate() {
                 usedIds[type->typeId].insert(entry->entryId);
             }
 
-            for (auto& valueConfig : entry->values) {
-                // Dispatch to the right method of this linker
-                // based on the value's type.
-                valueConfig.value->accept(*this, Args{
-                        ResourceNameRef{ mTable->getPackage(), type->type, entry->name },
-                        valueConfig.source
-                });
+            if (entry->publicStatus.isPublic && entry->values.empty()) {
+                // A public resource has no values. It will not be encoded
+                // properly without a symbol table. This is a unresolved symbol.
+                addUnresolvedSymbol(ResourceNameRef{
+                        mTable->getPackage(), type->type, entry->name },
+                        entry->publicStatus.source);
+            } else {
+                for (auto& valueConfig : entry->values) {
+                    // Dispatch to the right method of this linker
+                    // based on the value's type.
+                    valueConfig.value->accept(*this, Args{
+                            ResourceNameRef{ mTable->getPackage(), type->type, entry->name },
+                            valueConfig.source
+                    });
+                }
             }
         }
     }
@@ -268,11 +276,6 @@ void Linker::visit(Styleable& styleable, ValueVisitorArgs& a) {
     for (auto& attrRef : styleable.entries) {
         visit(attrRef, a);
     }
-}
-
-void Linker::visit(Sentinel& sentinel, ValueVisitorArgs& a) {
-    Args& args = static_cast<Args&>(a);
-    addUnresolvedSymbol(args.referrer, args.source);
 }
 
 void Linker::visit(Array& array, ValueVisitorArgs& a) {
