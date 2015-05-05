@@ -1692,7 +1692,8 @@ public final class BluetoothAdapter {
      * @param context Context of the application
      * @param listener The service Listener for connection callbacks.
      * @param profile The Bluetooth profile; either {@link BluetoothProfile#HEALTH},
-     *                {@link BluetoothProfile#HEADSET} or {@link BluetoothProfile#A2DP}.
+     *                {@link BluetoothProfile#HEADSET}, {@link BluetoothProfile#A2DP}.
+     *                {@link BluetoothProfile#GATT} or {@link BluetoothProfile#GATT_SERVER}.
      * @return true on success, false on error
      */
     public boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
