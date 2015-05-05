@@ -28,6 +28,7 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -35,6 +36,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -87,6 +89,7 @@ import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
+
 import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
@@ -532,11 +535,7 @@ public class DirectoryFragment extends Fragment {
                 return true;
 
             } else if (id == R.id.menu_select_all) {
-                int count = mCurrentView.getCount();
-                for (int i = 0; i < count; i++) {
-                    mCurrentView.setItemChecked(i, true);
-                }
-                updateDisplayState();
+                selectAllFiles();
                 return true;
 
             } else {
@@ -1207,8 +1206,19 @@ public class DirectoryFragment extends Fragment {
         return docs;
     }
 
+    private void copyFromClipData(ClipData clipData) {
+        copyFromClipData(
+                clipData,
+                ((BaseActivity)getActivity()).getCurrentDirectory());
+    }
+
     private void copyFromClipData(ClipData clipData, DocumentInfo dstDir) {
         final List<DocumentInfo> srcDocs = getDocumentsFromClipData(clipData);
+
+        if (!canCopy(srcDocs, dstDir)) {
+            Toast.makeText(getActivity(), R.string.clipboard_files_cannot_paste, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (srcDocs.isEmpty())
             return;
@@ -1263,6 +1273,61 @@ public class DirectoryFragment extends Fragment {
             }
         }
         return clipData;
+    }
+
+    void copyToClipboard() {
+        ClipboardManager clipboard = getClipboardManager();
+        List<DocumentInfo> docs = getSelectedDocuments();
+        ClipData data = getClipDataFromDocuments(docs);
+        clipboard.setPrimaryClip(data);
+
+        Activity activity = getActivity();
+        Toast.makeText(activity,
+                activity.getResources().getQuantityString(
+                        R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    void pasteFromClipboard() {
+        ClipboardManager clipboard = getClipboardManager();
+        copyFromClipData(clipboard.getPrimaryClip());
+    }
+
+    private ClipboardManager getClipboardManager() {
+        return (ClipboardManager)getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+    }
+
+    /**
+     * Returns true if the list of files can be copied to destination. Note that this
+     * is a policy check only. Currently the method does not attempt to verify
+     * available space or any other environmental aspects possibly resulting in
+     * failure to copy.
+     *
+     * @return true if the list of files can be copied to destination.
+     */
+    boolean canCopy(List<DocumentInfo> files, DocumentInfo dest) {
+        BaseActivity activity = (BaseActivity)getActivity();
+
+        final RootInfo root = activity.getCurrentRoot();
+
+        // Can't copy folders to Downloads.
+        if (root.isDownloads()) {
+            for (DocumentInfo docs : files) {
+                if (docs.isDirectory()) {
+                    return false;
+                }
+            }
+        }
+
+        return dest != null && dest.isDirectory() && dest.isCreateSupported();
+    }
+
+    void selectAllFiles() {
+        int count = mCurrentView.getCount();
+        for (int i = 0; i < count; i++) {
+            mCurrentView.setItemChecked(i, true);
+        }
+        updateDisplayState();
     }
 
     private void setupDragAndDropOnDirectoryView(AbsListView view) {
