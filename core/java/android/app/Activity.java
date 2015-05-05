@@ -6498,6 +6498,11 @@ public class Activity extends ContextThemeWrapper
             return (w == null) ? 0 : w.getAttributes().windowAnimations;
         }
 
+        @Override
+        public void onAttachFragment(Fragment fragment) {
+            Activity.this.onAttachFragment(fragment);
+        }
+
         @Nullable
         @Override
         public View onFindViewById(int id) {
