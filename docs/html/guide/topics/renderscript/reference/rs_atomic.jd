@@ -1,0 +1,506 @@
+page.title=RenderScript Atomic Update Functions
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> To update values shared between multiple threads, use the functions below.
+They ensure that the values are atomically updated, i.e. that the memory
+reads, the updates, and the memory writes are done in the right order.
+</p>
+
+<p> These functions are slower than their non-atomic equivalents, so use
+them only when synchronization is needed.
+</p>
+
+<p> Note that in RenderScript, your code is likely to be running in separate
+threads even though you did not explicitely create them.  The RenderScript
+runtime will very often split the execution of one kernel across multiple
+threads.  Updating globals should be done with atomic functions.  If possible,
+modify your algorithm to avoid them altogether.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicAdd'>rsAtomicAdd</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe addition
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicAnd'>rsAtomicAnd</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe bitwise and
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicCas'>rsAtomicCas</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe compare and set
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicDec'>rsAtomicDec</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe decrement
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicInc'>rsAtomicInc</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe increment
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicMax'>rsAtomicMax</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe maximum
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicMin'>rsAtomicMin</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe minimum
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicOr'>rsAtomicOr</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe bitwise or
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicSub'>rsAtomicSub</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe subtraction
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicXor'>rsAtomicXor</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe bitwise exclusive or
+    </td>
+  </tr>
+</tbody></table>
+<h2>Functions</h2>
+<a name='android_rs:rsAtomicAdd'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicAdd</span>
+    <span class='normal'>: Thread-safe addition</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicAdd(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicAdd(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 20</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to modify.</td></tr>
+    <tr><th>value</th><td>Amount to add.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly adds a value to the value at addr, i.e. <code>*addr += value</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicAnd'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicAnd</span>
+    <span class='normal'>: Thread-safe bitwise and</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicAnd(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicAnd(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 20</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to modify.</td></tr>
+    <tr><th>value</th><td>Value to and with.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly performs a bitwise and of two values, storing the result back at addr,
+i.e. <code>*addr &amp;= value</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicCas'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicCas</span>
+    <span class='normal'>: Thread-safe compare and set</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicCas(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> compareValue, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> newValue);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsAtomicCas(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> compareValue, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> newValue);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to compare and replace if the test passes.</td></tr>
+    <tr><th>compareValue</th><td>Value to test *addr against.</td></tr>
+    <tr><th>newValue</th><td>Value to write if the test passes.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> If the value at addr matches compareValue then the newValue is written at addr,
+i.e. <code>if (*addr == compareValue) { *addr = newValue; }</code>.
+</p>
+
+<p> You can check that the value was written by checking that the value returned
+by rsAtomicCas() is compareValue.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicDec'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicDec</span>
+    <span class='normal'>: Thread-safe decrement</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicDec(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicDec(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 20</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to decrement.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly subtracts one from the value at addr.  This is equivalent to <code><a href='rs_atomic.html#android_rs:rsAtomicSub'>rsAtomicSub</a>(addr, 1)</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicInc'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicInc</span>
+    <span class='normal'>: Thread-safe increment</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicInc(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicInc(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 20</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to increment.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly adds one to the value at addr.  This is equivalent to <code><a href='rs_atomic.html#android_rs:rsAtomicAdd'>rsAtomicAdd</a>(addr, 1)</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicMax'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicMax</span>
+    <span class='normal'>: Thread-safe maximum</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicMax(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsAtomicMax(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to modify.</td></tr>
+    <tr><th>value</th><td>Comparison value.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly sets the value at addr to the maximum of *addr and value, i.e.
+<code>*addr = max(*addr, value)</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicMin'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicMin</span>
+    <span class='normal'>: Thread-safe minimum</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicMin(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsAtomicMin(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to modify.</td></tr>
+    <tr><th>value</th><td>Comparison value.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly sets the value at addr to the minimum of *addr and value, i.e.
+<code>*addr = min(*addr, value)</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicOr'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicOr</span>
+    <span class='normal'>: Thread-safe bitwise or</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicOr(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicOr(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 20</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to modify.</td></tr>
+    <tr><th>value</th><td>Value to or with.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly perform a bitwise or two values, storing the result at addr,
+i.e. <code>*addr |= value</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicSub'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicSub</span>
+    <span class='normal'>: Thread-safe subtraction</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicSub(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicSub(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 20</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to modify.</td></tr>
+    <tr><th>value</th><td>Amount to subtract.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly subtracts a value from the value at addr, i.e. <code>*addr -= value</code>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAtomicXor'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAtomicXor</span>
+    <span class='normal'>: Thread-safe bitwise exclusive or</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicXor(volatile <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>* addr, <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a> rsAtomicXor(volatile <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>* addr, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> value);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 20</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>addr</th><td>Address of the value to modify.</td></tr>
+    <tr><th>value</th><td>Value to xor with.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Value of *addr prior to the operation.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Atomicly performs a bitwise xor of two values, storing the result at addr,
+i.e. <code>*addr ^= value</code>.
+</p>
+  </div>
+</div>
+
+</div>

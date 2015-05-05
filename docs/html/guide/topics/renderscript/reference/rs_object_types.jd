@@ -1,0 +1,336 @@
+page.title=RenderScript Object Types
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> The types below are used to manipulate RenderScript objects like allocations, samplers,
+elements, and scripts.  Most of these object are created using the Java RenderScript APIs.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to an allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_allocation_cubemap_face'>rs_allocation_cubemap_face</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Enum for selecting cube map faces
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_allocation_usage_type'>rs_allocation_usage_type</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Bitfield to specify how an allocation is used
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_data_kind'>rs_data_kind</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Element data kind
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_data_type'>rs_data_type</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Element basic data type
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_element'>rs_element</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to an element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_sampler'>rs_sampler</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a Sampler
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_sampler_value'>rs_sampler_value</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sampler wrap T value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_script'>rs_script</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a Script
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_type'>rs_type</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a Type
+    </td>
+  </tr>
+</tbody></table>
+<h2>Types</h2>
+<a name='android_rs:rs_allocation'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_allocation</span>
+    <span class='normal'>: Handle to an allocation</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> An opaque handle to a RenderScript allocation.
+</p>
+
+<p> See <a href="http://developer.android.com/reference/android/renderscript/Allocation.html">android.renderscript.Allocation</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_allocation_cubemap_face'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_allocation_cubemap_face</span>
+    <span class='normal'>: Enum for selecting cube map faces</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X = 0</th><td></td></tr>
+    <tr><th>RS_ALLOCATION_CUBEMAP_FACE_NEGATIVE_X = 1</th><td></td></tr>
+    <tr><th>RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_Y = 2</th><td></td></tr>
+    <tr><th>RS_ALLOCATION_CUBEMAP_FACE_NEGATIVE_Y = 3</th><td></td></tr>
+    <tr><th>RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_Z = 4</th><td></td></tr>
+    <tr><th>RS_ALLOCATION_CUBEMAP_FACE_NEGATIVE_Z = 5</th><td></td></tr>
+  </tbody></table><br/>
+<p> An enum used to specify one the six faces of a cubemap.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_allocation_usage_type'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_allocation_usage_type</span>
+    <span class='normal'>: Bitfield to specify how an allocation is used</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_ALLOCATION_USAGE_SCRIPT = 0x0001</th><td>Allocation is bound to and accessed by scripts.</td></tr>
+    <tr><th>RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE = 0x0002</th><td>Deprecated.</td></tr>
+    <tr><th>RS_ALLOCATION_USAGE_GRAPHICS_VERTEX = 0x0004</th><td>Deprecated.</td></tr>
+    <tr><th>RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS = 0x0008</th><td>Deprecated.</td></tr>
+    <tr><th>RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET = 0x0010</th><td>Deprecated.</td></tr>
+    <tr><th>RS_ALLOCATION_USAGE_IO_INPUT = 0x0020</th><td>Allocation is used as a Surface consumer.</td></tr>
+    <tr><th>RS_ALLOCATION_USAGE_IO_OUTPUT = 0x0040</th><td>Allocation is used as a Surface producer.</td></tr>
+    <tr><th>RS_ALLOCATION_USAGE_SHARED = 0x0080</th><td>Allocation's backing store is shared with another object (usually a Bitmap).  Copying to or from the original source Bitmap will cause a synchronization rather than a full copy.</td></tr>
+  </tbody></table><br/>
+<p> These values are ORed together to specify which usages or memory spaces are
+relevant to an allocation or an operation on an allocation.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_data_kind'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_data_kind</span>
+    <span class='normal'>: Element data kind</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_KIND_USER         = 0</th><td>No special interpretation.</td></tr>
+    <tr><th>RS_KIND_PIXEL_L      = 7</th><td>Luminance.</td></tr>
+    <tr><th>RS_KIND_PIXEL_A      = 8</th><td>Alpha.</td></tr>
+    <tr><th>RS_KIND_PIXEL_LA     = 9</th><td>Luminance and Alpha.</td></tr>
+    <tr><th>RS_KIND_PIXEL_RGB    = 10</th><td>Red, Green, Blue.</td></tr>
+    <tr><th>RS_KIND_PIXEL_RGBA   = 11</th><td>Red, Green, Blue, and Alpha.</td></tr>
+    <tr><th>RS_KIND_PIXEL_DEPTH  = 12</th><td>Depth for a depth texture.</td></tr>
+    <tr><th>RS_KIND_PIXEL_YUV    = 13</th><td>Luminance and chrominance.</td></tr>
+    <tr><th>RS_KIND_INVALID      = 100</th><td></td></tr>
+  </tbody></table><br/>
+<p> This enumeration is primarly useful for graphical data.  It provides additional information to
+help interpret the rs_data_type.
+</p>
+
+<p> RS_KIND_USER indicates no special interpretation is expected.
+</p>
+
+<p> The RS_KIND_PIXEL_* values are used in conjunction with the standard data types for representing
+texture formats.
+</p>
+
+<p> See the <a href='http://developer.android.com/reference/android/renderscript/Element.html#createPixel(android.renderscript.RenderScript,%20android.renderscript.Element.DataType, android.renderscript.Element.DataKind)'>Element.createPixel()</a> method.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_data_type'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_data_type</span>
+    <span class='normal'>: Element basic data type</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_TYPE_NONE = 0</th><td>Element is a complex type, i.e. a struct.</td></tr>
+    <tr><th>RS_TYPE_FLOAT_32 = 2</th><td>A 32 bit float point value.</td></tr>
+    <tr><th>RS_TYPE_FLOAT_64 = 3</th><td>A 64 bit floating point value.</td></tr>
+    <tr><th>RS_TYPE_SIGNED_8 = 4</th><td>An 8 bit signed integer.</td></tr>
+    <tr><th>RS_TYPE_SIGNED_16 = 5</th><td>A 16 bit signed integer.</td></tr>
+    <tr><th>RS_TYPE_SIGNED_32 = 6</th><td>A 32 bit signed integer.</td></tr>
+    <tr><th>RS_TYPE_SIGNED_64 = 7</th><td>A 64 bit signed integer.</td></tr>
+    <tr><th>RS_TYPE_UNSIGNED_8 = 8</th><td>An 8 bit unsigned integer.</td></tr>
+    <tr><th>RS_TYPE_UNSIGNED_16 = 9</th><td>A 16 bit unsigned integer.</td></tr>
+    <tr><th>RS_TYPE_UNSIGNED_32 = 10</th><td>A 32 bit unsigned integer.</td></tr>
+    <tr><th>RS_TYPE_UNSIGNED_64 = 11</th><td>A 64 bit unsigned integer.</td></tr>
+    <tr><th>RS_TYPE_BOOLEAN = 12</th><td>0 or 1 (false or true) stored in an 8 bit container.</td></tr>
+    <tr><th>RS_TYPE_UNSIGNED_5_6_5 = 13</th><td>A 16 bit unsigned integer packing graphical data in 5, 6, and 5 bit sections.</td></tr>
+    <tr><th>RS_TYPE_UNSIGNED_5_5_5_1 = 14</th><td>A 16 bit unsigned integer packing graphical data in 5, 5, 5, and 1 bit sections.</td></tr>
+    <tr><th>RS_TYPE_UNSIGNED_4_4_4_4 = 15</th><td>A 16 bit unsigned integer packing graphical data in 4, 4, 4, and 4 bit sections.</td></tr>
+    <tr><th>RS_TYPE_MATRIX_4X4 = 16</th><td>A 4x4 matrix of 32 bit floats, aligned on a 32 bit boundary.</td></tr>
+    <tr><th>RS_TYPE_MATRIX_3X3 = 17</th><td>A 3x3 matrix of 32 bit floats, aligned on a 32 bit boundary.</td></tr>
+    <tr><th>RS_TYPE_MATRIX_2X2 = 18</th><td>A 2x2 matrix of 32 bit floats, aligned on a 32 bit boundary.</td></tr>
+    <tr><th>RS_TYPE_ELEMENT = 1000</th><td>A handle to an Element.</td></tr>
+    <tr><th>RS_TYPE_TYPE = 1001</th><td>A handle to a Type.</td></tr>
+    <tr><th>RS_TYPE_ALLOCATION = 1002</th><td>A handle to an Allocation.</td></tr>
+    <tr><th>RS_TYPE_SAMPLER = 1003</th><td>A handle to a Sampler.</td></tr>
+    <tr><th>RS_TYPE_SCRIPT = 1004</th><td>A handle to a Script.</td></tr>
+    <tr><th>RS_TYPE_MESH = 1005</th><td>Deprecated.</td></tr>
+    <tr><th>RS_TYPE_PROGRAM_FRAGMENT = 1006</th><td>Deprecated.</td></tr>
+    <tr><th>RS_TYPE_PROGRAM_VERTEX = 1007</th><td>Deprecated.</td></tr>
+    <tr><th>RS_TYPE_PROGRAM_RASTER = 1008</th><td>Deprecated.</td></tr>
+    <tr><th>RS_TYPE_PROGRAM_STORE = 1009</th><td>Deprecated.</td></tr>
+    <tr><th>RS_TYPE_FONT = 1010</th><td>Deprecated.</td></tr>
+    <tr><th>RS_TYPE_INVALID = 10000</th><td></td></tr>
+  </tbody></table><br/>
+<p> rs_data_type is used to encode the type information of a basic element.
+</p>
+
+<p> RS_TYPE_UNSIGNED_5_6_5, RS_TYPE_UNSIGNED_5_5_5_1, RS_TYPE_UNSIGNED_4_4_4_4 are for packed
+graphical data formats and represent vectors with per vector member sizes which are treated
+as a single unit for packing and alignment purposes.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_element'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_element</span>
+    <span class='normal'>: Handle to an element</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> An opaque handle to a RenderScript element.
+</p>
+
+<p> See <a href="http://developer.android.com/reference/android/renderscript/Element.html">android.renderscript.Element</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_sampler'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_sampler</span>
+    <span class='normal'>: Handle to a Sampler</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> An opaque handle to a RenderScript sampler object.
+</p>
+
+<p> See <a href="http://developer.android.com/reference/android/renderscript/Sampler.html">android.renderscript.Sampler</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_sampler_value'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_sampler_value</span>
+    <span class='normal'>: Sampler wrap T value</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_SAMPLER_NEAREST = 0</th><td></td></tr>
+    <tr><th>RS_SAMPLER_LINEAR = 1</th><td></td></tr>
+    <tr><th>RS_SAMPLER_LINEAR_MIP_LINEAR = 2</th><td></td></tr>
+    <tr><th>RS_SAMPLER_WRAP = 3</th><td></td></tr>
+    <tr><th>RS_SAMPLER_CLAMP = 4</th><td></td></tr>
+    <tr><th>RS_SAMPLER_LINEAR_MIP_NEAREST = 5</th><td></td></tr>
+    <tr><th>RS_SAMPLER_MIRRORED_REPEAT = 6</th><td></td></tr>
+    <tr><th>RS_SAMPLER_INVALID = 100</th><td></td></tr>
+  </tbody></table><br/>
+  </div>
+</div>
+
+<a name='android_rs:rs_script'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_script</span>
+    <span class='normal'>: Handle to a Script</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> An opaque handle to a RenderScript script object.
+</p>
+
+<p> See <a href="http://developer.android.com/reference/android/renderscript/ScriptC.html">android.renderscript.ScriptC</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_type'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_type</span>
+    <span class='normal'>: Handle to a Type</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> An opaque handle to a RenderScript type.
+</p>
+
+<p> See <a href="http://developer.android.com/reference/android/renderscript/Type.html">android.renderscript.Type</a>.
+</p>
+  </div>
+</div>
+
+</div>

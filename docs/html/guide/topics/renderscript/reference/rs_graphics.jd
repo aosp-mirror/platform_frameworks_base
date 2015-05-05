@@ -1,0 +1,2085 @@
+page.title=RenderScript Graphics Functions and Types
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> The graphics subsystem of RenderScript has been deprecated.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Deprecated Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_blend_dst_func'>rs_blend_dst_func</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Blend destination function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_blend_src_func'>rs_blend_src_func</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Blend source function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_cull_mode'>rs_cull_mode</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Culling mode
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_depth_func'>rs_depth_func</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Depth function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_font'>rs_font</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Handle to a Font
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Handle to a Mesh
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_primitive'>rs_primitive</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  How to intepret mesh vertex data
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Handle to a ProgramFragment
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Handle to a ProgramRaster
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Handle to a ProgramStore
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rs_program_vertex'>rs_program_vertex</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Handle to a ProgramVertex
+    </td>
+  </tr>
+</tbody></table>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Deprecated Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgAllocationSyncAll'>rsgAllocationSyncAll</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Sync the contents of an allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindColorTarget'>rsgBindColorTarget</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Set the color target
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindConstant'>rsgBindConstant</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Bind a constant allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindDepthTarget'>rsgBindDepthTarget</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Set the depth target
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindFont'>rsgBindFont</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Bind a font object
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindProgramFragment'>rsgBindProgramFragment</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Bind a ProgramFragment
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindProgramRaster'>rsgBindProgramRaster</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Bind a ProgramRaster
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindProgramStore'>rsgBindProgramStore</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Bind a ProgramStore
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindProgramVertex'>rsgBindProgramVertex</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Bind a ProgramVertex
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindSampler'>rsgBindSampler</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Bind a sampler
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgBindTexture'>rsgBindTexture</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Bind a texture allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgClearAllRenderTargets'>rsgClearAllRenderTargets</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Clear all color and depth targets
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgClearColor'>rsgClearColor</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Clear the specified color from the surface
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgClearColorTarget'>rsgClearColorTarget</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Clear the color target
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgClearDepth'>rsgClearDepth</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Clear the depth surface
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgClearDepthTarget'>rsgClearDepthTarget</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Clear the depth target
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgDrawMesh'>rsgDrawMesh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Draw a mesh
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgDrawQuad'>rsgDrawQuad</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Draw a quad
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgDrawQuadTexCoords'>rsgDrawQuadTexCoords</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Draw a textured quad
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgDrawRect'>rsgDrawRect</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Draw a rectangle
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgDrawSpriteScreenspace'>rsgDrawSpriteScreenspace</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Draw rectangles in screenspace
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgDrawText'>rsgDrawText</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Draw a text string
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgFinish'>rsgFinish</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  End rendering commands
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgFontColor'>rsgFontColor</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Set the font color
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgGetHeight'>rsgGetHeight</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get the surface height
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgGetWidth'>rsgGetWidth</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get the surface width
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgMeasureText'>rsgMeasureText</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get the bounding box for a text string
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgMeshComputeBoundingBox'>rsgMeshComputeBoundingBox</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Compute a bounding box
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgMeshGetIndexAllocation'>rsgMeshGetIndexAllocation</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Return an allocation containing index data
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgMeshGetPrimitive'>rsgMeshGetPrimitive</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Return the primitive
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgMeshGetPrimitiveCount'>rsgMeshGetPrimitiveCount</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Return the number of index sets
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgMeshGetVertexAllocation'>rsgMeshGetVertexAllocation</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Return a vertex allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgMeshGetVertexAllocationCount'>rsgMeshGetVertexAllocationCount</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Return the number of vertex allocations
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramFragmentConstantColor'>rsgProgramFragmentConstantColor</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Set the constant color for a fixed function emulation program
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramRasterGetCullMode'>rsgProgramRasterGetCullMode</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program raster cull mode
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramRasterIsPointSpriteEnabled'>rsgProgramRasterIsPointSpriteEnabled</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program raster point sprite state
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreGetBlendDstFunc'>rsgProgramStoreGetBlendDstFunc</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store blend destination function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreGetBlendSrcFunc'>rsgProgramStoreGetBlendSrcFunc</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store blend source function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreGetDepthFunc'>rsgProgramStoreGetDepthFunc</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store depth function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreIsColorMaskAlphaEnabled'>rsgProgramStoreIsColorMaskAlphaEnabled</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store alpha component color mask
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreIsColorMaskBlueEnabled'>rsgProgramStoreIsColorMaskBlueEnabled</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store blur component color mask
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreIsColorMaskGreenEnabled'>rsgProgramStoreIsColorMaskGreenEnabled</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store green component color mask
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreIsColorMaskRedEnabled'>rsgProgramStoreIsColorMaskRedEnabled</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store red component color mask
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreIsDepthMaskEnabled'>rsgProgramStoreIsDepthMaskEnabled</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store depth mask
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramStoreIsDitherEnabled'>rsgProgramStoreIsDitherEnabled</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get program store dither state
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramVertexGetProjectionMatrix'>rsgProgramVertexGetProjectionMatrix</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Get the projection matrix for a fixed function vertex program
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramVertexLoadModelMatrix'>rsgProgramVertexLoadModelMatrix</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Load the model matrix for a bound fixed function vertex program
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramVertexLoadProjectionMatrix'>rsgProgramVertexLoadProjectionMatrix</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Load the projection matrix for a bound fixed function vertex program
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_graphics.html#android_rs:rsgProgramVertexLoadTextureMatrix'>rsgProgramVertexLoadTextureMatrix</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      <b>Deprecated</b>.  Load the texture matrix for a bound fixed function vertex program
+    </td>
+  </tr>
+</tbody></table>
+<h2>Types</h2>
+<a name='android_rs:rs_blend_dst_func'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_blend_dst_func</span>
+    <span class='normal'>: Blend destination function</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_BLEND_DST_ZERO = 0</th><td></td></tr>
+    <tr><th>RS_BLEND_DST_ONE = 1</th><td></td></tr>
+    <tr><th>RS_BLEND_DST_SRC_COLOR = 2</th><td></td></tr>
+    <tr><th>RS_BLEND_DST_ONE_MINUS_SRC_COLOR = 3</th><td></td></tr>
+    <tr><th>RS_BLEND_DST_SRC_ALPHA = 4</th><td></td></tr>
+    <tr><th>RS_BLEND_DST_ONE_MINUS_SRC_ALPHA = 5</th><td></td></tr>
+    <tr><th>RS_BLEND_DST_DST_ALPHA = 6</th><td></td></tr>
+    <tr><th>RS_BLEND_DST_ONE_MINUS_DST_ALPHA = 7</th><td></td></tr>
+    <tr><th>RS_BLEND_DST_INVALID = 100</th><td></td></tr>
+  </tbody></table><br/>
+    <p><b>Deprecated.</b>  Do not use.</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_blend_src_func'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_blend_src_func</span>
+    <span class='normal'>: Blend source function</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_BLEND_SRC_ZERO = 0</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_ONE = 1</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_DST_COLOR = 2</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_ONE_MINUS_DST_COLOR = 3</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_SRC_ALPHA = 4</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_ONE_MINUS_SRC_ALPHA = 5</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_DST_ALPHA = 6</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_ONE_MINUS_DST_ALPHA = 7</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_SRC_ALPHA_SATURATE = 8</th><td></td></tr>
+    <tr><th>RS_BLEND_SRC_INVALID = 100</th><td></td></tr>
+  </tbody></table><br/>
+    <p><b>Deprecated.</b>  Do not use.</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_cull_mode'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_cull_mode</span>
+    <span class='normal'>: Culling mode</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_CULL_BACK = 0</th><td></td></tr>
+    <tr><th>RS_CULL_FRONT = 1</th><td></td></tr>
+    <tr><th>RS_CULL_NONE = 2</th><td></td></tr>
+    <tr><th>RS_CULL_INVALID = 100</th><td></td></tr>
+  </tbody></table><br/>
+    <p><b>Deprecated.</b>  Do not use.</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_depth_func'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_depth_func</span>
+    <span class='normal'>: Depth function</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_DEPTH_FUNC_ALWAYS = 0</th><td>Always drawn</td></tr>
+    <tr><th>RS_DEPTH_FUNC_LESS = 1</th><td>Drawn if the incoming depth value is less than that in the depth buffer</td></tr>
+    <tr><th>RS_DEPTH_FUNC_LEQUAL = 2</th><td>Drawn if the incoming depth value is less or equal to that in the depth buffer</td></tr>
+    <tr><th>RS_DEPTH_FUNC_GREATER = 3</th><td>Drawn if the incoming depth value is greater than that in the depth buffer</td></tr>
+    <tr><th>RS_DEPTH_FUNC_GEQUAL = 4</th><td>Drawn if the incoming depth value is greater or equal to that in the depth buffer</td></tr>
+    <tr><th>RS_DEPTH_FUNC_EQUAL = 5</th><td>Drawn if the incoming depth value is equal to that in the depth buffer</td></tr>
+    <tr><th>RS_DEPTH_FUNC_NOTEQUAL = 6</th><td>Drawn if the incoming depth value is not equal to that in the depth buffer</td></tr>
+    <tr><th>RS_DEPTH_FUNC_INVALID = 100</th><td>Invalid depth function</td></tr>
+  </tbody></table><br/>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Specifies conditional drawing depending on the comparison of the incoming
+depth to that found in the depth buffer.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_font'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_font</span>
+    <span class='normal'>: Handle to a Font</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Opaque handle to a RenderScript font object.
+See: android.renderscript.Font
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_mesh'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_mesh</span>
+    <span class='normal'>: Handle to a Mesh</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Opaque handle to a RenderScript mesh object.
+See: android.renderscript.Mesh
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_primitive'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_primitive</span>
+    <span class='normal'>: How to intepret mesh vertex data</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_PRIMITIVE_POINT = 0</th><td>Vertex data will be rendered as a series of points</td></tr>
+    <tr><th>RS_PRIMITIVE_LINE = 1</th><td>Vertex pairs will be rendered as lines</td></tr>
+    <tr><th>RS_PRIMITIVE_LINE_STRIP = 2</th><td>Vertex data will be rendered as a connected line strip</td></tr>
+    <tr><th>RS_PRIMITIVE_TRIANGLE = 3</th><td>Vertices will be rendered as individual triangles</td></tr>
+    <tr><th>RS_PRIMITIVE_TRIANGLE_STRIP = 4</th><td>Vertices will be rendered as a connected triangle strip defined by the first three vertices with each additional triangle defined by a new vertex</td></tr>
+    <tr><th>RS_PRIMITIVE_TRIANGLE_FAN = 5</th><td>Vertices will be rendered as a sequence of triangles that all share first vertex as the origin</td></tr>
+    <tr><th>RS_PRIMITIVE_INVALID = 100</th><td>Invalid primitive</td></tr>
+  </tbody></table><br/>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Describes the way mesh vertex data is interpreted when rendering
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_program_fragment'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_program_fragment</span>
+    <span class='normal'>: Handle to a ProgramFragment</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Opaque handle to a RenderScript ProgramFragment object.
+See: android.renderscript.ProgramFragment
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_program_raster'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_program_raster</span>
+    <span class='normal'>: Handle to a ProgramRaster</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Opaque handle to a RenderScript ProgramRaster object.
+See: android.renderscript.ProgramRaster
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_program_store'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_program_store</span>
+    <span class='normal'>: Handle to a ProgramStore</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Opaque handle to a RenderScript ProgramStore object.
+See: android.renderscript.ProgramStore
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_program_vertex'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_program_vertex</span>
+    <span class='normal'>: Handle to a ProgramVertex</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: _RS_HANDLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Opaque handle to a RenderScript ProgramVertex object.
+See: android.renderscript.ProgramVertex
+</p>
+  </div>
+</div>
+
+<h2>Functions</h2>
+<a name='android_rs:rsgAllocationSyncAll'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgAllocationSyncAll</span>
+    <span class='normal'>: Sync the contents of an allocation</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgAllocationSyncAll(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+      <tr>
+        <td>void rsgAllocationSyncAll(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc, <a href='rs_object_types.html#android_rs:rs_allocation_usage_type'>rs_allocation_usage_type</a> source);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Sync the contents of an allocation.
+</p>
+
+<p> If the source is specified, sync from memory space specified by source.
+</p>
+
+<p> If the source is not specified, sync from its SCRIPT memory space to its HW
+memory spaces.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindColorTarget'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindColorTarget</span>
+    <span class='normal'>: Set the color target</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindColorTarget(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> colorTarget, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Set the color target used for all subsequent rendering calls
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindConstant'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindConstant</span>
+    <span class='normal'>: Bind a constant allocation</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindConstant(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> ps, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> c);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+      <tr>
+        <td>void rsgBindConstant(<a href='rs_graphics.html#android_rs:rs_program_vertex'>rs_program_vertex</a> pv, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> c);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program fragment object</td></tr>
+    <tr><th>slot</th><td>index of the constant buffer on the program</td></tr>
+    <tr><th>c</th><td>constants to bind</td></tr>
+    <tr><th>pv</th><td>program vertex object</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Bind a new Allocation object to a ProgramFragment or ProgramVertex.
+The Allocation must be a valid constant input for the Program.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindDepthTarget'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindDepthTarget</span>
+    <span class='normal'>: Set the depth target</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindDepthTarget(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> depthTarget);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Set the depth target used for all subsequent rendering calls
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindFont'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindFont</span>
+    <span class='normal'>: Bind a font object</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindFont(<a href='rs_graphics.html#android_rs:rs_font'>rs_font</a> font);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>font</th><td>object to bind</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Binds the font object to be used for all subsequent font rendering calls
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindProgramFragment'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindProgramFragment</span>
+    <span class='normal'>: Bind a ProgramFragment</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindProgramFragment(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> pf);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Bind a new ProgramFragment to the rendering context.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindProgramRaster'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindProgramRaster</span>
+    <span class='normal'>: Bind a ProgramRaster</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindProgramRaster(<a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a> pr);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Bind a new ProgramRaster to the rendering context.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindProgramStore'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindProgramStore</span>
+    <span class='normal'>: Bind a ProgramStore</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindProgramStore(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Bind a new ProgramStore to the rendering context.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindProgramVertex'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindProgramVertex</span>
+    <span class='normal'>: Bind a ProgramVertex</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindProgramVertex(<a href='rs_graphics.html#android_rs:rs_program_vertex'>rs_program_vertex</a> pv);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Bind a new ProgramVertex to the rendering context.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindSampler'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindSampler</span>
+    <span class='normal'>: Bind a sampler</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindSampler(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> fragment, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot, <a href='rs_object_types.html#android_rs:rs_sampler'>rs_sampler</a> sampler);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Bind a new Sampler object to a ProgramFragment.  The sampler will
+operate on the texture bound at the matching slot.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgBindTexture'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgBindTexture</span>
+    <span class='normal'>: Bind a texture allocation</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgBindTexture(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> v, <a href='rs_value_types.html#android_rs:uint'>uint</a> slot, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Bind a new Allocation object to a ProgramFragment.  The
+Allocation must be a valid texture for the Program.  The sampling
+of the texture will be controled by the Sampler bound at the
+matching slot.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgClearAllRenderTargets'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgClearAllRenderTargets</span>
+    <span class='normal'>: Clear all color and depth targets</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgClearAllRenderTargets();
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Clear all color and depth targets and resume rendering into
+the framebuffer
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgClearColor'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgClearColor</span>
+    <span class='normal'>: Clear the specified color from the surface</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgClearColor(float r, float g, float b, float a);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Clears the rendering surface to the specified color.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgClearColorTarget'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgClearColorTarget</span>
+    <span class='normal'>: Clear the color target</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgClearColorTarget(<a href='rs_value_types.html#android_rs:uint'>uint</a> slot);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Clear the previously set color target
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgClearDepth'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgClearDepth</span>
+    <span class='normal'>: Clear the depth surface</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgClearDepth(float value);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Clears the depth suface to the specified value.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgClearDepthTarget'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgClearDepthTarget</span>
+    <span class='normal'>: Clear the depth target</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgClearDepthTarget();
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Clear the previously set depth target
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgDrawMesh'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgDrawMesh</span>
+    <span class='normal'>: Draw a mesh</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgDrawMesh(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> ism);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+      <tr>
+        <td>void rsgDrawMesh(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> ism, <a href='rs_value_types.html#android_rs:uint'>uint</a> primitiveIndex);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+      <tr>
+        <td>void rsgDrawMesh(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> ism, <a href='rs_value_types.html#android_rs:uint'>uint</a> primitiveIndex, <a href='rs_value_types.html#android_rs:uint'>uint</a> start, <a href='rs_value_types.html#android_rs:uint'>uint</a> len);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ism</th><td>mesh object to render</td></tr>
+    <tr><th>primitiveIndex</th><td>for meshes that contain multiple primitive groups this parameter specifies the index of the group to draw.</td></tr>
+    <tr><th>start</th><td>starting index in the range</td></tr>
+    <tr><th>len</th><td>number of indices to draw</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Draw a mesh using the current context state.
+</p>
+
+<p> If primitiveIndex is specified, draw part of a mesh using the current context state.
+</p>
+
+<p> If start and len are also specified, draw specified index range of part of a mesh using the current context state.
+</p>
+
+<p> Otherwise the whole mesh is rendered.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgDrawQuad'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgDrawQuad</span>
+    <span class='normal'>: Draw a quad</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgDrawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Low performance utility function for drawing a simple quad.  Not intended for
+drawing large quantities of geometry.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgDrawQuadTexCoords'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgDrawQuadTexCoords</span>
+    <span class='normal'>: Draw a textured quad</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgDrawQuadTexCoords(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Low performance utility function for drawing a textured quad.  Not intended
+for drawing large quantities of geometry.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgDrawRect'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgDrawRect</span>
+    <span class='normal'>: Draw a rectangle</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgDrawRect(float x1, float y1, float x2, float y2, float z);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Low performance utility function for drawing a simple rectangle.  Not
+intended for drawing large quantities of geometry.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgDrawSpriteScreenspace'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgDrawSpriteScreenspace</span>
+    <span class='normal'>: Draw rectangles in screenspace</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgDrawSpriteScreenspace(float x, float y, float z, float w, float h);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Low performance function for drawing rectangles in screenspace.  This
+function uses the default passthough ProgramVertex.  Any bound ProgramVertex
+is ignored.  This function has considerable overhead and should not be used
+for drawing in shipping applications.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgDrawText'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgDrawText</span>
+    <span class='normal'>: Draw a text string</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgDrawText(const char* text, int x, int y);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+      <tr>
+        <td>void rsgDrawText(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc, int x, int y);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Draws text given a string and location
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgFinish'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgFinish</span>
+    <span class='normal'>: End rendering commands</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint'>uint</a> rsgFinish();
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Force RenderScript to finish all rendering commands
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgFontColor'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgFontColor</span>
+    <span class='normal'>: Set the font color</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgFontColor(float r, float g, float b, float a);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>r</th><td>red component</td></tr>
+    <tr><th>g</th><td>green component</td></tr>
+    <tr><th>b</th><td>blue component</td></tr>
+    <tr><th>a</th><td>alpha component</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Sets the font color for all subsequent rendering calls
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgGetHeight'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgGetHeight</span>
+    <span class='normal'>: Get the surface height</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint'>uint</a> rsgGetHeight();
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get the height of the current rendering surface.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgGetWidth'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgGetWidth</span>
+    <span class='normal'>: Get the surface width</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint'>uint</a> rsgGetWidth();
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get the width of the current rendering surface.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgMeasureText'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgMeasureText</span>
+    <span class='normal'>: Get the bounding box for a text string</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgMeasureText(const char* text, int* left, int* right, int* top, int* bottom);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+      <tr>
+        <td>void rsgMeasureText(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> alloc, int* left, int* right, int* top, int* bottom);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Returns the bounding box of the text relative to (0, 0)
+Any of left, right, top, bottom could be NULL
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgMeshComputeBoundingBox'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgMeshComputeBoundingBox</span>
+    <span class='normal'>: Compute a bounding box</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgMeshComputeBoundingBox(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> mesh, float* minX, float* minY, float* min, float* maxX, float* maxY, float* maxZ);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+      <tr>
+        <td>void rsgMeshComputeBoundingBox(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> mesh, <a href='rs_value_types.html#android_rs:float3'>float3</a>* bBoxMin, <a href='rs_value_types.html#android_rs:float3'>float3</a>* bBoxMax);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Computes an axis aligned bounding box of a mesh object
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgMeshGetIndexAllocation'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgMeshGetIndexAllocation</span>
+    <span class='normal'>: Return an allocation containing index data</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsgMeshGetIndexAllocation(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> index);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>mesh to get data from</td></tr>
+    <tr><th>index</th><td>index of the index allocation</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>allocation containing index data</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Returns an allocation containing index data or a null
+allocation if only the primitive is specified
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgMeshGetPrimitive'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgMeshGetPrimitive</span>
+    <span class='normal'>: Return the primitive</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_graphics.html#android_rs:rs_primitive'>rs_primitive</a> rsgMeshGetPrimitive(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> index);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>mesh to get data from</td></tr>
+    <tr><th>index</th><td>index of the primitive</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>primitive describing how the mesh is rendered</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Returns the primitive describing how a part of the mesh is
+rendered
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgMeshGetPrimitiveCount'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgMeshGetPrimitiveCount</span>
+    <span class='normal'>: Return the number of index sets</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsgMeshGetPrimitiveCount(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>mesh to get data from</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>number of primitive groups in the mesh. This would include simple primitives as well as allocations containing index data</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Meshes could have multiple index sets, this function returns
+the number.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgMeshGetVertexAllocation'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgMeshGetVertexAllocation</span>
+    <span class='normal'>: Return a vertex allocation</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> rsgMeshGetVertexAllocation(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> index);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>mesh to get data from</td></tr>
+    <tr><th>index</th><td>index of the vertex allocation</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>allocation containing vertex data</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Returns an allocation that is part of the mesh and contains
+vertex data, e.g. positions, normals, texcoords
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgMeshGetVertexAllocationCount'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgMeshGetVertexAllocationCount</span>
+    <span class='normal'>: Return the number of vertex allocations</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a> rsgMeshGetVertexAllocationCount(<a href='rs_graphics.html#android_rs:rs_mesh'>rs_mesh</a> m);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>m</th><td>mesh to get data from</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>number of allocations in the mesh that contain vertex data</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Returns the number of allocations in the mesh that contain
+vertex data
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramFragmentConstantColor'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramFragmentConstantColor</span>
+    <span class='normal'>: Set the constant color for a fixed function emulation program</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgProgramFragmentConstantColor(<a href='rs_graphics.html#android_rs:rs_program_fragment'>rs_program_fragment</a> pf, float r, float g, float b, float a);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Set the constant color for a fixed function emulation program.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramRasterGetCullMode'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramRasterGetCullMode</span>
+    <span class='normal'>: Get program raster cull mode</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_graphics.html#android_rs:rs_cull_mode'>rs_cull_mode</a> rsgProgramRasterGetCullMode(<a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a> pr);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>pr</th><td>program raster to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program raster cull mode
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramRasterIsPointSpriteEnabled'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramRasterIsPointSpriteEnabled</span>
+    <span class='normal'>: Get program raster point sprite state</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsgProgramRasterIsPointSpriteEnabled(<a href='rs_graphics.html#android_rs:rs_program_raster'>rs_program_raster</a> pr);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>pr</th><td>program raster to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program raster point sprite state
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreGetBlendDstFunc'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreGetBlendDstFunc</span>
+    <span class='normal'>: Get program store blend destination function</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_graphics.html#android_rs:rs_blend_dst_func'>rs_blend_dst_func</a> rsgProgramStoreGetBlendDstFunc(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store blend destination function
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreGetBlendSrcFunc'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreGetBlendSrcFunc</span>
+    <span class='normal'>: Get program store blend source function</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_graphics.html#android_rs:rs_blend_src_func'>rs_blend_src_func</a> rsgProgramStoreGetBlendSrcFunc(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store blend source function
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreGetDepthFunc'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreGetDepthFunc</span>
+    <span class='normal'>: Get program store depth function</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_graphics.html#android_rs:rs_depth_func'>rs_depth_func</a> rsgProgramStoreGetDepthFunc(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store depth function
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreIsColorMaskAlphaEnabled'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreIsColorMaskAlphaEnabled</span>
+    <span class='normal'>: Get program store alpha component color mask</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsgProgramStoreIsColorMaskAlphaEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store alpha component color mask
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreIsColorMaskBlueEnabled'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreIsColorMaskBlueEnabled</span>
+    <span class='normal'>: Get program store blur component color mask</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsgProgramStoreIsColorMaskBlueEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store blur component color mask
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreIsColorMaskGreenEnabled'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreIsColorMaskGreenEnabled</span>
+    <span class='normal'>: Get program store green component color mask</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsgProgramStoreIsColorMaskGreenEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store green component color mask
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreIsColorMaskRedEnabled'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreIsColorMaskRedEnabled</span>
+    <span class='normal'>: Get program store red component color mask</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsgProgramStoreIsColorMaskRedEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store red component color mask
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreIsDepthMaskEnabled'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreIsDepthMaskEnabled</span>
+    <span class='normal'>: Get program store depth mask</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsgProgramStoreIsDepthMaskEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store depth mask
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramStoreIsDitherEnabled'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramStoreIsDitherEnabled</span>
+    <span class='normal'>: Get program store dither state</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsgProgramStoreIsDitherEnabled(<a href='rs_graphics.html#android_rs:rs_program_store'>rs_program_store</a> ps);
+</td>
+        <td>    When compiling for 32 bits. Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>ps</th><td>program store to query</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get program store dither state
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramVertexGetProjectionMatrix'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramVertexGetProjectionMatrix</span>
+    <span class='normal'>: Get the projection matrix for a fixed function vertex program</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgProgramVertexGetProjectionMatrix(<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* proj);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>proj</th><td>matrix to store the current projection matrix into</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Get the projection matrix for a currently bound fixed function
+vertex program. Calling this function with a custom vertex shader
+would result in an error.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramVertexLoadModelMatrix'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramVertexLoadModelMatrix</span>
+    <span class='normal'>: Load the model matrix for a bound fixed function vertex program</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgProgramVertexLoadModelMatrix(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* model);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>model</th><td>model matrix</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Load the model matrix for a currently bound fixed function
+vertex program. Calling this function with a custom vertex shader
+would result in an error.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramVertexLoadProjectionMatrix'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramVertexLoadProjectionMatrix</span>
+    <span class='normal'>: Load the projection matrix for a bound fixed function vertex program</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgProgramVertexLoadProjectionMatrix(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* proj);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>proj</th><td>projection matrix</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Load the projection matrix for a currently bound fixed function
+vertex program. Calling this function with a custom vertex shader
+would result in an error.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsgProgramVertexLoadTextureMatrix'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsgProgramVertexLoadTextureMatrix</span>
+    <span class='normal'>: Load the texture matrix for a bound fixed function vertex program</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsgProgramVertexLoadTextureMatrix(const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* tex);
+</td>
+        <td>    When compiling for 32 bits. 
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>tex</th><td>texture matrix</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+    <p><b>Deprecated.</b>  Do not use.</p>
+<p> Load the texture matrix for a currently bound fixed function
+vertex program. Calling this function with a custom vertex shader
+would result in an error.
+</p>
+  </div>
+</div>
+
+</div>
