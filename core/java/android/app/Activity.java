@@ -21,6 +21,7 @@ import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
@@ -891,6 +892,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onRestoreInstanceState
      * @see #onPostCreate
      */
+    @MainThread
     @CallSuper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);

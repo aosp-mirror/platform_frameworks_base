@@ -9062,5 +9062,15 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(METADATA_AUTHORITY_URI,
                 "metadata_sync");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of contact metadata
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single contact metadata.
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
     }
 }

@@ -1074,11 +1074,11 @@
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"तयारी गर्दै <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटिहरूको लागि जाँच गर्दै"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नयाँ <xliff:g id="NAME">%s</xliff:g> भेटियो"</string>
-    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"फोटोहरू र मिडिया स्थानान्तरणका लागि"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"तस्बिरहरू र मिडिया स्थानान्तरणका लागि"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4863279349863279603">"<xliff:g id="NAME">%s</xliff:g> बिग्रेको छ।"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> बिग्रेको छ; यसलाई पुनः फर्म्याट गर्न प्रयास गर्नुहोस्"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="7391672496565685690">"<xliff:g id="NAME">%s</xliff:g> बिग्रेको छ; यसलाई पुनः ढाँचा गर्न प्रयास गर्नुहोस्"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> अप्रत्याशित रूपमा निकालियो"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"डेटा नोक्सानबाट बच्न निकाल्नु अघि <xliff:g id="NAME">%s</xliff:g> अनमाउन्ट गर्नुहोस्"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"डेटा हराउनबाट जोगाउन निकाल्नु अघि <xliff:g id="NAME">%s</xliff:g> अनमाउन्ट गर्नुहोस्"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"निकालियो <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> निकालियो; नयाँ हाल्नुहोस्"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"अझै निकाल्दै <xliff:g id="NAME">%s</xliff:g>..."</string>
@@ -1086,6 +1086,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"सेटअप"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"निकाल्नुहोस्"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"अन्वेषण गर्नुहोस्"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> हराइरहेको"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"यो यन्त्र पुनःहाल्नुहोस्"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> सार्दै"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"डेटा सार्दै..."</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"सबै सार्नुहोस्"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"डेटा <xliff:g id="NAME">%s</xliff:g> मा सारियो"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"डेटा सार्न सकिएन"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"डेटा मूल स्थानबाट छुट्यो"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"कुनै मिल्ने गतिविधि पाइएन।"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"मिडिया परिणाम दिशानिर्देश गर्नुहोस्"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"मिडिया परिणामलाई अन्य बाहिरी उपकरणहरूसँग लैजानको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>

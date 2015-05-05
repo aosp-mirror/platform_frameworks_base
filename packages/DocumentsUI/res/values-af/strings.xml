@@ -65,9 +65,11 @@
       <item quantity="one">Kopieer tans <xliff:g id="COUNT_0">%1$d</xliff:g> lêer.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Maak tans gereed vir kopieer …"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other">Kon <xliff:g id="COUNT_1">%1$d</xliff:g> lêers nie kopieer nie</item>
+      <item quantity="one">Kon <xliff:g id="COUNT_0">%1$d</xliff:g> lêer nie kopieer nie</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Raak om besonderhede te bekyk"</string>
     <string name="retry" msgid="7564024179122207376">"Herprobeer"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Hierdie lêers is nie gekopieer nie: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

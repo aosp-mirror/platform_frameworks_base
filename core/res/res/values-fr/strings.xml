@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permet à l\'application de recevoir et de traiter les messages WAP. Cette autorisation lui donne la possibilité de surveiller ou supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"récupérer les applications en cours d\'exécution"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permet à l\'application de récupérer des informations sur des tâches en cours d\'exécution et récemment exécutées. L\'application est ainsi susceptible d\'obtenir des informations sur les applications utilisées sur l\'appareil."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Gérer les propriétaires des profils et de l\'appareil"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Autoriser les applications à définir les propriétaires des profils et celui de l\'appareil"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"réorganiser les applications en cours d\'exécution"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permet à l\'application de déplacer les tâches au premier plan et en arrière-plan. L\'application peut procéder à ces opérations sans votre intervention."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activer le mode voiture"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Configurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Éjecter"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Parcourir"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" manquante"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Réinsérez cette mémoire."</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Transfert de l\'application <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Déplacement des données en cours"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Transfert terminé"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Les données ont bien été transférées sur la mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\""</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Impossible de transférer données"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Les données sont restées à l\'emplacement d\'origine"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Aucune activité correspondante trouvée."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Diriger la sortie multimédia"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permet à une application de diriger la sortie multimédia vers d\'autres appareils externes."</string>

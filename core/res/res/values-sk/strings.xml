@@ -276,10 +276,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Umožňuje aplikácii prijímať a spracovávať správy WAP. Toto povolenie zahŕňa možnosť sledovať vaše správy alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"načítať spustené aplikácie"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Umožňuje aplikácii načítať informácie o aktuálne či nedávno spustených úlohách. Toto povolenie môže aplikácii umožniť objaviť informácie o tom, ktoré aplikácie sa na zariadení používajú."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Správa vlastníkov profilov a zariadenia"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Povolí aplikáciám nastaviť vlastníkov profilov a vlastníka zariadenia."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"zmeniť poradie spustených aplikácií"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Umožňuje aplikácii presunúť úlohy do popredia alebo do pozadia. Aplikácia tak môže urobiť bez vášho zásahu."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivovať režim V aute"</string>
@@ -1094,6 +1092,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Nastavenie"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Odpojiť"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Preskúmať"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Chýba: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Opäť vložte toto zariadenie"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Presúva sa aplikácia <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Presúvajú sa údaje"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Presun bol dokončený"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Údaje boli presunuté do úložiska <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Presun údajov zlyhal"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Údaje boli ponechané v pôvodnom umiestnení"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nenašli sa žiadne zodpovedajúce aktivity."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Smerovanie výstupu médií"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Umožňuje aplikácii smerovať výstup médií do ďalších externých zariadení."</string>

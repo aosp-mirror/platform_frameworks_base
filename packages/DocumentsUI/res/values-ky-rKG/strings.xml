@@ -65,9 +65,11 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл көчүрүлүүдө.</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Көчүрүүгө даярдалууда…"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файл көчүрүлбөй койду</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл көчүрүлбөй койду</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Чоо-жайын билүү үчүн тийип коюңуз"</string>
     <string name="retry" msgid="7564024179122207376">"Дагы аракет кылуу"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Төмөнкү файлдар көчүрүлгөн жок: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

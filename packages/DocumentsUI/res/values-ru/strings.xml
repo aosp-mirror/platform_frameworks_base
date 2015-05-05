@@ -67,9 +67,13 @@
       <item quantity="other">Копируется <xliff:g id="COUNT_1">%1$d</xliff:g> файла...</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Подготовка к копированию…"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one">Не удалось скопировать <xliff:g id="COUNT_1">%1$d</xliff:g> файл</item>
+      <item quantity="few">Не удалось скопировать <xliff:g id="COUNT_1">%1$d</xliff:g> файла</item>
+      <item quantity="many">Не удалось скопировать <xliff:g id="COUNT_1">%1$d</xliff:g> файлов</item>
+      <item quantity="other">Не удалось скопировать <xliff:g id="COUNT_1">%1$d</xliff:g> файла</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Нажмите, чтобы узнать подробности."</string>
     <string name="retry" msgid="7564024179122207376">"Повторить"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Не удалось скопировать эти файлы: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

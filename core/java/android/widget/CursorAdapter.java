@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -425,6 +426,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
      * @see #getFilterQueryProvider()
      * @see #setFilterQueryProvider(android.widget.FilterQueryProvider)
      */
+    @WorkerThread
     public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
         if (mFilterQueryProvider != null) {
             return mFilterQueryProvider.runQuery(constraint);

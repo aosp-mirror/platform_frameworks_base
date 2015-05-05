@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"앱이 WAP 메시지를 수신하고 처리할 수 있도록 허용합니다. 이는 앱이 사용자에게 표시하지 않고 기기로 전송된 메시지를 모니터링 또는 삭제할 수도 있다는 것을 의미합니다."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"실행 중인 앱 검색"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"앱이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 허용합니다. 이 경우 앱이 기기에서 사용되는 다른 앱에 대한 정보를 검색할 수 있습니다."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"프로필 및 기기 소유자 관리"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"앱이 프로필 소유자와 기기 소유자를 설정하도록 허용합니다."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"실행 중인 앱 순서 재지정"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"앱이 사용자의 입력 없이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 허용합니다."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"운전모드 사용"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"설정"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"꺼내기"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"둘러보기"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> 없음"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"기기 다시 삽입"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> 이동 중"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"데이터 이동 중"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"이동 완료"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"데이터를 <xliff:g id="NAME">%s</xliff:g>(으)로 이동했습니다."</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"데이터를 이동할 수 없음"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"원래 위치에 데이터 남아 있음"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"일치하는 활동이 없습니다."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"미디어 출력 연결"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"앱이 미디어 출력을 기타 외부 기기에 연결할 수 있도록 허용합니다."</string>

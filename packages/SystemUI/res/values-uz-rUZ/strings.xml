@@ -369,6 +369,18 @@
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Qurilmangiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz sozlamalar, korporativ ruxsat, ilovalar, qurilmangiz va qurilmangizning joylashuv ma’lumoti bilan bog‘liq ma’lumotlarni kuzata oladi va boshqara oladi.\n\nShuningdek, siz tarmoqdagi faoliyatingizni, jumladan, e-pochtal, ilova va veb-saytlaringizni kuzata oladigan VPN tarmog‘iga ham ulangansiz.\n\nKo‘proq ma’lumot olish uchun  administrator bilan bog‘laning."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"Sizning ish profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz tarmoqdagi faoliyatingizni, jumladan, e-pochta, ilova va xavfsiz veb-saytlar bilan ishlashingizni  kuzata oladi.\n\nKo‘proq ma’lumot olish uchun administrator bilan bog‘laning.\n\nShuningdek, siz tarmoqdagi faoliyatingizni kuzata oladigan VPN tarmog‘iga ham ulangansiz."</string>
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"Qurilmangiz <xliff:g id="ORGANIZATION_0">%1$s</xliff:g> tomonidan boshqariladi.\nIsh profilingiz \n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g> tomonidan boshqariladi.\n\nAdministratoringiz tarmoqdagi faoliyatingizni, jumladan, e-pochta, ilova va xavfsiz veb-saytlaringizni kuzata oladi.\n\nKo‘proq ma’lumot olish uchun administrator bilan bog‘laning.\n\nShuningdek, siz shaxsiy tarmoqdagi faoliyatingizni kuzata oladigan VPN tarmog‘iga ham ulangansiz."</string>
+    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Qurilma qo‘lda qulfdan chiqarilmaguncha qulflangan holatda qoladi"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Bildirishnomalarni tezroq oling"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ularni qulfdan chiqarishdan oldin ko‘ring"</string>

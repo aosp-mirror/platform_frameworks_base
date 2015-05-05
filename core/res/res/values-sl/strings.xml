@@ -276,10 +276,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Aplikaciji omogoča prejemanje in obdelavo sporočil WAP. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"dobivanje aplikacij, ki se izvajajo"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Aplikaciji omogoča prejemanje podatkov o trenutnih in nedavno izvajajočih se opravilih. S tem lahko aplikacija odkrije podatke o aplikacijah, ki se uporabljajo v napravi."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Upravljanje lastnikov profilov in lastnika naprave."</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Dovolite aplikacijam, da nastavijo lastnike profilov in lastnika naprave."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"preurejanje aplikacij, ki se izvajajo"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Aplikaciji omogoča premikanje opravil v ospredje in ozadje. Aplikacija lahko to naredi brez vašega nadzora."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"omogočanje načina delovanja v avtomobilu"</string>
@@ -1094,6 +1092,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Nastavitev"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izvrzite"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Raziščite"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Ni shrambe <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Znova vstavite to napravo"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Premikanje aplikacije <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Premikanje podatkov"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Premik je dokončan"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Podatki so premaknjeni v shrambo <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Premik podatkov ni uspel"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Podatki so ostali na izvirni lokaciji"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Ni ustreznih dejavnosti."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Preusmeritev predstavnosti"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Aplikaciji omogoča preusmerjanje predstavnosti v druge zunanje naprave."</string>

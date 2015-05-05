@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Uygulamaya WAP mesajlarını alma ve işleme izni verir. Buna, size gönderilen mesajları takip edip size göstermeden silebilme izni de dahildir."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"çalışan uygulamaları al"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Uygulamaya o anda ve son çalışan görevler hakkında bilgi alma izni verir. Bu izin, uygulamanın cihaz tarafından kullanılan uygulamalar hakkında bilgi elde etmesine olanak sağlayabilir."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profil ve cihaz sahiplerini yönetme"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Uygulamaların, profil sahiplerini ve cihaz sahibini ayarlamasına izin verir."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"çalışan uygulamaları yeniden sırala"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Uygulamaya, görevleri ön plana ve arka plana taşıma izni verir. Uygulama bunu sizden bir giriş olmadan yapabilir."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"araç modunu etkinleştir"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Kurulum"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Çıkar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Keşfedin"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> bulunamıyor"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Bu cihazı yeniden yerleştirin"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> taşınıyor"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Veriler taşınıyor"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Taşıma işlemi tamamlandı"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Veriler <xliff:g id="NAME">%s</xliff:g> depolama birimine taşındı"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Veriler taşınamadı"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Orijinal konumda veri kaldı"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Eşleşen hiçbir etkinlik bulunamadı."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Medya çıktısını yönlendir"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Uygulamaya medya çıktısını başka harici cihazlara yönlendirme izni verir."</string>

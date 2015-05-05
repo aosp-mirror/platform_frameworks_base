@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Апп нь WAP мессежийг хүлээн авах болон биелүүлэх боломжтой. Энэ зөвшөөрөл нь танд илгээсэн мессежийг танд харуулалгүйгээр хянах эсвэл устгах боломжийг агуулна."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ажиллаж байгаа апп-г дуудах"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Апп нь одоо ажиллаж байгаа болон сүүлд ажилласан даалгаврын талаарх мэдээллийг авах боломжтой. Ингэснээр апп нь төхөөмж дээрх ямар аппликешнүүд ашиглагдсан талаарх мэдээлийг олох боломжтой."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Профайл болон төхөөрөмжийн эзэмшигчийг удирдах"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Аппликейшнд профайл болон төхөөрөмж эзэмшигчийг сонгохыг зөвшөөрөх"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ажиллаж байгаа апп-уудыг дахин эрэмбэлэх"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Апп нь даалгавруудыг нүүрлүү болон арлуу зөөх боломжтой. Апп нь энийг таны оролцоогүйгээр хийж болзошгүй"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"машины горимыг идэвхжүүлэх"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Тохируулга"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Салгах"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Судлах"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> байхгүй байна"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Энэ төхөөрөмжийг дахин оруул"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>-ыг зөөж байна"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Өгөгдөл зөөвөрлөж байна..."</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Бүрэн бүтнээр шилжүүлэх"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Өгөгдөл <xliff:g id="NAME">%s</xliff:g>-д зөөгдсөн"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Өгөгдлийг зөөх боломжгүй байна"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Анхны байршилд өгөгдөл үлдсэн байна"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Таарах активити олдсонгүй."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа гаралтыг чиглүүлэх"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Аппликешн нь медиа гаралтыг бусад гадаад төхөөрөмжрүү чиглүүлэх боломжтой."</string>

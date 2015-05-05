@@ -819,7 +819,8 @@ public class ScrollView extends FrameLayout {
             return false;
         }
         switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+            case R.id.accessibilityActionScrollDown: {
                 final int viewportHeight = getHeight() - mPaddingBottom - mPaddingTop;
                 final int targetScrollY = Math.min(mScrollY + viewportHeight, getScrollRange());
                 if (targetScrollY != mScrollY) {
@@ -827,7 +828,8 @@ public class ScrollView extends FrameLayout {
                     return true;
                 }
             } return false;
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+            case R.id.accessibilityActionScrollUp: {
                 final int viewportHeight = getHeight() - mPaddingBottom - mPaddingTop;
                 final int targetScrollY = Math.max(mScrollY - viewportHeight, 0);
                 if (targetScrollY != mScrollY) {
@@ -853,10 +855,13 @@ public class ScrollView extends FrameLayout {
             if (scrollRange > 0) {
                 info.setScrollable(true);
                 if (mScrollY > 0) {
-                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                    info.addAction(
+                            AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP);
                 }
                 if (mScrollY < scrollRange) {
-                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
                 }
             }
         }

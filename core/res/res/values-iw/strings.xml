@@ -276,10 +276,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"‏מאפשר לאפליקציה לקבל ולעבד הודעות WAP. אישור זה כולל את היכולת לעקוב אחר הודעות שנשלחו אליך ולמחוק אותן מבלי להציג לך אותן."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"אחזור אפליקציות פעילות"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"מאפשר לאפליקציה לאחזר מידע לגבי משימות הפועלות כרגע ושפעלו לאחרונה. ייתכן שהדבר יתיר לאפליקציה לגלות מידע לגבי האפליקציות שבהן נעשה שימוש במכשיר."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"ניהול בעלים של פרופיל ומכשיר"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"מאפשרת לאפליקציות להגדיר את הבעלים של הפרופיל ואת בעל המכשיר."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"סידור מחדש של אפליקציות פעילות"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"מאפשר לאפליקציה להעביר משימות לחזית ולרקע. האפליקציה עשוי לעשות זאת ללא התערבותך."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"הפוך מצב מכונית לפעיל"</string>
@@ -1094,6 +1092,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"הגדר"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"הוצא"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"גלה"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> חסר"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"הכנס שוב את ההתקן הזה"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"מעביר את <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"מעביר נתונים"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ההעברה הושלמה"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"הנתונים הועברו אל <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"לא ניתן היה להעביר את הנתונים"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"הנתונים נותרו במיקום המקורי"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"לא נמצאו פעילויות תואמות."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"ניתוב פלט מדיה"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"מאפשר לאפליקציה לנתב פלט מדיה למכשירים חיצוניים אחרים."</string>

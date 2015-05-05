@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्याला पाठविलेले संदेश आपल्याला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चालणारे अॅप्स पुनर्प्राप्त करा"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"सध्या आणि अलीकडे चालणार्‍या कार्यांविषयी माहिती पुनर्प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे डिव्हाइसवर कोणते अनुप्रयोग वापरले जात आहेत त्याविषयी माहिती शोधण्यासाठी अॅप ला अनुमती देऊ शकतात."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"प्रोफाईल आणि डिव्हाइस मालक व्यवस्थापित करा"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"प्रोफाईल मालक आणि डिव्हाइस मालक सेट करण्याची अॅप्सना अनुमती द्या."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चालणारे अॅप्स पुनर्क्रमित करा"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"समोर आणि पार्श्वभूमीवर कार्ये हलविण्यासाठी अॅप ला अनुमती देते. अॅप हे आपल्या इनपुटशिवाय करू शकतो."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड सक्षम करा"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"सेटअप"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"बाहेर काढा"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"एक्सप्लोर करा"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> गहाळ आहे"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"हे डिव्हाइस पुन्हा घाला"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> हलवित आहे"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"डेटा हलवित आहे"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"हलविणे पूर्ण"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> वर डेटा हलविला"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"डेटा हलविणे शक्य झाले नाही"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"मूळ स्थानावर डेटा सोडला"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"कोणतेही जुळणारे क्रियाकलाप आढळले नाहीत."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"मीडिया आउटपुट मार्गस्थ करा"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"अन्य बाह्य डिव्हाइसेसवरील रूट मीडिया आउटपुट वर अनुप्रयोगास अनुमती देते."</string>

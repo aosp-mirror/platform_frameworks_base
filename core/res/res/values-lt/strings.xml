@@ -276,10 +276,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leidžiama programai gauti ir apdoroti WAP pranešimus. Šis leidimas apima galimybę stebėti ar ištrinti jums siunčiamus pranešimus jums jų neparodžius."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"nuskaityti vykdomas programas"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leidžiama programai nuskaityti informaciją apie šiuo ir pastaruoju metu vykdomas užduotis. Taip programa gali atrasti informacijos, kokios programos naudojamos įrenginyje."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Tvarkyti profilio ir įrenginio savininkus"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Leisti programai nustatyti profilio savininkus ir įrenginio savininką."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pertvarkyti vykdomas programas"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Leidžiama programai perkelti užduotis į priekinį planą ir foną. Programa gali tai daryti be jūsų įsikišimo."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"įgalinti automobilio režimą"</string>
@@ -1094,6 +1092,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Sąranka"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Pašalinti"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Naršyti"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Trūksta <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Iš naujo įdėkite šį įrenginį"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Perkeliama programa „<xliff:g id="NAME">%s</xliff:g>“"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Perkeliami duomenys"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Perkėlimo veiksmas užbaigtas"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Duomenys perkelti į <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Nepavyko perkelti duomenų"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Duomenys palikti pradinėje vietoje"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nerasta atitinkančios veiklos."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Medijos išvesties nukreipimas"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Leidžiama programai nukreipti medijos išvestį į kitus išorinius įrenginius."</string>

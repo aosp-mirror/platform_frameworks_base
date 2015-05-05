@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"允許應用程式接收和處理 WAP 訊息。這項權限也能讓應用程式監控訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"擷取執行中的應用程式"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"允許應用程式擷取有關目前和最近執行的工作的資訊。如此一來，應用程式或可找出裝置上所使用應用程式的相關資訊。"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"管理您的設定檔和裝置擁有者"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"允許應用程式設定檔案擁有者和裝置擁有者。"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"為執行中的應用程式重新排序"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"允許應用程式將工作移至前景或背景。應用程式可以自行處理，您無須操作。"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"啟用行車模式"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"設定"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"移除"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"探索"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"找不到<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"重新插入此裝置"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"正在轉移<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"正在轉移資料"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"完成轉移"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"資料已轉移至<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"無法轉移資料"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"資料仍然儲存在原來位置"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"找不到相符的活動。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"轉送媒體輸出"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允許應用程式將媒體輸出轉送至其他外部裝置。"</string>

@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Разрешава на приложението да получава и обработва WAP съобщения. Това разрешение включва възможността да наблюдава или изтрива изпратените до вас, без да ви ги покаже."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"извличане на изпълняваните приложения"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Разрешава на приложението да извлича информация за задачите, изпълнявани понастоящем и неотдавна. Това може да му позволи да открива данни за това, кои приложения се използват на устройството."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Управление на собствениците на потребителските профили и на устройствата"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Разрешава на приложенията да задават собствениците на потребителските профили и собственика на устройствата."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"пренареждане на изпълняваните приложения"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Разрешава на приложението да прехвърля задачи на преден и на заден план. То може да направи това без вашето потвърждение."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"активиране на мото режима"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Настройване"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Изваждане"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Изследване"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Липсва <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Поставете отново това у-во"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> се премества"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Данните се преместват"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Преместването завърши"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Данните са преместени в/ъв <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Данните не бяха преместени"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Данните останаха в първоначалното местоположение"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Не бяха намерени съответстващи дейности."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Насочване на изходящата мултимедия"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Разрешава на приложението да насочва изходящата мултимедия към други външни устройства."</string>
