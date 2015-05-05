@@ -590,6 +590,7 @@ public abstract class LayoutInflater {
                     }
                 }
                 constructor = clazz.getConstructor(mConstructorSignature);
+                constructor.setAccessible(true);
                 sConstructorMap.put(name, constructor);
             } else {
                 // If we have a filter, apply it to cached constructor
@@ -615,7 +616,6 @@ public abstract class LayoutInflater {
             Object[] args = mConstructorArgs;
             args[1] = attrs;
 
-            constructor.setAccessible(true);
             final View view = constructor.newInstance(args);
             if (view instanceof ViewStub) {
                 // Use the same context when inflating ViewStub later.
