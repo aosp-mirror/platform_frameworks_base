@@ -412,7 +412,7 @@ public class DevicePolicyManager {
         = "android.app.action.MANAGED_PROFILE_PROVISIONED";
 
     /**
-     * A boolean extra indicating whether device encryption is required as part of Device Owner
+     * A boolean extra indicating whether device encryption can be skipped as part of Device Owner
      * provisioning.
      *
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC_V2} that starts device owner
