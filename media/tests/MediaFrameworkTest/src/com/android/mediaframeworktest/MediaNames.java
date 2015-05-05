@@ -60,6 +60,7 @@ public class MediaNames {
     public static final String VIDEO_H264_AAC = "/sdcard/media_api/video/H264_320_AAC_64.3gp";
     public static final String VIDEO_H264_AMR = "/sdcard/media_api/video/H264_320_AMRNB_6.3gp";
     public static final String VIDEO_HEVC_AAC = "/sdcard/media_api/video/HEVC_320_AAC_128.mp4";
+    public static final String VIDEO_MPEG2_AAC = "/sdcard/media_api/video/MPEG2_1500_AAC_128.mp4";
     public static final String VIDEO_HIGHRES_H263 = "/sdcard/media_api/video/H263_500_AMRNB_12.3gp";
     public static final String VIDEO_HIGHRES_MP4 = "/sdcard/media_api/video/H264_500_AAC_128.3gp";
     public static final String VIDEO_WEBM = "/sdcard/media_api/video/big-buck-bunny_trailer.webm";

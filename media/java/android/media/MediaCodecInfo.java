@@ -1733,6 +1733,72 @@ public final class MediaCodecInfo {
                         maxBlocks, maxBlocksPerSecond,
                         16 /* blockWidth */, 16 /* blockHeight */,
                         1 /* widthAlignment */, 1 /* heightAlignment */);
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_MPEG2)) {
+                int maxWidth = 11, maxHeight = 9, maxRate = 15;
+                maxBlocks = 99;
+                maxBlocksPerSecond = 1485;
+                maxBps = 64000;
+                for (CodecProfileLevel profileLevel: profileLevels) {
+                    int MBPS = 0, FS = 0, BR = 0, FR = 0, W = 0, H = 0;
+                    boolean supported = true;
+                    switch (profileLevel.profile) {
+                        case CodecProfileLevel.MPEG2ProfileSimple:
+                            switch (profileLevel.level) {
+                                case CodecProfileLevel.MPEG2LevelML:
+                                    FR = 30; W = 45; H =  36; MBPS =  48600; FS =  1620; BR =  15000; break;
+                                default:
+                                    Log.w(TAG, "Unrecognized profile/level "
+                                            + profileLevel.profile + "/"
+                                            + profileLevel.level + " for " + mime);
+                                    errors |= ERROR_UNRECOGNIZED;
+                            }
+                            break;
+                        case CodecProfileLevel.MPEG2ProfileMain:
+                            switch (profileLevel.level) {
+                                case CodecProfileLevel.MPEG2LevelLL:
+                                    FR = 30; W = 22; H =  18; MBPS =  11880; FS =  396; BR =  4000; break;
+                                case CodecProfileLevel.MPEG2LevelML:
+                                    FR = 30; W = 45; H =  36; MBPS =  48600; FS =  1620; BR =  15000; break;
+                                case CodecProfileLevel.MPEG2LevelH14:
+                                    FR = 60; W = 90; H =  68; MBPS =  367200; FS =  6120; BR = 60000; break;
+                                case CodecProfileLevel.MPEG2LevelHL:
+                                    FR = 60; W = 120; H = 68; MBPS =  489600; FS =  8160; BR = 80000; break;
+                                default:
+                                    Log.w(TAG, "Unrecognized profile/level "
+                                            + profileLevel.profile + "/"
+                                            + profileLevel.level + " for " + mime);
+                                    errors |= ERROR_UNRECOGNIZED;
+                            }
+                            break;
+                        case CodecProfileLevel.MPEG2Profile422:
+                        case CodecProfileLevel.MPEG2ProfileSNR:
+                        case CodecProfileLevel.MPEG2ProfileSpatial:
+                        case CodecProfileLevel.MPEG2ProfileHigh:
+                            Log.i(TAG, "Unsupported profile "
+                                    + profileLevel.profile + " for " + mime);
+                            errors |= ERROR_UNSUPPORTED;
+                            supported = false;
+                            break;
+                        default:
+                            Log.w(TAG, "Unrecognized profile "
+                                    + profileLevel.profile + " for " + mime);
+                            errors |= ERROR_UNRECOGNIZED;
+                    }
+                    if (supported) {
+                        errors &= ~ERROR_NONE_SUPPORTED;
+                    }
+                    maxBlocksPerSecond = Math.max(MBPS, maxBlocksPerSecond);
+                    maxBlocks = Math.max(FS, maxBlocks);
+                    maxBps = Math.max(BR * 1000, maxBps);
+                    maxWidth = Math.max(W, maxWidth);
+                    maxHeight = Math.max(H, maxHeight);
+                    maxRate = Math.max(FR, maxRate);
+                }
+                applyMacroBlockLimits(maxWidth, maxHeight,
+                        maxBlocks, maxBlocksPerSecond,
+                        16 /* blockWidth */, 16 /* blockHeight */,
+                        1 /* widthAlignment */, 1 /* heightAlignment */);
+                mFrameRateRange = mFrameRateRange.intersect(12, maxRate);
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_MPEG4)) {
                 int maxWidth = 11, maxHeight = 9, maxRate = 15;
                 maxBlocks = 99;
@@ -2342,6 +2408,20 @@ public final class MediaCodecInfo {
         public static final int MPEG4Level4      = 0x20;
         public static final int MPEG4Level4a     = 0x40;
         public static final int MPEG4Level5      = 0x80;
+
+        // from OMX_VIDEO_MPEG2PROFILETYPE
+        public static final int MPEG2ProfileSimple              = 0x00;
+        public static final int MPEG2ProfileMain                = 0x01;
+        public static final int MPEG2Profile422                 = 0x02;
+        public static final int MPEG2ProfileSNR                 = 0x03;
+        public static final int MPEG2ProfileSpatial             = 0x04;
+        public static final int MPEG2ProfileHigh                = 0x05;
+
+        // from OMX_VIDEO_MPEG2LEVELTYPE
+        public static final int MPEG2LevelLL     = 0x00;
+        public static final int MPEG2LevelML     = 0x01;
+        public static final int MPEG2LevelH14    = 0x02;
+        public static final int MPEG2LevelHL     = 0x03;
 
         // from OMX_AUDIO_AACPROFILETYPE
         public static final int AACObjectMain       = 1;
