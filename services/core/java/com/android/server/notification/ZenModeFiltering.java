@@ -86,7 +86,7 @@ public class ZenModeFiltering {
             if (validator != null) {
                 final float contactAffinity = validator.getContactAffinity(userHandle, extras,
                         contactsTimeoutMs, timeoutAffinity);
-                return audienceMatches(config, contactAffinity);
+                return audienceMatches(config.allowCallsFrom, contactAffinity);
             }
         }
         return true;
@@ -133,14 +133,14 @@ public class ZenModeFiltering {
                         ZenLog.traceIntercepted(record, "!allowCalls");
                         return true;
                     }
-                    return shouldInterceptAudience(config, record);
+                    return shouldInterceptAudience(config.allowCallsFrom, record);
                 }
                 if (isMessage(record)) {
                     if (!config.allowMessages) {
                         ZenLog.traceIntercepted(record, "!allowMessages");
                         return true;
                     }
-                    return shouldInterceptAudience(config, record);
+                    return shouldInterceptAudience(config.allowMessagesFrom, record);
                 }
                 if (isEvent(record)) {
                     if (!config.allowEvents) {
@@ -163,9 +163,8 @@ public class ZenModeFiltering {
         }
     }
 
-    private static boolean shouldInterceptAudience(ZenModeConfig config,
-            NotificationRecord record) {
-        if (!audienceMatches(config, record.getContactAffinity())) {
+    private static boolean shouldInterceptAudience(int source, NotificationRecord record) {
+        if (!audienceMatches(source, record.getContactAffinity())) {
             ZenLog.traceIntercepted(record, "!audienceMatches");
             return true;
         }
@@ -219,8 +218,8 @@ public class ZenModeFiltering {
         return record.isCategory(Notification.CATEGORY_MESSAGE) || isDefaultMessagingApp(record);
     }
 
-    private static boolean audienceMatches(ZenModeConfig config, float contactAffinity) {
-        switch (config.allowFrom) {
+    private static boolean audienceMatches(int source, float contactAffinity) {
+        switch (source) {
             case ZenModeConfig.SOURCE_ANYONE:
                 return true;
             case ZenModeConfig.SOURCE_CONTACT:
@@ -228,7 +227,7 @@ public class ZenModeFiltering {
             case ZenModeConfig.SOURCE_STAR:
                 return contactAffinity >= ValidateNotificationPeople.STARRED_CONTACT;
             default:
-                Slog.w(TAG, "Encountered unknown source: " + config.allowFrom);
+                Slog.w(TAG, "Encountered unknown source: " + source);
                 return true;
         }
     }
