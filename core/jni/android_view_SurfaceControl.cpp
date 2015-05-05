@@ -23,6 +23,7 @@
 
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
+#include "android/graphics/Bitmap.h"
 #include "android/graphics/GraphicsJNI.h"
 #include "android/graphics/Region.h"
 
@@ -168,21 +169,18 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         }
     }
 
-    const ssize_t rowBytes =
+    const size_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
 
-    SkBitmap* bitmap = new SkBitmap();
-    bitmap->setInfo(screenshotInfo, (size_t)rowBytes);
-    if (screenshotInfo.fWidth > 0 && screenshotInfo.fHeight > 0) {
-        // takes ownership of ScreenshotClient
-        SkMallocPixelRef* pixels = SkMallocPixelRef::NewWithProc(screenshotInfo,
-                (size_t) rowBytes, NULL, (void*) screenshot->getPixels(), &DeleteScreenshot,
-                (void*) (screenshot.get()));
-        screenshot.detach();
-        pixels->setImmutable();
-        bitmap->setPixelRef(pixels)->unref();
-        bitmap->lockPixels();
+    if (!screenshotInfo.fWidth || !screenshotInfo.fHeight) {
+        return NULL;
     }
+
+    Bitmap* bitmap = new Bitmap(
+            (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
+            screenshotInfo, rowBytes, nullptr);
+    screenshot.detach();
+    bitmap->pixelRef()->setImmutable();
 
     return GraphicsJNI::createBitmap(env, bitmap,
             GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
