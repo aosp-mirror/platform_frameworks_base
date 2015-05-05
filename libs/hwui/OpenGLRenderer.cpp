@@ -245,7 +245,7 @@ bool OpenGLRenderer::finish() {
 #if DEBUG_MEMORY_USAGE
         mCaches.dumpMemoryUsage();
 #else
-        if (mCaches.getDebugLevel() & kDebugMemory) {
+        if (Properties::debugLevel & kDebugMemory) {
             mCaches.dumpMemoryUsage();
         }
 #endif
@@ -339,7 +339,7 @@ void OpenGLRenderer::debugOverdraw(bool enable, bool clear) {
 }
 
 void OpenGLRenderer::renderOverdraw() {
-    if (mCaches.debugOverdraw && getTargetFbo() == 0) {
+    if (Properties::debugOverdraw && getTargetFbo() == 0) {
         const Rect* clip = &mTilingClip;
 
         mRenderState.scissor().setEnabled(true);
@@ -381,7 +381,7 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
             debugOverdraw(false, false);
         }
 
-        if (CC_UNLIKELY(inFrame || mCaches.drawDeferDisabled)) {
+        if (CC_UNLIKELY(inFrame || Properties::drawDeferDisabled)) {
             layer->render(*this);
         } else {
             layer->defer(*this);
@@ -392,7 +392,7 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
             startTilingCurrentClip();
         }
 
-        layer->debugDrawUpdate = mCaches.debugLayersUpdates;
+        layer->debugDrawUpdate = Properties::debugLayersUpdates;
         layer->hasDrawnSinceUpdate = false;
 
         return true;
@@ -407,7 +407,7 @@ void OpenGLRenderer::updateLayers() {
     // in the layer updates list which will be cleared by flushLayers().
     int count = mLayerUpdates.size();
     if (count > 0) {
-        if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
+        if (CC_UNLIKELY(Properties::drawDeferDisabled)) {
             startMark("Layer Updates");
         } else {
             startMark("Defer Layer Updates");
@@ -419,7 +419,7 @@ void OpenGLRenderer::updateLayers() {
             updateLayer(layer, false);
         }
 
-        if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
+        if (CC_UNLIKELY(Properties::drawDeferDisabled)) {
             mLayerUpdates.clear();
             mRenderState.bindFramebuffer(getTargetFbo());
         }
@@ -883,13 +883,13 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
  * operations are correctly counted twice for overdraw. NOTE: assumes composeLayerRegion only used
  * by saveLayer's restore
  */
-#define DRAW_DOUBLE_STENCIL_IF(COND, DRAW_COMMAND) {                             \
-        DRAW_COMMAND;                                                            \
-        if (CC_UNLIKELY(mCaches.debugOverdraw && getTargetFbo() == 0 && COND)) { \
-            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);                 \
-            DRAW_COMMAND;                                                        \
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);                     \
-        }                                                                        \
+#define DRAW_DOUBLE_STENCIL_IF(COND, DRAW_COMMAND) { \
+        DRAW_COMMAND; \
+        if (CC_UNLIKELY(Properties::debugOverdraw && getTargetFbo() == 0 && COND)) { \
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); \
+            DRAW_COMMAND; \
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); \
+        } \
     }
 
 #define DRAW_DOUBLE_STENCIL(DRAW_COMMAND) DRAW_DOUBLE_STENCIL_IF(true, DRAW_COMMAND)
@@ -1324,7 +1324,7 @@ void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
 }
 
 void OpenGLRenderer::setStencilFromClip() {
-    if (!mCaches.debugOverdraw) {
+    if (!Properties::debugOverdraw) {
         if (!currentSnapshot()->clipIsSimple()) {
             int incrementThreshold;
             EVENT_LOGD("setStencilFromClip - enabling");
@@ -1383,8 +1383,8 @@ void OpenGLRenderer::setStencilFromClip() {
             // Draw the region used to generate the stencil if the appropriate debug
             // mode is enabled
             // TODO: Implement for rectangle list clip areas
-            if (mCaches.debugStencilClip == Caches::kStencilShowRegion &&
-                    !clipArea.isRectangleList()) {
+            if (Properties::debugStencilClip == StencilClipDebug::ShowRegion
+                    && !clipArea.isRectangleList()) {
                 paint.setColor(0x7f0000ff);
                 paint.setXfermodeMode(SkXfermode::kSrcOver_Mode);
                 drawRegionRects(currentSnapshot()->getClipRegion(), paint);
@@ -1469,7 +1469,7 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
     if (renderNode && renderNode->isRenderable()) {
         // compute 3d ordering
         renderNode->computeOrdering();
-        if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
+        if (CC_UNLIKELY(Properties::drawDeferDisabled)) {
             startFrame();
             ReplayStateStruct replayStruct(*this, dirty, replayFlags);
             renderNode->replay(replayStruct, 0);
@@ -1478,7 +1478,7 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
 
         // Don't avoid overdraw when visualizing, since that makes it harder to
         // debug where it's coming from, and when the problem occurs.
-        bool avoidOverdraw = !mCaches.debugOverdraw;
+        bool avoidOverdraw = !Properties::debugOverdraw;
         DeferredDisplayList deferredList(mState.currentClipRect(), avoidOverdraw);
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         renderNode->defer(deferStruct, 0);
@@ -2452,8 +2452,8 @@ void OpenGLRenderer::drawShadow(float casterAlpha,
 
     // The caller has made sure casterAlpha > 0.
     float ambientShadowAlpha = mAmbientShadowAlpha;
-    if (CC_UNLIKELY(mCaches.propertyAmbientShadowStrength >= 0)) {
-        ambientShadowAlpha = mCaches.propertyAmbientShadowStrength;
+    if (CC_UNLIKELY(Properties::overrideAmbientShadowStrength >= 0)) {
+        ambientShadowAlpha = Properties::overrideAmbientShadowStrength;
     }
     if (ambientShadowVertexBuffer && ambientShadowAlpha > 0) {
         paint.setARGB(casterAlpha * ambientShadowAlpha, 0, 0, 0);
@@ -2461,8 +2461,8 @@ void OpenGLRenderer::drawShadow(float casterAlpha,
     }
 
     float spotShadowAlpha = mSpotShadowAlpha;
-    if (CC_UNLIKELY(mCaches.propertySpotShadowStrength >= 0)) {
-        spotShadowAlpha = mCaches.propertySpotShadowStrength;
+    if (CC_UNLIKELY(Properties::overrideSpotShadowStrength >= 0)) {
+        spotShadowAlpha = Properties::overrideSpotShadowStrength;
     }
     if (spotShadowVertexBuffer && spotShadowAlpha > 0) {
         paint.setARGB(casterAlpha * spotShadowAlpha, 0, 0, 0);
