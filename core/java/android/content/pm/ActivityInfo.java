@@ -570,14 +570,32 @@ public class ActivityInfo extends ComponentInfo
         Configuration.NATIVE_CONFIG_DENSITY,                // DENSITY
         Configuration.NATIVE_CONFIG_LAYOUTDIR,              // LAYOUT DIRECTION
     };
-    /** @hide
+
+    /**
      * Convert Java change bits to native.
+     *
+     * @hide
      */
     public static int activityInfoConfigToNative(int input) {
         int output = 0;
-        for (int i=0; i<CONFIG_NATIVE_BITS.length; i++) {
-            if ((input&(1<<i)) != 0) {
+        for (int i = 0; i < CONFIG_NATIVE_BITS.length; i++) {
+            if ((input & (1 << i)) != 0) {
                 output |= CONFIG_NATIVE_BITS[i];
+            }
+        }
+        return output;
+    }
+
+    /**
+     * Convert native change bits to Java.
+     *
+     * @hide
+     */
+    public static int activityInfoConfigNativeToJava(int input) {
+        int output = 0;
+        for (int i = 0; i < CONFIG_NATIVE_BITS.length; i++) {
+            if ((input & CONFIG_NATIVE_BITS[i]) != 0) {
+                output |= (1 << i);
             }
         }
         return output;

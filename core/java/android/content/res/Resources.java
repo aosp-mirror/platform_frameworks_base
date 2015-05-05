@@ -1731,6 +1731,19 @@ public class Resources {
         }
 
         /**
+         * Returns a bit mask of configuration changes that will impact this
+         * theme (and thus require completely reloading it).
+         *
+         * @return a bit mask of configuration changes, as defined by
+         *         {@link ActivityInfo}
+         * @see ActivityInfo
+         */
+        public int getChangingConfigurations() {
+            final int nativeChangingConfig = AssetManager.getThemeChangingConfigurations(mTheme);
+            return ActivityInfo.activityInfoConfigNativeToJava(nativeChangingConfig);
+        }
+
+        /**
          * Print contents of this theme out to the log.  For debugging only.
          * 
          * @param priority The log priority to use.

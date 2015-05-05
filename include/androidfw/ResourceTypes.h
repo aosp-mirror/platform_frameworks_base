@@ -1662,6 +1662,12 @@ public:
                 uint32_t* inoutTypeSpecFlags = NULL,
                 ResTable_config* inoutConfig = NULL) const;
 
+        /**
+         * Returns a bit mask of configuration changes that will impact this
+         * theme (and thus require completely reloading it).
+         */
+        uint32_t getChangingConfigurations() const;
+
         void dumpToLog() const;
         
     private:
@@ -1688,6 +1694,7 @@ public:
 
         const ResTable& mTable;
         package_info*   mPackages[Res_MAXPACKAGE];
+        uint32_t        mTypeSpecFlags;
     };
 
     void setParameters(const ResTable_config* params);
