@@ -27,6 +27,7 @@ include $(LOCAL_PATH)/Android.common.mk
 
 LOCAL_SRC_FILES += \
     unit_tests/ClipAreaTests.cpp \
+    unit_tests/DamageAccumulatorTests.cpp \
     unit_tests/LinearAllocatorTests.cpp \
     unit_tests/main.cpp
 
