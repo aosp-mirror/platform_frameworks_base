@@ -3147,6 +3147,7 @@ struct ResTable::bag_set
 
 ResTable::Theme::Theme(const ResTable& table)
     : mTable(table)
+    , mTypeSpecFlags(0)
 {
     memset(mPackages, 0, sizeof(mPackages));
 }
@@ -3204,6 +3205,8 @@ status_t ResTable::Theme::applyStyle(uint32_t resID, bool force)
         mTable.unlock();
         return N;
     }
+
+    mTypeSpecFlags |= bagTypeSpecFlags;
 
     uint32_t curPackage = 0xffffffff;
     ssize_t curPackageIndex = 0;
@@ -3323,6 +3326,8 @@ status_t ResTable::Theme::setTo(const Theme& other)
         }
     }
 
+    mTypeSpecFlags = other.mTypeSpecFlags;
+
     if (kDebugTableTheme) {
         ALOGI("Final theme:");
         dumpToLog();
@@ -3415,6 +3420,11 @@ ssize_t ResTable::Theme::resolveAttributeReference(Res_value* inOutValue,
     }
     return mTable.resolveReference(inOutValue, blockIndex, outLastRef,
             inoutTypeSpecFlags, inoutConfig);
+}
+
+uint32_t ResTable::Theme::getChangingConfigurations() const
+{
+    return mTypeSpecFlags;
 }
 
 void ResTable::Theme::dumpToLog() const
