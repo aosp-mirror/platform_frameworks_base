@@ -528,11 +528,12 @@ public abstract class TvInputService extends Service {
          * TvInputManager.isParentalControlsEnabled()} returns {@code true}). Whether the TV input
          * service should block the content or not is determined by invoking
          * {@link TvInputManager#isRatingBlocked TvInputManager.isRatingBlocked(TvContentRating)}
-         * with the content rating for the current program. Then the {@link TvInputManager} makes a
-         * judgment based on the user blocked ratings stored in the secure settings and returns the
-         * result. If the rating in question turns out to be blocked, the TV input service must
-         * immediately block the content and call this method with the content rating of the current
-         * program to prompt the PIN verification screen.
+         * with the content rating for the current program or {@link TvContentRating#UNRATED} in
+         * case the rating information is missing. Then the {@link TvInputManager} makes a judgment
+         * based on the user blocked ratings stored in the secure settings and returns the result.
+         * If the rating in question turns out to be blocked, the TV input service must immediately
+         * block the content and call this method with the content rating of the current program to
+         * prompt the PIN verification screen.
          *
          * <p>Each TV input service also needs to continuously listen to any changes made to the
          * parental controls settings by registering a broadcast receiver to receive
@@ -540,7 +541,8 @@ public abstract class TvInputService extends Service {
          * {@link TvInputManager#ACTION_PARENTAL_CONTROLS_ENABLED_CHANGED} and immediately
          * reevaluate the current program with the new parental controls settings.
          *
-         * @param rating The content rating for the current TV program.
+         * @param rating The content rating for the current TV program. Can be
+         *            {@link TvContentRating#UNRATED}.
          * @see #notifyContentAllowed
          * @see TvInputManager
          */

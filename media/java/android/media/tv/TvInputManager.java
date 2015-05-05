@@ -1035,7 +1035,7 @@ public final class TvInputManager {
     /**
      * Checks whether a given TV content rating is blocked by the user.
      *
-     * @param rating The TV content rating to check.
+     * @param rating The TV content rating to check. Can be {@link TvContentRating#UNRATED}.
      * @return {@code true} if the given TV content rating is blocked, {@code false} otherwise.
      */
     public boolean isRatingBlocked(@NonNull TvContentRating rating) {
