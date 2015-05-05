@@ -14,6 +14,7 @@
 
 package android.telecom;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -35,15 +36,27 @@ public class DefaultDialerManager {
     private static final String TAG = "DefaultDialerManager";
 
     /**
-     * Sets the specified package name as the default dialer application. The caller of this method
-     * needs to have permission to write to secure settings.
+     * Sets the specified package name as the default dialer application for the current user.
+     * The caller of this method needs to have permission to write to secure settings and
+     * manage users on the device.
      *
      * @hide
      * */
     public static void setDefaultDialerApplication(Context context, String packageName) {
+        setDefaultDialerApplication(context, packageName, ActivityManager.getCurrentUser());
+    }
+
+    /**
+     * Sets the specified package name as the default dialer application for the specified user.
+     * The caller of this method needs to have permission to write to secure settings and
+     * manage users on the device.
+     *
+     * @hide
+     * */
+    public static void setDefaultDialerApplication(Context context, String packageName, int user) {
         // Get old package name
-        String oldPackageName = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.DIALER_DEFAULT_APPLICATION);
+        String oldPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
+                Settings.Secure.DIALER_DEFAULT_APPLICATION, user);
 
         if (packageName != null && oldPackageName != null && packageName.equals(oldPackageName)) {
             // No change
@@ -55,26 +68,44 @@ public class DefaultDialerManager {
 
         if (packageNames.contains(packageName)) {
             // Update the secure setting.
-            Settings.Secure.putString(context.getContentResolver(),
-                    Settings.Secure.DIALER_DEFAULT_APPLICATION, packageName);
+            Settings.Secure.putStringForUser(context.getContentResolver(),
+                    Settings.Secure.DIALER_DEFAULT_APPLICATION, packageName, user);
         }
     }
 
     /**
-     * Returns the installed dialer application that will be used to receive incoming calls, and is
-     * allowed to make emergency calls.
+     * Returns the installed dialer application for the current user that will be used to receive
+     * incoming calls, and is allowed to make emergency calls.
      *
      * The application will be returned in order of preference:
      * 1) User selected phone application (if still installed)
      * 2) Pre-installed system dialer (if not disabled)
      * 3) Null
      *
+     * The caller of this method needs to have permission to manage users on the device.
+     *
      * @hide
      * */
     public static String getDefaultDialerApplication(Context context) {
-        String defaultPackageName = Settings.Secure.getString(context.getContentResolver(),
-                Settings.Secure.DIALER_DEFAULT_APPLICATION);
+        return getDefaultDialerApplication(context, ActivityManager.getCurrentUser());
+    }
 
+    /**
+     * Returns the installed dialer application for the specified user that will be used to receive
+     * incoming calls, and is allowed to make emergency calls.
+     *
+     * The application will be returned in order of preference:
+     * 1) User selected phone application (if still installed)
+     * 2) Pre-installed system dialer (if not disabled)
+     * 3) Null
+     *
+     * The caller of this method needs to have permission to manage users on the device.
+     *
+     * @hide
+     * */
+    public static String getDefaultDialerApplication(Context context, int user) {
+        String defaultPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
+                Settings.Secure.DIALER_DEFAULT_APPLICATION, user);
 
         final List<String> packageNames = getInstalledDialerApplications(context);
 
