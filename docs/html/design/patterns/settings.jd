@@ -64,8 +64,8 @@ meets the bar:</p>
 
 <div class="vspace size-3">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5 with-callouts">
+<div class="cols">
+  <div class="col-5 with-callouts">
 
 <h4 id="group-settings">If you still have lots of settings, group related settings together</h4>
 
@@ -89,7 +89,7 @@ to a subscreen of related settings. In addition, the items themselves are groupe
 dividers.</p>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/settings_grouping.png">
 
@@ -101,26 +101,26 @@ on the total number of settings in your app.</p>
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-2">
+<div class="cols">
+  <div class="col-2">
 
 <h4>7 or fewer</h4>
 
   </div>
-  <div class="layout-content-col span-11">
+  <div class="col-11">
 
 <p>Don't group them at all. It won't benefit users and will seem like overkill.</p>
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-2">
+<div class="cols">
+  <div class="col-2">
 
 <h4>8 to 10</h4>
 
   </div>
-  <div class="layout-content-col span-11">
+  <div class="col-11">
 
 <p>Try grouping related settings under 1 or 2 section dividers. If you have any "singletons"
 (settings that don't relate to any other settings and can't be grouped under your section
@@ -136,13 +136,13 @@ importance.</li>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-2">
+<div class="cols">
+  <div class="col-2">
 
 <h4>11 to 15</h4>
 
   </div>
-  <div class="layout-content-col span-11">
+  <div class="col-11">
 
 <p>Same advice as above, but try 2 to 4 section dividers.</p>
 
@@ -161,13 +161,13 @@ setting.</li>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-2">
+<div class="cols">
+  <div class="col-2">
 
 <h4>16 or more</h4>
 
   </div>
-  <div class="layout-content-col span-11">
+  <div class="col-11">
 
 <p>If you have any instances of 4 or more related settings, group them under a subscreen. Then use
 the advice suggested above for the reduced list size.</p>
@@ -178,66 +178,66 @@ the advice suggested above for the reduced list size.</p>
 
 <h2 id="patterns">Design Patterns</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Checkbox</h4>
 <p>Use this pattern for a setting that is either selected or not selected.</p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_checkbox.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Multiple choice</h4>
 <p>Use this pattern for a setting that needs to present a discrete set of options, from which the
 user can choose only one.</p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_multiple_choice.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Slider</h4>
 <p>Use this pattern for a setting where the range of values are not discrete and fall along a
 continuum.</p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_slider.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Date/time</h4>
 <p>Use this pattern for a setting that needs to collect a date and/or time from the user.</p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_date_time.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Subscreen navigation</h4>
 <p>Use this pattern for navigating to a subscreen or sequence of subscreens that guide the user
@@ -250,15 +250,15 @@ first step in the sequence.</li>
 </ul>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_subscreen_navigation.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>List subscreen</h4>
 <p>Use this pattern for a setting or category of settings that contains a list of equivalent items.
@@ -268,15 +268,15 @@ example, status is reinforced with an icon to the right of the label.) Any actio
 the list appear in the action bar rather than the list itself.</p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_list_subscreen.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Master on/off switch</h4>
 <p>Use this pattern for a category of settings that need a mechanism for turning on or off as a
@@ -286,15 +286,15 @@ is turned off, the items in the list disappear, replaced by text that describes 
 empty. If any actions require the switch to be on, they become disabled.</p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_master_on_off.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <div class="vspace size-2">&nbsp;</div>
 
@@ -303,15 +303,15 @@ However, you should only do this in cases where users rarely need to access the 
 it's initially set up and more often just want to toggle the switch.</p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_master_on_off_2.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Individual on/off switch</h4>
 <p>Use this pattern for an individual setting that requires a more elaborate description than can
@@ -323,15 +323,15 @@ reflect the current selection.</p>
 does, we made the status more descriptive than just "On".</p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_individual_on_off.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
 
 <h4>Dependency</h4>
 <p>Use this pattern for a setting that changes availability based on the value of another setting.
@@ -344,7 +344,7 @@ master on/off switch so that your main settings screen isn't cluttered by lots o
 </p>
 
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
 
 <img src="{@docRoot}design/media/settings_dependency.png">
 
@@ -408,8 +408,8 @@ they'll fit everywhere.</p>
 it or provide instructions. Starting in Ice Cream Sandwich, we're using secondary text for status.
 </p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <div class="do-dont-label bad emulate-content-left-padding">Before</div>
 
@@ -431,7 +431,7 @@ it or provide instructions. Starting in Ice Cream Sandwich, we're using secondar
     </table>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <div class="do-dont-label good">After</div>
 
@@ -490,8 +490,8 @@ provide a description. Only include one if necessary.</p>
 <p>The following are examples of changes we made to labels and secondary text in the Settings app
 in Ice Cream Sandwich.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <div class="do-dont-label bad emulate-content-left-padding">Before</div>
 
@@ -506,7 +506,7 @@ in Ice Cream Sandwich.</p>
     </table>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <div class="do-dont-label good">After</div>
 
@@ -521,7 +521,7 @@ in Ice Cream Sandwich.</p>
     </table>
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <p>In this checkbox setting, we eliminated the throwaway word "Use" and rephrased the label to be
 more direct and understandable.</p>
@@ -530,8 +530,8 @@ more direct and understandable.</p>
 
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <div class="do-dont-label bad emulate-content-left-padding">Before</div>
 
@@ -553,7 +553,7 @@ more direct and understandable.</p>
     </table>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <div class="do-dont-label good">After</div>
 
@@ -575,7 +575,7 @@ more direct and understandable.</p>
     </table>
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <p>In this multiple choice setting, we changed the label to a friendlier term and also replaced
 the description with status. We put some descriptive words around the selected value, "10
@@ -584,8 +584,8 @@ minutes", because on its own, the meaning could be misinterpreted as "sleep for 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <div class="do-dont-label bad emulate-content-left-padding">Before</div>
 
@@ -607,7 +607,7 @@ minutes", because on its own, the meaning could be misinterpreted as "sleep for 
     </table>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <div class="do-dont-label good">After</div>
 
@@ -629,7 +629,7 @@ minutes", because on its own, the meaning could be misinterpreted as "sleep for 
     </table>
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <p>This setting navigates to a a sequence of subscreens that allow users to choose a type of
 screen lock and then set it up. We eliminated the throwaway word "Change" in the label, and
@@ -639,8 +639,8 @@ hasn't set up a screen lock, the secondary text says "None".</p>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <div class="do-dont-label bad emulate-content-left-padding">Before</div>
 
@@ -662,7 +662,7 @@ hasn't set up a screen lock, the secondary text says "None".</p>
     </table>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <div class="do-dont-label good">After</div>
 
@@ -684,7 +684,7 @@ hasn't set up a screen lock, the secondary text says "None".</p>
     </table>
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <p>In this checkbox setting&mdash;although it's technical jargon&mdash;we kept the "NFC" label
 because: (1) we couldn't find a clear, concise alternative, and (2) user familiarity with the

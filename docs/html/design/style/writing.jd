@@ -16,8 +16,8 @@ page.tags=dialog,toast,notification
 
 <p><em>Avoid wordy, stilted text</em></p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
+<div class="cols">
+  <div class="col-6 layout-with-list-item-margins">
 
     <div class="do-dont-label bad">Don't</div>
 
@@ -26,7 +26,7 @@ page.tags=dialog,toast,notification
     </td></tr></tbody></table>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <div class="do-dont-label good">Do</div>
 
@@ -39,8 +39,8 @@ page.tags=dialog,toast,notification
 
 <p><em>Don't provide unnecessary information</em></p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
+<div class="cols">
+  <div class="col-6 layout-with-list-item-margins">
 
     <div class="do-dont-label bad">From a Setup Wizard screen</div>
 
@@ -64,7 +64,7 @@ page.tags=dialog,toast,notification
     </table>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <div class="do-dont-label good">From a Setup Wizard screen</div>
 
@@ -100,8 +100,8 @@ page.tags=dialog,toast,notification
 
 <p><em>Focus on the user's concern, not technical details</em></p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
+<div class="cols">
+  <div class="col-6 layout-with-list-item-margins">
 
     <div class="do-dont-label bad">Don't</div>
 
@@ -110,7 +110,7 @@ page.tags=dialog,toast,notification
     </td></tr></tbody></table>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <div class="do-dont-label good">Do</div>
 
@@ -123,8 +123,8 @@ page.tags=dialog,toast,notification
 
 <p><em>Put top news first</em></p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
+<div class="cols">
+  <div class="col-6 layout-with-list-item-margins">
 
     <div class="do-dont-label bad">Don't</div>
 
@@ -133,7 +133,7 @@ page.tags=dialog,toast,notification
     </td></tr></tbody></table>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <div class="do-dont-label good">Do</div>
 
@@ -146,8 +146,8 @@ page.tags=dialog,toast,notification
 
 <p><em>Put the user's goal first</em></p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
+<div class="cols">
+  <div class="col-6 layout-with-list-item-margins">
 
     <div class="do-dont-label bad">Don't</div>
 
@@ -156,7 +156,7 @@ page.tags=dialog,toast,notification
     </td></tr></tbody></table>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <div class="do-dont-label good">Do</div>
 
@@ -178,8 +178,8 @@ page.tags=dialog,toast,notification
 </ul>
 
 <p><em>Avoid being confusing or annoying</em></p>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6 layout-with-list-item-margins">
+<div class="cols">
+  <div class="col-6 layout-with-list-item-margins">
     <div class="do-dont-label bad">Don't</div>
     <table class="ui-table bad">
     <thead>
@@ -200,7 +200,7 @@ page.tags=dialog,toast,notification
     </table>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <div class="do-dont-label good">Do</div>
     <table class="ui-table good">
     <thead>

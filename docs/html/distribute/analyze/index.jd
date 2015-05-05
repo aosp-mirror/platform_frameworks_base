@@ -1,5 +1,6 @@
 page.title=Analyze
 page.metaDescription=Understanding what your users do inside your app is the key to engaging and monetizing them.
+page.image=images/cards/analytics-mobile_2x.jpg
 section.landing=true
 excludefromsuggestions=true
 nonavpage=true
@@ -37,4 +38,3 @@ nonavpage=true
     data-cardSizes="6x6"
     data-maxResults="10">
   </div>
- 

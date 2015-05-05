@@ -22,8 +22,8 @@ paying attention.</p>
 
 <h2>Anatomy of a notification</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <h4>Base Layout</h4>
     <p>At a minimum, all notifications consist of a base layout, including:</p>
     <ul>
@@ -34,7 +34,7 @@ paying attention.</p>
 image is shown for the main icon</li>
     </ul>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <img src="{@docRoot}design/media/notifications_pattern_anatomy.png">
     <div class="figure-caption">
       Base layout of a notification
@@ -54,8 +54,8 @@ for you to re-use in your application.</p>
 <img src="{@docRoot}design/media/notifications_pattern_expandable.png">
 
 <h4>Actions</h4>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <p>Android supports optional actions that are displayed at the bottom of
 the notification. With actions, users can handle the most common tasks for a
 particular notification from within the notification shade without having to
@@ -80,7 +80,7 @@ displaying</li>
 or "Open")</li>
     </ul>
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
     <img src="{@docRoot}design/media/notifications_pattern_two_actions.png">
     <div class="figure-caption">
       Calendar reminder notification with two actions
@@ -96,11 +96,11 @@ otherwise hidden, you must make sure that any action a user can invoke from a
 notification is available from within the associated application as well.</p>
 
 <h2>Design guidelines</h2>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <img src="{@docRoot}design/media/notifications_pattern_personal.png">
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
     <h4>Make it personal</h4>
     <p>For notifications of items sent by another user (such as a message or
 status update), include that person's image.</p>
@@ -264,8 +264,8 @@ other people.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
 <h4>When not to display a notification</h4>
 <p>There are however many other cases where notifications should not be
@@ -312,20 +312,20 @@ develop a widget that they can choose to place on their home screen.</p>
 </ul>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <img src="{@docRoot}design/media/notifications_pattern_social_fail.png">
   </div>
 </div>
 
 <h2 id="interacting-with-notifications">Interacting With Notifications</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/notifications_pattern_phone_icons.png">
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
   <p>Notifications are indicated by icons in the notification area and can be
 accessed by opening the notification drawer.</p>
@@ -337,8 +337,8 @@ removes it from the drawer.</p>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <p><h4>Ongoing notifications</h4>
 <p>Ongoing notifications keep users informed about an ongoing process in the
@@ -349,15 +349,15 @@ downloading a file, or encoding a video. Ongoing notifications cannot be
 manually removed from the notification drawer.</p></p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/notifications_pattern_ongoing_music.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-12">
+<div class="cols">
+  <div class="col-12">
     <h4>Dialogs and toasts are for feedback not notification</h4>
     <p>Your app should not create a dialog or toast if it is not currently on
 screen. Dialogs and Toasts should only be displayed as the immediate response

@@ -99,6 +99,138 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"video"
   },
   {
+    "title":"DesignBytes: Intro To Material Design",
+    "titleFriendly":"",
+    "summary":"These days, UI designers need to be thinking about phones, tablets, laptops, TVs, smartwatches, and beyond. In this DesignByte we talk about how Google designers have been working on making cross-platform and multi-screen design easier. We wanted to build a design system that felt at home on every screen, from the smallest watch to the largest TV.",
+    "url":"http://www.youtube.com/watch?v=p4gmvHyuZzw",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/p4gmvHyuZzw/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"DesignBytes: Paper and Ink: The Materials that Matter",
+    "titleFriendly":"",
+    "summary":"Join Rich Fulcher to learn about the materials of material design. See how virtual paper and ink form the foundation of your tactile user interface and master the rules that govern their behaviour.",
+    "url":"http://www.youtube.com/watch?v=YaG_ljfzeUw",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/YaG_ljfzeUw/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"DesignBytes: Material Design in the Google I/O App",
+    "titleFriendly":"",
+    "summary":"Roman Nurik shares details on the design process for the Google I/O 2014 app. To check out the app's source code, visit github.com/google/iosched.",
+    "url":"http://www.youtube.com/watch?v=XOcCOBe8PTc",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/XOcCOBe8PTc/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Battery Drain and Networking",
+    "titleFriendly":"",
+    "summary":"Let’s take a moment to make something insanely clear: As far as battery is concerned, NETWORKING is the biggest, baddest, dirtiest offender there is. And optimizing performance here isn’t easy. Since the chip isn’t always awake and draining power, means you can optimize how it wakes up, sends traffic, and saves battery.",
+    "url":"http://www.youtube.com/watch?v=fEEulSk1kNY",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/fEEulSk1kNY/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Batching Background Work Until Later",
+    "titleFriendly":"",
+    "summary":"Yes, your app is special. But when it comes to battery use, sometimes it’s better to be part of the crowd. Why not spread the battery blame around a bit? Ian Ni-Lewis shows you how ridiculously easy it is to go from battery hog to team player in this video.",
+    "url":"http://www.youtube.com/watch?v=-3ry8PxcJJA",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/-3ry8PxcJJA/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"The Performance Lifecycle",
+    "titleFriendly":"",
+    "summary":"Performance problems surface in your application at the least-wanted times (like right before you’re about to ship your first build). But don’t freak out: There’s a simple process that you can follow to help get your performance back under control.",
+    "url":"http://www.youtube.com/watch?v=_kKTGK-Cb_4",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/_kKTGK-Cb_4/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Introduction to Android Studio",
+    "titleFriendly":"",
+    "summary":"A high level introduction to Android Studio, the new IDE for Android application development. Learn why you should migrate your projects to Android Studio now and how it can help you be more productive as a developer. Rich layout editor, handy suggestions and fixes, new Android project view - these are just some of the things you can expect from the IDE, which is built on the successful IntelliJ IDEA.",
+    "url":"http://www.youtube.com/watch?v=K2dodTXARqc",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/K2dodTXARqc/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"DevBytes: Google Play Services 7.3",
+    "titleFriendly":"",
+    "summary":"Google Play Services 7.3 brings a ton of great new features to help you BUILD BETTER APPS! This update brings the ability to connect multiple wearables simultaneously to a single phone.",
+    "url":"http://www.youtube.com/watch?v=FOn64iqlphk",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/FOn64iqlphk/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Running a Successful Games Business with Google",
+    "titleFriendly":"",
+    "summary":"Sure, we all want to make the next great gaming masterpiece. But we also want to feed our families and/or dogs. Join Bob Meese from the Google Play team as he gives you some key pointers on how to make sure you're best taking advantage of Google Play and running a successful games business.",
+    "url":"http://www.youtube.com/watch?v=tDmnGNkTtlE",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/tDmnGNkTtlE/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Android TV: Introduction to Android TV",
+    "titleFriendly":"",
+    "summary":"Android TV brings the Android platform to the living room with rich content and entertaining app experiences. In this video, Timothy introduces the design philosophy and developer components that make building TV experiences easier than ever before.",
+    "url":"http://www.youtube.com/watch?v=6K_jxccHv5M",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/6K_jxccHv5M/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Under the Hood of Android Auto",
+    "titleFriendly":"",
+    "summary":"Your car contains some serious technology. Learn about the Android Auto architecture, which enables you to control Android apps and services running on your phone through your car. In this talk, we'll highlight the key characteristics of the Android Auto protocol, which enables your Android phone to talk to compatible cars. We'll also take a look at some of the details of the Android Auto rendering subsystem, which uses Binders and the Android VirtualDisplay API to composite UI from multiple Android apps. Finally, we'll discuss how we're enhancing the Google Maps app by integrating with the Android Auto platform.",
+    "url":"http://www.youtube.com/watch?v=KNKGM4ss5Sc",
+    "group":"",
+    "keywords": [],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/KNKGM4ss5Sc/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
     "title":"Developer Registration",
     "titleFriendly":"",
     "summary":"Additional information about the registration process.",
@@ -1990,6 +2122,183 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/animation/",
+    "timestamp": null,
+    "image": "images/cards/material-animation_2x.png",
+    "title": "Animation",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/style/",
+    "timestamp": null,
+    "image": "images/cards/material-style_2x.jpg",
+    "title": "Style",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/layout/",
+    "timestamp": null,
+    "image": "images/cards/material-layout_2x.png",
+    "title": "Layout",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/components/",
+    "timestamp": null,
+    "image": "images/cards/material-components_2x.jpg",
+    "title": "Components",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/patterns/",
+    "timestamp": null,
+    "image": "images/cards/material-patterns_2x.png",
+    "title": "Patterns",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/usability/",
+    "timestamp": null,
+    "image": "images/cards/material-usability_2x.png",
+    "title": "Usability",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/resources/color-palettes.html",
+    "timestamp": null,
+    "image": "images/cards/material-color-palette_2x.jpg",
+    "title": "Color Palettes",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/resources/layout-templates.html",
+    "timestamp": null,
+    "image": "images/cards/material-layout-template_2x.jpg",
+    "title": "Layout Templates",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/resources/sticker-sheets-icons.html",
+    "timestamp": null,
+    "image": "images/cards/material-sticker-sheet_2x.jpg",
+    "title": "Sticker Sheets & Icons",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.google.com/design/spec/resources/roboto-noto-fonts.html",
+    "timestamp": null,
+    "image": "images/cards/material-typography_2x.jpg",
+    "title": "Typography: Roboto and Noto Sans fonts",
+    "summary": "",
+    "keywords": [],
+    "type": "design",
+    "titleFriendly": ""
+  },
+  {
+    "title":"Android Wear Materials",
+    "titleFriendly":"",
+    "summary":"You may use these materials without restriction to facilitate your app design and implementation. Drag and drop your way to beautifully designed Android apps. The stencils feature the rich typography, colors, interactive controls, and icons found throughout…",
+    "url":"design/downloads/index.html#Wear",
+    "group":"",
+    "keywords": ["icons","stencils","color swatches"],
+    "tags": ["icons","stencils","colorswatches"],
+    "image":"images/cards/android-wear-materials_2x.jpg",
+    "lang":"en",
+    "type":"design"
+  },
+  {
+    "tags": [
+      "android",
+      "developerstory",
+      "googleplay",
+      "featured"
+    ],
+    "title": "Android Developer Story: Jelly Button Games — Growing globally through data driven development",
+    "type": "youtube",
+    "url": "http://www.youtube.com/watch?v=Pd49vTkvu0U"
+  },
+  {
+    "title":"Scale with Google Cloud Platform",
+    "titleFriendly":"",
+    "summary":"With Google Cloud Platform, developers can build, test and deploy applications on Google's highly-scalable and reliable infrastructure for your web, mobile and backend solutions.",
+    "url":"https://cloud.google.com/docs/",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/cards/cloud-platform_2x.png",
+    "lang":"en",
+    "type":"distribute"
+  },
+  {
+    "title":"Opportunities & Programs",
+    "titleFriendly":"",
+    "summary":"This is a card body place holder text. This is a card body place holder text. This is a card body place holder text.",
+    "url":"distribute/googleplay/index.html#opportunities",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/cards/program-edu_2x.jpg",
+    "lang":"en",
+    "type":"distribute"
+  },
+  {
     "lang": "ja",
     "title": "Gaming Everywhere",
     "titleFriendly": "",
@@ -2314,3 +2623,44 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "distribute"
   }
 ]);
+
+var CAROUSEL_OVERRIDE = {
+  "about/versions/lollipop.html": {
+    "image": "images/home/hero-lollipop_2x.png",
+    "heroColor": "#263238",
+    "heroInvert": true,
+    "title": "Android 5.0 Lollipop",
+    "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new Material design interface, and much more."
+  },
+  "distribute/googleplay/families/about.html": {
+    "image": "images/distribute/hero-family.jpg",
+    "title": "Designed for Families",
+    "summary": "Introducing a new Google Play section to promote family friendly apps. Your apps in the program can benefit from enhanced discoverability in addition to maintaining their existing categories, rankings, and reviews elsewhere on the Google Play store."
+  },
+  "http://www.youtube.com/watch?v=Pd49vTkvu0U": {
+    "image": "images/distribute/hero-jelly-button.jpg",
+    "title": "How Jelly Button Games are growing globally through data",
+    "summary": "To really understand their users, Jelly Button Games analyses over 3 billion events each month using Google Analytics and Google BigQuery."
+  },
+  "http://www.youtube.com/watch?v=700gYRkhkLM": {
+    "image": "images/distribute/hero-outfit7.jpg",
+    "title": "Outfit7 — Building an entertainment company with Google",
+    "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories...."
+  },
+  "http://www.youtube.com/watch?v=MPnH7h12h0U": {
+    "image": "images/distribute/hero-haystack.jpg",
+    "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen."
+  },
+  "http://www.youtube.com/watch?v=ekxABqJeRBc": {
+    "image": "images/distribute/hero-ginlemon.jpg",
+    "title": "How GinLemon is breaking through with Google Play",
+    "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy."
+  },
+  "distribute/googleplay/guide.html": {
+    "heroColor": "#fcb94e",
+    "image": "images/distribute/hero-g-play-guidebooks_2x.png",
+    "title": "Finding Success on Google Play",
+    "summary": "We’ve created a downloadable guide to help you find success with your app or game business on Google Play. In it, you’ll find features, tips, and best practices to help you build an effective strategy.",
+    "tags": []
+  }
+};

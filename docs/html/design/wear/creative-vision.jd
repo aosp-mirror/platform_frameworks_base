@@ -2,17 +2,19 @@ page.title=Creative Vision for Android Wear
 @jd:body
 
 <style>
-div.span-13 {
-  margin:10px 0;
+.page-vision  {
+  float: left;
+  margin: 10px 0;
+  width: 100%;
 }
-div.span-13 img {
+.page-vision img {
   float:left;
   margin:2px 20px 40px 0;
 }
-div.span-13 p {
+.page-vision p {
   margin-left:167px;
 }
-div.span-13 h2 {
+.page-vision h2 {
   margin-top:0;
   }
 </style>
@@ -22,28 +24,28 @@ allowing users to be more connected to both the virtual world and the real world
 Wear experiences are:</p>
 
 
-  <div class="layout-content-col span-13">
+  <div class="page-vision">
     <img src="{@docRoot}design/media/wear/vision_traffic.png" width="147" height="147" />
 
     <h2 id="Launched">Launched automatically</h2>
     <p>Most people are used to launching apps by clicking an icon. Android Wear is different. Wearable apps are aware of the user’s context - time, location, physical activity, and so on. The apps use this information to insert cards into the stream when they become relevant. This makes Android Wear timely, relevant and very specific.</p>
   </div>
 
-  <div class="layout-content-col span-13">
+  <div class="page-vision">
     <img src="{@docRoot}design/media/wear/vision_navigation.png" width="147" height="147" />
 
     <h2 id="Glanceable">Glanceable</h2>
     <p>A classic wrist watch is designed to let you see the time in a split second and get on with what you were doing. Designing for Android Wear is no different. The less time it takes to use your software, the more time the user can be present in whatever they are doing. Android wear is fast, sharp, and immediate.</p>
   </div>
 
-  <div class="layout-content-col span-13">
+  <div class="page-vision">
     <img src="{@docRoot}design/media/wear/vision_voice.png" width="147" height="147" style="border: 1px solid #ddd;" />
 
     <h2 id="SuggestDemand">All about suggest and demand</h2>
     <p>Android Wear is like a great personal assistant: it knows you and your preferences, it only interrupts you when absolutely necessary, and it’s always on hand to provide a ready answer. Android Wear is helpful, respectful, and responsive.</p>
   </div>
 
-  <div class="layout-content-col span-13">
+  <div class="page-vision">
     <img src="{@docRoot}design/media/wear/vision_music.png" width="147" height="147" />
 
     <h2 id="Interaction">Zero or low interaction</h2>
