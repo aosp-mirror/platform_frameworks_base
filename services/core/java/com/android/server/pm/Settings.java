@@ -4165,19 +4165,11 @@ final class Settings {
         }
 
         public void writePermissionsForUserSyncLPr(int userId) {
-            if (!PackageManagerService.RUNTIME_PERMISSIONS_ENABLED) {
-                return;
-            }
-
             mHandler.removeMessages(userId);
             writePermissionsSync(userId);
         }
 
         public void writePermissionsForUserAsyncLPr(int userId) {
-            if (!PackageManagerService.RUNTIME_PERMISSIONS_ENABLED) {
-                return;
-            }
-
             final long currentTimeMillis = SystemClock.uptimeMillis();
 
             if (mWriteScheduled.get(userId)) {

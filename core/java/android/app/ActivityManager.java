@@ -16,8 +16,10 @@
 
 package android.app;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -26,6 +28,7 @@ import android.os.BatteryStats;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
+import android.util.Log;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
@@ -2396,7 +2399,24 @@ public class ActivityManager {
         } catch (RemoteException e) {
         }
     }
-    
+
+    /**
+     * Kills the specified UID.
+     * @param uid The UID to kill.
+     * @param reason The reason for the kill.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.KILL_UID)
+    public void killUid(int uid, String reason) {
+        try {
+            ActivityManagerNative.getDefault().killUid(uid, reason);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't kill uid:" + uid, e);
+        }
+    }
+
     /**
      * Have the system perform a force stop of everything associated with
      * the given application package.  All processes that share its uid
