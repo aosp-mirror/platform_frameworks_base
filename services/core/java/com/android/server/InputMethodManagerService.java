@@ -145,10 +145,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final char INPUT_METHOD_SEPARATOR = ':';
     private static final char INPUT_METHOD_SUBTYPE_SEPARATOR = ';';
 
-    static final int MSG_SHOW_IM_PICKER = 1;
-    static final int MSG_SHOW_IM_SUBTYPE_PICKER = 2;
-    static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 3;
-    static final int MSG_SHOW_IM_CONFIG = 4;
+    static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
+    static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 2;
+    static final int MSG_SHOW_IM_CONFIG = 3;
 
     static final int MSG_UNBIND_INPUT = 1000;
     static final int MSG_BIND_INPUT = 1010;
@@ -2597,12 +2596,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     public boolean handleMessage(Message msg) {
         SomeArgs args;
         switch (msg.what) {
-            case MSG_SHOW_IM_PICKER:
-                showInputMethodMenu();
-                return true;
-
             case MSG_SHOW_IM_SUBTYPE_PICKER:
-                showInputMethodSubtypeMenu();
+                showInputMethodMenu();
                 return true;
 
             case MSG_SHOW_IM_SUBTYPE_ENABLER:
@@ -2861,14 +2856,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // ----------------------------------------------------------------------
 
-    private void showInputMethodMenu() {
-        showInputMethodMenuInternal(false);
-    }
-
-    private void showInputMethodSubtypeMenu() {
-        showInputMethodMenuInternal(true);
-    }
-
     private void showInputMethodAndSubtypeEnabler(String inputMethodId) {
         Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -2893,7 +2880,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 && mKeyguardManager.isKeyguardLocked() && mKeyguardManager.isKeyguardSecure();
     }
 
-    private void showInputMethodMenuInternal(boolean showSubtypes) {
+    private void showInputMethodMenu() {
         if (DEBUG) Slog.v(TAG, "Show switching menu");
 
         final Context context = mContext;
@@ -2915,7 +2902,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             final List<ImeSubtypeListItem> imList =
                     mSwitchingController.getSortedInputMethodAndSubtypeListLocked(
-                            showSubtypes, mInputShown, isScreenLocked);
+                            true /* showSubtypes */, mInputShown, isScreenLocked);
 
             if (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
                 final InputMethodSubtype currentSubtype = getCurrentInputMethodSubtypeLocked();
@@ -3016,7 +3003,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             };
             mDialogBuilder.setSingleChoiceItems(adapter, checkedItem, choiceListener);
 
-            if (showSubtypes && !isScreenLocked) {
+            if (!isScreenLocked) {
                 final OnClickListener positiveListener = new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int whichButton) {
