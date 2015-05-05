@@ -239,7 +239,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
             }
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(mActivity, this,
-                    mAllSharedElementNames, resultCode, data);
+                    mSharedElementNames, resultCode, data);
             mActivity.convertToTranslucent(new Activity.TranslucentConversionListener() {
                 @Override
                 public void onTranslucentConversionComplete(boolean drawComplete) {
