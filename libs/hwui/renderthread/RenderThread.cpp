@@ -144,6 +144,7 @@ RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
         , mFrameCallbackTask(nullptr)
         , mRenderState(nullptr)
         , mEglManager(nullptr) {
+    Properties::load();
     mFrameCallbackTask = new DispatchFrameCallbacks(this);
     mLooper = new Looper(false);
     run("RenderThread");

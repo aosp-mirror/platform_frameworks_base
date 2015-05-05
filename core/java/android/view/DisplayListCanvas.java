@@ -93,12 +93,6 @@ public class DisplayListCanvas extends Canvas {
 
     private static native long nCreateDisplayListCanvas();
 
-    public static void setProperty(String name, String value) {
-        nSetProperty(name, value);
-    }
-
-    private static native void nSetProperty(String name, String value);
-
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
     ///////////////////////////////////////////////////////////////////////////

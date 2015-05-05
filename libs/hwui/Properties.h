@@ -19,11 +19,15 @@
 
 #include <cutils/properties.h>
 #include <stdlib.h>
+#include <utils/Singleton.h>
 
 /**
  * This file contains the list of system properties used to configure
  * the OpenGLRenderer.
  */
+
+namespace android {
+namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Compile-time properties
@@ -253,12 +257,61 @@ enum DebugLevel {
 // Converts a number of kilo-bytes into bytes
 #define KB(s) s * 1024
 
-static inline DebugLevel readDebugLevel() {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG, property, nullptr) > 0) {
-        return (DebugLevel) atoi(property);
-    }
-    return kDebugDisabled;
-}
+enum class ProfileType {
+    None,
+    Console,
+    Bars
+};
+
+enum class OverdrawColorSet {
+    Default = 0,
+    Deuteranomaly
+};
+
+enum class StencilClipDebug {
+    Hide,
+    ShowHighlight,
+    ShowRegion
+};
+
+/**
+ * Renderthread-only singleton which manages several static rendering properties. Most of these
+ * are driven by system properties which are queried once at initialization, and again if init()
+ * is called.
+ */
+class Properties {
+public:
+    static bool load();
+
+    static bool drawDeferDisabled;
+    static bool drawReorderDisabled;
+    static bool debugLayersUpdates;
+    static bool debugOverdraw;
+    static bool showDirtyRegions;
+
+    static DebugLevel debugLevel;
+    static OverdrawColorSet overdrawColorSet;
+    static StencilClipDebug debugStencilClip;
+
+    // Override the value for a subset of properties in this class
+    static void overrideProperty(const char* name, const char* value);
+
+    static float overrideLightRadius;
+    static float overrideLightPosY;
+    static float overrideLightPosZ;
+    static float overrideAmbientRatio;
+    static int overrideAmbientShadowStrength;
+    static int overrideSpotShadowStrength;
+
+    static ProfileType getProfileType();
+
+private:
+    static ProfileType sProfileType;
+    static bool sDisableProfileBars;
+
+}; // class Caches
+
+}; // namespace uirenderer
+}; // namespace android
 
 #endif // ANDROID_HWUI_PROPERTIES_H
