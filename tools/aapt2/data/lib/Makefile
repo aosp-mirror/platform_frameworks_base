@@ -56,7 +56,7 @@ $(foreach d,$(PRIVATE_RESOURCE_TYPES),$(eval $(call make-collect-rule,$d)))
 
 # Link: out/package-unaligned.apk <- out/values-v4.apk out/drawable-v4.apk
 $(PRIVATE_APK_UNALIGNED): $(PRIVATE_INTERMEDIATE_TABLES) $(PRIVATE_LIBS) AndroidManifest.xml
-	$(AAPT) link --manifest AndroidManifest.xml $(addprefix -I ,$(PRIVATE_LIBS)) --java $(LOCAL_GEN) -o $@ $(PRIVATE_INTERMEDIATE_TABLES)
+	$(AAPT) link --manifest AndroidManifest.xml $(addprefix -I ,$(PRIVATE_LIBS)) --java $(LOCAL_GEN) -o $@ $(PRIVATE_INTERMEDIATE_TABLES) --static-lib
 
 # R.java: gen/com/android/app/R.java <- out/resources.arsc
 # No action since R.java is generated when out/resources.arsc is.
