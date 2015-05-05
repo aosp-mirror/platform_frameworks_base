@@ -96,9 +96,9 @@ interface IPackageManager {
 
     void removePermission(String name);
 
-    boolean grantPermission(String packageName, String permissionName, int userId);
+    void grantPermission(String packageName, String permissionName, int userId);
 
-    boolean revokePermission(String packageName, String permissionName, int userId);
+    void revokePermission(String packageName, String permissionName, int userId);
 
     boolean isProtectedBroadcast(String actionName);
 

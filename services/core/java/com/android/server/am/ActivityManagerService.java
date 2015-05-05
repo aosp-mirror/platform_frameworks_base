@@ -10754,9 +10754,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void killUid(int uid, String reason) {
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("killUid only available to the system");
-        }
+        enforceCallingPermission(Manifest.permission.KILL_UID, "killUid");
         synchronized (this) {
             killPackageProcessesLocked(null, UserHandle.getAppId(uid), UserHandle.getUserId(uid),
                     ProcessList.FOREGROUND_APP_ADJ-1, false, true, true, false,
