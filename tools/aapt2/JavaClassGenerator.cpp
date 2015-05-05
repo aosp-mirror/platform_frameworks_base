@@ -94,12 +94,12 @@ void JavaClassGenerator::visit(const Styleable& styleable, ValueVisitorArgs& a) 
     std::u16string* entryName = static_cast<GenArgs&>(a).entryName;
 
     // This must be sorted by resource ID.
-    std::vector<std::pair<ResourceId, StringPiece16>> sortedAttributes;
+    std::vector<std::pair<ResourceId, ResourceNameRef>> sortedAttributes;
     sortedAttributes.reserve(styleable.entries.size());
     for (const auto& attr : styleable.entries) {
         assert(attr.id.isValid() && "no ID set for Styleable entry");
         assert(attr.name.isValid() && "no name set for Styleable entry");
-        sortedAttributes.emplace_back(attr.id, attr.name.entry);
+        sortedAttributes.emplace_back(attr.id, attr.name);
     }
     std::sort(sortedAttributes.begin(), sortedAttributes.end());
 
@@ -124,8 +124,15 @@ void JavaClassGenerator::visit(const Styleable& styleable, ValueVisitorArgs& a) 
     for (size_t i = 0; i < attrCount; i++) {
         *out << "        "
              << "public static" << finalModifier
-             << " int " << transform(*entryName) << "_" << transform(sortedAttributes[i].second)
-             << " = " << i << ";" << std::endl;
+             << " int " << transform(*entryName);
+
+        // We may reference IDs from other packages, so prefix the entry name with
+        // the package.
+        const ResourceNameRef& itemName = sortedAttributes[i].second;
+        if (itemName.package != mTable->getPackage()) {
+            *out << "_" << transform(itemName.package);
+        }
+        *out << "_" << transform(itemName.entry) << " = " << i << ";" << std::endl;
     }
 }
 

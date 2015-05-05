@@ -96,6 +96,8 @@ struct ResourceNameRef {
     ResourceNameRef(ResourceNameRef&&) = default;
     ResourceNameRef(const ResourceName& rhs);
     ResourceNameRef(const StringPiece16& p, ResourceType t, const StringPiece16& e);
+    ResourceNameRef& operator=(const ResourceNameRef& rhs) = default;
+    ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
     ResourceNameRef& operator=(const ResourceName& rhs);
 
     ResourceName toResourceName() const;
