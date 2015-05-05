@@ -16,6 +16,9 @@
 
 package com.android.systemui.volume;
 
+import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
+
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -32,6 +35,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -43,6 +47,8 @@ import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.AccessibilityDelegate;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnLayoutChangeListener;
 import android.view.View.OnTouchListener;
@@ -50,6 +56,9 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -97,6 +106,7 @@ public class VolumeDialog {
     private final ZenFooter mZenFooter;
     private final LayoutTransition mLayoutTransition;
     private final Object mSafetyWarningLock = new Object();
+    private final Accessibility mAccessibility = new Accessibility();
 
     private boolean mShowing;
     private boolean mExpanded;
@@ -173,6 +183,8 @@ public class VolumeDialog {
         mExpandButtonAnimationDuration = res.getInteger(R.integer.volume_expand_animation_duration);
         mZenFooter = (ZenFooter) mDialog.findViewById(R.id.volume_zen_footer);
         mZenFooter.init(zenModeController);
+
+        mAccessibility.init();
 
         controller.addCallback(mControllerCallbackH, mHandler);
         controller.getState();
@@ -409,10 +421,13 @@ public class VolumeDialog {
 
     protected void rescheduleTimeoutH() {
         mHandler.removeMessages(H.DISMISS);
-        final int timeout = computeTimeoutH();
-        if (D.BUG) Log.d(TAG, "rescheduleTimeout " + timeout);
-        mHandler.sendMessageDelayed(mHandler
-                .obtainMessage(H.DISMISS, Events.DISMISS_REASON_TIMEOUT, 0), timeout);
+        int timeout = -1;
+        if (!mAccessibility.mFeedbackEnabled) {
+            timeout = computeTimeoutH();
+            mHandler.sendMessageDelayed(mHandler
+                    .obtainMessage(H.DISMISS, Events.DISMISS_REASON_TIMEOUT, 0), timeout);
+        }
+        if (D.BUG) Log.d(TAG, "rescheduleTimeout " + timeout + " " + Debug.getCaller());
         mController.userActivity();
     }
 
@@ -475,6 +490,8 @@ public class VolumeDialog {
         if (res == mExpandButtonRes) return;
         mExpandButtonRes = res;
         mExpandButton.setImageResource(res);
+        mExpandButton.setContentDescription(mContext.getString(mExpanded ?
+                R.string.accessibility_volume_collapse : R.string.accessibility_volume_expand));
     }
 
     private boolean isVisibleH(VolumeRow row, boolean isActive) {
@@ -632,6 +649,7 @@ public class VolumeDialog {
                 : (iconRes == R.drawable.ic_volume_media_bt || iconRes == row.iconRes)
                         ? Events.ICON_STATE_UNMUTE
                 : Events.ICON_STATE_UNKNOWN;
+        row.icon.setContentDescription(ss.name);
 
         // update slider
         updateVolumeRowSliderH(row, zenMuted);
@@ -928,6 +946,56 @@ public class VolumeDialog {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(H.RECHECK, mRow),
                         USER_ATTEMPT_GRACE_PERIOD);
             }
+        }
+    }
+
+    private final class Accessibility {
+        private AccessibilityManager mMgr;
+        private boolean mFeedbackEnabled;
+
+        public void init() {
+            mMgr = (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+            mDialogView.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    // noop
+                }
+
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    updateFeedbackEnabled();
+                }
+            });
+            mDialogView.setAccessibilityDelegate(new AccessibilityDelegate() {
+                @Override
+                public boolean onRequestSendAccessibilityEvent(ViewGroup host, View child,
+                        AccessibilityEvent event) {
+                    rescheduleTimeoutH();
+                    return super.onRequestSendAccessibilityEvent(host, child, event);
+                }
+            });
+            mMgr.addAccessibilityStateChangeListener(new AccessibilityStateChangeListener() {
+                @Override
+                public void onAccessibilityStateChanged(boolean enabled) {
+                    updateFeedbackEnabled();
+                }
+            });
+            updateFeedbackEnabled();
+        }
+
+        private void updateFeedbackEnabled() {
+            mFeedbackEnabled = computeFeedbackEnabled();
+        }
+
+        private boolean computeFeedbackEnabled() {
+            final List<AccessibilityServiceInfo> services =
+                    mMgr.getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
+            for (AccessibilityServiceInfo asi : services) {
+                if ((asi.feedbackType & FEEDBACK_ALL_MASK) != 0) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
