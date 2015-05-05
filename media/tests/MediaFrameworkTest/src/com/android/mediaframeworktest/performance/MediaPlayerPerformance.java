@@ -432,7 +432,22 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         assertTrue("HEVC playback memory test", memoryResult);
     }
 
-    // Test case 4: Capture the memory usage after every 20 video only recorded
+    // Test case 4: Capture the memory usage after every 20 mpeg2 playback
+    @LargeTest
+    public void testMPEG2VideoPlaybackMemoryUsage() throws Exception {
+        boolean memoryResult = false;
+
+        mStartPid = getMediaserverPid();
+        for (int i = 0; i < NUM_STRESS_LOOP; i++) {
+            mediaStressPlayback(MediaNames.VIDEO_MPEG2_AAC);
+            getMemoryWriteToLog(i);
+            writeProcmemInfo();
+        }
+        memoryResult = validateMemoryResult(mStartPid, mStartMemory, DECODER_LIMIT);
+        assertTrue("MPEG2 playback memory test", memoryResult);
+    }
+
+    // Test case 5: Capture the memory usage after every 20 video only recorded
     @LargeTest
     public void testH263RecordVideoOnlyMemoryUsage() throws Exception {
         if (mCamcorderProfile != null) {
@@ -453,7 +468,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         }
     }
 
-    // Test case 5: Capture the memory usage after every 20 video only recorded
+    // Test case 6: Capture the memory usage after every 20 video only recorded
     @LargeTest
     public void testMpeg4RecordVideoOnlyMemoryUsage() throws Exception {
         if (mCamcorderProfile != null) {
@@ -474,7 +489,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         }
     }
 
-    // Test case 6: Capture the memory usage after every 20 video and audio
+    // Test case 7: Capture the memory usage after every 20 video and audio
     // recorded
     @LargeTest
     public void testRecordVideoAudioMemoryUsage() throws Exception {
@@ -496,7 +511,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         }
     }
 
-    // Test case 7: Capture the memory usage after every 20 audio only recorded
+    // Test case 8: Capture the memory usage after every 20 audio only recorded
     @LargeTest
     public void testRecordAudioOnlyMemoryUsage() throws Exception {
         boolean memoryResult = false;
@@ -511,7 +526,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         assertTrue("audio record only memory test", memoryResult);
     }
 
-    // Test case 8: Capture the memory usage after every 20 camera preview
+    // Test case 9: Capture the memory usage after every 20 camera preview
     @LargeTest
     public void testCameraPreviewMemoryUsage() throws Exception {
         boolean memoryResult = false;
