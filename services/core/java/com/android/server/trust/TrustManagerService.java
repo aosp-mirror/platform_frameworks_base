@@ -227,7 +227,7 @@ public class TrustManagerService extends SystemService {
             if (!userInfo.supportsSwitchTo()) continue;
             if (!mActivityManager.isUserRunning(userInfo.id)) continue;
             if (!lockPatternUtils.isSecure(userInfo.id)) continue;
-            if (!mUserHasAuthenticatedSinceBoot.get(userInfo.id)) continue;
+            if (!getUserHasAuthenticated(userInfo.id)) continue;
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
             final boolean disableTrustAgents =
@@ -506,7 +506,7 @@ public class TrustManagerService extends SystemService {
     // Agent dispatch and aggregation
 
     private boolean aggregateIsTrusted(int userId) {
-        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
+        if (!getUserHasAuthenticated(userId)) {
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
@@ -521,7 +521,7 @@ public class TrustManagerService extends SystemService {
     }
 
     private boolean aggregateIsTrustManaged(int userId) {
-        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
+        if (!getUserHasAuthenticated(userId)) {
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
@@ -549,21 +549,44 @@ public class TrustManagerService extends SystemService {
     }
 
     private void updateUserHasAuthenticated(int userId) {
-        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
-            mUserHasAuthenticatedSinceBoot.put(userId, true);
+        boolean changed = setUserHasAuthenticated(userId);
+        if (changed) {
             refreshAgentList(userId);
         }
     }
 
+    private boolean getUserHasAuthenticated(int userId) {
+        synchronized (mUserHasAuthenticatedSinceBoot) {
+            return mUserHasAuthenticatedSinceBoot.get(userId);
+        }
+    }
+
+    /**
+     * @return whether the value has changed
+     */
+    private boolean setUserHasAuthenticated(int userId) {
+        synchronized (mUserHasAuthenticatedSinceBoot) {
+            if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
+                mUserHasAuthenticatedSinceBoot.put(userId, true);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private void clearUserHasAuthenticated(int userId) {
+        synchronized (mUserHasAuthenticatedSinceBoot) {
+            if (userId == UserHandle.USER_ALL) {
+                mUserHasAuthenticatedSinceBoot.clear();
+            } else {
+                mUserHasAuthenticatedSinceBoot.put(userId, false);
+            }
+        }
+    }
 
     private void requireCredentialEntry(int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            mUserHasAuthenticatedSinceBoot.clear();
-            refreshAgentList(UserHandle.USER_ALL);
-        } else {
-            mUserHasAuthenticatedSinceBoot.put(userId, false);
-            refreshAgentList(userId);
-        }
+        clearUserHasAuthenticated(userId);
+        refreshAgentList(userId);
     }
 
     // Listeners
@@ -700,6 +723,18 @@ public class TrustManagerService extends SystemService {
             long token = Binder.clearCallingIdentity();
             try {
                 return new LockPatternUtils(mContext).isSecure(userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean hasUserAuthenticatedSinceBoot(int userId) throws RemoteException {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, null);
+            long token = Binder.clearCallingIdentity();
+            try {
+                return getUserHasAuthenticated(userId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
