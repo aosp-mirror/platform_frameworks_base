@@ -3,7 +3,7 @@ page.viewport_width=970
 fullpage=true
 no_footer_links=true
 page.type=about
-
+page.image=images/cards/android-wear_2x.png
 @jd:body
 
 <style>
@@ -74,7 +74,7 @@ page.type=about
     </div> <!-- end .landing-section .landing-hero -->
 
 
-    <div class="landing-rest-of-page" style="margin-top:80px">
+    <div class="landing-rest-of-page">
       <div class="landing-section" id="extending-android-to-wearables">
         <div class="wrap">
           <div class="landing-section-header">

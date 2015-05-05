@@ -21,8 +21,8 @@ page.tags=settings,preferences
 <em>To teach high value functionality that's only available through a gesture.</em></p>
 
 <p>For example, we use help content to teach users how to place apps on their Home screen. This functionality is:</p>
-<div class="layout-content-row">
-  <div class="layout-content-col span-8">
+<div class="cols">
+  <div class="col-8">
     <ul>
       <li><strong>High value</strong>
       <p style="margin-top:0;">Without it, users wouldn't be able to customize the most frequently visited Android screen to meet their needs.</p></li>
@@ -31,7 +31,7 @@ page.tags=settings,preferences
     </ul>
     <p>However, not all high value gesture-only functionality needs a tutorial. For example, don't teach users how to scroll content. They already know how because it's a fundamental, system-wide interaction.</p>
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
     <img src="{@docRoot}design/media/help_cling.png">
     <div class="figure-caption">
       The first time each user visits the All Apps screen, a semi-transparent overlay appears to teach an important gesture.
@@ -44,11 +44,11 @@ page.tags=settings,preferences
 
 <p>On every screen in your app, offer help in the <a href="{@docRoot}design/patterns/actionbar.html">action overflow</a>. Always make it the very last item in the menu and label it "Help".</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
     <img src="{@docRoot}design/media/help_overflow.png">
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <img src="{@docRoot}design/media/help_solo_overflow.png">
     <div class="figure-caption">
       Even if your screen has no other action overflow items, "Help" should appear there and not be promoted to the action bar.
@@ -67,28 +67,28 @@ page.tags=settings,preferences
 
 <p>When someone chooses "Help":</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
     <img src="{@docRoot}design/media/help_dont.png">
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/help_better.png">
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
     <img src="{@docRoot}design/media/help_evenbetter.png">
   </div>  
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
     <h4 class="do-dont-label bad">Don't</h4>
     <p>Present a dialog asking them to choose between help and other options.</p>
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <h4 class="do-dont-label good">Better</h4>
     <p>Immediately launch a web browser with help content. Place other options in a footer.</p>
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
     <h4 class="do-dont-label good">Even Better</h4>
     <p>Build a help screen in your app and offer other options in the action bar. For example, you could let users contact you with questions or feedback through an action button. The action overflow is the ideal place for non-help information that users rarely need.</p>
     <p>This requires more development work than launching a web browser, but it's a nicer experience for users because they don't leave your app to get the help they need and doesn't require a network connection.</p>

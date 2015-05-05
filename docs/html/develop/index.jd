@@ -9,378 +9,100 @@ tabbedList=1
 excludeFromSuggestions=true
 @jd:body
 
-<style>
-#noplayer-message {
-position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display:none;
-}
-#player-frame object {z-index:1;}
-</style>
-
-<div id="player-wrapper">
-  <div id="player-frame">
-    <div id="noplayer-message">
-      <!-- busted flash player message -->
-      Your video is supposed to appear here.<br/>
-      Make sure you have the <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash&reg; Player</a>.
+<section class="dac-expand dac-hero dac-light">
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-1of2 col-push-1of2 dac-hero-figure">
+        <img class="dac-hero-image" src="/images/develop/hero-android-studio-on-device.png">
+      </div>
+      <div class="col-1of2 col-pull-1of2">
+        <h1 class="dac-hero-title">Start!</h1>
+        <p class="dac-hero-description">
+          Set up your environment and create an app. Build faster with sample projects and templates.
+        </p>
+        <a class="dac-hero-cta" href="/sdk/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Set up Android Studio
+        </a><br>
+        <a class="dac-hero-cta" href="/training/basics/firstapp/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Make your first app
+        </a><br>
+        <a class="dac-hero-cta" href="/guide/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Learn about Android
+        </a><br>
+      </div>
     </div>
-    <div id="player"><!-- Youtube embeds here... actually replaces this div --></div>
-    <a class="close" onclick="$('#player-wrapper').hide()">close video</a>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:develop/landing/mainlinks"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>
+    </div>
   </div>
-</div>
-<div class="wrap">
-   <!-- Slideshow -->
-   <div class="slideshow-container slideshow-develop col-16">
-       <a href="" class="slideshow-prev">Prev</a>
-       <a href="" class="slideshow-next">Next</a>
-       <div class="frame">
-           <ul>
+</section>
 
-              <li class="item carousel-home">
-                 <div class="col-8">
-                   <img 
-                   style="max-height: 250px; margin-top:5px;
-                   margin-left: 30px; max-width: 451px;"
-src="{@docRoot}design/tv/images/focus.png"
-class="play no-shadow no-transform" />
-                 </div>
-                <div class="content-right col-6">
-                  <h2>Create Quality Apps for TV</h2>
-                  <p>Now that the Android platform has
-                  extended to TVs, your apps on Google Play have
-                  a new opportunity for engagement in the
-                  living room. To provide the best
-                  "leanback" experience on the couch, follow
-                  this quality checklist.</p>
-                  <p><a
-href="{@docRoot}distribute/essentials/quality/tv.html" class="button">Read
-more</a></p>
-                </div>            
-              </li>
+<section class="dac-section dac-gray dac-small dac-invert"><div class="wrap">
+  <h2 class="norule">Latest</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/latest"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>
 
-              <li class="item carousel-home">
-                 <div class="col-8">
-                   <img
-src="//lh4.ggpht.com/-lfjzgG5Dqrk/UHMThRtpRwI/AAAAAAAABpk/h4d3nsmkgPM/s400/mint.png"
-class="play no-shadow no-transform" />
-                 </div>
-                <div class="content-right col-6">
-                  <h2>Building Great Apps for Tablets</h2>
-                  <p>Tablets are a fast-growing part of the Android installed base and they offer new opportunities for user engagement and monetization. If you are targeting tablets, check out this list of tips and techniques on how to deliver a great app experience for tablet users.  </p>
-                  <p><a
-href="//android-developers.blogspot.com/2012/11/designing-for-tablets-were-here-to-help.html" class="button">Read
-more</a></p>
-                </div>            
-              </li>
-              <li class="item carousel-home">
-                 <div class="col-8">
-                   <img src="{@docRoot}images/google/gps-location.png"
-class="play no-shadow no-transform" style="margin:0 0 0 70px;height:230px;width:340px" />
-                 </div>
-                <div class="content-right col-6" style="width:350px">
-                  <h2>New Location APIs from Google</h2>
-                  <p>The latest version of Google Play services includes new APIs that provide more
-                  efficient and immediate user location data on devices running Android 2.2
-                  and higher. Features include geofencing APIs, user activity recognition, and
-                  power-efficient location updates.</p>
-                  <p><a
-href="{@docRoot}google/play-services/location.html" class="button">Read more</a></p>
-                </div>
-              </li>
+<section class="dac-section dac-light"><div class="wrap">
+  <h1 class="dac-section-title">Android performance patterns</h1>
+  <div class="dac-section-subtitle">
+    Everything you need to know about improving your app’s performance.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/performance"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://www.youtube.com/playlist?list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Playlist
+    </a></li>
+  </ul>
+</div></section>
 
-              <li class="item carousel-home">
-                 <div class="col-8">
-                   <img src="{@docRoot}images/google/gps-plus-signin-hero.jpg"
-class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;height:250px;
-                                           max-width:409px;width:409px" />
-                 </div>
-                <div class="content-right col-6" style="width:350px">
-                  <h2>New Cross-Platform Single Sign On</h2>
-                  <p>Google+ Sign-In is an easy, trusted way to sign a user into your app.
-                  Now it's even more seamless. A user can sign in to your app on one device and
-                  pick it up on another&mdash;without signing in again. Best of all, it's built
-                  into Google+ Sign-in, so there's no change needed in your app.</p>
-                  <p><a
-href="{@docRoot}google/play-services/plus.html" class="button">Read more</a></p>
-                </div>
-              </li>
+<section class="dac-section dac-dark dac-invert"><div class="wrap">
+  <h1 class="dac-section-title">Build with Google</h1>
+  <div class="dac-section-subtitle">Services on billions of Android devices worldwide to help you build better apps.</div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/buildwithgoogle"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://developers.google.com/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get started with Google << NEEDS LINK
+    </a></li>
+  </ul>
+</div></section>
 
-              <li class="item carousel-home">
-                 <div class="col-8">
-                   <img src="{@docRoot}images/google/maps-v2-trulia-n7.png"
-class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;height:250px;
-                                           max-width:409px;width:409px" />
-                 </div>
-                <div class="content-right col-6" style="width:350px">
-                  <h2>New Google Maps Android APIs!</h2>
-                  <p>Google Maps Android API version 2 is now available with enhanced
-                    features such as 3D buildings, vector-based map tiles, rich overlay capabilities,
-                    indoor maps, support for fragments, and much more.</p>
-                    
-                  <p>The APIs are bundled with Google Play services and are
-                  compatible with Android 2.2 and higher.</p>
-                  <p><a
-href="{@docRoot}google/play-services/maps.html" class="button">Read more</a></p>
-                </div>            
-              </li>
-           </ul>
-       </div>
-   </div>
-   <!-- /End slideshow -->
-</div>
-<div class="wrap">
-	<!-- news and feature feed -->
-	<div class="feed col-8" style="margin-left:0">
-		<ul class="feed-nav">
-			<li class="active">DEVELOPER NEWS</li>
-			<li>FEATURED DOCS</li>
-		</ul>
-		<div class="feed-container">
-			<div class="feed-frame">
-                                <!-- DEVELOPER NEWS -->
-          <ul>
-            <li><a href="//android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html">
-              <div class="feed-image" style="background:url('//2.bp.blogspot.com/-HfoO6KNFBKA/UeiyRoELb7I/AAAAAAAAAFs/bHR-5viktU4/s1000/icons.png') no-repeat 0 0;background-size:500px;background-position:center center;"></div>
-              <h4>Making Beautiful Android App Icons</h4>
-              <p>As higher density screens gain popularity, it's important to make sure your launcher icon is crisp and high quality...</p>
-              </a></li>
-            <li><a href="//android-developers.blogspot.com/2013/07/beautiful-design-collection-summer-2013.html">
-              <div class="feed-image" style="background:url('//1.bp.blogspot.com/-k8DZYu0daT4/UdRt1AzstvI/AAAAAAAAAFM/CvEkb2yh-i0/s965/beautifulapps_4.png') no-repeat 0 0"></div>
-              <h4>The Beautiful Design Summer 2013 Collection</h4>
-              <p>See the apps chosen by the Android Design team for their masterfully crafted design details...</p>
-              </a></li>
-            <li><a href="//android-developers.blogspot.com/2013/10/new-developer-features-in-google-play.html">
-              <div class="feed-image" style="background:url('//3.bp.blogspot.com/-k33rf398Lqw/UlRUMQQRUNI/AAAAAAAAClM/pSwz2YgQpmY/s1600/gps-play_games_logo.png') no-repeat 0 0;background-size:130px;background-position:8px -4px;"></div>
-              <h4>New Features in Google Play Games</h4>
-              <p>Three new features that make it easier to understand what players are doing in your game and help you manage game features...</p>
-            </a></li>
-            <li><a href="//android-developers.blogspot.com/2013/05/new-ways-to-optimize-your-business-in.html">
-              <div class="feed-image" style="background:url('//3.bp.blogspot.com/-_8WvpdTVGsE/UkxxxrVoNNI/AAAAAAAACj8/FrQyA-BO11c/s1600/gp-referral-ga.png') no-repeat 0 0;background-size:180px"></div>
-              <h4>Linking Google Analytics with Google Play</h4>
-              <p>Understanding your users easier through a new integration between Google Analytics and the Google Play Developer Console...</p>
-              </a></li>
-          </ul>
-                                <!-- FEATURED DOCS -->
-          <ul>
-            <li><a href="{@docRoot}distribute/googleplay/spotlight/tablets.html">
-              <h4>Tablet Stories</h4>
-              <p>More developers are investing in a full tablet experience for their apps. Here are some stories from developers who are seeing real results as they expand their offering to include Android tablets. </p>
-              </a></li>
-            <li><a href="{@docRoot}distribute/googleplay/quality/core.html">
-              <h4>Core App Quality Guidelines</h4>
-              <p>This document helps you assess basic aspects of quality in your app through a compact set of core app quality criteria and associated tests. All Android apps should meet these criteria.</p>
-              </a></li>
-            <li><a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">
-              <h4>Updated Notifications API Guide</h4>
-              <p>The Notifications API Guide is updated to include information about building Jelly Bean rich notifications using the Support Library APIs for backwards-compatibility.</p>
-              </a></li>
-            <li><a href="{@docRoot}guide/topics/ui/dialogs.html">
-              <h4>Updated Dialogs API Guide</h4>
-              <p>The Dialogs API Guide now shows to use DialogFragment class, a simpler way to manage your dialogs and embed them in alternative layouts.</p>
-              </a></li>                                      
-          </ul>
-			</div>
-		</div>
-	</div>	<!-- /news and feature feed -->
-	<!-- video feed -->
-	<div class="feed col-8" style="margin-right:0">
-		<ul class="feed-nav">
-			<li class="active">DEVELOPERS LIVE</li>
-			<li>VIDEO PLAYLISTS</li>
-		</ul>
-		<div class="feed-container">
-			<div class="feed-frame">
-              <ul id="DevelopersLive">
-              </ul>
-              <ul id="VideoPlaylists">
-              </ul>
-			</div>
-		</div>
-	</div>
-	<!-- /video feed -->
-</div>
+<section class="dac-section dac-light"><div class="wrap">
+  <h1 class="dac-section-title">DevBytes</h1>
+  <div class="dac-section-subtitle">Learn Android in short, focused tutorials.</div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/devbytes"
+       data-cardSizes="6x6"
+       data-maxResults="6"></div>
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://www.youtube.com/watch?v=wlFVIIstKmA&list=PLOU2XLYxmsIJJHY5OrsREtKewtBhc0Uy2">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      DevBytes 2014 playlist
+    </a></li>
+  </ul>
+</div></section>
 
-<br class="clearfix"/>
-
-      
-      
-      
-      
-      
-      
-      
-      
-
-<script src="//swfobject.googlecode.com/svn/trunk/swfobject/swfobject.js" type="text/javascript"></script>
-<script type="text/javascript">
-
-/* Load a video into the player box.
- * @param id        The YouTube video ID
- * @param title     The video title to display in the player box (character escaped)
- * @param autoplay  Whether to automatically play the video
- */
-function loadVideo(id, title, autoplay) {
-  swfobject.embedSWF('//www.youtube.com/v/' + id + '&rel=1&border=0&fs=1&autoplay=' +
-      (autoplay?1:0), 'player', '525', '330', '9.0.0', false, false, {allowfullscreen: 'true'});
-  $("#videoPlayerTitle").html("<h2>" + unescape(title) + "</h2>");
-  $("#player-wrapper").show();
-  setTimeout(function(){$('#noplayer-message').show()}, 2000);
-}
-
-/* Draw all videos from a playlist into a 'videoPreviews' list
- * @param data  The feed data returned from the youtube request
- */
-function renderVideoPlaylists(data) {
-  var MAX_LIST_DESC_LENGTH = 130; // the length at which we will trim the description
-  var MAX_VIDEO_DESC_LENGTH = 100; // the length at which we will trim the description
-  var MAX_LIST_LENGTH = 4; // number of videos to put in the list
-  var feed = data.feed;
-  var entries = feed.entry || [];
-  var playlistId = feed.yt$playlistId.$t;
-
-  var $ulVideos = $('<ul style="display:none"/>');
-  var summary = feed.media$group.media$description != null ? feed.media$group.media$description.$t : feed.subtitle.$t;
-  
-  var $liPlaylist = $('<li class="playlist"></li>');
-  var $aPlaylist = $('<a href="" onclick="togglePlaylist(this);return false;"></a>');
-  $liPlaylist.append($aPlaylist);
-  $aPlaylist.append('<h4>' + feed.title.$t + '</h4>');
-  
-  var playlistDescription = summary.substr(0, MAX_LIST_DESC_LENGTH);
-  playlistDescription += playlistDescription.length == MAX_LIST_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
-  $aPlaylist.append('<p>' +  playlistDescription + '</p>');
-  
-  // Loop through each entry (each video) and add it to the 'videoPreviews' list
-  var length = feed.entry.length < MAX_LIST_LENGTH ? feed.entry.length : MAX_LIST_LENGTH; // max of 4 videos per list
-  for (var i = 0; i < length; i++) {
-    var entry = entries[i];
-
-    var title = entry.title.$t;
-    var id = entry.media$group.yt$videoid.$t;
-    var thumbUrl = entry.media$group.media$thumbnail[0].url;
-    var fullDescription = entry.media$group.media$description.$t;
-    var playerUrl = entry.media$group.media$content[0].url;
-
-    var shortDescription = fullDescription.substr(0, MAX_VIDEO_DESC_LENGTH);
-    shortDescription += shortDescription.length == MAX_VIDEO_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
-
-    var img = $('<img src="' + thumbUrl + '" width="60" height="45"/>');
-    var a = $('<a href="#" onclick="loadVideo(\'' + id + '\',\'' + escape(title) + '\',true); return false;" />');
-    var pShortDescription = $('<p>' + shortDescription + '</p>');
-    var h5Title = "<h5>" + title + "</h5>";
-    var li = $('<li class="playlist-video"/>');
-
-    li.append(a);
-    a.append(img).append(h5Title).append(pShortDescription);
-
-    $ulVideos.append(li);
-    
-    // use the first entry's thumbnail for the playlist
-    if (i == 0) {
-      $aPlaylist.prepend('<img src="' + thumbUrl + '" width="120" height="90"/>');
-    }
-  }
-  
-  if (feed.entry.length > MAX_LIST_LENGTH) {
-    // add item to go to youtube for playlist
-    $ulVideos.append('<li class="more"><a href="//www.youtube.com/playlist?list=' + playlistId + '">More &raquo;</a></li>');
-  }
-
-  $liPlaylist.append($ulVideos);
-  $('#VideoPlaylists').append($liPlaylist);
-}
-
-
-function renderDevelopersLivePlaylist(data) {
-
-  var MAX_DESC_LENGTH = 125; // the length at which we will trim the description
-  var feed = data.feed;
-  var entries = feed.entry || [];
-  var playlistId = feed.yt$playlistId.$t;
-
-  var ul = $('#DevelopersLive');
-
-  // Loop through each entry (each video) and add it to the '#DevelopersLive' list
-  for (var i = 0; i < 4; i++) {
-    var entry = entries[i];
-
-    var title = entry.title.$t;
-    var id = entry.media$group.yt$videoid.$t;
-    var thumbUrl = entry.media$group.media$thumbnail[0].url;
-    var fullDescription = entry.media$group.media$description.$t;
-    var playerUrl = entry.media$group.media$content[0].url;
-    var shortDescription = fullDescription.substr(0, MAX_DESC_LENGTH);
-    shortDescription += shortDescription.length == MAX_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
-
-    var img = $('<img src="' + thumbUrl + '" width="120" height="90"/>');
-    var a = $('<a href="#" onclick="loadVideo(\'' + id + '\',\'' + escape(title) + '\',true); return false;" />');
-    var pShortDescription = $('<p>' + shortDescription + '</p>');
-    var h4Title = "<h4>" + title + "</h4>";
-    var li = $('<li/>');
-
-    li.append(a);
-    a.append(img).append(h4Title).append(pShortDescription);
-
-    ul.append(li);
-  }
-}
-
-/* This 'playlist' object defines the playlist IDs for each tab.
- * Each name inside 'playlist' corresponds to class names for the tab that the playlists belong to (eg: "googleioTab" and "googleioBox" divs).
- * Each string in 'ids' is the ID of a YouTube playlist that belongs in the corresponding tab.
- */
-var playlists = {
-  'designinaction' : {
-    'ids': ["PLWz5rJ2EKKc8j2B95zGMb8muZvrIy-wcF"]
-  },
-  'bizdevbytes' : {
-    'ids': ["PLWz5rJ2EKKc8-Osr0TuHyTMEhKV0xJ6ql"]
-  },
-  'thisweek' : {
-    'ids': ["PLWz5rJ2EKKc9Wam5jE-9oY8l6RpeAx-XM"]
-  },
-  'googleio' : {
-    'ids': ["PLWz5rJ2EKKc9WGUwq2gQ-coU3fSyexgOx"]
-  }
-};
-
-/* Request the playlist feeds from YouTube */
-function showVideosPlaylists() {
-  for (var x in playlists) {
-    var ids = playlists[x].ids;
-    for (var i in ids) {
-      var script = "<script type='text/javascript' src='//gdata.youtube.com/feeds/api/playlists/"
-                    + ids[i] +
-                    "?v=2&alt=json-in-script&max-results=50&callback=renderVideoPlaylists&orderby=position'><\/script>";
-      $("body").append(script);
-    }
-  }
-}
-
-
-/* Request the playlist feeds from YouTube */
-function showDevelopersLivePlaylist() {
-  var playlistId = "PLWz5rJ2EKKc_XOgcRukSoKKjewFJZrKV0"; /* DevBytes */
-  var script = "<script type='text/javascript' src='//gdata.youtube.com/feeds/api/playlists/"
-                + playlistId +
-                "?v=2&alt=json-in-script&max-results=10&callback=renderDevelopersLivePlaylist&orderby=position'><\/script > ";
-  $("body").append(script);
-}
-
-
-function togglePlaylist(listLink) {
-  var $list = $(listLink).parent();
-  var $ul = $list.find('ul');
-  if ($ul.is(":visible")) {
-    $ul.slideUp(function() {
-      $list.css({'height':'inherit'});
-    });
-  } else {
-    $list.closest('ul').find('li.playlist').find('ul').slideUp();
-    $ul.slideDown();
-    $list.css({'height':'auto'});
-  }
-}
-
-showDevelopersLivePlaylist();
-showVideosPlaylists();
-</script>
+<section class="dac-section dac-gray"><div class="wrap">
+  <h1 class="dac-section-title">Courses</h1>
+  <div class="dac-section-subtitle">Take free online courses from Android experts that bring you step-by-step to building your own apps.</div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/courses"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>

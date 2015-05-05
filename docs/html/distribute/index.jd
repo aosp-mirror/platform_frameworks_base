@@ -1,3 +1,4 @@
+fullpage=true
 page.title=Distribute Your Apps
 page.viewport_width=970
 section.landing=true
@@ -6,21 +7,74 @@ nonavpage=true
 page.metaDescription=The most visited store in the world for Android apps. Cloud-connected and always synced, it's never been easier for users to find and download your apps.
 
 @jd:body
+<div class="dac-hero-carousel" data-carousel-query="collection:distribute/landing/carousel">
+</div>
 
-    <div class="resource-widget resource-carousel-layout col-16" 
-    style="height:420px;margin-top:20px;padding-top:0"
-    data-query="type:youtube+tag:googleplay+tag:developerstory+tag:featured"
-    data-sortOdrder="-timestamp"
-    data-maxResults="4"></div>
-
+<section class="dac-section dac-gray dac-small dac-invert"><div class="wrap">
+  <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
-    data-query="type:blog+tag:googleplay+tag:distribute+tag:featured"
-    data-sortOrder=""
-    data-cardSizes="9x6"
-    data-maxResults="2"></div>
+      data-query="type:youtube+tag:googleplay+tag:developerstory+tag:featured, type:blog+tag:googleplay+tag:distribute+tag:featured"
+      data-sortOrder="-timestamp"
+      data-cardSizes="6x6"
+      data-maxResults="6"></div>
+</div></section>
 
+<section class="dac-section dac-invert dac-darken-bg" style="background-image: url(/images/distribute/google-play-bg.jpg)"><div class="wrap">
+  <div class="cols"><div class="col-10of12 col-push-1of12">
+    <h1 class="dac-section-title">Reach the world with Google Play</h1>
+    <div class="dac-section-subtitle">
+      Publish your apps and games on Google Play and reach over a billion active Android users in over 190 countries around the world.
+    </div>
+  </div></div>
   <div class="resource-widget resource-flow-layout col-16"
-    data-query="collection:launch/static"
-    data-sortOrder=""
-    data-cardSizes="6x2x3,6x6,6x6,6x6,6x6,6x2x3,6x2x3,6x6,6x6,6x6,6x6,6x6"
-    data-maxResults="24"></div>
+       data-query="collection:distribute/landing/googleplay"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="/distribute/googleplay/start.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get started
+    </a></li>
+    <li class="dac-section-link"><a href="/distribute/essentials/index.html#quality-guidelines">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Quality guidelines
+    </a></li>
+    <li class="dac-section-link"><a href="/distribute/essentials/index.html#tools-and-resources">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Resources &amp; tools
+    </a></li>
+    <li class="dac-section-link"><a href="/distribute/stories/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Developer stories
+    </a></li>
+    <li class="dac-section-link"><a href="/distribute/users/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get users
+    </a></li>
+    <li class="dac-section-link"><a href="/distribute/engage/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Engage &amp; retain
+    </a></li>
+    <li class="dac-section-link"><a href="/distribute/monetize/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Monetize
+    </a></li>
+  </ul>
+</div></section>
+
+<section class="dac-section dac-light"><div class="wrap">
+  <div class="cols"><div class="col-10of12 col-push-1of12">
+    <h1 class="dac-section-title">More from Google</h1>
+    <div class="dac-section-subtitle">Reach and retain a valuable audience and grow your revenue.</div>
+  </div></div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:distribute/landing/more"
+       data-cardSizes="6x6"></div>
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://developers.google.com/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      More on Google Developers
+    </a></li>
+  </ul>
+</div></section>

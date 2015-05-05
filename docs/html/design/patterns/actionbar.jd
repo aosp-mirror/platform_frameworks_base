@@ -34,8 +34,8 @@ page.metaDescription=The Action bar is an essential design element for all apps.
 <p>The action bar is split into four different functional areas that apply to most apps.</p>
 <img src="{@docRoot}design/media/action_bar_basics.png">
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7 with-callouts">
+<div class="cols">
+  <div class="col-7 with-callouts">
 
     <ol>
       <li class="value-1"><h4>App icon</h4>
@@ -57,7 +57,7 @@ Up navigation, see the <a href="{@docRoot}design/patterns/navigation.html">Navig
     </ol>
 
   </div>
-  <div class="layout-content-col span-6 with-callouts">
+  <div class="col-6 with-callouts">
 
     <ol>
       <li class="value-2"><h4>View control</h4>
@@ -107,8 +107,8 @@ content across multiple bars located below the main action bar or at the bottom 
 
 <h2 id="considerations-split-action-bars">Layout Considerations for Split Action Bars</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-8 with-callouts">
+<div class="cols">
+  <div class="col-8 with-callouts">
 
 <p>When splitting up content across multiple action bars, you generally have three possible locations
 for action bar content:</p>
@@ -124,7 +124,7 @@ the top bar.</p>
 <p>To display actions and, if necessary, the action overflow, use the bottom bar.</p>
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
     <img src="{@docRoot}design/media/action_bar_pattern_considerations.png">
 
@@ -144,8 +144,8 @@ action overflow. The action bar should show only those actions that are availabl
 
 <p>For guidance on prioritizing actions, use the FIT scheme.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
 <p><strong>F &mdash; Frequent</strong></p>
 <ul>
@@ -155,7 +155,7 @@ action overflow. The action bar should show only those actions that are availabl
 </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <p><strong>I &mdash; Important</strong></p>
 <ul>
@@ -164,7 +164,7 @@ action overflow. The action bar should show only those actions that are availabl
 </ul>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <p><strong>T &mdash; Typical</strong></p>
 <ul>
@@ -194,8 +194,8 @@ files for further customization.
 
 </p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <h4>Action overflow</h4>
 <p>The action overflow in the action bar provides access to your app's less frequently used actions.
@@ -203,7 +203,7 @@ The overflow icon only appears on phones that have no menu hardware keys. Phones
 display the action overflow when the user presses the key.</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/action_bar_pattern_overflow.png">
     <div class="figure-caption">

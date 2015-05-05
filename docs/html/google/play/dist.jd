@@ -9,8 +9,8 @@ page.title=Google Play Distribution
 <div class="vspace size-1">
   &nbsp;
 </div>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <h4>
       Device Filtering
     </h4>
@@ -20,7 +20,7 @@ page.title=Google Play Distribution
     </p><p><a href="{@docRoot}google/play/filters.html">Learn more &raquo;</a></p>
   </div>
 
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <h4>
       Multiple APK Support
     </h4>
@@ -30,8 +30,8 @@ page.title=Google Play Distribution
     </p><p><a href="{@docRoot}google/play/publishing/multiple-apks.html">Learn more &raquo;</a></p>
   </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <h4>
       APK Expansion files
     </h4>
@@ -42,14 +42,14 @@ page.title=Google Play Distribution
     </p><a href="{@docRoot}google/play/expansion-files.html">Learn more &raquo;</a>
   </div>
 
-   <div class="layout-content-col span-6">
+   <div class="col-6">
     <h4>
       Application Licensing
     </h4>
     <p>Protect your revenue streams and integrate policies for usage into your app.
     </p><a href="{@docRoot}google/play/licensing/index.html">Learn more &raquo;</a>
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <h4>
       Google Play Developer API
     </h4>

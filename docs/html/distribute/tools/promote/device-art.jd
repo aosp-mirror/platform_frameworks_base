@@ -16,12 +16,12 @@ feature image or screenshots for your Google Play app listing.</p>
 
 <div class="supported-browser">
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
     <h4>Step 1</h4>
     <p>Drag a screenshot from your desktop onto a device to the right.</p>
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
     <ul class="device-list primary"></ul>
     <a href="#" id="archive-expando">Older devices</a>
     <ul class="device-list archive"></ul>
@@ -30,8 +30,8 @@ feature image or screenshots for your Google Play app listing.</p>
 
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-3">
+<div class="cols">
+  <div class="col-3">
     <h4>Step 2</h4>
     <p>Customize the generated image and drag it to your desktop to save.</p>
     <p id="frame-customizations">
@@ -48,7 +48,7 @@ feature image or screenshots for your Google Play app listing.</p>
       <label for="output-round">Round</label><br><br>
     </p>
   </div>
-  <div class="layout-content-col span-10">
+  <div class="col-10">
     <!-- position:relative fixes an issue where dragging an image out of a inline-block container
          produced no drag feedback image in Chrome 28. -->
     <div id="output" style="position:relative">No input image.</div>

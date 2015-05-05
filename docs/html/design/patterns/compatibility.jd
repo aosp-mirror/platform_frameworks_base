@@ -20,8 +20,8 @@ page.metaDescription=Notes on how Android 4.x adapts UI designed for older hardw
 
 <h2 id="older-hardware">Adapting Android 4.0 to Older Hardware and Apps</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <h4>Phones with virtual navigation controls</h4>
 <p>Android apps written for Android 3.0 and later display actions in the action bar. Actions that don't
@@ -30,15 +30,15 @@ action overflow.</p>
 <p>Users access the action overflow by touching it in the action bar.</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <h4>Phones with physical navigation keys</h4>
 <p>Android phones with traditional navigation hardware keys don't display the virtual navigation bar at
@@ -46,15 +46,15 @@ the bottom of the screen. Instead, the action overflow is available from the men
 resulting actions popup has the same style as in the previous example, but is displayed at the bottom of the screen.</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
 
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <h4>Legacy apps on phones with virtual navigation controls</h4>
 <p>When you run an app that was built for Android 2.3 or earlier on a phone with virtual navigation
@@ -62,7 +62,7 @@ controls, an action overflow control appears at the right side of the virtual na
 can touch the control to display the app's actions in the traditional Android menu styling.</p>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
 

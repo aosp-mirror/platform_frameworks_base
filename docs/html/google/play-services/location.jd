@@ -30,8 +30,8 @@ developer guide.
 </div>
 <div class="landing-docs">
   <h3 style="clear:left">Key Developer Features</h3>
-  <div class="layout-content-row normal-links">
-  <div class="layout-content-col span-6">
+  <div class="cols normal-links">
+  <div class="col-6">
 
 
 
@@ -74,7 +74,7 @@ developer guide.
 </ul>
 </div>
 
-<div class="layout-content-col span-6">
+<div class="col-6">
 
 <h4 style="font-weight:bold">Places API</h4>
 
