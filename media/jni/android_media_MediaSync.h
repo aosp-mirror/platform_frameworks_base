@@ -33,8 +33,8 @@ class MediaSync;
 struct JMediaSync : public RefBase {
     JMediaSync();
 
-    status_t configureSurface(const sp<IGraphicBufferProducer> &bufferProducer);
-    status_t configureAudioTrack(const sp<AudioTrack> &audioTrack);
+    status_t setSurface(const sp<IGraphicBufferProducer> &bufferProducer);
+    status_t setAudioTrack(const sp<AudioTrack> &audioTrack);
 
     status_t createInputSurface(sp<IGraphicBufferProducer>* bufferProducer);
 
