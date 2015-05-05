@@ -53,8 +53,11 @@ import java.util.Arrays;
  * attribute identifier.
  * <p>
  * A touch feedback drawable may contain multiple child layers, including a
- * special mask layer that is not drawn to the screen. A single layer may be set
- * as the mask by specifying its android:id value as {@link android.R.id#mask}.
+ * special mask layer that is not drawn to the screen. A single layer may be
+ * set as the mask from XML by specifying its {@code android:id} value as
+ * {@link android.R.id#mask}. At run time, a single layer may be set as the
+ * mask using {@code setId(..., android.R.id.mask)} or an existing mask layer
+ * may be replaced using {@code setDrawableByLayerId(android.R.id.mask, ...)}.
  * <pre>
  * <code>&lt!-- A red ripple masked against an opaque rectangle. --/>
  * &ltripple android:color="#ffff0000">
