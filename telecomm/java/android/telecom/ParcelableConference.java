@@ -121,11 +121,10 @@ public final class ParcelableConference implements Parcelable {
             List<String> connectionIds = new ArrayList<>(2);
             source.readList(connectionIds, classLoader);
             long connectTimeMillis = source.readLong();
-            StatusHints statusHints = source.readParcelable(classLoader);
-
             IVideoProvider videoCallProvider =
                     IVideoProvider.Stub.asInterface(source.readStrongBinder());
             int videoState = source.readInt();
+            StatusHints statusHints = source.readParcelable(classLoader);
 
             return new ParcelableConference(phoneAccount, state, capabilities, connectionIds,
                     videoCallProvider, videoState, connectTimeMillis, statusHints);

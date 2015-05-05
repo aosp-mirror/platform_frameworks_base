@@ -176,6 +176,13 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void setConferenceMergeFailed(String callId) {
+            // Nothing to do here.
+            // The event has already been handled and there is no state to update
+            // in the underlying connection or conference objects
+        }
+
+        @Override
         public void addConferenceCall(
                 final String callId,
                 ParcelableConference parcel) {

@@ -275,10 +275,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Ļauj lietotnei saņemt un apstrādāt WAP ziņojumus. Šī atļauja ietver iespēju pārraudzīt vai dzēst jums nosūtītos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"izgūt izmantotās lietotnes"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Ļauj lietotnei izgūt informāciju par pašreiz un nesen darbinātajiem uzdevumiem. Tādējādi lietotne var atklāt informāciju par ierīcē izmantotajām lietojumprogrammām."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Profilu un ierīces īpašnieku pārvaldība"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Atļaut lietotnēm iestatīt profilu īpašniekus un ierīces īpašnieku."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"pārkārtot izmantotās lietotnes"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Ļauj lietotnei pārvietot uzdevumus priekšplānā un fonā. Lietotne var to izdarīt bez jūsu apstiprinājuma."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"iespējot automobiļa režīmu"</string>
@@ -1087,6 +1085,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Iestatīt"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izstumt"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Izpētīt"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"Nav ierīces <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Vēlreiz ievietojiet ierīci."</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Notiek lietotnes <xliff:g id="NAME">%s</xliff:g> pārvietošana"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Notiek datu pārvietošana"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Pārvietošana ir pabeigta"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Dati ir pārvietoti uz ierīci <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Nevarēja pārvietot datus"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Dati tika atstāti sākotnējā atrašanās vietā"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nav atrasta neviena atbilstoša darbība."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Multivides datu izejas maršrutēšana"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Ļauj lietojumprogrammai maršrutēt multivides datu izeju uz citām ārējām ierīcēm."</string>

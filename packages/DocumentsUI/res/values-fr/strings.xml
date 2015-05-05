@@ -65,9 +65,11 @@
       <item quantity="other">Copie de <xliff:g id="COUNT_1">%1$d</xliff:g> fichiers en cours…</item>
     </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Préparation de la copie en cours…"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one">Impossible de copier <xliff:g id="COUNT_1">%1$d</xliff:g> fichier</item>
+      <item quantity="other">Impossible de copier <xliff:g id="COUNT_1">%1$d</xliff:g> fichiers</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Appuyez pour en savoir plus."</string>
     <string name="retry" msgid="7564024179122207376">"Réessayer"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Les fichiers suivants n\'ont pas été copiés : <xliff:g id="LIST">%1$s</xliff:g>."</string>
 </resources>

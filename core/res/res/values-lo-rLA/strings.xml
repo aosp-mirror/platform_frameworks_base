@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ອະນຸຍາດໃຫ້ແອັບຯຮັບ ແລະປະມວນຜົນຂໍ້ຄວາມ WAP. ການອະນຸຍາດນີ້ຮວມເຖິງຄວາມສາມາດໃນການກວດເບິ່ງ ແລະລຶບຂໍ້ຄວາມທີ່ສົ່ງແລ້ວ ໂດຍບໍ່ຕ້ອງສະແດງໃຫ້ທ່ານເຫັນ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ດຶງແອັບຯທີ່ເຮັດວຽກຢູ່ມາ"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"ອະນຸຍາດໃຫ້ແອັບຯດຶງຂໍ້ມູນກ່ຽວກັບການເຮັດວຽກໃນປັດຈຸບັນ ແລະຫາກໍຜ່ານມາ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດຄົ້ນພົບຂໍ້ມູນ ກ່ຽວກັບແອັບພລິເຄຊັນທີ່ໃຊ້ຢູ່ໃນອຸປະກອນໄດ້."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"ຈັດ​ການ​ເຈົ້າ​ຂອງ​ໂປ​ຣ​ໄຟ​ລ໌ ແລະ​ອຸ​ປະ​ກອນ"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ຕັ້ງ​ເຈົ້າ​ຂອງ​ໂປ​ຣ​ໄຟ​ລ໌ ແລະ​ເຈົ້າ​ຂອງ​ອຸ​ປະ​ກອນ."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ຮຽງລຳດັບແອັບຯທີ່ກຳລັງເຮັດວຽກຄືນໃໝ່"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ອະນຸຍາດໃຫ້ແອັບຯຍ້າຍການເຮັດວຽກໄປໃສ່ດ້ານໜ້າ ແລະພື້ນຫຼັງໄດ້. ແອັບຯອາດຈະດຳເນີນການໂດຍບໍ່ຕ້ອງໃຫ້ທ່ານບອກ."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ເປີດນຳໃຊ້ໂຫມດຂັບລົດ"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"ຕິດຕັ້ງ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ເອົາອອກ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ຄົ້ນຫາ"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ຂາດ​ໄປ"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"ໃສ່​ອຸ​ປະ​ກອນ​ນີ້​ເຂົ້າ​ໃໝ່"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"ກຳ​ລັງ​ຍ້າຍ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"ກຳ​ລັງ​ຍ້າຍ​ຂໍ້​ມູນ"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ການ​ຍ້າຍ​ສຳ​ເລັດ"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"ຍ້າຍ​ຂໍ້​ມູນ​ໃສ່ <xliff:g id="NAME">%s</xliff:g> ແລ້ວ"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ບໍ່​ສາ​ມາດ​ຍ້າຍ​ຂໍ້​ມູນ​ໄດ້"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ຂໍ້​ມູນ​ເຫຼືອ​ໄວ້​ຢູ່​ໃນ​ທີ່​ຕັ້ງ​ເດີມ"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ບໍ່ພົບກິດຈະກຳທີ່ກົງກັນ."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"ກຳນົດເສັ້ນທາງເອົ້າພຸດຂອງສື່"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ກຳນົດເສັ້ນທາງເອົ້າພຸດຂອງສື່ໄປຫາອຸປະກອນພາຍນອກອື່ນໆ."</string>

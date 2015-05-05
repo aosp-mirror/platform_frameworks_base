@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Consente all\'applicazione di ricevere ed elaborare messaggi WAP. Questa autorizzazione include la facoltà di monitorare o eliminare i messaggi che ti vengono inviati senza mostrarteli."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recupero applicazioni in esecuzione"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Consente all\'applicazione di recuperare informazioni sulle attività attualmente e recentemente in esecuzione. Ciò potrebbe consentire all\'applicazione di scoprire informazioni sulle applicazioni in uso sul dispositivo."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Gestione dei proprietari di profili e dispositivi"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Consente alle app di impostare i proprietari dei profili e dei dispositivi."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"riordinamento applicazioni in esecuzione"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Consente all\'applicazione di spostare attività in primo piano e in background. L\'applicazione potrebbe farlo senza un tuo comando."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"abilitazione modalità auto"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Configura"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Espelli"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Scopri"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> mancante"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Reinserisci il dispositivo"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Spostamento di <xliff:g id="NAME">%s</xliff:g> in corso"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Spostamento dei dati in corso"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Spostamento completato"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Dati spostati sulla <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Impossibile spostare i dati"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Dati lasciati nella posizione originaria"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nessuna attività corrispondente trovata."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Indirizzamento uscita media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Consente a un\'applicazione di indirizzare l\'uscita di media verso altri dispositivi esterni."</string>

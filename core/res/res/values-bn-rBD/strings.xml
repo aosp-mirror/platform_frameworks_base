@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"অ্যাপ্লিকেশানটিকে WAP বার্তা প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"চলমান অ্যাপ্লিকেশান উদ্ধার করে"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"বর্তমানে ও সাম্প্রতিককালের সক্রিয় ক্রিয়াগুলি সম্বন্ধে তথ্য পুনরুদ্ধার করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এছাড়া এটি ডিভাইসটিতে কোন অ্যাপ্লিকেশানগুলি ব্যবহৃত হচ্ছে তার বিষয়ে তথ্য খুঁজে বের করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করতে পারে৷"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"প্রোফাইল এবং ডিভাইস মালিকদের পরিচালনা করুন"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"অ্যাপ্লিকেশানগুলিকে প্রোফাইলের মালিকদের এবং ডিভাইসের মালিককে সেট করার অনুমতি দেয়৷"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"চলমান অ্যাপ্লিকেশান পুনর্বিন্যাস করে"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"অ্যাপ্লিকেশানটিকে কার্যগুলিকে পুরোভাগে এবং পশ্চাদপটে সরানোর অনুমতি দেয়৷ অ্যাপ্লিকেশানটি আপনার ইনপুট ছাড়া এটি করতে পারে৷"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"গাড়ী মোড সক্ষম করে"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"সেটআপ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"বের করে নিন"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ঘুরে দেখুন"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> অনুপস্থিত"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"এই ডিভাইসটিকে পুনরায় সন্নিবেশ করান"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> সরানো হচ্ছে"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"ডেটা সরানো হচ্ছে"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"সরানো সম্পূর্ণ হয়েছে"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"ডেটা <xliff:g id="NAME">%s</xliff:g> এ সরানো হয়েছে"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ডেটা সরানো যায়নি"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"মূল অবস্থানে ডেটা রাখুন"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"কোনো সমরূপ কার্যকলাপ খুঁজে পাওয়া যায়নি৷"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"মিডিয়া আউটপুট রুট করুন"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"অ্যাপ্লিকেশানটিকে অন্যান্য বহিরাগত ডিভাইসে মিডিয়া আউটপুট রুট করার অনুমতি দেয়৷"</string>

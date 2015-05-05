@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Allows the app to receive and process WAP messages. This permission includes the ability to monitor or delete messages sent to you without showing them to you."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"retrieve running apps"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Allows the app to retrieve information about currently and recently running tasks. This may allow the app to discover information about which applications are used on the device."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Manage profile and device owners"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Allows apps to set the profile owners and the device owner."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"re-order running apps"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Allows the app to move tasks to the foreground and background. The app may do this without your input."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"enable car mode"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Set up"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Eject"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explore"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> missing"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Reinsert this device"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Moving <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Moving data"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Move complete"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Data moved to <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Couldn\'t move data"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Data left at original location"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"No matching activities found."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Route media output"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Allows an application to route media output to other external devices."</string>

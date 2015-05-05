@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Leyfir forriti að taka á móti og vinna úr WAP-skilaboðum. Þessi heimild felur í sér möguleikann á að fylgjast með eða eyða skilaboðum sem þér eru send án þess að birta þér þau."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"sækja forrit í gangi"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Leyfir forriti að sækja upplýsingar um opin forrit og forrit sem nýlega hafa verið opin. Þetta getur gert forritinu kleift að nálgast upplýsingar um forritin sem notuð eru í tækinu."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Stjórna eigendum sniða og tækis"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Leyfir forritum að stilla eigendur sniða og eiganda tækisins."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"endurraða forritum í gangi"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Leyfir forriti að færa verk á milli forgrunns og bakgrunns. Forritið getur gert þetta án inngrips frá þér."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"kveikja á bílastillingu"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Uppsetning"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Fjarlægja"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Kanna"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> vantar"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Settu þetta tæki aftur í"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Flytur <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Flytur gögn"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Flutningi lokið"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Gögn flutt á <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Ekki var hægt að færa gögnin"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Gögn eftir á upprunalega staðnum"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Engar aðgerðir með samsvörun fundust."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Beina margmiðlunarúttaki"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Leyfir forriti að beina margmiðlunarúttaki til annarra ytri tækja."</string>

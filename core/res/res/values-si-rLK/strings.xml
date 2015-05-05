@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP පණිවිඩ ලැබීමට සහ ක්‍රියාවලි කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙහි ඔබව ඒවාට පෙන්වීමකින් තොරව ඔබට පණිවිඩ නිරීක්ෂණයට හෝ මැකීමට හැකියාව ඇතුළත් වේ."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ධාවනය වන යෙදුම් ලබාගැනීම"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"දැනට සහ මෑත ක්‍රියාත්මක කාර්යයන් පිළිබඳ විස්තරාත්මක තොරතුරු සොයා ලබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය කුමන යෙදුම් උපාංගයේ භාවිතා කරන්නේද යන තොරතුරු යෙදුම්වලට සොයා ගැනීමට ඉඩ දිය හැක."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"පැතිකඩ සහ උපාංග හිමිකරුවන් කළමනාකරණය කරන්න"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"යෙදුම්වලට පැතිකඩ හිමියන් සහ උපාංග හිමිකරු සැකසීමට ඉඩ දෙයි."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ධාවනය වන යෙදුම් නැවත අනුපිළිවෙලට සැකසීම"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"පෙරබිමට හෝ පසුබිමට සිදුවීම් ගෙනයාමට යෙදුමට අවසර දෙන්න. ඔබගේ ආදානයකින් තොරව යෙදුම මෙය සිදුකරයි."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"මෝටර් රථ ආකාරය ක්‍රියාත්මක කරන්න"</string>
@@ -1082,6 +1080,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"ස්ථාපනය"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ගැලවීම"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ගවේෂණය කරන්න"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> අස්ථානගතයි"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"මෙම උපාංගය යළි ඇතුළු කරන්න"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ගෙන යමින්"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"දත්ත ගෙන යමින්"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ගෙන යාම සම්පූර්ණ කරන්න"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"දත්ත <xliff:g id="NAME">%s</xliff:g> වෙත ගෙන යන ලදී"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"දත්ත ගෙන යාමට නොහැකි විය"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"මුල් ස්ථානයෙහි ඉතිරි දත්ත"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ගැලපෙන ක්‍රියාකාරකම් හමු නොවුණි."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"මාධ්‍ය ප්‍රතිදානයේ මාර්ගගත කිරීම"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"වෙනත් බාහිර උපාංග වෙත මාධ්‍ය ප්‍රතිදානය යැවීමට යෙදුමට අවසර දෙන්න."</string>

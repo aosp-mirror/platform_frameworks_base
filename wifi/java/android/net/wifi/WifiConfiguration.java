@@ -926,7 +926,7 @@ public class WifiConfiguration implements Parcelable {
     public boolean isValid() {
         String reason = strIsValid();
         if (reason != null) {
-            Log.e("WFII", "WiFi Config not valid: " + reason);
+            Log.e(TAG, "WiFi Config not valid: " + reason);
             return false;
         }
         else {

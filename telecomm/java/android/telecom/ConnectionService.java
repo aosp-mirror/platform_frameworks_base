@@ -562,6 +562,14 @@ public abstract class ConnectionService extends Service {
                 mAdapter.setIsConferenced(id, conferenceId);
             }
         }
+
+        @Override
+        public void onConferenceMergeFailed(Connection connection) {
+            String id = mIdByConnection.get(connection);
+            if (id != null) {
+                mAdapter.onConferenceMergeFailed(id);
+            }
+        }
     };
 
     /** {@inheritDoc} */

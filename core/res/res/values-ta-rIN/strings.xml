@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. உங்களுக்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்க அல்லது நீக்குவதற்கான திறன் இந்த அனுமதியில் உள்ளடங்கும்."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"இயங்கும் பயன்பாடுகளை மீட்டெடுத்தல்"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"நடப்பில் மற்றும் சமீபத்தில் இயங்கும் காரியங்களின் தகவலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. சாதனத்தில் எந்தப் பயன்பாடுகள் பயன்படுத்தப்படுகின்றன என்பது குறித்த தகவலைக் கண்டறிய பயன்பாட்டை இது அனுமதிக்கலாம்."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"சுயவிவரத்தையும் சாதன உரிமையாளர்களையும் நிர்வகிக்கவும்"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"சுயவிவர உரிமையாளர்களையும் சாதன உரிமையாளரையும் அமைக்க, பயன்பாடுகளை அனுமதிக்கிறது."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"இயங்கும் பயன்பாடுகளை மறுவரிசைப்படுத்தல்"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"பின்புலத்திலும், முன்புலத்திலும் காரியங்களை நகர்த்த பயன்பாட்டை அனுமதிக்கிறது. உங்கள் உள்ளீடு இல்லாமலே பயன்பாடு இதைச் செய்யலாம்."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"கார் பயன்முறையை இயக்குதல்"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"அமைவு"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"வெளியேற்று"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"உலாவுக"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> இல்லை"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"சாதனத்தை மீண்டும் செருகவும்"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>ஐ நகர்த்துகிறது"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"தரவு நகர்த்தப்படுகிறது"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"நகர்த்தப்பட்டது"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g>க்குத் தரவு நகர்த்தப்பட்டது"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"தரவை நகர்த்த முடியவில்லை"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"அசல் இடத்திலிருந்து தரவு நகர்த்தப்பட்டது"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"பொருந்தும் செயல்பாடுகள் கண்டறியப்படவில்லை."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"மீடியா அவுட்புட்டை வழிசெலுத்துதல்"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"மீடியாவைப் பிற வெளிப்புறச் சாதனங்களுக்கு வெளியீடாக வழிகாட்ட பயன்பாட்டை அனுமதிக்கிறது."</string>

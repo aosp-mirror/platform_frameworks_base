@@ -371,6 +371,18 @@
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"您的裝置由 <xliff:g id="ORGANIZATION">%1$s</xliff:g> 管理。\n\n您的管理員可以監控及管理您裝置的設定、企業存取、應用程式、資料及位置資訊。\n\n 您的裝置亦已與 VPN 連線，因此 VPN 服務供應商也能監控您的個人網絡活動，包括電郵、應用程式及網站。\n\n如需更多資料，請與您的管理員聯絡。"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2224494839524715272">"您的公司檔案由 <xliff:g id="ORGANIZATION">%1$s</xliff:g> 管理。\n\n您的管理員可以監控您的網絡活動，包括電郵、應用程式及安全網站。\n\n如需更多資訊，請聯絡您的管理員。\n\n您的裝置亦已與 VPN 連線，因此 VPN 服務供應商也能監控您的個人網絡活動。"</string>
     <string name="monitoring_description_vpn_device_and_profile_owned" msgid="2198546817407897093">"您裝置的管理機構：<xliff:g id="ORGANIZATION_0">%1$s</xliff:g>。\n您公司檔案的管理機構：\n<xliff:g id="ORGANIZATION_1">%2$s</xliff:g>。\n\n您的管理員可以監控您的網絡活動，包括電郵、應用程式及安全網站。\n\n如需更多資訊，請聯絡您的管理員。\n\n您的裝置亦已與 VPN 連線，因此 VPN 服務供應商也能監控您的個人網絡活動。"</string>
+    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
+    <skip />
+    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
+    <skip />
+    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"裝置將保持上鎖，直到您手動解鎖"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"更快取得通知"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"解鎖前顯示"</string>

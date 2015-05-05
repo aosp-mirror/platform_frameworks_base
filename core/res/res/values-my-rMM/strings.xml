@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"အပလီကေးရှင်းအား WAP စာများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"အလုပ်လုပ်နေကြသည့် appများကို ရယူခြင်း"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"အပလီကေးရှင်းအား လက်ရှိနဲ့ လတ်တလော လုပ်ဆောင်ခဲ့သော သတင်းအချက်အလက် အသေးစိတ်အား ထုတ်ယူခွင့်ပြုရန်။ အပလီကေးရှင်းမှ သင် ဘယ် အပလီကေးရှင်းများသုံးရှိကြောင့် တွေ့ရှိနိုင်ပါသည်"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"ကိုယ်ရေးအချက်အလက်နှင့် စက်ပစ္စည်းပိုင်ရှင်များကို စီမံပါ"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ကိုယ်ရေးအချက်လက်ပိုင်ရှင်များနှင့်စက်ပစ္စည်းပိုင်ရှင်အား သတ်မှတ်ရန် App အားခွင့်ပြုပါ။"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"အလုပ်လုပ်နေကြသည့် appများကို ပြန်လည်စီစဉ်ခြင်း"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"အပလီကေးရှင်းအား နောက်ကွယ် နှင့် ရှေ့မှောက်တွင် လက်ရှိ လုပ်ဆောင်နေမှုများအား ဖယ်ခွင့် ပြုပါ။ သင့် ခွင့်ပြုချက်မပါပဲ လုပ်ဆောင်နိုင်ပါလိမ့်မည်"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"ကားမောင်းနေစဥ်စနစ်အား ရရှိစေခြင်း"</string>
@@ -1080,8 +1078,18 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"စဖွင့်သတ်မှတ်ရန်"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ထုတ်မည်"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"စူးစမ်းရန်"</string>
-    <string name="activity_list_empty" msgid="1675388330786841066">"တိုက်ဆိုင်သော ပြုလုပ်ချက် ရှာမတွေ့ပါ"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ပျောက်နေသည်"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"ဤစက်ပစ္စည်းအား ပြန်ထည့်ရန်"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ရွှေ့နေစဉ်"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"ဒေတာများ ရွှေ့နေစဉ်"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ရွှေ့ပြီး၏"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> သို့ ဒေတာ ရွှေ့ခဲ့၏"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ဒေတာမရွှေ့နိုင်ပါ"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"မူရင်းနေရာတွင် ဒေတာ ကျန်ခဲ့၏"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"မီဒီယာထွက်ပေါက်အား လမ်းလွှဲပြောင်းခြင်း"</string>
+    <string name="activity_list_empty" msgid="1675388330786841066">"တိုက<U+103A>ဆိုင<U+103A>သော ပ<U+103C>ုလုပ<U+103A>ခ<U+103B>က
+                            <U+103A> ရ<U+103E>ာမတ<U+103D>ေ့ပ<U+102B>"</string>
+
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"အပလီကေးရှင်းအား မီဒီယာ ထုတ်လွှတ်မှုကို အခြားပြင်ပ စက်ပစ္စည်းများသို့ လွှဲပြောင်းခွင့်ပြုပါ"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"တပ်ဆင်ရေး ချိတ်ဆက်မှုများကို ဖတ်ရန်"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"အပလီကေးရှင်းအား တပ်ဆင်ရေး ချိတ်ဆက်မှုများကို ဖတ်ခွင့်ပြုသည်။ ၎င်းသည် ဖွင့်သုံးနေသည့် အထုပ်အား တပ်ဆင်မှုဆိုင်ရာ အသေးိစတ်များကို ကြည့်ရှုခွင့် ပြုသည်။"</string>

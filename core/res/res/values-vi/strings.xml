@@ -274,10 +274,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Cho phép ứng dụng nhận và xử lý tin nhắn WAP. Quyền này bao gồm khả năng giám sát hoặc xóa tin nhắn được gửi cho bạn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"truy xuất các ứng dụng đang chạy"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Cho phép ứng dụng truy xuất thông tin về các công việc đã và đang chạy gần đây. Việc này có thể cho phép ứng dụng phát hiện thông tin về những ứng dụng nào đã được sử dụng trên thiết bị."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Quản lý chủ sở hữu thiết bị và hồ sơ"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Cho phép ứng dụng đặt chủ sở hữu hồ sơ và chủ sở hữu thiết bị."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"sắp xếp lại những ứng dụng đang chạy"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Cho phép ứng dụng di chuyển công việc sang nền trước và nền sau. Ứng dụng có thể thực hiện việc này mà không cần bạn nhập."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"bật chế độ trên ô tô"</string>
@@ -1080,6 +1078,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Thiết lập"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Tháo"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Khám phá"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> bị thiếu"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Cắm lại thiết bị này"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Di chuyển <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Di chuyển dữ liệu"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Hoàn tất di chuyển"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Dữ liệu được di chuyển sang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Không thể di chuyển dữ liệu"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Dữ liệu vẫn ở vị trí ban đầu"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Không tìm thấy hoạt động nào phù hợp."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Định tuyến thiết bị ra phương tiện"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Cho phép ứng dụng định tuyến thiết bị ra phương tiện đến các thiết bị bên ngoài khác."</string>

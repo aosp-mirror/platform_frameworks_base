@@ -275,10 +275,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite aplicației să primească și să proceseze mesaje WAP. Această permisiune include capacitatea de a monitoriza sau şterge mesajele care v-au fost trimise fără a vi le arăta."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"preluare aplicații care rulează"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite aplicației să preia informaţiile despre activităţile care rulează în prezent și care au rulat recent. În acest fel, aplicația poate descoperi informaţii despre aplicațiile care sunt utilizate pe dispozitiv."</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Gestionează proprietarii de profiluri și proprietarul dispozitivului"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Permite aplicațiilor să seteze proprietarii de profiluri și proprietarul dispozitivului."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"reordonare aplicații care rulează"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite aplicației să mute activităţile în prim-plan și în fundal. Aplicaţia poate face acest lucru fără aportul dvs."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"activare mod Maşină"</string>
@@ -1087,6 +1085,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Configurați"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Scoateți"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorați"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> lipsește"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Reintroduceți dispozitivul"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Se mută <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Se mută datele"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Mutare finalizată"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Date mutate pe <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Nu s-au putut muta datele"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Au rămas date în locația inițială"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Nu s-a găsit nicio activitate potrivită."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Direcţionează rezultatele media"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Permite unei aplicații să direcţioneze rezultate media către alte dispozitive externe."</string>
