@@ -383,8 +383,10 @@ void RenderProxy::notifyFramePending() {
     mRenderThread.queueAtFront(task);
 }
 
-CREATE_BRIDGE3(dumpProfileInfo, CanvasContext* context, int fd, int dumpFlags) {
+CREATE_BRIDGE4(dumpProfileInfo, CanvasContext* context, RenderThread* thread,
+        int fd, int dumpFlags) {
     args->context->profiler().dumpData(args->fd);
+    args->thread->jankTracker().dump(args->fd);
     if (args->dumpFlags & DumpFlags::kFrameStats) {
         args->context->dumpFrames(args->fd);
     }
@@ -397,8 +399,20 @@ CREATE_BRIDGE3(dumpProfileInfo, CanvasContext* context, int fd, int dumpFlags) {
 void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {
     SETUP_TASK(dumpProfileInfo);
     args->context = mContext;
+    args->thread = &mRenderThread;
     args->fd = fd;
     args->dumpFlags = dumpFlags;
+    postAndWait(task);
+}
+
+CREATE_BRIDGE1(resetProfileInfo, CanvasContext* context) {
+    args->context->resetFrameStats();
+    return nullptr;
+}
+
+void RenderProxy::resetProfileInfo() {
+    SETUP_TASK(resetProfileInfo);
+    args->context = mContext;
     postAndWait(task);
 }
 
