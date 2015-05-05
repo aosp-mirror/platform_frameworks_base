@@ -449,7 +449,7 @@ public class CopyService extends IntentService {
         InputStream src = null;
         OutputStream dst = null;
 
-        boolean errorOccurred = false;
+        IOException copyError = null;
         try {
             srcFile = mSrcClient.openFile(srcUri, "r", canceller);
             dstFile = mDstClient.openFile(dstUri, "w", canceller);
@@ -462,24 +462,35 @@ public class CopyService extends IntentService {
                 dst.write(buffer, 0, len);
                 makeProgress(len);
             }
+
             srcFile.checkError();
-            dstFile.checkError();
         } catch (IOException e) {
-            errorOccurred = true;
-            Log.e(TAG, "Error while copying " + srcUri.toString(), e);
-            try {
-                mFailedFiles.add(DocumentInfo.fromUri(getContentResolver(), srcUri));
-            } catch (FileNotFoundException ignore) {
-                Log.w(TAG, "Source file gone: " + srcUri, e);
-              // The source file is gone.
-            }
+            copyError = e;
         } finally {
+            if (copyError != null) {
+                try {
+                    dstFile.closeWithError(copyError.getMessage());
+                } catch (IOException e) {
+                    Log.e(TAG, "Error closing destination", e);
+                }
+            }
             // This also ensures the file descriptors are closed.
             IoUtils.closeQuietly(src);
             IoUtils.closeQuietly(dst);
         }
 
-        if (errorOccurred || mIsCancelled) {
+        if (copyError != null) {
+            // Log errors.
+            Log.e(TAG, "Error while copying " + srcUri.toString(), copyError);
+            try {
+                mFailedFiles.add(DocumentInfo.fromUri(getContentResolver(), srcUri));
+            } catch (FileNotFoundException ignore) {
+                Log.w(TAG, "Source file gone: " + srcUri, copyError);
+              // The source file is gone.
+            }
+        }
+
+        if (copyError != null || mIsCancelled) {
             // Clean up half-copied files.
             canceller.cancel();
             try {
