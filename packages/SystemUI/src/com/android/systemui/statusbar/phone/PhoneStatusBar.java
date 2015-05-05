@@ -3579,6 +3579,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void setBouncerShowing(boolean bouncerShowing) {
         super.setBouncerShowing(bouncerShowing);
+        mStatusBarView.setBouncerShowing(bouncerShowing);
         disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
     }
 
