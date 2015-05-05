@@ -121,6 +121,9 @@ public class ConditionProviders extends ManagedServices {
     @Override
     public void onBootPhaseAppsCanStart() {
         super.onBootPhaseAppsCanStart();
+        for (int i = 0; i < mSystemConditionProviders.size(); i++) {
+            mSystemConditionProviders.valueAt(i).onBootComplete();
+        }
         if (mCallback != null) {
             mCallback.onBootComplete();
         }
