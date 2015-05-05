@@ -30,6 +30,9 @@ import com.android.internal.widget.FloatingToolbar;
 
 public class FloatingActionMode extends ActionMode {
 
+    private static final int MAX_SNOOZE_TIME = 3000;
+    private static final int MOVING_HIDE_DELAY = 300;
+
     private final Context mContext;
     private final ActionMode.Callback2 mCallback;
     private final MenuBuilder mMenu;
@@ -38,12 +41,26 @@ public class FloatingActionMode extends ActionMode {
     private final Rect mPreviousContentRectOnWindow;
     private final int[] mViewPosition;
     private final View mOriginatingView;
+
+    private final Runnable mMovingOff = new Runnable() {
+        public void run() {
+            mFloatingToolbarVisibilityHelper.setMoving(false);
+        }
+    };
+
+    private final Runnable mSnoozeOff = new Runnable() {
+        public void run() {
+            mFloatingToolbarVisibilityHelper.setSnoozed(false);
+        }
+    };
+
     private FloatingToolbar mFloatingToolbar;
+    private FloatingToolbarVisibilityHelper mFloatingToolbarVisibilityHelper;
 
     public FloatingActionMode(
             Context context, ActionMode.Callback2 callback, View originatingView) {
-        mContext = context;
-        mCallback = callback;
+        mContext = Preconditions.checkNotNull(context);
+        mCallback = Preconditions.checkNotNull(callback);
         mMenu = new MenuBuilder(context).setDefaultShowAsAction(
                 MenuItem.SHOW_AS_ACTION_IF_ROOM);
         setType(ActionMode.TYPE_FLOATING);
@@ -51,7 +68,8 @@ public class FloatingActionMode extends ActionMode {
         mContentRectOnWindow = new Rect();
         mPreviousContentRectOnWindow = new Rect();
         mViewPosition = new int[2];
-        mOriginatingView = originatingView;
+        mOriginatingView = Preconditions.checkNotNull(originatingView);
+        mOriginatingView.getLocationInWindow(mViewPosition);
     }
 
     public void setFloatingToolbar(FloatingToolbar floatingToolbar) {
@@ -63,6 +81,7 @@ public class FloatingActionMode extends ActionMode {
                         return mCallback.onActionItemClicked(FloatingActionMode.this, item);
                     }
                 });
+        mFloatingToolbarVisibilityHelper = new FloatingToolbarVisibilityHelper(mFloatingToolbar);
     }
 
     @Override
@@ -82,7 +101,7 @@ public class FloatingActionMode extends ActionMode {
 
     @Override
     public void invalidate() {
-        Preconditions.checkNotNull(mFloatingToolbar);
+        checkToolbarInitialized();
         mCallback.onPrepareActionMode(this, mMenu);
         mFloatingToolbar.updateLayout();
         invalidateContentRect();
@@ -90,32 +109,57 @@ public class FloatingActionMode extends ActionMode {
 
     @Override
     public void invalidateContentRect() {
-        Preconditions.checkNotNull(mFloatingToolbar);
+        checkToolbarInitialized();
         mCallback.onGetContentRect(this, mOriginatingView, mContentRect);
         repositionToolbar();
     }
 
     public void updateViewLocationInWindow() {
-        Preconditions.checkNotNull(mFloatingToolbar);
+        checkToolbarInitialized();
         mOriginatingView.getLocationInWindow(mViewPosition);
         repositionToolbar();
     }
 
     private void repositionToolbar() {
+        checkToolbarInitialized();
         mContentRectOnWindow.set(
                 mContentRect.left + mViewPosition[0],
                 mContentRect.top + mViewPosition[1],
                 mContentRect.right + mViewPosition[0],
                 mContentRect.bottom + mViewPosition[1]);
         if (!mContentRectOnWindow.equals(mPreviousContentRectOnWindow)) {
+            if (!mPreviousContentRectOnWindow.isEmpty()) {
+                notifyContentRectMoving();
+            }
             mFloatingToolbar.setContentRect(mContentRectOnWindow);
             mFloatingToolbar.updateLayout();
         }
         mPreviousContentRectOnWindow.set(mContentRectOnWindow);
     }
 
+    private void notifyContentRectMoving() {
+        mOriginatingView.removeCallbacks(mMovingOff);
+        mFloatingToolbarVisibilityHelper.setMoving(true);
+        mOriginatingView.postDelayed(mMovingOff, MOVING_HIDE_DELAY);
+    }
+
+    @Override
+    public void snooze(int snoozeTime) {
+        checkToolbarInitialized();
+        snoozeTime = Math.min(MAX_SNOOZE_TIME, snoozeTime);
+        mOriginatingView.removeCallbacks(mSnoozeOff);
+        if (snoozeTime <= 0) {
+            mSnoozeOff.run();
+        } else {
+            mFloatingToolbarVisibilityHelper.setSnoozed(true);
+            mOriginatingView.postDelayed(mSnoozeOff, snoozeTime);
+        }
+    }
+
     @Override
     public void finish() {
+        checkToolbarInitialized();
+        reset();
         mCallback.onDestroyActionMode(this);
     }
 
@@ -144,4 +188,56 @@ public class FloatingActionMode extends ActionMode {
         return new MenuInflater(mContext);
     }
 
+    /**
+     * @throws IlllegalStateException
+     */
+    private void checkToolbarInitialized() {
+        Preconditions.checkState(mFloatingToolbar != null);
+        Preconditions.checkState(mFloatingToolbarVisibilityHelper != null);
+    }
+
+    private void reset() {
+        mOriginatingView.removeCallbacks(mMovingOff);
+        mOriginatingView.removeCallbacks(mSnoozeOff);
+    }
+
+
+    /**
+     * A helper that shows/hides the floating toolbar depending on certain states.
+     */
+    private static final class FloatingToolbarVisibilityHelper {
+
+        private final FloatingToolbar mToolbar;
+
+        private boolean mSnoozed;
+        private boolean mMoving;
+        private boolean mOutOfBounds;
+
+        public FloatingToolbarVisibilityHelper(FloatingToolbar toolbar) {
+            mToolbar = Preconditions.checkNotNull(toolbar);
+        }
+
+        public void setSnoozed(boolean snoozed) {
+            mSnoozed = snoozed;
+            updateToolbarVisibility();
+        }
+
+        public void setMoving(boolean moving) {
+            mMoving = moving;
+            updateToolbarVisibility();
+        }
+
+        public void setOutOfBounds(boolean outOfBounds) {
+            mOutOfBounds = outOfBounds;
+            updateToolbarVisibility();
+        }
+
+        private void updateToolbarVisibility() {
+            if (mSnoozed || mMoving || mOutOfBounds) {
+                mToolbar.hide();
+            } else if (mToolbar.isHidden()) {
+                mToolbar.show();
+            }
+        }
+    }
 }

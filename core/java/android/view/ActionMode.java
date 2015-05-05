@@ -44,6 +44,12 @@ public abstract class ActionMode {
      */
     public static final int TYPE_FLOATING = 1;
 
+    /**
+     * Default snooze time.
+     */
+    public static final int SNOOZE_TIME_DEFAULT =
+            ViewConfiguration.getDefaultActionModeSnoozeTime();
+
     private Object mTag;
     private boolean mTitleOptionalHint;
     private int mType = TYPE_PRIMARY;
@@ -205,6 +211,19 @@ public abstract class ActionMode {
      * @see Callback2#onGetContentRect(ActionMode, View, Rect) .
      */
     public void invalidateContentRect() {}
+
+    /**
+     * Hide the action mode view from obstructing the content below for a short period.
+     * This only makes sense for action modes that support dynamic positioning on the screen.
+     * If this method is called again before the snooze time expires, the later snooze will
+     * cancel the former and then take effect.
+     * NOTE that there is an internal limit to how long the mode can be snoozed for. It's typically
+     * about a few seconds.
+     *
+     * @param snoozeTime The number of milliseconds to snooze for.
+     * @see #SNOOZE_TIME_DEFAULT
+     */
+    public void snooze(int snoozeTime) {}
 
     /**
      * Finish and close this action mode. The action mode's {@link ActionMode.Callback} will

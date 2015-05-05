@@ -34438,6 +34438,8 @@ package android.view {
     method public abstract void setTitle(int);
     method public void setTitleOptionalHint(boolean);
     method public void setType(int);
+    method public void snooze(int);
+    field public static final int SNOOZE_TIME_DEFAULT;
     field public static final int TYPE_FLOATING = 1; // 0x1
     field public static final int TYPE_PRIMARY = 0; // 0x0
   }
@@ -36501,6 +36503,7 @@ package android.view {
   public class ViewConfiguration {
     ctor public deprecated ViewConfiguration();
     method public static android.view.ViewConfiguration get(android.content.Context);
+    method public static int getDefaultActionModeSnoozeTime();
     method public static int getDoubleTapTimeout();
     method public static deprecated int getEdgeSlop();
     method public static deprecated int getFadingEdgeLength();
