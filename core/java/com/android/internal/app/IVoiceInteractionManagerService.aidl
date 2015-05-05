@@ -97,6 +97,12 @@ interface IVoiceInteractionManagerService {
     void showSessionForActiveService(IVoiceInteractionSessionShowCallback showCallback);
 
     /**
+     * Notifies the active service that a launch was requested from the Keyguard. This will only
+     * be called if {@link #activeServiceSupportsLaunchFromKeyguard()} returns true.
+     */
+    void launchVoiceAssistFromKeyguard();
+
+    /**
      * Indicates whether there is a voice session running (but not necessarily showing).
      */
     boolean isSessionRunning();
@@ -106,4 +112,10 @@ interface IVoiceInteractionManagerService {
      * assist gesture.
      */
     boolean activeServiceSupportsAssist();
+
+    /**
+     * Indicates whether the currently active voice interaction service is capable of being launched
+     * from the lockscreen.
+     */
+    boolean activeServiceSupportsLaunchFromKeyguard();
 }

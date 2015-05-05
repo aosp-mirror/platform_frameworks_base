@@ -52,7 +52,7 @@
         android:contentDescription="@string/accessibility_camera_button" />
 
     <com.android.systemui.statusbar.KeyguardAffordanceView
-        android:id="@+id/phone_button"
+        android:id="@+id/left_button"
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|start"
