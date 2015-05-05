@@ -19,6 +19,7 @@ package com.android.documentsui;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
+
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
@@ -27,7 +28,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
@@ -36,13 +36,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import com.android.documentsui.FailureDialogFragment;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -83,8 +81,8 @@ public class StandaloneActivity extends BaseActivity {
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
 
         mState = (icicle != null)
-            ? icicle.<State>getParcelable(EXTRA_STATE)
-            : buildDefaultState();
+                ? icicle.<State> getParcelable(EXTRA_STATE)
+                : buildDefaultState();
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitleTextAppearance(context,
@@ -111,10 +109,13 @@ public class StandaloneActivity extends BaseActivity {
             final Intent intent = getIntent();
             final DocumentStack dstStack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
             final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
+            final int transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
+                    CopyService.TRANSFER_MODE_NONE);
             if (failure != 0) {
                 final ArrayList<DocumentInfo> failedSrcList =
                         intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);
-                FailureDialogFragment.show(getFragmentManager(), failure, failedSrcList, dstStack);
+                FailureDialogFragment.show(getFragmentManager(), failure, failedSrcList, dstStack,
+                        transferMode);
             }
         } else {
             onCurrentDirectoryChanged(ANIM_NONE);
@@ -276,6 +277,7 @@ public class StandaloneActivity extends BaseActivity {
         }
     }
 
+    @Override
     public void onDocumentsPicked(List<DocumentInfo> docs) {
         // TODO
     }

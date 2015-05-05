@@ -72,7 +72,7 @@ public class StubProvider extends DocumentsProvider {
     private String mAuthority;
     private SharedPreferences mPrefs;
     private Map<String, RootInfo> mRoots;
-    private boolean mSimulateReadErrors;
+    private String mSimulateReadErrors;
 
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
@@ -176,6 +176,7 @@ public class StubProvider extends DocumentsProvider {
         }
 
         final StubDocument document = new StubDocument(file, mimeType, parentDocument);
+        Log.d(TAG, "Created document " + document.documentId);
         notifyParentChanged(document.parentId);
         getContext().getContentResolver().notifyChange(
                 DocumentsContract.buildDocumentUri(mAuthority, document.documentId),
@@ -193,7 +194,9 @@ public class StubProvider extends DocumentsProvider {
             throw new FileNotFoundException();
         synchronized (mWriteLock) {
             document.rootInfo.size -= fileSize;
+            mStorage.remove(documentId);
         }
+        Log.d(TAG, "Document deleted: " + documentId);
         notifyParentChanged(document.parentId);
         getContext().getContentResolver().notifyChange(
                 DocumentsContract.buildDocumentUri(mAuthority, document.documentId),
@@ -239,7 +242,7 @@ public class StubProvider extends DocumentsProvider {
         if ("r".equals(mode)) {
             ParcelFileDescriptor pfd = ParcelFileDescriptor.open(document.file,
                     ParcelFileDescriptor.MODE_READ_ONLY);
-            if (mSimulateReadErrors) {
+            if (docId.equals(mSimulateReadErrors)) {
                 pfd = new ParcelFileDescriptor(pfd) {
                     @Override
                     public void checkError() throws IOException {
@@ -257,8 +260,8 @@ public class StubProvider extends DocumentsProvider {
     }
 
     @VisibleForTesting
-    public void simulateReadErrors(boolean b) {
-        mSimulateReadErrors = b;
+    public void simulateReadErrorsForFile(Uri uri) {
+        mSimulateReadErrors = DocumentsContract.getDocumentId(uri);
     }
 
     @Override
@@ -284,6 +287,7 @@ public class StubProvider extends DocumentsProvider {
                 InputStream inputStream = null;
                 OutputStream outputStream = null;
                 try {
+                    Log.d(TAG, "Opening write stream on file " + document.documentId);
                     inputStream = new ParcelFileDescriptor.AutoCloseInputStream(readPipe);
                     outputStream = new FileOutputStream(document.file);
                     byte[] buffer = new byte[32 * 1024];
@@ -312,6 +316,7 @@ public class StubProvider extends DocumentsProvider {
                 } finally {
                     IoUtils.closeQuietly(inputStream);
                     IoUtils.closeQuietly(outputStream);
+                    Log.d(TAG, "Closing write stream on file " + document.documentId);
                     notifyParentChanged(document.parentId);
                     getContext().getContentResolver().notifyChange(
                             DocumentsContract.buildDocumentUri(mAuthority, document.documentId),
@@ -408,6 +413,7 @@ public class StubProvider extends DocumentsProvider {
     @VisibleForTesting
     public Uri createFile(String rootId, String path, String mimeType, byte[] content)
             throws FileNotFoundException, IOException {
+        Log.d(TAG, "Creating file " + rootId + ":" + path);
         StubDocument root = mRoots.get(rootId).rootDocument;
         if (root == null) {
             throw new FileNotFoundException("No roots with the ID " + rootId + " were found");
@@ -417,6 +423,9 @@ public class StubProvider extends DocumentsProvider {
         if (parent == null) {
             parent = mStorage.get(createFile(rootId, file.getParentFile().getPath(),
                     DocumentsContract.Document.MIME_TYPE_DIR, null));
+            Log.d(TAG, "Created parent " + parent.documentId);
+        } else {
+            Log.d(TAG, "Found parent " + parent.documentId);
         }
 
         if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mimeType)) {

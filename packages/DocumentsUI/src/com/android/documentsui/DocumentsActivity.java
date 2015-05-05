@@ -242,6 +242,8 @@ public class DocumentsActivity extends BaseActivity {
         if (state.action == ACTION_OPEN_COPY_DESTINATION) {
             state.directoryCopy = intent.getBooleanExtra(
                     BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, false);
+            state.transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
+                    CopyService.TRANSFER_MODE_NONE);
         }
 
         return state;
@@ -703,6 +705,7 @@ public class DocumentsActivity extends BaseActivity {
                     | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
             // TODO: Move passing the stack to the separate ACTION_COPY action once it's implemented.
             intent.putExtra(CopyService.EXTRA_STACK, (Parcelable)mState.stack);
+            intent.putExtra(CopyService.EXTRA_TRANSFER_MODE, mState.transferMode);
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION

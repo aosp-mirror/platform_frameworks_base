@@ -28,6 +28,7 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -53,6 +54,7 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
@@ -355,7 +357,8 @@ public class DirectoryFragment extends Fragment {
         }
 
         CopyService.start(getActivity(), getDisplayState(this).selectedDocumentsForCopy,
-                (DocumentStack) data.getParcelableExtra(CopyService.EXTRA_STACK));
+                (DocumentStack) data.getParcelableExtra(CopyService.EXTRA_STACK),
+                data.getIntExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_NONE));
     }
 
     @Override
@@ -488,6 +491,7 @@ public class DirectoryFragment extends Fragment {
             final MenuItem share = menu.findItem(R.id.menu_share);
             final MenuItem delete = menu.findItem(R.id.menu_delete);
             final MenuItem copy = menu.findItem(R.id.menu_copy);
+            final MenuItem move = menu.findItem(R.id.menu_move);
 
             final boolean manageOrBrowse = (state.action == ACTION_MANAGE
                     || state.action == ACTION_BROWSE || state.action == ACTION_BROWSE_ALL);
@@ -497,7 +501,7 @@ public class DirectoryFragment extends Fragment {
             delete.setVisible(manageOrBrowse);
             // Disable copying from the Recents view.
             copy.setVisible(manageOrBrowse && mType != TYPE_RECENT_OPEN);
-
+            move.setVisible(SystemProperties.getBoolean("debug.documentsui.enable_move", false));
             return true;
         }
 
@@ -522,7 +526,12 @@ public class DirectoryFragment extends Fragment {
                 return true;
 
             } else if (id == R.id.menu_copy) {
-                onCopyDocuments(docs);
+                onTransferDocuments(docs, CopyService.TRANSFER_MODE_COPY);
+                mode.finish();
+                return true;
+
+            } else if (id == R.id.menu_move) {
+                onTransferDocuments(docs, CopyService.TRANSFER_MODE_MOVE);
                 mode.finish();
                 return true;
 
@@ -655,7 +664,7 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private void onCopyDocuments(List<DocumentInfo> docs) {
+    private void onTransferDocuments(List<DocumentInfo> docs, int mode) {
         getDisplayState(this).selectedDocumentsForCopy = docs;
 
         // Pop up a dialog to pick a destination.  This is inadequate but works for now.
@@ -673,6 +682,7 @@ public class DirectoryFragment extends Fragment {
             }
         }
         intent.putExtra(BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, directoryCopy);
+        intent.putExtra(CopyService.EXTRA_TRANSFER_MODE, mode);
         startActivityForResult(intent, REQUEST_COPY_DESTINATION);
     }
 
@@ -1220,7 +1230,7 @@ public class DirectoryFragment extends Fragment {
             tmpStack = curStack;
         }
 
-        CopyService.start(getActivity(), srcDocs, tmpStack);
+        CopyService.start(getActivity(), srcDocs, tmpStack, CopyService.TRANSFER_MODE_COPY);
     }
 
     private List<DocumentInfo> getDocumentsFromClipData(ClipData clipData) {
