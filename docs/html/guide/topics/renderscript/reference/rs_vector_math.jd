@@ -1,0 +1,574 @@
+page.title=RenderScript Vector Math Functions
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> These functions interpret the input arguments as representation of vectors in
+n-dimensional space.
+</p>
+
+<p> The precision of the mathematical operations on 32 bit floats is affected by the pragmas
+rs_fp_relaxed and rs_fp_full.  See <a href='rs_math.html'>Mathematical Constants and Functions</a> for details.
+</p>
+
+<p> Different precision/speed tradeoffs can be achieved by using variants of the common math
+functions.  Functions with a name starting with<ul>
+<li>native_: May have custom hardware implementations with weaker precision.  Additionally,
+  subnormal values may be flushed to zero, rounding towards zero may be used, and NaN and
+  infinity input may not be handled correctly.</li>
+<li>fast_: May perform internal computations using 16 bit floats.  Additionally, subnormal
+  values may be flushed to zero, and rounding towards zero may be used.</li>
+</ul>
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:cross'>cross</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Cross product of two vectors
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:distance'>distance</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Distance between two points
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:dot'>dot</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Dot product of two vectors
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:fast_distance'>fast_distance</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate distance between two points
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:fast_length'>fast_length</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate length of a vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:fast_normalize'>fast_normalize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate normalized vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:length'>length</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Length of a vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:native_distance'>native_distance</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate distance between two points
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:native_length'>native_length</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate length of a vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:native_normalize'>native_normalize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximately normalize a vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:normalize'>normalize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Normalize a vector
+    </td>
+  </tr>
+</tbody></table>
+<h2>Functions</h2>
+<a name='android_rs:cross'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>cross</span>
+    <span class='normal'>: Cross product of two vectors</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> cross(<a href='rs_value_types.html#android_rs:float3'>float3</a> left_vector, <a href='rs_value_types.html#android_rs:float3'>float3</a> right_vector);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> cross(<a href='rs_value_types.html#android_rs:float4'>float4</a> left_vector, <a href='rs_value_types.html#android_rs:float4'>float4</a> right_vector);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Computes the cross product of two vectors.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:distance'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>distance</span>
+    <span class='normal'>: Distance between two points</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float distance(float left_vector, float right_vector);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float distance(<a href='rs_value_types.html#android_rs:float2'>float2</a> left_vector, <a href='rs_value_types.html#android_rs:float2'>float2</a> right_vector);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float distance(<a href='rs_value_types.html#android_rs:float3'>float3</a> left_vector, <a href='rs_value_types.html#android_rs:float3'>float3</a> right_vector);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float distance(<a href='rs_value_types.html#android_rs:float4'>float4</a> left_vector, <a href='rs_value_types.html#android_rs:float4'>float4</a> right_vector);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Compute the distance between two points.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:fast_distance'>fast_distance</a>(), <a href='rs_vector_math.html#android_rs:native_distance'>native_distance</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:dot'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>dot</span>
+    <span class='normal'>: Dot product of two vectors</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float dot(float left_vector, float right_vector);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float dot(<a href='rs_value_types.html#android_rs:float2'>float2</a> left_vector, <a href='rs_value_types.html#android_rs:float2'>float2</a> right_vector);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float dot(<a href='rs_value_types.html#android_rs:float3'>float3</a> left_vector, <a href='rs_value_types.html#android_rs:float3'>float3</a> right_vector);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float dot(<a href='rs_value_types.html#android_rs:float4'>float4</a> left_vector, <a href='rs_value_types.html#android_rs:float4'>float4</a> right_vector);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Computes the dot product of two vectors.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:fast_distance'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>fast_distance</span>
+    <span class='normal'>: Approximate distance between two points</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float fast_distance(float left_vector, float right_vector);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float fast_distance(<a href='rs_value_types.html#android_rs:float2'>float2</a> left_vector, <a href='rs_value_types.html#android_rs:float2'>float2</a> right_vector);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float fast_distance(<a href='rs_value_types.html#android_rs:float3'>float3</a> left_vector, <a href='rs_value_types.html#android_rs:float3'>float3</a> right_vector);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float fast_distance(<a href='rs_value_types.html#android_rs:float4'>float4</a> left_vector, <a href='rs_value_types.html#android_rs:float4'>float4</a> right_vector);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Computes the approximate distance between two points.
+</p>
+
+<p> The precision is what would be expected from doing the computation using 16 bit floating
+point values.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:distance'>distance</a>(), <a href='rs_vector_math.html#android_rs:native_distance'>native_distance</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:fast_length'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>fast_length</span>
+    <span class='normal'>: Approximate length of a vector</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float fast_length(float v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float fast_length(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float fast_length(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float fast_length(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Computes the approximate length of a vector.
+</p>
+
+<p> The precision is what would be expected from doing the computation using 16 bit floating
+point values.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:length'>length</a>(), <a href='rs_vector_math.html#android_rs:native_length'>native_length</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:fast_normalize'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>fast_normalize</span>
+    <span class='normal'>: Approximate normalized vector</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float fast_normalize(float v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> fast_normalize(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> fast_normalize(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> fast_normalize(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Approximately normalizes a vector.
+</p>
+
+<p> For vectors of size 1, returns -1.f for negative values, 0.f for null values, and 1.f for
+positive values.
+</p>
+
+<p> The precision is what would be expected from doing the computation using 16 bit floating
+point values.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:normalize'>normalize</a>(), <a href='rs_vector_math.html#android_rs:native_normalize'>native_normalize</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:length'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>length</span>
+    <span class='normal'>: Length of a vector</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float length(float v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float length(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float length(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>float length(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Computes the length of a vector.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:fast_length'>fast_length</a>(), <a href='rs_vector_math.html#android_rs:native_length'>native_length</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:native_distance'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>native_distance</span>
+    <span class='normal'>: Approximate distance between two points</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float native_distance(float left_vector, float right_vector);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float native_distance(<a href='rs_value_types.html#android_rs:float2'>float2</a> left_vector, <a href='rs_value_types.html#android_rs:float2'>float2</a> right_vector);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float native_distance(<a href='rs_value_types.html#android_rs:float3'>float3</a> left_vector, <a href='rs_value_types.html#android_rs:float3'>float3</a> right_vector);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float native_distance(<a href='rs_value_types.html#android_rs:float4'>float4</a> left_vector, <a href='rs_value_types.html#android_rs:float4'>float4</a> right_vector);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Computes the approximate distance between two points.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:distance'>distance</a>(), <a href='rs_vector_math.html#android_rs:fast_distance'>fast_distance</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:native_length'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>native_length</span>
+    <span class='normal'>: Approximate length of a vector</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float native_length(float v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float native_length(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float native_length(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td>float native_length(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Compute the approximate length of a vector.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:length'>length</a>(), <a href='rs_vector_math.html#android_rs:fast_length'>fast_length</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:native_normalize'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>native_normalize</span>
+    <span class='normal'>: Approximately normalize a vector</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float native_normalize(float v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> native_normalize(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> native_normalize(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> native_normalize(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Approximately normalizes a vector.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:normalize'>normalize</a>(), <a href='rs_vector_math.html#android_rs:fast_normalize'>fast_normalize</a>().
+</p>
+  </div>
+</div>
+
+<a name='android_rs:normalize'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>normalize</span>
+    <span class='normal'>: Normalize a vector</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float normalize(float v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> normalize(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> normalize(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> normalize(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Normalize a vector.
+</p>
+
+<p> For vectors of size 1, returns -1.f for negative values, 0.f for null values, and 1.f for
+positive values.
+</p>
+
+<p> See also <a href='rs_vector_math.html#android_rs:fast_normalize'>fast_normalize</a>(), <a href='rs_vector_math.html#android_rs:native_normalize'>native_normalize</a>().
+</p>
+  </div>
+</div>
+
+</div>
