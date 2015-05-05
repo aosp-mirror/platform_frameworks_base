@@ -1,0 +1,185 @@
+page.title=RenderScript Input/Output Functions
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> These functions are used to:<ul>
+<li>Send information to the Java client, and</li>
+<li>Send the processed allocation or receive the next allocation to process.</li></ul>
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_io.html#android_rs:rsAllocationIoReceive'>rsAllocationIoReceive</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Receive new content from the queue
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_io.html#android_rs:rsAllocationIoSend'>rsAllocationIoSend</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Send new content to the queue
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_io.html#android_rs:rsSendToClient'>rsSendToClient</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Send a message to the client, non-blocking
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_io.html#android_rs:rsSendToClientBlocking'>rsSendToClientBlocking</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Send a message to the client, blocking
+    </td>
+  </tr>
+</tbody></table>
+<h2>Functions</h2>
+<a name='android_rs:rsAllocationIoReceive'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAllocationIoReceive</span>
+    <span class='normal'>: Receive new content from the queue</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsAllocationIoReceive(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>a</th><td>Allocation to work on.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Receive a new set of contents from the queue.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsAllocationIoSend'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsAllocationIoSend</span>
+    <span class='normal'>: Send new content to the queue</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsAllocationIoSend(<a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 16</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>a</th><td>Allocation to work on.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Send the contents of the Allocation to the queue.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsSendToClient'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsSendToClient</span>
+    <span class='normal'>: Send a message to the client, non-blocking</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>bool rsSendToClient(int cmdID);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>bool rsSendToClient(int cmdID, const void* data, <a href='rs_value_types.html#android_rs:uint'>uint</a> len);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>cmdID</th><td></td></tr>
+    <tr><th>data</th><td>Application specific data.</td></tr>
+    <tr><th>len</th><td>Length of the data, in bytes.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Sends a message back to the client.  This call does not block.
+It returns true if the message was sent and false if the
+message queue is full.
+</p>
+
+<p> A message ID is required.  The data payload is optional.
+</p>
+
+<p> See <a href='http://developer.android.com/reference/android/renderscript/RenderScript.RSMessageHandler.html'>RenderScript.RSMessageHandler</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsSendToClientBlocking'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsSendToClientBlocking</span>
+    <span class='normal'>: Send a message to the client, blocking</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsSendToClientBlocking(int cmdID);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsSendToClientBlocking(int cmdID, const void* data, <a href='rs_value_types.html#android_rs:uint'>uint</a> len);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>cmdID</th><td></td></tr>
+    <tr><th>data</th><td>Application specific data.</td></tr>
+    <tr><th>len</th><td>Length of the data, in bytes.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Sends a message back to the client.  This function will block
+until there is room on the message queue for this message.
+This function may return before the message was delivered and
+processed by the client.
+</p>
+
+<p> A message ID is required.  The data payload is optional.
+</p>
+
+<p> See <a href='http://developer.android.com/reference/android/renderscript/RenderScript.RSMessageHandler.html'>RenderScript.RSMessageHandler</a>.
+</p>
+  </div>
+</div>
+
+</div>

@@ -1,0 +1,1836 @@
+page.title=RenderScript Conversion Functions
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> The functions below convert from a numerical vector type to another, of from one color
+representation to another.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_convert.html#android_rs:convert'>convert</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Convert numerical vectors
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_convert.html#android_rs:rsPackColorTo8888'>rsPackColorTo8888</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Create a uchar4 RGBA from floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_convert.html#android_rs:rsUnpackColor8888'>rsUnpackColor8888</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Create a float4 RGBA from uchar4
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_convert.html#android_rs:rsYuvToRGBA'>rsYuvToRGBA</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Convert a YUV value to RGBA
+    </td>
+  </tr>
+</tbody></table>
+<h2>Functions</h2>
+<a name='android_rs:convert'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>convert</span>
+    <span class='normal'>: Convert numerical vectors</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char2'>char2</a> convert_char2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char3'>char3</a> convert_char3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:char4'>char4</a> convert_char4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double2'>double2</a> convert_double2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double3'>double3</a> convert_double3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:double4'>double4</a> convert_double4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float2'>float2</a> convert_float2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float3'>float3</a> convert_float3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> convert_float4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int2'>int2</a> convert_int2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int3'>int3</a> convert_int3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int4'>int4</a> convert_int4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long2'>long2</a> convert_long2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long3'>long3</a> convert_long3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:long4'>long4</a> convert_long4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short2'>short2</a> convert_short2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short3'>short3</a> convert_short3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:short4'>short4</a> convert_short4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> convert_uchar2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> convert_uchar3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> convert_uchar4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint2'>uint2</a> convert_uint2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint3'>uint3</a> convert_uint3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uint4'>uint4</a> convert_uint4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> convert_ulong2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> convert_ulong3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> convert_ulong4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:char2'>char2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:double2'>double2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:float2'>float2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:int2'>int2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:long2'>long2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:short2'>short2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:uint2'>uint2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> convert_ushort2(<a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:char3'>char3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:double3'>double3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:float3'>float3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:int3'>int3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:long3'>long3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:short3'>short3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:uint3'>uint3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> convert_ushort3(<a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:char4'>char4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:double4'>double4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:float4'>float4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:int4'>int4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:long4'>long4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:short4'>short4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:uint4'>uint4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> v);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> convert_ushort4(<a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> v);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Converts a vector from one numerical type to another.  The conversion are done entry per entry.
+</p>
+
+<p> E.g calling <code>a = convert_short3(b);</code> is equivalent to doing
+<code>a.x = (short)b.x; a.y = (short)b.y; a.z = (short)b.z;</code>.
+</p>
+
+<p> Converting floating point values to integer types truncates.
+</p>
+
+<p> Converting numbers too large to fit the destination type yields undefined results.
+For example, converting a float that contains 1.0e18 to a short is undefined.
+Use <a href='rs_math.html#android_rs:clamp'>clamp</a>() to avoid this.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsPackColorTo8888'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsPackColorTo8888</span>
+    <span class='normal'>: Create a uchar4 RGBA from floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> rsPackColorTo8888(float r, float g, float b);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> rsPackColorTo8888(float r, float g, float b, float a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> rsPackColorTo8888(<a href='rs_value_types.html#android_rs:float3'>float3</a> color);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> rsPackColorTo8888(<a href='rs_value_types.html#android_rs:float4'>float4</a> color);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>r</th><td>Red component.</td></tr>
+    <tr><th>g</th><td>Green component.</td></tr>
+    <tr><th>b</th><td>Blue component.</td></tr>
+    <tr><th>a</th><td>Alpha component.</td></tr>
+    <tr><th>color</th><td>Vector of 3 or 4 floats containing the R, G, B, and A values.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Packs three or four floating point RGBA values into a uchar4.  The RGBA values should be
+between 0.0 and 1.0 inclusive.  Values outside of this range are clamped to this range.
+However numbers greater than INT_MAX or less than INT_MIN can result in undefined behavior.
+</p>
+
+<p> If the alpha component is not specified, it is assumed to be 1.0, i.e. the result will
+have an alpha set to 255.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsUnpackColor8888'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsUnpackColor8888</span>
+    <span class='normal'>: Create a float4 RGBA from uchar4</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsUnpackColor8888(<a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> c);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Unpacks a uchar4 color to float4.  The resulting floats will be between 0.0 and 1.0 inclusive.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsYuvToRGBA'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsYuvToRGBA</span>
+    <span class='normal'>: Convert a YUV value to RGBA</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:float4'>float4</a> rsYuvToRGBA_float4(<a href='rs_value_types.html#android_rs:uchar'>uchar</a> y, <a href='rs_value_types.html#android_rs:uchar'>uchar</a> u, <a href='rs_value_types.html#android_rs:uchar'>uchar</a> v);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> rsYuvToRGBA_uchar4(<a href='rs_value_types.html#android_rs:uchar'>uchar</a> y, <a href='rs_value_types.html#android_rs:uchar'>uchar</a> u, <a href='rs_value_types.html#android_rs:uchar'>uchar</a> v);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>y</th><td>Luminance component.</td></tr>
+    <tr><th>u</th><td>U chrominance component.</td></tr>
+    <tr><th>v</th><td>V chrominance component.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Converts a color from a YUV representation to RGBA.
+</p>
+
+<p> We currently don't provide a function to do the reverse conversion.
+</p>
+  </div>
+</div>
+
+</div>
