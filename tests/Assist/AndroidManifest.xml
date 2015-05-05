@@ -30,10 +30,20 @@
             <meta-data
                 android:name="com.android.systemui.action_assist_icon"
                 android:resource="@drawable/assistant" />
+            <meta-data
+                android:name="com.android.keyguard.layout"
+                android:resource="@layout/keyguard_preview" />
         </service>
         <service android:name="AssistInteractionSessionService"
                 android:permission="android.permission.BIND_VOICE_INTERACTION"
                 android:process=":session">
         </service>
+        <activity android:name=".AboveKeyguardActivity"
+                  android:label="Test Above Keyguard Activity"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:excludeFromRecents="true"
+                  android:launchMode="singleTask"
+                  android:exported="false" >
+        </activity>
     </application>
 </manifest>
