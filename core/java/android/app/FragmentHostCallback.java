@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.ArrayMap;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -140,6 +139,14 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
         return mWindowAnimations;
     }
 
+    /**
+     * Called when a {@link Fragment} is being attached to this host, immediately
+     * after the call to its {@link Fragment#onAttach(Context)} method and before
+     * {@link Fragment#onCreate(Bundle)}.
+     */
+    public void onAttachFragment(Fragment fragment) {
+    }
+
     @Nullable
     @Override
     public View onFindViewById(int id) {
@@ -185,14 +192,6 @@ public abstract class FragmentHostCallback<E> extends FragmentContainer {
                 mAllLoaderManagers.remove(who);
             }
         }
-    }
-
-    void onFragmentInflate(Fragment fragment, AttributeSet attrs, Bundle savedInstanceState) {
-        fragment.onInflate(mContext, attrs, savedInstanceState);
-    }
-
-    void onFragmentAttach(Fragment fragment) {
-        fragment.onAttach(mContext);
     }
 
     void doLoaderStart() {
