@@ -951,6 +951,12 @@
     <!-- Button label for ending zen mode in the volume dialog -->
     <string name="volume_zen_end_now">End now</string>
 
+    <!-- Content description for accessibility (not shown on the screen): volume dialog expand button. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_volume_expand">Expand</string>
+
+    <!-- Content description for accessibility (not shown on the screen): volume dialog collapse button. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_volume_collapse">Collapse</string>
+
     <!-- Screen pinning dialog title. -->
     <string name="screen_pinning_title">Screen is pinned</string>
     <!-- Screen pinning dialog description. -->
