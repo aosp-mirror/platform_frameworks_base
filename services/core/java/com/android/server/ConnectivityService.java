@@ -1141,7 +1141,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
         if (nai != null) {
             synchronized (nai) {
-                return new NetworkCapabilities(nai.networkCapabilities);
+                NetworkCapabilities nc = new NetworkCapabilities(nai.networkCapabilities);
+                if (nai.lastValidated) {
+                    nc.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                } else {
+                    nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                }
+                return nc;
             }
         }
         return null;

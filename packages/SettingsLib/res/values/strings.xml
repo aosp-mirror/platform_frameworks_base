@@ -72,6 +72,9 @@
     <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
     <string name="available_via_passpoint">Available via %1$s</string>
 
+    <!-- Summary for Connected wifi network without internet -->
+    <string name="wifi_connected_no_internet">Connected, no Internet</string>
+
     <!-- Bluetooth settings.  Message when a device is disconnected -->
     <string name="bluetooth_disconnected">Disconnected</string>
     <!-- Bluetooth settings.  Message when disconnecting from a device -->
