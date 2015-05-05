@@ -550,7 +550,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         @Override
         public void onAuthenticationError(int errMsgId, CharSequence errString) {
-            mHandler.obtainMessage(MSG_FINGERPRINT_ERROR, errMsgId, 0, errString);
+            mHandler.obtainMessage(MSG_FINGERPRINT_ERROR, errMsgId, 0, errString).sendToTarget();
         }
     };
     private CancellationSignal mFingerprintCancelSignal;
