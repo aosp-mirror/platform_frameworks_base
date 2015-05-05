@@ -1,4 +1,5 @@
 page.title=Pure Android
+page.image=images/cards/design-pure-android_2x.png
 @jd:body
 
 <p>Most developers want to distribute their apps on multiple platforms. As you plan your app for
@@ -10,8 +11,8 @@ guidelines to avoid the most common traps and pitfalls.</p>
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
 <h4>Don't mimic UI elements from other platforms</h4>
 <p>Platforms typically provide a carefully designed set of UI elements that are themed in a very
@@ -28,7 +29,7 @@ elements, customize carefully according to your specific branding - and not acco
 conventions of a different platform.</p>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/migrating_ui_elements.png">
     <div class="figure-caption">
@@ -40,8 +41,8 @@ conventions of a different platform.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
 <h4>Don't carry over platform-specific icons</h4>
 <p>Platforms typically provide sets of icons for common functionality, such as sharing, creating a new
@@ -52,7 +53,7 @@ counterparts.</p>
 <a href="{@docRoot}design/downloads/index.html">Downloads</a> page.</p>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/migrating_icons.png">
     <div class="figure-caption">
@@ -64,8 +65,8 @@ counterparts.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
 <h4>Don't use bottom tab bars</h4>
 <p>Other platforms use the bottom tab bar to switch between the app's views. Per platform convention,
@@ -77,7 +78,7 @@ platform and to avoid confusion between actions and view switching on Android.</
 <a href="{@docRoot}design/patterns/actionbar.html">Action Bars</a>.</p>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/migrating_ios_dialers.png">
     <div class="figure-caption">
@@ -87,8 +88,8 @@ platform and to avoid confusion between actions and view switching on Android.</
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
 <h4>Don't hardcode links to other apps</h4>
 <p>In some cases you might want your app to take advantage of another app's feature set. For
@@ -101,7 +102,7 @@ Action Provider</em> in your action bar to provide faster access to the user's m
 sharing target.</p>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/migrating_intents.png">
     <div class="figure-caption">
@@ -114,8 +115,8 @@ sharing target.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
 <h4>Don't use labeled back buttons on action bars</h4>
 <p>Other platforms use an explicit back button with label to allow the user to navigate up the
@@ -125,7 +126,7 @@ please review the <a href="{@docRoot}design/patterns/navigation.html">Navigation
 <p>Follow this guideline to provide a consistent navigation experience across the platform.</p>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/migrating_ios_galleries.png">
     <div class="figure-caption">
@@ -135,8 +136,8 @@ please review the <a href="{@docRoot}design/patterns/navigation.html">Navigation
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
 <h4>Don't use right-pointing carets on line items</h4>
 <p>A common pattern on other platforms is the display of right-pointing carets on line items that allow
@@ -145,7 +146,7 @@ the user to drill deeper into additional content.</p>
 the platform and in order to not have the user guess as to what the meaning of those carets may be.</p>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/migrating_ios_settings.png">
     <div class="figure-caption">

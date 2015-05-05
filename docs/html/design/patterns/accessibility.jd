@@ -48,11 +48,11 @@ page.metaDescription=Design an app that's universally accessible to people with 
 <h4>Label visual UI elements meaningfully</h4>
 <p>In your wireframes, <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#label-ui">label functional UI components</a> that have no visible text. Those components might be buttons, icons, tabs with icons, and icons with state (like stars). Developers can use the <code><a href="{@docRoot}guide/topics/ui/accessibility/apps.html#label-ui">contentDescription</a></code> attribute to set the label.</p>
 
-<div class ="layout-content-row">
-    <div class="layout-content-col span-8">
+<div class ="cols">
+    <div class="col-8">
       <img src="{@docRoot}design/media/accessibility_contentdesc.png">
     </div>
-    <div class="layout-content-col span-5 with-callouts">
+    <div class="col-5 with-callouts">
       <ol>
         <li class="value-1">group</li>
         <li class="value-2">all contacts</li>

@@ -32,13 +32,13 @@ page.tags=progressbar,download,network
 
 <p>Two styles are available: a bar and a circle. Each is offered in a variety of sizes, in both Holo Light and Holo Dark themes. Choose the appropriate style and size for the surrounding context. For example, the largest activity circle works well when displayed in a blank content area, but not in a smaller dialog box. Each operation should only be represented by one activity indicator.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/progress_activity.png">
 
   </div>
-  <div class="layout-content-col span-7 with-callouts">
+  <div class="col-7 with-callouts">
 
     <ol>
       <li class="value-1"><h4>Activity bar</h4>
@@ -49,13 +49,13 @@ page.tags=progressbar,download,network
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/progress_activity2.png">
 
   </div>
-  <div class="layout-content-col span-7 with-callouts">
+  <div class="col-7 with-callouts">
 
     <ol>
       <li class="value-2"><h4>Activity circle</h4>
@@ -91,11 +91,11 @@ In all of the Google Play apps (Music, Books, Movies, Magazines), we wanted the 
 
 <p>The color indicates whether it's downloaded (blue) or not (gray). The appearance of the pin indicates whether the download is permanent (white, upright) or temporary (gray, diagonal). And when state is in the process of changing, progress is indicated by a moving pie chart.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-9">
+<div class="cols">
+  <div class="col-9">
     <img src="{@docRoot}design/media/progress_activity_custom_app.png">
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <div class="figure-caption">
       Across Google Play apps with different layouts, the same custom indicator appears with each item. It communicates download state as well as progress, in a compact package that can be incorporated into any screen design.
     </div>

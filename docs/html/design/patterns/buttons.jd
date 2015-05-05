@@ -19,13 +19,13 @@ page.tags=buttons
   back into view.
 </p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <h4>Lean Back</h4>
     <p>Touch the screen anywhere to bring back system bars. </p>
     <img src="{@docRoot}design/media/fullscreen_leanback.png" style="width:311px;">
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <h4>Immersive</h4>
     <p>Swipe from the any edge of the screen with a hidden bar to bring back system bars. </p>
     <img src="{@docRoot}design/media/fullscreen_immersive_swipe_bottom.png" style="width:160px;float:right">
@@ -69,8 +69,8 @@ page.tags=buttons
   interrupted by accidental touches and swipes.
 </p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <img src="{@docRoot}design/media/fullscreen_immersive_swipe_bottom.png" style="width:160px;float:right">
     <img src="{@docRoot}design/media/fullscreen_immersive_swipe_top.png" style="width:160px">
   </div>

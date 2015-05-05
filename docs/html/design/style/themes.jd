@@ -1,8 +1,8 @@
 page.title=Themes
 @jd:body
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
     <img src="{@docRoot}design/media/themes_holo_light.png">
     <div class="figure-caption">
@@ -15,7 +15,7 @@ page.title=Themes
     </div>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
 
 <a class="notice-designers-material"

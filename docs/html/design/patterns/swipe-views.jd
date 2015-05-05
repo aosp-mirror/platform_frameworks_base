@@ -42,8 +42,8 @@ using the swipe gesture to navigate to the next/previous detail view.</p>
 
 <h2 id="between-tabs">Swiping Between Tabs</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
     <div class="framed-nexus5-port-span-5">
       <video class="play-on-hover" autoplay>
@@ -58,7 +58,7 @@ using the swipe gesture to navigate to the next/previous detail view.</p>
     </div>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
     <p>If your app uses action bar tabs, use swipe to navigate between the different views.</p>
     <div class="vspace size-1">&nbsp;</div>
 

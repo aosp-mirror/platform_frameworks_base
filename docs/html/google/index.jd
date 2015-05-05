@@ -16,7 +16,7 @@ div.cell-icon img {
 }
 </style>
 
-<div class="landing-banner">
+<div class="landing-banner cols">
         
 <div class="col-6" style="min-height:0">
   <img src="{@docRoot}images/google/google-services.png" alt="" width="340" height="193" />

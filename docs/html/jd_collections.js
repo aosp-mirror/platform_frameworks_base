@@ -1,4 +1,10 @@
 var RESOURCE_COLLECTIONS = {
+  "index/carousel": {
+    "title": "",
+    "resources": [
+      "about/versions/lollipop.html"
+    ]
+  },
   "index/primary": {
     "title": "",
     "resources": [
@@ -7,12 +13,133 @@ var RESOURCE_COLLECTIONS = {
       "sdk/index.html"
     ]
   },
+  "index/multiscreen": {
+    "title": "",
+    "resources": [
+      "wear/index.html",
+      "tv/index.html",
+      "auto/index.html"
+    ]
+  },
   "index/primary/zhcn": {
     "title": "",
     "resources": [
       "intl/zh-cn/resources.html",
       "intl/zh-cn/distribute/tools/launch-checklist.html",
       "intl/zh-cn/distribute/tools/localization-checklist.html"
+    ]
+  },
+  "design/landing/latest": {
+    "title": "",
+    "resources": [
+      "http://www.youtube.com/watch?v=p4gmvHyuZzw",
+      "http://www.youtube.com/watch?v=YaG_ljfzeUw",
+      "http://www.youtube.com/watch?v=XOcCOBe8PTc"
+    ]
+  },
+  "design/landing/materialdesign": {
+    "title": "",
+    "resources": [
+      "https://www.google.com/design/spec/animation/",
+      "https://www.google.com/design/spec/style/",
+      "https://www.google.com/design/spec/layout/",
+      "https://www.google.com/design/spec/components/",
+      "https://www.google.com/design/spec/patterns/",
+      "https://www.google.com/design/spec/usability/"
+    ]
+  },
+  "design/landing/pureandroid": {
+    "title": "",
+    "resources": [
+      "design/get-started/creative-vision.html",
+      "design/material/index.html",
+      "training/material/index.html",
+      "design/patterns/pure-android.html",
+      "design/patterns/new.html",
+      "design/devices.html"
+    ]
+  },
+  "design/landing/resources": {
+    "title": "",
+    "resources": [
+      "https://www.google.com/design/spec/resources/color-palettes.html",
+      "https://www.google.com/design/spec/resources/layout-templates.html",
+      "https://www.google.com/design/spec/resources/sticker-sheets-icons.html",
+      "https://www.google.com/design/spec/resources/roboto-noto-fonts.html",
+      "design/downloads/index.html#Wear"
+    ]
+  },
+  "develop/landing/mainlinks": {
+    "title": "",
+    "resources": [
+      "tools/studio/index.html",
+      "samples/new/index.html",
+      "tools/projects/templates.html"
+    ]
+  },
+  "develop/landing/latest": {
+    "title": "",
+    "resources": [
+      "http://android-developers.blogspot.com/2015/04/new-android-code-samples.html",
+      "http://android-developers.blogspot.com/2015/04/android-support-library-221.html",
+      "http://android-developers.blogspot.com/2015/03/a-new-reference-app-for-multi-device.html"
+    ]
+  },
+  "develop/landing/performance": {
+    "title": "",
+    "resources": [
+      "http://www.youtube.com/watch?v=fEEulSk1kNY",
+      "http://www.youtube.com/watch?v=-3ry8PxcJJA",
+      "http://www.youtube.com/watch?v=_kKTGK-Cb_4"
+    ]
+  },
+  "develop/landing/buildwithgoogle": {
+    "title": "",
+    "resources": [
+    ]
+  },
+  "develop/landing/devbytes": {
+    "title": "",
+    "resources": [
+      "http://www.youtube.com/watch?v=K2dodTXARqc",
+      "http://www.youtube.com/watch?v=FOn64iqlphk",
+      "http://www.youtube.com/watch?v=p4gmvHyuZzw",
+      "http://www.youtube.com/watch?v=tDmnGNkTtlE",
+      "http://www.youtube.com/watch?v=6K_jxccHv5M",
+      "http://www.youtube.com/watch?v=KNKGM4ss5Sc"
+    ]
+  },
+  "develop/landing/courses": {
+    "title": "",
+    "resources": [
+    ]
+  },
+  "distribute/landing/carousel": {
+    "title": "",
+    "resources": [
+      "http://www.youtube.com/watch?v=Pd49vTkvu0U",
+      "http://www.youtube.com/watch?v=ekxABqJeRBc",
+      "http://www.youtube.com/watch?v=MPnH7h12h0U",
+      "http://www.youtube.com/watch?v=700gYRkhkLM"
+    ]
+  },
+  "distribute/landing/googleplay": {
+    "title": "",
+    "resources": [
+      "distribute/googleplay/about.html",
+      "distribute/googleplay/developer-console.html",
+      "distribute/googleplay/index.html#opportunities"
+    ]
+  },
+  "distribute/landing/more": {
+    "title": "",
+    "resources": [
+      "distribute/users/promote-with-ads.html",
+      "distribute/monetize/ads.html",
+      "distribute/analyze/index.html",
+      "distribute/engage/deep-linking.html",
+      "distribute/engage/easy-signin.html",
+      "https://cloud.google.com/docs/"
     ]
   },
   "distribute/edu/videos/stories": {
@@ -40,21 +167,20 @@ var RESOURCE_COLLECTIONS = {
   "launch/static": {
     "title": "",
     "resources": [
-      "distribute/googleplay/about.html",
-      "distribute/googleplay/guide.html",
-      "about/versions/lollipop.html",
-      "distribute/googleplay/wear.html",
-      "distribute/googleplay/tv.html",
-      "distribute/googleplay/edu/about.html",
-      "distribute/googleplay/families/about.html",
-      "distribute/monetize/subscriptions.html",
+      "http://www.youtube.com/watch?v=1RIz-cmTQB4",
+      "http://www.youtube.com/watch?v=MVBMWDzyHAI",
+      "http://android-developers.blogspot.com/2013/11/app-translation-service-now-available.html",
+      "http://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
+      "http://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
+      "distribute/essentials/quality/tablets.html",
+      "distribute/users/build-buzz.html",
+      "distribute/monetize/premium.html",
       "distribute/monetize/freemium.html",
       "distribute/monetize/ads.html",
-      "distribute/users/promote-with-ads.html",
-      "distribute/engage/deep-linking.html",
-      "distribute/engage/game-services.html",
-      "distribute/essentials/optimizing-your-app.html",
-      "distribute/engage/easy-signin.html",
+      "distribute/essentials/best-practices/apps.html",
+      "distribute/essentials/best-practices/games.html",
+      "distribute/users/know-your-user.html",
+      "distribute/googleplay/developer-console.html"
     ]
   },
   "launch/static/ja": {

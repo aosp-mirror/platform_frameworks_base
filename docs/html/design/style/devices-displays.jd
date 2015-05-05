@@ -19,15 +19,15 @@ gracefully scale from large tablets to smaller phones.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
 <h4>Be flexible</h4>
 
 <p>Stretch and compress your layouts to accommodate various heights and widths.</p>
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <h4>Optimize layouts</h4>
 
@@ -35,7 +35,7 @@ gracefully scale from large tablets to smaller phones.</p>
 multiple views to reveal more content and ease navigation.</p>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <h4>Assets for all</h4>
 <p>Provide resources for different screen densities (<acronym title="Dots per inch">DPI</acronym>) to
