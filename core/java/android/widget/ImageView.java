@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -43,6 +44,7 @@ import android.util.Log;
 import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
 
@@ -1430,5 +1432,12 @@ public class ImageView extends View {
     @Override
     public CharSequence getAccessibilityClassName() {
         return ImageView.class.getName();
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
+        super.encodeProperties(stream);
+        stream.addProperty("layout:baseline", getBaseline());
     }
 }

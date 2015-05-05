@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -56,6 +57,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
@@ -6330,6 +6332,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         public LayoutParams(ViewGroup.LayoutParams source) {
             super(source);
         }
+
+        /** @hide */
+        @Override
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            super.encodeProperties(encoder);
+
+            encoder.addProperty("list:viewType", viewType);
+            encoder.addProperty("list:recycledHeaderFooter", recycledHeaderFooter);
+            encoder.addProperty("list:forceAdd", forceAdd);
+        }
     }
 
     /**
@@ -6909,6 +6921,25 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mPositionScroller.stop();
             }
             requestLayout();
+        }
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+
+        encoder.addProperty("drawing:cacheColorHint", getCacheColorHint());
+        encoder.addProperty("list:fastScrollEnabled", isFastScrollEnabled());
+        encoder.addProperty("list:scrollingCacheEnabled", isScrollingCacheEnabled());
+        encoder.addProperty("list:smoothScrollbarEnabled", isSmoothScrollbarEnabled());
+        encoder.addProperty("list:stackFromBottom", isStackFromBottom());
+        encoder.addProperty("list:textFilterEnabled", isTextFilterEnabled());
+
+        View selectedView = getSelectedView();
+        if (selectedView != null) {
+            encoder.addPropertyKey("selectedView");
+            selectedView.encode(encoder);
         }
     }
 
