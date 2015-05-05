@@ -255,6 +255,8 @@
     <string-array name="wfcOperatorErrorNotificationMessages" />
     <!-- Template for showing cellular network operator name while WFC is active -->
     <string name="wfcSpnFormat">%s</string>
+    <!-- Template for showing operator name for data connection while WFC is active -->
+    <string name="wfcDataSpnFormat">%s</string>
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
     <!-- WFC, summary for Wi-Fi Preferred -->
