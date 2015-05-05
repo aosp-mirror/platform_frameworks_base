@@ -252,6 +252,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         sessionId,
         AudioRecord::TRANSFER_DEFAULT,
         flags,
+        -1, -1,        // default uid, pid
         paa);
 
     if (status != NO_ERROR) {
