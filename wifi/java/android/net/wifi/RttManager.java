@@ -134,6 +134,8 @@ public class RttManager {
     public static final int REASON_NOT_AVAILABLE            = -2;
     public static final int REASON_INVALID_LISTENER         = -3;
     public static final int REASON_INVALID_REQUEST          = -4;
+    /** Do not have required permission */
+    public static final int REASON_PERMISSION_DENIED        = -5;
 
     public static final String DESCRIPTION_KEY  = "android.net.wifi.RttManager.Description";
 

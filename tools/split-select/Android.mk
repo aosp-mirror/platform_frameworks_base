@@ -52,7 +52,8 @@ hostStaticLibs := \
     libutils \
     libcutils \
     libexpat \
-    libziparchive-host
+    libziparchive-host \
+    libbase
 
 cFlags := -Wall -Werror
 

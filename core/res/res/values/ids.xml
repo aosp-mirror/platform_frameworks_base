@@ -101,6 +101,18 @@
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_TO_POSITION}. -->
   <item type="id" name="accessibilityActionScrollToPosition" />
 
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_UP}. -->
+  <item type="id" name="accessibilityActionScrollUp" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_LEFT}. -->
+  <item type="id" name="accessibilityActionScrollLeft" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_DOWN}. -->
+  <item type="id" name="accessibilityActionScrollDown" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_RIGHT}. -->
+  <item type="id" name="accessibilityActionScrollRight" />
+  
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_STYLUS_BUTTON_PRESS}. -->
   <item type="id" name="accessibilityActionStylusButtonPress" />
 </resources>

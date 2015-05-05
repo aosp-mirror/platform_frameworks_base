@@ -1506,10 +1506,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (isEnabled()) {
             if (canScrollUp()) {
                 info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_UP);
                 info.setScrollable(true);
             }
             if (canScrollDown()) {
                 info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_DOWN);
                 info.setScrollable(true);
             }
         }
@@ -1537,14 +1539,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return true;
         }
         switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+            case R.id.accessibilityActionScrollDown: {
                 if (isEnabled() && getLastVisiblePosition() < getCount() - 1) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(viewportHeight, PositionScroller.SCROLL_DURATION);
                     return true;
                 }
             } return false;
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+            case R.id.accessibilityActionScrollUp: {
                 if (isEnabled() && mFirstPosition > 0) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(-viewportHeight, PositionScroller.SCROLL_DURATION);

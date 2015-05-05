@@ -16,6 +16,9 @@
 
 package android.os;
 
+import android.annotation.MainThread;
+import android.annotation.WorkerThread;
+
 import java.util.ArrayDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -350,6 +353,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #onPostExecute
      * @see #publishProgress
      */
+    @WorkerThread
     protected abstract Result doInBackground(Params... params);
 
     /**
@@ -358,6 +362,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #onPostExecute
      * @see #doInBackground
      */
+    @MainThread
     protected void onPreExecute() {
     }
 
@@ -374,6 +379,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #onCancelled(Object) 
      */
     @SuppressWarnings({"UnusedDeclaration"})
+    @MainThread
     protected void onPostExecute(Result result) {
     }
 
@@ -387,6 +393,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #doInBackground
      */
     @SuppressWarnings({"UnusedDeclaration"})
+    @MainThread
     protected void onProgressUpdate(Progress... values) {
     }
 
@@ -405,6 +412,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #isCancelled()
      */
     @SuppressWarnings({"UnusedParameters"})
+    @MainThread
     protected void onCancelled(Result result) {
         onCancelled();
     }    
@@ -421,6 +429,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #cancel(boolean)
      * @see #isCancelled()
      */
+    @MainThread
     protected void onCancelled() {
     }
 
@@ -535,6 +544,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #executeOnExecutor(java.util.concurrent.Executor, Object[])
      * @see #execute(Runnable)
      */
+    @MainThread
     public final AsyncTask<Params, Progress, Result> execute(Params... params) {
         return executeOnExecutor(sDefaultExecutor, params);
     }
@@ -572,6 +582,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      *
      * @see #execute(Object[])
      */
+    @MainThread
     public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor exec,
             Params... params) {
         if (mStatus != Status.PENDING) {
@@ -604,6 +615,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #execute(Object[])
      * @see #executeOnExecutor(java.util.concurrent.Executor, Object[])
      */
+    @MainThread
     public static void execute(Runnable runnable) {
         sDefaultExecutor.execute(runnable);
     }
@@ -622,6 +634,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * @see #onProgressUpdate
      * @see #doInBackground
      */
+    @WorkerThread
     protected final void publishProgress(Progress... values) {
         if (!isCancelled()) {
             getHandler().obtainMessage(MESSAGE_POST_PROGRESS,

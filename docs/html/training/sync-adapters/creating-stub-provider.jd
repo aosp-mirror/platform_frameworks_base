@@ -85,11 +85,11 @@ public class StubProvider extends ContentProvider {
         return true;
     }
     /*
-     * Return an empty String for MIME type
+     * Return no type for MIME type
      */
     &#64;Override
-    public String getType() {
-        return new String();
+    public String getType(Uri uri) {
+        return null;
     }
     /*
      * query() always returns no results

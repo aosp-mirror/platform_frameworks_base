@@ -1686,9 +1686,13 @@ package android {
 
   public static final class R.id {
     ctor public R.id();
+    field public static final int accessibilityActionScrollDown = 16908345; // 0x1020039
+    field public static final int accessibilityActionScrollLeft = 16908344; // 0x1020038
+    field public static final int accessibilityActionScrollRight = 16908346; // 0x102003a
     field public static final int accessibilityActionScrollToPosition = 16908342; // 0x1020036
+    field public static final int accessibilityActionScrollUp = 16908343; // 0x1020037
     field public static final int accessibilityActionShowOnScreen = 16908341; // 0x1020035
-    field public static final int accessibilityActionStylusButtonPress = 16908344; // 0x1020038
+    field public static final int accessibilityActionStylusButtonPress = 16908348; // 0x102003c
     field public static final int addToDictionary = 16908330; // 0x102002a
     field public static final int background = 16908288; // 0x1020000
     field public static final int button1 = 16908313; // 0x1020019
@@ -1728,7 +1732,7 @@ package android {
     field public static final int selectAll = 16908319; // 0x102001f
     field public static final int selectTextMode = 16908333; // 0x102002d
     field public static final int selectedIcon = 16908302; // 0x102000e
-    field public static final int shareText = 16908343; // 0x1020037
+    field public static final int shareText = 16908347; // 0x102003b
     field public static final int startSelectingText = 16908328; // 0x1020028
     field public static final int statusBarBackground = 16908335; // 0x102002f
     field public static final int stopSelectingText = 16908329; // 0x1020029
@@ -7172,7 +7176,14 @@ package android.bluetooth.le {
     method public int getScanResultType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALLBACK_TYPE_ALL_MATCHES = 1; // 0x1
+    field public static final int CALLBACK_TYPE_FIRST_MATCH = 2; // 0x2
+    field public static final int CALLBACK_TYPE_MATCH_LOST = 4; // 0x4
     field public static final android.os.Parcelable.Creator<android.bluetooth.le.ScanSettings> CREATOR;
+    field public static final int MATCH_MODE_AGGRESSIVE = 1; // 0x1
+    field public static final int MATCH_MODE_STICKY = 2; // 0x2
+    field public static final int MATCH_NUM_FEW_ADVERTISEMENT = 2; // 0x2
+    field public static final int MATCH_NUM_MAX_ADVERTISEMENT = 3; // 0x3
+    field public static final int MATCH_NUM_ONE_ADVERTISEMENT = 1; // 0x1
     field public static final int SCAN_MODE_BALANCED = 1; // 0x1
     field public static final int SCAN_MODE_LOW_LATENCY = 2; // 0x2
     field public static final int SCAN_MODE_LOW_POWER = 0; // 0x0
@@ -7182,6 +7193,8 @@ package android.bluetooth.le {
   public static final class ScanSettings.Builder {
     ctor public ScanSettings.Builder();
     method public android.bluetooth.le.ScanSettings build();
+    method public android.bluetooth.le.ScanSettings.Builder setMatchMode(int);
+    method public android.bluetooth.le.ScanSettings.Builder setNumOfMatches(int);
     method public android.bluetooth.le.ScanSettings.Builder setReportDelay(long);
     method public android.bluetooth.le.ScanSettings.Builder setScanMode(int);
   }
@@ -18353,6 +18366,7 @@ package android.net {
     method public deprecated void reportBadNetwork(android.net.Network);
     method public void reportCaptivePortalDismissed(android.net.Network, java.lang.String);
     method public void reportNetworkConnectivity(android.net.Network, boolean);
+    method public boolean requestBandwidthUpdate(android.net.Network);
     method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public void requestNetwork(android.net.NetworkRequest, android.app.PendingIntent);
     method public deprecated void setNetworkPreference(int);
@@ -28826,13 +28840,17 @@ package android.service.carrier {
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onDownloadMms(android.net.Uri, int, android.net.Uri, android.service.carrier.CarrierMessagingService.ResultCallback<java.lang.Integer>);
     method public void onFilterSms(android.service.carrier.MessagePdu, java.lang.String, int, int, android.service.carrier.CarrierMessagingService.ResultCallback<java.lang.Boolean>);
-    method public void onSendDataSms(byte[], int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public deprecated void onSendDataSms(byte[], int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public void onSendDataSms(byte[], int, java.lang.String, int, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
     method public void onSendMms(android.net.Uri, int, android.net.Uri, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMmsResult>);
-    method public void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
-    method public void onSendTextSms(java.lang.String, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public deprecated void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
+    method public void onSendMultipartTextSms(java.util.List<java.lang.String>, int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendMultipartSmsResult>);
+    method public deprecated void onSendTextSms(java.lang.String, int, java.lang.String, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
+    method public void onSendTextSms(java.lang.String, int, java.lang.String, int, android.service.carrier.CarrierMessagingService.ResultCallback<android.service.carrier.CarrierMessagingService.SendSmsResult>);
     field public static final int DOWNLOAD_STATUS_ERROR = 2; // 0x2
     field public static final int DOWNLOAD_STATUS_OK = 0; // 0x0
     field public static final int DOWNLOAD_STATUS_RETRY_ON_CARRIER_NETWORK = 1; // 0x1
+    field public static final int SEND_FLAG_REQUEST_DELIVERY_STATUS = 1; // 0x1
     field public static final int SEND_STATUS_ERROR = 2; // 0x2
     field public static final int SEND_STATUS_OK = 0; // 0x0
     field public static final int SEND_STATUS_RETRY_ON_CARRIER_NETWORK = 1; // 0x1
@@ -30762,6 +30780,7 @@ package android.telecom {
     method public static boolean isPaused(int);
     method public static boolean isReceptionEnabled(int);
     method public static boolean isTransmissionEnabled(int);
+    method public static java.lang.String videoStateToString(int);
     field public static final int AUDIO_ONLY = 0; // 0x0
     field public static final int BIDIRECTIONAL = 3; // 0x3
     field public static final int PAUSED = 4; // 0x4
@@ -31182,7 +31201,8 @@ package android.telephony {
   public class SmsMessage {
     method public static int[] calculateLength(java.lang.CharSequence, boolean);
     method public static int[] calculateLength(java.lang.String, boolean);
-    method public static android.telephony.SmsMessage createFromPdu(byte[]);
+    method public static deprecated android.telephony.SmsMessage createFromPdu(byte[]);
+    method public static android.telephony.SmsMessage createFromPdu(byte[], java.lang.String);
     method public java.lang.String getDisplayMessageBody();
     method public java.lang.String getDisplayOriginatingAddress();
     method public java.lang.String getEmailBody();
@@ -37845,8 +37865,12 @@ package android.view.accessibility {
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_PREVIOUS_HTML_ELEMENT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_BACKWARD;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_DOWN;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_FORWARD;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_LEFT;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_RIGHT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_TO_POSITION;
+    field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SCROLL_UP;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SELECT;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_SELECTION;
     field public static final android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction ACTION_SET_TEXT;

@@ -678,7 +678,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             handleRemoveListLocked();
         }
         broadcastCallStateChanged(state, incomingNumber,
-                SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID);
     }
 
     public void notifyCallStateForSubscriber(int subId, int state, String incomingNumber) {
@@ -1374,6 +1374,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
+    /**
+     * Broadcasts an intent notifying apps of a phone state change. {@code subId} can be
+     * a valid subId, in which case this function fires a subId-specific intent, or it
+     * can be {@code SubscriptionManager.INVALID_SUBSCRIPTION_ID}, in which case we send
+     * a global state change broadcast ({@code TelephonyManager.ACTION_PHONE_STATE_CHANGED}).
+     */
     private void broadcastCallStateChanged(int state, String incomingNumber, int subId) {
         long ident = Binder.clearCallingIdentity();
         try {
@@ -1394,7 +1400,14 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!TextUtils.isEmpty(incomingNumber)) {
             intent.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
         }
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+
+        // If a valid subId was specified, we should fire off a subId-specific state
+        // change intent and include the subId.
+        if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            intent.setAction(PhoneConstants.ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED);
+            intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        }
+
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 android.Manifest.permission.READ_PHONE_STATE,
                 AppOpsManager.OP_READ_PHONE_STATE);
