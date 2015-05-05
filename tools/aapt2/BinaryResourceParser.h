@@ -66,6 +66,7 @@ private:
     bool idToName(Reference* reference);
 
     bool parsePackage(const android::ResChunk_header* chunk);
+    bool parsePublic(const android::ResChunk_header* chunk);
     bool parseTypeSpec(const android::ResChunk_header* chunk);
     bool parseType(const android::ResChunk_header* chunk);
 
