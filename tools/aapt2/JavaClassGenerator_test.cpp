@@ -16,8 +16,9 @@
 
 #include "JavaClassGenerator.h"
 #include "Linker.h"
-#include "Resolver.h"
+#include "MockResolver.h"
 #include "ResourceTable.h"
+#include "ResourceTableResolver.h"
 #include "ResourceValues.h"
 #include "Util.h"
 
@@ -84,7 +85,7 @@ TEST_F(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
               output.find("public static final int hey_dude_cool_attr = 0;"));
 }
 
-/*
+
 TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
     ASSERT_TRUE(addResource(ResourceName{ {}, ResourceType::kId, u"foo" },
                             ResourceId{ 0x01, 0x02, 0x0000 }));
@@ -94,9 +95,8 @@ TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
                                   SourceLine{ "lib.xml", 33 }, util::make_unique<Id>()));
     ASSERT_TRUE(mTable->merge(std::move(table)));
 
-    std::shared_ptr<Resolver> resolver = std::make_shared<Resolver>(mTable,
-            std::make_shared<const android::AssetManager>());
-    Linker linker(mTable, resolver);
+    Linker linker(mTable, std::make_shared<MockResolver>(mTable,
+                                                         std::map<ResourceName, ResourceId>()));
     ASSERT_TRUE(linker.linkAndValidate());
 
     JavaClassGenerator generator(mTable, {});
@@ -112,6 +112,34 @@ TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
     output = out.str();
     EXPECT_NE(std::string::npos, output.find("int test ="));
     EXPECT_EQ(std::string::npos, output.find("int foo ="));
-}*/
+}
+
+TEST_F(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
+    std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
+    styleable->entries.emplace_back(ResourceNameRef{ mTable->getPackage(),
+                                                     ResourceType::kAttr,
+                                                     u"bar" });
+    styleable->entries.emplace_back(ResourceNameRef{ u"com.lib", ResourceType::kAttr, u"bar" });
+    ASSERT_TRUE(mTable->addResource(ResourceName{ {}, ResourceType::kStyleable, u"Foo" }, {}, {},
+                                    std::move(styleable)));
+
+    std::shared_ptr<IResolver> resolver = std::make_shared<MockResolver>(mTable,
+            std::map<ResourceName, ResourceId>({
+                    { ResourceName{ u"android", ResourceType::kAttr, u"bar" },
+                      ResourceId{ 0x01, 0x01, 0x0000 } },
+                    { ResourceName{ u"com.lib", ResourceType::kAttr, u"bar" },
+                      ResourceId{ 0x02, 0x01, 0x0000 } }}));
+
+    Linker linker(mTable, resolver);
+    ASSERT_TRUE(linker.linkAndValidate());
+
+    JavaClassGenerator generator(mTable, {});
+
+    std::stringstream out;
+    EXPECT_TRUE(generator.generate(mTable->getPackage(), out));
+    std::string output = out.str();
+    EXPECT_NE(std::string::npos, output.find("int Foo_bar ="));
+    EXPECT_NE(std::string::npos, output.find("int Foo_com_lib_bar ="));
+}
 
 } // namespace aapt

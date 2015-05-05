@@ -52,12 +52,6 @@ public:
     };
 
     /**
-     * Return the package to use when none is specified. This
-     * is the package name of the app being built.
-     */
-    virtual const std::u16string& getDefaultPackage() const = 0;
-
-    /**
      * Returns a ResourceID if the name is found. The ResourceID
      * may not be valid if the resource was not assigned an ID.
      */
