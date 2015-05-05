@@ -95,8 +95,9 @@ TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
                                   SourceLine{ "lib.xml", 33 }, util::make_unique<Id>()));
     ASSERT_TRUE(mTable->merge(std::move(table)));
 
-    Linker linker(mTable, std::make_shared<MockResolver>(mTable,
-                                                         std::map<ResourceName, ResourceId>()));
+    Linker linker(mTable,
+                  std::make_shared<MockResolver>(mTable, std::map<ResourceName, ResourceId>()),
+                  {});
     ASSERT_TRUE(linker.linkAndValidate());
 
     JavaClassGenerator generator(mTable, {});
@@ -130,7 +131,7 @@ TEST_F(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
                     { ResourceName{ u"com.lib", ResourceType::kAttr, u"bar" },
                       ResourceId{ 0x02, 0x01, 0x0000 } }}));
 
-    Linker linker(mTable, resolver);
+    Linker linker(mTable, resolver, {});
     ASSERT_TRUE(linker.linkAndValidate());
 
     JavaClassGenerator generator(mTable, {});

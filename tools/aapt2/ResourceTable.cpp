@@ -42,6 +42,8 @@ static bool lessThanEntry(const std::unique_ptr<ResourceEntry>& lhs, const Strin
 }
 
 ResourceTable::ResourceTable() : mPackageId(kUnsetPackageId) {
+    // Make sure attrs always have type ID 1.
+    findOrCreateType(ResourceType::kAttr)->typeId = 1;
 }
 
 std::unique_ptr<ResourceTableType>& ResourceTable::findOrCreateType(ResourceType type) {
@@ -142,10 +144,30 @@ static int defaultCollisionHandler(const Value& existing, const Value& incoming)
 }
 
 static constexpr const char16_t* kValidNameChars = u"._-";
+static constexpr const char16_t* kValidNameMangledChars = u"._-$";
+
+bool ResourceTable::addResource(const ResourceNameRef& name, const ConfigDescription& config,
+                                const SourceLine& source, std::unique_ptr<Value> value) {
+    return addResourceImpl(name, ResourceId{}, config, source, std::move(value), kValidNameChars);
+}
 
 bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId resId,
-        const ConfigDescription& config, const SourceLine& source,
-        std::unique_ptr<Value> value) {
+                                const ConfigDescription& config, const SourceLine& source,
+                                std::unique_ptr<Value> value) {
+    return addResourceImpl(name, resId, config, source, std::move(value), kValidNameChars);
+}
+
+bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
+                                            const ConfigDescription& config,
+                                            const SourceLine& source,
+                                            std::unique_ptr<Value> value) {
+    return addResourceImpl(name, ResourceId{}, config, source, std::move(value),
+                           kValidNameMangledChars);
+}
+
+bool ResourceTable::addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
+                                    const ConfigDescription& config, const SourceLine& source,
+                                    std::unique_ptr<Value> value, const char16_t* validChars) {
     if (!name.package.empty() && name.package != mPackage) {
         Logger::error(source)
                 << "resource '"
@@ -157,7 +179,7 @@ bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId re
         return false;
     }
 
-    auto badCharIter = util::findNonAlphaNumericAndNotInSet(name.entry, kValidNameChars);
+    auto badCharIter = util::findNonAlphaNumericAndNotInSet(name.entry, validChars);
     if (badCharIter != name.entry.end()) {
         Logger::error(source)
                 << "resource '"
@@ -233,13 +255,18 @@ bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId re
     return true;
 }
 
-bool ResourceTable::addResource(const ResourceNameRef& name, const ConfigDescription& config,
-                                const SourceLine& source, std::unique_ptr<Value> value) {
-    return addResource(name, ResourceId{}, config, source, std::move(value));
-}
-
 bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId resId,
                                const SourceLine& source) {
+    return markPublicImpl(name, resId, source, kValidNameChars);
+}
+
+bool ResourceTable::markPublicAllowMangled(const ResourceNameRef& name, const ResourceId resId,
+                                           const SourceLine& source) {
+    return markPublicImpl(name, resId, source, kValidNameMangledChars);
+}
+
+bool ResourceTable::markPublicImpl(const ResourceNameRef& name, const ResourceId resId,
+                                   const SourceLine& source, const char16_t* validChars) {
     if (!name.package.empty() && name.package != mPackage) {
         Logger::error(source)
                 << "resource '"
@@ -251,7 +278,7 @@ bool ResourceTable::markPublic(const ResourceNameRef& name, const ResourceId res
         return false;
     }
 
-    auto badCharIter = util::findNonAlphaNumericAndNotInSet(name.entry, kValidNameChars);
+    auto badCharIter = util::findNonAlphaNumericAndNotInSet(name.entry, validChars);
     if (badCharIter != name.entry.end()) {
         Logger::error(source)
                 << "resource '"

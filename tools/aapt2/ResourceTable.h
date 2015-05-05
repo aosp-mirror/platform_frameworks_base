@@ -143,11 +143,21 @@ public:
     bool addResource(const ResourceNameRef& name, const ConfigDescription& config,
                      const SourceLine& source, std::unique_ptr<Value> value);
 
+    /**
+     * Same as addResource, but doesn't verify the validity of the name. This is used
+     * when loading resources from an existing binary resource table that may have mangled
+     * names.
+     */
+    bool addResourceAllowMangled(const ResourceNameRef& name, const ConfigDescription& config,
+                                 const SourceLine& source, std::unique_ptr<Value> value);
+
     bool addResource(const ResourceNameRef& name, const ResourceId resId,
                      const ConfigDescription& config, const SourceLine& source,
                      std::unique_ptr<Value> value);
 
     bool markPublic(const ResourceNameRef& name, const ResourceId resId, const SourceLine& source);
+    bool markPublicAllowMangled(const ResourceNameRef& name, const ResourceId resId,
+                                const SourceLine& source);
 
     /*
      * Merges the resources from `other` into this table, mangling the names of the resources
@@ -175,6 +185,12 @@ private:
     std::unique_ptr<ResourceTableType>& findOrCreateType(ResourceType type);
     std::unique_ptr<ResourceEntry>& findOrCreateEntry(std::unique_ptr<ResourceTableType>& type,
                                                       const StringPiece16& name);
+
+    bool addResourceImpl(const ResourceNameRef& name, const ResourceId resId,
+                         const ConfigDescription& config, const SourceLine& source,
+                         std::unique_ptr<Value> value, const char16_t* validChars);
+    bool markPublicImpl(const ResourceNameRef& name, const ResourceId resId,
+                        const SourceLine& source, const char16_t* validChars);
 
     std::u16string mPackage;
     size_t mPackageId;
