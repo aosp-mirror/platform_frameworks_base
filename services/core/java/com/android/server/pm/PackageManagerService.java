@@ -277,8 +277,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
 
-    static final boolean RUNTIME_PERMISSIONS_ENABLED = true;
-
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
     private static final int NFC_UID = Process.NFC_UID;
@@ -2131,13 +2129,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + "; regranting permissions for internal storage");
             mSettings.mInternalSdkPlatform = mSdkVersion;
 
-            // For now runtime permissions are toggled via a system property.
-            if (!RUNTIME_PERMISSIONS_ENABLED) {
-                // Remove the runtime permissions state if the feature
-                // was disabled by flipping the system property.
-                mSettings.deleteRuntimePermissionsFiles();
-            }
-
             updatePermissionsLPw(null, null, UPDATE_PERMISSIONS_ALL
                     | (regrantPermissions
                             ? (UPDATE_PERMISSIONS_REPLACE_PKG|UPDATE_PERMISSIONS_REPLACE_ALL)
@@ -3149,13 +3140,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public boolean grantPermission(String packageName, String name, int userId) {
-        if (!RUNTIME_PERMISSIONS_ENABLED) {
-            return false;
-        }
-
+    public void grantPermission(String packageName, String name, int userId) {
         if (!sUserManager.exists(userId)) {
-            return false;
+            return;
         }
 
         mContext.enforceCallingOrSelfPermission(
@@ -3191,12 +3178,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             final int result = permissionsState.grantRuntimePermission(bp, userId);
             switch (result) {
                 case PermissionsState.PERMISSION_OPERATION_FAILURE: {
-                    return false;
+                    return;
                 }
 
                 case PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED: {
                     gidsChanged = true;
-                } break;
+                }
+                break;
             }
 
             // Not critical if that is lost - app has to request again.
@@ -3206,18 +3194,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (gidsChanged) {
             killSettingPackagesForUser(sb, userId, KILL_APP_REASON_GIDS_CHANGED);
         }
-
-        return true;
     }
 
     @Override
-    public boolean revokePermission(String packageName, String name, int userId) {
-        if (!RUNTIME_PERMISSIONS_ENABLED) {
-            return false;
-        }
-
+    public void revokePermission(String packageName, String name, int userId) {
         if (!sUserManager.exists(userId)) {
-            return false;
+            return;
         }
 
         mContext.enforceCallingOrSelfPermission(
@@ -3251,7 +3233,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (permissionsState.revokeRuntimePermission(bp, userId) ==
                     PermissionsState.PERMISSION_OPERATION_FAILURE) {
-                return false;
+                return;
             }
 
             // Critical, after this call all should never have the permission.
@@ -3259,8 +3241,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         killSettingPackagesForUser(sb, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
-
-        return true;
     }
 
     @Override
@@ -7604,9 +7584,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } break;
 
                 case PermissionInfo.PROTECTION_DANGEROUS: {
-                    if (!RUNTIME_PERMISSIONS_ENABLED
-                            || pkg.applicationInfo.targetSdkVersion
-                                    <= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    if (pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1) {
                         // For legacy apps dangerous permissions are install time ones.
                         grant = GRANT_INSTALL;
                     } else if (ps.isSystem()) {
@@ -7745,10 +7723,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         ps.setPermissionsUpdatedForUserIds(currentUserIds);
 
         // Persist the runtime permissions state for users with changes.
-        if (RUNTIME_PERMISSIONS_ENABLED) {
-            for (int userId : changedRuntimePermissionUserIds) {
-                mSettings.writeRuntimePermissionsForUserLPr(userId, true);
-            }
+        for (int userId : changedRuntimePermissionUserIds) {
+            mSettings.writeRuntimePermissionsForUserLPr(userId, true);
         }
     }
 

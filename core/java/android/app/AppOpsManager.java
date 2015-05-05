@@ -941,7 +941,8 @@ public class AppOpsManager {
      * @hide
      */
     public static int permissionToOpCode(String permission) {
-        return sPermToOp.get(permission);
+        Integer boxedOpCode = sPermToOp.get(permission);
+        return boxedOpCode != null ? boxedOpCode : OP_NONE;
     }
 
     /**
