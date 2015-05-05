@@ -1,3 +1,7 @@
+#define LOG_TAG "Bitmap"
+
+#include "Bitmap.h"
+
 #include "Paint.h"
 #include "SkBitmap.h"
 #include "SkPixelRef.h"
@@ -14,10 +18,321 @@
 #include "android_util_Binder.h"
 #include "android_nio_utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
+#include <Caches.h>
 
 #include "core_jni_helpers.h"
 
 #include <jni.h>
+
+namespace android {
+
+class WrappedPixelRef : public SkPixelRef {
+public:
+    WrappedPixelRef(Bitmap* wrapper, void* storage,
+            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+            : SkPixelRef(info)
+            , mBitmap(*wrapper)
+            , mStorage(storage) {
+        reconfigure(info, rowBytes, ctable);
+    }
+
+    ~WrappedPixelRef() {
+        // Tell SkRefCnt that everything is as it expects by forcing
+        // the refcnt to 1
+        internal_dispose_restore_refcnt_to_1();
+        SkSafeUnref(mColorTable);
+    }
+
+    void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable) {
+        if (kIndex_8_SkColorType != info.colorType()) {
+            ctable = nullptr;
+        }
+        mRowBytes = rowBytes;
+        if (mColorTable != ctable) {
+            SkSafeUnref(mColorTable);
+            mColorTable = ctable;
+            SkSafeRef(mColorTable);
+        }
+        // Dirty hack is dirty
+        // TODO: Figure something out here, Skia's current design makes this
+        // really hard to work with. Skia really, really wants immutable objects,
+        // but with the nested-ref-count hackery going on that's just not
+        // feasible without going insane trying to figure it out
+        SkImageInfo* myInfo = const_cast<SkImageInfo*>(&this->info());
+        *myInfo = info;
+
+        // Docs say to only call this in the ctor, but we're going to call
+        // it anyway even if this isn't always the ctor.
+        // TODO: Fix this too as part of the above TODO
+        setPreLocked(mStorage, mRowBytes, mColorTable);
+    }
+
+    // Can't mark as override since SkPixelRef::rowBytes isn't virtual
+    // but that's OK since we just want BitmapWrapper to be able to rely
+    // on calling rowBytes() on an unlocked pixelref, which it will be
+    // doing on a WrappedPixelRef type, not a SkPixelRef, so static
+    // dispatching will do what we want.
+    size_t rowBytes() const { return mRowBytes; }
+    SkColorTable* colorTable() const { return mColorTable; }
+
+    bool hasHardwareMipMap() const {
+        return mHasHardwareMipMap;
+    }
+
+    void setHasHardwareMipMap(bool hasMipMap) {
+        mHasHardwareMipMap = hasMipMap;
+    }
+
+protected:
+    virtual bool onNewLockPixels(LockRec* rec) override {
+        rec->fPixels = mStorage;
+        rec->fRowBytes = mRowBytes;
+        rec->fColorTable = mColorTable;
+        return true;
+    }
+
+    virtual void onUnlockPixels() override {
+        // nothing
+    }
+
+    virtual size_t getAllocatedSizeInBytes() const override {
+        return info().getSafeSize(mRowBytes);
+    }
+
+private:
+    Bitmap& mBitmap;
+    void* mStorage;
+    size_t mRowBytes = 0;
+    SkColorTable* mColorTable = nullptr;
+    bool mHasHardwareMipMap = false;
+
+    virtual void internal_dispose() const override {
+        mBitmap.onStrongRefDestroyed();
+    }
+};
+
+Bitmap::Bitmap(JNIEnv* env, jbyteArray storageObj, void* address,
+            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+        : mPixelStorageType(PixelStorageType::Java) {
+    env->GetJavaVM(&mPixelStorage.java.jvm);
+    mPixelStorage.java.jweakRef = env->NewWeakGlobalRef(storageObj);
+    mPixelStorage.java.jstrongRef = nullptr;
+    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));
+    // Note: this will trigger a call to onStrongRefDestroyed(), but
+    // we want the pixel ref to have a ref count of 0 at this point
+    mPixelRef->unref();
+}
+
+Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
+            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+        : mPixelStorageType(PixelStorageType::External) {
+    mPixelStorage.external.address = address;
+    mPixelStorage.external.context = context;
+    mPixelStorage.external.freeFunc = freeFunc;
+    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));
+    // Note: this will trigger a call to onStrongRefDestroyed(), but
+    // we want the pixel ref to have a ref count of 0 at this point
+    mPixelRef->unref();
+}
+
+Bitmap::~Bitmap() {
+    doFreePixels();
+}
+
+void Bitmap::freePixels() {
+    AutoMutex _lock(mLock);
+    if (mPinnedRefCount == 0) {
+        doFreePixels();
+        mPixelStorageType = PixelStorageType::Invalid;
+    }
+}
+
+void Bitmap::doFreePixels() {
+    switch (mPixelStorageType) {
+    case PixelStorageType::Invalid:
+        // already free'd, nothing to do
+        break;
+    case PixelStorageType::External:
+        mPixelStorage.external.freeFunc(mPixelStorage.external.address,
+                mPixelStorage.external.context);
+        break;
+    case PixelStorageType::Java:
+        JNIEnv* env = jniEnv();
+        LOG_ALWAYS_FATAL_IF(mPixelStorage.java.jstrongRef,
+                "Deleting a bitmap wrapper while there are outstanding strong "
+                "references! mPinnedRefCount = %d", mPinnedRefCount);
+        env->DeleteWeakGlobalRef(mPixelStorage.java.jweakRef);
+        break;
+    }
+
+    if (android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().textureCache.releaseTexture(
+                mPixelRef->getStableID());
+    }
+}
+
+bool Bitmap::hasHardwareMipMap() {
+    return mPixelRef->hasHardwareMipMap();
+}
+
+void Bitmap::setHasHardwareMipMap(bool hasMipMap) {
+    mPixelRef->setHasHardwareMipMap(hasMipMap);
+}
+
+const SkImageInfo& Bitmap::info() const {
+    assertValid();
+    return mPixelRef->info();
+}
+
+size_t Bitmap::rowBytes() const {
+    return mPixelRef->rowBytes();
+}
+
+SkPixelRef* Bitmap::pixelRef() const {
+    assertValid();
+    return mPixelRef.get();
+}
+
+void Bitmap::reconfigure(const SkImageInfo& info, size_t rowBytes,
+        SkColorTable* ctable) {
+    mPixelRef->reconfigure(info, rowBytes, ctable);
+}
+
+void Bitmap::reconfigure(const SkImageInfo& info) {
+    mPixelRef->reconfigure(info, mPixelRef->rowBytes(), mPixelRef->colorTable());
+}
+
+void Bitmap::detachFromJava() {
+    bool disposeSelf;
+    {
+        android::AutoMutex _lock(mLock);
+        mAttachedToJava = false;
+        disposeSelf = shouldDisposeSelfLocked();
+    }
+    if (disposeSelf) {
+        delete this;
+    }
+}
+
+bool Bitmap::shouldDisposeSelfLocked() {
+    return mPinnedRefCount == 0 && !mAttachedToJava;
+}
+
+JNIEnv* Bitmap::jniEnv() {
+    JNIEnv* env;
+    auto success = mPixelStorage.java.jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
+    LOG_ALWAYS_FATAL_IF(success != JNI_OK,
+        "Failed to get JNIEnv* from JVM: %p", mPixelStorage.java.jvm);
+    return env;
+}
+
+void Bitmap::onStrongRefDestroyed() {
+    bool disposeSelf = false;
+    {
+        android::AutoMutex _lock(mLock);
+        if (mPinnedRefCount > 0) {
+            mPinnedRefCount--;
+            if (mPinnedRefCount == 0) {
+                unpinPixelsLocked();
+                disposeSelf = shouldDisposeSelfLocked();
+            }
+        }
+    }
+    if (disposeSelf) {
+        delete this;
+    }
+}
+
+void Bitmap::pinPixelsLocked() {
+    switch (mPixelStorageType) {
+    case PixelStorageType::Invalid:
+        LOG_ALWAYS_FATAL("Cannot pin invalid pixels!");
+        break;
+    case PixelStorageType::External:
+        // Nothing to do
+        break;
+    case PixelStorageType::Java: {
+        JNIEnv* env = jniEnv();
+        if (!mPixelStorage.java.jstrongRef) {
+            mPixelStorage.java.jstrongRef = reinterpret_cast<jbyteArray>(
+                    env->NewGlobalRef(mPixelStorage.java.jweakRef));
+            if (!mPixelStorage.java.jstrongRef) {
+                LOG_ALWAYS_FATAL("Failed to acquire strong reference to pixels");
+            }
+        }
+        break;
+    }
+    }
+}
+
+void Bitmap::unpinPixelsLocked() {
+    switch (mPixelStorageType) {
+    case PixelStorageType::Invalid:
+        LOG_ALWAYS_FATAL("Cannot unpin invalid pixels!");
+        break;
+    case PixelStorageType::External:
+        // Don't need to do anything
+        break;
+    case PixelStorageType::Java: {
+        JNIEnv* env = jniEnv();
+        if (mPixelStorage.java.jstrongRef) {
+            env->DeleteGlobalRef(mPixelStorage.java.jstrongRef);
+            mPixelStorage.java.jstrongRef = nullptr;
+        }
+        break;
+    }
+    }
+}
+
+void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
+    assertValid();
+    android::AutoMutex _lock(mLock);
+    mPixelRef->ref();
+    if (mPixelRef->unique()) {
+        // We just restored this from 0, pin the pixels and inc the strong count
+        // Note that there *might be* an incoming onStrongRefDestroyed from whatever
+        // last unref'd
+        pinPixelsLocked();
+        mPinnedRefCount++;
+    }
+    // Safe because mPixelRef is a WrappedPixelRef type, otherwise rowBytes()
+    // would require locking the pixels first.
+    outBitmap->setInfo(mPixelRef->info(), mPixelRef->rowBytes());
+    outBitmap->setPixelRef(mPixelRef.get())->unref();
+    outBitmap->setHasHardwareMipMap(hasHardwareMipMap());
+}
+
+void Bitmap::assertValid() const {
+    LOG_ALWAYS_FATAL_IF(mPixelStorageType == PixelStorageType::Invalid,
+            "Error, cannot access an invalid/free'd bitmap here!");
+}
+
+} // namespace android
+
+using namespace android;
+
+// Convenience class that does not take a global ref on the pixels, relying
+// on the caller already having a local JNI ref
+class LocalScopedBitmap {
+public:
+    LocalScopedBitmap(jlong bitmapHandle)
+            : mBitmap(reinterpret_cast<Bitmap*>(bitmapHandle)) {}
+
+    Bitmap* operator->() {
+        return mBitmap;
+    }
+
+    void* pixels() {
+        return mBitmap->pixelRef()->pixels();
+    }
+
+    bool valid() {
+        return mBitmap && mBitmap->valid();
+    }
+
+private:
+    Bitmap* mBitmap;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Conversions to/from SkColor, for get/setPixels, and the create method, which
@@ -328,8 +643,8 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     SkBitmap bitmap;
     bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType));
 
-    jbyteArray buff = GraphicsJNI::allocateJavaPixelRef(env, &bitmap, NULL);
-    if (NULL == buff) {
+    Bitmap* nativeBitmap = GraphicsJNI::allocateJavaPixelRef(env, &bitmap, NULL);
+    if (!nativeBitmap) {
         return NULL;
     }
 
@@ -338,39 +653,41 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
                 0, 0, width, height, bitmap);
     }
 
-    return GraphicsJNI::createBitmap(env, new SkBitmap(bitmap), buff,
-            getPremulBitmapCreateFlags(isMutable), NULL, NULL);
+    return GraphicsJNI::createBitmap(env, nativeBitmap,
+            getPremulBitmapCreateFlags(isMutable));
 }
 
 static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
                            jint dstConfigHandle, jboolean isMutable) {
-    const SkBitmap* src = reinterpret_cast<SkBitmap*>(srcHandle);
+    SkBitmap src;
+    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
     SkColorType dstCT = GraphicsJNI::legacyBitmapConfigToColorType(dstConfigHandle);
     SkBitmap            result;
     JavaPixelAllocator  allocator(env);
 
-    if (!src->copyTo(&result, dstCT, &allocator)) {
+    if (!src.copyTo(&result, dstCT, &allocator)) {
         return NULL;
     }
-    return GraphicsJNI::createBitmap(env, new SkBitmap(result), allocator.getStorageObj(),
-            getPremulBitmapCreateFlags(isMutable), NULL, NULL);
+    Bitmap* bitmap = allocator.getStorageObjAndReset();
+    return GraphicsJNI::createBitmap(env, bitmap,
+            getPremulBitmapCreateFlags(isMutable));
 }
 
 static void Bitmap_destructor(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    delete bitmap;
+    LocalScopedBitmap bitmap(bitmapHandle);
+    bitmap->detachFromJava();
 }
 
 static jboolean Bitmap_recycle(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    bitmap->setPixels(NULL, NULL);
+    LocalScopedBitmap bitmap(bitmapHandle);
+    bitmap->freePixels();
     return JNI_TRUE;
 }
 
 static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         jint width, jint height, jint configHandle, jint allocSize,
         jboolean requestPremul) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    LocalScopedBitmap bitmap(bitmapHandle);
     SkColorType colorType = GraphicsJNI::legacyBitmapConfigToColorType(configHandle);
 
     // ARGB_4444 is a deprecated format, convert automatically to 8888
@@ -383,11 +700,9 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         doThrowIAE(env, "Bitmap not large enough to support new configuration");
         return;
     }
-    SkPixelRef* ref = bitmap->pixelRef();
-    ref->ref();
     SkAlphaType alphaType;
-    if (bitmap->colorType() != kRGB_565_SkColorType
-            && bitmap->alphaType() == kOpaque_SkAlphaType) {
+    if (bitmap->info().colorType() != kRGB_565_SkColorType
+            && bitmap->info().alphaType() == kOpaque_SkAlphaType) {
         // If the original bitmap was set to opaque, keep that setting, unless it
         // was 565, which is required to be opaque.
         alphaType = kOpaque_SkAlphaType;
@@ -395,22 +710,7 @@ static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         // Otherwise respect the premultiplied request.
         alphaType = requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType;
     }
-    bitmap->setInfo(SkImageInfo::Make(width, height, colorType, alphaType));
-    // FIXME: Skia thinks of an SkPixelRef as having a constant SkImageInfo (except for
-    // its alphatype), so it would make more sense from Skia's perspective to create a
-    // new SkPixelRef. That said, libhwui uses the pointer to the SkPixelRef as a key
-    // for its cache, so it won't realize this is the same Java Bitmap.
-    SkImageInfo& info = const_cast<SkImageInfo&>(ref->info());
-    // Use the updated from the SkBitmap, which may have corrected an invalid alphatype.
-    // (e.g. 565 non-opaque)
-    info = bitmap->info();
-    bitmap->setPixelRef(ref);
-
-    // notifyPixelsChanged will increment the generation ID even though the actual pixel data
-    // hasn't been touched. This signals the renderer that the bitmap (including width, height,
-    // colortype and alphatype) has changed.
-    ref->notifyPixelsChanged();
-    ref->unref();
+    bitmap->reconfigure(SkImageInfo::Make(width, height, colorType, alphaType));
 }
 
 // These must match the int values in Bitmap.java
@@ -423,7 +723,8 @@ enum JavaEncodeFormat {
 static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
                                 jint format, jint quality,
                                 jobject jstream, jbyteArray jstorage) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+
+    LocalScopedBitmap bitmap(bitmapHandle);
     SkImageEncoder::Type fm;
 
     switch (format) {
@@ -440,92 +741,92 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         return JNI_FALSE;
     }
 
+    if (!bitmap.valid()) {
+        return JNI_FALSE;
+    }
+
     bool success = false;
-    if (NULL != bitmap) {
-        SkAutoLockPixels alp(*bitmap);
 
-        if (NULL == bitmap->getPixels()) {
-            return JNI_FALSE;
-        }
+    std::unique_ptr<SkWStream> strm(CreateJavaOutputStreamAdaptor(env, jstream, jstorage));
+    if (!strm.get()) {
+        return JNI_FALSE;
+    }
 
-        SkWStream* strm = CreateJavaOutputStreamAdaptor(env, jstream, jstorage);
-        if (NULL == strm) {
-            return JNI_FALSE;
-        }
-
-        SkImageEncoder* encoder = SkImageEncoder::Create(fm);
-        if (NULL != encoder) {
-            success = encoder->encodeStream(strm, *bitmap, quality);
-            delete encoder;
-        }
-        delete strm;
+    std::unique_ptr<SkImageEncoder> encoder(SkImageEncoder::Create(fm));
+    if (encoder.get()) {
+        SkBitmap skbitmap;
+        bitmap->getSkBitmap(&skbitmap);
+        success = encoder->encodeStream(strm.get(), skbitmap, quality);
     }
     return success ? JNI_TRUE : JNI_FALSE;
 }
 
 static void Bitmap_erase(JNIEnv* env, jobject, jlong bitmapHandle, jint color) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    bitmap->eraseColor(color);
+    LocalScopedBitmap bitmap(bitmapHandle);
+    SkBitmap skBitmap;
+    bitmap->getSkBitmap(&skBitmap);
+    skBitmap.eraseColor(color);
 }
 
 static jint Bitmap_rowBytes(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    LocalScopedBitmap bitmap(bitmapHandle);
     return static_cast<jint>(bitmap->rowBytes());
 }
 
 static jint Bitmap_config(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    return GraphicsJNI::colorTypeToLegacyBitmapConfig(bitmap->colorType());
+    LocalScopedBitmap bitmap(bitmapHandle);
+    return GraphicsJNI::colorTypeToLegacyBitmapConfig(bitmap->info().colorType());
 }
 
 static jint Bitmap_getGenerationId(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    return static_cast<jint>(bitmap->getGenerationID());
+    LocalScopedBitmap bitmap(bitmapHandle);
+    return static_cast<jint>(bitmap->pixelRef()->getGenerationID());
 }
 
 static jboolean Bitmap_isPremultiplied(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    if (bitmap->alphaType() == kPremul_SkAlphaType) {
+    LocalScopedBitmap bitmap(bitmapHandle);
+    if (bitmap->info().alphaType() == kPremul_SkAlphaType) {
         return JNI_TRUE;
     }
     return JNI_FALSE;
 }
 
 static jboolean Bitmap_hasAlpha(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    return !bitmap->isOpaque() ? JNI_TRUE : JNI_FALSE;
+    LocalScopedBitmap bitmap(bitmapHandle);
+    return !bitmap->info().isOpaque() ? JNI_TRUE : JNI_FALSE;
 }
 
 static void Bitmap_setHasAlpha(JNIEnv* env, jobject, jlong bitmapHandle,
         jboolean hasAlpha, jboolean requestPremul) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    LocalScopedBitmap bitmap(bitmapHandle);
     if (hasAlpha) {
-        bitmap->setAlphaType(requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType);
+        bitmap->pixelRef()->changeAlphaType(
+                requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType);
     } else {
-        bitmap->setAlphaType(kOpaque_SkAlphaType);
+        bitmap->pixelRef()->changeAlphaType(kOpaque_SkAlphaType);
     }
 }
 
 static void Bitmap_setPremultiplied(JNIEnv* env, jobject, jlong bitmapHandle,
         jboolean isPremul) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    if (!bitmap->isOpaque()) {
+    LocalScopedBitmap bitmap(bitmapHandle);
+    if (!bitmap->info().isOpaque()) {
         if (isPremul) {
-            bitmap->setAlphaType(kPremul_SkAlphaType);
+            bitmap->pixelRef()->changeAlphaType(kPremul_SkAlphaType);
         } else {
-            bitmap->setAlphaType(kUnpremul_SkAlphaType);
+            bitmap->pixelRef()->changeAlphaType(kUnpremul_SkAlphaType);
         }
     }
 }
 
 static jboolean Bitmap_hasMipMap(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    LocalScopedBitmap bitmap(bitmapHandle);
     return bitmap->hasHardwareMipMap() ? JNI_TRUE : JNI_FALSE;
 }
 
 static void Bitmap_setHasMipMap(JNIEnv* env, jobject, jlong bitmapHandle,
                                 jboolean hasMipMap) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    LocalScopedBitmap bitmap(bitmapHandle);
     bitmap->setHasHardwareMipMap(hasMipMap);
 }
 
@@ -580,8 +881,8 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         }
     }
 
-    jbyteArray buffer = GraphicsJNI::allocateJavaPixelRef(env, bitmap.get(), ctable);
-    if (NULL == buffer) {
+    android::Bitmap* nativeBitmap = GraphicsJNI::allocateJavaPixelRef(env, bitmap.get(), ctable);
+    if (!nativeBitmap) {
         SkSafeUnref(ctable);
         return NULL;
     }
@@ -593,6 +894,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     android::Parcel::ReadableBlob blob;
     android::status_t status = p->readBlob(size, &blob);
     if (status) {
+        nativeBitmap->detachFromJava();
         doThrowRE(env, "Could not read bitmap from parcel blob.");
         return NULL;
     }
@@ -603,7 +905,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     blob.release();
 
-    return GraphicsJNI::createBitmap(env, bitmap.release(), buffer,
+    return GraphicsJNI::createBitmap(env, nativeBitmap,
             getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);
 }
 
@@ -611,24 +913,25 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
                                      jlong bitmapHandle,
                                      jboolean isMutable, jint density,
                                      jobject parcel) {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
     if (parcel == NULL) {
         SkDebugf("------- writeToParcel null parcel\n");
         return JNI_FALSE;
     }
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
+    SkBitmap bitmap;
+    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
 
     p->writeInt32(isMutable);
-    p->writeInt32(bitmap->colorType());
-    p->writeInt32(bitmap->alphaType());
-    p->writeInt32(bitmap->width());
-    p->writeInt32(bitmap->height());
-    p->writeInt32(bitmap->rowBytes());
+    p->writeInt32(bitmap.colorType());
+    p->writeInt32(bitmap.alphaType());
+    p->writeInt32(bitmap.width());
+    p->writeInt32(bitmap.height());
+    p->writeInt32(bitmap.rowBytes());
     p->writeInt32(density);
 
-    if (bitmap->colorType() == kIndex_8_SkColorType) {
-        SkColorTable* ctable = bitmap->getColorTable();
+    if (bitmap.colorType() == kIndex_8_SkColorType) {
+        SkColorTable* ctable = bitmap.getColorTable();
         if (ctable != NULL) {
             int count = ctable->count();
             p->writeInt32(count);
@@ -639,7 +942,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
         }
     }
 
-    size_t size = bitmap->getSize();
+    size_t size = bitmap.getSize();
 
     android::Parcel::WritableBlob blob;
     android::status_t status = p->writeBlob(size, &blob);
@@ -648,14 +951,14 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
         return JNI_FALSE;
     }
 
-    bitmap->lockPixels();
-    const void* pSrc =  bitmap->getPixels();
+    bitmap.lockPixels();
+    const void* pSrc =  bitmap.getPixels();
     if (pSrc == NULL) {
         memset(blob.data(), 0, size);
     } else {
         memcpy(blob.data(), pSrc, size);
     }
-    bitmap->unlockPixels();
+    bitmap.unlockPixels();
 
     blob.release();
     return JNI_TRUE;
@@ -664,17 +967,17 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
 static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
                                    jlong srcHandle, jlong paintHandle,
                                    jintArray offsetXY) {
-    const SkBitmap* src = reinterpret_cast<SkBitmap*>(srcHandle);
+    SkBitmap src;
+    reinterpret_cast<Bitmap*>(srcHandle)->getSkBitmap(&src);
     const android::Paint* paint = reinterpret_cast<android::Paint*>(paintHandle);
     SkIPoint  offset;
-    SkBitmap* dst = new SkBitmap;
+    SkBitmap dst;
     JavaPixelAllocator allocator(env);
 
-    src->extractAlpha(dst, paint, &allocator, &offset);
+    src.extractAlpha(&dst, paint, &allocator, &offset);
     // If Skia can't allocate pixels for destination bitmap, it resets
     // it, that is set its pixels buffer to NULL, and zero width and height.
-    if (dst->getPixels() == NULL && src->getPixels() != NULL) {
-        delete dst;
+    if (dst.getPixels() == NULL && src.getPixels() != NULL) {
         doThrowOOME(env, "failed to allocate pixels for alpha");
         return NULL;
     }
@@ -685,53 +988,55 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
         env->ReleaseIntArrayElements(offsetXY, array, 0);
     }
 
-    return GraphicsJNI::createBitmap(env, dst, allocator.getStorageObj(),
-            getPremulBitmapCreateFlags(true), NULL, NULL);
+    return GraphicsJNI::createBitmap(env, allocator.getStorageObjAndReset(),
+            getPremulBitmapCreateFlags(true));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static jint Bitmap_getPixel(JNIEnv* env, jobject, jlong bitmapHandle,
         jint x, jint y) {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkAutoLockPixels alp(*bitmap);
+    SkBitmap bitmap;
+    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    SkAutoLockPixels alp(bitmap);
 
-    ToColorProc proc = ChooseToColorProc(*bitmap);
+    ToColorProc proc = ChooseToColorProc(bitmap);
     if (NULL == proc) {
         return 0;
     }
-    const void* src = bitmap->getAddr(x, y);
+    const void* src = bitmap.getAddr(x, y);
     if (NULL == src) {
         return 0;
     }
 
     SkColor dst[1];
-    proc(dst, src, 1, bitmap->getColorTable());
+    proc(dst, src, 1, bitmap.getColorTable());
     return static_cast<jint>(dst[0]);
 }
 
 static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
         jintArray pixelArray, jint offset, jint stride,
         jint x, jint y, jint width, jint height) {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkAutoLockPixels alp(*bitmap);
+    SkBitmap bitmap;
+    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    SkAutoLockPixels alp(bitmap);
 
-    ToColorProc proc = ChooseToColorProc(*bitmap);
+    ToColorProc proc = ChooseToColorProc(bitmap);
     if (NULL == proc) {
         return;
     }
-    const void* src = bitmap->getAddr(x, y);
+    const void* src = bitmap.getAddr(x, y);
     if (NULL == src) {
         return;
     }
 
-    SkColorTable* ctable = bitmap->getColorTable();
+    SkColorTable* ctable = bitmap.getColorTable();
     jint* dst = env->GetIntArrayElements(pixelArray, NULL);
     SkColor* d = (SkColor*)dst + offset;
     while (--height >= 0) {
         proc(d, src, width, ctable);
         d += stride;
-        src = (void*)((const char*)src + bitmap->rowBytes());
+        src = (void*)((const char*)src + bitmap.rowBytes());
     }
     env->ReleaseIntArrayElements(pixelArray, dst, 0);
 }
@@ -740,79 +1045,85 @@ static void Bitmap_getPixels(JNIEnv* env, jobject, jlong bitmapHandle,
 
 static void Bitmap_setPixel(JNIEnv* env, jobject, jlong bitmapHandle,
         jint x, jint y, jint colorHandle) {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    SkBitmap bitmap;
+    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
     SkColor color = static_cast<SkColor>(colorHandle);
-    SkAutoLockPixels alp(*bitmap);
-    if (NULL == bitmap->getPixels()) {
+    SkAutoLockPixels alp(bitmap);
+    if (NULL == bitmap.getPixels()) {
         return;
     }
 
-    FromColorProc proc = ChooseFromColorProc(*bitmap);
+    FromColorProc proc = ChooseFromColorProc(bitmap);
     if (NULL == proc) {
         return;
     }
 
-    proc(bitmap->getAddr(x, y), &color, 1, x, y);
-    bitmap->notifyPixelsChanged();
+    proc(bitmap.getAddr(x, y), &color, 1, x, y);
+    bitmap.notifyPixelsChanged();
 }
 
 static void Bitmap_setPixels(JNIEnv* env, jobject, jlong bitmapHandle,
         jintArray pixelArray, jint offset, jint stride,
         jint x, jint y, jint width, jint height) {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
+    SkBitmap bitmap;
+    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
     GraphicsJNI::SetPixels(env, pixelArray, offset, stride,
-            x, y, width, height, *bitmap);
+            x, y, width, height, bitmap);
 }
 
 static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
                                       jlong bitmapHandle, jobject jbuffer) {
-    const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkAutoLockPixels alp(*bitmap);
-    const void* src = bitmap->getPixels();
+    SkBitmap bitmap;
+    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    SkAutoLockPixels alp(bitmap);
+    const void* src = bitmap.getPixels();
 
     if (NULL != src) {
         android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
 
         // the java side has already checked that buffer is large enough
-        memcpy(abp.pointer(), src, bitmap->getSize());
+        memcpy(abp.pointer(), src, bitmap.getSize());
     }
 }
 
 static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
                                         jlong bitmapHandle, jobject jbuffer) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkAutoLockPixels alp(*bitmap);
-    void* dst = bitmap->getPixels();
+    SkBitmap bitmap;
+    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+    SkAutoLockPixels alp(bitmap);
+    void* dst = bitmap.getPixels();
 
     if (NULL != dst) {
         android::AutoBufferPointer abp(env, jbuffer, JNI_FALSE);
         // the java side has already checked that buffer is large enough
-        memcpy(dst, abp.pointer(), bitmap->getSize());
-        bitmap->notifyPixelsChanged();
+        memcpy(dst, abp.pointer(), bitmap.getSize());
+        bitmap.notifyPixelsChanged();
     }
 }
 
 static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
                               jlong bm1Handle) {
-    const SkBitmap* bm0 = reinterpret_cast<SkBitmap*>(bm0Handle);
-    const SkBitmap* bm1 = reinterpret_cast<SkBitmap*>(bm1Handle);
-    if (bm0->width() != bm1->width() ||
-        bm0->height() != bm1->height() ||
-        bm0->colorType() != bm1->colorType()) {
+    SkBitmap bm0;
+    SkBitmap bm1;
+    reinterpret_cast<Bitmap*>(bm0Handle)->getSkBitmap(&bm0);
+    reinterpret_cast<Bitmap*>(bm1Handle)->getSkBitmap(&bm1);
+    if (bm0.width() != bm1.width() ||
+        bm0.height() != bm1.height() ||
+        bm0.colorType() != bm1.colorType()) {
         return JNI_FALSE;
     }
 
-    SkAutoLockPixels alp0(*bm0);
-    SkAutoLockPixels alp1(*bm1);
+    SkAutoLockPixels alp0(bm0);
+    SkAutoLockPixels alp1(bm1);
 
     // if we can't load the pixels, return false
-    if (NULL == bm0->getPixels() || NULL == bm1->getPixels()) {
+    if (NULL == bm0.getPixels() || NULL == bm1.getPixels()) {
         return JNI_FALSE;
     }
 
-    if (bm0->colorType() == kIndex_8_SkColorType) {
-        SkColorTable* ct0 = bm0->getColorTable();
-        SkColorTable* ct1 = bm1->getColorTable();
+    if (bm0.colorType() == kIndex_8_SkColorType) {
+        SkColorTable* ct0 = bm0.getColorTable();
+        SkColorTable* ct1 = bm1.getColorTable();
         if (NULL == ct0 || NULL == ct1) {
             return JNI_FALSE;
         }
@@ -829,16 +1140,16 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
     // now compare each scanline. We can't do the entire buffer at once,
     // since we don't care about the pixel values that might extend beyond
     // the width (since the scanline might be larger than the logical width)
-    const int h = bm0->height();
-    const size_t size = bm0->width() * bm0->bytesPerPixel();
+    const int h = bm0.height();
+    const size_t size = bm0.width() * bm0.bytesPerPixel();
     for (int y = 0; y < h; y++) {
         // SkBitmap::getAddr(int, int) may return NULL due to unrecognized config
         // (ex: kRLE_Index8_Config). This will cause memcmp method to crash. Since bm0
         // and bm1 both have pixel data() (have passed NULL == getPixels() check),
         // those 2 bitmaps should be valid (only unrecognized), we return JNI_FALSE
         // to warn user those 2 unrecognized config bitmaps may be different.
-        void *bm0Addr = bm0->getAddr(0, y);
-        void *bm1Addr = bm1->getAddr(0, y);
+        void *bm0Addr = bm0.getAddr(0, y);
+        void *bm1Addr = bm1.getAddr(0, y);
 
         if(bm0Addr == NULL || bm1Addr == NULL) {
             return JNI_FALSE;
@@ -851,15 +1162,9 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
     return JNI_TRUE;
 }
 
-static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    bitmap->lockPixels();
-    bitmap->unlockPixels();
-}
-
 static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
-    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-    SkPixelRef* pixelRef = bitmap ? bitmap->pixelRef() : nullptr;
+    LocalScopedBitmap bitmap(bitmapHandle);
+    SkPixelRef* pixelRef = bitmap.valid() ? bitmap->pixelRef() : nullptr;
     SkSafeRef(pixelRef);
     return reinterpret_cast<jlong>(pixelRef);
 }
@@ -902,7 +1207,6 @@ static JNINativeMethod gBitmapMethods[] = {
     {   "nativeCopyPixelsFromBuffer", "(JLjava/nio/Buffer;)V",
                                             (void*)Bitmap_copyPixelsFromBuffer },
     {   "nativeSameAs",             "(JJ)Z", (void*)Bitmap_sameAs },
-    {   "nativePrepareToDraw",      "(J)V", (void*)Bitmap_prepareToDraw },
     {   "nativeRefPixelRef",        "(J)J", (void*)Bitmap_refPixelRef },
 };
 
