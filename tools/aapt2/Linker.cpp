@@ -16,6 +16,8 @@
 
 #include "Linker.h"
 #include "Logger.h"
+#include "NameMangler.h"
+#include "Resolver.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -38,7 +40,7 @@ namespace aapt {
 Linker::Args::Args(const ResourceNameRef& r, const SourceLine& s) : referrer(r), source(s) {
 }
 
-Linker::Linker(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolver> resolver) :
+Linker::Linker(std::shared_ptr<ResourceTable> table, std::shared_ptr<IResolver> resolver) :
         mTable(table), mResolver(resolver), mError(false) {
 }
 
@@ -100,11 +102,15 @@ bool Linker::linkAndValidate() {
                 }
                 entry->entryId = nextIndex++;
 
+                std::u16string unmangledPackage = mTable->getPackage();
+                std::u16string unmangledName = entry->name;
+                NameMangler::unmangle(&unmangledName, &unmangledPackage);
+
                 // Update callers of this resource with the right ID.
                 auto callersIter = mGraph.find(ResourceNameRef{
-                        mTable->getPackage(),
+                        unmangledPackage,
                         type->type,
-                        entry->name
+                        unmangledName
                 });
 
                 if (callersIter != std::end(mGraph)) {
@@ -175,13 +181,14 @@ void Linker::processAttributeValue(const ResourceNameRef& name, const SourceLine
         // we called through the original value.
 
         auto onCreateReference = [&](const ResourceName& name) {
-            mTable->addResource(name, ConfigDescription{},
-                    source, util::make_unique<Id>());
+            // We should never get here. All references would have been
+            // parsed in the parser phase.
+            assert(false);
+            //mTable->addResource(name, ConfigDescription{}, source, util::make_unique<Id>());
         };
 
-        convertedValue = ResourceParser::parseItemForAttribute(
-                *str.value, attr, mResolver->getDefaultPackage(),
-                onCreateReference);
+        convertedValue = ResourceParser::parseItemForAttribute(*str.value, attr,
+                                                               onCreateReference);
         if (!convertedValue && attr.typeMask & android::ResTable_map::TYPE_STRING) {
             // Last effort is to parse as a string.
             util::StringBuilder builder;
@@ -225,13 +232,13 @@ void Linker::visit(Style& style, ValueVisitorArgs& a) {
     }
 
     for (Style::Entry& styleEntry : style.entries) {
-        Maybe<Resolver::Entry> result = mResolver->findAttribute(styleEntry.key.name);
+        Maybe<IResolver::Entry> result = mResolver->findAttribute(styleEntry.key.name);
         if (!result || !result.value().attr) {
             addUnresolvedSymbol(styleEntry.key.name, args.source);
             continue;
         }
 
-        const Resolver::Entry& entry = result.value();
+        const IResolver::Entry& entry = result.value();
         if (entry.id.isValid()) {
             styleEntry.key.id = entry.id;
         } else {

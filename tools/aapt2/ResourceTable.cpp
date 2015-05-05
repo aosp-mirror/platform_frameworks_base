@@ -318,12 +318,16 @@ bool ResourceTable::merge(ResourceTable&& other) {
 
     for (auto& otherType : other) {
         std::unique_ptr<ResourceTableType>& type = findOrCreateType(otherType->type);
-        if (type->publicStatus.isPublic && otherType->publicStatus.isPublic &&
-                type->typeId != otherType->typeId) {
-            Logger::error() << "can not merge type '" << type->type << "': conflicting public IDs "
-                            << "(" << type->typeId << " vs " << otherType->typeId << ")."
-                            << std::endl;
-            return false;
+        if (otherType->publicStatus.isPublic) {
+            if (type->publicStatus.isPublic && type->typeId != otherType->typeId) {
+                Logger::error() << "can not merge type '" << type->type
+                                << "': conflicting public IDs "
+                                << "(" << type->typeId << " vs " << otherType->typeId << ")."
+                                << std::endl;
+                return false;
+            }
+            type->publicStatus = std::move(otherType->publicStatus);
+            type->typeId = otherType->typeId;
         }
 
         for (auto& otherEntry : otherType->entries) {
@@ -335,13 +339,16 @@ bool ResourceTable::merge(ResourceTable&& other) {
             }
 
             std::unique_ptr<ResourceEntry>& entry = findOrCreateEntry(type, *nameToAdd);
-            if (entry->publicStatus.isPublic && otherEntry->publicStatus.isPublic &&
-                    entry->entryId != otherEntry->entryId) {
-                Logger::error() << "can not merge entry '" << type->type << "/" << entry->name
-                                << "': conflicting public IDs "
-                                << "(" << entry->entryId << " vs " << entry->entryId << ")."
-                                << std::endl;
-                return false;
+            if (otherEntry->publicStatus.isPublic) {
+                if (entry->publicStatus.isPublic && entry->entryId != otherEntry->entryId) {
+                    Logger::error() << "can not merge entry '" << type->type << "/" << entry->name
+                                    << "': conflicting public IDs "
+                                    << "(" << entry->entryId << " vs " << entry->entryId << ")."
+                                    << std::endl;
+                    return false;
+                }
+                entry->publicStatus = std::move(otherEntry->publicStatus);
+                entry->entryId = otherEntry->entryId;
             }
 
             for (ResourceConfigValue& otherValue : otherEntry->values) {

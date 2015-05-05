@@ -72,15 +72,26 @@ public:
      */
     virtual const std::u16string& getText() const = 0;
 
-    /**
-     * Namespace prefix is available for StartNamespace and EndNamespace.
-     */
-    virtual const std::u16string& getNamespacePrefix() const = 0;
+    //
+    // Namespace prefix and URI are available for StartNamespace and EndNamespace.
+    //
 
-    /**
-     * Namespace URI is available for StartNamespace.
-     */
+    virtual const std::u16string& getNamespacePrefix() const = 0;
     virtual const std::u16string& getNamespaceUri() const = 0;
+
+    /*
+     * Uses the current stack of namespaces to resolve the package. Eg:
+     * xmlns:app = "http://schemas.android.com/apk/res/com.android.app"
+     * ...
+     * android:text="@app:string/message"
+     *
+     * In this case, 'app' will be converted to 'com.android.app'.
+     *
+     * If xmlns:app="http://schemas.android.com/apk/res-auto", then
+     * 'package' will be set to 'defaultPackage'.
+     */
+    virtual bool applyPackageAlias(std::u16string* package,
+                                   const std::u16string& defaultPackage) const = 0;
 
     //
     // These are available for StartElement and EndElement.

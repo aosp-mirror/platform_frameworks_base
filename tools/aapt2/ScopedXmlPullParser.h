@@ -52,25 +52,27 @@ public:
     ScopedXmlPullParser& operator=(const ScopedXmlPullParser&) = delete;
     ~ScopedXmlPullParser();
 
-    Event getEvent() const;
-    const std::string& getLastError() const;
-    Event next();
+    Event getEvent() const override;
+    const std::string& getLastError() const override;
+    Event next() override;
 
-    const std::u16string& getComment() const;
-    size_t getLineNumber() const;
-    size_t getDepth() const;
+    const std::u16string& getComment() const override;
+    size_t getLineNumber() const override;
+    size_t getDepth() const override;
 
-    const std::u16string& getText() const;
+    const std::u16string& getText() const override;
 
-    const std::u16string& getNamespacePrefix() const;
-    const std::u16string& getNamespaceUri() const;
+    const std::u16string& getNamespacePrefix() const override;
+    const std::u16string& getNamespaceUri() const override;
+    bool applyPackageAlias(std::u16string* package, const std::u16string& defaultPackage)
+            const override;
 
-    const std::u16string& getElementNamespace() const;
-    const std::u16string& getElementName() const;
+    const std::u16string& getElementNamespace() const override;
+    const std::u16string& getElementName() const override;
 
-    const_iterator beginAttributes() const;
-    const_iterator endAttributes() const;
-    size_t getAttributeCount() const;
+    const_iterator beginAttributes() const override;
+    const_iterator endAttributes() const override;
+    size_t getAttributeCount() const override;
 
 private:
     XmlPullParser* mParser;

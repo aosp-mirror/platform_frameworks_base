@@ -190,18 +190,26 @@ bool ManifestValidator::validateManifest(const Source& source, android::ResXMLPa
     bool error = false;
     SourceLogger logger(source);
 
-    const size_t attrCount = parser->getAttributeCount();
-    for (size_t i = 0; i < attrCount; i++) {
-        size_t len = 0;
-        StringPiece16 attrNamespace(parser->getAttributeNamespace(i, &len), len);
-        StringPiece16 attrName(parser->getAttributeName(i, &len), len);
-        if (attrNamespace.empty() && attrName == u"package") {
-            error |= !validateInlineAttribute(parser, i, logger, kPackageIdentSet);
-        } else if (attrNamespace == u"android") {
-            if (attrName == u"sharedUserId") {
-                error |= !validateInlineAttribute(parser, i, logger, kPackageIdentSet);
-            }
-        }
+    const StringPiece16 kAndroid = u"android";
+    const StringPiece16 kPackage = u"package";
+    const StringPiece16 kSharedUserId = u"sharedUserId";
+
+    ssize_t idx;
+
+    idx = parser->indexOfAttribute(nullptr, 0, kPackage.data(), kPackage.size());
+    if (idx < 0) {
+        logger.error(parser->getLineNumber())
+                << "missing package attribute."
+                << std::endl;
+        error = true;
+    } else {
+        error |= !validateInlineAttribute(parser, idx, logger, kPackageIdentSet);
+    }
+
+    idx = parser->indexOfAttribute(kAndroid.data(), kAndroid.size(),
+                                   kSharedUserId.data(), kSharedUserId.size());
+    if (idx >= 0) {
+        error |= !validateInlineAttribute(parser, idx, logger, kPackageIdentSet);
     }
     return !error;
 }

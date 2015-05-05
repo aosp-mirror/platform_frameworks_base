@@ -65,7 +65,7 @@ void parse(int argc, char** argv, const StringPiece& command) {
     for (int i = 0; i < argc; i++) {
         const StringPiece arg(argv[i]);
         if (*arg.data() != '-') {
-            sArgs.emplace_back(arg.toString());
+            sArgs.push_back(arg.toString());
             continue;
         }
 
