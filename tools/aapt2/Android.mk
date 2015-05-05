@@ -40,10 +40,10 @@ sources := \
 	ManifestValidator.cpp \
 	Png.cpp \
 	ResChunkPullParser.cpp \
-	Resolver.cpp \
 	Resource.cpp \
 	ResourceParser.cpp \
 	ResourceTable.cpp \
+	ResourceTableResolver.cpp \
 	ResourceValues.cpp \
 	SdkConstants.cpp \
 	StringPool.cpp \

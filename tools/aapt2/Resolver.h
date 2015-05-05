@@ -19,31 +19,18 @@
 
 #include "Maybe.h"
 #include "Resource.h"
-#include "ResourceTable.h"
 #include "ResourceValues.h"
 
-#include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
-#include <memory>
-#include <vector>
-#include <unordered_set>
 
 namespace aapt {
 
 /**
  * Resolves symbolic references (package:type/entry) into resource IDs/objects.
- * Encapsulates the search of library sources as well as the local ResourceTable.
  */
-class Resolver {
+class IResolver {
 public:
-    /**
-     * Creates a resolver with a local ResourceTable and an AssetManager
-     * loaded with library packages.
-     */
-    Resolver(std::shared_ptr<const ResourceTable> table,
-             std::shared_ptr<const android::AssetManager> sources);
-
-    Resolver(const Resolver&) = delete; // Not copyable.
+    virtual ~IResolver() {};
 
     /**
      * Holds the result of a resource name lookup.
@@ -68,43 +55,26 @@ public:
      * Return the package to use when none is specified. This
      * is the package name of the app being built.
      */
-    const std::u16string& getDefaultPackage() const;
+    virtual const std::u16string& getDefaultPackage() const = 0;
 
     /**
      * Returns a ResourceID if the name is found. The ResourceID
      * may not be valid if the resource was not assigned an ID.
      */
-    Maybe<ResourceId> findId(const ResourceName& name);
+    virtual Maybe<ResourceId> findId(const ResourceName& name) = 0;
 
     /**
      * Returns an Entry if the name is found. Entry::attr
      * may be nullptr if the resource is not an attribute.
      */
-    Maybe<Entry> findAttribute(const ResourceName& name);
+    virtual Maybe<Entry> findAttribute(const ResourceName& name) = 0;
 
-    const android::ResTable& getResTable() const;
-
-private:
-    struct CacheEntry {
-        ResourceId id;
-        std::unique_ptr<Attribute> attr;
-    };
-
-    const CacheEntry* buildCacheEntry(const ResourceName& name);
-
-    std::shared_ptr<const ResourceTable> mTable;
-    std::shared_ptr<const android::AssetManager> mSources;
-    std::map<ResourceName, CacheEntry> mCache;
-    std::unordered_set<std::u16string> mIncludedPackages;
+    /**
+     * Find a resource by ID. Resolvers may contain resources without
+     * resource IDs assigned to them.
+     */
+    virtual Maybe<ResourceName> findName(ResourceId resId) = 0;
 };
-
-inline const std::u16string& Resolver::getDefaultPackage() const {
-    return mTable->getPackage();
-}
-
-inline const android::ResTable& Resolver::getResTable() const {
-    return mSources->getResources(false);
-}
 
 } // namespace aapt
 

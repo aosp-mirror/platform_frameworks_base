@@ -23,20 +23,64 @@ namespace aapt {
 
 struct Dummy {
     Dummy() {
-        std::cerr << "Constructing Dummy " << (void *) this << std::endl;
+        data = new int;
+        *data = 1;
+        std::cerr << "Construct Dummy{0x" << (void *) this
+                  << "} with data=0x" << (void*) data
+                  << std::endl;
     }
 
     Dummy(const Dummy& rhs) {
-        std::cerr << "Copying Dummy " << (void *) this << " from " << (const void*) &rhs << std::endl;
+        data = nullptr;
+        if (rhs.data) {
+            data = new int;
+            *data = *rhs.data;
+        }
+        std::cerr << "CopyConstruct Dummy{0x" << (void *) this
+                  << "} from Dummy{0x" << (const void*) &rhs
+                  << "}" << std::endl;
     }
 
     Dummy(Dummy&& rhs) {
-        std::cerr << "Moving Dummy " << (void *) this << " from " << (void*) &rhs << std::endl;
+        data = rhs.data;
+        rhs.data = nullptr;
+        std::cerr << "MoveConstruct Dummy{0x" << (void *) this
+                  << "} from Dummy{0x" << (const void*) &rhs
+                  << "}" << std::endl;
+    }
+
+    Dummy& operator=(const Dummy& rhs) {
+        delete data;
+        data = nullptr;
+
+        if (rhs.data) {
+            data = new int;
+            *data = *rhs.data;
+        }
+        std::cerr << "CopyAssign Dummy{0x" << (void *) this
+                  << "} from Dummy{0x" << (const void*) &rhs
+                  << "}" << std::endl;
+        return *this;
+    }
+
+    Dummy& operator=(Dummy&& rhs) {
+        delete data;
+        data = rhs.data;
+        rhs.data = nullptr;
+        std::cerr << "MoveAssign Dummy{0x" << (void *) this
+                  << "} from Dummy{0x" << (const void*) &rhs
+                  << "}" << std::endl;
+        return *this;
     }
 
     ~Dummy() {
-        std::cerr << "Destroying Dummy " << (void *) this << std::endl;
+        std::cerr << "Destruct Dummy{0x" << (void *) this
+                  << "} with data=0x" << (void*) data
+                  << std::endl;
+        delete data;
     }
+
+    int* data;
 };
 
 TEST(MaybeTest, MakeNothing) {
@@ -64,6 +108,14 @@ TEST(MaybeTest, Lifecycle) {
     Maybe<Dummy> val = make_nothing<Dummy>();
 
     Maybe<Dummy> val2 = make_value(Dummy());
+}
+
+TEST(MaybeTest, MoveAssign) {
+    Maybe<Dummy> val;
+    {
+        Maybe<Dummy> val2 = Dummy();
+        val = std::move(val2);
+    }
 }
 
 } // namespace aapt

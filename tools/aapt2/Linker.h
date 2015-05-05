@@ -52,9 +52,9 @@ class Linker : ValueVisitor {
 public:
     /**
      * Create a Linker for the given resource table with the sources available in
-     * Resolver. Resolver should contain the ResourceTable as a source too.
+     * IResolver. IResolver should contain the ResourceTable as a source too.
      */
-    Linker(std::shared_ptr<ResourceTable> table, std::shared_ptr<Resolver> resolver);
+    Linker(std::shared_ptr<ResourceTable> table, std::shared_ptr<IResolver> resolver);
 
     Linker(const Linker&) = delete;
 
@@ -117,7 +117,7 @@ private:
     friend ::std::ostream& operator<<(::std::ostream&, const Node&);
 
     std::shared_ptr<ResourceTable> mTable;
-    std::shared_ptr<Resolver> mResolver;
+    std::shared_ptr<IResolver> mResolver;
     std::map<ResourceNameRef, std::vector<Node>> mGraph;
     std::map<ResourceName, std::vector<SourceLine>> mUnresolvedSymbols;
     bool mError;

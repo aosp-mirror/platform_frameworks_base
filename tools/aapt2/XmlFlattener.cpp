@@ -36,56 +36,67 @@
 namespace aapt {
 
 constexpr const char16_t* kSchemaAndroid = u"http://schemas.android.com/apk/res/android";
-constexpr const char16_t* kSchemaAuto = u"http://schemas.android.com/apk/res-auto";
-constexpr const char16_t* kSchemaPrefix = u"http://schemas.android.com/apk/res/";
 
 struct AttributeValueFlattener : ValueVisitor {
-    struct Args : ValueVisitorArgs {
-        Args(std::shared_ptr<Resolver> r, SourceLogger& s, android::Res_value& oV,
-                std::shared_ptr<XmlPullParser> p, bool& e, StringPool::Ref& rV,
-                std::vector<std::pair<StringPool::Ref, android::ResStringPool_ref*>>& sR) :
-                resolver(r), logger(s), outValue(oV), parser(p), error(e), rawValue(rV),
-                stringRefs(sR) {
+    AttributeValueFlattener(
+            std::shared_ptr<IResolver> resolver, SourceLogger* logger,
+            android::Res_value* outValue, std::shared_ptr<XmlPullParser> parser, bool* outError,
+            StringPool::Ref rawValue, std::u16string* defaultPackage,
+            std::vector<std::pair<StringPool::Ref, android::ResStringPool_ref*>>* outStringRefs) :
+            mResolver(resolver), mLogger(logger), mOutValue(outValue), mParser(parser),
+            mError(outError), mRawValue(rawValue), mDefaultPackage(defaultPackage),
+            mStringRefs(outStringRefs) {
+    }
+
+    void visit(Reference& reference, ValueVisitorArgs&) override {
+        // First see if we can convert the package name from a prefix to a real
+        // package name.
+        ResourceName aliasedName = reference.name;
+
+        if (!reference.name.package.empty()) {
+            // Only if we specified a package do we look for its alias.
+            mParser->applyPackageAlias(&reference.name.package, *mDefaultPackage);
+        } else {
+            reference.name.package = *mDefaultPackage;
         }
 
-        std::shared_ptr<Resolver> resolver;
-        SourceLogger& logger;
-        android::Res_value& outValue;
-        std::shared_ptr<XmlPullParser> parser;
-        bool& error;
-        StringPool::Ref& rawValue;
-        std::vector<std::pair<StringPool::Ref, android::ResStringPool_ref*>>& stringRefs;
-    };
-
-    void visit(Reference& reference, ValueVisitorArgs& a) override {
-        Args& args = static_cast<Args&>(a);
-
-        Maybe<ResourceId> result = args.resolver->findId(reference.name);
+        Maybe<ResourceId> result = mResolver->findId(reference.name);
         if (!result || !result.value().isValid()) {
-            args.logger.error(args.parser->getLineNumber())
+            std::ostream& out = mLogger->error(mParser->getLineNumber())
                     << "unresolved reference '"
-                    << reference.name
-                    << "'."
-                    << std::endl;
-            args.error = true;
+                    << aliasedName
+                    << "'";
+            if (aliasedName != reference.name) {
+                out << " (aka '" << reference.name << "')";
+            }
+            out << "'." << std::endl;
+            *mError = true;
         } else {
             reference.id = result.value();
-            reference.flatten(args.outValue);
+            reference.flatten(*mOutValue);
         }
     }
 
-    void visit(String& string, ValueVisitorArgs& a) override {
-        Args& args = static_cast<Args&>(a);
-
-        args.outValue.dataType = android::Res_value::TYPE_STRING;
-        args.stringRefs.emplace_back(args.rawValue,
-                reinterpret_cast<android::ResStringPool_ref*>(&args.outValue.data));
+    void visit(String& string, ValueVisitorArgs&) override {
+        mOutValue->dataType = android::Res_value::TYPE_STRING;
+        mStringRefs->emplace_back(
+                mRawValue,
+                reinterpret_cast<android::ResStringPool_ref*>(mOutValue->data));
     }
 
-    void visitItem(Item& item, ValueVisitorArgs& a) override {
-        Args& args = static_cast<Args&>(a);
-        item.flatten(args.outValue);
+    void visitItem(Item& item, ValueVisitorArgs&) override {
+        item.flatten(*mOutValue);
     }
+
+private:
+    std::shared_ptr<IResolver> mResolver;
+    SourceLogger* mLogger;
+    android::Res_value* mOutValue;
+    std::shared_ptr<XmlPullParser> mParser;
+    bool* mError;
+    StringPool::Ref mRawValue;
+    std::u16string* mDefaultPackage;
+    std::vector<std::pair<StringPool::Ref, android::ResStringPool_ref*>>* mStringRefs;
 };
 
 struct XmlAttribute {
@@ -100,7 +111,7 @@ static bool lessAttributeId(const XmlAttribute& a, uint32_t id) {
 }
 
 XmlFlattener::XmlFlattener(const std::shared_ptr<ResourceTable>& table,
-                           const std::shared_ptr<Resolver>& resolver) :
+                           const std::shared_ptr<IResolver>& resolver) :
         mTable(table), mResolver(resolver) {
 }
 
@@ -184,8 +195,13 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                 node->comment.index = -1;
 
                 android::ResXMLTree_attrExt* elem = out.nextBlock<android::ResXMLTree_attrExt>();
-                stringRefs.emplace_back(
-                        pool.makeRef(parser->getElementNamespace(), lowPriority), &elem->ns);
+                if (!parser->getElementNamespace().empty()) {
+                    stringRefs.emplace_back(
+                            pool.makeRef(parser->getElementNamespace(), lowPriority), &elem->ns);
+                } else {
+                    // The device doesn't think a string of size 0 is the same as null.
+                    elem->ns.index = -1;
+                }
                 stringRefs.emplace_back(
                         pool.makeRef(parser->getElementName(), lowPriority), &elem->name);
                 elem->attributeStart = sizeof(*elem);
@@ -222,28 +238,25 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                     }
 
 
-                    StringPiece16 package;
-                    if (util::stringStartsWith<char16_t>(attrIter->namespaceUri, kSchemaPrefix)) {
-                        StringPiece16 schemaPrefix = kSchemaPrefix;
-                        package = attrIter->namespaceUri;
-                        package = package.substr(schemaPrefix.size(),
-                                                 package.size() - schemaPrefix.size());
-                    } else if (attrIter->namespaceUri == kSchemaAuto && mResolver) {
-                        package = mResolver->getDefaultPackage();
-                    }
-
-                    if (package.empty() || !mResolver) {
+                    Maybe<std::u16string> package = util::extractPackageFromNamespace(
+                            attrIter->namespaceUri);
+                    if (!package || !mResolver) {
                         // Attributes that have no resource ID (because they don't belong to a
                         // package) should appear after those that do have resource IDs. Assign
-                        // them some/ integer value that will appear after.
+                        // them some integer value that will appear after.
                         id = 0x80000000u | nextAttributeId++;
                         nameRef = pool.makeRef(attrIter->name, StringPool::Context{ id });
 
                     } else {
                         // Find the Attribute object via our Resolver.
                         ResourceName attrName = {
-                                package.toString(), ResourceType::kAttr, attrIter->name };
-                        Maybe<Resolver::Entry> result = mResolver->findAttribute(attrName);
+                                package.value(), ResourceType::kAttr, attrIter->name };
+
+                        if (attrName.package.empty()) {
+                            attrName.package = options.defaultPackage;
+                        }
+
+                        Maybe<IResolver::Entry> result = mResolver->findAttribute(attrName);
                         if (!result || !result.value().id.isValid()) {
                             logger.error(parser->getLineNumber())
                                     << "unresolved attribute '"
@@ -269,7 +282,7 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
 
                         // Put the attribute name into a package specific pool, since we don't
                         // want to collapse names from different packages.
-                        nameRef = packagePools[package.toString()].makeRef(
+                        nameRef = packagePools[package.value()].makeRef(
                                 attrIter->name, StringPool::Context{ id });
                     }
 
@@ -290,26 +303,32 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                 for (auto entry : sortedAttributes) {
                     android::ResXMLTree_attribute* attr =
                             out.nextBlock<android::ResXMLTree_attribute>();
-                    stringRefs.emplace_back(
-                            pool.makeRef(entry.xmlAttr->namespaceUri, lowPriority), &attr->ns);
-                    StringPool::Ref rawValueRef = pool.makeRef(entry.xmlAttr->value, lowPriority);
-                    stringRefs.emplace_back(rawValueRef, &attr->rawValue);
+                    if (!entry.xmlAttr->namespaceUri.empty()) {
+                        stringRefs.emplace_back(
+                                pool.makeRef(entry.xmlAttr->namespaceUri, lowPriority), &attr->ns);
+                    } else {
+                        attr->ns.index = -1;
+                    }
+
                     stringRefs.emplace_back(entry.nameRef, &attr->name);
+                    attr->rawValue.index = -1;
+
+                    StringPool::Ref rawValueRef = pool.makeRef(entry.xmlAttr->value, lowPriority);
 
                     if (entry.attr) {
                         std::unique_ptr<Item> value = ResourceParser::parseItemForAttribute(
-                                entry.xmlAttr->value, *entry.attr, mResolver->getDefaultPackage());
+                                entry.xmlAttr->value, *entry.attr);
                         if (value) {
-                            AttributeValueFlattener flattener;
-                            value->accept(flattener, AttributeValueFlattener::Args{
+                            AttributeValueFlattener flattener(
                                     mResolver,
-                                    logger,
-                                    attr->typedValue,
+                                    &logger,
+                                    &attr->typedValue,
                                     parser,
-                                    error,
+                                    &error,
                                     rawValueRef,
-                                    stringRefs
-                            });
+                                    &options.defaultPackage,
+                                    &stringRefs);
+                            value->accept(flattener, {});
                         } else if (!(entry.attr->typeMask & android::ResTable_map::TYPE_STRING)) {
                             logger.error(parser->getLineNumber())
                                     << "'"
@@ -321,12 +340,14 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                             error = true;
                         } else {
                             attr->typedValue.dataType = android::Res_value::TYPE_STRING;
+                            stringRefs.emplace_back(rawValueRef, &attr->rawValue);
                             stringRefs.emplace_back(rawValueRef,
                                     reinterpret_cast<android::ResStringPool_ref*>(
                                             &attr->typedValue.data));
                         }
                     } else {
                         attr->typedValue.dataType = android::Res_value::TYPE_STRING;
+                        stringRefs.emplace_back(rawValueRef, &attr->rawValue);
                         stringRefs.emplace_back(rawValueRef,
                                 reinterpret_cast<android::ResStringPool_ref*>(
                                         &attr->typedValue.data));
@@ -438,7 +459,7 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
     resIdMapChunk->size = outBuffer->size() - beforeResIdMapIndex;
 
     // Flatten the StringPool.
-    StringPool::flattenUtf8(outBuffer, pool);
+    StringPool::flattenUtf16(outBuffer, pool);
 
     // Move the temporary BigBuffer into outBuffer->
     outBuffer->appendBuffer(std::move(out));

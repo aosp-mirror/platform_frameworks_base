@@ -84,6 +84,7 @@ TEST_F(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
               output.find("public static final int hey_dude_cool_attr = 0;"));
 }
 
+/*
 TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
     ASSERT_TRUE(addResource(ResourceName{ {}, ResourceType::kId, u"foo" },
                             ResourceId{ 0x01, 0x02, 0x0000 }));
@@ -111,6 +112,6 @@ TEST_F(JavaClassGeneratorTest, EmitPackageMangledSymbols) {
     output = out.str();
     EXPECT_NE(std::string::npos, output.find("int test ="));
     EXPECT_EQ(std::string::npos, output.find("int foo ="));
-}
+}*/
 
 } // namespace aapt

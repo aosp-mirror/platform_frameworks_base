@@ -43,7 +43,7 @@ public:
      * add any resources parsed to `table`. `source` is for logging purposes.
      */
     BinaryResourceParser(const std::shared_ptr<ResourceTable>& table,
-                         const std::shared_ptr<Resolver>& resolver,
+                         const std::shared_ptr<IResolver>& resolver,
                          const Source& source,
                          const void* data, size_t len);
 
@@ -92,7 +92,7 @@ private:
 
     std::shared_ptr<ResourceTable> mTable;
 
-    std::shared_ptr<Resolver> mResolver;
+    std::shared_ptr<IResolver> mResolver;
 
     const Source mSource;
 

@@ -211,6 +211,7 @@ struct ValueFlattener : ConstValueVisitor {
 
     virtual void visitItem(const Item& item, ValueVisitorArgs&) override {
         result = item.flatten(*mOutValue);
+        mOutValue->res0 = 0;
         mOutValue->size = sizeof(*mOutValue);
     }
 
@@ -508,9 +509,9 @@ bool TableFlattener::flatten(BigBuffer* out, const ResourceTable& table) {
     package->name[table.getPackage().length()] = 0;
 
     package->typeStrings = package->header.headerSize;
-    StringPool::flattenUtf8(out, typePool);
+    StringPool::flattenUtf16(out, typePool);
     package->keyStrings = out->size() - beforePackageIndex;
-    StringPool::flattenUtf8(out, keyPool);
+    StringPool::flattenUtf16(out, keyPool);
 
     if (symbolEntryData != nullptr) {
         for (size_t i = 0; i < symbolEntries.size(); i++) {

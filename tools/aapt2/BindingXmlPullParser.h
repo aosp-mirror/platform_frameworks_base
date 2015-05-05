@@ -42,6 +42,8 @@ public:
 
     const std::u16string& getNamespacePrefix() const override;
     const std::u16string& getNamespaceUri() const override;
+    bool applyPackageAlias(std::u16string* package, const std::u16string& defaultPackage)
+            const override;
 
     const std::u16string& getElementNamespace() const override;
     const std::u16string& getElementName() const override;

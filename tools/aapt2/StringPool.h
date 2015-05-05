@@ -127,7 +127,7 @@ public:
     using const_iterator = std::vector<std::unique_ptr<Entry>>::const_iterator;
 
     static bool flattenUtf8(BigBuffer* out, const StringPool& pool);
-    static bool flatten(BigBuffer* out, const StringPool& pool);
+    static bool flattenUtf16(BigBuffer* out, const StringPool& pool);
 
     StringPool() = default;
     StringPool(const StringPool&) = delete;
@@ -192,6 +192,8 @@ public:
 private:
     friend const_iterator begin(const StringPool& pool);
     friend const_iterator end(const StringPool& pool);
+
+    static bool flatten(BigBuffer* out, const StringPool& pool, bool utf8);
 
     Ref makeRefImpl(const StringPiece16& str, const Context& context, bool unique);
 
