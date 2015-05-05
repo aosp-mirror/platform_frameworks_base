@@ -1,0 +1,135 @@
+page.title=Adding Swipe-to-Refresh To Your App
+trainingnavtop=true
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+    <li><a href="#AddSwipeWidget">Add the SwipeRefreshLayout Widget</a>
+    <li><a href="#AddRefreshAction">Add a Refresh Action to the Action Bar</a>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li>
+    <a href=
+    "{@docRoot}guide/topics/ui/accessibility/index.html">Accessibility</a>
+  </li>
+
+  <li>
+    <a href="{@docRoot}training/basics/actionbar/index.html">Adding the Action
+    Bar</a>
+  </li>
+</ul>
+
+<h2>Sample Apps</h2>
+
+<ul>
+    <li><a href="{@docRoot}samples/SwipeRefreshLayoutBasic/index.html">
+            SwipeRefreshLayoutBasic</a></li>
+    <li><a href="{@docRoot}samples/SwipeRefreshListFragment/index.html">
+            SwipeRefreshListFragment</a></li>
+</ul>
+
+</div>
+</div>
+
+
+<p>
+  The swipe-to-refresh user interface pattern is implemented entirely within
+  the {@link android.support.v4.widget.SwipeRefreshLayout} widget, which
+  detects the vertical swipe, displays a distinctive progress bar, and triggers
+  callback methods in your app. You enable this behavior
+  by adding the widget to your layout file as the parent of a {@link
+  android.widget.ListView} or {@link android.widget.GridView}, and implementing
+  the refresh behavior that gets invoked when the user swipes.
+</p>
+
+<p>
+  This lesson shows you how to add the widget to an existing layout. It also
+  shows you how to add a refresh action to the action bar overflow area, so
+  that users who may be unable to use the swipe gesture can trigger a manual
+  update with an external device.
+</p>
+
+<h2 id="AddSwipeWidget">Add the SwipeRefreshLayout Widget</h2>
+<p>
+  To add the swipe to refresh widget to an existing app, add {@link
+  android.support.v4.widget.SwipeRefreshLayout} as the parent
+  of a single {@link android.widget.ListView} or {@link
+  android.widget.GridView}. Remember that {@link
+  android.support.v4.widget.SwipeRefreshLayout} only supports a single {@link
+  android.widget.ListView} or {@link android.widget.GridView} child.
+</p>
+
+<p>
+  The following example demonstrates how to add the {@link
+  android.support.v4.widget.SwipeRefreshLayout} widget to an existing layout
+  file containing a {@link android.widget.ListView}:
+</p>
+
+<pre>&lt;android.support.v4.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="&#64;+id/swiperefresh"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;ListView
+        android:id="&#64;android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" /&gt;
+
+&lt;/android.support.v4.widget.SwipeRefreshLayout&gt;</pre>
+
+<p>
+  You can also use the {@link android.support.v4.widget.SwipeRefreshLayout}
+  widget with a {@link android.support.v4.app.ListFragment}. If the layout
+  contains a {@link android.widget.ListView} with the ID
+  <code>"@android:id/list"</code>, the swipe-to-refresh functionality is
+  automatically supported. However, explicitly declaring the {@link
+  android.widget.ListView} in this way supersedes the default {@link
+  android.support.v4.app.ListFragment} view structure. If you want to use the
+  default view structure, you will have to override parts of the {@link
+  android.support.v4.widget.SwipeRefreshLayout} and {@link
+  android.support.v4.app.ListFragment} behavior. For an example of how to do
+  this, see the <a href=
+  "{@docRoot}samples/SwipeRefreshListFragment/index.html">SwipeRefreshListFragment</a>
+  sample app.
+</p>
+
+<h2 id="AddRefreshAction">Add a Refresh Action to the Action Bar</h2>
+
+<p>
+  You should add a refresh action to your app's action bar to ensure that
+  users who may not be able to perform a swipe gesture can still trigger a
+  manual update. For example, users with accessibility issues can trigger
+  action bar actions using external devices, such as keyboards and D-pads.
+</p>
+
+<p>
+  You should add the refresh action as a menu item,
+  rather than as a button, by setting the attribute
+  <code>android:showAsAction=never</code>. If you display the action as a
+  button, users may assume that the refresh button action is different from the
+  swipe-to-refresh action. By making the refresh action less conspicuous in the
+  action bar, you can encourage users to perform manual updates with the swipe
+  gesture while still maintaining the accessible option in a place where D-pad
+  users would look for it.
+</p>
+
+<p>
+  The following code demonstrates how to add the swipe-to-refresh action to the
+  overflow area:
+</p>
+
+<pre>&lt;menu xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+    &lt;item
+        android:id="&#64;+id/menu_refresh"
+        android:showAsAction="never"
+        android:title="&#64;string/menu_refresh"/&gt;
+&lt;/menu&gt;</pre>
