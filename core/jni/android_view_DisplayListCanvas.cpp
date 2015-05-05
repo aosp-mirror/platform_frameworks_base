@@ -86,24 +86,6 @@ static void android_view_DisplayListCanvas_finish(JNIEnv* env, jobject clazz,
     renderer->finish();
 }
 
-static void android_view_DisplayListCanvas_setProperty(JNIEnv* env,
-        jobject clazz, jstring name, jstring value) {
-    if (!Caches::hasInstance()) {
-        ALOGW("can't set property, no Caches instance");
-        return;
-    }
-
-    if (name == NULL || value == NULL) {
-        ALOGW("can't set prop, null passed");
-    }
-
-    const char* nameCharArray = env->GetStringUTFChars(name, NULL);
-    const char* valueCharArray = env->GetStringUTFChars(value, NULL);
-    Caches::getInstance().setTempProperty(nameCharArray, valueCharArray);
-    env->ReleaseStringUTFChars(name, nameCharArray);
-    env->ReleaseStringUTFChars(name, valueCharArray);
-}
-
 // ----------------------------------------------------------------------------
 // Functor
 // ----------------------------------------------------------------------------
@@ -268,8 +250,6 @@ static JNINativeMethod gMethods[] = {
     { "nPrepare",           "(J)V",            (void*) android_view_DisplayListCanvas_prepare },
     { "nPrepareDirty",      "(JIIII)V",        (void*) android_view_DisplayListCanvas_prepareDirty },
     { "nFinish",            "(J)V",            (void*) android_view_DisplayListCanvas_finish },
-    { "nSetProperty",       "(Ljava/lang/String;Ljava/lang/String;)V",
-            (void*) android_view_DisplayListCanvas_setProperty },
 
     { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_DisplayListCanvas_callDrawGLFunction },
 

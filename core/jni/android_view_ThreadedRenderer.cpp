@@ -388,6 +388,15 @@ static void android_view_ThreadedRenderer_trimMemory(JNIEnv* env, jobject clazz,
     RenderProxy::trimMemory(level);
 }
 
+static void android_view_ThreadedRenderer_overrideProperty(JNIEnv* env, jobject clazz,
+        jstring name, jstring value) {
+    const char* nameCharArray = env->GetStringUTFChars(name, NULL);
+    const char* valueCharArray = env->GetStringUTFChars(value, NULL);
+    RenderProxy::overrideProperty(nameCharArray, valueCharArray);
+    env->ReleaseStringUTFChars(name, nameCharArray);
+    env->ReleaseStringUTFChars(name, valueCharArray);
+}
+
 static void android_view_ThreadedRenderer_fence(JNIEnv* env, jobject clazz,
         jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -466,6 +475,7 @@ static JNINativeMethod gMethods[] = {
     { "nDetachSurfaceTexture", "(JJ)V", (void*) android_view_ThreadedRenderer_detachSurfaceTexture },
     { "nDestroyHardwareResources", "(J)V", (void*) android_view_ThreadedRenderer_destroyHardwareResources },
     { "nTrimMemory", "(I)V", (void*) android_view_ThreadedRenderer_trimMemory },
+    { "nOverrideProperty", "(Ljava/lang/String;Ljava/lang/String;)V",  (void*) android_view_ThreadedRenderer_overrideProperty },
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
     { "nStopDrawing", "(J)V", (void*) android_view_ThreadedRenderer_stopDrawing },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },

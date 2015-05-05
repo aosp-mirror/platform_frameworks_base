@@ -39,7 +39,6 @@ import com.android.systemui.R;
 import com.android.systemui.recents.misc.DebugTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -392,15 +391,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
         registerReceiver(mSystemBroadcastReceiver, filter);
-
-        // Private API calls to make the shadows look better
-        try {
-            Utilities.setShadowProperty("ambientRatio", String.valueOf(1.5f));
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
     }
 
     /** Inflates the debug overlay if debug mode is enabled. */

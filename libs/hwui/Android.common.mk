@@ -63,6 +63,7 @@ LOCAL_SRC_FILES := \
     PixelBuffer.cpp \
     Program.cpp \
     ProgramCache.cpp \
+    Properties.cpp \
     RenderBufferCache.cpp \
     RenderNode.cpp \
     RenderProperties.cpp \
