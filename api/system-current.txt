@@ -28048,6 +28048,7 @@ package android.provider {
     field public static final java.lang.String CONTACT_ID = "contact_id";
     field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";
+    field public static final java.lang.String METADATA_DIRTY = "metadata_dirty";
     field public static final java.lang.String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
     field public static final java.lang.String RAW_CONTACT_IS_USER_PROFILE = "raw_contact_is_user_profile";
   }

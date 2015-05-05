@@ -2275,6 +2275,13 @@ public final class ContactsContract {
          * personal profile entry.
          */
         public static final String RAW_CONTACT_IS_USER_PROFILE = "raw_contact_is_user_profile";
+
+        /**
+         * Flag indicating that a raw contact's metadata has changed, and its metadata
+         * needs to be synchronized by the server.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String METADATA_DIRTY = "metadata_dirty";
     }
 
     /**
