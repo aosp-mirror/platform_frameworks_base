@@ -789,6 +789,7 @@ public final class AssetManager implements AutoCloseable {
                                                                 TypedValue outValue,
                                                                 boolean resolve);
     /*package*/ native static final void dumpTheme(long theme, int priority, String tag, String prefix);
+    /*package*/ native static final int getThemeChangingConfigurations(long theme);
 
     private native final long openXmlAssetNative(int cookie, String fileName);
 
