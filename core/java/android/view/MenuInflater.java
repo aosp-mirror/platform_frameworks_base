@@ -544,6 +544,7 @@ public class MenuInflater {
             try {
                 Class<?> clazz = mContext.getClassLoader().loadClass(className);
                 Constructor<?> constructor = clazz.getConstructor(constructorSignature);
+                constructor.setAccessible(true);
                 return (T) constructor.newInstance(arguments);
             } catch (Exception e) {
                 Log.w(LOG_TAG, "Cannot instantiate class: " + className, e);
