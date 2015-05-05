@@ -16,9 +16,9 @@
 
 #include "Maybe.h"
 #include "NameMangler.h"
-#include "Resolver.h"
 #include "Resource.h"
 #include "ResourceTable.h"
+#include "ResourceTableResolver.h"
 #include "ResourceValues.h"
 #include "Util.h"
 
@@ -29,8 +29,9 @@
 
 namespace aapt {
 
-Resolver::Resolver(std::shared_ptr<const ResourceTable> table,
-                   std::shared_ptr<const android::AssetManager> sources) :
+ResourceTableResolver::ResourceTableResolver(
+        std::shared_ptr<const ResourceTable> table,
+        std::shared_ptr<const android::AssetManager> sources) :
         mTable(table), mSources(sources) {
     const android::ResTable& resTable = mSources->getResources(false);
     const size_t packageCount = resTable.getBasePackageCount();
@@ -40,7 +41,7 @@ Resolver::Resolver(std::shared_ptr<const ResourceTable> table,
     }
 }
 
-Maybe<ResourceId> Resolver::findId(const ResourceName& name) {
+Maybe<ResourceId> ResourceTableResolver::findId(const ResourceName& name) {
     Maybe<Entry> result = findAttribute(name);
     if (result) {
         return result.value().id;
@@ -48,7 +49,7 @@ Maybe<ResourceId> Resolver::findId(const ResourceName& name) {
     return {};
 }
 
-Maybe<Resolver::Entry> Resolver::findAttribute(const ResourceName& name) {
+Maybe<IResolver::Entry> ResourceTableResolver::findAttribute(const ResourceName& name) {
     auto cacheIter = mCache.find(name);
     if (cacheIter != std::end(mCache)) {
         return Entry{ cacheIter->second.id, cacheIter->second.attr.get() };
@@ -97,12 +98,30 @@ Maybe<Resolver::Entry> Resolver::findAttribute(const ResourceName& name) {
     return {};
 }
 
+Maybe<ResourceName> ResourceTableResolver::findName(ResourceId resId) {
+    const android::ResTable& table = mSources->getResources(false);
+
+    android::ResTable::resource_name resourceName;
+    if (!table.getResourceName(resId.id, false, &resourceName)) {
+        return {};
+    }
+
+    const ResourceType* type = parseResourceType(StringPiece16(resourceName.type,
+                                                               resourceName.typeLen));
+    assert(type);
+    return ResourceName{
+            { resourceName.package, resourceName.packageLen },
+            *type,
+            { resourceName.name, resourceName.nameLen } };
+}
+
 /**
  * This is called when we need to lookup a resource name in the AssetManager.
  * Since the values in the AssetManager are not parsed like in a ResourceTable,
  * we must create Attribute objects here if we find them.
  */
-const Resolver::CacheEntry* Resolver::buildCacheEntry(const ResourceName& name) {
+const ResourceTableResolver::CacheEntry* ResourceTableResolver::buildCacheEntry(
+        const ResourceName& name) {
     const android::ResTable& table = mSources->getResources(false);
 
     const StringPiece16 type16 = toString(name.type);

@@ -125,11 +125,9 @@ struct ResourceParserTest : public ::testing::Test {
         mTable->setPackage(u"android");
     }
 
-    ::testing::AssertionResult testParse(std::istream& in) {
+    ::testing::AssertionResult testParse(const StringPiece& str) {
         std::stringstream input(kXmlPreamble);
-        input << "<resources>" << std::endl
-              << in.rdbuf() << std::endl
-              << "</resources>" << std::endl;
+        input << "<resources>\n" << str << "\n</resources>" << std::endl;
         ResourceParser parser(mTable, Source{ "test" }, {},
                               std::make_shared<SourceXmlPullParser>(input));
         if (parser.parse()) {
@@ -174,7 +172,7 @@ TEST_F(ResourceParserTest, FailToParseWithNoRootResourcesElement) {
 }
 
 TEST_F(ResourceParserTest, ParseQuotedString) {
-    std::stringstream input("<string name=\"foo\">   \"  hey there \" </string>");
+    std::string input = "<string name=\"foo\">   \"  hey there \" </string>";
     ASSERT_TRUE(testParse(input));
 
     const String* str = findResource<String>(ResourceName{
@@ -184,7 +182,7 @@ TEST_F(ResourceParserTest, ParseQuotedString) {
 }
 
 TEST_F(ResourceParserTest, ParseEscapedString) {
-    std::stringstream input("<string name=\"foo\">\\?123</string>");
+    std::string input = "<string name=\"foo\">\\?123</string>";
     ASSERT_TRUE(testParse(input));
 
     const String* str = findResource<String>(ResourceName{
@@ -194,9 +192,8 @@ TEST_F(ResourceParserTest, ParseEscapedString) {
 }
 
 TEST_F(ResourceParserTest, ParseAttr) {
-    std::stringstream input;
-    input << "<attr name=\"foo\" format=\"string\"/>" << std::endl
-          << "<attr name=\"bar\"/>" << std::endl;
+    std::string input = "<attr name=\"foo\" format=\"string\"/>\n"
+                        "<attr name=\"bar\"/>";
     ASSERT_TRUE(testParse(input));
 
     const Attribute* attr = findResource<Attribute>(ResourceName{
@@ -211,11 +208,10 @@ TEST_F(ResourceParserTest, ParseAttr) {
 }
 
 TEST_F(ResourceParserTest, ParseUseAndDeclOfAttr) {
-    std::stringstream input;
-    input << "<declare-styleable name=\"Styleable\">" << std::endl
-          << "  <attr name=\"foo\" />" << std::endl
-          << "</declare-styleable>" << std::endl
-          << "<attr name=\"foo\" format=\"string\"/>" << std::endl;
+    std::string input = "<declare-styleable name=\"Styleable\">\n"
+                        "  <attr name=\"foo\" />\n"
+                        "</declare-styleable>\n"
+                        "<attr name=\"foo\" format=\"string\"/>";
     ASSERT_TRUE(testParse(input));
 
     const Attribute* attr = findResource<Attribute>(ResourceName{
@@ -225,14 +221,12 @@ TEST_F(ResourceParserTest, ParseUseAndDeclOfAttr) {
 }
 
 TEST_F(ResourceParserTest, ParseDoubleUseOfAttr) {
-    std::stringstream input;
-    input << "<declare-styleable name=\"Theme\">" << std::endl
-          << "  <attr name=\"foo\" />" << std::endl
-          << "</declare-styleable>" << std::endl
-          << "<declare-styleable name=\"Window\">" << std::endl
-          << "  <attr name=\"foo\" format=\"boolean\"/>" << std::endl
-          << "</declare-styleable>" << std::endl;
-
+    std::string input = "<declare-styleable name=\"Theme\">"
+                        "  <attr name=\"foo\" />\n"
+                        "</declare-styleable>\n"
+                        "<declare-styleable name=\"Window\">\n"
+                        "  <attr name=\"foo\" format=\"boolean\"/>\n"
+                        "</declare-styleable>";
     ASSERT_TRUE(testParse(input));
 
     const Attribute* attr = findResource<Attribute>(ResourceName{
@@ -242,12 +236,11 @@ TEST_F(ResourceParserTest, ParseDoubleUseOfAttr) {
 }
 
 TEST_F(ResourceParserTest, ParseEnumAttr) {
-    std::stringstream input;
-    input << "<attr name=\"foo\">" << std::endl
-          << "  <enum name=\"bar\" value=\"0\"/>" << std::endl
-          << "  <enum name=\"bat\" value=\"1\"/>" << std::endl
-          << "  <enum name=\"baz\" value=\"2\"/>" << std::endl
-          << "</attr>" << std::endl;
+    std::string input = "<attr name=\"foo\">\n"
+                        "  <enum name=\"bar\" value=\"0\"/>\n"
+                        "  <enum name=\"bat\" value=\"1\"/>\n"
+                        "  <enum name=\"baz\" value=\"2\"/>\n"
+                        "</attr>";
     ASSERT_TRUE(testParse(input));
 
     const Attribute* enumAttr = findResource<Attribute>(ResourceName{
@@ -267,12 +260,11 @@ TEST_F(ResourceParserTest, ParseEnumAttr) {
 }
 
 TEST_F(ResourceParserTest, ParseFlagAttr) {
-    std::stringstream input;
-    input << "<attr name=\"foo\">" << std::endl
-          << "  <flag name=\"bar\" value=\"0\"/>" << std::endl
-          << "  <flag name=\"bat\" value=\"1\"/>" << std::endl
-          << "  <flag name=\"baz\" value=\"2\"/>" << std::endl
-          << "</attr>" << std::endl;
+    std::string input = "<attr name=\"foo\">\n"
+                        "  <flag name=\"bar\" value=\"0\"/>\n"
+                        "  <flag name=\"bat\" value=\"1\"/>\n"
+                        "  <flag name=\"baz\" value=\"2\"/>\n"
+                        "</attr>";
     ASSERT_TRUE(testParse(input));
 
     const Attribute* flagAttr = findResource<Attribute>(ResourceName{
@@ -297,22 +289,20 @@ TEST_F(ResourceParserTest, ParseFlagAttr) {
 }
 
 TEST_F(ResourceParserTest, FailToParseEnumAttrWithNonUniqueKeys) {
-    std::stringstream input;
-    input << "<attr name=\"foo\">" << std::endl
-          << "  <enum name=\"bar\" value=\"0\"/>" << std::endl
-          << "  <enum name=\"bat\" value=\"1\"/>" << std::endl
-          << "  <enum name=\"bat\" value=\"2\"/>" << std::endl
-          << "</attr>" << std::endl;
+    std::string input = "<attr name=\"foo\">\n"
+                        "  <enum name=\"bar\" value=\"0\"/>\n"
+                        "  <enum name=\"bat\" value=\"1\"/>\n"
+                        "  <enum name=\"bat\" value=\"2\"/>\n"
+                        "</attr>";
     ASSERT_FALSE(testParse(input));
 }
 
 TEST_F(ResourceParserTest, ParseStyle) {
-    std::stringstream input;
-    input << "<style name=\"foo\" parent=\"@style/fu\">" << std::endl
-          << "  <item name=\"bar\">#ffffffff</item>" << std::endl
-          << "  <item name=\"bat\">@string/hey</item>" << std::endl
-          << "  <item name=\"baz\"><b>hey</b></item>" << std::endl
-          << "</style>" << std::endl;
+    std::string input = "<style name=\"foo\" parent=\"@style/fu\">\n"
+                        "  <item name=\"bar\">#ffffffff</item>\n"
+                        "  <item name=\"bat\">@string/hey</item>\n"
+                        "  <item name=\"baz\"><b>hey</b></item>\n"
+                        "</style>";
     ASSERT_TRUE(testParse(input));
 
     const Style* style = findResource<Style>(ResourceName{
@@ -330,8 +320,7 @@ TEST_F(ResourceParserTest, ParseStyle) {
 }
 
 TEST_F(ResourceParserTest, ParseStyleWithShorthandParent) {
-    std::stringstream input;
-    input << "<style name=\"foo\" parent=\"com.app:Theme\"/>" << std::endl;
+    std::string input = "<style name=\"foo\" parent=\"com.app:Theme\"/>";
     ASSERT_TRUE(testParse(input));
 
     const Style* style = findResource<Style>(
@@ -340,9 +329,34 @@ TEST_F(ResourceParserTest, ParseStyleWithShorthandParent) {
     EXPECT_EQ(ResourceNameRef(u"com.app", ResourceType::kStyle, u"Theme"), style->parent.name);
 }
 
+TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedParent) {
+    std::string input = "<style xmlns:app=\"http://schemas.android.com/apk/res/android\"\n"
+                        "       name=\"foo\" parent=\"app:Theme\"/>";
+    ASSERT_TRUE(testParse(input));
+
+    const Style* style = findResource<Style>(ResourceName{
+            u"android", ResourceType::kStyle, u"foo" });
+    ASSERT_NE(style, nullptr);
+    EXPECT_EQ(ResourceNameRef(u"android", ResourceType::kStyle, u"Theme"), style->parent.name);
+}
+
+TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedItems) {
+    std::string input =
+            "<style xmlns:app=\"http://schemas.android.com/apk/res/android\" name=\"foo\">\n"
+            "  <item name=\"app:bar\">0</item>\n"
+            "</style>";
+    ASSERT_TRUE(testParse(input));
+
+    const Style* style = findResource<Style>(ResourceName{
+            u"android", ResourceType::kStyle, u"foo" });
+    ASSERT_NE(style, nullptr);
+    ASSERT_EQ(1u, style->entries.size());
+    EXPECT_EQ(ResourceNameRef(u"android", ResourceType::kAttr, u"bar"),
+              style->entries[0].key.name);
+}
+
 TEST_F(ResourceParserTest, ParseAutoGeneratedIdReference) {
-    std::stringstream input;
-    input << "<string name=\"foo\">@+id/bar</string>" << std::endl;
+    std::string input = "<string name=\"foo\">@+id/bar</string>";
     ASSERT_TRUE(testParse(input));
 
     const Id* id = findResource<Id>(ResourceName{ u"android", ResourceType::kId, u"bar"});
@@ -350,11 +364,10 @@ TEST_F(ResourceParserTest, ParseAutoGeneratedIdReference) {
 }
 
 TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
-    std::stringstream input;
-    input << "<declare-styleable name=\"foo\">" << std::endl
-          << "  <attr name=\"bar\" />" << std::endl
-          << "  <attr name=\"bat\" format=\"string|reference\"/>" << std::endl
-          << "</declare-styleable>" << std::endl;
+    std::string input = "<declare-styleable name=\"foo\">\n"
+                        "  <attr name=\"bar\" />\n"
+                        "  <attr name=\"bat\" format=\"string|reference\"/>\n"
+                        "</declare-styleable>";
     ASSERT_TRUE(testParse(input));
 
     const Attribute* attr = findResource<Attribute>(ResourceName{
@@ -376,12 +389,11 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
 }
 
 TEST_F(ResourceParserTest, ParseArray) {
-    std::stringstream input;
-    input << "<array name=\"foo\">" << std::endl
-          << "  <item>@string/ref</item>" << std::endl
-          << "  <item>hey</item>" << std::endl
-          << "  <item>23</item>" << std::endl
-          << "</array>" << std::endl;
+    std::string input = "<array name=\"foo\">\n"
+                        "  <item>@string/ref</item>\n"
+                        "  <item>hey</item>\n"
+                        "  <item>23</item>\n"
+                        "</array>";
     ASSERT_TRUE(testParse(input));
 
     const Array* array = findResource<Array>(ResourceName{
@@ -395,19 +407,16 @@ TEST_F(ResourceParserTest, ParseArray) {
 }
 
 TEST_F(ResourceParserTest, ParsePlural) {
-    std::stringstream input;
-    input << "<plurals name=\"foo\">" << std::endl
-          << "  <item quantity=\"other\">apples</item>" << std::endl
-          << "  <item quantity=\"one\">apple</item>" << std::endl
-          << "</plurals>" << std::endl
-          << std::endl;
+    std::string input = "<plurals name=\"foo\">\n"
+                        "  <item quantity=\"other\">apples</item>\n"
+                        "  <item quantity=\"one\">apple</item>\n"
+                        "</plurals>";
     ASSERT_TRUE(testParse(input));
 }
 
 TEST_F(ResourceParserTest, ParseCommentsWithResource) {
-    std::stringstream input;
-    input << "<!-- This is a comment -->" << std::endl
-          << "<string name=\"foo\">Hi</string>" << std::endl;
+    std::string input = "<!-- This is a comment -->\n"
+                        "<string name=\"foo\">Hi</string>";
     ASSERT_TRUE(testParse(input));
 
     const ResourceTableType* type;
@@ -425,7 +434,7 @@ TEST_F(ResourceParserTest, ParseCommentsWithResource) {
  * (as an ID has no value).
  */
 TEST_F(ResourceParserTest, ParsePublicIdAsDefinition) {
-    std::stringstream input("<public type=\"id\" name=\"foo\"/>");
+    std::string input = "<public type=\"id\" name=\"foo\"/>";
     ASSERT_TRUE(testParse(input));
 
     const Id* id = findResource<Id>(ResourceName{ u"android", ResourceType::kId, u"foo" });

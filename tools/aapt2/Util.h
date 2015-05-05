@@ -18,6 +18,7 @@
 #define AAPT_UTIL_H
 
 #include "BigBuffer.h"
+#include "Maybe.h"
 #include "StringPiece.h"
 
 #include <androidfw/ResourceTypes.h>
@@ -276,6 +277,15 @@ inline Tokenizer<Char>::Tokenizer(BasicStringPiece<Char> str, Char sep) :
         mBegin(++iterator(str, sep, BasicStringPiece<Char>(str.begin() - 1, 0))),
         mEnd(str, sep, BasicStringPiece<Char>(str.end(), 0)) {
 }
+
+/**
+ * Returns a package name if the namespace URI is of the form:
+ * http://schemas.android.com/apk/res/<package>
+ *
+ * Special case: if namespaceUri is http://schemas.android.com/apk/res-auto,
+ * returns an empty package name.
+ */
+Maybe<std::u16string> extractPackageFromNamespace(const std::u16string& namespaceUri);
 
 } // namespace util
 
