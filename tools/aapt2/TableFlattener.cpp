@@ -31,8 +31,8 @@
 namespace aapt {
 
 struct FlatEntry {
-    const ResourceEntry& entry;
-    const Value& value;
+    const ResourceEntry* entry;
+    const Value* value;
     uint32_t entryKey;
     uint32_t sourcePathKey;
     uint32_t sourceLine;
@@ -48,10 +48,10 @@ public:
         mMap = mOut->nextBlock<android::ResTable_map_entry>();
         mMap->key.index = flatEntry.entryKey;
         mMap->flags = android::ResTable_entry::FLAG_COMPLEX;
-        if (flatEntry.entry.publicStatus.isPublic) {
+        if (flatEntry.entry->publicStatus.isPublic) {
             mMap->flags |= android::ResTable_entry::FLAG_PUBLIC;
         }
-        if (flatEntry.value.isWeak()) {
+        if (flatEntry.value->isWeak()) {
             mMap->flags |= android::ResTable_entry::FLAG_WEAK;
         }
 
@@ -229,14 +229,14 @@ TableFlattener::TableFlattener(Options options)
 
 bool TableFlattener::flattenValue(BigBuffer* out, const FlatEntry& flatEntry,
                                   SymbolEntryVector* symbols) {
-    if (flatEntry.value.isItem()) {
+    if (flatEntry.value->isItem()) {
         android::ResTable_entry* entry = out->nextBlock<android::ResTable_entry>();
 
-        if (flatEntry.entry.publicStatus.isPublic) {
+        if (flatEntry.entry->publicStatus.isPublic) {
             entry->flags |= android::ResTable_entry::FLAG_PUBLIC;
         }
 
-        if (flatEntry.value.isWeak()) {
+        if (flatEntry.value->isWeak()) {
             entry->flags |= android::ResTable_entry::FLAG_WEAK;
         }
 
@@ -252,14 +252,14 @@ bool TableFlattener::flattenValue(BigBuffer* out, const FlatEntry& flatEntry,
             entry->size += sizeof(*sourceBlock);
         }
 
-        const Item* item = static_cast<const Item*>(&flatEntry.value);
+        const Item* item = static_cast<const Item*>(flatEntry.value);
         ValueFlattener flattener(out, symbols);
         item->accept(flattener, {});
         return flattener.result;
     }
 
     MapFlattener flattener(out, flatEntry, symbols);
-    flatEntry.value.accept(flattener, {});
+    flatEntry.value->accept(flattener, {});
     return true;
 }
 
@@ -373,6 +373,15 @@ bool TableFlattener::flatten(BigBuffer* out, const ResourceTable& table) {
             }
         }
 
+        const size_t beforePublicHeader = typeBlock.size();
+        Public_header* publicHeader = nullptr;
+        if (mOptions.useExtendedChunks) {
+            publicHeader = typeBlock.nextBlock<Public_header>();
+            publicHeader->header.type = RES_TABLE_PUBLIC_TYPE;
+            publicHeader->header.headerSize = sizeof(*publicHeader);
+            publicHeader->typeId = type->typeId;
+        }
+
         // The binary resource table lists resource entries for each configuration.
         // We store them inverted, where a resource entry lists the values for each
         // configuration available. Here we reverse this to match the binary table.
@@ -387,16 +396,33 @@ bool TableFlattener::flatten(BigBuffer* out, const ResourceTable& table) {
                 return false;
             }
 
+            if (publicHeader && entry->publicStatus.isPublic) {
+                // Write the public status of this entry.
+                Public_entry* publicEntry = typeBlock.nextBlock<Public_entry>();
+                publicEntry->entryId = static_cast<uint32_t>(entry->entryId);
+                publicEntry->key.index = static_cast<uint32_t>(keyIndex);
+                publicEntry->source.index = static_cast<uint32_t>(sourcePool.makeRef(
+                            util::utf8ToUtf16(entry->publicStatus.source.path)).getIndex());
+                publicEntry->sourceLine = static_cast<uint32_t>(entry->publicStatus.source.line);
+                publicHeader->count += 1;
+            }
+
             for (const auto& configValue : entry->values) {
                 data[configValue.config].push_back(FlatEntry{
-                        *entry,
-                        *configValue.value,
+                        entry,
+                        configValue.value.get(),
                         static_cast<uint32_t>(keyIndex),
                         static_cast<uint32_t>(sourcePool.makeRef(util::utf8ToUtf16(
-                                        configValue.source.path)).getIndex()),
+                                    configValue.source.path)).getIndex()),
                         static_cast<uint32_t>(configValue.source.line)
                 });
             }
+        }
+
+        if (publicHeader) {
+            typeBlock.align4();
+            publicHeader->header.size =
+                    static_cast<uint32_t>(typeBlock.size() - beforePublicHeader);
         }
 
         // Begin flattening a configuration for the current type.
@@ -416,13 +442,13 @@ bool TableFlattener::flatten(BigBuffer* out, const ResourceTable& table) {
 
             const size_t entryStart = typeBlock.size();
             for (const FlatEntry& flatEntry : entry.second) {
-                assert(flatEntry.entry.entryId < type->entries.size());
-                indices[flatEntry.entry.entryId] = typeBlock.size() - entryStart;
+                assert(flatEntry.entry->entryId < type->entries.size());
+                indices[flatEntry.entry->entryId] = typeBlock.size() - entryStart;
                 if (!flattenValue(&typeBlock, flatEntry, &symbolEntries)) {
                     Logger::error()
                             << "failed to flatten resource '"
                             << ResourceNameRef {
-                                    table.getPackage(), type->type, flatEntry.entry.name }
+                                    table.getPackage(), type->type, flatEntry.entry->name }
                             << "' for configuration '"
                             << entry.first
                             << "'."

@@ -88,7 +88,6 @@ private:
     void visit(Attribute& attribute, ValueVisitorArgs& args) override;
     void visit(Styleable& styleable, ValueVisitorArgs& args) override;
     void visit(Style& style, ValueVisitorArgs& args) override;
-    void visit(Sentinel& sentinel, ValueVisitorArgs& args) override;
     void visit(Array& array, ValueVisitorArgs& args) override;
     void visit(Plural& plural, ValueVisitorArgs& args) override;
 
