@@ -466,14 +466,12 @@ public class CopyService extends IntentService {
             srcFile.checkError();
         } catch (IOException e) {
             copyError = e;
-        } finally {
-            if (copyError != null) {
-                try {
-                    dstFile.closeWithError(copyError.getMessage());
-                } catch (IOException e) {
-                    Log.e(TAG, "Error closing destination", e);
-                }
+            try {
+                dstFile.closeWithError(copyError.getMessage());
+            } catch (IOException closeError) {
+                Log.e(TAG, "Error closing destination", closeError);
             }
+        } finally {
             // This also ensures the file descriptors are closed.
             IoUtils.closeQuietly(src);
             IoUtils.closeQuietly(dst);
