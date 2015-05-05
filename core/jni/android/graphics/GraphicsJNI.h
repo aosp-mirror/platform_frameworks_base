@@ -1,6 +1,7 @@
 #ifndef _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 #define _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 
+#include "Bitmap.h"
 #include "SkBitmap.h"
 #include "SkDevice.h"
 #include "SkPixelRef.h"
@@ -49,7 +50,7 @@ public:
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
     static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
-    static SkBitmap* getSkBitmapDeprecated(JNIEnv*, jobject bitmap);
+    static android::Bitmap* getBitmap(JNIEnv*, jobject bitmap);
     static void getSkBitmap(JNIEnv*, jobject bitmap, SkBitmap* outBitmap);
     static SkPixelRef* getSkPixelRef(JNIEnv*, jobject bitmap);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
@@ -71,22 +72,18 @@ public:
     */
     static SkColorType getNativeBitmapColorType(JNIEnv*, jobject jconfig);
 
-    /** Create a java Bitmap object given the native bitmap (required) and optional
-        storage array (may be null).
-        bitmap's SkAlphaType must already be in sync with bitmapCreateFlags.
+    /*
+     * Create a java Bitmap object given the native bitmap
+     * bitmap's SkAlphaType must already be in sync with bitmapCreateFlags.
     */
-    static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
-            int bitmapCreateFlags, jbyteArray ninePatch, jobject ninePatchInsets, int density = -1);
-
-    static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreateFlags,
-            jbyteArray ninePatch, int density = -1) {
-        return createBitmap(env, bitmap, NULL, bitmapCreateFlags, ninePatch, NULL, density);
-    }
+    static jobject createBitmap(JNIEnv* env, android::Bitmap* bitmap,
+            int bitmapCreateFlags, jbyteArray ninePatchChunk = NULL,
+            jobject ninePatchInsets = NULL, int density = -1);
 
     /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
         sync with isPremultiplied
     */
-    static void reinitBitmap(JNIEnv* env, jobject javaBitmap, SkBitmap* bitmap,
+    static void reinitBitmap(JNIEnv* env, jobject javaBitmap, const SkImageInfo& info,
             bool isPremultiplied);
 
     static int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
@@ -95,7 +92,7 @@ public:
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
-    static jbyteArray allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
+    static android::Bitmap* allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable);
 
     /**
@@ -113,30 +110,6 @@ public:
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
             int srcStride, int x, int y, int width, int height,
             const SkBitmap& dstBitmap);
-
-    static jbyteArray getBitmapStorageObj(SkPixelRef *pixref);
-};
-
-class AndroidPixelRef : public SkMallocPixelRef {
-public:
-    AndroidPixelRef(JNIEnv* env, const SkImageInfo& info, void* storage, size_t rowBytes,
-            jbyteArray storageObj, SkColorTable* ctable);
-
-    /**
-     * Creates an AndroidPixelRef that wraps (and refs) another to reuse/share
-     * the same storage and java byte array refcounting, yet have a different
-     * color table.
-     */
-    AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, const SkImageInfo& info,
-            size_t rowBytes, SkColorTable* ctable);
-
-    virtual ~AndroidPixelRef();
-
-private:
-    AndroidPixelRef* const fWrappedPixelRef; // if set, delegate memory management calls to this
-
-    JavaVM* fVM;
-    jbyteArray fStorageObj; // The Java byte[] object used as the bitmap backing store
 };
 
 /** Allocator which allocates the backing buffer in the Java heap.
@@ -147,30 +120,22 @@ private:
 class JavaPixelAllocator : public SkBitmap::Allocator {
 public:
     JavaPixelAllocator(JNIEnv* env);
-    // overrides
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
+    ~JavaPixelAllocator();
 
-    /** Return the Java array object created for the last allocation.
-     *  This returns a local JNI reference which the caller is responsible
-     *  for storing appropriately (usually by passing it to the Bitmap
-     *  constructor).
-     */
-    jbyteArray getStorageObj() { return fStorageObj; }
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
 
-    /** Same as getStorageObj(), but also resets the allocator so that it
-     *  can allocate again.
+    /**
+     * Fetches the backing allocation object. Must be called!
      */
-    jbyteArray getStorageObjAndReset() {
-        jbyteArray result = fStorageObj;
-        fStorageObj = NULL;
-        fAllocCount = 0;
+    android::Bitmap* getStorageObjAndReset() {
+        android::Bitmap* result = mStorage;
+        mStorage = NULL;
         return result;
     };
 
 private:
-    JavaVM* fVM;
-    jbyteArray fStorageObj;
-    int fAllocCount;
+    JavaVM* mJavaVM;
+    android::Bitmap* mStorage = nullptr;
 };
 
 enum JNIAccess {

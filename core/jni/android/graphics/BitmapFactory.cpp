@@ -156,13 +156,11 @@ private:
 
 class RecyclingPixelAllocator : public SkBitmap::Allocator {
 public:
-    RecyclingPixelAllocator(SkPixelRef* pixelRef, unsigned int size)
-            : mPixelRef(pixelRef), mSize(size) {
-        SkSafeRef(mPixelRef);
+    RecyclingPixelAllocator(android::Bitmap* bitmap, unsigned int size)
+            : mBitmap(bitmap), mSize(size) {
     }
 
     ~RecyclingPixelAllocator() {
-        SkSafeUnref(mPixelRef);
     }
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
@@ -185,11 +183,9 @@ public:
             return false;
         }
 
-        // Create a new pixelref with the new ctable that wraps the previous pixelref
-        SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef),
-                info, bitmap->rowBytes(), ctable);
+        mBitmap->reconfigure(info, bitmap->rowBytes(), ctable);
+        bitmap->setPixelRef(mBitmap->pixelRef());
 
-        bitmap->setPixelRef(pr)->unref();
         // since we're already allocated, we lockPixels right away
         // HeapAllocator/JavaPixelAllocator behaves this way too
         bitmap->lockPixels();
@@ -197,7 +193,7 @@ public:
     }
 
 private:
-    SkPixelRef* const mPixelRef;
+    android::Bitmap* const mBitmap;
     const unsigned int mSize;
 };
 
@@ -258,27 +254,24 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
     decoder->setRequireUnpremultipliedColors(requireUnpremultiplied);
 
-    SkBitmap* outputBitmap = NULL;
+    android::Bitmap* reuseBitmap = nullptr;
     unsigned int existingBufferSize = 0;
     if (javaBitmap != NULL) {
-        outputBitmap = GraphicsJNI::getSkBitmapDeprecated(env, javaBitmap);
-        if (outputBitmap->isImmutable()) {
+        reuseBitmap = GraphicsJNI::getBitmap(env, javaBitmap);
+        if (reuseBitmap->pixelRef()->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             javaBitmap = NULL;
-            outputBitmap = NULL;
+            reuseBitmap = nullptr;
         } else {
             existingBufferSize = GraphicsJNI::getBitmapAllocationByteCount(env, javaBitmap);
         }
     }
 
-    SkAutoTDelete<SkBitmap> adb(outputBitmap == NULL ? new SkBitmap : NULL);
-    if (outputBitmap == NULL) outputBitmap = adb.get();
-
     NinePatchPeeker peeker(decoder);
     decoder->setPeeker(&peeker);
 
     JavaPixelAllocator javaAllocator(env);
-    RecyclingPixelAllocator recyclingAllocator(outputBitmap->pixelRef(), existingBufferSize);
+    RecyclingPixelAllocator recyclingAllocator(reuseBitmap, existingBufferSize);
     ScaleCheckingAllocator scaleCheckingAllocator(scale, existingBufferSize);
     SkBitmap::Allocator* outputAllocator = (javaBitmap != NULL) ?
             (SkBitmap::Allocator*)&recyclingAllocator : (SkBitmap::Allocator*)&javaAllocator;
@@ -374,6 +367,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         }
     }
 
+    SkBitmap outputBitmap;
     if (willScale) {
         // This is weird so let me explain: we could use the scale parameter
         // directly, but for historical reasons this is how the corresponding
@@ -388,26 +382,27 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         // FIXME: If the alphaType is kUnpremul and the image has alpha, the
         // colors may not be correct, since Skia does not yet support drawing
         // to/from unpremultiplied bitmaps.
-        outputBitmap->setInfo(SkImageInfo::Make(scaledWidth, scaledHeight,
+        outputBitmap.setInfo(SkImageInfo::Make(scaledWidth, scaledHeight,
                 colorType, decodingBitmap.alphaType()));
-        if (!outputBitmap->tryAllocPixels(outputAllocator, NULL)) {
+        if (!outputBitmap.tryAllocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
 
         // If outputBitmap's pixels are newly allocated by Java, there is no need
         // to erase to 0, since the pixels were initialized to 0.
         if (outputAllocator != &javaAllocator) {
-            outputBitmap->eraseColor(0);
+            outputBitmap.eraseColor(0);
         }
 
         SkPaint paint;
         paint.setFilterQuality(kLow_SkFilterQuality);
 
-        SkCanvas canvas(*outputBitmap);
+        SkCanvas canvas(outputBitmap);
         canvas.scale(sx, sy);
+        canvas.drawARGB(0x00, 0x00, 0x00, 0x00);
         canvas.drawBitmap(decodingBitmap, 0.0f, 0.0f, &paint);
     } else {
-        outputBitmap->swap(decodingBitmap);
+        outputBitmap.swap(decodingBitmap);
     }
 
     if (padding) {
@@ -422,22 +417,19 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // if we get here, we're in kDecodePixels_Mode and will therefore
     // already have a pixelref installed.
-    if (outputBitmap->pixelRef() == NULL) {
+    if (outputBitmap.pixelRef() == NULL) {
         return nullObjectReturn("Got null SkPixelRef");
     }
 
     if (!isMutable && javaBitmap == NULL) {
         // promise we will never change our pixels (great for sharing and pictures)
-        outputBitmap->setImmutable();
+        outputBitmap.setImmutable();
     }
-
-    // detach bitmap from its autodeleter, since we want to own it now
-    adb.detach();
 
     if (javaBitmap != NULL) {
         bool isPremultiplied = !requireUnpremultiplied;
-        GraphicsJNI::reinitBitmap(env, javaBitmap, outputBitmap, isPremultiplied);
-        outputBitmap->notifyPixelsChanged();
+        GraphicsJNI::reinitBitmap(env, javaBitmap, outputBitmap.info(), isPremultiplied);
+        outputBitmap.notifyPixelsChanged();
         // If a java bitmap was passed in for reuse, pass it back
         return javaBitmap;
     }
@@ -447,7 +439,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     if (!requireUnpremultiplied) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
 
     // now create the java bitmap
-    return GraphicsJNI::createBitmap(env, outputBitmap, javaAllocator.getStorageObj(),
+    return GraphicsJNI::createBitmap(env, javaAllocator.getStorageObjAndReset(),
             bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
 }
 
