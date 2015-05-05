@@ -231,7 +231,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * device owner app.
      *
      * <p>The broadcast will be limited to the {@link DeviceAdminReceiver} component specified in
-     * the (@link DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME) field
+     * the {@link DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME} field
      * of the original intent or NFC bump that started the provisioning process. You will generally
      * handle this in {@link DeviceAdminReceiver#onReadyForUserInitialization}.
      *
@@ -450,9 +450,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * <p>It is not assumed that the device initializer is finished when it returns from
      * this call, as it may do additional setup asynchronously. The device initializer must call
-     * {DevicePolicyManager#setUserEnabled(ComponentName admin)} when it has finished any additional
-     * setup (such as adding an account by using the {@link AccountManager}) in order for the user
-     * to be functional.
+     * {@link DevicePolicyManager#setUserEnabled(ComponentName admin)} when it has finished any
+     * additional setup (such as adding an account by using the {@link AccountManager}) in order for
+     * the user to be functional.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
