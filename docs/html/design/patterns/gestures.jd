@@ -15,9 +15,9 @@ following table shows the core gesture set that is supported in Android.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
+<div class="cols">
 
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/gesture_touch.png">
     <h4>Touch</h4>
     <p>Triggers the default functionality for a given item.</p>
@@ -28,7 +28,7 @@ following table shows the core gesture set that is supported in Android.</p>
     </ul>
   </div>
 
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/gesture_longtouch.png">
     <h4>Long press</h4>
     <p>Enters data selection mode. Allows you to select one or more items in a view and act upon
@@ -40,7 +40,7 @@ following table shows the core gesture set that is supported in Android.</p>
     </ul>
   </div>
 
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/gesture_swipe.png">
     <h4>Swipe or drag</h4>
     <p>Scrolls overflowing content, or navigates between views in the same hierarchy. Swipes are
@@ -57,9 +57,9 @@ following table shows the core gesture set that is supported in Android.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
+<div class="cols">
 
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/gesture_drag.png">
     <h4>Long press drag</h4>
     <p>Rearranges data within a view, or moves data into a container (e.g. folders on Home Screen).</p>
@@ -70,7 +70,7 @@ following table shows the core gesture set that is supported in Android.</p>
     </ul>
   </div>
 
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/gesture_doubletouch.png">
     <h4>Double touch </h4>
     <p> Scales up a standard amount around the target with each repeated gesture until reaching
@@ -84,7 +84,7 @@ following table shows the core gesture set that is supported in Android.</p>
     </ul>
   </div>
 
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/gesture_doubletouchdrag.png">
     <h4>Double touch drag</h4>
     <p>Scales content by pushing away or pulling closer, centered around gesture.</p>
@@ -106,9 +106,9 @@ following table shows the core gesture set that is supported in Android.</p>
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
+<div class="cols">
 
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/gesture_pinchopen.png" style="margin-left:-4px">
     <h4>Pinch open</h4>
     <p>Zooms into content.</p>
@@ -119,7 +119,7 @@ following table shows the core gesture set that is supported in Android.</p>
     </ul>
   </div>
 
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/gesture_pinchclose.png">
     <h4>Pinch close</h4>
     <p>Zooms out of content.</p>

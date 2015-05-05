@@ -21,18 +21,18 @@ page.metaDescription=Design guide to creating widgets that are easy to use and l
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <h3>Collection widgets</h3>
     <p>As the name implies, collection widgets specialize in displaying multitude elements of the same type, such as a collection of pictures from a gallery app, a collection of articles from a news app or a collection of emails/messages from a communication app. Collection widgets typically focus on two use cases: browsing the collection, and opening an element of the collection to its detail view for consumption. Collection widgets can scroll vertically.</p>
   </div>
-  <div class="layout-content-col span-3">
+  <div class="col-3">
     <img src="{@docRoot}design/media/widgets_collection_gmail.png">
     <div class="figure-caption">
       ListView widget
     </div>
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
     <img src="{@docRoot}design/media/widgets_collection_bookmarks.png">
     <div class="figure-caption">
       GridView widget
@@ -84,8 +84,8 @@ A music player widget is primarily a control widget, but also keeps the user inf
   <li>Open application at top level: Tapping on an information element will usually navigate the user to a lower level detail screen. Providing access to the top level of your application provides more navigation flexibility and can replace a dedicated app shortcut that users would otherwise use to navigate to the app from the home screen. Using your application icon as an affordance can also provide your widget with a clear identity in case the data you're displaying is ambiguous.</li>
 </ul>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <h3>Widget resizing</h3>
     <p>With version 3.1, Android introduced resizable widgets to the platform. Resizing allows users to adjust the height and/or the width of a widget within the constraints of the home panel placement grid. You can decide if your widget is freely resizable or if it is constrained to horizontal or vertical size changes. You do not have to support resizing if your particular widget is inherently fixed-size.</p>
     <p>Allowing users to resize widgets has important benefits:</p>
@@ -95,7 +95,7 @@ A music player widget is primarily a control widget, but also keeps the user inf
     </ul>
   </div>
 
-  <div class="layout-content-col span-7">
+  <div class="col-7">
     <img src="{@docRoot}design/media/widgets_resizing01.png">
     <div class="figure-caption">
       A long press and subsequent release sets resizable widgets into resize mode. Users can use the drag handles or the widget corners to set the desired size.
@@ -116,14 +116,14 @@ A music player widget is primarily a control widget, but also keeps the user inf
 </ul>
 
 <h3>Widget configuration</h3>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <p>Sometimes widgets need to be setup before they can become useful. Think of an email widget for example, where you need to provide an account before the inbox can be displayed. Or a static photo widget where the user has to assign the picture that is to be displayed from the gallery.</p>
     <p>Android widgets display their configuration choices right after the widget is dropped onto a home panel. Keep the widget configuration light and don't present more than 2-3 configuration elements. Use dialog-style instead of full-screen activities to present configuration choices and retain the user's context of place, even if doing so requires use of multiple dialogs.</p>
 <p>Once setup, there typically is not a lot of reason to revisit the setup. Therefore Android widgets do not show a "Setup" or "Configuration" button.</p>
   </div>
 
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <img src="{@docRoot}design/media/widgets_config.png">
     <div class="figure-caption">
       After adding a Play widget to a home panel, the widget asks the user to specify the type of media the widget should display.

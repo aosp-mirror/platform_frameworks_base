@@ -20,8 +20,8 @@ and tablets.
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/ui_overview_home_screen.png">
 
@@ -34,7 +34,7 @@ regardless of which panel is currently showing.</p>
 the Favorites Tray.</p>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/ui_overview_all_apps.png">
 
@@ -45,7 +45,7 @@ device.</p>
 any Home screen.</p>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/ui_overview_recents.png">
 
@@ -94,13 +94,13 @@ provide updates, reminders, or information that's important, but not critical en
 interrupting the user. Open the notifications drawer by swiping down on the status bar. Touching a
 notification opens the associated app. <a href="{@docRoot}design/patterns/notifications.html">More on Notifications</a></p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
     <img src="{@docRoot}design/media/ui_overview_notifications.png">
 
   </div>
-  <div class="layout-content-col span-9">
+  <div class="col-9">
 
     <img src="{@docRoot}design/media/notifications_dismiss.png">
 
@@ -116,13 +116,13 @@ notification opens the associated app. <a href="{@docRoot}design/patterns/notifi
 <h2 id="app">Common App UI</h2>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/app_structure_drawer.png">
 
   </div>
-  <div class="layout-content-col span-6 with-callouts">
+  <div class="col-6 with-callouts">
 
 <p>A typical Android app uses action bars, and many apps will include a navigation drawer.</p>
 <ol>

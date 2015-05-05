@@ -40,13 +40,13 @@ refer to layout dimensions with <acronym title="Density-independent pixels: One 
 on a 160 dpi (mdpi) screen.">dp</acronym> measurements instead of pixels.</p>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-8">
+<div class="cols">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/metrics_diagram.png">
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <h4>Space considerations</h4>
 <p>Devices vary in the amount of density-independent pixels (dp) they can display.</p>

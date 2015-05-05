@@ -6,96 +6,53 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 @jd:body
 
-<div class="home-new-carousel-1">
-  <div class="fullscreen-carousel-content">
-    <div class="vcenter">
-      <div class="wrap clearfix">
+<div class="dac-hero-carousel" data-carousel-query="collection:index/carousel">
+</div>
 
-        <div class="static resource-flow-layout wrap col-16">
-          <div class="resource resource-card resource-card-18x6">
-
-      <div class="landing-section-header">
-            <div class="col-10"><img src="{@docRoot}images/home/l-hero_2x.png"
-                 srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x"
-                 width="510" style="margin:20px 30px 0 30px"></div>
-            <div class="col-5" style=" margin-top:70px ">
-            <h3 stye="font-weight:300;">Android 5.0 Lollipop</h3>
-            <p>The Android 5.0 update adds a variety of new
-            features for your apps, such as notifications on the lock screen, an all-new camera API,
-            OpenGL ES 3.1, the new Material design interface, and much more.</p>
-            <a href="{@docRoot}about/versions/lollipop.html" class="landing-button landing-primary">Learn More</a>
-            </div>
-          </div>
-          </div>
-        </div>
-       <h2>&nbsp;</h2>
-        <div style="margin-top:20px;height:115px" class="resource-widget resource-flow-layout wrap col-16
-        no-section" data-query="collection:index/primary" data-resourcestyle="card"
-        data-sortorder="-timestamp" data-maxresults="3" data-cardsizes="6x2,6x2,6x2"></div> <!-- end .resource-widget -->
-      </div> <!-- end .wrap -->
-    </div> <!-- end .vcenter -->
-  </div> <!-- end .fullscreen-carousel-content -->
-</div> <!-- end .fullscreen-carousel -->
-
-<div class="actions-bar" style="margin-top:20px">
+<div class="actions-bar dac-expand dac-invert">
   <div class="wrap">
     <div class="actions">
-      <div><a href="{@docRoot}sdk/index.html">Get the SDK</a></div>
-      <div><a href="{@docRoot}samples/index.html">Browse Samples</a></div>
-      <div><a href="//www.youtube.com/user/androiddevelopers">Watch Videos</a></div>
-      <div><a href="{@docRoot}distribute/googleplay/developer-console.html">Manage Your Apps</a></div>
+      <div><a href="{@docRoot}sdk/index.html">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Get the SDK
+      </a></div>
+      <div><a href="{@docRoot}samples/index.html">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Browse Samples
+      </a></div>
+      <div><a href="//www.youtube.com/user/androiddevelopers">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Watch Videos
+      </a></div>
+      <div><a href="{@docRoot}distribute/googleplay/developer-console.html">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Manage Your Apps
+      </a></div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
 </div><!-- end .actions-bar -->
 
+<section class="dac-section dac-section-light"><div class="wrap">
+  <h1 class="dac-section-title">Build Beautiful Apps</h1>
+  <div class="dac-section-subtitle">
+    See what’s new or find the resources to get you started with designing and developing for Android.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:index/primary"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>
 
-
-<div class="landing-rest-of-page">
-  <div class="landing-section">
-    <div class="wrap">
-      <div class="landing-section-header">
-
-            <div class="landing-h1" style="margin-top:0px">Build for a Multi-Screen World</div>
-        <div class="landing-subhead" style="margin-top: 20px;">
-          Android runs on hundreds of millions of handheld devices around the world, <br>
-          and it now supports these exciting, new form-factors.
-        </div>
-      </div>
-      <div class="landing-body" style="margin-top: 50px;">
-        <div class="landing-breakout cols">
-          <div class="col-3-wide">
-              <img src="{@docRoot}images/home/wear-wordmark.png">
-              <img src="{@docRoot}images/home/wear.png">
-              <p class="landing-small">
-                Provide information on-the-go for your users, whenever they need it.
-            </p>
-            <p class="landing-small">
-              <a href="{@docRoot}wear/index.html">Learn about Android Wear</a>
-            </p>
-          </div>
-          <div class="col-3-wide">
-              <img src="{@docRoot}images/home/tv-wordmark.png">
-             <img src="{@docRoot}images/home/tv.png">
-              <p class="landing-small">
-                Build your apps for the big screen and bring your content to life.
-              </p>
-            <p class="landing-small">
-              <a href="{@docRoot}tv/index.html">Learn about Android TV</a>
-
-            </p>
-          </div>
-          <div class="col-3-wide">
-              <img src="{@docRoot}images/home/auto-wordmark.png">
-              <img src="{@docRoot}images/home/auto.png">
-              <p class="landing-small">
-                Extend your music apps to automobile
-                entertainment systems.
-             </p>
-            <p class="landing-small">
-              <a href="{@docRoot}auto/index.html">Learn about Android Auto</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>  <!-- end .wrap -->
-  </div> <!-- end .landing-section -->
+<section class="dac-section dac-gray"><div class="wrap">
+  <div class="cols"><div class="col-10of12 col-push-1of12">
+    <h1 class="dac-section-title">Build for a Multi-Screen World</h1>
+    <div class="dac-section-subtitle">
+      Android runs on hundreds of millions of handheld devices around the world,
+      and it now supports these exciting, new form-factors.
+    </div>
+  </div></div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:index/multiscreen"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>

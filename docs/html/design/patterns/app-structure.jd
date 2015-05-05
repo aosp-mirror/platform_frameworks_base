@@ -25,13 +25,13 @@ page.tags=navigation,layout,tablet
 <p>A typical Android app consists of top level and detail/edit views. If the navigation hierarchy is
 deep and complex, category views connect top level and detail views.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-9">
+<div class="cols">
+  <div class="col-9">
 
     <img src="{@docRoot}design/media/app_structure_overview.png">
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <h4>Top level views</h4>
 <p>The top level of the app typically consists of the different views that your app supports. The views
@@ -57,8 +57,8 @@ visitors alike.</p>
 <p>Ask yourself: "What are my typical users most likely going to want to do in my app?", and structure
 your start screen experience accordingly.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
 <h4>Put content forward</h4>
 <p>Many apps focus on the content display. Avoid navigation-only screens and instead let people get to
@@ -66,7 +66,7 @@ the meat of your app right away by making content the centerpiece of your start 
 layouts that are visually engaging and appropriate for the data type and screen size.</p>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/app_structure_market.png">
     <div class="figure-caption">
@@ -80,8 +80,8 @@ layouts that are visually engaging and appropriate for the data type and screen 
 
 <h4>Set up action bars for navigation and actions</h4>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-5">
+<div class="cols">
+  <div class="col-5">
 
   <p>All screens in your app should display action bars to provide consistent navigation and surface
 important actions.</p>
@@ -96,7 +96,7 @@ important actions.</p>
     </ul>
 
   </div>
-  <div class="layout-content-col span-8">
+  <div class="col-8">
 
     <img src="{@docRoot}design/media/app_structure_gmail.png">
     <div class="figure-caption">
@@ -111,8 +111,8 @@ important actions.</p>
 <p>The top level communicates your app’s capabilities by introducing the user to the major functional areas. In many cases the top level will consist of multiple views, and you need to make sure that the user can navigate between them efficiently. Android supports a number of view controls for this task. Use the control that best matches your app's navigation needs:</p>
 
 <h4>Fixed tabs</h4>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 <p><em>Fixed tabs</em> display top-level views concurrently and make it easy to explore and switch between them. They are always visible on the screen, and can't be moved out of the way like scrollable tabs. <em>Fixed tabs</em> should always allow the user to navigate between the views by swiping left or right on the content area.</p>
 <p><strong>Use tabs if</strong>:</p>
 <ul>
@@ -122,7 +122,7 @@ important actions.</p>
 </ul>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/app_structure_default_tabs.png">
     <div class="figure-caption">
@@ -132,8 +132,8 @@ important actions.</p>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <h4>Spinners</h4>
 <p>A <em>spinner</em> is a drop-down menu that allows users to switch between views of your app. </p>
@@ -144,7 +144,7 @@ important actions.</p>
 </ul>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/app_structure_spinner.png">
     <div class="figure-caption">
@@ -155,8 +155,8 @@ important actions.</p>
 </div>
 
 <h4>Navigation drawers</h4>
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 <p>A <em>navigation drawer</em> is a slide-out menu that allows users to switch between views of your app. It can hold a large number of items and is accessible from anywhere in your app. Navigation drawers show your app's top-level views, but can also provide navigation to lower-level screens. This makes them particularly suitable for complex apps.</p>
 
 <p><strong>Use navigation drawers if</strong>:</p>
@@ -169,7 +169,7 @@ important actions.</p>
 </ul>
 
   </div>
-  <div class="layout-content-col span-7">
+  <div class="col-7">
     <img src="{@docRoot}design/media/app_structure_drawer.png">
     <div class="figure-caption">
       Navigation drawer from the Keep app.
@@ -196,8 +196,8 @@ experience than to an explicit navigation step.</p>
 
 <div class="vspace size-1">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-8">
+<div class="cols">
+  <div class="col-8">
 
 <p>If the categories are familiar, predictable, or closely related, use scrolling tabs (where not all
 items are in view simultaneously). Keep the number of scrolling tabs at a manageable level to
@@ -210,7 +210,7 @@ minimize navigational effort. Rule of thumb: no more than 5&ndash;7 tabs.</p>
     </div>
 
   </div>
-  <div class="layout-content-col span-5">
+  <div class="col-5">
 
 <p>If the categories in the tabs are not closely related, favor fixed tabs, so that all categories are
 in view at the same time.</p>
@@ -257,14 +257,14 @@ design guide.</p>
 
 <p>The detail view allows you to view and act on your data. The layout of the detail view depends on the data type being displayed, and therefore differs widely among apps.</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-4">
+<div class="cols">
+  <div class="col-4">
 
 <h4>Layout</h4>
 <p>Consider the activities people will perform in the detail view and arrange the layout accordingly.</p>
 
   </div>
-  <div class="layout-content-col span-9">
+  <div class="col-9">
 
     <img src="{@docRoot}design/media/app_structure_people_detail.png">
 
