@@ -52,7 +52,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
     public MobileRadioPowerCalculator(PowerProfile profile, BatteryStats stats) {
         mPowerRadioOn = profile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE);
         for (int i = 0; i < mPowerBins.length; i++) {
-            mPowerBins[i] = profile.getAveragePower(PowerProfile.POWER_RADIO_ACTIVE, i);
+            mPowerBins[i] = profile.getAveragePower(PowerProfile.POWER_RADIO_ON, i);
         }
         mPowerScan = profile.getAveragePower(PowerProfile.POWER_RADIO_SCANNING);
         mStats = stats;
@@ -128,7 +128,9 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
         }
 
         if (power != 0) {
-            app.noCoveragePercent = noCoverageTimeMs * 100.0 / signalTimeMs;
+            if (signalTimeMs != 0) {
+                app.noCoveragePercent = noCoverageTimeMs * 100.0 / signalTimeMs;
+            }
             app.mobileActive = remainingActiveTimeMs;
             app.mobileActiveCount = stats.getMobileRadioActiveUnknownCount(statsType);
             app.mobileRadioPowerMah = power;
