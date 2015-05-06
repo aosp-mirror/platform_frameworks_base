@@ -1,0 +1,2676 @@
+page.title=RenderScript Runtime API Reference
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> RenderScript is a high-performance runtime that provides compute operations at the native level.
+RenderScript code is compiled on devices at runtime to allow platform-independence as well.
+</p>
+
+<p> This reference documentation describes the RenderScript runtime APIs, which you can utilize
+to write RenderScript code in C99. The RenderScript compute header files are automatically
+included for you.
+</p>
+
+<p> To use RenderScript, you need to utilize the RenderScript runtime APIs documented here as well
+as the Android framework APIs for RenderScript.  For documentation on the Android framework
+APIs, see the <a target="_parent" href="http://developer.android.com/reference/android/renderscript/package-summary.html">android.renderscript</a> package reference.
+</p>
+
+<p> For more information on how to develop with RenderScript and how the runtime and Android
+framework APIs interact, see the <a target="_parent" href="http://developer.android.com/guide/topics/renderscript/index.html">RenderScript developer guide</a> and the <a target="_parent" href="http://developer.android.com/resources/samples/RenderScript/index.html">RenderScript samples</a>.
+</p>
+<h2>Numerical Types</h2>
+<p> <h5>Scalars:</h5>
+</p>
+
+<p> RenderScript supports the following scalar numerical types:
+<table>
+<tr><td>                 </td>  <td>8 bits        </td>   <td>16 bits         </td>   <td>32 bits       </td>   <td>64 bits</td></tr>
+<tr><td>Integer:         </td>  <td>char, <a href='rs_value_types.html#android_rs:int8_t'>int8_t</a>  </td>   <td>short, <a href='rs_value_types.html#android_rs:int16_t'>int16_t</a>  </td>   <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>       </td>   <td>long, long long, <a href='rs_value_types.html#android_rs:int64_t'>int64_t</a></td></tr>
+<tr><td>Unsigned integer:</td>  <td>uchar, <a href='rs_value_types.html#android_rs:uint8_t'>uint8_t</a></td>   <td>ushort, <a href='rs_value_types.html#android_rs:uint16_t'>uint16_t</a></td>   <td>uint, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a></td>   <td>ulong, <a href='rs_value_types.html#android_rs:uint64_t'>uint64_t</a></td></tr>
+<tr><td>Floating point:  </td>  <td>              </td>   <td>                </td>   <td>float         </td>   <td>double</td></tr>
+</table>
+</p>
+
+<p> <h5>Vectors:</h5>
+</p>
+
+<p> RenderScript supports fixed size vectors of length 2, 3, and 4.
+Vectors are declared using the common type name followed by a 2, 3, or 4.
+E.g. <a href='rs_value_types.html#android_rs:float4'>float4</a>, <a href='rs_value_types.html#android_rs:int3'>int3</a>, <a href='rs_value_types.html#android_rs:double2'>double2</a>, <a href='rs_value_types.html#android_rs:ulong4'>ulong4</a>.
+</p>
+
+<p> To create vector literals, use the vector type followed by the values enclosed
+between parentheses, e.g. <code>(float3)(1.0f, 2.0f, 3.0f)</code>.
+</p>
+
+<p> Entries of a vector can be accessed using different naming styles.
+</p>
+
+<p> Single entries can be accessed by following the variable name with a dot and:<ul>
+<li>The letters x, y, z, and w,</li>
+<li>The letters r, g, b, and a,</li>
+<li>The letter s or S, followed by a zero based index.</li></ul>
+</p>
+
+<p> For example, with <code>int4 myVar;</code> the following are equivalent:<code><br/>
+  myVar.x == myVar.r == myVar.s0 == myVar.S0<br/>
+  myVar.y == myVar.g == myVar.s1 == myVar.S1<br/>
+  myVar.z == myVar.b == myVar.s2 == myVar.S2<br/>
+  myVar.w == myVar.a == myVar.s3 == myVar.S3</code>
+</p>
+
+<p> Multiple entries of a vector can be accessed at once by using an identifier that is
+the concatenation of multiple letters or indices.  The resulting vector has a size
+equal to the number of entries named.
+</p>
+
+<p> With the example above, the middle two entries can be accessed using
+<code>myVar.yz</code>, <code>myVar.gb</code>, <code>myVar.s12</code>, and <code>myVar.S12</code>.
+</p>
+
+<p> The entries don't have to be contiguous or in increasing order.  Entries can even be
+repeated, as long as we're not trying to assign to it.  You also can't mix the naming
+styles.
+</p>
+
+<p> Here are examples of what can or can't be done:<code><br/>
+float4 v4;<br/>
+float3 v3;<br/>
+float2 v2;<br/>
+v2 = v4.xx; // Valid<br/>
+v3 = v4.zxw; // Valid<br/>
+v3 = v4.bba; // Valid<br/>
+v3 = v4.s032; // Valid<br/>
+v3.s120 = v4.S233; // Valid<br/>
+v4.yz = v3.rg; // Valid<br/>
+v4.yzx = v3.rg; // Invalid: mismatched sizes<br/>
+v4.yzz = v3; // Invalid: z appears twice in an assignment<br/>
+v3 = v3.xas0; // Invalid: can't mix xyzw with rgba nor s0...<br/>
+v3 = v4.s034; // Invalid: the digit can only be 0, 1, 2, or 3<br/>
+</code>
+</p>
+
+<p> <h5>Matrices and Quaternions:</h5>
+</p>
+
+<p> RenderScript supports fixed size square matrices of floats of size 2x2, 3x3, and 4x4.
+The types are named <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>, <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>, and <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>.  See
+<a href='rs_matrix.html'>Matrix Functions</a> for the list of operations.
+</p>
+
+<p> Quaternions are also supported via <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>.  See <a href='rs_quaternion.html'>Quaterion Functions</a> for the list
+of operations.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:char2'>char2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 8 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:char3'>char3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 8 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:char4'>char4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 8 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:double2'>double2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 64 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:double3'>double3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 64 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:double4'>double4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 64 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:float2'>float2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:float3'>float3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:float4'>float4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int16_t'>int16_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      16 bit signed integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int2'>int2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 32 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int3'>int3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 32 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      32 bit signed integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int4'>int4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 32 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int64_t'>int64_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      64 bit signed integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int8_t'>int8_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      8 bit signed integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:long2'>long2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 64 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:long3'>long3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 64 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:long4'>long4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 64 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      2x2 matrix of 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      3x3 matrix of 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      4x4 matrix of 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:short2'>short2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 16 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:short3'>short3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 16 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:short4'>short4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 16 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:size_t'>size_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Unsigned size type
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ssize_t'>ssize_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Signed size type
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uchar'>uchar</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      8 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uchar2'>uchar2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 8 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uchar3'>uchar3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 8 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uchar4'>uchar4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 8 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint'>uint</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      32 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint16_t'>uint16_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      16 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint2'>uint2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 32 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint3'>uint3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 32 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      32 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint4'>uint4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 32 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint64_t'>uint64_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      64 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint8_t'>uint8_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      8 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ulong'>ulong</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      64 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ulong2'>ulong2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 64 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ulong3'>ulong3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 64 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ulong4'>ulong4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 64 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ushort'>ushort</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      16 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ushort2'>ushort2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 16 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ushort3'>ushort3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 16 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ushort4'>ushort4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 16 bit unsigned integers
+    </td>
+  </tr>
+</tbody></table>
+<h2>Object Types</h2>
+<p> The types below are used to manipulate RenderScript objects like allocations, samplers,
+elements, and scripts.  Most of these object are created using the Java RenderScript APIs.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to an allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_allocation_cubemap_face'>rs_allocation_cubemap_face</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Enum for selecting cube map faces
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_allocation_usage_type'>rs_allocation_usage_type</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Bitfield to specify how an allocation is used
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_data_kind'>rs_data_kind</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Element data kind
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_data_type'>rs_data_type</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Element basic data type
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_element'>rs_element</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to an element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_sampler'>rs_sampler</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a Sampler
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_sampler_value'>rs_sampler_value</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sampler wrap T value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_script'>rs_script</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a Script
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_types.html#android_rs:rs_type'>rs_type</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a Type
+    </td>
+  </tr>
+</tbody></table>
+<h2>Conversion Functions</h2>
+<p> The functions below convert from a numerical vector type to another, of from one color
+representation to another.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_convert.html#android_rs:convert'>convert</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Convert numerical vectors
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_convert.html#android_rs:rsPackColorTo8888'>rsPackColorTo8888</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Create a uchar4 RGBA from floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_convert.html#android_rs:rsUnpackColor8888'>rsUnpackColor8888</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Create a float4 RGBA from uchar4
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_convert.html#android_rs:rsYuvToRGBA'>rsYuvToRGBA</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Convert a YUV value to RGBA
+    </td>
+  </tr>
+</tbody></table>
+<h2>Mathematical Constants and Functions</h2>
+<p> The mathematical functions below can be applied to scalars and vectors.   When applied
+to vectors, the returned value is a vector of the function applied to each entry of the input.
+</p>
+
+<p> For example:<code><br/>
+float3 a, b;<br/>
+// The following call sets<br/>
+//   a.x to sin(b.x),<br/>
+//   a.y to sin(b.y), and<br/>
+//   a.z to sin(b.z).<br/>
+a = sin(b);<br/>
+</code>
+</p>
+
+<p> See <a href='rs_vector_math.html'>Vector Math Functions</a> for functions like <a href='rs_vector_math.html#android_rs:distance'>distance</a>() and <a href='rs_vector_math.html#android_rs:length'>length</a>() that interpret
+instead the input as a single vector in n-dimensional space.
+</p>
+
+<p> The precision of the mathematical operations on 32 bit floats is affected by the pragmas
+rs_fp_relaxed and rs_fp_full.  Under rs_fp_relaxed, subnormal values may be flushed to zero and
+rounding may be done towards zero.  In comparison, rs_fp_full requires correct handling of
+subnormal values, i.e. smaller than 1.17549435e-38f.  rs_fp_rull also requires round to nearest
+with ties to even.
+</p>
+
+<p> Different precision/speed tradeoffs can be achieved by using variants of the common math
+functions.  Functions with a name starting with<ul>
+<li>native_: May have custom hardware implementations with weaker precision.  Additionally,
+  subnormal values may be flushed to zero, rounding towards zero may be used, and NaN and
+  infinity input may not be handled correctly.</li>
+<li>half_: May perform internal computations using 16 bit floats.  Additionally, subnormal
+  values may be flushed to zero, and rounding towards zero may be used.</li>
+</ul>
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Constants</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_1_PI'>M_1_PI</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      1 / pi, as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_2_PI'>M_2_PI</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      2 / pi, as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_2_SQRTPI'>M_2_SQRTPI</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      2 / sqrt(pi), as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_E'>M_E</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      e, as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_LN10'>M_LN10</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      log_e(10), as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_LN2'>M_LN2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      log_e(2), as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_LOG10E'>M_LOG10E</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      log_10(e), as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_LOG2E'>M_LOG2E</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      log_2(e), as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_PI'>M_PI</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      pi, as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_PI_2'>M_PI_2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      pi / 2, as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_PI_4'>M_PI_4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      pi / 4, as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_SQRT1_2'>M_SQRT1_2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      1 / sqrt(2), as a 32 bit float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:M_SQRT2'>M_SQRT2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      sqrt(2), as a 32 bit float
+    </td>
+  </tr>
+</tbody></table>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:abs'>abs</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Absolute value of an integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:acos'>acos</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:acosh'>acosh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse hyperbolic cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:acospi'>acospi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse cosine divided by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:asin'>asin</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse sine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:asinh'>asinh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse hyperbolic sine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:asinpi'>asinpi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse sine divided by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:atan'>atan</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse tangent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:atan2'>atan2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse tangent of a ratio
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:atan2pi'>atan2pi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse tangent of a ratio, divided by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:atanh'>atanh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse hyperbolic tangent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:atanpi'>atanpi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverse tangent divided by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:cbrt'>cbrt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Cube root
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:ceil'>ceil</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Smallest integer not less than a value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:clamp'>clamp</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Restrain a value to a range
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:clz'>clz</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Number of leading 0 bits
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:copysign'>copysign</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Copies the sign of a number to another
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:cos'>cos</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:cosh'>cosh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Hypebolic cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:cospi'>cospi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Cosine of a number multiplied by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:degrees'>degrees</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Converts radians into degrees
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:erf'>erf</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Mathematical error function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:erfc'>erfc</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Mathematical complementary error function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:exp'>exp</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      e raised to a number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:exp10'>exp10</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      10 raised to a number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:exp2'>exp2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      2 raised to a number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:expm1'>expm1</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      e raised to a number minus one
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:fabs'>fabs</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Absolute value of a float
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:fdim'>fdim</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Positive difference between two values
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:floor'>floor</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Smallest integer not greater than a value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:fma'>fma</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Multiply and add
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:fmax'>fmax</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Maximum of two floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:fmin'>fmin</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Minimum of two floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:fmod'>fmod</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Modulo
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:fract'>fract</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Positive fractional part
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:frexp'>frexp</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Binary mantissa and exponent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:half_recip'>half_recip</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Reciprocal computed to 16 bit precision
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:half_rsqrt'>half_rsqrt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Reciprocal of a square root computed to 16 bit precision
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:half_sqrt'>half_sqrt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Square root computed to 16 bit precision
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:hypot'>hypot</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Hypotenuse
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:ilogb'>ilogb</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Base two exponent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:ldexp'>ldexp</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Creates a floating point from mantissa and exponent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:lgamma'>lgamma</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Natural logarithm of the gamma function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:log'>log</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Natural logarithm
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:log10'>log10</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Base 10 logarithm
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:log1p'>log1p</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Natural logarithm of a value plus 1
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:log2'>log2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Base 2 logarithm
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:logb'>logb</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Base two exponent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:mad'>mad</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Multiply and add
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:max'>max</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Maximum
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:min'>min</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Minimum
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:mix'>mix</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Mixes two values
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:modf'>modf</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Integral and fractional components
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:nan'>nan</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Not a Number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_acos'>native_acos</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_acosh'>native_acosh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse hyperbolic cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_acospi'>native_acospi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse cosine divided by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_asin'>native_asin</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse sine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_asinh'>native_asinh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse hyperbolic sine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_asinpi'>native_asinpi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse sine divided by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_atan'>native_atan</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse tangent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_atan2'>native_atan2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse tangent of a ratio
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_atan2pi'>native_atan2pi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse tangent of a ratio, divided by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_atanh'>native_atanh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse hyperbolic tangent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_atanpi'>native_atanpi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate inverse tangent divided by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_cbrt'>native_cbrt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate cube root
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_cos'>native_cos</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_cosh'>native_cosh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate hypebolic cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_cospi'>native_cospi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate cosine of a number multiplied by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_divide'>native_divide</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate division
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_exp'>native_exp</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate e raised to a number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_exp10'>native_exp10</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate 10 raised to a number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_exp2'>native_exp2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate 2 raised to a number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_expm1'>native_expm1</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate e raised to a number minus one
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_hypot'>native_hypot</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate hypotenuse
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_log'>native_log</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate natural logarithm
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_log10'>native_log10</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate base 10 logarithm
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_log1p'>native_log1p</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate natural logarithm of a value plus 1
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_log2'>native_log2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate base 2 logarithm
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_powr'>native_powr</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate positive base raised to an exponent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_recip'>native_recip</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate reciprocal
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_rootn'>native_rootn</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate nth root
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_rsqrt'>native_rsqrt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate reciprocal of a square root
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_sin'>native_sin</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate sine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_sincos'>native_sincos</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate sine and cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_sinh'>native_sinh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate hyperbolic sine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_sinpi'>native_sinpi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate sine of a number multiplied by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_sqrt'>native_sqrt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate square root
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_tan'>native_tan</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate tangent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_tanh'>native_tanh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate hyperbolic tangent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:native_tanpi'>native_tanpi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate tangent of a number multiplied by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:nextafter'>nextafter</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Next floating point number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:pow'>pow</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Base raised to an exponent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:pown'>pown</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Base raised to an integer exponent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:powr'>powr</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Positive base raised to an exponent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:radians'>radians</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Converts degrees into radians
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:remainder'>remainder</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Remainder of a division
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:remquo'>remquo</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Remainder and quotient of a division
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:rint'>rint</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Round to even
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:rootn'>rootn</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Nth root
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:round'>round</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Round away from zero
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:rsRand'>rsRand</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Pseudo-random number
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:rsqrt'>rsqrt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Reciprocal of a square root
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:sign'>sign</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sign of a value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:sin'>sin</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:sincos'>sincos</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sine and cosine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:sinh'>sinh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Hyperbolic sine
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:sinpi'>sinpi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sine of a number multiplied by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:sqrt'>sqrt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Square root
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:step'>step</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      0 if less than a value, 0 otherwise
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:tan'>tan</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Tangent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:tanh'>tanh</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Hyperbolic tangent
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:tanpi'>tanpi</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Tangent of a number multiplied by pi
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:tgamma'>tgamma</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Gamma function
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_math.html#android_rs:trunc'>trunc</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Truncates a floating point
+    </td>
+  </tr>
+</tbody></table>
+<h2>Vector Math Functions</h2>
+<p> These functions interpret the input arguments as representation of vectors in
+n-dimensional space.
+</p>
+
+<p> The precision of the mathematical operations on 32 bit floats is affected by the pragmas
+rs_fp_relaxed and rs_fp_full.  See <a href='rs_math.html'>Mathematical Constants and Functions</a> for details.
+</p>
+
+<p> Different precision/speed tradeoffs can be achieved by using variants of the common math
+functions.  Functions with a name starting with<ul>
+<li>native_: May have custom hardware implementations with weaker precision.  Additionally,
+  subnormal values may be flushed to zero, rounding towards zero may be used, and NaN and
+  infinity input may not be handled correctly.</li>
+<li>fast_: May perform internal computations using 16 bit floats.  Additionally, subnormal
+  values may be flushed to zero, and rounding towards zero may be used.</li>
+</ul>
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:cross'>cross</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Cross product of two vectors
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:distance'>distance</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Distance between two points
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:dot'>dot</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Dot product of two vectors
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:fast_distance'>fast_distance</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate distance between two points
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:fast_length'>fast_length</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate length of a vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:fast_normalize'>fast_normalize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate normalized vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:length'>length</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Length of a vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:native_distance'>native_distance</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate distance between two points
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:native_length'>native_length</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximate length of a vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:native_normalize'>native_normalize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Approximately normalize a vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_vector_math.html#android_rs:normalize'>normalize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Normalize a vector
+    </td>
+  </tr>
+</tbody></table>
+<h2>Matrix Functions</h2>
+<p> These functions let you manipulate square matrices of rank 2x2, 3x3, and 4x4.
+They are particularly useful for graphical transformations and are compatible
+with OpenGL.
+</p>
+
+<p> We use a zero-based index for rows and columns.  E.g. the last element of a
+<a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a> is found at (3, 3).
+</p>
+
+<p> RenderScript uses column-major matrices and column-based vectors.  Transforming
+a vector is done by postmultiplying the vector, e.g. <code>(matrix * vector)</code>,
+as provided by <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>().
+</p>
+
+<p> To create a transformation matrix that performs two transformations at once,
+multiply the two source matrices, with the first transformation as the right
+argument.  E.g. to create a transformation matrix that applies the
+transformation s1 followed by s2, call <code>rsMatrixLoadMultiply(&amp;combined, &amp;s2, &amp;s1)</code>.
+This derives from <code>s2 * (s1 * v)</code>, which is <code>(s2 * s1) * v</code>.
+</p>
+
+<p> We have two style of functions to create transformation matrices:
+rsMatrixLoad<i>Transformation</i> and rsMatrix<i>Transformation</i>.  The former
+style simply stores the transformation matrix in the first argument.  The latter
+modifies a pre-existing transformation matrix so that the new transformation
+happens first.  E.g. if you call <a href='rs_matrix.html#android_rs:rsMatrixTranslate'>rsMatrixTranslate</a>() on a matrix that already
+does a scaling, the resulting matrix when applied to a vector will first do the
+translation then the scaling.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsExtractFrustumPlanes'>rsExtractFrustumPlanes</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Compute frustum planes
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsIsSphereInFrustum'>rsIsSphereInFrustum</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Checks if a sphere is within the frustum planes
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixGet'>rsMatrixGet</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get one element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixInverse'>rsMatrixInverse</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverts a matrix in place
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixInverseTranspose'>rsMatrixInverseTranspose</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Inverts and transpose a matrix in place
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoad'>rsMatrixLoad</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load or copy a matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadFrustum'>rsMatrixLoadFrustum</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a frustum projection matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadIdentity'>rsMatrixLoadIdentity</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load identity matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadMultiply'>rsMatrixLoadMultiply</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Multiply two matrices
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadOrtho'>rsMatrixLoadOrtho</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load an orthographic projection matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadPerspective'>rsMatrixLoadPerspective</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a perspective projection matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadRotate'>rsMatrixLoadRotate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a rotation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadScale'>rsMatrixLoadScale</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a scaling matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixLoadTranslate'>rsMatrixLoadTranslate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Load a translation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixMultiply'>rsMatrixMultiply</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Multiply a matrix by a vector or another matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixRotate'>rsMatrixRotate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Apply a rotation to a transformation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixScale'>rsMatrixScale</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Apply a scaling to a transformation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixSet'>rsMatrixSet</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Set one element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixTranslate'>rsMatrixTranslate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Apply a translation to a transformation matrix
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_matrix.html#android_rs:rsMatrixTranspose'>rsMatrixTranspose</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Transpose a matrix place
+    </td>
+  </tr>
+</tbody></table>
+<h2>Quaternion Functions</h2>
+<p> The following functions manipulate quaternions.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionAdd'>rsQuaternionAdd</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Add two quaternions
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionConjugate'>rsQuaternionConjugate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Conjugate a quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionDot'>rsQuaternionDot</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Dot product of two quaternions
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionGetMatrixUnit'>rsQuaternionGetMatrixUnit</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get a rotation matrix from a quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionLoadRotate'>rsQuaternionLoadRotate</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Create a rotation quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionLoadRotateUnit'>rsQuaternionLoadRotateUnit</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Quaternion that represents a rotation about an arbitrary unit vector
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionMultiply'>rsQuaternionMultiply</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Multiply a quaternion by a scalar or another quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionNormalize'>rsQuaternionNormalize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Normalize a quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionSet'>rsQuaternionSet</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Create a quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_quaternion.html#android_rs:rsQuaternionSlerp'>rsQuaternionSlerp</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Spherical linear interpolation between two quaternions
+    </td>
+  </tr>
+</tbody></table>
+<h2>Atomic Update Functions</h2>
+<p> To update values shared between multiple threads, use the functions below.
+They ensure that the values are atomically updated, i.e. that the memory
+reads, the updates, and the memory writes are done in the right order.
+</p>
+
+<p> These functions are slower than their non-atomic equivalents, so use
+them only when synchronization is needed.
+</p>
+
+<p> Note that in RenderScript, your code is likely to be running in separate
+threads even though you did not explicitely create them.  The RenderScript
+runtime will very often split the execution of one kernel across multiple
+threads.  Updating globals should be done with atomic functions.  If possible,
+modify your algorithm to avoid them altogether.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicAdd'>rsAtomicAdd</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe addition
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicAnd'>rsAtomicAnd</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe bitwise and
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicCas'>rsAtomicCas</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe compare and set
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicDec'>rsAtomicDec</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe decrement
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicInc'>rsAtomicInc</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe increment
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicMax'>rsAtomicMax</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe maximum
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicMin'>rsAtomicMin</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe minimum
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicOr'>rsAtomicOr</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe bitwise or
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicSub'>rsAtomicSub</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe subtraction
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_atomic.html#android_rs:rsAtomicXor'>rsAtomicXor</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Thread-safe bitwise exclusive or
+    </td>
+  </tr>
+</tbody></table>
+<h2>Time Functions and Types</h2>
+<p> The functions below can be used to tell the current clock time and the current
+system up time.  It is not recommended to call these functions inside of a kernel.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rs_time_t'>rs_time_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Seconds since January 1, 1970
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rs_tm'>rs_tm</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Date and time structure
+    </td>
+  </tr>
+</tbody></table>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsGetDt'>rsGetDt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Elapsed time since last call
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsLocaltime'>rsLocaltime</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Convert to local time
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsTime'>rsTime</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Seconds since January 1, 1970
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsUptimeMillis'>rsUptimeMillis</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      System uptime in milliseconds
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsUptimeNanos'>rsUptimeNanos</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      System uptime in nanoseconds
+    </td>
+  </tr>
+</tbody></table>
+<h2>Allocation Data Access Functions</h2>
+<p> The functions below can be used to get and set the cells that comprise
+an allocation.
+<ul>
+<li>Individual cells are accessed using the rsGetElementAt* and
+  <a href='rs_allocation_data.html#android_rs:rsSetElementAt'>rsSetElementAt</a> functions.</li>
+<li>Multiple cells can be copied using the rsAllocationCopy* and
+  rsAllocationV* functions.</li>
+<li>For getting values through a sampler, use <a href='rs_allocation_data.html#android_rs:rsSample'>rsSample</a>.</li>
+</ul>
+The <a href='rs_allocation_data.html#android_rs:rsGetElementAt'>rsGetElementAt</a> and rsSetElement* functions are somewhat misnamed.
+They don't get or set elements, which are akin to data types; they get
+or set cells.  Think of them as rsGetCellAt and and rsSetCellAt.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsAllocationCopy1DRange'>rsAllocationCopy1DRange</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Copy consecutive cells between allocations
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsAllocationCopy2DRange'>rsAllocationCopy2DRange</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Copy a rectangular region of cells between allocations
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsAllocationVLoadX'>rsAllocationVLoadX</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get a vector from an allocation of scalars
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsAllocationVStoreX'>rsAllocationVStoreX</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Store a vector into an allocation of scalars
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsGetElementAt'>rsGetElementAt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Return a cell from an allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsGetElementAtYuv_uchar_U'>rsGetElementAtYuv_uchar_U</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get the U component of an allocation of YUVs
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsGetElementAtYuv_uchar_V'>rsGetElementAtYuv_uchar_V</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get the V component of an allocation of YUVs
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsGetElementAtYuv_uchar_Y'>rsGetElementAtYuv_uchar_Y</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get the Y component of an allocation of YUVs
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsSample'>rsSample</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sample a value from a texture allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_allocation_data.html#android_rs:rsSetElementAt'>rsSetElementAt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Set a cell of an allocation
+    </td>
+  </tr>
+</tbody></table>
+<h2>Object Characteristics Functions</h2>
+<p> The functions below can be used to query the characteristics of an Allocation, Element,
+or Sampler object.  These objects are created from Java.  You can't create them from a
+script.
+</p>
+
+<p> <h5>Allocations:</h5>
+</p>
+
+<p> Allocations are the primary method used to pass data to and from RenderScript kernels.
+</p>
+
+<p> They are a structured collection of cells that can be used to store bitmaps, textures,
+arbitrary data points, etc.
+</p>
+
+<p> This collection of cells may have many dimensions (X, Y, Z, Array0, Array1, Array2, Array3),
+faces (for cubemaps), and level of details (for mipmapping).
+</p>
+
+<p> See the <a href='http://developer.android.com/reference/android/renderscript/Allocation.html'>android.renderscript.Allocation</a> for details on to create Allocations.
+</p>
+
+<p> <h5>Elements:</h5>
+</p>
+
+<p> The term "element" is used a bit ambiguously in RenderScript, as both type information
+for the cells of an Allocation and the instantiation of that type.  For example:<ul>
+<li><a href='rs_object_types.html#android_rs:rs_element'>rs_element</a> is a handle to a type specification, and</li>
+<li>In functions like <a href='rs_allocation_data.html#android_rs:rsGetElementAt'>rsGetElementAt</a>(), "element" means the instantiation of the type,
+    i.e. a cell of an Allocation.</li></ul>
+</p>
+
+<p> The functions below let you query the characteristics of the type specificiation.
+</p>
+
+<p> An Element can specify a simple data types as found in C, e.g. an integer, float, or
+boolean.  It can also specify a handle to a RenderScript object.  See <a href='rs_object_types.html#android_rs:rs_data_type'>rs_data_type</a> for
+a list of basic types.
+</p>
+
+<p> Elements can specify fixed size vector (of size 2, 3, or 4) versions of the basic types.
+Elements can be grouped together into complex Elements, creating the equivalent of
+C structure definitions.
+</p>
+
+<p> Elements can also have a kind, which is semantic information used to interpret pixel
+data.  See <a href='rs_object_types.html#android_rs:rs_data_kind'>rs_data_kind</a>.
+</p>
+
+<p> When creating Allocations of common elements, you can simply use one of the many predefined
+Elements like <a href='http://developer.android.com/reference/android/renderscript/Element.html#F32_2(android.renderscript.RenderScript)'>F32_2</a>.
+</p>
+
+<p> To create complex Elements, use the <a href='http://developer.android.com/reference/android/renderscript/Element.Builder.html'>Element.Builder</a> Java class.
+</p>
+
+<p> <h5>Samplers:</h5>
+</p>
+
+<p> Samplers objects define how Allocations can be read as structure within a kernel.
+See <a href='http://developer.android.com/reference/android/renderscript/Sampler.html'>android.renderscript.S</a>.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsAllocationGetDimFaces'>rsAllocationGetDimFaces</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Presence of more than one face
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsAllocationGetDimLOD'>rsAllocationGetDimLOD</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Presence of levels of detail
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsAllocationGetDimX'>rsAllocationGetDimX</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the X dimension
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsAllocationGetDimY'>rsAllocationGetDimY</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Y dimension
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsAllocationGetDimZ'>rsAllocationGetDimZ</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of the Z dimension
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsAllocationGetElement'>rsAllocationGetElement</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Get the object that describes the cell of an Allocation
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsClearObject'>rsClearObject</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Release an object
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetBytesSize'>rsElementGetBytesSize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Size of an Element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetDataKind'>rsElementGetDataKind</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Kind of an Element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetDataType'>rsElementGetDataType</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Data type of an Element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetSubElement'>rsElementGetSubElement</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sub-element of a complex Element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetSubElementArraySize'>rsElementGetSubElementArraySize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Array size of a sub-element of a complex Element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetSubElementCount'>rsElementGetSubElementCount</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Number of sub-elements
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetSubElementName'>rsElementGetSubElementName</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Name of a sub-element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetSubElementNameLength'>rsElementGetSubElementNameLength</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Length of the name of a sub-element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetSubElementOffsetBytes'>rsElementGetSubElementOffsetBytes</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Offset of the instantiated sub-element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsElementGetVectorSize'>rsElementGetVectorSize</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Vector size of the Element
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsIsObject'>rsIsObject</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Check for an empty handle
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsSamplerGetAnisotropy'>rsSamplerGetAnisotropy</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Anisotropy of the Sampler
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsSamplerGetMagnification'>rsSamplerGetMagnification</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sampler magnification value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsSamplerGetMinification'>rsSamplerGetMinification</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sampler minification value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsSamplerGetWrapS'>rsSamplerGetWrapS</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sampler wrap S value
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_object_info.html#android_rs:rsSamplerGetWrapT'>rsSamplerGetWrapT</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Sampler wrap T value
+    </td>
+  </tr>
+</tbody></table>
+<h2>Kernel Invocation Functions and Types</h2>
+<p> The <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>() function can be used to invoke the root kernel of a script.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rs_for_each_strategy_t'>rs_for_each_strategy_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Suggested cell processing order
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rs_script_call_t'>rs_script_call_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Cell iteration information
+    </td>
+  </tr>
+</tbody></table>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Invoke the root kernel of a script
+    </td>
+  </tr>
+</tbody></table>
+<h2>Input/Output Functions</h2>
+<p> These functions are used to:<ul>
+<li>Send information to the Java client, and</li>
+<li>Send the processed allocation or receive the next allocation to process.</li></ul>
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_io.html#android_rs:rsAllocationIoReceive'>rsAllocationIoReceive</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Receive new content from the queue
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_io.html#android_rs:rsAllocationIoSend'>rsAllocationIoSend</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Send new content to the queue
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_io.html#android_rs:rsSendToClient'>rsSendToClient</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Send a message to the client, non-blocking
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_io.html#android_rs:rsSendToClientBlocking'>rsSendToClientBlocking</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Send a message to the client, blocking
+    </td>
+  </tr>
+</tbody></table>
+<h2>Debugging Functions</h2>
+<p> The functions below are intended to be used during application developement.
+They should not be used in shipping applications.
+</p>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_debug.html#android_rs:rsDebug'>rsDebug</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Log a message and values
+    </td>
+  </tr>
+</tbody></table>
+<h2>Graphics Functions and Types</h2>
+<p> The graphics subsystem of RenderScript has been deprecated.
+</p>
+</div>

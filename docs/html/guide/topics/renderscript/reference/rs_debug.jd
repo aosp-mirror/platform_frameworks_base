@@ -1,0 +1,301 @@
+page.title=RenderScript Debugging Functions
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> The functions below are intended to be used during application developement.
+They should not be used in shipping applications.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_debug.html#android_rs:rsDebug'>rsDebug</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Log a message and values
+    </td>
+  </tr>
+</tbody></table>
+<h2>Functions</h2>
+<a name='android_rs:rsDebug'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsDebug</span>
+    <span class='normal'>: Log a message and values</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsDebug(const char* message, char a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:char2'>char2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:char3'>char3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:char4'>char4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, const <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>* a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, const <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>* a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, const <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>* a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, const void* a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, double a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, float a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, float a, float b);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, float a, float b, float c);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, float a, float b, float c, float d);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:float2'>float2</a> a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:float3'>float3</a> a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:float4'>float4</a> a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, int a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:int2'>int2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:int3'>int3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:int4'>int4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, long a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, long long a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:long2'>long2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:long3'>long3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:long4'>long4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, short a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:short2'>short2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:short3'>short3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:short4'>short4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:uchar'>uchar</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:uchar2'>uchar2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:uchar3'>uchar3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:uchar4'>uchar4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:uint'>uint</a> a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:uint2'>uint2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:uint3'>uint3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:uint4'>uint4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:ulong'>ulong</a> a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:ulong2'>ulong2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:ulong3'>ulong3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:ulong4'>ulong4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, unsigned long long a);
+</td>
+        <td>        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:ushort'>ushort</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:ushort2'>ushort2</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:ushort3'>ushort3</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsDebug(const char* message, <a href='rs_value_types.html#android_rs:ushort4'>ushort4</a> a);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 17</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> This function prints a message to the standard log, followed by the provided values.
+</p>
+
+<p> This function is intended for debugging only and should not be used in shipping
+applications.
+</p>
+  </div>
+</div>
+
+</div>
