@@ -91,6 +91,7 @@ public class StaticLayout extends Layout {
             b.mEllipsizedWidth = width;
             b.mEllipsize = null;
             b.mMaxLines = Integer.MAX_VALUE;
+            b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
 
             b.mMeasuredText = MeasuredText.obtain();
             return b;
@@ -100,6 +101,8 @@ public class StaticLayout extends Layout {
             b.mPaint = null;
             b.mText = null;
             MeasuredText.recycle(b.mMeasuredText);
+            b.mMeasuredText = null;
+            nFinishBuilder(b.mNativePtr);
             sPool.release(b);
         }
 
