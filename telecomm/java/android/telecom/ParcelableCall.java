@@ -178,10 +178,10 @@ public final class ParcelableCall implements Parcelable {
      * Returns an object for remotely communicating through the video call provider's binder.
      * @return The video call.
      */
-    public InCallService.VideoCall getVideoCall() {
+    public InCallService.VideoCall getVideoCall(Call call) {
         if (mVideoCall == null && mVideoCallProvider != null) {
             try {
-                mVideoCall = new VideoCallImpl(mVideoCallProvider);
+                mVideoCall = new VideoCallImpl(mVideoCallProvider, call);
             } catch (RemoteException ignored) {
                 // Ignore RemoteException.
             }
