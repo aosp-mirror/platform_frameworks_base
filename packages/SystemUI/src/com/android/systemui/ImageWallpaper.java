@@ -236,7 +236,9 @@ public class ImageWallpaper extends WallpaperService {
                     Log.d(TAG, "Visibility changed to visible=" + visible);
                 }
                 mVisible = visible;
-                drawFrame();
+                if (visible) {
+                    drawFrame();
+                }
             }
         }
 
