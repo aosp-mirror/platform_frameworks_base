@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,24 +15,19 @@
 -->
 
 <animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
-        android:id="@+id/on"
+        android:id="@+id/checked"
         android:state_checked="true"
         android:drawable="@drawable/ic_checkbox_checked" />
-
     <item
-        android:id="@+id/off"
+        android:id="@+id/unchecked"
         android:drawable="@drawable/ic_checkbox_unchecked" />
-
     <transition
-        android:fromId="@+id/off"
-        android:toId="@+id/on"
-        android:drawable="@drawable/ic_checkbox_unchecked_animation" />
-
+        android:fromId="@+id/unchecked"
+        android:toId="@+id/checked"
+        android:drawable="@drawable/ic_checkbox_unchecked_to_checked_animation" />
     <transition
-        android:fromId="@+id/on"
-        android:toId="@+id/off"
-        android:drawable="@drawable/ic_checkbox_checked_animation" />
-
+        android:fromId="@+id/checked"
+        android:toId="@+id/unchecked"
+        android:drawable="@drawable/ic_checkbox_checked_to_unchecked_animation" />
 </animated-selector>
