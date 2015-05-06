@@ -9368,44 +9368,47 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 throw new SecurityException("No permission to restore other packages");
             }
 
-            // So far so good; we're allowed to try to restore this package.  Now
-            // check whether there is data for it in the current dataset, falling back
-            // to the ancestral dataset if not.
-            long token = getAvailableRestoreToken(packageName);
-            if (DEBUG) Slog.v(TAG, "restorePackage pkg=" + packageName
-                    + " token=" + Long.toHexString(token));
-
-            // If we didn't come up with a place to look -- no ancestral dataset and
-            // the app has never been backed up from this device -- there's nothing
-            // to do but return failure.
-            if (token == 0) {
-                if (DEBUG) Slog.w(TAG, "No data available for this package; not restoring");
-                return -1;
-            }
-
-            String dirName;
-            try {
-                dirName = mRestoreTransport.transportDirName();
-            } catch (RemoteException e) {
-                // Transport went AWOL; fail.
-                Slog.e(TAG, "Unable to contact transport for restore");
-                return -1;
-            }
-
-            // Stop the session timeout until we finalize the restore
-            mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
-
-            // Ready to go:  enqueue the restore request and claim success
+            // So far so good; we're allowed to try to restore this package.
             long oldId = Binder.clearCallingIdentity();
-            mWakelock.acquire();
-            if (MORE_DEBUG) {
-                Slog.d(TAG, "restorePackage() : " + packageName);
+            try {
+                // Check whether there is data for it in the current dataset, falling back
+                // to the ancestral dataset if not.
+                long token = getAvailableRestoreToken(packageName);
+                if (DEBUG) Slog.v(TAG, "restorePackage pkg=" + packageName
+                        + " token=" + Long.toHexString(token));
+
+                // If we didn't come up with a place to look -- no ancestral dataset and
+                // the app has never been backed up from this device -- there's nothing
+                // to do but return failure.
+                if (token == 0) {
+                    if (DEBUG) Slog.w(TAG, "No data available for this package; not restoring");
+                    return -1;
+                }
+
+                String dirName;
+                try {
+                    dirName = mRestoreTransport.transportDirName();
+                } catch (RemoteException e) {
+                    // Transport went AWOL; fail.
+                    Slog.e(TAG, "Unable to contact transport for restore");
+                    return -1;
+                }
+
+                // Stop the session timeout until we finalize the restore
+                mBackupHandler.removeMessages(MSG_RESTORE_TIMEOUT);
+
+                // Ready to go:  enqueue the restore request and claim success
+                mWakelock.acquire();
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "restorePackage() : " + packageName);
+                }
+                Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+                msg.obj = new RestoreParams(mRestoreTransport, dirName,
+                        observer, token, app, 0);
+                mBackupHandler.sendMessage(msg);
+            } finally {
+                Binder.restoreCallingIdentity(oldId);
             }
-            Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-            msg.obj = new RestoreParams(mRestoreTransport, dirName,
-                    observer, token, app, 0);
-            mBackupHandler.sendMessage(msg);
-            Binder.restoreCallingIdentity(oldId);
             return 0;
         }
 
