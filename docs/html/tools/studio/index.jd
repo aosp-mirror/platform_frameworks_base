@@ -282,13 +282,6 @@ device or emulator, click the <strong>Android</strong> tab in the lower left cor
 runtime window to launch the Android runtime window. Click the <strong>Memory</strong> or
 <strong>CPU</strong> tab. </p>
 
-
-<h3 id="memory-monitor">Memory Monitor</h3>
-<p>Android Studio provides a memory monitor view so you can more easily monitor your
-app's memory usage to find deallocated objects, locate memory leaks and track the amount of
-memory the connected device is using. With your app running on a device or emulator, click the
-<strong>Memory Monitor</strong> tab in the lower right corner to launch the memory monitor. </p>
-
 <img src="{@docRoot}images/tools/studio-memory-monitor.png" srcset="{@docRoot}images/tools/studio-memory-monitor_2x.png 2x" width"635" height="171" alt="" />
     <p class="img-caption"><strong>Figure 4.</strong> Monitor memory and CPU usage.</p>
 
