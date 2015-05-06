@@ -209,9 +209,11 @@ public class ZenModeHelper {
             pw.println(config);
             return;
         }
-        pw.printf("allow(calls=%s,repeatCallers=%s,events=%s,from=%s,messages=%s,reminders=%s)\n",
-                config.allowCalls, config.allowRepeatCallers, config.allowEvents, config.allowFrom,
-                config.allowMessages, config.allowReminders);
+        pw.printf("allow(calls=%s,callsFrom=%s,repeatCallers=%s,messages=%s,messagesFrom=%s,"
+                + "events=%s,reminders=%s)\n",
+                config.allowCalls, config.allowCallsFrom, config.allowRepeatCallers,
+                config.allowMessages, config.allowMessagesFrom,
+                config.allowEvents, config.allowReminders);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;
         final int N = config.automaticRules.size();
@@ -483,8 +485,9 @@ public class ZenModeHelper {
             final ZenModeConfig rt = new ZenModeConfig();
             rt.allowCalls = v1.allowCalls;
             rt.allowEvents = v1.allowEvents;
-            rt.allowFrom = v1.allowFrom;
+            rt.allowCallsFrom = v1.allowFrom;
             rt.allowMessages = v1.allowMessages;
+            rt.allowMessagesFrom = v1.allowFrom;
             rt.allowReminders = v1.allowReminders;
             // don't migrate current exit condition
             final int[] days = ZenModeConfig.XmlV1.tryParseDays(v1.sleepMode);
