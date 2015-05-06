@@ -721,5 +721,11 @@ public class AudioSystem
             (1 << STREAM_RING) |
             (1 << STREAM_NOTIFICATION) |
             (1 << STREAM_SYSTEM);
+
+    /**
+     * Event posted by AudioTrack and AudioRecord JNI (JNIDeviceCallback) when routing changes.
+     * Keep in sync with core/jni/android_media_DeviceCallback.h.
+     */
+    final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
 }
 

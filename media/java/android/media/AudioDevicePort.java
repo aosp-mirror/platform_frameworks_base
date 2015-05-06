@@ -83,6 +83,16 @@ public class AudioDevicePort extends AudioPort {
         if (o == null || !(o instanceof AudioDevicePort)) {
             return false;
         }
+        AudioDevicePort other = (AudioDevicePort)o;
+        if (mType != other.type()) {
+            return false;
+        }
+        if (mAddress == null && other.address() != null) {
+            return false;
+        }
+        if (!mAddress.equals(other.address())) {
+            return false;
+        }
         return super.equals(o);
     }
 

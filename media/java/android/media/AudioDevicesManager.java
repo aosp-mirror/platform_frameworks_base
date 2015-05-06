@@ -96,7 +96,7 @@ public class AudioDevicesManager {
      * @param flags A set of bitflags specifying the criteria to test.
      * @see {@link LIST_DEVICES_OUTPUTS} and {@link LIST_DEVICES_INPUTS}
      **/
-    private boolean checkFlags(AudioDevicePort port, int flags) {
+    private static boolean checkFlags(AudioDevicePort port, int flags) {
         return port.role() == AudioPort.ROLE_SINK && (flags & LIST_DEVICES_OUTPUTS) != 0 ||
                port.role() == AudioPort.ROLE_SOURCE && (flags & LIST_DEVICES_INPUTS) != 0;
     }
@@ -110,8 +110,21 @@ public class AudioDevicesManager {
      * @return A (possibly zero-length) array of AudioDeviceInfo objects.
      */
     public AudioDeviceInfo[] listDevices(int flags) {
+        return listDevicesStatic(flags);
+    }
+
+    /**
+     * Generates a list of AudioDeviceInfo objects corresponding to the audio devices currently
+     * connected to the system and meeting the criteria specified in the <code>flags</code>
+     * parameter.
+     * @param flags A set of bitflags specifying the criteria to test.
+     * @see {@link LIST_DEVICES_OUTPUTS}, {@link LIST_DEVICES_INPUTS} and {@link LIST_DEVICES_ALL}.
+     * @return A (possibly zero-length) array of AudioDeviceInfo objects.
+     * @hide
+     */
+    public static AudioDeviceInfo[] listDevicesStatic(int flags) {
         ArrayList<AudioDevicePort> ports = new ArrayList<AudioDevicePort>();
-        int status = mAudioManager.listAudioDevicePorts(ports);
+        int status = AudioManager.listAudioDevicePorts(ports);
         if (status != AudioManager.SUCCESS) {
             // fail and bail!
             return new AudioDeviceInfo[0];
