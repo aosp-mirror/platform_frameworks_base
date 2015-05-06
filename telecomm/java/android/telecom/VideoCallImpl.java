@@ -40,6 +40,8 @@ public class VideoCallImpl extends VideoCall {
     private final IVideoProvider mVideoProvider;
     private final VideoCallListenerBinder mBinder;
     private VideoCall.Callback mCallback;
+    private int mVideoQuality = VideoProfile.QUALITY_UNKNOWN;
+    private Call mCall;
 
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
@@ -161,6 +163,7 @@ public class VideoCallImpl extends VideoCall {
                             (CameraCapabilities) msg.obj);
                     break;
                 case MSG_CHANGE_VIDEO_QUALITY:
+                    mVideoQuality = msg.arg1;
                     mCallback.onVideoQualityChanged(msg.arg1);
                     break;
                 default:
@@ -171,12 +174,13 @@ public class VideoCallImpl extends VideoCall {
 
     private Handler mHandler;
 
-    VideoCallImpl(IVideoProvider videoProvider) throws RemoteException {
+    VideoCallImpl(IVideoProvider videoProvider, Call call) throws RemoteException {
         mVideoProvider = videoProvider;
         mVideoProvider.asBinder().linkToDeath(mDeathRecipient, 0);
 
         mBinder = new VideoCallListenerBinder();
         mVideoProvider.addVideoCallback(mBinder);
+        mCall = call;
     }
 
     public void destroy() {
@@ -251,10 +255,24 @@ public class VideoCallImpl extends VideoCall {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * Sends a session modification request to the video provider.
+     * <p>
+     * The {@link InCallService} will create the {@code requestProfile} based on the current
+     * video state (i.e. {@link Call.Details#getVideoState()}).  It is, however, possible that the
+     * video state maintained by the {@link InCallService} could get out of sync with what is known
+     * by the {@link android.telecom.Connection.VideoProvider}.  To remove ambiguity, the
+     * {@link VideoCallImpl} passes along the pre-modify video profile to the {@code VideoProvider}
+     * to ensure it has full context of the requested change.
+     *
+     * @param requestProfile The requested video profile.
+     */
     public void sendSessionModifyRequest(VideoProfile requestProfile) {
         try {
-            mVideoProvider.sendSessionModifyRequest(requestProfile);
+            VideoProfile originalProfile = new VideoProfile(mCall.getDetails().getVideoState(),
+                    mVideoQuality);
+
+            mVideoProvider.sendSessionModifyRequest(originalProfile, requestProfile);
         } catch (RemoteException e) {
         }
     }
