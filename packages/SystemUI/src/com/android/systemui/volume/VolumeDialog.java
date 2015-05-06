@@ -788,6 +788,7 @@ public class VolumeDialog {
         public void onConfigurationChanged() {
             updateWindowWidthH();
             mSpTexts.update();
+            mZenFooter.onConfigurationChanged();
         }
 
         @Override

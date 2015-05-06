@@ -36,10 +36,11 @@ public class ZenFooter extends LinearLayout {
     private static final String TAG = Util.logTag(ZenFooter.class);
 
     private final Context mContext;
+    private final SpTexts mSpTexts;
 
     private TextView mSummaryLine1;
     private TextView mSummaryLine2;
-    private View mEndNowButton;
+    private TextView mEndNowButton;
     private int mZen = -1;
     private ZenModeConfig mConfig;
     private ZenModeController mController;
@@ -47,6 +48,7 @@ public class ZenFooter extends LinearLayout {
     public ZenFooter(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
+        mSpTexts = new SpTexts(mContext);
         setLayoutTransition(new LayoutTransition());
     }
 
@@ -55,7 +57,10 @@ public class ZenFooter extends LinearLayout {
         super.onFinishInflate();
         mSummaryLine1 = (TextView) findViewById(R.id.volume_zen_summary_line_1);
         mSummaryLine2 = (TextView) findViewById(R.id.volume_zen_summary_line_2);
-        mEndNowButton = findViewById(R.id.volume_zen_end_now);
+        mEndNowButton = (TextView) findViewById(R.id.volume_zen_end_now);
+        mSpTexts.add(mSummaryLine1);
+        mSpTexts.add(mSummaryLine2);
+        mSpTexts.add(mEndNowButton);
     }
 
     public void init(final ZenModeController controller) {
@@ -120,6 +125,10 @@ public class ZenFooter extends LinearLayout {
         final String line2 = ZenModeConfig.getConditionSummary(mContext, mConfig,
                 mController.getCurrentUser());
         Util.setText(mSummaryLine2, line2);
+    }
+
+    public void onConfigurationChanged() {
+        mSpTexts.update();
     }
 
 }
