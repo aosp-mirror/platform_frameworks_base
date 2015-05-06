@@ -117,14 +117,22 @@ final class LogicalDisplay {
     public DisplayInfo getDisplayInfoLocked() {
         if (mInfo == null) {
             mInfo = new DisplayInfo();
+            mInfo.copyFrom(mBaseDisplayInfo);
             if (mOverrideDisplayInfo != null) {
-                mInfo.copyFrom(mOverrideDisplayInfo);
-                mInfo.layerStack = mBaseDisplayInfo.layerStack;
-                mInfo.name = mBaseDisplayInfo.name;
-                mInfo.uniqueId = mBaseDisplayInfo.uniqueId;
-                mInfo.state = mBaseDisplayInfo.state;
-            } else {
-                mInfo.copyFrom(mBaseDisplayInfo);
+                mInfo.appWidth = mOverrideDisplayInfo.appWidth;
+                mInfo.appHeight = mOverrideDisplayInfo.appHeight;
+                mInfo.smallestNominalAppWidth = mOverrideDisplayInfo.smallestNominalAppWidth;
+                mInfo.smallestNominalAppHeight = mOverrideDisplayInfo.smallestNominalAppHeight;
+                mInfo.largestNominalAppWidth = mOverrideDisplayInfo.largestNominalAppWidth;
+                mInfo.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
+                mInfo.logicalWidth = mOverrideDisplayInfo.logicalWidth;
+                mInfo.logicalHeight = mOverrideDisplayInfo.logicalHeight;
+                mInfo.overscanLeft = mOverrideDisplayInfo.overscanLeft;
+                mInfo.overscanTop = mOverrideDisplayInfo.overscanTop;
+                mInfo.overscanRight = mOverrideDisplayInfo.overscanRight;
+                mInfo.overscanBottom = mOverrideDisplayInfo.overscanBottom;
+                mInfo.rotation = mOverrideDisplayInfo.rotation;
+                mInfo.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
             }
         }
         return mInfo;
