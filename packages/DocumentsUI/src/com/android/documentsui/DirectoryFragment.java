@@ -1220,8 +1220,9 @@ public class DirectoryFragment extends Fragment {
             return;
         }
 
-        if (srcDocs.isEmpty())
+        if (srcDocs.isEmpty()) {
             return;
+        }
 
         final DocumentStack curStack = getDisplayState(this).stack;
         DocumentStack tmpStack = new DocumentStack();
@@ -1246,12 +1247,17 @@ public class DirectoryFragment extends Fragment {
             ClipData.Item item = clipData.getItemAt(i);
             Uri itemUri = item.getUri();
             if (itemUri != null && DocumentsContract.isDocumentUri(context, itemUri)) {
+                ContentProviderClient client = null;
                 try {
-                    Cursor cursor = resolver.query(itemUri, null, null, null, null);
+                    client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                            resolver, itemUri.getAuthority());
+                    Cursor cursor = client.query(itemUri, null, null, null, null);
                     cursor.moveToPosition(0);
                     srcDocs.add(DocumentInfo.fromCursor(cursor, itemUri.getAuthority()));
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
+                } finally {
+                    ContentProviderClient.releaseQuietly(client);
                 }
             }
         }
@@ -1266,7 +1272,10 @@ public class DirectoryFragment extends Fragment {
         for (DocumentInfo doc : docs) {
             final Uri uri = DocumentsContract.buildDocumentUri(doc.authority, doc.documentId);
             if (clipData == null) {
-                clipData = ClipData.newUri(resolver, "", uri);
+                // TODO: figure out what this string should be.
+                // Currently it is not displayed anywhere in the UI, but this might change.
+                final String label = "";
+                clipData = ClipData.newUri(resolver, label, uri);
             } else {
                 // TODO: update list of mime types in ClipData.
                 clipData.addItem(new ClipData.Item(uri));
