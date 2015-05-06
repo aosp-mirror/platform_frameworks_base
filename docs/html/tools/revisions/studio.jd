@@ -50,7 +50,7 @@ Android Studio, as denoted by revision number. </p>
     <p>Various fixes and enhancements:</p>
     <ul>
       <li>Updated the Android runtime window to include the
-        <a href="{@docRoot}tools/studio/index.html#memory-monitor">Memory Monitor</a> tool
+        <a href="{@docRoot}tools/studio/index.html#mem-cpu">Memory Monitor</a> tool
         and added a tab for CPU performance monitoring.</li>
       <li>Added a <em>Captures</em> tab in the left margin to display the captured memory and CPU
         performance data files, such as CPU method tracking and memory heap snapshots.</li>
