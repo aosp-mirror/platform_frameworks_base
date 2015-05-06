@@ -1,0 +1,1172 @@
+page.title=RenderScript Numerical Types
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> <h5>Scalars:</h5>
+</p>
+
+<p> RenderScript supports the following scalar numerical types:
+<table>
+<tr><td>                 </td>  <td>8 bits        </td>   <td>16 bits         </td>   <td>32 bits       </td>   <td>64 bits</td></tr>
+<tr><td>Integer:         </td>  <td>char, <a href='rs_value_types.html#android_rs:int8_t'>int8_t</a>  </td>   <td>short, <a href='rs_value_types.html#android_rs:int16_t'>int16_t</a>  </td>   <td><a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>       </td>   <td>long, long long, <a href='rs_value_types.html#android_rs:int64_t'>int64_t</a></td></tr>
+<tr><td>Unsigned integer:</td>  <td>uchar, <a href='rs_value_types.html#android_rs:uint8_t'>uint8_t</a></td>   <td>ushort, <a href='rs_value_types.html#android_rs:uint16_t'>uint16_t</a></td>   <td>uint, <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a></td>   <td>ulong, <a href='rs_value_types.html#android_rs:uint64_t'>uint64_t</a></td></tr>
+<tr><td>Floating point:  </td>  <td>              </td>   <td>                </td>   <td>float         </td>   <td>double</td></tr>
+</table>
+</p>
+
+<p> <h5>Vectors:</h5>
+</p>
+
+<p> RenderScript supports fixed size vectors of length 2, 3, and 4.
+Vectors are declared using the common type name followed by a 2, 3, or 4.
+E.g. <a href='rs_value_types.html#android_rs:float4'>float4</a>, <a href='rs_value_types.html#android_rs:int3'>int3</a>, <a href='rs_value_types.html#android_rs:double2'>double2</a>, <a href='rs_value_types.html#android_rs:ulong4'>ulong4</a>.
+</p>
+
+<p> To create vector literals, use the vector type followed by the values enclosed
+between parentheses, e.g. <code>(float3)(1.0f, 2.0f, 3.0f)</code>.
+</p>
+
+<p> Entries of a vector can be accessed using different naming styles.
+</p>
+
+<p> Single entries can be accessed by following the variable name with a dot and:<ul>
+<li>The letters x, y, z, and w,</li>
+<li>The letters r, g, b, and a,</li>
+<li>The letter s or S, followed by a zero based index.</li></ul>
+</p>
+
+<p> For example, with <code>int4 myVar;</code> the following are equivalent:<code><br/>
+  myVar.x == myVar.r == myVar.s0 == myVar.S0<br/>
+  myVar.y == myVar.g == myVar.s1 == myVar.S1<br/>
+  myVar.z == myVar.b == myVar.s2 == myVar.S2<br/>
+  myVar.w == myVar.a == myVar.s3 == myVar.S3</code>
+</p>
+
+<p> Multiple entries of a vector can be accessed at once by using an identifier that is
+the concatenation of multiple letters or indices.  The resulting vector has a size
+equal to the number of entries named.
+</p>
+
+<p> With the example above, the middle two entries can be accessed using
+<code>myVar.yz</code>, <code>myVar.gb</code>, <code>myVar.s12</code>, and <code>myVar.S12</code>.
+</p>
+
+<p> The entries don't have to be contiguous or in increasing order.  Entries can even be
+repeated, as long as we're not trying to assign to it.  You also can't mix the naming
+styles.
+</p>
+
+<p> Here are examples of what can or can't be done:<code><br/>
+float4 v4;<br/>
+float3 v3;<br/>
+float2 v2;<br/>
+v2 = v4.xx; // Valid<br/>
+v3 = v4.zxw; // Valid<br/>
+v3 = v4.bba; // Valid<br/>
+v3 = v4.s032; // Valid<br/>
+v3.s120 = v4.S233; // Valid<br/>
+v4.yz = v3.rg; // Valid<br/>
+v4.yzx = v3.rg; // Invalid: mismatched sizes<br/>
+v4.yzz = v3; // Invalid: z appears twice in an assignment<br/>
+v3 = v3.xas0; // Invalid: can't mix xyzw with rgba nor s0...<br/>
+v3 = v4.s034; // Invalid: the digit can only be 0, 1, 2, or 3<br/>
+</code>
+</p>
+
+<p> <h5>Matrices and Quaternions:</h5>
+</p>
+
+<p> RenderScript supports fixed size square matrices of floats of size 2x2, 3x3, and 4x4.
+The types are named <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>, <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>, and <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>.  See
+<a href='rs_matrix.html'>Matrix Functions</a> for the list of operations.
+</p>
+
+<p> Quaternions are also supported via <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>.  See <a href='rs_quaternion.html'>Quaterion Functions</a> for the list
+of operations.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:char2'>char2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 8 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:char3'>char3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 8 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:char4'>char4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 8 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:double2'>double2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 64 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:double3'>double3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 64 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:double4'>double4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 64 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:float2'>float2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:float3'>float3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:float4'>float4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int16_t'>int16_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      16 bit signed integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int2'>int2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 32 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int3'>int3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 32 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int32_t'>int32_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      32 bit signed integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int4'>int4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 32 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int64_t'>int64_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      64 bit signed integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:int8_t'>int8_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      8 bit signed integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:long2'>long2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 64 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:long3'>long3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 64 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:long4'>long4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 64 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:rs_matrix2x2'>rs_matrix2x2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      2x2 matrix of 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:rs_matrix3x3'>rs_matrix3x3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      3x3 matrix of 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:rs_matrix4x4'>rs_matrix4x4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      4x4 matrix of 32 bit floats
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:rs_quaternion'>rs_quaternion</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Quaternion
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:short2'>short2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 16 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:short3'>short3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 16 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:short4'>short4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 16 bit signed integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:size_t'>size_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Unsigned size type
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ssize_t'>ssize_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Signed size type
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uchar'>uchar</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      8 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uchar2'>uchar2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 8 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uchar3'>uchar3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 8 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uchar4'>uchar4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 8 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint'>uint</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      32 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint16_t'>uint16_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      16 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint2'>uint2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 32 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint3'>uint3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 32 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint32_t'>uint32_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      32 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint4'>uint4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 32 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint64_t'>uint64_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      64 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:uint8_t'>uint8_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      8 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ulong'>ulong</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      64 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ulong2'>ulong2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 64 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ulong3'>ulong3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 64 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ulong4'>ulong4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 64 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ushort'>ushort</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      16 bit unsigned integer
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ushort2'>ushort2</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Two 16 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ushort3'>ushort3</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Three 16 bit unsigned integers
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_value_types.html#android_rs:ushort4'>ushort4</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Four 16 bit unsigned integers
+    </td>
+  </tr>
+</tbody></table>
+<h2>Types</h2>
+<a name='android_rs:char2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>char2</span>
+    <span class='normal'>: Two 8 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: char __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two chars.  These two chars are packed into a single 16 bit field
+with a 16 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:char3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>char3</span>
+    <span class='normal'>: Three 8 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: char __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three chars.  These three chars are packed into a single 32 bit field
+with a 32 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:char4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>char4</span>
+    <span class='normal'>: Four 8 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: char __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four chars.  These four chars are packed into a single 32 bit field
+with a 32 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:double2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>double2</span>
+    <span class='normal'>: Two 64 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: double __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two doubles.  These two double fields packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:double3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>double3</span>
+    <span class='normal'>: Three 64 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: double __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three doubles.  These three double fields packed into a single 256 bit field
+with a 256 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:double4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>double4</span>
+    <span class='normal'>: Four 64 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: double __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four doubles.  These four double fields packed into a single 256 bit field
+with a 256 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:float2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>float2</span>
+    <span class='normal'>: Two 32 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: float __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two floats.  These two floats are packed into a single 64 bit field
+with a 64 bit alignment.
+</p>
+
+<p> A vector of two floats.  These two floats are packed into a single 64 bit field
+with a 64 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:float3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>float3</span>
+    <span class='normal'>: Three 32 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: float __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three floats.  These three floats are packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:float4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>float4</span>
+    <span class='normal'>: Four 32 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: float __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four floats type.  These four floats are packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:int16_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>int16_t</span>
+    <span class='normal'>: 16 bit signed integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: short&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A 16 bit signed integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:int2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>int2</span>
+    <span class='normal'>: Two 32 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: int __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two ints.  These two ints are packed into a single 64 bit field
+with a 64 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:int3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>int3</span>
+    <span class='normal'>: Three 32 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: int __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three ints.  These three ints are packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:int32_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>int32_t</span>
+    <span class='normal'>: 32 bit signed integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A 32 bit signed integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:int4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>int4</span>
+    <span class='normal'>: Four 32 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: int __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four ints.  These two fours are packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:int64_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>int64_t</span>
+    <span class='normal'>: 64 bit signed integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+</p>
+<p>A typedef of: long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+</p>
+<p> A 64 bit signed integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:int8_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>int8_t</span>
+    <span class='normal'>: 8 bit signed integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> 8 bit signed integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:long2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>long2</span>
+    <span class='normal'>: Two 64 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: long __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two longs.  These two longs are packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:long3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>long3</span>
+    <span class='normal'>: Three 64 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: long __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three longs.  These three longs are packed into a single 256 bit field
+with a 256 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:long4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>long4</span>
+    <span class='normal'>: Four 64 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: long __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four longs.  These four longs are packed into a single 256 bit field
+with a 256 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_matrix2x2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_matrix2x2</span>
+    <span class='normal'>: 2x2 matrix of 32 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A structure with the following fields:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>float m[4]</th><td></td></tr>
+  </tbody></table><br/>
+<p> A square 2x2 matrix of floats.  The entries are stored in the array at the
+location [row*2 + col].
+</p>
+
+<p> See <a href='rs_matrix.html'>Matrix Functions</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_matrix3x3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_matrix3x3</span>
+    <span class='normal'>: 3x3 matrix of 32 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A structure with the following fields:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>float m[9]</th><td></td></tr>
+  </tbody></table><br/>
+<p> A square 3x3 matrix of floats.  The entries are stored in the array at the
+location [row*3 + col].
+</p>
+
+<p> See <a href='rs_matrix.html'>Matrix Functions</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_matrix4x4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_matrix4x4</span>
+    <span class='normal'>: 4x4 matrix of 32 bit floats</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A structure with the following fields:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>float m[16]</th><td></td></tr>
+  </tbody></table><br/>
+<p> A square 4x4 matrix of floats.  The entries are stored in the array at the
+location [row*4 + col].
+</p>
+
+<p> See <a href='rs_matrix.html'>Matrix Functions</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_quaternion'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_quaternion</span>
+    <span class='normal'>: Quaternion</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: float4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A square 4x4 matrix of floats that represents a quaternion.
+</p>
+
+<p> See <a href='rs_quaternion.html'>Quaternion Functions</a>.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:short2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>short2</span>
+    <span class='normal'>: Two 16 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: short __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two shorts.  These two shorts are packed into a single 32 bit field
+with a 32 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:short3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>short3</span>
+    <span class='normal'>: Three 16 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: short __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three shorts.  These three short fields packed into a single 64 bit field
+with a 64 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:short4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>short4</span>
+    <span class='normal'>: Four 16 bit signed integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: short __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four shorts.  These four short fields packed into a single 64 bit field
+with a 64 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:size_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>size_t</span>
+    <span class='normal'>: Unsigned size type</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uint64_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 64 bits. 
+</p>
+<p>A typedef of: uint32_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+<p> Unsigned size type.  The number of bits depend on the compilation flags.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ssize_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ssize_t</span>
+    <span class='normal'>: Signed size type</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: int64_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 64 bits. 
+</p>
+<p>A typedef of: int32_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+<p> Signed size type.  The number of bits depend on the compilation flags.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uchar'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uchar</span>
+    <span class='normal'>: 8 bit unsigned integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uint8_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> 8 bit unsigned integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uchar2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uchar2</span>
+    <span class='normal'>: Two 8 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uchar __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two uchars.  These two uchar fields packed into a single 16 bit field
+with a 16 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uchar3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uchar3</span>
+    <span class='normal'>: Three 8 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uchar __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three uchars.  These three uchar fields packed into a single 32 bit field
+with a 32 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uchar4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uchar4</span>
+    <span class='normal'>: Four 8 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uchar __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four uchars.  These four uchar fields packed into a single 32 bit field
+with a 32 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uint'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uint</span>
+    <span class='normal'>: 32 bit unsigned integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uint32_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A 32 bit unsigned integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uint16_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uint16_t</span>
+    <span class='normal'>: 16 bit unsigned integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: unsigned short&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A 16 bit unsigned integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uint2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uint2</span>
+    <span class='normal'>: Two 32 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uint __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two uints.  These two uints are packed into a single 64 bit field
+with a 64 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uint3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uint3</span>
+    <span class='normal'>: Three 32 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uint __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three uints.  These three uints are packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uint32_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uint32_t</span>
+    <span class='normal'>: 32 bit unsigned integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: unsigned int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A 32 bit unsigned integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uint4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uint4</span>
+    <span class='normal'>: Four 32 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uint __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four uints.  These four uints are packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uint64_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uint64_t</span>
+    <span class='normal'>: 64 bit unsigned integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: unsigned long long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+</p>
+<p>A typedef of: unsigned long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 21</a>
+</p>
+<p> A 64 bit unsigned integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:uint8_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>uint8_t</span>
+    <span class='normal'>: 8 bit unsigned integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: unsigned char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> 8 bit unsigned integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ulong'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ulong</span>
+    <span class='normal'>: 64 bit unsigned integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uint64_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A 64 bit unsigned integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ulong2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ulong2</span>
+    <span class='normal'>: Two 64 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: ulong __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two ulongs.  These two ulongs are packed into a single 128 bit field
+with a 128 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ulong3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ulong3</span>
+    <span class='normal'>: Three 64 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: ulong __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three ulongs.  These three ulong fields packed into a single 256 bit field
+with a 256 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ulong4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ulong4</span>
+    <span class='normal'>: Four 64 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: ulong __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four ulongs.  These four ulong fields packed into a single 256 bit field
+with a 256 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ushort'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ushort</span>
+    <span class='normal'>: 16 bit unsigned integer</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: uint16_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A 16 bit unsigned integer type.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ushort2'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ushort2</span>
+    <span class='normal'>: Two 16 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: ushort __attribute__((ext_vector_type(2)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of two ushorts.  These two ushort fields packed into a single 32 bit field
+with a 32 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ushort3'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ushort3</span>
+    <span class='normal'>: Three 16 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: ushort __attribute__((ext_vector_type(3)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of three ushorts.  These three ushort fields packed into a single 64 bit field
+with a 64 bit alignment.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:ushort4'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>ushort4</span>
+    <span class='normal'>: Four 16 bit unsigned integers</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: ushort __attribute__((ext_vector_type(4)))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p> A vector of four ushorts.  These four ushort fields packed into a single 64 bit field
+with a 64 bit alignment.
+</p>
+  </div>
+</div>
+
+</div>
