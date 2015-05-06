@@ -104,13 +104,13 @@ public class AndroidKeyStoreProvider extends Provider {
      *
      * <p>The following primitives are supported: {@link Cipher} and {@link Mac}.
      *
-     * @return KeyStore operation handle or {@code null} if the provided primitive's KeyStore
-     *         operation is not in progress.
+     * @return KeyStore operation handle or {@code 0} if the provided primitive's KeyStore operation
+     *         is not in progress.
      *
      * @throws IllegalArgumentException if the provided primitive is not supported or is not backed
      *         by AndroidKeyStore provider.
      */
-    public static Long getKeyStoreOperationHandle(Object cryptoPrimitive) {
+    public static long getKeyStoreOperationHandle(Object cryptoPrimitive) {
         if (cryptoPrimitive == null) {
             throw new NullPointerException();
         }

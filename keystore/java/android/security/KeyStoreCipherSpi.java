@@ -134,7 +134,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
      * error conditions in between.
      */
     private IBinder mOperationToken;
-    private Long mOperationHandle;
+    private long mOperationHandle;
     private KeyStoreCryptoOperationChunkedStreamer mMainDataStreamer;
 
     /**
@@ -247,7 +247,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         mIvHasBeenUsed = false;
         mAdditionalEntropyForBegin = null;
         mOperationToken = null;
-        mOperationHandle = null;
+        mOperationHandle = 0;
         mMainDataStreamer = null;
         mCachedException = null;
     }
@@ -258,7 +258,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
             mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
-        mOperationHandle = null;
+        mOperationHandle = 0;
         mMainDataStreamer = null;
         mAdditionalEntropyForBegin = null;
         mCachedException = null;
@@ -321,6 +321,9 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
 
         if (mOperationToken == null) {
             throw new IllegalStateException("Keystore returned null operation token");
+        }
+        if (mOperationHandle == 0) {
+            throw new IllegalStateException("Keystore returned invalid operation handle");
         }
 
         loadAlgorithmSpecificParametersFromBeginResult(keymasterOutputArgs);
@@ -471,7 +474,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     }
 
     @Override
-    public Long getOperationHandle() {
+    public long getOperationHandle() {
         return mOperationHandle;
     }
 
