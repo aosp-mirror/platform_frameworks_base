@@ -165,8 +165,6 @@ public class SearchDialog extends Dialog {
         setContentView(com.android.internal.R.layout.search_bar);
 
         // get the view elements for local access
-        SearchBar searchBar = (SearchBar) findViewById(com.android.internal.R.id.search_bar);
-        searchBar.setSearchDialog(this);
         mSearchView = (SearchView) findViewById(com.android.internal.R.id.search_view);
         mSearchView.setIconified(false);
         mSearchView.setOnCloseListener(mOnCloseListener);
@@ -618,26 +616,12 @@ public class SearchDialog extends Dialog {
      */
     public static class SearchBar extends LinearLayout {
 
-        private SearchDialog mSearchDialog;
-
         public SearchBar(Context context, AttributeSet attrs) {
             super(context, attrs);
         }
 
         public SearchBar(Context context) {
             super(context);
-        }
-
-        public void setSearchDialog(SearchDialog searchDialog) {
-            mSearchDialog = searchDialog;
-        }
-
-        /**
-         * Don't allow action modes in a SearchBar, it looks silly.
-         */
-        @Override
-        public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
-            return null;
         }
 
         @Override
