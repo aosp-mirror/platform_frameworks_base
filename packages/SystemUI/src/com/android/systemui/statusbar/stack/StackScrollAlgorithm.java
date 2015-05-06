@@ -582,7 +582,7 @@ public class StackScrollAlgorithm {
             return row.getIntrinsicHeight();
         } else if (child instanceof ExpandableView) {
             ExpandableView expandableView = (ExpandableView) child;
-            return expandableView.getActualHeight();
+            return expandableView.getIntrinsicHeight();
         }
         return child == null? mCollapsedSize : child.getHeight();
     }
