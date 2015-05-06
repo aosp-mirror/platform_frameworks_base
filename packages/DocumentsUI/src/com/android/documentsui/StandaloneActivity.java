@@ -200,9 +200,9 @@ public class StandaloneActivity extends BaseActivity {
                 && !mSearchManager.isSearching()
                 && !root.isDownloads());
 
-        fileSize.setVisible(cwd != null);
-        advanced.setVisible(cwd != null);
-
+        createDir.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        fileSize.setVisible(true);
+        advanced.setVisible(true);
         settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
 
         return shown;

@@ -16,17 +16,17 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/menu_create_dir"
-        android:title="@string/menu_create_dir"
-        android:icon="@drawable/ic_menu_new_folder"
-        android:showAsAction="always" />
-    <item
         android:id="@+id/menu_search"
         android:title="@string/menu_search"
         android:icon="@drawable/ic_menu_search"
         android:showAsAction="always|collapseActionView"
         android:actionViewClass="android.widget.SearchView"
         android:imeOptions="actionSearch" />
+    <item
+        android:id="@+id/menu_create_dir"
+        android:title="@string/menu_create_dir"
+        android:icon="@drawable/ic_menu_new_folder"
+        android:showAsAction="always" />
     <item
         android:id="@+id/menu_sort"
         android:title="@string/menu_sort"
