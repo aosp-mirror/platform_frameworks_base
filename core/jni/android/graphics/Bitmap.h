@@ -62,7 +62,8 @@ public:
     int width() const { return info().width(); }
     int height() const { return info().height(); }
     size_t rowBytes() const;
-    SkPixelRef* pixelRef() const;
+    SkPixelRef* peekAtPixelRef() const;
+    SkPixelRef* refPixelRef();
     bool valid() const { return mPixelStorageType != PixelStorageType::Invalid; }
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
@@ -88,6 +89,7 @@ private:
     JNIEnv* jniEnv();
     bool shouldDisposeSelfLocked();
     void assertValid() const;
+    SkPixelRef* refPixelRefLocked();
 
     android::Mutex mLock;
     int mPinnedRefCount = 0;

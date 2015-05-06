@@ -352,8 +352,8 @@ void GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap, SkBitmap* outBitmap) 
     getBitmap(env, bitmap)->getSkBitmap(outBitmap);
 }
 
-SkPixelRef* GraphicsJNI::getSkPixelRef(JNIEnv* env, jobject bitmap) {
-    return getBitmap(env, bitmap)->pixelRef();
+SkPixelRef* GraphicsJNI::refSkPixelRef(JNIEnv* env, jobject bitmap) {
+    return getBitmap(env, bitmap)->refPixelRef();
 }
 
 SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) {
