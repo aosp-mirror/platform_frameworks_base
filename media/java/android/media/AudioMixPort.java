@@ -20,16 +20,21 @@ package android.media;
  * The AudioMixPort is a specialized type of AudioPort
  * describing an audio mix or stream at an input or output stream of the audio
  * framework.
+ * In addition to base audio port attributes, the mix descriptor contains:
+ * - the unique audio I/O handle assigned by AudioFlinger to this mix.
  * @see AudioPort
  * @hide
  */
 
 public class AudioMixPort extends AudioPort {
 
-    AudioMixPort(AudioHandle handle, int role, String deviceName,
+    private final int mIoHandle;
+
+    AudioMixPort(AudioHandle handle, int ioHandle, int role, String deviceName,
             int[] samplingRates, int[] channelMasks,
             int[] formats, AudioGain[] gains) {
         super(handle, role, deviceName, samplingRates, channelMasks, formats, gains);
+        mIoHandle = ioHandle;
     }
 
     /**
@@ -41,11 +46,23 @@ public class AudioMixPort extends AudioPort {
         return new AudioMixPortConfig(this, samplingRate, channelMask, format, gain);
     }
 
+    /**
+     * Get the device type (e.g AudioManager.DEVICE_OUT_SPEAKER)
+     */
+    public int ioHandle() {
+        return mIoHandle;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || !(o instanceof AudioMixPort)) {
             return false;
         }
+        AudioMixPort other = (AudioMixPort)o;
+        if (mIoHandle != other.ioHandle()) {
+            return false;
+        }
+
         return super.equals(o);
     }
 
