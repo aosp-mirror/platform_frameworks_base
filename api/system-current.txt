@@ -1122,6 +1122,7 @@ package android {
     field public static final int screenOrientation = 16842782; // 0x101001e
     field public static final int screenSize = 16843466; // 0x10102ca
     field public static final int scrollHorizontally = 16843099; // 0x101015b
+    field public static final int scrollIndicators = 16844023; // 0x10104f7
     field public static final int scrollViewStyle = 16842880; // 0x1010080
     field public static final int scrollX = 16842962; // 0x10100d2
     field public static final int scrollY = 16842963; // 0x10100d3
@@ -38425,6 +38426,7 @@ package android.view {
     method public int getScrollBarFadeDuration();
     method public int getScrollBarSize();
     method public int getScrollBarStyle();
+    method public int getScrollIndicators();
     method public final int getScrollX();
     method public final int getScrollY();
     method public int getSolidColor();
@@ -38506,6 +38508,7 @@ package android.view {
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
     method public boolean isScrollContainer();
+    method public boolean isScrollIndicatorEnabled(int);
     method public boolean isScrollbarFadingEnabled();
     method public boolean isSelected();
     method public boolean isShown();
@@ -38705,6 +38708,8 @@ package android.view {
     method public void setScrollBarSize(int);
     method public void setScrollBarStyle(int);
     method public void setScrollContainer(boolean);
+    method public void setScrollIndicators(int);
+    method public void setScrollIndicators(int, int);
     method public void setScrollX(int);
     method public void setScrollY(int);
     method public void setScrollbarFadingEnabled(boolean);
@@ -38830,6 +38835,12 @@ package android.view {
     field public static final int SCROLL_AXIS_HORIZONTAL = 1; // 0x1
     field public static final int SCROLL_AXIS_NONE = 0; // 0x0
     field public static final int SCROLL_AXIS_VERTICAL = 2; // 0x2
+    field public static final int SCROLL_INDICATOR_BOTTOM = 2; // 0x2
+    field public static final int SCROLL_INDICATOR_END = 32; // 0x20
+    field public static final int SCROLL_INDICATOR_LEFT = 4; // 0x4
+    field public static final int SCROLL_INDICATOR_RIGHT = 8; // 0x8
+    field public static final int SCROLL_INDICATOR_START = 16; // 0x10
+    field public static final int SCROLL_INDICATOR_TOP = 1; // 0x1
     field protected static final int[] SELECTED_STATE_SET;
     field protected static final int[] SELECTED_WINDOW_FOCUSED_STATE_SET;
     field public static final int SOUND_EFFECTS_ENABLED = 134217728; // 0x8000000

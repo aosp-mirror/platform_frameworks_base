@@ -24,52 +24,51 @@
 
     <include layout="@layout/alert_dialog_title_material" />
 
-    <FrameLayout android:id="@+id/contentPanel"
+    <FrameLayout
+        android:id="@+id/contentPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:minHeight="48dp">
-        <View android:id="@+id/scrollIndicatorUp"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_gravity="top"
-            android:background="@drawable/list_divider_material"/>
-        <ScrollView android:id="@+id/scrollView"
+
+        <ScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="@dimen/dialog_padding_top_material"
             android:clipToPadding="false">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-                <TextView android:id="@+id/message"
-                          style="@style/TextAppearance.Material.Subhead"
-                          android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:paddingStart="?attr/dialogPreferredPadding"
-                          android:paddingTop="@dimen/dialog_padding_top_material"
-                          android:paddingEnd="?attr/dialogPreferredPadding" />
-                <Space android:id="@+id/textSpacerNoButtons"
-                       android:visibility="gone"
-                       android:layout_width="0dp"
-                       android:layout_height="@dimen/dialog_padding_top_material" />
+
+                <TextView
+                    android:id="@+id/message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="?attr/dialogPreferredPadding"
+                    android:paddingStart="?attr/dialogPreferredPadding"
+                    style="@style/TextAppearance.Material.Subhead" />
+
+                <Space
+                    android:id="@+id/textSpacerNoButtons"
+                    android:visibility="gone"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dialog_padding_top_material" />
             </LinearLayout>
         </ScrollView>
-        <View android:id="@+id/scrollIndicatorDown"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_gravity="bottom"
-            android:background="@drawable/list_divider_material"/>
     </FrameLayout>
 
-    <FrameLayout android:id="@+id/customPanel"
+    <FrameLayout
+        android:id="@+id/customPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:minHeight="48dp">
-        <FrameLayout android:id="@+id/custom"
+
+        <FrameLayout
+            android:id="@+id/custom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </FrameLayout>
