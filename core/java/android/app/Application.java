@@ -18,6 +18,7 @@ package android.app;
 
 import java.util.ArrayList;
 
+import android.annotation.CallSuper;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -89,6 +90,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
      * service, or receiver in a process.
      * If you override this method, be sure to call super.onCreate().
      */
+    @CallSuper
     public void onCreate() {
     }
 
@@ -98,9 +100,11 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
      * removed by simply killing them; no user code (including this callback)
      * is executed when doing so.
      */
+    @CallSuper
     public void onTerminate() {
     }
 
+    @CallSuper
     public void onConfigurationChanged(Configuration newConfig) {
         Object[] callbacks = collectComponentCallbacks();
         if (callbacks != null) {
@@ -110,6 +114,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    @CallSuper
     public void onLowMemory() {
         Object[] callbacks = collectComponentCallbacks();
         if (callbacks != null) {
@@ -119,6 +124,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    @CallSuper
     public void onTrimMemory(int level) {
         Object[] callbacks = collectComponentCallbacks();
         if (callbacks != null) {
