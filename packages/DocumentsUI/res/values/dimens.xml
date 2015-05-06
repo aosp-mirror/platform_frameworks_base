@@ -39,4 +39,6 @@
 
     <dimen name="dir_elevation">8dp</dimen>
 
+    <dimen name="drag_shadow_size">120dp</dimen>
+
 </resources>

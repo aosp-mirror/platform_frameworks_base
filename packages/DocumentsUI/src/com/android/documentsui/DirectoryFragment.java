@@ -44,6 +44,7 @@ import android.content.Loader;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
@@ -62,6 +63,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -88,6 +90,7 @@ import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -202,6 +205,7 @@ public class DirectoryFragment extends Fragment {
         mListView.setOnItemClickListener(mItemListener);
         mListView.setMultiChoiceModeListener(mMultiListener);
         mListView.setRecyclerListener(mRecycleListener);
+        setupDragAndDropOnDirectoryView(mListView);
 
         // Indent our list divider to align with text
         final Drawable divider = mListView.getDivider();
@@ -217,6 +221,7 @@ public class DirectoryFragment extends Fragment {
         mGridView.setOnItemClickListener(mItemListener);
         mGridView.setMultiChoiceModeListener(mMultiListener);
         mGridView.setRecyclerListener(mRecycleListener);
+        setupDragAndDropOnDirectoryView(mGridView);
 
         return view;
     }
@@ -897,13 +902,8 @@ public class DirectoryFragment extends Fragment {
                 iconMime.setAlpha(1f);
                 iconThumb.setAlpha(0f);
                 iconThumb.setImageDrawable(null);
-                if (docIcon != 0) {
-                    iconMime.setImageDrawable(
-                            IconUtils.loadPackageIcon(context, docAuthority, docIcon));
-                } else {
-                    iconMime.setImageDrawable(IconUtils.loadMimeIcon(
-                            context, docMimeType, docAuthority, docId, state.derivedMode));
-                }
+                iconMime.setImageDrawable(
+                        getDocumentIcon(context, docAuthority, docId, docMimeType, docIcon, state));
             }
 
             boolean hasLine1 = false;
@@ -1010,6 +1010,8 @@ public class DirectoryFragment extends Fragment {
             iconThumb.setAlpha(iconAlpha);
             if (icon1 != null) icon1.setAlpha(iconAlpha);
             if (icon2 != null) icon2.setAlpha(iconAlpha);
+
+            setupDragAndDropOnDocumentView(convertView, cursor);
 
             return convertView;
         }
@@ -1261,5 +1263,136 @@ public class DirectoryFragment extends Fragment {
             }
         }
         return clipData;
+    }
+
+    private void setupDragAndDropOnDirectoryView(AbsListView view) {
+        // Listen for drops on non-directory items and empty space.
+        view.setOnDragListener(mOnDragListener);
+    }
+
+    private void setupDragAndDropOnDocumentView(View view, Cursor cursor) {
+        final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+        if (Document.MIME_TYPE_DIR.equals(docMimeType)) {
+            // Make a directory item a drop target. Drop on non-directories and empty space
+            // is handled at the list/grid view level.
+            view.setOnDragListener(mOnDragListener);
+        }
+
+        // Temporary: attaching the listener to the title only.
+        // Attaching to the entire item conflicts with the item long click handler responsible
+        // for item selection.
+        final View title = view.findViewById(android.R.id.title);
+        title.setOnLongClickListener(mLongClickListener);
+    }
+
+    private View.OnDragListener mOnDragListener = new View.OnDragListener() {
+        @Override
+        public boolean onDrag(View v, DragEvent event) {
+            switch (event.getAction()) {
+                case DragEvent.ACTION_DRAG_STARTED:
+                    // TODO: Check if the event contains droppable data.
+                    return true;
+
+                // TODO: Highlight potential drop target directory?
+                // TODO: Expand drop target directory on hover?
+                case DragEvent.ACTION_DRAG_ENTERED:
+                case DragEvent.ACTION_DRAG_LOCATION:
+                case DragEvent.ACTION_DRAG_EXITED:
+                case DragEvent.ACTION_DRAG_ENDED:
+                    return true;
+
+                case DragEvent.ACTION_DROP:
+                    int dstPosition = mCurrentView.getPositionForView(v);
+                    DocumentInfo dstDir = null;
+                    if (dstPosition != android.widget.AdapterView.INVALID_POSITION) {
+                        Cursor dstCursor = mAdapter.getItem(dstPosition);
+                        dstDir = DocumentInfo.fromDirectoryCursor(dstCursor);
+                        // TODO: Do not drop into the directory where the documents came from.
+                    }
+                    copyFromClipData(event.getClipData(), dstDir);
+                    return true;
+            }
+            return false;
+        }
+    };
+
+    private View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            final List<DocumentInfo> docs = getDraggableDocuments(v);
+            if (docs.isEmpty()) {
+                return false;
+            }
+            v.startDrag(
+                    getClipDataFromDocuments(docs),
+                    new DrawableShadowBuilder(getDragShadowIcon(docs)),
+                    null,
+                    View.DRAG_FLAG_GLOBAL
+            );
+            return true;
+        }
+    };
+
+    private List<DocumentInfo> getDraggableDocuments(View currentItemView) {
+        final int position = mCurrentView.getPositionForView(currentItemView);
+        if (position == android.widget.AdapterView.INVALID_POSITION) {
+            return Collections.EMPTY_LIST;
+        }
+
+        final List<DocumentInfo> selectedDocs = getSelectedDocuments();
+        if (!selectedDocs.isEmpty()) {
+            if (!mCurrentView.isItemChecked(position)) {
+                // There is a selection that does not include the current item, drag nothing.
+                return Collections.EMPTY_LIST;
+            }
+            return selectedDocs;
+        }
+
+        final Cursor cursor = mAdapter.getItem(position);
+        final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
+        return Lists.newArrayList(doc);
+    }
+
+    private Drawable getDragShadowIcon(List<DocumentInfo> docs) {
+        if (docs.size() == 1) {
+            final DocumentInfo doc = docs.get(0);
+            return getDocumentIcon(getActivity(), doc.authority, doc.documentId,
+                    doc.mimeType, doc.icon, getDisplayState(this));
+        }
+        return getActivity().getDrawable(R.drawable.ic_doc_generic);
+    }
+
+    public static Drawable getDocumentIcon(Context context, String docAuthority, String docId,
+            String docMimeType, int docIcon, State state) {
+        if (docIcon != 0) {
+            return IconUtils.loadPackageIcon(context, docAuthority, docIcon);
+        } else {
+            return IconUtils.loadMimeIcon(context, docMimeType, docAuthority, docId,
+                    state.derivedMode);
+        }
+    }
+
+    private class DrawableShadowBuilder extends View.DragShadowBuilder {
+
+        private final Drawable mShadow;
+
+        private final int mShadowDimension;
+
+        public DrawableShadowBuilder(Drawable shadow) {
+            mShadow = shadow;
+            mShadowDimension = getResources().getDimensionPixelSize(
+                    R.dimen.drag_shadow_size);
+            mShadow.setBounds(0, 0, mShadowDimension, mShadowDimension);
+        }
+
+        public void onProvideShadowMetrics(
+                Point shadowSize, Point shadowTouchPoint) {
+            shadowSize.set(mShadowDimension, mShadowDimension);
+            shadowTouchPoint.set(mShadowDimension / 2, mShadowDimension / 2);
+        }
+
+        public void onDrawShadow(Canvas canvas) {
+            mShadow.draw(canvas);
+        }
     }
 }
