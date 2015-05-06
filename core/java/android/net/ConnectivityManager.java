@@ -1904,14 +1904,33 @@ public class ConnectivityManager {
      *
      * @return {@link ProxyInfo} for the current global HTTP proxy or {@code null}
      *        if no global HTTP proxy is set.
-     *
-     * <p>This method requires the caller to hold the permission
-     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * @hide
      */
     public ProxyInfo getGlobalProxy() {
         try {
             return mService.getGlobalProxy();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Retrieve the global HTTP proxy, or if no global HTTP proxy is set, a
+     * network-specific HTTP proxy.  If {@code network} is null, the
+     * network-specific proxy returned is the proxy of the default active
+     * network.
+     *
+     * @return {@link ProxyInfo} for the current global HTTP proxy, or if no
+     *         global HTTP proxy is set, {@code ProxyInfo} for {@code network},
+     *         or when {@code network} is {@code null},
+     *         the {@code ProxyInfo} for the default active network.  Returns
+     *         {@code null} when no proxy applies or the caller doesn't have
+     *         permission to use {@code network}.
+     * @hide
+     */
+    public ProxyInfo getProxyForNetwork(Network network) {
+        try {
+            return mService.getProxyForNetwork(network);
         } catch (RemoteException e) {
             return null;
         }
@@ -1927,19 +1946,7 @@ public class ConnectivityManager {
      *        HTTP proxy is active.
      */
     public ProxyInfo getDefaultProxy() {
-        final Network network = getBoundNetworkForProcess();
-        if (network != null) {
-            final ProxyInfo globalProxy = getGlobalProxy();
-            if (globalProxy != null) return globalProxy;
-            final LinkProperties lp = getLinkProperties(network);
-            if (lp != null) return lp.getHttpProxy();
-            return null;
-        }
-        try {
-            return mService.getDefaultProxy();
-        } catch (RemoteException e) {
-            return null;
-        }
+        return getProxyForNetwork(getBoundNetworkForProcess());
     }
 
     /**
