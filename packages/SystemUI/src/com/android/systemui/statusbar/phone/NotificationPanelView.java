@@ -952,6 +952,10 @@ public class NotificationPanelView extends PanelView implements
         } else {
             mKeyguardStatusBar.setAlpha(1f);
             mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
+            if (keyguardShowing && oldState != mStatusBarState) {
+                mKeyguardBottomArea.updateLeftAffordance();
+                mAfforanceHelper.updatePreviews();
+            }
         }
         resetVerticalPanelPosition();
         updateQsState();
@@ -1831,7 +1835,7 @@ public class NotificationPanelView extends PanelView implements
         if (start) {
             EventLogTags.writeSysuiLockscreenGesture(
                     EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DIALER, lengthDp, velocityDp);
-            mKeyguardBottomArea.launchPhone();
+            mKeyguardBottomArea.launchLeftAffordance();
         } else {
             EventLogTags.writeSysuiLockscreenGesture(
                     EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_CAMERA, lengthDp, velocityDp);
@@ -1912,15 +1916,19 @@ public class NotificationPanelView extends PanelView implements
         if (rightIcon) {
             mStatusBar.onCameraHintStarted();
         } else {
-            mStatusBar.onPhoneHintStarted();
+            if (mKeyguardBottomArea.isLeftVoiceAssist()) {
+                mStatusBar.onVoiceAssistHintStarted();
+            } else {
+                mStatusBar.onPhoneHintStarted();
+            }
         }
     }
 
     @Override
     public KeyguardAffordanceView getLeftIcon() {
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
-                ? mKeyguardBottomArea.getCameraView()
-                : mKeyguardBottomArea.getPhoneView();
+                ? mKeyguardBottomArea.getRightView()
+                : mKeyguardBottomArea.getLeftView();
     }
 
     @Override
@@ -1931,22 +1939,22 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public KeyguardAffordanceView getRightIcon() {
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
-                ? mKeyguardBottomArea.getPhoneView()
-                : mKeyguardBottomArea.getCameraView();
+                ? mKeyguardBottomArea.getLeftView()
+                : mKeyguardBottomArea.getRightView();
     }
 
     @Override
     public View getLeftPreview() {
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
-                ? mKeyguardBottomArea.getCameraPreview()
-                : mKeyguardBottomArea.getPhonePreview();
+                ? mKeyguardBottomArea.getRightPreview()
+                : mKeyguardBottomArea.getLeftPreview();
     }
 
     @Override
     public View getRightPreview() {
         return getLayoutDirection() == LAYOUT_DIRECTION_RTL
-                ? mKeyguardBottomArea.getPhonePreview()
-                : mKeyguardBottomArea.getCameraPreview();
+                ? mKeyguardBottomArea.getLeftPreview()
+                : mKeyguardBottomArea.getRightPreview();
     }
 
     @Override

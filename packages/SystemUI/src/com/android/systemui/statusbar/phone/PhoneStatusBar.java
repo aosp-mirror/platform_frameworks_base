@@ -102,7 +102,7 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.assist.AssistGestureManager;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -324,7 +324,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mNavigationIconHints = 0;
     private HandlerThread mHandlerThread;
 
-    private AssistGestureManager mAssistGestureManager;
+    private AssistManager mAssistManager;
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -646,8 +646,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         new NavigationBarView.OnVerticalChangedListener() {
                     @Override
                     public void onVerticalChanged(boolean isVertical) {
-                        if (mAssistGestureManager != null) {
-                            mAssistGestureManager.onConfigurationChanged();
+                        if (mAssistManager != null) {
+                            mAssistManager.onConfigurationChanged();
                         }
                         mNotificationPanel.setQsScrimEnabled(!isVertical);
                     }
@@ -662,6 +662,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         } catch (RemoteException ex) {
             // no window manager? good luck with that
         }
+
+        mAssistManager = new AssistManager(this, context);
 
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.OPAQUE;
@@ -721,6 +723,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardBottomArea =
                 (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
         mKeyguardBottomArea.setActivityStarter(this);
+        mKeyguardBottomArea.setAssistManager(mAssistManager);
         mKeyguardIndicationController = new KeyguardIndicationController(mContext,
                 (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
                         R.id.keyguard_indication_text));
@@ -842,7 +845,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mBroadcastReceiver.onReceive(mContext,
                 new Intent(pm.isScreenOn() ? Intent.ACTION_SCREEN_ON : Intent.ACTION_SCREEN_OFF));
 
-        mAssistGestureManager = new AssistGestureManager(this, context);
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -971,7 +973,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void invokeAssistGesture(boolean vibrate) {
         mHandler.removeCallbacks(mInvokeAssist);
-        mAssistGestureManager.onGestureInvoked(vibrate);
+        mAssistManager.onGestureInvoked(vibrate);
     }
 
     public int getStatusBarHeight() {
@@ -1051,7 +1053,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNavigationBarView.getBackButton().setLongClickable(true);
         mNavigationBarView.getBackButton().setOnLongClickListener(mLongPressBackRecentsListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeActionListener);
-        mAssistGestureManager.onConfigurationChanged();
+        mAssistManager.onConfigurationChanged();
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
@@ -1812,6 +1814,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         startActivityDismissingKeyguard(intent, false, dismissShade);
     }
 
+    @Override
+    public void preventNextAnimation() {
+        overrideActivityPendingAppTransition(true /* keyguardShowing */);
+    }
+
     public void setQsExpanded(boolean expanded) {
         mStatusBarWindowManager.setQsExpanded(expanded);
     }
@@ -1929,6 +1936,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     protected boolean isSnoozedPackage(StatusBarNotification sbn) {
         return mHeadsUpManager.isSnoozed(sbn.getPackageName());
+    }
+
+    public boolean isKeyguardCurrentlySecure() {
+        return !mUnlockMethodCache.isCurrentlyInsecure();
     }
 
     /**
@@ -2657,6 +2668,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
                 mContext, intent, mCurrentUserId);
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
+        Runnable runnable = new Runnable() {
+            public void run() {
+                intent.setFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                mContext.startActivityAsUser(
+                        intent, new UserHandle(UserHandle.USER_CURRENT));
+                overrideActivityPendingAppTransition(
+                        keyguardShowing && !afterKeyguardGone);
+            }
+        };
+        executeRunnableDismissingKeyguard(runnable, dismissShade, afterKeyguardGone);
+    }
+
+    public void executeRunnableDismissingKeyguard(final Runnable runnable,
+            final boolean dismissShade,
+            final boolean afterKeyguardGone) {
+        final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         dismissKeyguardThenExecute(new OnDismissAction() {
             @Override
             public boolean onDismiss() {
@@ -2667,12 +2695,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 ActivityManagerNative.getDefault()
                                         .keyguardWaitingForActivityDrawn();
                             }
-                            intent.setFlags(
-                                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            mContext.startActivityAsUser(
-                                    intent, new UserHandle(UserHandle.USER_CURRENT));
-                            overrideActivityPendingAppTransition(
-                                    keyguardShowing && !afterKeyguardGone);
+                            if (runnable != null) {
+                                runnable.run();
+                            }
                         } catch (RemoteException e) {
                         }
                     }
@@ -3026,7 +3051,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mHandlerThread = null;
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
-        mAssistGestureManager.destroy();
+        mAssistManager.destroy();
     }
 
     private boolean mDemoModeAllowed;
@@ -3472,6 +3497,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onCameraHintStarted() {
         mKeyguardIndicationController.showTransientIndication(R.string.camera_hint);
+    }
+
+    public void onVoiceAssistHintStarted() {
+        mKeyguardIndicationController.showTransientIndication(R.string.voice_hint);
     }
 
     public void onPhoneHintStarted() {
