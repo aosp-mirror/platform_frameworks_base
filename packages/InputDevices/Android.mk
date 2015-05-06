@@ -42,7 +42,7 @@ $(LOCAL_BUILT_MODULE) : $(input_devices_keymaps) | $(validatekeymaps)
 	$(hide) mkdir -p $(dir $@) && touch $@
 
 # Run validatekeymaps unconditionally for platform build.
-droidcore all_modules : $(LOCAL_BUILT_MODULE)
+droidcore : $(LOCAL_BUILT_MODULE)
 
 # Reset temp vars.
 validatekeymaps :=
