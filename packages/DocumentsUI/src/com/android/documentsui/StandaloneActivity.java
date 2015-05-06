@@ -28,16 +28,15 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -279,6 +278,27 @@ public class StandaloneActivity extends BaseActivity {
 
     public void onDocumentsPicked(List<DocumentInfo> docs) {
         // TODO
+    }
+
+    @Override
+    public boolean onKeyShortcut(int keyCode, KeyEvent event) {
+        DirectoryFragment dir;
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_A:
+                dir = DirectoryFragment.get(getFragmentManager());
+                dir.selectAllFiles();
+                return true;
+            case KeyEvent.KEYCODE_C:
+                dir = DirectoryFragment.get(getFragmentManager());
+                dir.copyToClipboard();
+                return true;
+            case KeyEvent.KEYCODE_V:
+                dir = DirectoryFragment.get(getFragmentManager());
+                dir.pasteFromClipboard();
+                return true;
+            default:
+                return super.onKeyUp(keyCode, event);
+        }
     }
 
     @Override
