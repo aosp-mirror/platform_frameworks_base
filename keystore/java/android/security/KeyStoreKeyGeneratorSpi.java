@@ -174,12 +174,9 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
         }
 
-        byte[] additionalEntropy = null;
-        SecureRandom rng = mRng;
-        if (rng != null) {
-            additionalEntropy = new byte[(keySizeBits + 7) / 8];
-            rng.nextBytes(additionalEntropy);
-        }
+        byte[] additionalEntropy =
+                KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
+                        mRng, (keySizeBits + 7) / 8);
 
         int flags = spec.getFlags();
         String keyAliasInKeystore = Credentials.USER_SECRET_KEY + spec.getKeystoreAlias();
