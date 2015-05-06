@@ -55,6 +55,7 @@ public class ZenModeConfig implements Parcelable {
     public static final int SOURCE_CONTACT = 1;
     public static final int SOURCE_STAR = 2;
     public static final int MAX_SOURCE = SOURCE_STAR;
+    private static final int DEFAULT_SOURCE = SOURCE_CONTACT;
 
     public static final int[] ALL_DAYS = { Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
             Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY };
@@ -67,6 +68,8 @@ public class ZenModeConfig implements Parcelable {
     private static final int MINUTES_MS = 60 * SECONDS_MS;
     private static final int ZERO_VALUE_MS = 10 * SECONDS_MS;
 
+    private static final boolean DEFAULT_ALLOW_CALLS = true;
+    private static final boolean DEFAULT_ALLOW_MESSAGES = false;
     private static final boolean DEFAULT_ALLOW_REMINDERS = true;
     private static final boolean DEFAULT_ALLOW_EVENTS = true;
     private static final boolean DEFAULT_ALLOW_REPEAT_CALLERS = false;
@@ -79,6 +82,8 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_REPEAT_CALLERS = "repeatCallers";
     private static final String ALLOW_ATT_MESSAGES = "messages";
     private static final String ALLOW_ATT_FROM = "from";
+    private static final String ALLOW_ATT_CALLS_FROM = "callsFrom";
+    private static final String ALLOW_ATT_MESSAGES_FROM = "messagesFrom";
     private static final String ALLOW_ATT_REMINDERS = "reminders";
     private static final String ALLOW_ATT_EVENTS = "events";
 
@@ -103,12 +108,13 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_ZEN = "zen";
     private static final String RULE_ATT_CONDITION_ID = "conditionId";
 
-    public boolean allowCalls;
+    public boolean allowCalls = DEFAULT_ALLOW_CALLS;
     public boolean allowRepeatCallers = DEFAULT_ALLOW_REPEAT_CALLERS;
-    public boolean allowMessages;
+    public boolean allowMessages = DEFAULT_ALLOW_MESSAGES;
     public boolean allowReminders = DEFAULT_ALLOW_REMINDERS;
     public boolean allowEvents = DEFAULT_ALLOW_EVENTS;
-    public int allowFrom = SOURCE_ANYONE;
+    public int allowCallsFrom = DEFAULT_SOURCE;
+    public int allowMessagesFrom = DEFAULT_SOURCE;
 
     public ZenRule manualRule;
     public ArrayMap<String, ZenRule> automaticRules = new ArrayMap<>();
@@ -121,7 +127,8 @@ public class ZenModeConfig implements Parcelable {
         allowMessages = source.readInt() == 1;
         allowReminders = source.readInt() == 1;
         allowEvents = source.readInt() == 1;
-        allowFrom = source.readInt();
+        allowCallsFrom = source.readInt();
+        allowMessagesFrom = source.readInt();
         manualRule = source.readParcelable(null);
         final int len = source.readInt();
         if (len > 0) {
@@ -142,7 +149,8 @@ public class ZenModeConfig implements Parcelable {
         dest.writeInt(allowMessages ? 1 : 0);
         dest.writeInt(allowReminders ? 1 : 0);
         dest.writeInt(allowEvents ? 1 : 0);
-        dest.writeInt(allowFrom);
+        dest.writeInt(allowCallsFrom);
+        dest.writeInt(allowMessagesFrom);
         dest.writeParcelable(manualRule, 0);
         if (!automaticRules.isEmpty()) {
             final int len = automaticRules.size();
@@ -166,7 +174,8 @@ public class ZenModeConfig implements Parcelable {
             .append("allowCalls=").append(allowCalls)
             .append(",allowRepeatCallers=").append(allowRepeatCallers)
             .append(",allowMessages=").append(allowMessages)
-            .append(",allowFrom=").append(sourceToString(allowFrom))
+            .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
+            .append(",allowMessagesFrom=").append(sourceToString(allowMessagesFrom))
             .append(",allowReminders=").append(allowReminders)
             .append(",allowEvents=").append(allowEvents)
             .append(",automaticRules=").append(automaticRules)
@@ -234,7 +243,8 @@ public class ZenModeConfig implements Parcelable {
         return other.allowCalls == allowCalls
                 && other.allowRepeatCallers == allowRepeatCallers
                 && other.allowMessages == allowMessages
-                && other.allowFrom == allowFrom
+                && other.allowCallsFrom == allowCallsFrom
+                && other.allowMessagesFrom == allowMessagesFrom
                 && other.allowReminders == allowReminders
                 && other.allowEvents == allowEvents
                 && Objects.equals(other.automaticRules, automaticRules)
@@ -243,8 +253,8 @@ public class ZenModeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowCalls, allowRepeatCallers, allowMessages, allowFrom,
-                allowReminders, allowEvents, automaticRules, manualRule);
+        return Objects.hash(allowCalls, allowRepeatCallers, allowMessages, allowCallsFrom,
+                allowMessagesFrom, allowReminders, allowEvents, automaticRules, manualRule);
     }
 
     private static String toDayList(int[] days) {
@@ -314,9 +324,19 @@ public class ZenModeConfig implements Parcelable {
                     rt.allowReminders = safeBoolean(parser, ALLOW_ATT_REMINDERS,
                             DEFAULT_ALLOW_REMINDERS);
                     rt.allowEvents = safeBoolean(parser, ALLOW_ATT_EVENTS, DEFAULT_ALLOW_EVENTS);
-                    rt.allowFrom = safeInt(parser, ALLOW_ATT_FROM, SOURCE_ANYONE);
-                    if (rt.allowFrom < SOURCE_ANYONE || rt.allowFrom > MAX_SOURCE) {
-                        throw new IndexOutOfBoundsException("bad source in config:" + rt.allowFrom);
+                    final int from = safeInt(parser, ALLOW_ATT_FROM, -1);
+                    final int callsFrom = safeInt(parser, ALLOW_ATT_CALLS_FROM, -1);
+                    final int messagesFrom = safeInt(parser, ALLOW_ATT_MESSAGES_FROM, -1);
+                    if (isValidSource(callsFrom) && isValidSource(messagesFrom)) {
+                        rt.allowCallsFrom = callsFrom;
+                        rt.allowMessagesFrom = messagesFrom;
+                    } else if (isValidSource(from)) {
+                        Slog.i(TAG, "Migrating existing shared 'from': " + sourceToString(from));
+                        rt.allowCallsFrom = from;
+                        rt.allowMessagesFrom = from;
+                    } else {
+                        rt.allowCallsFrom = DEFAULT_SOURCE;
+                        rt.allowMessagesFrom = DEFAULT_SOURCE;
                     }
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser, false /*conditionRequired*/);
@@ -342,7 +362,8 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_MESSAGES, Boolean.toString(allowMessages));
         out.attribute(null, ALLOW_ATT_REMINDERS, Boolean.toString(allowReminders));
         out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
-        out.attribute(null, ALLOW_ATT_FROM, Integer.toString(allowFrom));
+        out.attribute(null, ALLOW_ATT_CALLS_FROM, Integer.toString(allowCallsFrom));
+        out.attribute(null, ALLOW_ATT_MESSAGES_FROM, Integer.toString(allowMessagesFrom));
         out.endTag(null, ALLOW_TAG);
 
         if (manualRule != null) {
@@ -432,6 +453,10 @@ public class ZenModeConfig implements Parcelable {
         return val >= 0 && val < 60;
     }
 
+    private static boolean isValidSource(int source) {
+        return source >= SOURCE_ANYONE && source <= MAX_SOURCE;
+    }
+
     private static boolean safeBoolean(XmlPullParser parser, String att, boolean defValue) {
         final String val = parser.getAttributeValue(null, att);
         if (TextUtils.isEmpty(val)) return defValue;
@@ -494,7 +519,8 @@ public class ZenModeConfig implements Parcelable {
 
     public Policy toNotificationPolicy() {
         int priorityCategories = 0;
-        int prioritySenders = Policy.PRIORITY_SENDERS_ANY;
+        int priorityCallSenders = Policy.PRIORITY_SENDERS_CONTACTS;
+        int priorityMessageSenders = Policy.PRIORITY_SENDERS_CONTACTS;
         if (allowCalls) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_CALLS;
         }
@@ -510,18 +536,27 @@ public class ZenModeConfig implements Parcelable {
         if (allowRepeatCallers) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
         }
-        switch (allowFrom) {
-            case SOURCE_ANYONE:
-                prioritySenders = Policy.PRIORITY_SENDERS_ANY;
-                break;
-            case SOURCE_CONTACT:
-                prioritySenders = Policy.PRIORITY_SENDERS_CONTACTS;
-                break;
-            case SOURCE_STAR:
-                prioritySenders = Policy.PRIORITY_SENDERS_STARRED;
-                break;
+        priorityCallSenders = sourceToPrioritySenders(allowCallsFrom, priorityCallSenders);
+        priorityMessageSenders = sourceToPrioritySenders(allowMessagesFrom, priorityMessageSenders);
+        return new Policy(priorityCategories, priorityCallSenders);
+    }
+
+    private static int sourceToPrioritySenders(int source, int def) {
+        switch (source) {
+            case SOURCE_ANYONE: return Policy.PRIORITY_SENDERS_ANY;
+            case SOURCE_CONTACT: return Policy.PRIORITY_SENDERS_CONTACTS;
+            case SOURCE_STAR: return Policy.PRIORITY_SENDERS_STARRED;
+            default: return def;
         }
-        return new Policy(priorityCategories, prioritySenders);
+    }
+
+    private static int prioritySendersToSource(int prioritySenders, int def) {
+        switch (prioritySenders) {
+            case Policy.PRIORITY_SENDERS_CONTACTS: return SOURCE_CONTACT;
+            case Policy.PRIORITY_SENDERS_STARRED: return SOURCE_STAR;
+            case Policy.PRIORITY_SENDERS_ANY: return SOURCE_ANYONE;
+            default: return def;
+        }
     }
 
     public void applyNotificationPolicy(Policy policy) {
@@ -532,17 +567,7 @@ public class ZenModeConfig implements Parcelable {
         allowReminders = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REMINDERS) != 0;
         allowRepeatCallers = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_REPEAT_CALLERS)
                 != 0;
-        switch (policy.prioritySenders) {
-            case Policy.PRIORITY_SENDERS_CONTACTS:
-                allowFrom = SOURCE_CONTACT;
-                break;
-            case Policy.PRIORITY_SENDERS_STARRED:
-                allowFrom = SOURCE_STAR;
-                break;
-            default:
-                allowFrom = SOURCE_ANYONE;
-                break;
-        }
+        allowCallsFrom = prioritySendersToSource(policy.prioritySenders, allowCallsFrom);
     }
 
     public static Condition toTimeCondition(Context context, int minutesFromNow, int userHandle) {
