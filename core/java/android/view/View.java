@@ -2395,9 +2395,142 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_NESTED_SCROLLING_ENABLED = 0x80;
 
+    /**
+     * Flag indicating that the bottom scroll indicator should be displayed
+     * when this view can scroll up.
+     */
+    static final int PFLAG3_SCROLL_INDICATOR_TOP = 0x0100;
+
+    /**
+     * Flag indicating that the bottom scroll indicator should be displayed
+     * when this view can scroll down.
+     */
+    static final int PFLAG3_SCROLL_INDICATOR_BOTTOM = 0x0200;
+
+    /**
+     * Flag indicating that the left scroll indicator should be displayed
+     * when this view can scroll left.
+     */
+    static final int PFLAG3_SCROLL_INDICATOR_LEFT = 0x0400;
+
+    /**
+     * Flag indicating that the right scroll indicator should be displayed
+     * when this view can scroll right.
+     */
+    static final int PFLAG3_SCROLL_INDICATOR_RIGHT = 0x0800;
+
+    /**
+     * Flag indicating that the start scroll indicator should be displayed
+     * when this view can scroll in the start direction.
+     */
+    static final int PFLAG3_SCROLL_INDICATOR_START = 0x1000;
+
+    /**
+     * Flag indicating that the end scroll indicator should be displayed
+     * when this view can scroll in the end direction.
+     */
+    static final int PFLAG3_SCROLL_INDICATOR_END = 0x2000;
+
     /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
+
+    static final int SCROLL_INDICATORS_NONE = 0x0000;
+
+    /**
+     * Mask for use with setFlags indicating bits used for indicating which
+     * scroll indicators are enabled.
+     */
+    static final int SCROLL_INDICATORS_PFLAG3_MASK = PFLAG3_SCROLL_INDICATOR_TOP
+            | PFLAG3_SCROLL_INDICATOR_BOTTOM | PFLAG3_SCROLL_INDICATOR_LEFT
+            | PFLAG3_SCROLL_INDICATOR_RIGHT | PFLAG3_SCROLL_INDICATOR_START
+            | PFLAG3_SCROLL_INDICATOR_END;
+
+    /**
+     * Left-shift required to translate between public scroll indicator flags
+     * and internal PFLAGS3 flags. When used as a right-shift, translates
+     * PFLAGS3 flags to public flags.
+     */
+    static final int SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT = 8;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true,
+            value = {
+                    SCROLL_INDICATOR_TOP,
+                    SCROLL_INDICATOR_BOTTOM,
+                    SCROLL_INDICATOR_LEFT,
+                    SCROLL_INDICATOR_RIGHT,
+                    SCROLL_INDICATOR_START,
+                    SCROLL_INDICATOR_END,
+            })
+    public @interface ScrollIndicators {}
+
+    /**
+     * Scroll indicator direction for the top edge of the view.
+     *
+     * @see #setScrollIndicators(int)
+     * @see #setScrollIndicators(int, int)
+     * @see #getScrollIndicators()
+     */
+    public static final int SCROLL_INDICATOR_TOP =
+            PFLAG3_SCROLL_INDICATOR_TOP >> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+
+    /**
+     * Scroll indicator direction for the bottom edge of the view.
+     *
+     * @see #setScrollIndicators(int)
+     * @see #setScrollIndicators(int, int)
+     * @see #getScrollIndicators()
+     */
+    public static final int SCROLL_INDICATOR_BOTTOM =
+            PFLAG3_SCROLL_INDICATOR_BOTTOM >> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+
+    /**
+     * Scroll indicator direction for the left edge of the view.
+     *
+     * @see #setScrollIndicators(int)
+     * @see #setScrollIndicators(int, int)
+     * @see #getScrollIndicators()
+     */
+    public static final int SCROLL_INDICATOR_LEFT =
+            PFLAG3_SCROLL_INDICATOR_LEFT >> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+
+    /**
+     * Scroll indicator direction for the right edge of the view.
+     *
+     * @see #setScrollIndicators(int)
+     * @see #setScrollIndicators(int, int)
+     * @see #getScrollIndicators()
+     */
+    public static final int SCROLL_INDICATOR_RIGHT =
+            PFLAG3_SCROLL_INDICATOR_RIGHT >> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+
+    /**
+     * Scroll indicator direction for the starting edge of the view.
+     * <p>
+     * Resolved according to the view's layout direction, see
+     * {@link #getLayoutDirection()} for more information.
+     *
+     * @see #setScrollIndicators(int)
+     * @see #setScrollIndicators(int, int)
+     * @see #getScrollIndicators()
+     */
+    public static final int SCROLL_INDICATOR_START =
+            PFLAG3_SCROLL_INDICATOR_START >> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+
+    /**
+     * Scroll indicator direction for the ending edge of the view.
+     * <p>
+     * Resolved according to the view's layout direction, see
+     * {@link #getLayoutDirection()} for more information.
+     *
+     * @see #setScrollIndicators(int)
+     * @see #setScrollIndicators(int, int)
+     * @see #getScrollIndicators()
+     */
+    public static final int SCROLL_INDICATOR_END =
+            PFLAG3_SCROLL_INDICATOR_END >> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
 
     /**
      * <p>Indicates that we are allowing {@link android.view.ViewAssistStructure} to traverse
@@ -3217,6 +3350,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "fg_")
     private ForegroundInfo mForegroundInfo;
 
+    private Drawable mScrollIndicatorDrawable;
+
     /**
      * RenderNode used for backgrounds.
      * <p>
@@ -3769,6 +3904,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int scrollbarStyle = SCROLLBARS_INSIDE_OVERLAY;
         int overScrollMode = mOverScrollMode;
         boolean initializeScrollbars = false;
+        boolean initializeScrollIndicators = false;
 
         boolean startPaddingDefined = false;
         boolean endPaddingDefined = false;
@@ -4135,6 +4271,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                     mForegroundInfo.mInsidePadding = a.getBoolean(attr,
                             mForegroundInfo.mInsidePadding);
+                case R.styleable.View_scrollIndicators:
+                    final int scrollIndicators =
+                            a.getInt(attr, SCROLL_INDICATORS_NONE) & SCROLL_INDICATORS_PFLAG3_MASK;
+                    if (scrollIndicators != 0) {
+                        viewFlagValues |= scrollIndicators;
+                        viewFlagMasks |= SCROLL_INDICATORS_PFLAG3_MASK;
+                        initializeScrollIndicators = true;
+                    }
                     break;
             }
         }
@@ -4209,6 +4353,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (initializeScrollbars) {
             initializeScrollbarsInternal(a);
+        }
+
+        if (initializeScrollIndicators) {
+            initializeScrollIndicatorsInternal();
         }
 
         a.recycle();
@@ -4682,6 +4830,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         resolvePadding();
     }
 
+    private void initializeScrollIndicatorsInternal() {
+        // Some day maybe we'll break this into top/left/start/etc. and let the
+        // client control it. Until then, you can have any scroll indicator you
+        // want as long as it's a 1dp foreground-colored rectangle.
+        if (mScrollIndicatorDrawable == null) {
+            mScrollIndicatorDrawable = mContext.getDrawable(R.drawable.scroll_indicator_material);
+        }
+    }
+
     /**
      * <p>
      * Initalizes the scrollability cache if necessary.
@@ -4719,6 +4876,118 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public int getVerticalScrollbarPosition() {
         return mVerticalScrollbarPosition;
+    }
+
+    /**
+     * Sets the state of all scroll indicators.
+     * <p>
+     * See {@link #setScrollIndicators(int, int)} for usage information.
+     *
+     * @param indicators a bitmask of indicators that should be enabled, or
+     *                   {@code 0} to disable all indicators
+     * @see #setScrollIndicators(int, int)
+     * @see #getScrollIndicators()
+     * @attr ref android.R.styleable#View_scrollIndicators
+     */
+    public void setScrollIndicators(@ScrollIndicators int indicators) {
+        setScrollIndicators(indicators, SCROLL_INDICATORS_PFLAG3_MASK);
+    }
+
+    /**
+     * Sets the state of the scroll indicators specified by the mask. To change
+     * all scroll indicators at once, see {@link #setScrollIndicators(int)}.
+     * <p>
+     * When a scroll indicator is enabled, it will be displayed if the view
+     * can scroll in the direction of the indicator.
+     * <p>
+     * Multiple indicator types may be enabled or disabled by passing the
+     * logical OR of the desired types. If multiple types are specified, they
+     * will all be set to the same enabled state.
+     * <p>
+     * For example, to enable the top scroll indicatorExample: {@code setScrollIndicators
+     *
+     * @param indicators the indicator direction, or the logical OR of multiple
+     *             indicator directions. One or more of:
+     *             <ul>
+     *               <li>{@link #SCROLL_INDICATOR_TOP}</li>
+     *               <li>{@link #SCROLL_INDICATOR_BOTTOM}</li>
+     *               <li>{@link #SCROLL_INDICATOR_LEFT}</li>
+     *               <li>{@link #SCROLL_INDICATOR_RIGHT}</li>
+     *               <li>{@link #SCROLL_INDICATOR_START}</li>
+     *               <li>{@link #SCROLL_INDICATOR_END}</li>
+     *             </ul>
+     * @see #setScrollIndicators(int)
+     * @see #getScrollIndicators()
+     * @attr ref android.R.styleable#View_scrollIndicators
+     */
+    public void setScrollIndicators(@ScrollIndicators int indicators, @ScrollIndicators int mask) {
+        // Shift and sanitize mask.
+        mask <<= SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+        mask &= SCROLL_INDICATORS_PFLAG3_MASK;
+
+        // Shift and mask indicators.
+        indicators <<= SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+        indicators &= mask;
+
+        // Merge with non-masked flags.
+        final int updatedFlags = indicators | (mPrivateFlags3 & ~mask);
+
+        if (mPrivateFlags3 != updatedFlags) {
+            mPrivateFlags3 = updatedFlags;
+
+            if (indicators != 0) {
+                initializeScrollIndicatorsInternal();
+            }
+            invalidate();
+        }
+    }
+
+    /**
+     * Returns a bitmask representing the enabled scroll indicators.
+     * <p>
+     * For example, if the top and left scroll indicators are enabled and all
+     * other indicators are disabled, the return value will be
+     * {@code View.SCROLL_INDICATOR_TOP | View.SCROLL_INDICATOR_LEFT}.
+     * <p>
+     * To check whether the bottom scroll indicator is enabled, use the value
+     * of {@code (getScrollIndicators() & View.SCROLL_INDICATOR_BOTTOM) != 0}.
+     *
+     * @return a bitmask representing the enabled scroll indicators
+     */
+    @ScrollIndicators
+    public int getScrollIndicators() {
+        return (mPrivateFlags3 & SCROLL_INDICATORS_PFLAG3_MASK)
+                >>> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+    }
+
+    /**
+     * Returns whether the specified scroll indicator is enabled.
+     * <p>
+     * Multiple indicator types may be queried by passing the logical OR of the
+     * desired types. If multiple types are specified, the return value
+     * represents whether they are all enabled.
+     *
+     * @param direction the indicator direction, or the logical OR of multiple
+     *             indicator directions. One or more of:
+     *             <ul>
+     *               <li>{@link #SCROLL_INDICATOR_TOP}</li>
+     *               <li>{@link #SCROLL_INDICATOR_BOTTOM}</li>
+     *               <li>{@link #SCROLL_INDICATOR_LEFT}</li>
+     *               <li>{@link #SCROLL_INDICATOR_RIGHT}</li>
+     *               <li>{@link #SCROLL_INDICATOR_START}</li>
+     *               <li>{@link #SCROLL_INDICATOR_END}</li>
+     *             </ul>
+     * @return {@code true} if the specified indicator(s) are enabled,
+     *         {@code false} otherwise
+     * @attr ref android.R.styleable#View_scrollIndicators
+     */
+    public boolean isScrollIndicatorEnabled(int direction) {
+        // Shift and sanitize input.
+        direction <<= SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
+        direction &= SCROLL_INDICATORS_PFLAG3_MASK;
+
+        // All of the flags must be set.
+        return (mPrivateFlags3 & direction) == direction;
     }
 
     ListenerInfo getListenerInfo() {
@@ -13444,6 +13713,75 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    void getScrollIndicatorBounds(@NonNull Rect out) {
+        out.left = mScrollX;
+        out.right = mScrollX + mRight - mLeft;
+        out.top = mScrollY;
+        out.bottom = mScrollY + mBottom - mTop;
+    }
+
+    private void onDrawScrollIndicators(Canvas c) {
+        if ((mPrivateFlags3 & SCROLL_INDICATORS_PFLAG3_MASK) == 0) {
+            // No scroll indicators enabled.
+            return;
+        }
+
+        final Drawable dr = mScrollIndicatorDrawable;
+        if (dr == null) {
+            // Scroll indicators aren't supported here.
+            return;
+        }
+
+        final int h = dr.getIntrinsicHeight();
+        final int w = dr.getIntrinsicWidth();
+        final Rect rect = mAttachInfo.mTmpInvalRect;
+        getScrollIndicatorBounds(rect);
+
+        if ((mPrivateFlags3 & PFLAG3_SCROLL_INDICATOR_TOP) != 0) {
+            final boolean canScrollUp = canScrollVertically(-1);
+            if (canScrollUp) {
+                dr.setBounds(rect.left, rect.top, rect.right, rect.top + h);
+                dr.draw(c);
+            }
+        }
+
+        if ((mPrivateFlags3 & PFLAG3_SCROLL_INDICATOR_BOTTOM) != 0) {
+            final boolean canScrollDown = canScrollVertically(1);
+            if (canScrollDown) {
+                dr.setBounds(rect.left, rect.bottom - h, rect.right, rect.bottom);
+                dr.draw(c);
+            }
+        }
+
+        final int leftRtl;
+        final int rightRtl;
+        if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+            leftRtl = PFLAG3_SCROLL_INDICATOR_END;
+            rightRtl = PFLAG3_SCROLL_INDICATOR_START;
+        } else {
+            leftRtl = PFLAG3_SCROLL_INDICATOR_START;
+            rightRtl = PFLAG3_SCROLL_INDICATOR_END;
+        }
+
+        final int leftMask = PFLAG3_SCROLL_INDICATOR_LEFT | leftRtl;
+        if ((mPrivateFlags3 & leftMask) != 0) {
+            final boolean canScrollLeft = canScrollHorizontally(-1);
+            if (canScrollLeft) {
+                dr.setBounds(rect.left, rect.top, rect.left + w, rect.bottom);
+                dr.draw(c);
+            }
+        }
+
+        final int rightMask = PFLAG3_SCROLL_INDICATOR_RIGHT | rightRtl;
+        if ((mPrivateFlags3 & rightMask) != 0) {
+            final boolean canScrollRight = canScrollHorizontally(1);
+            if (canScrollRight) {
+                dr.setBounds(rect.right - w, rect.top, rect.right, rect.bottom);
+                dr.draw(c);
+            }
+        }
+    }
+
     /**
      * <p>Request the drawing of the horizontal and the vertical scrollbar. The
      * scrollbars are painted only if they have been awakened first.</p>
@@ -17272,6 +17610,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param canvas canvas to draw into
      */
     public void onDrawForeground(Canvas canvas) {
+        onDrawScrollIndicators(canvas);
         onDrawScrollBars(canvas);
 
         final Drawable foreground = mForegroundInfo != null ? mForegroundInfo.mDrawable : null;

@@ -18,6 +18,7 @@ package android.view;
 
 import android.animation.LayoutTransition;
 import android.annotation.IdRes;
+import android.annotation.NonNull;
 import android.annotation.UiThread;
 import android.content.Context;
 import android.content.Intent;
@@ -3545,6 +3546,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         return child.draw(canvas, this, drawingTime);
+    }
+
+    @Override
+    void getScrollIndicatorBounds(@NonNull Rect out) {
+        super.getScrollIndicatorBounds(out);
+
+        // If we have padding and we're supposed to clip children to that
+        // padding, offset the scroll indicators to match our clip bounds.
+        final boolean clipToPadding = (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
+        if (clipToPadding) {
+            out.left += mPaddingLeft;
+            out.right -= mPaddingRight;
+            out.top += mPaddingTop;
+            out.bottom -= mPaddingBottom;
+        }
     }
 
     /**
