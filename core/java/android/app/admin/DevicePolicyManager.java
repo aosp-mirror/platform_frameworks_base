@@ -4294,14 +4294,14 @@ public class DevicePolicyManager {
      * being disabled.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param enabled New state of the keyguard.
+     * @param disabled {@code true} disables the keyguard, {@code false} reenables it.
      *
      * @return {@code false} if attempting to disable the keyguard while a lock password was in
-     * place. {@code true} otherwise."
+     * place. {@code true} otherwise.
      */
-    public boolean setKeyguardEnabledState(ComponentName admin, boolean enabled) {
+    public boolean setKeyguardDisabled(ComponentName admin, boolean disabled) {
         try {
-            return mService.setKeyguardEnabledState(admin, enabled);
+            return mService.setKeyguardDisabled(admin, disabled);
         } catch (RemoteException re) {
             Log.w(TAG, "Failed talking with device policy service", re);
             return false;
@@ -4309,18 +4309,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to set the enabled state of the status bar. Disabling the status
-     * bar blocks notifications, quick settings and other screen overlays that allow escaping from
+     * Called by device owner to disable the status bar. Disabling the status bar blocks
+     * notifications, quick settings and other screen overlays that allow escaping from
      * a single use device.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param enabled New state of the status bar.
+     * @param disabled {@code true} disables the status bar, {@code false} reenables it.
+     *
+     * @return {@code false} if attempting to disable the status bar failed.
+     * {@code true} otherwise.
      */
-    public void setStatusBarEnabledState(ComponentName admin, boolean enabled) {
+    public boolean setStatusBarDisabled(ComponentName admin, boolean disabled) {
         try {
-            mService.setStatusBarEnabledState(admin, enabled);
+            return mService.setStatusBarDisabled(admin, disabled);
         } catch (RemoteException re) {
             Log.w(TAG, "Failed talking with device policy service", re);
+            return false;
         }
     }
 
