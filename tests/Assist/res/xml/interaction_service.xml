@@ -18,4 +18,5 @@
 <voice-interaction-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:sessionService="com.android.test.assist.AssistInteractionSessionService"
     android:recognitionService="com.android.test.assist.AssistRecognitionService"
-    android:supportsAssist="true"/>
+    android:supportsAssist="true"
+    android:supportsLaunchVoiceAssistFromKeyguard="true"/>
