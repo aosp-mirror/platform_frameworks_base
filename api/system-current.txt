@@ -43195,6 +43195,7 @@ package android.widget {
     method public void setSoftInputMode(int);
     method public void setVerticalOffset(int);
     method public void setWidth(int);
+    method public void setWindowLayoutType(int);
     method public void show();
     field public static final int INPUT_METHOD_FROM_FOCUSABLE = 0; // 0x0
     field public static final int INPUT_METHOD_NEEDED = 1; // 0x1
