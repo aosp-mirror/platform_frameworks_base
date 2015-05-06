@@ -13310,6 +13310,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         storage.registerListener(mStorageListener);
 
         mInstallerService.systemReady();
+        mPackageDexOptimizer.systemReady();
     }
 
     @Override

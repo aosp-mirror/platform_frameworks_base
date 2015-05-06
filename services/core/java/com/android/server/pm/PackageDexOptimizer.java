@@ -17,9 +17,12 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
+import android.os.PowerManager;
 import android.os.UserHandle;
+import android.os.WorkSource;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -51,8 +54,14 @@ final class PackageDexOptimizer {
     private final PackageManagerService mPackageManagerService;
     private ArraySet<PackageParser.Package> mDeferredDexOpt;
 
+    private final PowerManager.WakeLock mDexoptWakeLock;
+    private volatile boolean mSystemReady;
+
     PackageDexOptimizer(PackageManagerService packageManagerService) {
         this.mPackageManagerService = packageManagerService;
+        PowerManager powerManager = (PowerManager)packageManagerService.mContext.getSystemService(
+                Context.POWER_SERVICE);
+        mDexoptWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*dexopt*");
     }
 
     /**
@@ -72,7 +81,18 @@ final class PackageDexOptimizer {
             done = null;
         }
         synchronized (mPackageManagerService.mInstallLock) {
-            return performDexOptLI(pkg, instructionSets, forceDex, defer, done);
+            final boolean useLock = mSystemReady;
+            if (useLock) {
+                mDexoptWakeLock.setWorkSource(new WorkSource(pkg.applicationInfo.uid));
+                mDexoptWakeLock.acquire();
+            }
+            try {
+                return performDexOptLI(pkg, instructionSets, forceDex, defer, done);
+            } finally {
+                if (useLock) {
+                    mDexoptWakeLock.release();
+                }
+            }
         }
     }
 
@@ -243,5 +263,9 @@ final class PackageDexOptimizer {
             mDeferredDexOpt = new ArraySet<>();
         }
         mDeferredDexOpt.add(pkg);
+    }
+
+    void systemReady() {
+        mSystemReady = true;
     }
 }
