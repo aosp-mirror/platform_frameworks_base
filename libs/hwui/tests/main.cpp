@@ -58,13 +58,20 @@ static void endRecording(DisplayListCanvas* renderer, RenderNode* node) {
 class TreeContentAnimation {
 public:
     virtual ~TreeContentAnimation() {}
-    virtual int getFrameCount() { return 150; }
+    int frameCount = 150;
+    virtual int getFrameCount() { return frameCount; }
+    virtual void setFrameCount(int fc) {
+        if (fc > 0) {
+            frameCount = fc;
+        }
+    }
     virtual void createContent(int width, int height, DisplayListCanvas* renderer) = 0;
     virtual void doFrame(int frameNr) = 0;
 
     template <class T>
-    static void run() {
+    static void run(int frameCount) {
         T animation;
+        animation.setFrameCount(frameCount);
 
         TestContext testContext;
 
@@ -137,9 +144,10 @@ public:
         renderer->insertReorderBarrier(false);
     }
     void doFrame(int frameNr) override {
+        int curFrame = frameNr % 150;
         for (size_t ci = 0; ci < cards.size(); ci++) {
-            cards[ci]->mutateStagingProperties().setTranslationX(frameNr);
-            cards[ci]->mutateStagingProperties().setTranslationY(frameNr);
+            cards[ci]->mutateStagingProperties().setTranslationX(curFrame);
+            cards[ci]->mutateStagingProperties().setTranslationY(curFrame);
             cards[ci]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
         }
     }
@@ -149,6 +157,47 @@ private:
         node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
         node->mutateStagingProperties().setElevation(dp(16));
         node->mutateStagingProperties().mutableOutline().setRoundRect(0, 0, width, height, dp(10), 1);
+        node->mutateStagingProperties().mutableOutline().setShouldClip(true);
+        node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y | RenderNode::Z);
+
+        DisplayListCanvas* renderer = startRecording(node.get());
+        renderer->drawColor(0xFFEEEEEE, SkXfermode::kSrcOver_Mode);
+        endRecording(renderer, node.get());
+        return node;
+    }
+};
+
+class ShadowGrid2Animation : public TreeContentAnimation {
+public:
+    std::vector< sp<RenderNode> > cards;
+    void createContent(int width, int height, DisplayListCanvas* renderer) override {
+        renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        renderer->insertReorderBarrier(true);
+
+        for (int x = dp(8); x < (width - dp(58)); x += dp(58)) {
+            for (int y = dp(8); y < (height - dp(58)); y += dp(58)) {
+                sp<RenderNode> card = createCard(x, y, dp(50), dp(50));
+                renderer->drawRenderNode(card.get());
+                cards.push_back(card);
+            }
+        }
+
+        renderer->insertReorderBarrier(false);
+    }
+    void doFrame(int frameNr) override {
+        int curFrame = frameNr % 150;
+        for (size_t ci = 0; ci < cards.size(); ci++) {
+            cards[ci]->mutateStagingProperties().setTranslationX(curFrame);
+            cards[ci]->mutateStagingProperties().setTranslationY(curFrame);
+            cards[ci]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+        }
+    }
+private:
+    sp<RenderNode> createCard(int x, int y, int width, int height) {
+        sp<RenderNode> node = new RenderNode();
+        node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
+        node->mutateStagingProperties().setElevation(dp(16));
+        node->mutateStagingProperties().mutableOutline().setRoundRect(0, 0, width, height, dp(6), 1);
         node->mutateStagingProperties().mutableOutline().setShouldClip(true);
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y | RenderNode::Z);
 
@@ -172,8 +221,9 @@ public:
         renderer->insertReorderBarrier(false);
     }
     void doFrame(int frameNr) override {
-        card->mutateStagingProperties().setTranslationX(frameNr);
-        card->mutateStagingProperties().setTranslationY(frameNr);
+        int curFrame = frameNr % 150;
+        card->mutateStagingProperties().setTranslationX(curFrame);
+        card->mutateStagingProperties().setTranslationY(curFrame);
         card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
     }
 private:
@@ -220,8 +270,9 @@ public:
     }
 
     void doFrame(int frameNr) override {
-        card->mutateStagingProperties().setTranslationX(frameNr);
-        card->mutateStagingProperties().setTranslationY(frameNr);
+        int curFrame = frameNr % 150;
+        card->mutateStagingProperties().setTranslationX(curFrame);
+        card->mutateStagingProperties().setTranslationY(curFrame);
         card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
     }
 private:
@@ -248,10 +299,11 @@ struct cstr_cmp {
     }
 };
 
-typedef void (*testProc)();
+typedef void (*testProc)(int);
 
 std::map<const char*, testProc, cstr_cmp> gTestMap {
     {"shadowgrid", TreeContentAnimation::run<ShadowGridAnimation>},
+    {"shadowgrid2", TreeContentAnimation::run<ShadowGrid2Animation>},
     {"rectgrid", TreeContentAnimation::run<RectGridAnimation> },
     {"oval", TreeContentAnimation::run<OvalAnimation> },
 };
@@ -271,11 +323,19 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
+    int frameCount = 150;
+    if (argc > 3) {
+        frameCount = atoi(argv[3]);
+        if (frameCount < 1) {
+            printf("Invalid frame count!\n");
+            return 1;
+        }
+    }
     if (loopCount < 0) {
         loopCount = INT_MAX;
     }
     for (int i = 0; i < loopCount; i++) {
-        proc();
+        proc(frameCount);
     }
     printf("Success!\n");
     return 0;
