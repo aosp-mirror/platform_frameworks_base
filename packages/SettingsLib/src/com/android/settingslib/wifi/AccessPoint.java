@@ -29,6 +29,12 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.LruCache;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
+import android.os.UserHandle;
+import android.os.RemoteException;
+import android.app.AppGlobals;
 
 import com.android.settingslib.R;
 
@@ -282,12 +288,28 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public String getSavedNetworkSummary() {
-        // Update to new summary
-        if (mConfig != null && mConfig.isPasspoint()) {
-            return "";
-        } else {
-            return getSettingsSummary();
+        if (mConfig != null) {
+            PackageManager pm = mContext.getPackageManager();
+            String systemName = pm.getNameForUid(android.os.Process.SYSTEM_UID);
+            int userId = UserHandle.getUserId(mConfig.creatorUid);
+            ApplicationInfo appInfo = null;
+            if (mConfig.creatorName != null && mConfig.creatorName.equals(systemName)) {
+                appInfo = mContext.getApplicationInfo();
+            } else {
+                try {
+                    IPackageManager ipm = AppGlobals.getPackageManager();
+                    appInfo = ipm.getApplicationInfo(mConfig.creatorName, 0 /* flags */, userId);
+                } catch (RemoteException rex) {
+                }
+            }
+            if (appInfo != null &&
+                    !appInfo.packageName.equals(mContext.getString(R.string.settings_package)) &&
+                    !appInfo.packageName.equals(
+                    mContext.getString(R.string.certinstaller_package))) {
+                return mContext.getString(R.string.saved_network, appInfo.loadLabel(pm));
+            }
         }
+        return "";
     }
 
     public String getSummary() {

@@ -64,6 +64,8 @@
     <string name="wifi_not_in_range">Not in range</string>
     <!-- Summary for the remembered network but no internet connection was detected. -->
     <string name="wifi_no_internet">No Internet Access Detected, won\'t automatically reconnect.</string>
+    <!-- Summary for saved networks -->
+    <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
 
     <!-- Status message of Wi-Fi when it is connected by a Wi-Fi assistant application. [CHAR LIMIT=NONE] -->
     <string name="connected_via_wfa">Connected via Wi\u2011Fi assistant</string>
@@ -71,6 +73,10 @@
     <string name="connected_via_passpoint">Connected via %1$s</string>
     <!-- Status message of Wi-Fi when network has matching passpoint credentials. [CHAR LIMIT=NONE] -->
     <string name="available_via_passpoint">Available via %1$s</string>
+    <!-- Package name for Settings app-->
+    <string name="settings_package" translatable="false">com.android.settings</string>
+    <!-- Package name for Certinstaller app-->
+    <string name="certinstaller_package" translatable="false">com.android.certinstaller</string>
 
     <!-- Bluetooth settings.  Message when a device is disconnected -->
     <string name="bluetooth_disconnected">Disconnected</string>
