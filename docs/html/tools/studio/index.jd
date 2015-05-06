@@ -53,7 +53,8 @@ Studio features.</p>
 "{@docRoot}tools/workflow/index.html">Workflow</a> section, such as <a href=
 "{@docRoot}tools/projects/projects-studio.html">Managing Projects from Android Studio</a> and
 <a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android
-Studio</a>.</p>
+Studio</a>. For a summary of the latest changes to Android Studio, see the
+<a href="{@docRoot}tools/revisions/studio.html">Android Studio Release Notes</a>.</p>
 
 
 
