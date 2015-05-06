@@ -39,6 +39,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
@@ -72,6 +73,10 @@ public class NotificationPanelView extends PanelView implements
 
     private static final float HEADER_RUBBERBAND_FACTOR = 2.05f;
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
+
+    private static final String COUNTER_PANEL_OPEN = "panel_open";
+    private static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
+    private static final String COUNTER_PANEL_OPEN_PEEK = "panel_open_peek";
 
     public static final long DOZE_ANIMATION_DURATION = 700;
 
@@ -541,6 +546,8 @@ public class NotificationPanelView extends PanelView implements
         initDownStates(event);
         if (mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
             mIsExpansionFromHeadsUp = true;
+            MetricsLogger.count(mContext, COUNTER_PANEL_OPEN, 1);
+            MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_PEEK, 1);
             return true;
         }
         if (!isFullyCollapsed() && onQsIntercept(event)) {
@@ -617,7 +624,7 @@ public class NotificationPanelView extends PanelView implements
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
                 if (mQsTracking) {
-                    flingQsWithCurrentVelocity(
+                    flingQsWithCurrentVelocity(y,
                             event.getActionMasked() == MotionEvent.ACTION_CANCEL);
                     mQsTracking = false;
                 }
@@ -655,9 +662,24 @@ public class NotificationPanelView extends PanelView implements
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
     }
 
-    private void flingQsWithCurrentVelocity(boolean isCancelMotionEvent) {
+    private void flingQsWithCurrentVelocity(float y, boolean isCancelMotionEvent) {
         float vel = getCurrentVelocity();
-        flingSettings(vel, flingExpandsQs(vel) && !isCancelMotionEvent);
+        final boolean expandsQs = flingExpandsQs(vel);
+        if (expandsQs) {
+            logQsSwipeDown(y);
+        }
+        flingSettings(vel, expandsQs && !isCancelMotionEvent);
+    }
+
+    private void logQsSwipeDown(float y) {
+        float vel = getCurrentVelocity();
+        final int gesture = mStatusBarState == StatusBarState.KEYGUARD
+                ? EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_DOWN_QS
+                : EventLogConstants.SYSUI_SHADE_GESTURE_SWIPE_DOWN_QS;
+        EventLogTags.writeSysuiLockscreenGesture(
+                gesture,
+                (int) ((y - mInitialTouchY) / mStatusBar.getDisplayDensity()),
+                (int) (vel / mStatusBar.getDisplayDensity()));
     }
 
     private boolean flingExpandsQs(float vel) {
@@ -699,6 +721,7 @@ public class NotificationPanelView extends PanelView implements
             return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
+            MetricsLogger.count(mContext, COUNTER_PANEL_OPEN, 1);
             updateVerticalPanelPosition(event.getX());
         }
         super.onTouchEvent(event);
@@ -738,6 +761,7 @@ public class NotificationPanelView extends PanelView implements
         if (mTwoFingerQsExpandPossible && event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN
                 && event.getPointerCount() == 2
                 && event.getY(event.getActionIndex()) < mStatusBarMinHeight) {
+            MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_QS, 1);
             mQsExpandImmediate = true;
             requestPanelHeightUpdate();
 
@@ -799,6 +823,7 @@ public class NotificationPanelView extends PanelView implements
         }
         final float y = event.getY(pointerIndex);
         final float x = event.getX(pointerIndex);
+        final float h = y - mInitialTouchY;
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
@@ -826,7 +851,6 @@ public class NotificationPanelView extends PanelView implements
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                final float h = y - mInitialTouchY;
                 setQsExpansion(h + mInitialHeightOnTouch);
                 if (h >= getFalsingThreshold()) {
                     mQsTouchAboveFalsingThreshold = true;
@@ -842,9 +866,10 @@ public class NotificationPanelView extends PanelView implements
                 float fraction = getQsExpansionFraction();
                 if ((fraction != 0f || y >= mInitialTouchY)
                         && (fraction != 1f || y <= mInitialTouchY)) {
-                    flingQsWithCurrentVelocity(
+                    flingQsWithCurrentVelocity(y,
                             event.getActionMasked() == MotionEvent.ACTION_CANCEL);
                 } else {
+                    logQsSwipeDown(y);
                     mScrollYOverride = -1;
                 }
                 if (mVelocityTracker != null) {
@@ -1819,6 +1844,9 @@ public class NotificationPanelView extends PanelView implements
             if (mQsExpanded) {
                 flingSettings(0 /* vel */, false /* expand */);
             } else if (mQsExpansionEnabled) {
+                EventLogTags.writeSysuiLockscreenGesture(
+                        EventLogConstants.SYSUI_TAP_TO_OPEN_QS,
+                        0, 0);
                 flingSettings(0 /* vel */, true /* expand */);
             }
         }

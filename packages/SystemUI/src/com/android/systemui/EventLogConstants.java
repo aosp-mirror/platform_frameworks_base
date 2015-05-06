@@ -34,4 +34,10 @@ public class EventLogConstants {
     public static final int SYSUI_LOCKSCREEN_GESTURE_TAP_LOCK = 6;
     /** The user tapped a notification, needs to tap again to launch. */
     public static final int SYSUI_LOCKSCREEN_GESTURE_TAP_NOTIFICATION_ACTIVATE = 7;
+    /** The user swiped down to open quick settings, from keyguard. */
+    public static final int SYSUI_LOCKSCREEN_GESTURE_SWIPE_DOWN_QS = 8;
+    /** The user swiped down to open quick settings, from shade. */
+    public static final int SYSUI_SHADE_GESTURE_SWIPE_DOWN_QS = 9;
+    /** The user tapped on the status bar to open quick settings, from shade. */
+    public static final int SYSUI_TAP_TO_OPEN_QS = 10;
 }
