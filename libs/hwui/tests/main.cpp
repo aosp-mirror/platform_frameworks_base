@@ -263,7 +263,20 @@ int main(int argc, char* argv[]) {
         printf("Error: couldn't find test %s\n", testName);
         return 1;
     }
-    proc();
+    int loopCount = 1;
+    if (argc > 2) {
+        loopCount = atoi(argv[2]);
+        if (!loopCount) {
+            printf("Invalid loop count!\n");
+            return 1;
+        }
+    }
+    if (loopCount < 0) {
+        loopCount = INT_MAX;
+    }
+    for (int i = 0; i < loopCount; i++) {
+        proc();
+    }
     printf("Success!\n");
     return 0;
 }
