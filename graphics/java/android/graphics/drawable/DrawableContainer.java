@@ -291,9 +291,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public void setHotspotBounds(int left, int top, int right, int bottom) {
         if (mHotspotBounds == null) {
-            mHotspotBounds = new Rect(left, top, bottom, right);
+            mHotspotBounds = new Rect(left, top, right, bottom);
         } else {
-            mHotspotBounds.set(left, top, bottom, right);
+            mHotspotBounds.set(left, top, right, bottom);
         }
 
         if (mCurrDrawable != null) {
