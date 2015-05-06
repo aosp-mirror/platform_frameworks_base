@@ -32,7 +32,7 @@ $(LOCAL_BUILT_MODULE) : $(framework_keylayouts) $(framework_keycharmaps) $(frame
 	$(hide) mkdir -p $(dir $@) && touch $@
 
 # Run validatekeymaps uncondionally for platform build.
-droidcore all_modules : $(LOCAL_BUILT_MODULE)
+droidcore : $(LOCAL_BUILT_MODULE)
 
 # Reset temp vars.
 validatekeymaps :=
