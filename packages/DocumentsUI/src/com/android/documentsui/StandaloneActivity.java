@@ -19,6 +19,7 @@ package com.android.documentsui;
 import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
+
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
@@ -133,7 +134,7 @@ public class StandaloneActivity extends BaseActivity {
         state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
         state.showAdvanced = state.forceAdvanced
                 | LocalPreferences.getDisplayAdvancedDevices(this);
-        state.showSize = true;
+        state.showSize = LocalPreferences.getDisplayFileSize(this);
         final DocumentStack stack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
         if (stack != null)
             state.stack = stack;
