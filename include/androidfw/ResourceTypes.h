@@ -1631,6 +1631,7 @@ public:
 
         status_t applyStyle(uint32_t resID, bool force=false);
         status_t setTo(const Theme& other);
+        status_t clear();
 
         /**
          * Retrieve a value in the theme.  If the theme defines this
