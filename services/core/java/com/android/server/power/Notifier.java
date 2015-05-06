@@ -539,9 +539,11 @@ final class Notifier {
     };
 
     private void playWirelessChargingStartedSound() {
+        final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.CHARGING_SOUNDS_ENABLED, 1) != 0;
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.WIRELESS_CHARGING_STARTED_SOUND);
-        if (soundPath != null) {
+        if (enabled && soundPath != null) {
             final Uri soundUri = Uri.parse("file://" + soundPath);
             if (soundUri != null) {
                 final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
