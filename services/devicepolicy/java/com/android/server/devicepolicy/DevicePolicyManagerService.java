@@ -6313,7 +6313,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setPermissionPolicy(ComponentName admin, int policy) throws RemoteException {
         int userId = UserHandle.getCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             DevicePolicyData userPolicy = getUserData(userId);
             if (userPolicy.mPermissionPolicy != policy) {
                 userPolicy.mPermissionPolicy = policy;
@@ -6336,7 +6336,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String permission, boolean granted) throws RemoteException {
         UserHandle user = Binder.getCallingUserHandle();
         synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = Binder.clearCallingIdentity();
             try {
                 if (granted) {
