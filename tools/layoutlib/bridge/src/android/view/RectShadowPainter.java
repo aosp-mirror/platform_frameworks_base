@@ -19,6 +19,7 @@ package android.view;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 
 import android.graphics.Canvas;
+import android.graphics.Canvas_Delegate;
 import android.graphics.LinearGradient;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -125,6 +126,9 @@ public class RectShadowPainter {
 
     private static void sideShadow(Canvas canvas, Paint edgePaint,
             RectF edgeShadowRect, float dx, float dy, int rotations) {
+        if (isRectEmpty(edgeShadowRect)) {
+            return;
+        }
         int saved = canvas.save();
         canvas.translate(dx, dy);
         canvas.rotate(rotations * PERPENDICULAR_ANGLE);
@@ -152,5 +156,16 @@ public class RectShadowPainter {
         path.close();
         canvas.drawPath(path, paint);
         canvas.restoreToCount(saved);
+    }
+
+    /**
+     * Differs from {@link RectF#isEmpty()} as this first converts the rect to int and then checks.
+     * <p/>
+     * This is required because {@link Canvas_Delegate#native_drawRect(long, float, float, float,
+     * float, long)} casts the co-ordinates to int and we want to ensure that it doesn't end up
+     * drawing empty rectangles, which results in IllegalArgumentException.
+     */
+    private static boolean isRectEmpty(RectF rect) {
+        return (int) rect.left >= (int) rect.right || (int) rect.top >= (int) rect.bottom;
     }
 }
