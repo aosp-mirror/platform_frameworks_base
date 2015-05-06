@@ -25,7 +25,7 @@ public interface KeyStoreCryptoOperation {
     /**
      * Gets the KeyStore operation handle of this crypto operation.
      *
-     * @return handle or {@code null} if the KeyStore operation is not in progress.
+     * @return handle or {@code 0} if the KeyStore operation is not in progress.
      */
-    Long getOperationHandle();
+    long getOperationHandle();
 }
