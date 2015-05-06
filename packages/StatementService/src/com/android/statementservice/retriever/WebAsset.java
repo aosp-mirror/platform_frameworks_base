@@ -39,6 +39,7 @@ import java.util.Locale;
 /* package private */ final class WebAsset extends AbstractAsset {
 
     private static final String MISSING_FIELD_FORMAT_STRING = "Expected %s to be set.";
+    private static final String SCHEME_HTTP = "http";
 
     private final URL mUrl;
 
@@ -103,6 +104,12 @@ import java.util.Locale;
     @Override
     public int lookupKey() {
         return toJson().hashCode();
+    }
+
+    @Override
+    public boolean followInsecureInclude() {
+        // Only allow insecure include file if the asset scheme is http.
+        return SCHEME_HTTP.equals(getScheme());
     }
 
     /**

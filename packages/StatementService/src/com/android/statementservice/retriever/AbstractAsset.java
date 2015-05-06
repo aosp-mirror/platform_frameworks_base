@@ -63,4 +63,10 @@ public abstract class AbstractAsset {
             throws AssociationServiceException {
         return AssetFactory.create(assetJson);
     }
+
+    /**
+     * If this is the source asset of a statement file, should the retriever follow
+     * any insecure (non-HTTPS) include statements made by the asset.
+     */
+    public abstract boolean followInsecureInclude();
 }
