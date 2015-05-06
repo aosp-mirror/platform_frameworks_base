@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.internal.policy;
 
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
@@ -27,6 +27,34 @@ import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.os.UserHandle;
 
+import android.view.ActionMode;
+import android.view.ContextThemeWrapper;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.IRotationWatcher.Stub;
+import android.view.IWindowManager;
+import android.view.InputDevice;
+import android.view.InputEvent;
+import android.view.InputQueue;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.SearchEvent;
+import android.view.SurfaceHolder.Callback2;
+import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.view.ViewManager;
+import android.view.ViewParent;
+import android.view.ViewRootImpl;
+import android.view.ViewStub;
+import android.view.ViewTreeObserver.OnPreDrawListener;
+import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.FloatingActionMode;
@@ -67,7 +95,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -140,7 +167,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private ViewGroup mContentRoot;
 
-    SurfaceHolder.Callback2 mTakeSurfaceCallback;
+    Callback2 mTakeSurfaceCallback;
 
     InputQueue.Callback mTakeInputQueueCallback;
 
@@ -427,7 +454,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void takeSurface(SurfaceHolder.Callback2 callback) {
+    public void takeSurface(Callback2 callback) {
         mTakeSurfaceCallback = callback;
     }
 
@@ -2181,7 +2208,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private ActionBarContextView mPrimaryActionModeView;
         private PopupWindow mPrimaryActionModePopup;
         private Runnable mShowPrimaryActionModePopup;
-        private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
+        private OnPreDrawListener mFloatingToolbarPreDrawListener;
         private View mFloatingActionModeOriginatingView;
         private FloatingToolbar mFloatingToolbar;
 
@@ -3354,7 +3381,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mContext, callback, originatingView, mFloatingToolbar);
             mFloatingActionModeOriginatingView = originatingView;
             mFloatingToolbarPreDrawListener =
-                new ViewTreeObserver.OnPreDrawListener() {
+                new OnPreDrawListener() {
                     @Override
                     public boolean onPreDraw() {
                         mode.updateViewLocationInWindow();
@@ -4718,7 +4745,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     }
 
-    static class RotationWatcher extends IRotationWatcher.Stub {
+    static class RotationWatcher extends Stub {
         private Handler mHandler;
         private final Runnable mRotationChanged = new Runnable() {
             public void run() {

@@ -28,7 +28,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.PhoneWindow;
+import com.android.internal.policy.PhoneWindow;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
