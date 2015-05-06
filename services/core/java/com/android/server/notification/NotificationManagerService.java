@@ -2018,7 +2018,8 @@ public class NotificationManagerService extends SystemService {
             throw new IllegalArgumentException("null not allowed: pkg=" + pkg
                     + " id=" + id + " notification=" + notification);
         }
-        if (notification.icon != 0) {
+
+        if (notification.getSmallIcon() != null) {
             if (!notification.isValid()) {
                 throw new IllegalArgumentException("Invalid notification (): pkg=" + pkg
                         + " id=" + id + " notification=" + notification);
@@ -2139,11 +2140,11 @@ public class NotificationManagerService extends SystemService {
                     applyZenModeLocked(r);
                     mRankingHelper.sort(mNotificationList);
 
-                    if (notification.icon != 0) {
+                    if (notification.getSmallIcon() != null) {
                         StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
                         mListeners.notifyPostedLocked(n, oldSbn);
                     } else {
-                        Slog.e(TAG, "Not posting notification with icon==0: " + notification);
+                        Slog.e(TAG, "Not posting notification without small icon: " + notification);
                         if (old != null && !old.isCanceled) {
                             mListeners.notifyRemovedLocked(n);
                         }
@@ -2716,7 +2717,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         // status bar
-        if (r.getNotification().icon != 0) {
+        if (r.getNotification().getSmallIcon() != null) {
             r.isCanceled = true;
             mListeners.notifyRemovedLocked(r.sbn);
         }

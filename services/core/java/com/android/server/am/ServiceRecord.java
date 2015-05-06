@@ -430,7 +430,7 @@ final class ServiceRecord extends Binder {
             // avoid deadlocks.
             final String localPackageName = packageName;
             final int localForegroundId = foregroundId;
-            final Notification localForegroundNoti = foregroundNoti;
+            final Notification _foregroundNoti = foregroundNoti;
             ams.mHandler.post(new Runnable() {
                 public void run() {
                     NotificationManagerInternal nm = LocalServices.getService(
@@ -438,16 +438,14 @@ final class ServiceRecord extends Binder {
                     if (nm == null) {
                         return;
                     }
+                    Notification localForegroundNoti = _foregroundNoti;
                     try {
-                        if (localForegroundNoti.icon == 0) {
+                        if (localForegroundNoti.getSmallIcon() == null) {
                             // It is not correct for the caller to supply a notification
                             // icon, but this used to be able to slip through, so for
-                            // those dirty apps give it the app's icon.
-                            localForegroundNoti.icon = appInfo.icon;
+                            // those dirty apps we will create a notification clearly
+                            // blaming the app.
 
-                            // Do not allow apps to present a sneaky invisible content view either.
-                            localForegroundNoti.contentView = null;
-                            localForegroundNoti.bigContentView = null;
                             CharSequence appName = appInfo.loadLabel(
                                     ams.mContext.getPackageManager());
                             if (appName == null) {
@@ -457,35 +455,44 @@ final class ServiceRecord extends Binder {
                             try {
                                 ctx = ams.mContext.createPackageContext(
                                         appInfo.packageName, 0);
+
+                                Notification.Builder notiBuilder = new Notification.Builder(ctx);
+
+                                // it's ugly, but it clearly identifies the app
+                                notiBuilder.setSmallIcon(appInfo.icon);
+
                                 Intent runningIntent = new Intent(
                                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                 runningIntent.setData(Uri.fromParts("package",
                                         appInfo.packageName, null));
                                 PendingIntent pi = PendingIntent.getActivity(ams.mContext, 0,
                                         runningIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                localForegroundNoti.color = ams.mContext.getColor(
+                                notiBuilder.setColor(ams.mContext.getColor(
                                         com.android.internal
-                                                .R.color.system_notification_accent_color);
-                                localForegroundNoti.setLatestEventInfo(ctx,
+                                                .R.color.system_notification_accent_color));
+                                notiBuilder.setContentTitle(
                                         ams.mContext.getString(
                                                 com.android.internal.R.string
                                                         .app_running_notification_title,
-                                                appName),
+                                                appName));
+                                notiBuilder.setContentText(
                                         ams.mContext.getString(
                                                 com.android.internal.R.string
                                                         .app_running_notification_text,
-                                                appName),
-                                        pi);
+                                                appName));
+                                notiBuilder.setContentIntent(pi);
+
+                                localForegroundNoti = notiBuilder.build();
                             } catch (PackageManager.NameNotFoundException e) {
-                                localForegroundNoti.icon = 0;
                             }
                         }
-                        if (localForegroundNoti.icon == 0) {
+                        if (localForegroundNoti.getSmallIcon() == null) {
                             // Notifications whose icon is 0 are defined to not show
                             // a notification, silently ignoring it.  We don't want to
                             // just ignore it, we want to prevent the service from
                             // being foreground.
-                            throw new RuntimeException("icon must be non-zero");
+                            throw new RuntimeException("invalid service notification: "
+                                    + foregroundNoti);
                         }
                         int[] outId = new int[1];
                         nm.enqueueNotification(localPackageName, localPackageName,

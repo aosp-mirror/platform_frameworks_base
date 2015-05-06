@@ -1390,9 +1390,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             final ImageView profileBadge = (ImageView) publicViewLocal.findViewById(
                     R.id.profile_badge_line3);
 
-            final StatusBarIcon ic = new StatusBarIcon(entry.notification.getPackageName(),
+            final StatusBarIcon ic = new StatusBarIcon(
                     entry.notification.getUser(),
-                    entry.notification.getNotification().icon,
+                    entry.notification.getNotification().getSmallIcon(),
                     entry.notification.getNotification().iconLevel,
                     entry.notification.getNotification().number,
                     entry.notification.getNotification().tickerText);
@@ -1770,9 +1770,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), n);
         iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-        final StatusBarIcon ic = new StatusBarIcon(sbn.getPackageName(),
+        final StatusBarIcon ic = new StatusBarIcon(
                 sbn.getUser(),
-                    n.icon,
+                    n.getSmallIcon(),
                     n.iconLevel,
                     n.number,
                     n.tickerText);
@@ -1916,9 +1916,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             try {
                 if (entry.icon != null) {
                     // Update the icon
-                    final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
+                    final StatusBarIcon ic = new StatusBarIcon(
                             notification.getUser(),
-                            n.icon,
+                            n.getSmallIcon(),
                             n.iconLevel,
                             n.number,
                             n.tickerText);
@@ -1938,9 +1938,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         if (!updateSuccessful) {
             if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
-            final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
+            final StatusBarIcon ic = new StatusBarIcon(
                     notification.getUser(),
-                    n.icon,
+                    n.getSmallIcon(),
                     n.iconLevel,
                     n.number,
                     n.tickerText);
