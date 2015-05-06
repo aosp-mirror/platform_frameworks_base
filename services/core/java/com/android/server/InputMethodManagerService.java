@@ -2038,11 +2038,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (!mIWindowManager.inputMethodClientHasFocus(client)) {
                             if (DEBUG) Slog.w(TAG, "Ignoring hideSoftInput of uid "
                                     + uid + ": " + client);
-                            setImeWindowVisibilityStatusHiddenLocked();
                             return false;
                         }
                     } catch (RemoteException e) {
-                        setImeWindowVisibilityStatusHiddenLocked();
                         return false;
                     }
                 }
