@@ -2588,21 +2588,6 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.GET_RESTRICTION_ENTRIES";
 
     /**
-     * @hide
-     * Activity to challenge the user for a PIN that was configured when setting up
-     * restrictions. Restrictions include blocking of apps and preventing certain user operations,
-     * controlled by {@link android.os.UserManager#setUserRestrictions(Bundle).
-     * Launch the activity using
-     * {@link android.app.Activity#startActivityForResult(Intent, int)} and check if the
-     * result is {@link android.app.Activity#RESULT_OK} for a successful response to the
-     * challenge.<p/>
-     * Before launching this activity, make sure that there is a PIN in effect, by calling
-     * {@link android.os.UserManager#hasRestrictionsChallenge()}.
-     */
-    public static final String ACTION_RESTRICTIONS_CHALLENGE =
-            "android.intent.action.RESTRICTIONS_CHALLENGE";
-
-    /**
      * Sent the first time a user is starting, to allow system apps to
      * perform one time initialization.  (This will not be seen by third
      * party applications because a newly initialized user does not have any

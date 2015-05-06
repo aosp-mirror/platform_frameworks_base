@@ -23867,7 +23867,7 @@ package android.os {
     method public boolean isUserAGoat();
     method public boolean isUserRunning(android.os.UserHandle);
     method public boolean isUserRunningOrStopping(android.os.UserHandle);
-    method public boolean setRestrictionsChallenge(java.lang.String);
+    method public deprecated boolean setRestrictionsChallenge(java.lang.String);
     method public deprecated void setUserRestriction(java.lang.String, boolean);
     method public deprecated void setUserRestrictions(android.os.Bundle);
     method public deprecated void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
