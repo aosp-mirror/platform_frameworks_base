@@ -829,9 +829,9 @@ public class PopupWindow {
     }
 
     /**
-     * Set the layout type for this window. This value will be passed through to
-     * {@link WindowManager.LayoutParams#type} therefore the value should match any value
-     * {@link WindowManager.LayoutParams#type} accepts.
+     * Set the layout type for this window.
+     * <p>
+     * See {@link WindowManager.LayoutParams#type} for possible values.
      *
      * @param layoutType Layout type for this window.
      *
