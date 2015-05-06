@@ -378,6 +378,7 @@ public final class FloatingToolbar {
             mShowAnimation = createGrowFadeInFromBottom(mContentContainer);
             mDismissAnimation = createShrinkFadeOutFromBottomAnimation(
                     mContentContainer,
+                    0,
                     new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -387,6 +388,7 @@ public final class FloatingToolbar {
                     });
             mHideAnimation = createShrinkFadeOutFromBottomAnimation(
                     mContentContainer,
+                    150,
                     new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -1224,15 +1226,16 @@ public final class FloatingToolbar {
      * Creates a "shrink and fade out from bottom" animation for the specified view.
      *
      * @param view  The view to animate
+     * @param startDelay  The start delay of the animation
      * @param listener  The animation listener
      */
     private static AnimatorSet createShrinkFadeOutFromBottomAnimation(
-            View view, Animator.AnimatorListener listener) {
+            View view, int startDelay, Animator.AnimatorListener listener) {
         AnimatorSet shrinkFadeOutFromBottomAnimation =  new AnimatorSet();
         shrinkFadeOutFromBottomAnimation.playTogether(
                 ObjectAnimator.ofFloat(view, View.SCALE_Y, 1, 0.5f).setDuration(125),
                 ObjectAnimator.ofFloat(view, View.ALPHA, 1, 0).setDuration(75));
-        shrinkFadeOutFromBottomAnimation.setStartDelay(150);
+        shrinkFadeOutFromBottomAnimation.setStartDelay(startDelay);
         shrinkFadeOutFromBottomAnimation.addListener(listener);
         return shrinkFadeOutFromBottomAnimation;
     }
