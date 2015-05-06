@@ -224,8 +224,8 @@ interface IDevicePolicyManager {
     void setSystemUpdatePolicy(in ComponentName who, in PersistableBundle policy);
     PersistableBundle getSystemUpdatePolicy();
 
-    boolean setKeyguardEnabledState(in ComponentName admin, boolean enabled);
-    void setStatusBarEnabledState(in ComponentName who, boolean enabled);
+    boolean setKeyguardDisabled(in ComponentName admin, boolean disabled);
+    boolean setStatusBarDisabled(in ComponentName who, boolean disabled);
     boolean getDoNotAskCredentialsOnBoot();
 
     void notifyPendingSystemUpdate(in long updateReceivedTime);
