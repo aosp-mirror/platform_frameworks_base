@@ -16,15 +16,22 @@
 
 package com.android.test.assist;
 
-import android.content.Intent;
-import android.service.voice.VoiceInteractionService;
+import android.annotation.Nullable;
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.WindowManager;
 
-public class AssistInteractionService extends VoiceInteractionService {
+import com.android.test.assist.R;
+
+/**
+ * An activity which can be shown above the keyguard.
+ */
+public class AboveKeyguardActivity extends Activity {
+
     @Override
-    public void onLaunchVoiceAssistFromKeyguard() {
-        super.onLaunchVoiceAssistFromKeyguard();
-        Intent intent = new Intent(this, AboveKeyguardActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        setContentView(R.layout.keyguard_preview);
     }
 }
