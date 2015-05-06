@@ -37,8 +37,8 @@ package android.app.admin;
  * <li>{@link #STATUS_ERROR_SET_DEVICE_POLICY}
  * <li>{@link #STATUS_ERROR_DELETE_APPS}
  * <li>{@link #STATUS_ERROR_DOUBLE_BUMP}
- * <li>{@link #STATUS_STATE_CONNECT_BLUETOOTH_PROXY}
- * <li>{@link #STATUS_STATE_DISCONNECT_BLUETOOTH_PROXY}
+ * <li>{@link #STATUS_STATE_CONNECTING_BLUETOOTH_PROXY}
+ * <li>{@link #STATUS_STATE_DISCONNECTING_BLUETOOTH_PROXY}
  * <li>{@link #STATUS_STATE_DEVICE_PROVISIONED}
  * </ul>
  */
@@ -84,13 +84,13 @@ public class DeviceInitializerStatus {
      * Device provisioning status code that indicates that a device is connecting to establish
      * a Bluetooth network proxy.
      */
-    public static final int STATUS_STATE_CONNECT_BLUETOOTH_PROXY = FLAG_STATUS_HIGH_PRIORITY | 8;
+    public static final int STATUS_STATE_CONNECTING_BLUETOOTH_PROXY = FLAG_STATUS_HIGH_PRIORITY | 8;
 
     /**
      * Device provisioning status code that indicates that a connected Bluetooth network proxy
      * is being shut down.
      */
-    public static final int STATUS_STATE_DISCONNECT_BLUETOOTH_PROXY = FLAG_STATUS_HIGH_PRIORITY | 9;
+    public static final int STATUS_STATE_DISCONNECTING_BLUETOOTH_PROXY = FLAG_STATUS_HIGH_PRIORITY | 9;
 
     /**
      * Device provisioning status code that indicates that a device has been successfully
@@ -140,38 +140,6 @@ public class DeviceInitializerStatus {
      * because the device has already been provisioned or that provisioning has already started.
      */
     public static final int STATUS_ERROR_DOUBLE_BUMP = FLAG_STATUS_ERROR | 30;
-
-    /**
-     * Determine if the specified status code represents an error status.
-     * @param statusCode status code to check
-     * @return {@code true} if the status code is an error status code
-     */
-    public static boolean isErrorStatus(int statusCode) {
-        return isFlagSet(statusCode, FLAG_STATUS_ERROR);
-    }
-
-    /**
-     * Determine if the specified status code is a custom status. Custom status codes are defined
-     * and sent by device initialization agents.
-     * @param statusCode status code to check
-     * @return {@code true} if the status code is a custom status code
-     */
-    public static boolean isCustomStatus(int statusCode) {
-        return isFlagSet(statusCode, FLAG_STATUS_CUSTOM);
-    }
-
-    /**
-     * Determine if the specified status code is a high priority status code.
-     * @param statusCode status code to check
-     * @return {@code true} if the status code is a high priority status code
-     */
-    public static boolean isHighPriority(int statusCode) {
-        return isFlagSet(statusCode, FLAG_STATUS_HIGH_PRIORITY);
-    }
-
-    private static boolean isFlagSet(int statusCode, int flag) {
-        return (statusCode & flag) != 0;
-    }
 
     private DeviceInitializerStatus() {}
 }
