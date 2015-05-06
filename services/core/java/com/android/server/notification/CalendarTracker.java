@@ -47,6 +47,7 @@ public class CalendarTracker {
         Instances.EVENT_ID,
         Instances.OWNER_ACCOUNT,
         Instances.CALENDAR_ID,
+        Instances.AVAILABILITY,
     };
 
     private static final String INSTANCE_ORDER_BY = Instances.BEGIN + " ASC";
@@ -143,11 +144,14 @@ public class CalendarTracker {
                 final int eventId = cursor.getInt(4);
                 final String owner = cursor.getString(5);
                 final long calendarId = cursor.getLong(6);
-                if (DEBUG) Log.d(TAG, String.format("%s %s-%s v=%s eid=%s o=%s cid=%s", title,
-                        new Date(begin), new Date(end), visible, eventId, owner, calendarId));
+                final int availability = cursor.getInt(7);
+                if (DEBUG) Log.d(TAG, String.format("%s %s-%s v=%s a=%s eid=%s o=%s cid=%s", title,
+                        new Date(begin), new Date(end), visible, availabilityToString(availability),
+                        eventId, owner, calendarId));
                 final boolean meetsTime = time >= begin && time < end;
                 final boolean meetsCalendar = visible
-                        && (filter.calendar == 0 || filter.calendar == calendarId);
+                        && (filter.calendar == 0 || filter.calendar == calendarId)
+                        && availability != Instances.AVAILABILITY_FREE;
                 if (meetsCalendar) {
                     if (DEBUG) Log.d(TAG, "  MEETS CALENDAR");
                     final boolean meetsAttendee = meetsAttendee(filter, eventId, owner);
@@ -225,6 +229,15 @@ public class CalendarTracker {
             case Attendees.ATTENDEE_STATUS_INVITED: return "ATTENDEE_STATUS_INVITED";
             case Attendees.ATTENDEE_STATUS_TENTATIVE: return "ATTENDEE_STATUS_TENTATIVE";
             default: return "ATTENDEE_STATUS_UNKNOWN_" + status;
+        }
+    }
+
+    private static String availabilityToString(int availability) {
+        switch (availability) {
+            case Instances.AVAILABILITY_BUSY: return "AVAILABILITY_BUSY";
+            case Instances.AVAILABILITY_FREE: return "AVAILABILITY_FREE";
+            case Instances.AVAILABILITY_TENTATIVE: return "AVAILABILITY_TENTATIVE";
+            default: return "AVAILABILITY_UNKNOWN_" + availability;
         }
     }
 
