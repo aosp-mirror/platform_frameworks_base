@@ -2623,7 +2623,6 @@
   <public type="attr" name="fullBackupContent" />
 
   <public type="style" name="Widget.Material.Button.Colored" />
-
   <public type="style" name="Theme.Material.DayNight" />
   <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
   <public type="style" name="Theme.Material.DayNight.Dialog" />
@@ -2686,4 +2685,5 @@
   <public type="attr" name="assistBlocked" />
   <public type="attr" name="stylusButtonPressable" />
   <public type="attr" name="supportsLaunchVoiceAssistFromKeyguard" />
+  <public type="attr" name="scrollIndicators" />
 </resources>

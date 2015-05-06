@@ -526,11 +526,15 @@ public class AlertController {
             mWindow.setCloseOnTouchOutsideIfNotSet(true);
         }
 
-        // Only display the divider if we have a title and a custom view or a
-        // message.
         if (hasTopPanel) {
+            // Only clip scrolling content to padding if we have a title.
+            if (mScrollView != null) {
+                mScrollView.setClipToPadding(true);
+            }
+
+            // Only show the divider if we have a title.
             final View divider;
-            if (mMessage != null || hasCustomPanel || mListView != null) {
+            if (mMessage != null || mListView != null || hasCustomPanel) {
                 divider = topPanel.findViewById(R.id.titleDivider);
             } else {
                 divider = topPanel.findViewById(R.id.titleDividerTop);
@@ -538,6 +542,17 @@ public class AlertController {
 
             if (divider != null) {
                 divider.setVisibility(View.VISIBLE);
+            }
+        }
+
+        // Update scroll indicators as needed.
+        if (!hasCustomPanel) {
+            final View content = mListView != null ? mListView : mScrollView;
+            if (content != null) {
+                final int indicators = (hasTopPanel ? View.SCROLL_INDICATOR_TOP : 0)
+                        | (hasButtonPanel ? View.SCROLL_INDICATOR_BOTTOM : 0);
+                content.setScrollIndicators(indicators,
+                        View.SCROLL_INDICATOR_TOP | View.SCROLL_INDICATOR_BOTTOM);
             }
         }
 
@@ -652,59 +667,6 @@ public class AlertController {
                         new LayoutParams(MATCH_PARENT, MATCH_PARENT));
             } else {
                 contentPanel.setVisibility(View.GONE);
-            }
-        }
-
-        // Set up scroll indicators (if present).
-        final View indicatorUp = contentPanel.findViewById(R.id.scrollIndicatorUp);
-        final View indicatorDown = contentPanel.findViewById(R.id.scrollIndicatorDown);
-        if (indicatorUp != null || indicatorDown != null) {
-            if (mMessage != null) {
-                // We're just showing the ScrollView, set up listener.
-                mScrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-                        @Override
-                        public void onScrollChange(View v, int scrollX, int scrollY,
-                                int oldScrollX, int oldScrollY) {
-                            manageScrollIndicators(v, indicatorUp, indicatorDown);
-                        }
-                    });
-                // Set up the indicators following layout.
-                mScrollView.post(new Runnable() {
-                     @Override
-                     public void run() {
-                             manageScrollIndicators(mScrollView, indicatorUp, indicatorDown);
-                         }
-                     });
-
-            } else if (mListView != null) {
-                // We're just showing the AbsListView, set up listener.
-                mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                        @Override
-                        public void onScrollStateChanged(AbsListView view, int scrollState) {
-                            // That's cool, I guess?
-                        }
-
-                        @Override
-                        public void onScroll(AbsListView v, int firstVisibleItem,
-                                int visibleItemCount, int totalItemCount) {
-                            manageScrollIndicators(v, indicatorUp, indicatorDown);
-                        }
-                    });
-                // Set up the indicators following layout.
-                mListView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            manageScrollIndicators(mListView, indicatorUp, indicatorDown);
-                        }
-                    });
-            } else {
-                // We don't have any content to scroll, remove the indicators.
-                if (indicatorUp != null) {
-                    contentPanel.removeView(indicatorUp);
-                }
-                if (indicatorDown != null) {
-                    contentPanel.removeView(indicatorDown);
-                }
             }
         }
     }

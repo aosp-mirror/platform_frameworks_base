@@ -1998,6 +1998,13 @@
         <attr name="needsDefaultBackgrounds" format="boolean" />
     </declare-styleable>
 
+    <!-- @hide -->
+    <declare-styleable name="ButtonBarLayout">
+        <!-- Whether to automatically stack the buttons when there is not
+             enough space to lay them out side-by-side. -->
+        <attr name="allowStacking" format="boolean" />
+    </declare-styleable>
+
     <!-- Fragment animation class attributes. -->
     <declare-styleable name="FragmentAnimation">
         <attr name="fragmentOpenEnterAnimation" format="reference" />
@@ -2713,6 +2720,28 @@
             <!-- Combines the tint and drawable color and alpha channels, clamping the
                  result to valid color values. Saturate(S + D) -->
             <enum name="add" value="16" />
+        </attr>
+
+        <!-- Defines which scroll indicators should be displayed when the view
+             can be scrolled. Multiple values may be combined using logical OR,
+             for example "top|bottom". -->
+        <attr name="scrollIndicators">
+            <!-- No scroll indicators are displayed. -->
+            <flag name="none" value="0x0000" />
+            <!-- Displays top scroll indicator when view can be scrolled up. -->
+            <flag name="top" value="0x0100" />
+            <!-- Displays bottom scroll indicator when vew can be scrolled down. -->
+            <flag name="bottom" value="0x0200" />
+            <!-- Displays left scroll indicator when vew can be scrolled left. -->
+            <flag name="left" value="0x0400" />
+            <!-- Displays right scroll indicator when vew can be scrolled right. -->
+            <flag name="right" value="0x0800" />
+            <!-- Displays right scroll indicator when vew can be scrolled in the
+                 start direction. -->
+            <flag name="start" value="0x1000" />
+            <!-- Displays right scroll indicator when vew can be scrolled in the
+                 end direction. -->
+            <flag name="end" value="0x2000" />
         </attr>
 
     </declare-styleable>
