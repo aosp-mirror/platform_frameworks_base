@@ -28,7 +28,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
@@ -726,6 +725,24 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public void launchVoiceAssistFromKeyguard() {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "launchVoiceAssistFromKeyguard without running voice interaction"
+                            + "service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.launchVoiceAssistFromKeyguard();
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
         public boolean isSessionRunning() {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
@@ -738,6 +755,14 @@ public class VoiceInteractionManagerService extends SystemService {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
                 return mImpl != null && mImpl.mInfo.getSupportsAssist();
+            }
+        }
+
+        @Override
+        public boolean activeServiceSupportsLaunchFromKeyguard() throws RemoteException {
+            enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
+            synchronized (this) {
+                return mImpl != null && mImpl.mInfo.getSupportsLaunchFromKeyguard();
             }
         }
 

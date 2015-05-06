@@ -2685,4 +2685,5 @@
 
   <public type="attr" name="assistBlocked" />
   <public type="attr" name="stylusButtonPressable" />
+  <public type="attr" name="supportsLaunchVoiceAssistFromKeyguard" />
 </resources>
