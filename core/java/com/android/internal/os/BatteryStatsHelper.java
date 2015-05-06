@@ -742,7 +742,6 @@ public final class BatteryStatsHelper {
                     parcel.setDataPosition(0);
                     BatteryStatsImpl stats = com.android.internal.os.BatteryStatsImpl.CREATOR
                             .createFromParcel(parcel);
-                    stats.distributeWorkLocked(BatteryStats.STATS_SINCE_CHARGED);
                     return stats;
                 } catch (IOException e) {
                     Log.w(TAG, "Unable to read statistics stream", e);
