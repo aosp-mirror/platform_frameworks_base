@@ -59,13 +59,187 @@ page.title=Support Library
 <p>This section provides details about the Support Library package releases.</p>
 
 
-<div class="toggle-content opened">
+<div class="toggle-content open">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
-/>Android Support Library, revision 22.1.0</a> <em>(April 2015)</em>
+    <img src="{@docRoot}assets/images/triangle-open.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22.2.0</a> <em>(May 2015)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
+      <dt>Added <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.design.widget.TextInputLayout} for showing
+            {@link android.widget.EditText} hint and error text as floating labels.
+          </li>
+          <li>Added {@link android.support.design.widget.FloatingActionButton} for implementing a
+            primary action on your interface as a
+            floating action button, supporting either default or mini sizes.
+          </li>
+          <li>Added {@link android.support.design.widget.Snackbar} for providing lightweight
+            feedback with an optional action in an animated snackbar.
+          </li>
+          <li>Added {@link android.support.design.widget.TabLayout} for implementing fixed and
+            scrollable
+           <a href="{@docRoot}design/building-blocks/tabs.html">tabs</a> as well as easy
+             integration with
+             {@link android.support.v4.view.ViewPager}.
+          </li>
+          <li>Added {@link android.support.design.widget.NavigationView} for implementing
+            <a href="{@docRoot}design/patterns/navigation-drawer.html">navigation drawer</a>
+             contents, including the ability to inflate menu items via a
+             <a href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a>.
+          </li>
+          <li>Added {@link android.support.design.widget.CoordinatorLayout}, a general purpose
+            layout, used for building dependencies between
+            sibling views and allowing easy scrolling reactions between components via
+            {@link android.support.design.widget.CoordinatorLayout.Behavior}. Many of the Design
+            Library components rely on being a child of a
+            {@link android.support.design.widget.CoordinatorLayout}.
+          </li>
+          <li>Added {@link android.support.design.widget.AppBarLayout}, a container for a
+            {@link android.widget.Toolbar}
+            and other views (such as {@link android.support.design.widget.TabLayout}) for
+            reacting to scrolling events by scrolling off the screen, becoming visible in reaction
+            to a downward scroll, or collapsing/uncollapsing before scrolling off/onto the screen.
+          </li>
+          <li>Added {@link android.support.design.widget.CollapsingToolbarLayout} for controlling
+            how a {@link android.widget.Toolbar} collapses. A toolbar may collapse by:
+            pinning components to the top of the screen while it collapses, introducing
+            parallax scrolling of components such as an {@link android.widget.ImageView},
+            or adding a content scrim color when the view is partially collapsed.
+          </li>
+       </ul>
+      </dt>
+
+
+
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+         <ul>
+
+          <li>Added the
+{@link android.support.v4.view.accessibility.AccessibilityEventCompat#getContentChangeTypes getContentChangeTypes()}
+            and
+{@link android.support.v4.view.accessibility.AccessibilityEventCompat#setContentChangeTypes setContentChangeTypes()}
+            methods and related change type
+            fields to the
+            {@link android.support.v4.view.accessibility.AccessibilityEventCompat}
+            class for accessibility event handling.
+          </li>
+          <li>Added the
+{@link android.support.v4.media.session.PlaybackStateCompat#getActiveQueueItemId getActiveQueueItemId()},
+{@link android.support.v4.media.session.PlaybackStateCompat#getCustomActions getCustomActions()},
+            and
+            {@link android.support.v4.media.session.PlaybackStateCompat#getExtras getExtras()}
+            methods with related state fields to the
+            {@link android.support.v4.media.session.PlaybackStateCompat} class for
+            getting custom actions from the queue.
+          </li>
+          <li>Added the
+{@link android.support.v4.media.session.PlaybackStateCompat.Builder#addCustomAction addCustomAction()},
+{@link android.support.v4.media.session.PlaybackStateCompat.Builder#addCustomAction addCustomAction()},
+{@link android.support.v4.media.session.PlaybackStateCompat.Builder#setActiveQueueItemId setActiveQueueItemId()},
+            and
+            {@link android.support.v4.media.session.PlaybackStateCompat.Builder#setExtras setExtras()}
+            methods to the
+            {@link android.support.v4.media.session.PlaybackStateCompat.Builder} class for adding
+            adding custom actions to a playback state.
+          </li>
+          <li>Added the
+{@link android.support.v4.media.session.PlaybackStateCompat.CustomAction#fromCustomAction fromCustomAction()} and
+{@link android.support.v4.media.session.PlaybackStateCompat.CustomAction#getCustomAction getCustomAction()} methods
+            to the
+            {@link android.support.v4.media.session.PlaybackStateCompat.CustomAction} class
+            for getting custom actions from the queue.
+          </li>
+          <li>Added the {@link android.support.v4.view.ViewCompat#isAttachedToWindow isAttachedToWindow()},
+            {@link android.support.v4.view.ViewCompat#offsetLeftAndRight offsetLeftAndRight()}, and
+            {@link android.support.v4.view.ViewCompat#offsetTopAndBottom offsetTopAndBottom()}
+            methods to the {@link android.support.v4.view.ViewCompat} class for working with views.
+          </li>
+          <li>Added the {@link android.support.v4.view.ViewPager#addOnPageChangeListener addOnPageChangeListener()},
+            {@link android.support.v4.view.ViewPager#clearOnPageChangeListeners clearOnPageChangeListeners()}, and
+            {@link android.support.v4.view.ViewPager#removeOnPageChangeListener removeOnPageChangeListener()}
+            methods to the {@link android.support.v4.view.ViewPager} class for responding to page
+            changes.
+            <p>Deprecated the
+            {@link android.support.v4.view.ViewPager#setOnPageChangeListener setOnPageChangeListener()} method.</p>
+          </li>
+          <li>Added the
+{@link android.support.v4.view.ViewParentCompat#notifySubtreeAccessibilityStateChanged notifySubtreeAccessibilityStateChanged()} method to
+            the {@link android.support.v4.view.ViewParentCompat} class for notifying a view parent
+            that the accessibility state of one of its descendants has changed.
+          </li>
+          <li>Added the {@link android.support.v4.view.ViewPropertyAnimatorCompat#translationZ translationZ()},
+            {@link android.support.v4.view.ViewPropertyAnimatorCompat#translationZBy translationZBy()},
+            {@link android.support.v4.view.ViewPropertyAnimatorCompat#z z()}, and
+            {@link android.support.v4.view.ViewPropertyAnimatorCompat#zBy zBy()}
+            methods to the {@link android.support.v4.view.ViewPropertyAnimatorCompat} class for
+            adding animation.
+          </li>
+       </ul>
+      </dd>
+
+
+
+<dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library</a>:</dt>
+      <dd>
+<ul>
+          <li>Added the
+            {@link android.support.v7.app.AppCompatActivity#onWindowStartingSupportActionMode onWindowStartingSupportActionMode()}
+            method to the
+            {@link android.support.v7.app.AppCompatActivity},
+            {@link android.support.v7.app.AppCompatCallback}, and
+            {@link android.support.v7.app.AppCompatDialog} classes for handling action modes
+            started from the current window.
+          </li>
+
+          <li>Added the
+{@link android.support.v7.app.AppCompatDelegate#isHandleNativeActionModesEnabled isHandleNativeActionModesEnabled()} and
+{@link android.support.v7.app.AppCompatDelegate#setHandleNativeActionModesEnabled setHandleNativeActionModesEnabled()}
+           methods to the
+           {@link android.support.v7.app.AppCompatDelegate} class for handling native action modes.
+          </li>
+       </ul>
+      </dd>
+
+
+    </dl>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22.1.0</a> <em>(April 2015)</em>
+  </p>
+
+
+
+  <div class="toggle-content-toggleme">
+    <dl>
+
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#annotations">annotations library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added the Annotations library to provide support for enhanced code inspections.
+            Annotations are added as metadata tags that you attach to variables, parameters,
+            and return values to inspect method return values, passed parameters, and local
+            variables and fields.
+          </li>
+        </ul>
+      </dd>
+
+
       <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
       <dd>
         <ul>
@@ -132,7 +306,7 @@ page.title=Support Library
          <li>Updated the {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
           class to add methods for errors, content invalidation and labels.
          </li>
-         <li>Added the following interpolation classses for animation:
+         <li>Added the following interpolation classes for animation:
            {@link android.support.v4.view.animation.FastOutLinearInInterpolator},
            {@link android.support.v4.view.animation.FastOutSlowInInterpolator},
            {@link android.support.v4.view.animation.LinearOutSlowInInterpolator},
@@ -245,7 +419,7 @@ page.title=Support Library
       </dd>
 
 
-      <dt>Changes for v8 renderscript library:</dt>
+      <dt>Changes for <a href="features.html#v8-renderscript">v8 renderscript library</a>:</dt>
       <dd>
         <ul>
           <li>Added the {@link android.support.v8.renderscript.ScriptIntrinsicHistogram} class for
@@ -643,7 +817,7 @@ page.title=Support Library
         </ul>
       </dd>
 
-      <dt>Changes for v8 renderscript library:</dt>
+      <dt>Changes for <a href="features.html#v8-renderscript">v8 renderscript library</a></dt>
       <dd>
         <ul>
           <li>Added error propagation for the RenderScript thunking layer.</li>
