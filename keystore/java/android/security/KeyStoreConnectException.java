@@ -16,12 +16,14 @@
 
 package android.security;
 
+import java.security.ProviderException;
+
 /**
  * Indicates a communications error with keystore service.
  *
  * @hide
  */
-public class KeyStoreConnectException extends IllegalStateException {
+public class KeyStoreConnectException extends ProviderException {
     public KeyStoreConnectException() {
         super("Failed to communicate with keystore service");
     }

@@ -24,6 +24,7 @@ import android.security.keymaster.OperationResult;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.ProviderException;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.MacSpi;
@@ -185,10 +186,10 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         }
 
         if (mOperationToken == null) {
-            throw new IllegalStateException("Keystore returned null operation token");
+            throw new ProviderException("Keystore returned null operation token");
         }
         if (mOperationHandle == 0) {
-            throw new IllegalStateException("Keystore returned invalid operation handle");
+            throw new ProviderException("Keystore returned invalid operation handle");
         }
 
         mChunkedStreamer = new KeyStoreCryptoOperationChunkedStreamer(
@@ -206,17 +207,17 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         try {
             ensureKeystoreOperationInitialized();
         } catch (InvalidKeyException e) {
-            throw new IllegalStateException("Failed to reinitialize MAC", e);
+            throw new ProviderException("Failed to reinitialize MAC", e);
         }
 
         byte[] output;
         try {
             output = mChunkedStreamer.update(input, offset, len);
         } catch (KeyStoreException e) {
-            throw new IllegalStateException("Keystore operation failed", e);
+            throw new ProviderException("Keystore operation failed", e);
         }
         if ((output != null) && (output.length != 0)) {
-            throw new IllegalStateException("Update operation unexpectedly produced output");
+            throw new ProviderException("Update operation unexpectedly produced output");
         }
     }
 
@@ -225,14 +226,14 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         try {
             ensureKeystoreOperationInitialized();
         } catch (InvalidKeyException e) {
-            throw new IllegalStateException("Failed to reinitialize MAC", e);
+            throw new ProviderException("Failed to reinitialize MAC", e);
         }
 
         byte[] result;
         try {
             result = mChunkedStreamer.doFinal(null, 0, 0);
         } catch (KeyStoreException e) {
-            throw new IllegalStateException("Keystore operation failed", e);
+            throw new ProviderException("Keystore operation failed", e);
         }
 
         resetWhilePreservingInitState();
