@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -88,6 +89,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void handleClick() {
+        super.handleClick();
         if (mState.value) {
             mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
         } else {
@@ -132,6 +134,11 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         if (mShowingDetail && !state.value) {
             showDetail(false);
         }
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_DND;
     }
 
     @Override
@@ -206,6 +213,11 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                 mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
                 showDetail(false);
             }
+        }
+
+        @Override
+        public int getMetricsCategory() {
+            return MetricsLogger.QS_DND_DETAILS;
         }
 
         @Override

@@ -29,6 +29,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.qs.QSTile;
 
 import java.util.Arrays;
@@ -42,6 +43,7 @@ public class IntentTile extends QSTile<QSTile.State> {
     private PendingIntent mOnLongClick;
     private String mOnLongClickUri;
     private int mCurrentUserId;
+    private String mIntentPackage;
 
     private IntentTile(Host host, String action) {
         super(host);
@@ -82,6 +84,7 @@ public class IntentTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleClick() {
+        super.handleClick();
         sendIntent("click", mOnClick, mOnClickUri);
     }
 
@@ -133,6 +136,17 @@ public class IntentTile extends QSTile<QSTile.State> {
         mOnClickUri = intent.getStringExtra("onClickUri");
         mOnLongClick = intent.getParcelableExtra("onLongClick");
         mOnLongClickUri = intent.getStringExtra("onLongClickUri");
+        mIntentPackage = intent.getStringExtra("package");
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_INTENT;
+    }
+
+    @Override
+    protected String getMetricsPackage() {
+        return mIntentPackage == null ? "" : mIntentPackage;
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {

@@ -33,6 +33,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
@@ -182,8 +183,11 @@ public class QSPanel extends ViewGroup {
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
+        MetricsLogger.visibility(mContext, MetricsLogger.QS_PANEL, mExpanded);
         if (!mExpanded) {
             closeDetail();
+        } else {
+            logTiles();
         }
     }
 
@@ -365,9 +369,11 @@ public class QSPanel extends ViewGroup {
             mDetailContent.removeAllViews();
             mDetail.bringToFront();
             mDetailContent.addView(r.detailView);
+            MetricsLogger.visible(mContext, detailAdapter.getMetricsCategory());
             setDetailRecord(r);
             listener = mHideGridContentWhenDone;
         } else {
+            MetricsLogger.hidden(mContext, mDetailRecord.detailAdapter.getMetricsCategory());
             mClosingDetail = true;
             setGridContentVisibility(true);
             listener = mTeardownDetailWhenDone;
@@ -387,7 +393,19 @@ public class QSPanel extends ViewGroup {
             }
         }
         mBrightnessView.setVisibility(newVis);
+        if (mGridContentVisible != visible) {
+            MetricsLogger.visibility(mContext, MetricsLogger.QS_PANEL, newVis);
+        }
         mGridContentVisible = visible;
+    }
+
+    private void logTiles() {
+        for (int i = 0; i < mRecords.size(); i++) {
+            TileRecord tileRecord = mRecords.get(i);
+            if (tileRecord.tile.getState().visible) {
+                MetricsLogger.visible(mContext, tileRecord.tile.getMetricsCategory());
+            }
+        }
     }
 
     @Override
