@@ -93,6 +93,14 @@ public class AudioPort {
     }
 
     /**
+     * Get the system unique device ID.
+     */
+    public int id() {
+        return mHandle.id();
+    }
+
+
+    /**
      * Get the audio port role
      */
     public int role() {

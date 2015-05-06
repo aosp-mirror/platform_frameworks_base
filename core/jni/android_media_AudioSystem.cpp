@@ -937,7 +937,8 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     } else if (nAudioPort->type == AUDIO_PORT_TYPE_MIX) {
         ALOGV("convertAudioPortFromNative is a mix");
         *jAudioPort = env->NewObject(gAudioMixPortClass, gAudioMixPortCstor,
-                                     jHandle, nAudioPort->role, jDeviceName,
+                                     jHandle, nAudioPort->ext.mix.handle,
+                                     nAudioPort->role, jDeviceName,
                                      jSamplingRates, jChannelMasks,
                                      jFormats, jGains);
     } else {
@@ -1670,7 +1671,7 @@ int register_android_media_AudioSystem(JNIEnv *env)
     jclass audioMixPortClass = FindClassOrDie(env, "android/media/AudioMixPort");
     gAudioMixPortClass = MakeGlobalRefOrDie(env, audioMixPortClass);
     gAudioMixPortCstor = GetMethodIDOrDie(env, audioMixPortClass, "<init>",
-            "(Landroid/media/AudioHandle;ILjava/lang/String;[I[I[I[Landroid/media/AudioGain;)V");
+            "(Landroid/media/AudioHandle;IILjava/lang/String;[I[I[I[Landroid/media/AudioGain;)V");
 
     jclass audioGainClass = FindClassOrDie(env, "android/media/AudioGain");
     gAudioGainClass = MakeGlobalRefOrDie(env, audioGainClass);

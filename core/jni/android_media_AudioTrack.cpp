@@ -36,6 +36,7 @@
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
 #include "android_media_PlaybackSettings.h"
+#include "android_media_DeviceCallback.h"
 
 // ----------------------------------------------------------------------------
 
@@ -79,6 +80,7 @@ class AudioTrackJniStorage {
         sp<MemoryHeapBase>         mMemHeap;
         sp<MemoryBase>             mMemBase;
         audiotrack_callback_cookie mCallbackData;
+        sp<JNIDeviceCallback>      mDeviceCallback;
 
     AudioTrackJniStorage() {
         mCallbackData.audioTrack_class = 0;
@@ -977,6 +979,51 @@ static jboolean android_media_AudioTrack_setOutputDevice(
     return lpTrack->setOutputDevice(device_id) == NO_ERROR;
 }
 
+static jint android_media_AudioTrack_getRoutedDeviceId(
+                JNIEnv *env,  jobject thiz) {
+
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        return 0;
+    }
+    return (jint)lpTrack->getRoutedDeviceId();
+}
+
+static void android_media_AudioTrack_enableDeviceCallback(
+                JNIEnv *env,  jobject thiz) {
+
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        return;
+    }
+    AudioTrackJniStorage* pJniStorage = (AudioTrackJniStorage *)env->GetLongField(
+        thiz, javaAudioTrackFields.jniData);
+    if (pJniStorage == NULL || pJniStorage->mDeviceCallback != 0) {
+        return;
+    }
+    pJniStorage->mDeviceCallback =
+    new JNIDeviceCallback(env, thiz, pJniStorage->mCallbackData.audioTrack_ref,
+                          javaAudioTrackFields.postNativeEventInJava);
+    lpTrack->addAudioDeviceCallback(pJniStorage->mDeviceCallback);
+}
+
+static void android_media_AudioTrack_disableDeviceCallback(
+                JNIEnv *env,  jobject thiz) {
+
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        return;
+    }
+    AudioTrackJniStorage* pJniStorage = (AudioTrackJniStorage *)env->GetLongField(
+        thiz, javaAudioTrackFields.jniData);
+    if (pJniStorage == NULL || pJniStorage->mDeviceCallback == 0) {
+        return;
+    }
+    lpTrack->removeAudioDeviceCallback(pJniStorage->mDeviceCallback);
+    pJniStorage->mDeviceCallback.clear();
+}
+
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static JNINativeMethod gMethods[] = {
@@ -1030,6 +1077,9 @@ static JNINativeMethod gMethods[] = {
                              "(I)I",     (void *)android_media_AudioTrack_attachAuxEffect},
     {"native_setOutputDevice", "(I)Z",
                              (void *)android_media_AudioTrack_setOutputDevice},
+    {"native_getRoutedDeviceId", "()I", (void *)android_media_AudioTrack_getRoutedDeviceId},
+    {"native_enableDeviceCallback", "()V", (void *)android_media_AudioTrack_enableDeviceCallback},
+    {"native_disableDeviceCallback", "()V", (void *)android_media_AudioTrack_disableDeviceCallback},
 };
 
 
