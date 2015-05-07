@@ -108,6 +108,21 @@ package android.text.format {
 
 }
 
+package android.util {
+
+  public deprecated class FloatMath {
+    method public static float ceil(float);
+    method public static float cos(float);
+    method public static float exp(float);
+    method public static float floor(float);
+    method public static float hypot(float, float);
+    method public static float pow(float, float);
+    method public static float sin(float);
+    method public static float sqrt(float);
+  }
+
+}
+
 package android.view {
 
   public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
