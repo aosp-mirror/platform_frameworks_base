@@ -27,6 +27,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.ProviderException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
@@ -315,15 +316,15 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
             } else if (e instanceof InvalidAlgorithmParameterException) {
                 throw (InvalidAlgorithmParameterException) e;
             } else {
-                throw new RuntimeException("Unexpected exception type", e);
+                throw new ProviderException("Unexpected exception type", e);
             }
         }
 
         if (mOperationToken == null) {
-            throw new IllegalStateException("Keystore returned null operation token");
+            throw new ProviderException("Keystore returned null operation token");
         }
         if (mOperationHandle == 0) {
-            throw new IllegalStateException("Keystore returned invalid operation handle");
+            throw new ProviderException("Keystore returned invalid operation handle");
         }
 
         loadAlgorithmSpecificParametersFromBeginResult(keymasterOutputArgs);
@@ -499,9 +500,9 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
                 params.init(new IvParameterSpec(mIv));
                 return params;
             } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException("Failed to obtain AES AlgorithmParameters", e);
+                throw new ProviderException("Failed to obtain AES AlgorithmParameters", e);
             } catch (InvalidParameterSpecException e) {
-                throw new RuntimeException(
+                throw new ProviderException(
                         "Failed to initialize AES AlgorithmParameters with an IV", e);
             }
         }
@@ -668,11 +669,11 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
             if (mIv == null) {
                 mIv = returnedIv;
             } else if ((returnedIv != null) && (!Arrays.equals(returnedIv, mIv))) {
-                throw new IllegalStateException("IV in use differs from provided IV");
+                throw new ProviderException("IV in use differs from provided IV");
             }
         } else {
             if (returnedIv != null) {
-                throw new IllegalStateException(
+                throw new ProviderException(
                         "IV in use despite IV not being used by this transformation");
             }
         }
