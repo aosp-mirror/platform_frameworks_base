@@ -1067,19 +1067,22 @@ final class Settings {
         return result;
     }
 
-    void removeIntentFilterVerificationLPw(String packageName, int userId) {
+    boolean removeIntentFilterVerificationLPw(String packageName, int userId) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
             Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
-            return;
+            return false;
         }
         ps.clearDomainVerificationStatusForUser(userId);
+        return true;
     }
 
-    void removeIntentFilterVerificationLPw(String packageName, int[] userIds) {
+    boolean removeIntentFilterVerificationLPw(String packageName, int[] userIds) {
+        boolean result = false;
         for (int userId : userIds) {
-            removeIntentFilterVerificationLPw(packageName, userId);
+            result |= removeIntentFilterVerificationLPw(packageName, userId);
         }
+        return result;
     }
 
     boolean setDefaultBrowserPackageNameLPr(String packageName, int userId) {

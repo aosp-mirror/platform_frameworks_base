@@ -11743,6 +11743,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             if (deletedPs != null) {
                 if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
+                    clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
                     if (outInfo != null) {
                         mSettings.mKeySetManagerService.removeAppKeySetDataLPw(packageName);
                         outInfo.removedAppId = mSettings.removePackageLPw(packageName);
@@ -11773,7 +11774,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                     clearPackagePreferredActivitiesLPw(deletedPs.name, UserHandle.USER_ALL);
-                    clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
                 }
                 // make sure to preserve per-user disabled state if this removal was just
                 // a downgrade of a system app to the factory package
@@ -12635,13 +12635,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
     void clearIntentFilterVerificationsLPw(String packageName, int userId) {
         if (userId == UserHandle.USER_ALL) {
-            mSettings.removeIntentFilterVerificationLPw(packageName, sUserManager.getUserIds());
-            for (int oneUserId : sUserManager.getUserIds()) {
-                scheduleWritePackageRestrictionsLocked(oneUserId);
+            if (mSettings.removeIntentFilterVerificationLPw(packageName,
+                    sUserManager.getUserIds())) {
+                for (int oneUserId : sUserManager.getUserIds()) {
+                    scheduleWritePackageRestrictionsLocked(oneUserId);
+                }
             }
         } else {
-            mSettings.removeIntentFilterVerificationLPw(packageName, userId);
-            scheduleWritePackageRestrictionsLocked(userId);
+            if (mSettings.removeIntentFilterVerificationLPw(packageName, userId)) {
+                scheduleWritePackageRestrictionsLocked(userId);
+            }
         }
     }
 
