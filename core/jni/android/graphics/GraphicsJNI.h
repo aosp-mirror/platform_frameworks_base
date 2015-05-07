@@ -52,7 +52,7 @@ public:
     static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
     static android::Bitmap* getBitmap(JNIEnv*, jobject bitmap);
     static void getSkBitmap(JNIEnv*, jobject bitmap, SkBitmap* outBitmap);
-    static SkPixelRef* getSkPixelRef(JNIEnv*, jobject bitmap);
+    static SkPixelRef* refSkPixelRef(JNIEnv*, jobject bitmap);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
     // Given the 'native' long held by the Rasterizer.java object, return a

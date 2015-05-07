@@ -180,7 +180,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
             (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
             screenshotInfo, rowBytes, nullptr);
     screenshot.detach();
-    bitmap->pixelRef()->setImmutable();
+    bitmap->peekAtPixelRef()->setImmutable();
 
     return GraphicsJNI::createBitmap(env, bitmap,
             GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
