@@ -188,18 +188,43 @@ size_t Bitmap::rowBytes() const {
     return mPixelRef->rowBytes();
 }
 
-SkPixelRef* Bitmap::pixelRef() const {
+SkPixelRef* Bitmap::peekAtPixelRef() const {
     assertValid();
+    return mPixelRef.get();
+}
+
+SkPixelRef* Bitmap::refPixelRef() {
+    assertValid();
+    android::AutoMutex _lock(mLock);
+    return refPixelRefLocked();
+}
+
+SkPixelRef* Bitmap::refPixelRefLocked() {
+    mPixelRef->ref();
+    if (mPixelRef->unique()) {
+        // We just restored this from 0, pin the pixels and inc the strong count
+        // Note that there *might be* an incoming onStrongRefDestroyed from whatever
+        // last unref'd
+        pinPixelsLocked();
+        mPinnedRefCount++;
+    }
     return mPixelRef.get();
 }
 
 void Bitmap::reconfigure(const SkImageInfo& info, size_t rowBytes,
         SkColorTable* ctable) {
+    {
+        android::AutoMutex _lock(mLock);
+        if (mPinnedRefCount) {
+            ALOGW("Called reconfigure on a bitmap that is in use! This may"
+                    " cause graphical corruption!");
+        }
+    }
     mPixelRef->reconfigure(info, rowBytes, ctable);
 }
 
 void Bitmap::reconfigure(const SkImageInfo& info) {
-    mPixelRef->reconfigure(info, mPixelRef->rowBytes(), mPixelRef->colorTable());
+    reconfigure(info, mPixelRef->rowBytes(), mPixelRef->colorTable());
 }
 
 void Bitmap::detachFromJava() {
@@ -287,18 +312,10 @@ void Bitmap::unpinPixelsLocked() {
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
     assertValid();
     android::AutoMutex _lock(mLock);
-    mPixelRef->ref();
-    if (mPixelRef->unique()) {
-        // We just restored this from 0, pin the pixels and inc the strong count
-        // Note that there *might be* an incoming onStrongRefDestroyed from whatever
-        // last unref'd
-        pinPixelsLocked();
-        mPinnedRefCount++;
-    }
     // Safe because mPixelRef is a WrappedPixelRef type, otherwise rowBytes()
     // would require locking the pixels first.
     outBitmap->setInfo(mPixelRef->info(), mPixelRef->rowBytes());
-    outBitmap->setPixelRef(mPixelRef.get())->unref();
+    outBitmap->setPixelRef(refPixelRefLocked())->unref();
     outBitmap->setHasHardwareMipMap(hasHardwareMipMap());
 }
 
@@ -323,7 +340,7 @@ public:
     }
 
     void* pixels() {
-        return mBitmap->pixelRef()->pixels();
+        return mBitmap->peekAtPixelRef()->pixels();
     }
 
     bool valid() {
@@ -780,7 +797,7 @@ static jint Bitmap_config(JNIEnv* env, jobject, jlong bitmapHandle) {
 
 static jint Bitmap_getGenerationId(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
-    return static_cast<jint>(bitmap->pixelRef()->getGenerationID());
+    return static_cast<jint>(bitmap->peekAtPixelRef()->getGenerationID());
 }
 
 static jboolean Bitmap_isPremultiplied(JNIEnv* env, jobject, jlong bitmapHandle) {
@@ -800,10 +817,10 @@ static void Bitmap_setHasAlpha(JNIEnv* env, jobject, jlong bitmapHandle,
         jboolean hasAlpha, jboolean requestPremul) {
     LocalScopedBitmap bitmap(bitmapHandle);
     if (hasAlpha) {
-        bitmap->pixelRef()->changeAlphaType(
+        bitmap->peekAtPixelRef()->changeAlphaType(
                 requestPremul ? kPremul_SkAlphaType : kUnpremul_SkAlphaType);
     } else {
-        bitmap->pixelRef()->changeAlphaType(kOpaque_SkAlphaType);
+        bitmap->peekAtPixelRef()->changeAlphaType(kOpaque_SkAlphaType);
     }
 }
 
@@ -812,9 +829,9 @@ static void Bitmap_setPremultiplied(JNIEnv* env, jobject, jlong bitmapHandle,
     LocalScopedBitmap bitmap(bitmapHandle);
     if (!bitmap->info().isOpaque()) {
         if (isPremul) {
-            bitmap->pixelRef()->changeAlphaType(kPremul_SkAlphaType);
+            bitmap->peekAtPixelRef()->changeAlphaType(kPremul_SkAlphaType);
         } else {
-            bitmap->pixelRef()->changeAlphaType(kUnpremul_SkAlphaType);
+            bitmap->peekAtPixelRef()->changeAlphaType(kUnpremul_SkAlphaType);
         }
     }
 }
@@ -1164,7 +1181,7 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
 
 static jlong Bitmap_refPixelRef(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmap(bitmapHandle);
-    SkPixelRef* pixelRef = bitmap.valid() ? bitmap->pixelRef() : nullptr;
+    SkPixelRef* pixelRef = bitmap.valid() ? bitmap->peekAtPixelRef() : nullptr;
     SkSafeRef(pixelRef);
     return reinterpret_cast<jlong>(pixelRef);
 }
