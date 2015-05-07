@@ -93,6 +93,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.android.layoutlib.bridge.android.RenderParamsFlags.FLAG_KEY_APPLICATION_PACKAGE;
+
 /**
  * Custom implementation of Context/Activity to handle non compiled resources.
  */
@@ -306,7 +308,7 @@ public final class BridgeContext extends Context {
         // check if this is a style resource
         if (value instanceof StyleResourceValue) {
             // get the id that will represent this style.
-            outValue.resourceId = getDynamicIdByStyle((StyleResourceValue)value);
+            outValue.resourceId = getDynamicIdByStyle((StyleResourceValue) value);
             return true;
         }
 
@@ -812,6 +814,14 @@ public final class BridgeContext extends Context {
     }
 
 
+    @Override
+    public String getPackageName() {
+        if (mApplicationInfo.packageName == null) {
+            mApplicationInfo.packageName = mLayoutlibCallback.getFlag(FLAG_KEY_APPLICATION_PACKAGE);
+        }
+        return mApplicationInfo.packageName;
+    }
+
     // ------------- private new methods
 
     /**
@@ -1220,12 +1230,6 @@ public final class BridgeContext extends Context {
 
     @Override
     public PackageManager getPackageManager() {
-        // pass
-        return null;
-    }
-
-    @Override
-    public String getPackageName() {
         // pass
         return null;
     }
