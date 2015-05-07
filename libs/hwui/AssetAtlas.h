@@ -45,8 +45,8 @@ class Image;
 class AssetAtlas {
 public:
     /**
-     * Entry representing the position and rotation of a
-     * bitmap inside the atlas.
+     * Entry representing the texture and uvMapper of a PixelRef in the
+     * atlas
      */
     class Entry {
     public:
@@ -78,30 +78,15 @@ public:
         SkPixelRef* pixelRef;
 
         /**
-         * Location of the bitmap inside the atlas, in pixels.
-         */
-        int x;
-        int y;
-
-        /**
-         * If set, the bitmap is rotated 90 degrees (clockwise)
-         * inside the atlas.
-         */
-        bool rotated;
-
-        /**
          * Atlas this entry belongs to.
          */
         const AssetAtlas& atlas;
 
-        Entry(SkPixelRef* pixelRef, int x, int y, bool rotated,
-                    Texture* texture, const UvMapper& mapper, const AssetAtlas& atlas)
+        Entry(SkPixelRef* pixelRef, Texture* texture, const UvMapper& mapper,
+                    const AssetAtlas& atlas)
                 : texture(texture)
                 , uvMapper(mapper)
                 , pixelRef(pixelRef)
-                , x(x)
-                , y(y)
-                , rotated(rotated)
                 , atlas(atlas) {
         }
 
@@ -120,8 +105,7 @@ public:
      * Initializes the atlas with the specified buffer and
      * map. The buffer is a gralloc'd texture that will be
      * used as an EGLImage. The map is a list of SkBitmap*
-     * and their (x, y) positions as well as their rotation
-     * flags.
+     * and their (x, y) positions
      *
      * This method returns immediately if the atlas is already
      * initialized. To re-initialize the atlas, you must
