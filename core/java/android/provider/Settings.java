@@ -5951,6 +5951,12 @@ public final class Settings {
                 "wireless_charging_started_sound";
 
         /**
+         * Whether to play a sound for charging events.
+         * @hide
+         */
+        public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
+
+        /**
          * Whether we keep the device on while the device is plugged in.
          * Supported values are:
          * <ul>
