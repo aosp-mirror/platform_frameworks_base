@@ -36,6 +36,7 @@ public class AppWindowAnimator {
     final WindowAnimator mAnimator;
 
     boolean animating;
+    boolean wasAnimating;
     Animation animation;
     boolean hasTransformation;
     final Transformation transformation = new Transformation();
