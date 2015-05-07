@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -34,6 +35,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.service.chooser.ChooserTarget;
 import android.service.chooser.ChooserTargetService;
@@ -53,11 +55,13 @@ public class ChooserActivity extends ResolverActivity {
 
     private static final boolean DEBUG = false;
 
-    private static final int QUERY_TARGET_LIMIT = 5;
+    private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
     private static final int WATCHDOG_TIMEOUT_MILLIS = 5000;
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
+    private IntentSender mRefinementIntentSender;
+    private RefinementResultReceiver mRefinementResultReceiver;
 
     private ChooserTarget[] mCallerChooserTargets;
 
@@ -113,6 +117,32 @@ public class ChooserActivity extends ResolverActivity {
         if (target != null) {
             modifyTargetIntent(target);
         }
+        Parcelable[] targetsParcelable
+                = intent.getParcelableArrayExtra(Intent.EXTRA_ALTERNATE_INTENTS);
+        if (targetsParcelable != null) {
+            final boolean offset = target == null;
+            Intent[] additionalTargets =
+                    new Intent[offset ? targetsParcelable.length - 1 : targetsParcelable.length];
+            for (int i = 0; i < targetsParcelable.length; i++) {
+                if (!(targetsParcelable[i] instanceof Intent)) {
+                    Log.w(TAG, "EXTRA_ALTERNATE_INTENTS array entry #" + i + " is not an Intent: "
+                            + targetsParcelable[i]);
+                    finish();
+                    super.onCreate(null);
+                    return;
+                }
+                final Intent additionalTarget = (Intent) targetsParcelable[i];
+                if (i == 0 && target == null) {
+                    target = additionalTarget;
+                    modifyTargetIntent(target);
+                } else {
+                    additionalTargets[offset ? i - 1 : i] = additionalTarget;
+                    modifyTargetIntent(additionalTarget);
+                }
+            }
+            setAdditionalTargets(additionalTargets);
+        }
+
         mReplacementExtras = intent.getBundleExtra(Intent.EXTRA_REPLACEMENT_EXTRAS);
         CharSequence title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE);
         int defaultTitleRes = 0;
@@ -125,7 +155,7 @@ public class ChooserActivity extends ResolverActivity {
             initialIntents = new Intent[pa.length];
             for (int i=0; i<pa.length; i++) {
                 if (!(pa[i] instanceof Intent)) {
-                    Log.w("ChooserActivity", "Initial intent #" + i + " not an Intent: " + pa[i]);
+                    Log.w(TAG, "Initial intent #" + i + " not an Intent: " + pa[i]);
                     finish();
                     super.onCreate(null);
                     return;
@@ -141,8 +171,7 @@ public class ChooserActivity extends ResolverActivity {
             final ChooserTarget[] targets = new ChooserTarget[pa.length];
             for (int i = 0; i < pa.length; i++) {
                 if (!(pa[i] instanceof ChooserTarget)) {
-                    Log.w("ChooserActivity", "Chooser target #" + i + " is not a ChooserTarget: " +
-                            pa[i]);
+                    Log.w(TAG, "Chooser target #" + i + " is not a ChooserTarget: " + pa[i]);
                     finish();
                     super.onCreate(null);
                     return;
@@ -153,9 +182,20 @@ public class ChooserActivity extends ResolverActivity {
         }
         mChosenComponentSender = intent.getParcelableExtra(
                 Intent.EXTRA_CHOSEN_COMPONENT_INTENT_SENDER);
+        mRefinementIntentSender = intent.getParcelableExtra(
+                Intent.EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER);
         setSafeForwardingMode(true);
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mRefinementResultReceiver != null) {
+            mRefinementResultReceiver.destroy();
+            mRefinementResultReceiver = null;
+        }
     }
 
     @Override
@@ -211,6 +251,37 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    @Override
+    protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
+        if (mRefinementIntentSender != null) {
+            final Intent fillIn = new Intent();
+            final List<Intent> sourceIntents = target.getAllSourceIntents();
+            if (!sourceIntents.isEmpty()) {
+                fillIn.putExtra(Intent.EXTRA_INTENT, sourceIntents.get(0));
+                if (sourceIntents.size() > 1) {
+                    final Intent[] alts = new Intent[sourceIntents.size() - 1];
+                    for (int i = 1, N = sourceIntents.size(); i < N; i++) {
+                        alts[i - 1] = sourceIntents.get(i);
+                    }
+                    fillIn.putExtra(Intent.EXTRA_ALTERNATE_INTENTS, alts);
+                }
+                if (mRefinementResultReceiver != null) {
+                    mRefinementResultReceiver.destroy();
+                }
+                mRefinementResultReceiver = new RefinementResultReceiver(this, target, null);
+                fillIn.putExtra(Intent.EXTRA_RESULT_RECEIVER,
+                        mRefinementResultReceiver);
+                try {
+                    mRefinementIntentSender.sendIntent(this, 0, fillIn, null, null);
+                    return false;
+                } catch (SendIntentException e) {
+                    Log.e(TAG, "Refinement IntentSender failed to send", e);
+                }
+            }
+        }
+        return super.onTargetSelected(target, alwaysCheck);
+    }
+
     void queryTargetServices(ChooserListAdapter adapter) {
         final PackageManager pm = getPackageManager();
         int targetsToQuery = 0;
@@ -258,8 +329,9 @@ public class ChooserActivity extends ResolverActivity {
                     targetsToQuery++;
                 }
             }
-            if (targetsToQuery >= QUERY_TARGET_LIMIT) {
-                if (DEBUG) Log.d(TAG, "queryTargets hit query target limit " + QUERY_TARGET_LIMIT);
+            if (targetsToQuery >= QUERY_TARGET_SERVICE_LIMIT) {
+                if (DEBUG) Log.d(TAG, "queryTargets hit query target limit "
+                        + QUERY_TARGET_SERVICE_LIMIT);
                 break;
             }
         }
@@ -303,6 +375,43 @@ public class ChooserActivity extends ResolverActivity {
         mTargetResultHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
     }
 
+    void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
+        if (mRefinementResultReceiver != null) {
+            mRefinementResultReceiver.destroy();
+            mRefinementResultReceiver = null;
+        }
+
+        if (selectedTarget == null) {
+            Log.e(TAG, "Refinement result intent did not match any known targets; canceling");
+        } else if (!checkTargetSourceIntent(selectedTarget, matchingIntent)) {
+            Log.e(TAG, "onRefinementResult: Selected target " + selectedTarget
+                    + " cannot match refined source intent " + matchingIntent);
+        } else if (super.onTargetSelected(selectedTarget.cloneFilledIn(matchingIntent, 0), false)) {
+            finish();
+            return;
+        }
+        onRefinementCanceled();
+    }
+
+    void onRefinementCanceled() {
+        if (mRefinementResultReceiver != null) {
+            mRefinementResultReceiver.destroy();
+            mRefinementResultReceiver = null;
+        }
+        finish();
+    }
+
+    boolean checkTargetSourceIntent(TargetInfo target, Intent matchingIntent) {
+        final List<Intent> targetIntents = target.getAllSourceIntents();
+        for (int i = 0, N = targetIntents.size(); i < N; i++) {
+            final Intent targetIntent = targetIntents.get(i);
+            if (targetIntent.filterEquals(matchingIntent)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     ResolveListAdapter createAdapter(Context context, Intent[] initialIntents,
             List<ResolveInfo> rList, int launchedFromUid, boolean filterLastUsed) {
@@ -313,17 +422,19 @@ public class ChooserActivity extends ResolverActivity {
         return adapter;
     }
 
-    class ChooserTargetInfo implements TargetInfo {
-        private final TargetInfo mSourceInfo;
+    final class ChooserTargetInfo implements TargetInfo {
+        private final DisplayResolveInfo mSourceInfo;
         private final ResolveInfo mBackupResolveInfo;
         private final ChooserTarget mChooserTarget;
         private final Drawable mDisplayIcon;
+        private final Intent mFillInIntent;
+        private final int mFillInFlags;
 
         public ChooserTargetInfo(ChooserTarget target) {
             this(null, target);
         }
 
-        public ChooserTargetInfo(TargetInfo sourceInfo, ChooserTarget chooserTarget) {
+        public ChooserTargetInfo(DisplayResolveInfo sourceInfo, ChooserTarget chooserTarget) {
             mSourceInfo = sourceInfo;
             mChooserTarget = chooserTarget;
             mDisplayIcon = new BitmapDrawable(getResources(), chooserTarget.getIcon());
@@ -333,6 +444,18 @@ public class ChooserActivity extends ResolverActivity {
             } else {
                 mBackupResolveInfo = getPackageManager().resolveActivity(getResolvedIntent(), 0);
             }
+
+            mFillInIntent = null;
+            mFillInFlags = 0;
+        }
+
+        private ChooserTargetInfo(ChooserTargetInfo other, Intent fillInIntent, int flags) {
+            mSourceInfo = other.mSourceInfo;
+            mBackupResolveInfo = other.mBackupResolveInfo;
+            mChooserTarget = other.mChooserTarget;
+            mDisplayIcon = other.mDisplayIcon;
+            mFillInIntent = fillInIntent;
+            mFillInFlags = flags;
         }
 
         @Override
@@ -358,22 +481,42 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         private Intent getFillInIntent() {
-            return mSourceInfo != null ? mSourceInfo.getResolvedIntent() : getTargetIntent();
+            Intent result = mSourceInfo != null
+                    ? mSourceInfo.getResolvedIntent() : getTargetIntent();
+            if (result == null) {
+                Log.e(TAG, "ChooserTargetInfo#getFillInIntent: no fillIn intent available");
+            } else if (mFillInIntent != null) {
+                result = new Intent(result);
+                result.fillIn(mFillInIntent, mFillInFlags);
+            }
+            return result;
         }
 
         @Override
         public boolean start(Activity activity, Bundle options) {
-            return mChooserTarget.sendIntent(activity, getFillInIntent());
+            final Intent intent = getFillInIntent();
+            if (intent == null) {
+                return false;
+            }
+            return mChooserTarget.sendIntent(activity, intent);
         }
 
         @Override
         public boolean startAsCaller(Activity activity, Bundle options, int userId) {
-            return mChooserTarget.sendIntentAsCaller(activity, getFillInIntent(), userId);
+            final Intent intent = getFillInIntent();
+            if (intent == null) {
+                return false;
+            }
+            return mChooserTarget.sendIntentAsCaller(activity, intent, userId);
         }
 
         @Override
         public boolean startAsUser(Activity activity, Bundle options, UserHandle user) {
-            return mChooserTarget.sendIntentAsUser(activity, getFillInIntent(), user);
+            final Intent intent = getFillInIntent();
+            if (intent == null) {
+                return false;
+            }
+            return mChooserTarget.sendIntentAsUser(activity, intent, user);
         }
 
         @Override
@@ -394,6 +537,21 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public Drawable getDisplayIcon() {
             return mDisplayIcon;
+        }
+
+        @Override
+        public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
+            return new ChooserTargetInfo(this, fillInIntent, flags);
+        }
+
+        @Override
+        public List<Intent> getAllSourceIntents() {
+            final List<Intent> results = new ArrayList<>();
+            if (mSourceInfo != null) {
+                // We only queried the service for the first one in our sourceinfo.
+                results.add(mSourceInfo.getAllSourceIntents().get(0));
+            }
+            return results;
         }
     }
 
@@ -540,6 +698,55 @@ public class ChooserActivity extends ResolverActivity {
             originalTarget = ot;
             resultTargets = rt;
             connection = c;
+        }
+    }
+
+    static class RefinementResultReceiver extends ResultReceiver {
+        private ChooserActivity mChooserActivity;
+        private TargetInfo mSelectedTarget;
+
+        public RefinementResultReceiver(ChooserActivity host, TargetInfo target,
+                Handler handler) {
+            super(handler);
+            mChooserActivity = host;
+            mSelectedTarget = target;
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (mChooserActivity == null) {
+                Log.e(TAG, "Destroyed RefinementResultReceiver received a result");
+                return;
+            }
+            if (resultData == null) {
+                Log.e(TAG, "RefinementResultReceiver received null resultData");
+                return;
+            }
+
+            switch (resultCode) {
+                case RESULT_CANCELED:
+                    mChooserActivity.onRefinementCanceled();
+                    break;
+                case RESULT_OK:
+                    Parcelable intentParcelable = resultData.getParcelable(Intent.EXTRA_INTENT);
+                    if (intentParcelable instanceof Intent) {
+                        mChooserActivity.onRefinementResult(mSelectedTarget,
+                                (Intent) intentParcelable);
+                    } else {
+                        Log.e(TAG, "RefinementResultReceiver received RESULT_OK but no Intent"
+                                + " in resultData with key Intent.EXTRA_INTENT");
+                    }
+                    break;
+                default:
+                    Log.w(TAG, "Unknown result code " + resultCode
+                            + " sent to RefinementResultReceiver");
+                    break;
+            }
+        }
+
+        public void destroy() {
+            mChooserActivity = null;
+            mSelectedTarget = null;
         }
     }
 }

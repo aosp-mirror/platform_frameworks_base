@@ -17,6 +17,7 @@
 package android.content;
 
 import android.content.pm.ApplicationInfo;
+import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.util.ArraySet;
 
@@ -3291,9 +3292,77 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * An Intent describing the choices you would like shown with
-     * {@link #ACTION_PICK_ACTIVITY}.
+     * {@link #ACTION_PICK_ACTIVITY} or {@link #ACTION_CHOOSER}.
      */
     public static final String EXTRA_INTENT = "android.intent.extra.INTENT";
+
+    /**
+     * An Intent[] describing additional, alternate choices you would like shown with
+     * {@link #ACTION_CHOOSER}.
+     *
+     * <p>An app may be capable of providing several different payload types to complete a
+     * user's intended action. For example, an app invoking {@link #ACTION_SEND} to share photos
+     * with another app may use EXTRA_ALTERNATE_INTENTS to have the chooser transparently offer
+     * several different supported sending mechanisms for sharing, such as the actual "image/*"
+     * photo data or a hosted link where the photos can be viewed.</p>
+     *
+     * <p>The intent present in {@link #EXTRA_INTENT} will be treated as the
+     * first/primary/preferred intent in the set. Additional intents specified in
+     * this extra are ordered; by default intents that appear earlier in the array will be
+     * preferred over intents that appear later in the array as matches for the same
+     * target component. To alter this preference, a calling app may also supply
+     * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER}.</p>
+     */
+    public static final String EXTRA_ALTERNATE_INTENTS = "android.intent.extra.ALTERNATE_INTENTS";
+
+    /**
+     * An {@link IntentSender} for an Activity that will be invoked when the user makes a selection
+     * from the chooser activity presented by {@link #ACTION_CHOOSER}.
+     *
+     * <p>An app preparing an action for another app to complete may wish to allow the user to
+     * disambiguate between several options for completing the action based on the chosen target
+     * or otherwise refine the action before it is invoked.
+     * </p>
+     *
+     * <p>When sent, this IntentSender may be filled in with the following extras:</p>
+     * <ul>
+     *     <li>{@link #EXTRA_INTENT} The first intent that matched the user's chosen target</li>
+     *     <li>{@link #EXTRA_ALTERNATE_INTENTS} Any additional intents that also matched the user's
+     *     chosen target beyond the first</li>
+     *     <li>{@link #EXTRA_RESULT_RECEIVER} A {@link ResultReceiver} that the refinement activity
+     *     should fill in and send once the disambiguation is complete</li>
+     * </ul>
+     */
+    public static final String EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER
+            = "android.intent.extra.CHOOSER_REFINEMENT_INTENT_SENDER";
+
+    /**
+     * A {@link ResultReceiver} used to return data back to the sender.
+     *
+     * <p>Used to complete an app-specific
+     * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER refinement} for {@link #ACTION_CHOOSER}.</p>
+     *
+     * <p>If {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER} is present in the intent
+     * used to start a {@link #ACTION_CHOOSER} activity this extra will be
+     * {@link #fillIn(Intent, int) filled in} to that {@link IntentSender} and sent
+     * when the user selects a target component from the chooser. It is up to the recipient
+     * to send a result to this ResultReceiver to signal that disambiguation is complete
+     * and that the chooser should invoke the user's choice.</p>
+     *
+     * <p>The disambiguator should provide a Bundle to the ResultReceiver with an intent
+     * assigned to the key {@link #EXTRA_INTENT}. This supplied intent will be used by the chooser
+     * to match and fill in the final Intent or ChooserTarget before starting it.
+     * The supplied intent must {@link #filterEquals(Intent) match} one of the intents from
+     * {@link #EXTRA_INTENT} or {@link #EXTRA_ALTERNATE_INTENTS} passed to
+     * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER} to be accepted.</p>
+     *
+     * <p>The result code passed to the ResultReceiver should be
+     * {@link android.app.Activity#RESULT_OK} if the refinement succeeded and the supplied intent's
+     * target in the chooser should be started, or {@link android.app.Activity#RESULT_CANCELED} if
+     * the chooser should finish without starting a target.</p>
+     */
+    public static final String EXTRA_RESULT_RECEIVER
+            = "android.intent.extra.RESULT_RECEIVER";
 
     /**
      * A CharSequence dialog title to provide to the user when used with a
