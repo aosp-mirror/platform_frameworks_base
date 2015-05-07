@@ -21,7 +21,7 @@ import android.annotation.SdkConstant;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
-import android.app.NotificationManager.Policy;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -64,25 +64,29 @@ public abstract class NotificationListenerService extends Service {
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
      *     Normal interruption filter.
      */
-    public static final int INTERRUPTION_FILTER_ALL = 1;
+    public static final int INTERRUPTION_FILTER_ALL
+            = NotificationManager.INTERRUPTION_FILTER_ALL;
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
      *     Priority interruption filter.
      */
-    public static final int INTERRUPTION_FILTER_PRIORITY = 2;
+    public static final int INTERRUPTION_FILTER_PRIORITY
+            = NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
      *     No interruptions filter.
      */
-    public static final int INTERRUPTION_FILTER_NONE = 3;
+    public static final int INTERRUPTION_FILTER_NONE
+            = NotificationManager.INTERRUPTION_FILTER_NONE;
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
      *     Alarms only interruption filter.
      */
-    public static final int INTERRUPTION_FILTER_ALARMS = 4;
+    public static final int INTERRUPTION_FILTER_ALARMS
+            = NotificationManager.INTERRUPTION_FILTER_ALARMS;
 
     /** {@link #getCurrentInterruptionFilter() Interruption filter} constant - returned when
      * the value is unavailable for any reason.  For example, before the notification listener
@@ -90,7 +94,8 @@ public abstract class NotificationListenerService extends Service {
      *
      * {@see #onListenerConnected()}
      */
-    public static final int INTERRUPTION_FILTER_UNKNOWN = 0;
+    public static final int INTERRUPTION_FILTER_UNKNOWN
+            = NotificationManager.INTERRUPTION_FILTER_UNKNOWN;
 
     /** {@link #getCurrentListenerHints() Listener hints} constant - the primary device UI
      * should disable notification sound, vibrating and other visual or aural effects.
@@ -512,22 +517,6 @@ public abstract class NotificationListenerService extends Service {
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
             return INTERRUPTION_FILTER_UNKNOWN;
-        }
-    }
-
-    /**
-     * Gets the notification policy token associated with this listener.
-     *
-     * <p>
-     * Returns null if this listener is not currently active.
-     */
-    public final Policy.Token getNotificationPolicyToken() {
-        if (!isBound()) return null;
-        try {
-            return getNotificationInterface().getPolicyTokenFromListener(mWrapper);
-        } catch (android.os.RemoteException ex) {
-            Log.v(TAG, "Unable to contact notification manager", ex);
-            return null;
         }
     }
 

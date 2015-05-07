@@ -189,6 +189,10 @@ abstract public class ManagedServices {
         }
     }
 
+    public boolean isComponentEnabledForPackage(String pkg) {
+        return mEnabledServicesPackageNames.contains(pkg);
+    }
+
     public void onPackagesChanged(boolean queryReplace, String[] pkgList) {
         if (DEBUG) Slog.d(TAG, "onPackagesChanged queryReplace=" + queryReplace
                 + " pkgList=" + (pkgList == null ? null : Arrays.asList(pkgList))
