@@ -21,6 +21,7 @@ import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 
 import java.security.InvalidAlgorithmParameterException;
+import java.security.ProviderException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Date;
@@ -38,6 +39,17 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
     public static class AES extends KeyStoreKeyGeneratorSpi {
         public AES() {
             super(KeymasterDefs.KM_ALGORITHM_AES, 128);
+        }
+
+        @Override
+        protected void engineInit(AlgorithmParameterSpec params, SecureRandom random)
+                throws InvalidAlgorithmParameterException {
+            super.engineInit(params, random);
+            if ((mKeySizeBits != 128) && (mKeySizeBits != 192) && (mKeySizeBits != 256)) {
+                throw new InvalidAlgorithmParameterException(
+                        "Unsupported key size: " + mKeySizeBits
+                        + ". Supported: 128, 192, 256.");
+            }
         }
     }
 
@@ -87,6 +99,11 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
     private KeyGeneratorSpec mSpec;
     private SecureRandom mRng;
 
+    protected int mKeySizeBits;
+    private int[] mKeymasterPurposes;
+    private int[] mKeymasterBlockModes;
+    private int[] mKeymasterPaddings;
+
     protected KeyStoreKeyGeneratorSpi(
             int keymasterAlgorithm,
             int defaultKeySizeBits) {
@@ -100,6 +117,97 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         mKeymasterAlgorithm = keymasterAlgorithm;
         mKeymasterDigest = keymasterDigest;
         mDefaultKeySizeBits = defaultKeySizeBits;
+        if (mDefaultKeySizeBits <= 0) {
+            throw new IllegalArgumentException("Default key size must be positive");
+        }
+
+        if ((mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) && (mKeymasterDigest == -1)) {
+            throw new IllegalArgumentException(
+                    "Digest algorithm must be specified for HMAC key");
+        }
+    }
+
+    @Override
+    protected void engineInit(SecureRandom random) {
+        throw new UnsupportedOperationException("Cannot initialize without an "
+                + KeyGeneratorSpec.class.getName() + " parameter");
+    }
+
+    @Override
+    protected void engineInit(int keySize, SecureRandom random) {
+        throw new UnsupportedOperationException("Cannot initialize without a "
+                + KeyGeneratorSpec.class.getName() + " parameter");
+    }
+
+    @Override
+    protected void engineInit(AlgorithmParameterSpec params, SecureRandom random)
+            throws InvalidAlgorithmParameterException {
+        resetAll();
+
+        boolean success = false;
+        try {
+            if ((params == null) || (!(params instanceof KeyGeneratorSpec))) {
+                throw new InvalidAlgorithmParameterException("Cannot initialize without an "
+                        + KeyGeneratorSpec.class.getName() + " parameter");
+            }
+            KeyGeneratorSpec spec = (KeyGeneratorSpec) params;
+            if (spec.getKeystoreAlias() == null) {
+                throw new InvalidAlgorithmParameterException("KeyStore entry alias not provided");
+            }
+
+            mRng = random;
+            mSpec = spec;
+
+            mKeySizeBits = (spec.getKeySize() != -1) ? spec.getKeySize() : mDefaultKeySizeBits;
+            if (mKeySizeBits <= 0) {
+                throw new InvalidAlgorithmParameterException(
+                        "Key size must be positive: " + mKeySizeBits);
+            } else if ((mKeySizeBits % 8) != 0) {
+                throw new InvalidAlgorithmParameterException(
+                        "Key size in must be a multiple of 8: " + mKeySizeBits);
+            }
+
+            try {
+                mKeymasterPurposes =
+                        KeyStoreKeyProperties.Purpose.allToKeymaster(spec.getPurposes());
+                mKeymasterPaddings = KeyStoreKeyProperties.EncryptionPadding.allToKeymaster(
+                        spec.getEncryptionPaddings());
+                mKeymasterBlockModes =
+                        KeyStoreKeyProperties.BlockMode.allToKeymaster(spec.getBlockModes());
+                if (((spec.getPurposes() & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
+                        && (spec.isRandomizedEncryptionRequired())) {
+                    for (int keymasterBlockMode : mKeymasterBlockModes) {
+                        if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(
+                                keymasterBlockMode)) {
+                            throw new InvalidAlgorithmParameterException(
+                                    "Randomized encryption (IND-CPA) required but may be violated"
+                                    + " by block mode: "
+                                    + KeyStoreKeyProperties.BlockMode.fromKeymaster(
+                                            keymasterBlockMode)
+                                    + ". See " + KeyGeneratorSpec.class.getName()
+                                    + " documentation.");
+                        }
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                throw new InvalidAlgorithmParameterException(e);
+            }
+
+            success = true;
+        } finally {
+            if (!success) {
+                resetAll();
+            }
+        }
+    }
+
+    private void resetAll() {
+        mSpec = null;
+        mRng = null;
+        mKeySizeBits = -1;
+        mKeymasterPurposes = null;
+        mKeymasterPaddings = null;
+        mKeymasterBlockModes = null;
     }
 
     @Override
@@ -117,42 +225,14 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
 
         KeymasterArguments args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
         if (mKeymasterDigest != -1) {
             args.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
         }
-        if (mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
-            if (mKeymasterDigest == -1) {
-                throw new IllegalStateException("Digest algorithm must be specified for HMAC key");
-            }
-        }
-        int keySizeBits = (spec.getKeySize() != -1) ? spec.getKeySize() : mDefaultKeySizeBits;
-        args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keySizeBits);
-        @KeyStoreKeyProperties.PurposeEnum int purposes = spec.getPurposes();
-        int[] keymasterBlockModes =
-                KeyStoreKeyProperties.BlockMode.allToKeymaster(spec.getBlockModes());
-        if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
-                && (spec.isRandomizedEncryptionRequired())) {
-            for (int keymasterBlockMode : keymasterBlockModes) {
-                if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(keymasterBlockMode)) {
-                    throw new IllegalStateException(
-                            "Randomized encryption (IND-CPA) required but may be violated by block"
-                            + " mode: "
-                            + KeyStoreKeyProperties.BlockMode.fromKeymaster(keymasterBlockMode)
-                            + ". See KeyGeneratorSpec documentation.");
-                }
-            }
-        }
-
-        for (int keymasterPurpose :
-            KeyStoreKeyProperties.Purpose.allToKeymaster(purposes)) {
-            args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
-        }
-        args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
-        args.addInts(
-                KeymasterDefs.KM_TAG_PADDING,
-                KeyStoreKeyProperties.EncryptionPadding.allToKeymaster(
-                        spec.getEncryptionPaddings()));
+        args.addInts(KeymasterDefs.KM_TAG_PURPOSE, mKeymasterPurposes);
+        args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
+        args.addInts(KeymasterDefs.KM_TAG_PADDING, mKeymasterPaddings);
         KeymasterUtils.addUserAuthArgs(args,
                 spec.getContext(),
                 spec.isUserAuthenticationRequired(),
@@ -167,7 +247,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 (spec.getKeyValidityForConsumptionEnd() != null)
                 ? spec.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
 
-        if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
+        if (((spec.getPurposes() & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
                 && (!spec.isRandomizedEncryptionRequired())) {
             // Permit caller-provided IV when encrypting with this key
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
@@ -175,47 +255,23 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
 
         byte[] additionalEntropy =
                 KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
-                        mRng, (keySizeBits + 7) / 8);
-
+                        mRng, (mKeySizeBits + 7) / 8);
         int flags = spec.getFlags();
         String keyAliasInKeystore = Credentials.USER_SECRET_KEY + spec.getKeystoreAlias();
+        KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
         int errorCode = mKeyStore.generateKey(
-                keyAliasInKeystore, args, additionalEntropy, flags, new KeyCharacteristics());
+                keyAliasInKeystore, args, additionalEntropy, flags, resultingKeyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
-            throw new IllegalStateException(
+            throw new ProviderException(
                     "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
         }
-        @KeyStoreKeyProperties.AlgorithmEnum String keyAlgorithmJCA =
-                KeyStoreKeyProperties.Algorithm.fromKeymasterSecretKeyAlgorithm(
-                        mKeymasterAlgorithm, mKeymasterDigest);
+        String keyAlgorithmJCA;
+        try {
+            keyAlgorithmJCA = KeyStoreKeyProperties.Algorithm.fromKeymasterSecretKeyAlgorithm(
+                    mKeymasterAlgorithm, mKeymasterDigest);
+        } catch (IllegalArgumentException e) {
+            throw new ProviderException("Failed to obtain JCA secret key algorithm name", e);
+        }
         return new KeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
-    }
-
-    @Override
-    protected void engineInit(SecureRandom random) {
-        throw new UnsupportedOperationException("Cannot initialize without an "
-                + KeyGeneratorSpec.class.getName() + " parameter");
-    }
-
-    @Override
-    protected void engineInit(AlgorithmParameterSpec params, SecureRandom random)
-            throws InvalidAlgorithmParameterException {
-        if ((params == null) || (!(params instanceof KeyGeneratorSpec))) {
-            throw new InvalidAlgorithmParameterException("Cannot initialize without an "
-                    + KeyGeneratorSpec.class.getName() + " parameter");
-        }
-        KeyGeneratorSpec spec = (KeyGeneratorSpec) params;
-        if (spec.getKeystoreAlias() == null) {
-            throw new InvalidAlgorithmParameterException("KeyStore entry alias not provided");
-        }
-
-        mSpec = spec;
-        mRng = random;
-    }
-
-    @Override
-    protected void engineInit(int keySize, SecureRandom random) {
-        throw new UnsupportedOperationException("Cannot initialize without a "
-                + KeyGeneratorSpec.class.getName() + " parameter");
     }
 }
