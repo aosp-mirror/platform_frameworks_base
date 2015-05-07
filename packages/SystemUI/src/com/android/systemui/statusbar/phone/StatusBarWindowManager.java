@@ -166,6 +166,7 @@ public class StatusBarWindowManager {
 
     private void apply(State state) {
         applyKeyguardFlags(state);
+        applyForceStatusBarVisibleFlag(state);
         applyFocusableFlag(state);
         adjustScreenOrientation(state);
         applyHeight(state);
@@ -175,6 +176,16 @@ public class StatusBarWindowManager {
         applyModalFlag(state);
         if (mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
+        }
+    }
+
+    private void applyForceStatusBarVisibleFlag(State state) {
+        if (state.forceStatusBarVisible) {
+            mLpChanged.privateFlags |= WindowManager
+                    .LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
+        } else {
+            mLpChanged.privateFlags &= ~WindowManager
+                    .LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
         }
     }
 
@@ -240,6 +251,11 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setForceStatusBarVisible(boolean forceStatusBarVisible) {
+        mCurrentState.forceStatusBarVisible = forceStatusBarVisible;
+        apply(mCurrentState);
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
@@ -250,6 +266,7 @@ public class StatusBarWindowManager {
         boolean keyguardFadingAway;
         boolean qsExpanded;
         boolean headsUpShowing;
+        boolean forceStatusBarVisible;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.

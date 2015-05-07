@@ -528,6 +528,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             = new HashMap<>();
     private HashSet<Entry> mHeadsUpEntriesToRemoveOnSwitch = new HashSet<>();
     private RankingMap mLatestRankingMap;
+    private boolean mNoAnimationOnNextBarModeChange;
 
     @Override
     public void start() {
@@ -1702,6 +1703,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * State is one or more of the DISABLE constants from StatusBarManager.
      */
     public void disable(int state1, int state2, boolean animate) {
+        animate &= mStatusBarWindowState != WINDOW_STATE_HIDDEN;
         mDisabledUnmodified1 = state1;
         mDisabledUnmodified2 = state2;
         state1 = adjustDisableFlags(state1);
@@ -1861,6 +1863,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
         if (inPinnedMode) {
             mStatusBarWindowManager.setHeadsUpShowing(true);
+            mStatusBarWindowManager.setForceStatusBarVisible(true);
         } else {
             Runnable endRunnable = new Runnable() {
                 @Override
@@ -2125,6 +2128,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Shrink the window to the size of the status bar only
         mStatusBarWindowManager.setStatusBarExpanded(false);
+        mStatusBarWindowManager.setForceStatusBarVisible(false);
         mStatusBarView.setFocusable(true);
 
         // Close any "App info" popups that might have snuck on-screen
@@ -2265,6 +2269,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 setAreThereNotifications();
             }
 
+            // ready to unhide
+            if ((vis & View.STATUS_BAR_UNHIDE) != 0) {
+                mSystemUiVisibility &= ~View.STATUS_BAR_UNHIDE;
+                mNoAnimationOnNextBarModeChange = true;
+            }
+
             // update status bar mode
             final int sbMode = computeBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
                     View.STATUS_BAR_TRANSIENT, View.STATUS_BAR_TRANSLUCENT);
@@ -2296,10 +2306,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
             }
 
-            // ready to unhide
-            if ((vis & View.STATUS_BAR_UNHIDE) != 0) {
-                mSystemUiVisibility &= ~View.STATUS_BAR_UNHIDE;
-            }
             if ((vis & View.NAVIGATION_BAR_UNHIDE) != 0) {
                 mSystemUiVisibility &= ~View.NAVIGATION_BAR_UNHIDE;
             }
@@ -2344,17 +2350,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void checkBarModes() {
         if (mDemoMode) return;
-        checkBarMode(mStatusBarMode, mStatusBarWindowState, mStatusBarView.getBarTransitions());
+        checkBarMode(mStatusBarMode, mStatusBarWindowState, mStatusBarView.getBarTransitions(),
+                mNoAnimationOnNextBarModeChange);
         if (mNavigationBarView != null) {
             checkBarMode(mNavigationBarMode,
-                    mNavigationBarWindowState, mNavigationBarView.getBarTransitions());
+                    mNavigationBarWindowState, mNavigationBarView.getBarTransitions(),
+                    mNoAnimationOnNextBarModeChange);
         }
+        mNoAnimationOnNextBarModeChange = false;
     }
 
-    private void checkBarMode(int mode, int windowState, BarTransitions transitions) {
+    private void checkBarMode(int mode, int windowState, BarTransitions transitions,
+            boolean noAnimation) {
         final boolean powerSave = mBatteryController.isPowerSave();
-        final boolean anim = (mScreenOn == null || mScreenOn) && windowState != WINDOW_STATE_HIDDEN
-                && !powerSave;
+        final boolean anim = !noAnimation && (mScreenOn == null || mScreenOn)
+                && windowState != WINDOW_STATE_HIDDEN && !powerSave;
         if (powerSave && getBarState() == StatusBarState.SHADE) {
             mode = MODE_WARNING;
         }
