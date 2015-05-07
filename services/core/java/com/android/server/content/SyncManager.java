@@ -52,6 +52,7 @@ import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryStats;
@@ -99,6 +100,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -157,7 +159,19 @@ public class SyncManager {
     /**
      * How long to wait before considering an active sync to have timed-out, and cancelling it.
      */
-    private static final long ACTIVE_SYNC_TIMEOUT_MILLIS = 30L * 60 * 1000;  // 30 mins.
+    private static final long ACTIVE_SYNC_TIMEOUT_MILLIS = 30L * 60 * 1000;  // 30 mins
+
+    /**
+     * How long to delay each queued {@link SyncHandler} message that may have occurred before boot
+     * or befor the device became provisioned.
+     */
+    private static final long PER_SYNC_BOOT_DELAY_MILLIS = 3000L;  // 3 seconds
+
+    /**
+     * The maximum amount of time we're willing to delay syncs out of boot, after device has been
+     * provisioned, etc.
+     */
+    private static final long MAX_SYNC_BOOT_DELAY_MILLIS = 120000L;  // 2 minutes
 
     private static final String SYNC_WAKE_LOCK_PREFIX = "*sync*/";
     private static final String HANDLE_SYNC_ALARM_WAKE_LOCK = "SyncManagerHandleSyncAlarm";
@@ -197,6 +211,9 @@ public class SyncManager {
     // Synchronized on "this". Instead of using this directly one should instead call
     // its accessor, getConnManager().
     private ConnectivityManager mConnManagerDoNotUseDirectly;
+
+    /** Track whether the device has already been provisioned. */
+    private boolean mProvisioned;
 
     protected SyncAdaptersCache mSyncAdapters;
 
@@ -242,6 +259,7 @@ public class SyncManager {
     private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            mBootCompleted = true;
             mSyncHandler.onBootCompleted();
         }
     };
@@ -491,12 +509,41 @@ public class SyncManager {
 
         mSyncStorageEngine.addStatusChangeListener(
                 ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, new ISyncStatusObserver.Stub() {
-            @Override
-            public void onStatusChanged(int which) {
-                // force the sync loop to run if the settings change
-                sendCheckAlarmsMessage();
+                    @Override
+                    public void onStatusChanged(int which) {
+                        // force the sync loop to run if the settings change
+                        sendCheckAlarmsMessage();
+                    }
+                });
+
+        mProvisioned = isDeviceProvisioned();
+        if (!mProvisioned) {
+            final ContentResolver resolver = context.getContentResolver();
+            ContentObserver provisionedObserver =
+                    new ContentObserver(null /* current thread */) {
+                        public void onChange(boolean selfChange) {
+                            mProvisioned |= isDeviceProvisioned();
+                            if (mProvisioned) {
+                                mSyncHandler.onDeviceProvisioned();
+                                resolver.unregisterContentObserver(this);
+                            }
+                        }
+                    };
+
+            synchronized (mSyncHandler) {
+                resolver.registerContentObserver(
+                        Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
+                        false /* notifyForDescendents */,
+                        provisionedObserver);
+
+                // The device *may* have been provisioned while we were registering above observer.
+                // Check again to make sure.
+                mProvisioned |= isDeviceProvisioned();
+                if (mProvisioned) {
+                    resolver.unregisterContentObserver(provisionedObserver);
+                }
             }
-        });
+        }
 
         if (!factoryTest) {
             // Register for account list updates for all users
@@ -510,6 +557,10 @@ public class SyncManager {
         mSyncRandomOffsetMillis = mSyncStorageEngine.getSyncRandomOffset() * 1000;
     }
 
+    private boolean isDeviceProvisioned() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        return (Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0);
+    }
     /**
      * Return a random value v that satisfies minValue <= v < maxValue. The difference between
      * maxValue and minValue must be less than Integer.MAX_VALUE.
@@ -2000,20 +2051,36 @@ public class SyncManager {
         public final SyncTimeTracker mSyncTimeTracker = new SyncTimeTracker();
         private final HashMap<String, PowerManager.WakeLock> mWakeLocks = Maps.newHashMap();
 
-        private List<Message> mBootQueue = new ArrayList<Message>();
+        private List<Message> mUnreadyQueue = new ArrayList<Message>();
 
-      public void onBootCompleted() {
+        void onBootCompleted() {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "Boot completed, clearing boot queue.");
             }
             doDatabaseCleanup();
             synchronized(this) {
                 // Dispatch any stashed messages.
-                for (Message message : mBootQueue) {
-                    sendMessage(message);
+                maybeEmptyUnreadyQueueLocked();
+            }
+        }
+
+        void onDeviceProvisioned() {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "mProvisioned=" + mProvisioned);
+            }
+            synchronized (this) {
+                maybeEmptyUnreadyQueueLocked();
+            }
+        }
+
+        private void maybeEmptyUnreadyQueueLocked() {
+            if (mProvisioned && mBootCompleted) {
+                // Dispatch any stashed messages.
+                for (int i=0; i<mUnreadyQueue.size(); i++) {
+                    sendMessageDelayed(mUnreadyQueue.get(i),
+                            Math.max(PER_SYNC_BOOT_DELAY_MILLIS * i, MAX_SYNC_BOOT_DELAY_MILLIS));
                 }
-                mBootQueue = null;
-                mBootCompleted = true;
+                mUnreadyQueue = null;
             }
         }
 
@@ -2030,20 +2097,23 @@ public class SyncManager {
         }
 
         /**
-         * Stash any messages that come to the handler before boot is complete.
-         * {@link #onBootCompleted()} will disable this and dispatch all the messages collected.
+         * Stash any messages that come to the handler before boot is complete or before the device
+         * is properly provisioned (i.e. out of set-up wizard).
+         * {@link #onBootCompleted()} and {@link #onDeviceProvisioned(boolean)} both need to come
+         * in before we start syncing.
          * @param msg Message to dispatch at a later point.
          * @return true if a message was enqueued, false otherwise. This is to avoid losing the
          * message if we manage to acquire the lock but by the time we do boot has completed.
          */
         private boolean tryEnqueueMessageUntilReadyToRun(Message msg) {
             synchronized (this) {
-                if (!mBootCompleted) {
+                if (!mBootCompleted || !mProvisioned) {
                     // Need to copy the message bc looper will recycle it.
-                    mBootQueue.add(Message.obtain(msg));
+                    mUnreadyQueue.add(Message.obtain(msg));
                     return true;
+                } else {
+                    return false;
                 }
-                return false;
             }
         }
 
@@ -2100,7 +2170,7 @@ public class SyncManager {
                         }
                         cancelActiveSync(expiredContext.mSyncOperation.target,
                                 expiredContext.mSyncOperation.extras);
-                        nextPendingSyncTime = maybeStartNextSyncLocked();
+                        nextPendingSyncTime = maybeStartNextSyncH();
                         break;
 
                     case SyncHandler.MESSAGE_CANCEL: {
@@ -2111,7 +2181,7 @@ public class SyncManager {
                                     + payload + " bundle: " + extras);
                         }
                         cancelActiveSyncLocked(payload, extras);
-                        nextPendingSyncTime = maybeStartNextSyncLocked();
+                        nextPendingSyncTime = maybeStartNextSyncH();
                         break;
                     }
 
@@ -2120,17 +2190,17 @@ public class SyncManager {
                             Log.v(TAG, "handleSyncHandlerMessage: MESSAGE_SYNC_FINISHED");
                         }
                         SyncHandlerMessagePayload payload = (SyncHandlerMessagePayload) msg.obj;
-                        if (!isSyncStillActive(payload.activeSyncContext)) {
+                        if (!isSyncStillActiveH(payload.activeSyncContext)) {
                             Log.d(TAG, "handleSyncHandlerMessage: dropping since the "
                                     + "sync is no longer active: "
                                     + payload.activeSyncContext);
                             break;
                         }
-                        runSyncFinishedOrCanceledLocked(payload.syncResult,
+                        runSyncFinishedOrCanceledH(payload.syncResult,
                                 payload.activeSyncContext);
 
                         // since a sync just finished check if it is time to start a new sync
-                        nextPendingSyncTime = maybeStartNextSyncLocked();
+                        nextPendingSyncTime = maybeStartNextSyncH();
                         break;
 
                     case SyncHandler.MESSAGE_SERVICE_CONNECTED: {
@@ -2140,7 +2210,7 @@ public class SyncManager {
                                     + msgData.activeSyncContext);
                         }
                         // check that this isn't an old message
-                        if (isSyncStillActive(msgData.activeSyncContext)) {
+                        if (isSyncStillActiveH(msgData.activeSyncContext)) {
                             runBoundToAdapter(
                                     msgData.activeSyncContext,
                                     msgData.adapter);
@@ -2156,7 +2226,7 @@ public class SyncManager {
                                     + currentSyncContext);
                         }
                         // check that this isn't an old message
-                        if (isSyncStillActive(currentSyncContext)) {
+                        if (isSyncStillActiveH(currentSyncContext)) {
                             // cancel the sync if we have a syncadapter, which means one is
                             // outstanding
                             try {
@@ -2174,10 +2244,10 @@ public class SyncManager {
                             // which is a soft error
                             SyncResult syncResult = new SyncResult();
                             syncResult.stats.numIoExceptions++;
-                            runSyncFinishedOrCanceledLocked(syncResult, currentSyncContext);
+                            runSyncFinishedOrCanceledH(syncResult, currentSyncContext);
 
                             // since a sync just finished check if it is time to start a new sync
-                            nextPendingSyncTime = maybeStartNextSyncLocked();
+                            nextPendingSyncTime = maybeStartNextSyncH();
                         }
 
                         break;
@@ -2190,7 +2260,7 @@ public class SyncManager {
                         }
                         mAlarmScheduleTime = null;
                         try {
-                            nextPendingSyncTime = maybeStartNextSyncLocked();
+                            nextPendingSyncTime = maybeStartNextSyncH();
                         } finally {
                             mHandleAlarmWakeLock.release();
                         }
@@ -2201,7 +2271,7 @@ public class SyncManager {
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
                             Log.v(TAG, "handleSyncHandlerMessage: MESSAGE_CHECK_ALARMS");
                         }
-                        nextPendingSyncTime = maybeStartNextSyncLocked();
+                        nextPendingSyncTime = maybeStartNextSyncH();
                         break;
                 }
             } finally {
@@ -2393,7 +2463,7 @@ public class SyncManager {
                     0 : (earliestFuturePollTime - nowAbsolute));
         }
 
-        private long maybeStartNextSyncLocked() {
+        private long maybeStartNextSyncH() {
             final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
             if (isLoggable) Log.v(TAG, "maybeStartNextSync");
 
@@ -2612,7 +2682,7 @@ public class SyncManager {
                 }
 
                 if (toReschedule != null) {
-                    runSyncFinishedOrCanceledLocked(null, toReschedule);
+                    runSyncFinishedOrCanceledH(null, toReschedule);
                     scheduleSyncOperation(toReschedule.mSyncOperation);
                 }
                 synchronized (mSyncQueue) {
@@ -2845,14 +2915,14 @@ public class SyncManager {
                                     false /* no config settings */)) {
                         continue;
                     }
-                    runSyncFinishedOrCanceledLocked(null /* no result since this is a cancel */,
+                    runSyncFinishedOrCanceledH(null /* no result since this is a cancel */,
                             activeSyncContext);
                 }
             }
         }
 
-        private void runSyncFinishedOrCanceledLocked(SyncResult syncResult,
-                ActiveSyncContext activeSyncContext) {
+        private void runSyncFinishedOrCanceledH(SyncResult syncResult,
+                                                ActiveSyncContext activeSyncContext) {
             boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
 
             final SyncOperation syncOperation = activeSyncContext.mSyncOperation;
@@ -3257,7 +3327,7 @@ public class SyncManager {
         }
     }
 
-    private boolean isSyncStillActive(ActiveSyncContext activeSyncContext) {
+    private boolean isSyncStillActiveH(ActiveSyncContext activeSyncContext) {
         for (ActiveSyncContext sync : mActiveSyncContexts) {
             if (sync == activeSyncContext) {
                 return true;
