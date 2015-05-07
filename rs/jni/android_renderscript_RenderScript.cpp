@@ -642,7 +642,7 @@ nScriptIntrinsicBLAS_Complex(JNIEnv *_env, jobject _this, jlong con, jlong id, j
     call.alpha.c.r = alphaX;
     call.alpha.c.i = alphaY;
     call.beta.c.r = betaX;
-    call.beta.c.r = betaY;
+    call.beta.c.i = betaY;
     call.incX = incX;
     call.incY = incY;
     call.KL = KL;
@@ -677,7 +677,7 @@ nScriptIntrinsicBLAS_Z(JNIEnv *_env, jobject _this, jlong con, jlong id, jint fu
     call.alpha.z.r = alphaX;
     call.alpha.z.i = alphaY;
     call.beta.z.r = betaX;
-    call.beta.z.r = betaY;
+    call.beta.z.i = betaY;
     call.incX = incX;
     call.incY = incY;
     call.KL = KL;
