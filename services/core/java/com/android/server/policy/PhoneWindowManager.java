@@ -93,7 +93,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.PhoneWindow;
+import com.android.internal.policy.PhoneWindow;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
