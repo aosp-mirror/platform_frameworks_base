@@ -1013,7 +1013,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
             }
         } else {
             if (A != null) {
-                if (TransA != NO_TRANSPOSE) {
+                if (TransA == TRANSPOSE || TransA == CONJ_TRANSPOSE) {
                     aN = A.getType().getY();
                     aM = A.getType().getX();
                 } else {
@@ -1022,7 +1022,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
                 }
             }
             if (B != null) {
-                if (TransB != NO_TRANSPOSE) {
+                if (TransB == TRANSPOSE || TransB == CONJ_TRANSPOSE) {
                     bN = B.getType().getY();
                     bM = B.getType().getX();
                 } else {
@@ -1273,7 +1273,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         validateUplo(Uplo);
         validateSYR2K(Element.F32(mRS), Trans, A, B, C);
         int K = -1;
-        if (Trans == TRANSPOSE) {
+        if (Trans != NO_TRANSPOSE) {
             K = A.getType().getY();
         } else {
             K = A.getType().getX();
@@ -1284,7 +1284,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         validateUplo(Uplo);
         validateSYR2K(Element.F64(mRS), Trans, A, B, C);
         int K = -1;
-        if (Trans == TRANSPOSE) {
+        if (Trans != NO_TRANSPOSE) {
             K = A.getType().getY();
         } else {
             K = A.getType().getX();
@@ -1295,7 +1295,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         validateUplo(Uplo);
         validateSYR2K(Element.F32_2(mRS), Trans, A, B, C);
         int K = -1;
-        if (Trans == TRANSPOSE) {
+        if (Trans != NO_TRANSPOSE) {
             K = A.getType().getY();
         } else {
             K = A.getType().getX();
@@ -1306,7 +1306,7 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
         validateUplo(Uplo);
         validateSYR2K(Element.F64_2(mRS), Trans, A, B, C);
         int K = -1;
-        if (Trans == TRANSPOSE) {
+        if (Trans != NO_TRANSPOSE) {
             K = A.getType().getY();
         } else {
             K = A.getType().getX();
