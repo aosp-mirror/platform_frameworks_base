@@ -20,6 +20,8 @@ import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+
+import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -132,10 +134,8 @@ public class Resources {
     // These are protected by mAccessLock.
     private final Object mAccessLock = new Object();
     private final Configuration mTmpConfig = new Configuration();
-    private final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> mDrawableCache =
-            new ArrayMap<>();
-    private final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> mColorDrawableCache =
-            new ArrayMap<>();
+    private final DrawableCache mDrawableCache = new DrawableCache(this);
+    private final DrawableCache mColorDrawableCache = new DrawableCache(this);
     private final ConfigurationBoundResourceCache<ColorStateList> mColorStateListCache =
             new ConfigurationBoundResourceCache<>(this);
     private final ConfigurationBoundResourceCache<Animator> mAnimatorCache =
@@ -1441,7 +1441,7 @@ public class Resources {
             AssetManager.applyThemeStyle(mTheme, resId, force);
 
             mThemeResId = resId;
-            mKey += Integer.toHexString(resId) + (force ? "! " : " ");
+            mKey.append(resId, force);
         }
 
         /**
@@ -1457,7 +1457,7 @@ public class Resources {
             AssetManager.copyTheme(mTheme, other.mTheme);
 
             mThemeResId = other.mThemeResId;
-            mKey = other.mKey;
+            mKey.setTo(other.getKey());
         }
 
         /**
@@ -1765,15 +1765,15 @@ public class Resources {
             mTheme = mAssets.createTheme();
         }
 
+        /** Unique key for the series of styles applied to this theme. */
+        private final ThemeKey mKey = new ThemeKey();
+
         @SuppressWarnings("hiding")
         private final AssetManager mAssets;
         private final long mTheme;
 
         /** Resource identifier for the theme. */
         private int mThemeResId = 0;
-
-        /** Unique key for the series of styles applied to this theme. */
-        private String mKey = "";
 
         // Needed by layoutlib.
         /*package*/ long getNativeTheme() {
@@ -1784,7 +1784,7 @@ public class Resources {
             return mThemeResId;
         }
 
-        /*package*/ String getKey() {
+        /*package*/ ThemeKey getKey() {
             return mKey;
         }
 
@@ -1793,28 +1793,118 @@ public class Resources {
         }
 
         /**
-         * Parses {@link #mKey} and returns a String array that holds pairs of adjacent Theme data:
-         * resource name followed by whether or not it was forced, as specified by
-         * {@link #applyStyle(int, boolean)}.
+         * Parses {@link #mKey} and returns a String array that holds pairs of
+         * adjacent Theme data: resource name followed by whether or not it was
+         * forced, as specified by {@link #applyStyle(int, boolean)}.
          *
          * @hide
          */
         @ViewDebug.ExportedProperty(category = "theme", hasAdjacentMapping = true)
         public String[] getTheme() {
-            String[] themeData = mKey.split(" ");
-            String[] themes = new String[themeData.length * 2];
-            String theme;
-            boolean forced;
-
-            for (int i = 0, j = themeData.length - 1; i < themes.length; i += 2, --j) {
-                theme = themeData[j];
-                forced = theme.endsWith("!");
-                themes[i] = forced ?
-                        getResourceNameFromHexString(theme.substring(0, theme.length() - 1)) :
-                        getResourceNameFromHexString(theme);
+            final int N = mKey.mCount;
+            final String[] themes = new String[N * 2];
+            for (int i = 0, j = N - 1; i < themes.length; i += 2, --j) {
+                final int resId = mKey.mResId[i];
+                final boolean forced = mKey.mForce[i];
+                themes[i] = getResourceName(resId);
                 themes[i + 1] = forced ? "forced" : "not forced";
             }
             return themes;
+        }
+
+        /**
+         * Rebases the theme against the parent Resource object's current
+         * configuration by re-applying the styles passed to
+         * {@link #applyStyle(int, boolean)}.
+         *
+         * @hide
+         */
+        public void rebase() {
+            AssetManager.clearTheme(mTheme);
+
+            // Reapply the same styles in the same order.
+            for (int i = 0; i < mKey.mCount; i++) {
+                final int resId = mKey.mResId[i];
+                final boolean force = mKey.mForce[i];
+                AssetManager.applyThemeStyle(mTheme, resId, force);
+            }
+        }
+    }
+
+    static class ThemeKey implements Cloneable {
+        int[] mResId;
+        boolean[] mForce;
+        int mCount;
+
+        private int mHashCode = 0;
+
+        public void append(int resId, boolean force) {
+            if (mResId == null) {
+                mResId = new int[4];
+            }
+
+            if (mForce == null) {
+                mForce = new boolean[4];
+            }
+
+            mResId = GrowingArrayUtils.append(mResId, mCount, resId);
+            mForce = GrowingArrayUtils.append(mForce, mCount, force);
+            mCount++;
+
+            mHashCode = 31 * (31 * mHashCode + resId) + (force ? 1 : 0);
+        }
+
+        /**
+         * Sets up this key as a deep copy of another key.
+         *
+         * @param other the key to deep copy into this key
+         */
+        public void setTo(ThemeKey other) {
+            mResId = other.mResId == null ? null : other.mResId.clone();
+            mForce = other.mForce == null ? null : other.mForce.clone();
+            mCount = other.mCount;
+        }
+
+        @Override
+        public int hashCode() {
+            return mHashCode;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass() || hashCode() != o.hashCode()) {
+                return false;
+            }
+
+            final ThemeKey t = (ThemeKey) o;
+            if (mCount != t.mCount) {
+                return false;
+            }
+
+            final int N = mCount;
+            for (int i = 0; i < N; i++) {
+                if (mResId[i] != t.mResId[i] || mForce[i] != t.mForce[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * @return a shallow copy of this key
+         */
+        @Override
+        public ThemeKey clone() {
+            final ThemeKey other = new ThemeKey();
+            other.mResId = mResId;
+            other.mForce = mForce;
+            other.mCount = mCount;
+            return other;
         }
     }
 
@@ -1944,8 +2034,8 @@ public class Resources {
                         + " final compat is " + mCompatibilityInfo);
             }
 
-            clearDrawableCachesLocked(mDrawableCache, configChanges);
-            clearDrawableCachesLocked(mColorDrawableCache, configChanges);
+            mDrawableCache.onConfigurationChange(configChanges);
+            mColorDrawableCache.onConfigurationChange(configChanges);
             mColorStateListCache.onConfigurationChange(configChanges);
             mAnimatorCache.onConfigurationChange(configChanges);
             mStateListAnimatorCache.onConfigurationChange(configChanges);
@@ -1981,48 +2071,6 @@ public class Resources {
             configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
         }
         return configChanges;
-    }
-
-    private void clearDrawableCachesLocked(
-            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
-            int configChanges) {
-        final int N = caches.size();
-        for (int i = 0; i < N; i++) {
-            clearDrawableCacheLocked(caches.valueAt(i), configChanges);
-        }
-    }
-
-    private void clearDrawableCacheLocked(
-            LongSparseArray<WeakReference<ConstantState>> cache, int configChanges) {
-        if (DEBUG_CONFIG) {
-            Log.d(TAG, "Cleaning up drawables config changes: 0x"
-                    + Integer.toHexString(configChanges));
-        }
-        final int N = cache.size();
-        for (int i = 0; i < N; i++) {
-            final WeakReference<ConstantState> ref = cache.valueAt(i);
-            if (ref != null) {
-                final ConstantState cs = ref.get();
-                if (cs != null) {
-                    if (Configuration.needNewResources(
-                            configChanges, cs.getChangingConfigurations())) {
-                        if (DEBUG_CONFIG) {
-                            Log.d(TAG, "FLUSHING #0x"
-                                    + Long.toHexString(cache.keyAt(i))
-                                    + " / " + cs + " with changes: 0x"
-                                    + Integer.toHexString(cs.getChangingConfigurations()));
-                        }
-                        cache.setValueAt(i, null);
-                    } else if (DEBUG_CONFIG) {
-                        Log.d(TAG, "(Keeping #0x"
-                                + Long.toHexString(cache.keyAt(i))
-                                + " / " + cs + " with changes: 0x"
-                                + Integer.toHexString(cs.getChangingConfigurations())
-                                + ")");
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -2436,7 +2484,7 @@ public class Resources {
         }
 
         final boolean isColorDrawable;
-        final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches;
+        final DrawableCache caches;
         final long key;
         if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
                 && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
@@ -2452,7 +2500,7 @@ public class Resources {
         // First, check whether we have a cached version of this drawable
         // that was inflated against the specified theme.
         if (!mPreloading) {
-            final Drawable cachedDrawable = getCachedDrawable(caches, key, theme);
+            final Drawable cachedDrawable = caches.getInstance(key, theme);
             if (cachedDrawable != null) {
                 return cachedDrawable;
             }
@@ -2479,13 +2527,8 @@ public class Resources {
         // Determine if the drawable has unresolved theme attributes. If it
         // does, we'll need to apply a theme and store it in a theme-specific
         // cache.
-        final String cacheKey;
-        if (!dr.canApplyTheme()) {
-            cacheKey = CACHE_NOT_THEMED;
-        } else if (theme == null) {
-            cacheKey = CACHE_NULL_THEME;
-        } else {
-            cacheKey = theme.getKey();
+        final boolean canApplyTheme = dr.canApplyTheme();
+        if (canApplyTheme && theme != null) {
             dr = dr.mutate();
             dr.applyTheme(theme);
             dr.clearMutated();
@@ -2495,15 +2538,14 @@ public class Resources {
         // cache: preload, not themed, null theme, or theme-specific.
         if (dr != null) {
             dr.setChangingConfigurations(value.changingConfigurations);
-            cacheDrawable(value, isColorDrawable, caches, cacheKey, key, dr);
+            cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
         }
 
         return dr;
     }
 
-    private void cacheDrawable(TypedValue value, boolean isColorDrawable,
-            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
-            String cacheKey, long key, Drawable dr) {
+    private void cacheDrawable(TypedValue value, boolean isColorDrawable, DrawableCache caches,
+            Theme theme, boolean usesTheme, long key, Drawable dr) {
         final ConstantState cs = dr.getConstantState();
         if (cs == null) {
             return;
@@ -2531,51 +2573,9 @@ public class Resources {
             }
         } else {
             synchronized (mAccessLock) {
-                LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(cacheKey);
-                if (themedCache == null) {
-                    // Clean out the caches before we add more. This shouldn't
-                    // happen very often.
-                    pruneCaches(caches);
-                    themedCache = new LongSparseArray<>(1);
-                    caches.put(cacheKey, themedCache);
-                }
-                themedCache.put(key, new WeakReference<>(cs));
+                caches.put(key, theme, cs, usesTheme);
             }
         }
-    }
-
-    /**
-     * Prunes empty caches from the cache map.
-     *
-     * @param caches The map of caches to prune.
-     */
-    private void pruneCaches(ArrayMap<String,
-            LongSparseArray<WeakReference<ConstantState>>> caches) {
-        final int N = caches.size();
-        for (int i = N - 1; i >= 0; i--) {
-            final LongSparseArray<WeakReference<ConstantState>> cache = caches.valueAt(i);
-            if (pruneCache(cache)) {
-                caches.removeAt(i);
-            }
-        }
-    }
-
-    /**
-     * Prunes obsolete weak references from a cache, returning {@code true} if
-     * the cache is empty and should be removed.
-     *
-     * @param cache The cache of weak references to prune.
-     * @return {@code true} if the cache is empty and should be removed.
-     */
-    private boolean pruneCache(LongSparseArray<WeakReference<ConstantState>> cache) {
-        final int N = cache.size();
-        for (int i = N - 1; i >= 0; i--) {
-            final WeakReference entry = cache.valueAt(i);
-            if (entry == null || entry.get() == null) {
-                cache.removeAt(i);
-            }
-        }
-        return cache.size() == 0;
     }
 
     /**
@@ -2631,51 +2631,6 @@ public class Resources {
         return dr;
     }
 
-    private Drawable getCachedDrawable(
-            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
-            long key, Theme theme) {
-        synchronized (mAccessLock) {
-            // First search theme-agnostic cache.
-            final Drawable unthemedDrawable = getCachedDrawableLocked(
-                    caches, key, CACHE_NOT_THEMED);
-            if (unthemedDrawable != null) {
-                return unthemedDrawable;
-            }
-
-            // Next search theme-specific cache.
-            final String themeKey = theme != null ? theme.getKey() : CACHE_NULL_THEME;
-            return getCachedDrawableLocked(caches, key, themeKey);
-        }
-    }
-
-    private Drawable getCachedDrawableLocked(
-            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
-            long key, String themeKey) {
-        final LongSparseArray<WeakReference<ConstantState>> cache = caches.get(themeKey);
-        if (cache != null) {
-            final ConstantState entry = getConstantStateLocked(cache, key);
-            if (entry != null) {
-                return entry.newDrawable(this);
-            }
-        }
-        return null;
-    }
-
-    private ConstantState getConstantStateLocked(
-            LongSparseArray<WeakReference<ConstantState>> drawableCache, long key) {
-        final WeakReference<ConstantState> wr = drawableCache.get(key);
-        if (wr != null) {
-            final ConstantState entry = wr.get();
-            if (entry != null) {
-                return entry;
-            } else {
-                // Our entry has been purged.
-                drawableCache.delete(key);
-            }
-        }
-        return null;
-    }
-
     @Nullable
     ColorStateList loadColorStateList(TypedValue value, int id, Theme theme)
             throws NotFoundException {
@@ -2713,8 +2668,7 @@ public class Resources {
         }
 
         final ConfigurationBoundResourceCache<ColorStateList> cache = mColorStateListCache;
-
-        csl = cache.get(key, theme);
+        csl = cache.getInstance(key, theme);
         if (csl != null) {
             return csl;
         }

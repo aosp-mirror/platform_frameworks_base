@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources.Theme;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FactoryTest;
@@ -291,7 +292,7 @@ public final class SystemServer {
     private void createSystemContext() {
         ActivityThread activityThread = ActivityThread.systemMain();
         mSystemContext = activityThread.getSystemContext();
-        mSystemContext.setTheme(android.R.style.Theme_DeviceDefault_Light_DarkActionBar);
+        mSystemContext.setTheme(android.R.style.Theme_Material_DayNight_DarkActionBar);
     }
 
     /**
@@ -1025,6 +1026,12 @@ public final class SystemServer {
         WindowManager w = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         w.getDefaultDisplay().getMetrics(metrics);
         context.getResources().updateConfiguration(config, metrics);
+
+        // The system context's theme may be configuration-dependent.
+        final Theme systemTheme = context.getTheme();
+        if (systemTheme.getChangingConfigurations() != 0) {
+            systemTheme.rebase();
+        }
 
         try {
             // TODO: use boot phase

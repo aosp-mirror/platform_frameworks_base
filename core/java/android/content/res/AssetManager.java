@@ -785,6 +785,7 @@ public final class AssetManager implements AutoCloseable {
     private native final void deleteTheme(long theme);
     /*package*/ native static final void applyThemeStyle(long theme, int styleRes, boolean force);
     /*package*/ native static final void copyTheme(long dest, long source);
+    /*package*/ native static final void clearTheme(long theme);
     /*package*/ native static final int loadThemeAttributeValue(long theme, int ident,
                                                                 TypedValue outValue,
                                                                 boolean resolve);
