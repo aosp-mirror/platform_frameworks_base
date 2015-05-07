@@ -177,26 +177,20 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     public synchronized int captureBurst(List<CaptureRequest> requests, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
         if (requests == null) {
-            throw new IllegalArgumentException("requests must not be null");
+            throw new IllegalArgumentException("Requests must not be null");
         } else if (requests.isEmpty()) {
-            throw new IllegalArgumentException("requests must have at least one element");
+            throw new IllegalArgumentException("Requests must have at least one element");
         }
 
-        boolean reprocess = requests.get(0).isReprocess();
-        if (reprocess && !isReprocessible()) {
-            throw new IllegalArgumentException("this capture session cannot handle reprocess " +
-                    "requests");
-        } else if (reprocess && requests.get(0).getReprocessibleSessionId() != mId) {
-            throw new IllegalArgumentException("capture request was created for another session");
-        }
-
-        for (int i = 1; i < requests.size(); i++) {
-            if (requests.get(i).isReprocess() != reprocess) {
-                throw new IllegalArgumentException("cannot mix regular and reprocess capture " +
-                        " requests");
-            } else if (reprocess && requests.get(i).getReprocessibleSessionId() != mId) {
-                throw new IllegalArgumentException("capture request was created for another " +
-                    "session");
+        for (CaptureRequest request : requests) {
+            if (request.isReprocess()) {
+                if (!isReprocessible()) {
+                    throw new IllegalArgumentException("This capture session cannot handle " +
+                            "reprocess requests");
+                } else if (request.getReprocessibleSessionId() != mId) {
+                    throw new IllegalArgumentException("Capture request was created for another " +
+                            "session");
+                }
             }
         }
 
