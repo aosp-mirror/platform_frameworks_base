@@ -79,8 +79,8 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         int keySize;
         @KeyStoreKeyProperties.PurposeEnum int purposes;
         String[] encryptionPaddings;
-        String[] digests;
-        String[] blockModes;
+        @KeyStoreKeyProperties.DigestEnum String[] digests;
+        @KeyStoreKeyProperties.BlockModeEnum String[] blockModes;
         int keymasterSwEnforcedUserAuthenticators;
         int keymasterHwEnforcedUserAuthenticators;
         try {
@@ -105,10 +105,10 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
 
             List<String> encryptionPaddingsList = new ArrayList<String>();
             for (int keymasterPadding : keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PADDING)) {
-                String jcaPadding;
+                @KeyStoreKeyProperties.EncryptionPaddingEnum String jcaPadding;
                 try {
-                    jcaPadding = KeymasterUtils.getJcaEncryptionPaddingFromKeymasterPadding(
-                            keymasterPadding);
+                    jcaPadding =
+                            KeyStoreKeyProperties.EncryptionPadding.fromKeymaster(keymasterPadding);
                 } catch (IllegalArgumentException e) {
                     throw new InvalidKeySpecException(
                             "Unsupported encryption padding: " + keymasterPadding);
@@ -118,9 +118,9 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             encryptionPaddings =
                     encryptionPaddingsList.toArray(new String[encryptionPaddingsList.size()]);
 
-            digests = KeymasterUtils.getJcaDigestAlgorithmsFromKeymasterDigests(
+            digests = KeyStoreKeyProperties.Digest.allFromKeymaster(
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST));
-            blockModes = KeymasterUtils.getJcaBlockModesFromKeymasterBlockModes(
+            blockModes = KeyStoreKeyProperties.BlockMode.allFromKeymaster(
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_BLOCK_MODE));
             keymasterSwEnforcedUserAuthenticators =
                     keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
