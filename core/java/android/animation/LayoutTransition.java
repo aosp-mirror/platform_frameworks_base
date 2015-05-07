@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class enables automatic animations on layout changes in ViewGroup objects. To enable
@@ -757,7 +758,7 @@ public class LayoutTransition {
         // reset the inter-animation delay, in case we use it later
         staggerDelay = 0;
 
-        final ViewTreeObserver observer = parent.getViewTreeObserver(); // used for later cleanup
+        final ViewTreeObserver observer = parent.getViewTreeObserver();
         if (!observer.isAlive()) {
             // If the observer's not in a good state, skip the transition
             return;
@@ -790,21 +791,9 @@ public class LayoutTransition {
         // This is the cleanup step. When we get this rendering event, we know that all of
         // the appropriate animations have been set up and run. Now we can clear out the
         // layout listeners.
-        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            public boolean onPreDraw() {
-                parent.getViewTreeObserver().removeOnPreDrawListener(this);
-                int count = layoutChangeListenerMap.size();
-                if (count > 0) {
-                    Collection<View> views = layoutChangeListenerMap.keySet();
-                    for (View view : views) {
-                        View.OnLayoutChangeListener listener = layoutChangeListenerMap.get(view);
-                        view.removeOnLayoutChangeListener(listener);
-                    }
-                }
-                layoutChangeListenerMap.clear();
-                return true;
-            }
-        });
+        CleanupCallback callback = new CleanupCallback(layoutChangeListenerMap, parent);
+        observer.addOnPreDrawListener(callback);
+        parent.addOnAttachStateChangeListener(callback);
     }
 
     /**
@@ -1498,5 +1487,51 @@ public class LayoutTransition {
         public void endTransition(LayoutTransition transition, ViewGroup container,
                 View view, int transitionType);
     }
+
+    /**
+     * Utility class to clean up listeners after animations are setup. Cleanup happens
+     * when either the OnPreDrawListener method is called or when the parent is detached,
+     * whichever comes first.
+     */
+    private static final class CleanupCallback implements ViewTreeObserver.OnPreDrawListener,
+            View.OnAttachStateChangeListener {
+
+        final Map<View, View.OnLayoutChangeListener> layoutChangeListenerMap;
+        final ViewGroup parent;
+
+        CleanupCallback(Map<View, View.OnLayoutChangeListener> listenerMap, ViewGroup parent) {
+            this.layoutChangeListenerMap = listenerMap;
+            this.parent = parent;
+        }
+
+        private void cleanup() {
+            parent.getViewTreeObserver().removeOnPreDrawListener(this);
+            parent.removeOnAttachStateChangeListener(this);
+            int count = layoutChangeListenerMap.size();
+            if (count > 0) {
+                Collection<View> views = layoutChangeListenerMap.keySet();
+                for (View view : views) {
+                    View.OnLayoutChangeListener listener = layoutChangeListenerMap.get(view);
+                    view.removeOnLayoutChangeListener(listener);
+                }
+                layoutChangeListenerMap.clear();
+            }
+        }
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            cleanup();
+        }
+
+        @Override
+        public boolean onPreDraw() {
+            cleanup();
+            return true;
+        }
+    };
 
 }
