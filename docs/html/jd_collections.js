@@ -1221,6 +1221,14 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/answer/2651410"
     ]
   },
+  "preview/landing/resources": {
+    "title": "",
+    "resources": [
+      "preview/api-overview.html",
+      "preview/setup-sdk.html",
+      "preview/samples.html"
+    ]
+  },
   "autolanding": {
     "title": "",
     "resources": [
