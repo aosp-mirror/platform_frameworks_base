@@ -3336,6 +3336,30 @@ status_t ResTable::Theme::setTo(const Theme& other)
     return NO_ERROR;
 }
 
+status_t ResTable::Theme::clear()
+{
+    if (kDebugTableTheme) {
+        ALOGI("Clearing theme %p...\n", this);
+        dumpToLog();
+    }
+
+    for (size_t i = 0; i < Res_MAXPACKAGE; i++) {
+        if (mPackages[i] != NULL) {
+            free_package(mPackages[i]);
+            mPackages[i] = NULL;
+        }
+    }
+
+    mTypeSpecFlags = 0;
+
+    if (kDebugTableTheme) {
+        ALOGI("Final theme:");
+        dumpToLog();
+    }
+
+    return NO_ERROR;
+}
+
 ssize_t ResTable::Theme::getAttribute(uint32_t resID, Res_value* outValue,
         uint32_t* outTypeSpecFlags) const
 {

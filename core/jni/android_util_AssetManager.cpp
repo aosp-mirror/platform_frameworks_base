@@ -976,6 +976,12 @@ static void android_content_AssetManager_copyTheme(JNIEnv* env, jobject clazz,
     dest->setTo(*src);
 }
 
+static void android_content_AssetManager_clearTheme(JNIEnv* env, jobject clazz, jlong themeHandle)
+{
+    ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeHandle);
+    theme->clear();
+}
+
 static jint android_content_AssetManager_loadThemeAttributeValue(
     JNIEnv* env, jobject clazz, jlong themeHandle, jint ident, jobject outValue, jboolean resolve)
 {
@@ -2108,6 +2114,8 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_applyThemeStyle },
     { "copyTheme", "(JJ)V",
         (void*) android_content_AssetManager_copyTheme },
+    { "clearTheme", "(J)V",
+        (void*) android_content_AssetManager_clearTheme },
     { "loadThemeAttributeValue", "(JILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadThemeAttributeValue },
     { "getThemeChangingConfigurations", "(J)I",
