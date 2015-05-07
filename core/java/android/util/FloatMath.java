@@ -25,6 +25,8 @@ package android.util;
  * {@link java.lang.Math}. {@link java.lang.Math} should be used in
  * preference.
  *
+ * <p>All methods were removed from the public API in version 23.
+ *
  * @deprecated Use {@link java.lang.Math} instead.
  */
 @Deprecated
@@ -39,6 +41,7 @@ public class FloatMath {
      *
      * @param value to be converted
      * @return the floor of value
+     * @removed
      */
     public static float floor(float value) {
         return (float) Math.floor(value);
@@ -50,6 +53,7 @@ public class FloatMath {
      *
      * @param value to be converted
      * @return the ceiling of value
+     * @removed
      */
     public static float ceil(float value) {
         return (float) Math.ceil(value);
@@ -60,6 +64,7 @@ public class FloatMath {
      *
      * @param angle to compute the cosine of, in radians
      * @return the sine of angle
+     * @removed
      */
     public static float sin(float angle) {
         return (float) Math.sin(angle);
@@ -70,6 +75,7 @@ public class FloatMath {
      *
      * @param angle to compute the cosine of, in radians
      * @return the cosine of angle
+     * @removed
      */
     public static float cos(float angle) {
         return (float) Math.cos(angle);
@@ -81,6 +87,7 @@ public class FloatMath {
      *
      * @param value to compute sqrt of
      * @return the square root of value
+     * @removed
      */
     public static float sqrt(float value) {
         return (float) Math.sqrt(value);
@@ -92,6 +99,7 @@ public class FloatMath {
      *
      * @param value to compute the exponential of
      * @return the exponential of value
+     * @removed
      */
     public static float exp(float value) {
         return (float) Math.exp(value);
@@ -104,6 +112,7 @@ public class FloatMath {
      * @param x the base of the operation.
      * @param y the exponent of the operation.
      * @return {@code x} to the power of {@code y}.
+     * @removed
      */
     public static float pow(float x, float y) {
         return (float) Math.pow(x, y);
@@ -116,6 +125,7 @@ public class FloatMath {
      * @param x a float number
      * @param y a float number
      * @return the hypotenuse
+     * @removed
      */
     public static float hypot(float x, float y) {
         return (float) Math.hypot(x, y);
