@@ -61,6 +61,8 @@ public class ParameterUtils {
     public static final Rect RECTANGLE_EMPTY =
             new Rect(/*left*/0, /*top*/0, /*right*/0, /*bottom*/0);
 
+    private static final double ASPECT_RATIO_TOLERANCE = 0.05f;
+
     /**
      * Calculate effective/reported zoom data from a user-specified crop region.
      */
@@ -498,7 +500,10 @@ public class ParameterUtils {
         float aspectRatioPreview = previewSize.getWidth() * 1.0f / previewSize.getHeight();
 
         float cropH, cropW;
-        if (aspectRatioPreview < aspectRatioArray) {
+        if (Math.abs(aspectRatioPreview - aspectRatioArray) < ASPECT_RATIO_TOLERANCE) {
+            cropH = activeArray.height();
+            cropW = activeArray.width();
+        } else if (aspectRatioPreview < aspectRatioArray) {
             // The new width must be smaller than the height, so scale the width by AR
             cropH = activeArray.height();
             cropW = cropH * aspectRatioPreview;
