@@ -51,37 +51,6 @@ public:
     ResourceType resourceType;
 };
 
-class BitmapKey {
-public:
-    BitmapKey(const SkBitmap& bitmap)
-        : mRefCount(1)
-        , mBitmapDimensions(bitmap.dimensions())
-        , mPixelRefOrigin(bitmap.pixelRefOrigin())
-        , mPixelRefStableID(bitmap.pixelRef()->getStableID()) { }
-
-    void operator=(const BitmapKey& other);
-    bool operator==(const BitmapKey& other) const;
-    bool operator<(const BitmapKey& other) const;
-
-private:
-    // This constructor is only used by the KeyedVector implementation
-    BitmapKey()
-        : mRefCount(-1)
-        , mBitmapDimensions(SkISize::Make(0,0))
-        , mPixelRefOrigin(SkIPoint::Make(0,0))
-        , mPixelRefStableID(0) { }
-
-    // reference count of all HWUI object using this bitmap
-    mutable int mRefCount;
-
-    SkISize mBitmapDimensions;
-    SkIPoint mPixelRefOrigin;
-    uint32_t mPixelRefStableID;
-
-    friend class ResourceCache;
-    friend struct android::key_value_pair_t<BitmapKey, SkBitmap*>;
-};
-
 class ANDROID_API ResourceCache: public Singleton<ResourceCache> {
     ResourceCache();
     ~ResourceCache();
@@ -97,18 +66,10 @@ public:
     void lock();
     void unlock();
 
-    /**
-     * The cache stores a copy of the provided resource or refs an existing resource
-     * if the bitmap has previously been inserted and returns the cached copy.
-     */
-    const SkBitmap* insert(const SkBitmap& resource);
-
     void incrementRefcount(const Res_png_9patch* resource);
 
-    void decrementRefcount(const SkBitmap* resource);
     void decrementRefcount(const Res_png_9patch* resource);
 
-    void decrementRefcountLocked(const SkBitmap* resource);
     void decrementRefcountLocked(const Res_png_9patch* resource);
 
     void destructor(Res_png_9patch* resource);
@@ -134,7 +95,6 @@ private:
     mutable Mutex mLock;
 
     KeyedVector<const void*, ResourceReference*>* mCache;
-    KeyedVector<BitmapKey, SkBitmap*> mBitmapCache;
 };
 
 }; // namespace uirenderer
