@@ -196,7 +196,7 @@ public class InputMethodSubtypeSwitchingController {
         }
 
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
-                boolean showSubtypes, boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
+                boolean showSubtypes, boolean inputShown, boolean isScreenLocked) {
             final ArrayList<ImeSubtypeListItem> imList =
                     new ArrayList<ImeSubtypeListItem>();
             final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
@@ -204,12 +204,6 @@ public class InputMethodSubtypeSwitchingController {
                             mContext);
             if (immis == null || immis.size() == 0) {
                 return Collections.emptyList();
-            }
-            if (isScreenLocked && includeAuxiliarySubtypes) {
-                if (DEBUG) {
-                    Slog.w(TAG, "Auxiliary subtypes are not allowed to be shown in lock screen.");
-                }
-                includeAuxiliarySubtypes = false;
             }
             mSortedImmis.clear();
             mSortedImmis.putAll(immis);
@@ -233,7 +227,7 @@ public class InputMethodSubtypeSwitchingController {
                         final String subtypeHashCode = String.valueOf(subtype.hashCode());
                         // We show all enabled IMEs and subtypes when an IME is shown.
                         if (enabledSubtypeSet.contains(subtypeHashCode)
-                                && (includeAuxiliarySubtypes || !subtype.isAuxiliary())) {
+                                && ((inputShown && !isScreenLocked) || !subtype.isAuxiliary())) {
                             final CharSequence subtypeLabel =
                                     subtype.overridesImplicitlyEnabledSubtype() ? null : subtype
                                             .getDisplayName(mContext, imi.getPackageName(),
@@ -522,8 +516,8 @@ public class InputMethodSubtypeSwitchingController {
     }
 
     public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListLocked(boolean showSubtypes,
-            boolean includingAuxiliarySubtypes, boolean isScreenLocked) {
+            boolean inputShown, boolean isScreenLocked) {
         return mSubtypeList.getSortedInputMethodAndSubtypeList(
-                showSubtypes, includingAuxiliarySubtypes, isScreenLocked);
+                showSubtypes, inputShown, isScreenLocked);
     }
 }
