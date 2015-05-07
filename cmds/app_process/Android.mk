@@ -52,11 +52,13 @@ LOCAL_LDFLAGS := -ldl -Wl,--version-script,art/sigchainlib/version-script.txt -W
 LOCAL_CPPFLAGS := -std=c++11
 
 LOCAL_MODULE := app_process__asan
-LOCAL_MODULE_TAGS := eng
-LOCAL_MODULE_PATH := $(TARGET_OUT_EXECUTABLES)/asan
-LOCAL_MODULE_STEM := app_process
+LOCAL_MULTILIB := both
+LOCAL_MODULE_STEM_32 := app_process32
+LOCAL_MODULE_STEM_64 := app_process64
+
 LOCAL_ADDRESS_SANITIZER := true
 LOCAL_CLANG := true
+LOCAL_MODULE_PATH := $(TARGET_OUT_EXECUTABLES)/asan
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
