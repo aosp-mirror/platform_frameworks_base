@@ -179,10 +179,10 @@ public class KeyStoreKeySpec implements KeySpec {
 
     /**
      * Gets the duration of time (seconds) for which this key can be used after the user is
-     * successfully authenticated.
+     * successfully authenticated. This has effect only if user authentication is required.
      *
-     * @return duration in seconds or {@code -1} if not restricted. {@code 0} means authentication
-     *         is required for every use of the key.
+     * @return duration in seconds or {@code -1} if authentication is required for every use of the
+     *         key.
      *
      * @see #isUserAuthenticationRequired()
      */
