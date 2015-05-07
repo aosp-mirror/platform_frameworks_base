@@ -2352,11 +2352,6 @@
     <permission android:name="android.permission.BIND_CONDITION_PROVIDER_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- Must be required by a {@link android.media.routing.MediaRouteService},
-         to ensure that only the system can bind to it. -->
-    <permission android:name="android.permission.BIND_MEDIA_ROUTE_SERVICE"
-        android:protectionLevel="signature" />
-
     <!-- Must be required by an {@link android.service.dreams.DreamService},
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_DREAM_SERVICE"
