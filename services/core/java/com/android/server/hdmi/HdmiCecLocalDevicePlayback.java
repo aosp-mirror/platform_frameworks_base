@@ -34,6 +34,9 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
+    private static final boolean WAKE_ON_HOTPLUG =
+            SystemProperties.getBoolean(Constants.PROPERTY_WAKE_ON_HOTPLUG, true);
+
     private boolean mIsActiveSource = false;
 
     // Used to keep the device awake while it is the active source. For devices that
@@ -130,7 +133,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         mCecMessageCache.flushAll();
         // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
-        if (connected && mService.isPowerStandbyOrTransient()) {
+        if (WAKE_ON_HOTPLUG && connected && mService.isPowerStandbyOrTransient()) {
             mService.wakeUp();
         }
         if (!connected) {
