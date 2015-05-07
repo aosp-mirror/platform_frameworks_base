@@ -16,7 +16,6 @@
 -->
 
 <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -27,8 +26,7 @@
         android:layout_column="0"
         android:layout_row="0"
         android:layout_rowSpan="3"
-        android:layout_gravity="center|fill"
-        tools:background="@color/accent_material_light" />
+        android:layout_gravity="center|fill" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -56,20 +54,14 @@
                 android:textAppearance="@style/TextAppearance.Material.TimePicker.TimeLabel"
                 android:singleLine="true"
                 android:ellipsize="none"
-                android:gravity="right"
-                tools:text="23"
-                tools:textSize="@dimen/timepicker_time_label_size"
-                tools:textColor="@color/white" />
+                android:gravity="right" />
 
             <TextView
                 android:id="@+id/separator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.Material.TimePicker.TimeLabel"
-                android:importantForAccessibility="no"
-                tools:text=":"
-                tools:textSize="@dimen/timepicker_time_label_size"
-                tools:textColor="@color/white" />
+                android:importantForAccessibility="no" />
 
             <!-- The minutes should always be to the right of the separator,
                  regardless of the current locale's layout direction. -->
@@ -80,10 +72,7 @@
                 android:textAppearance="@style/TextAppearance.Material.TimePicker.TimeLabel"
                 android:singleLine="true"
                 android:ellipsize="none"
-                android:gravity="left"
-                tools:text="59"
-                tools:textSize="@dimen/timepicker_time_label_size"
-                tools:textColor="@color/white" />
+                android:gravity="left" />
         </LinearLayout>
 
         <!-- The layout alignment of this view will switch between toRightOf
@@ -106,10 +95,7 @@
                 android:paddingTop="@dimen/timepicker_am_top_padding"
                 android:lines="1"
                 android:ellipsize="none"
-                android:includeFontPadding="false"
-                tools:text="AM"
-                tools:textSize="@dimen/timepicker_ampm_label_size"
-                tools:textColor="@color/white" />
+                android:includeFontPadding="false" />
 
             <CheckedTextView
                 android:id="@+id/pm_label"
@@ -121,10 +107,7 @@
                 android:paddingTop="@dimen/timepicker_pm_top_padding"
                 android:lines="1"
                 android:ellipsize="none"
-                android:includeFontPadding="false"
-                tools:text="PM"
-                tools:textSize="@dimen/timepicker_ampm_label_size"
-                tools:textColor="@color/white" />
+                android:includeFontPadding="false" />
         </LinearLayout>
     </RelativeLayout>
 
