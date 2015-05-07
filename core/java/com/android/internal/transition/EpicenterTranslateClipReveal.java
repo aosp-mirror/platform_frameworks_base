@@ -191,12 +191,6 @@ public class EpicenterTranslateClipReveal extends Visibility {
     private Rect getEpicenterOrCenter(Rect bestRect) {
         final Rect epicenter = getEpicenter();
         if (epicenter != null) {
-            /*
-            // Translate the clip bounds to be centered within the target bounds.
-            final int offsetX = bestRect.centerX() - epicenter.centerX();
-            final int offsetY = bestRect.centerY() - epicenter.centerY();
-            epicenter.offset(offsetX, offsetY);
-            */
             return epicenter;
         }
 
