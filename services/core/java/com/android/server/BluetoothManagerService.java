@@ -512,7 +512,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private void onBluetoothGattServiceUp() {
         if (DBG) Log.d(TAG,"BluetoothGatt Service is Up");
         try{
-            if (isBleAppPresent() == false && mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
+            if (isBleAppPresent() == false && mBluetooth != null
+                  && mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
                 mBluetooth.onLeServiceUp();
 
                 // waive WRITE_SECURE_SETTINGS permission check
@@ -531,32 +532,26 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     private void sendBrEdrDownCallback() {
         if (DBG) Log.d(TAG,"Calling sendBrEdrDownCallback callbacks");
-        int n = mCallbacks.beginBroadcast();
+
+        if(mBluetooth == null) {
+            Log.w(TAG, "Bluetooth handle is null");
+            return;
+        }
 
         if (isBleAppPresent() == false) {
             try {
                 mBluetooth.onBrEdrDown();
             } catch(RemoteException e) {
-                Log.e(TAG,"Unable to call onBrEdrDown", e);
+                Log.e(TAG, "Call to onBrEdrDown() failed.", e);
             }
-        }
-        else{//need to stay at BLE ON. disconnect all Gatt connections
+        } else {
+            // Need to stay at BLE ON. Disconnect all Gatt connections
             try{
-                mBluetoothGatt.unregAll();//disconnectAll();
+                mBluetoothGatt.unregAll();
             } catch(RemoteException e) {
-                Log.e(TAG,"Unable to disconn all", e);
+                Log.e(TAG, "Unable to disconnect all apps.", e);
             }
         }
-
-        Log.d(TAG,"Broadcasting onBrEdrDown() to " + n + " receivers.");
-        for (int i=0; i <n; i++) {
-            try {
-                mCallbacks.getBroadcastItem(i).onBrEdrDown();
-            }  catch (RemoteException e) {
-                Log.e(TAG, "Unable to call sendBrEdrDownCallback() on callback #" + i, e);
-            }
-        }
-        mCallbacks.finishBroadcast();
     }
 
     /** @hide*/
