@@ -61,6 +61,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         implements ActionProvider.SubUiVisibilityListener {
     private static final String TAG = "ActionMenuPresenter";
     private static final int ITEM_ANIMATION_DURATION = 150;
+    private static final boolean ACTIONBAR_ANIMATIONS_ENABLED = false;
 
     private OverflowMenuButton mOverflowButton;
     private boolean mReserveOverflow;
@@ -414,7 +415,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     @Override
     public void updateMenuView(boolean cleared) {
         final ViewGroup menuViewParent = (ViewGroup) ((View) mMenuView).getParent();
-        if (menuViewParent != null) {
+        if (menuViewParent != null && ACTIONBAR_ANIMATIONS_ENABLED) {
             setupItemAnimations();
         }
         super.updateMenuView(cleared);
