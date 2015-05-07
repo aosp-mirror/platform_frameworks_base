@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 
 package android.content.res;
 
+import android.graphics.drawable.Drawable;
+
 /**
- * A Cache class which can be used to cache resource objects that are easy to clone but more
- * expensive to inflate.
- *
- * @hide For internal use only.
+ * Class which can be used to cache Drawable resources against a theme.
  */
-public class ConfigurationBoundResourceCache<T> extends ThemedResourceCache<ConstantState<T>> {
+class DrawableCache extends ThemedResourceCache<Drawable.ConstantState> {
     private final Resources mResources;
 
     /**
@@ -30,7 +29,7 @@ public class ConfigurationBoundResourceCache<T> extends ThemedResourceCache<Cons
      *
      * @param resources the resources to use when creating new instances
      */
-    public ConfigurationBoundResourceCache(Resources resources) {
+    public DrawableCache(Resources resources) {
         mResources = resources;
     }
 
@@ -42,17 +41,17 @@ public class ConfigurationBoundResourceCache<T> extends ThemedResourceCache<Cons
      * @return a new instance of the resource, or {@code null} if not in
      *         the cache
      */
-    public T getInstance(long key, Resources.Theme theme) {
-        final ConstantState<T> entry = get(key, theme);
+    public Drawable getInstance(long key, Resources.Theme theme) {
+        final Drawable.ConstantState entry = get(key, theme);
         if (entry != null) {
-            return entry.newInstance(mResources, theme);
+            return entry.newDrawable(mResources, theme);
         }
 
         return null;
     }
 
     @Override
-    public boolean shouldInvalidateEntry(ConstantState<T> entry, int configChanges) {
-        return Configuration.needNewResources(configChanges, entry.getChangingConfigurations());
+    public boolean shouldInvalidateEntry(Drawable.ConstantState entry, int configChanges) {
+        return false;
     }
 }
