@@ -45,10 +45,10 @@ public final class KeyStoreParameter implements ProtectionParameter {
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
     private final @KeyStoreKeyProperties.PurposeEnum int mPurposes;
-    private final String[] mEncryptionPaddings;
-    private final String[] mSignaturePaddings;
-    private final String[] mDigests;
-    private final String[] mBlockModes;
+    private final @KeyStoreKeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
+    private final @KeyStoreKeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
+    private final @KeyStoreKeyProperties.DigestEnum String[] mDigests;
+    private final @KeyStoreKeyProperties.BlockModeEnum String[] mBlockModes;
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
@@ -60,10 +60,10 @@ public final class KeyStoreParameter implements ProtectionParameter {
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
             @KeyStoreKeyProperties.PurposeEnum int purposes,
-            String[] encryptionPaddings,
-            String[] signaturePaddings,
-            String[] digests,
-            String[] blockModes,
+            @KeyStoreKeyProperties.EncryptionPaddingEnum String[] encryptionPaddings,
+            @KeyStoreKeyProperties.SignaturePaddingEnum String[] signaturePaddings,
+            @KeyStoreKeyProperties.DigestEnum String[] digests,
+            @KeyStoreKeyProperties.BlockModeEnum String[] blockModes,
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds) {
@@ -151,7 +151,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
     /**
      * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
      */
-    public String[] getEncryptionPaddings() {
+    public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
 
@@ -159,7 +159,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      * Gets the set of padding schemes with which the key can be used when signing or verifying
      * signatures.
      */
-    public String[] getSignaturePaddings() {
+    public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
         return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
     }
 
@@ -170,7 +170,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * @see #isDigestsSpecified()
      */
-    public String[] getDigests() {
+    public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
         if (mDigests == null) {
             throw new IllegalStateException("Digests not specified");
         }
@@ -190,7 +190,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
     /**
      * Gets the set of block modes with which the key can be used.
      */
-    public String[] getBlockModes() {
+    public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
 
@@ -251,10 +251,10 @@ public final class KeyStoreParameter implements ProtectionParameter {
         private Date mKeyValidityForOriginationEnd;
         private Date mKeyValidityForConsumptionEnd;
         private @KeyStoreKeyProperties.PurposeEnum int mPurposes;
-        private String[] mEncryptionPaddings;
-        private String[] mSignaturePaddings;
-        private String[] mDigests;
-        private String[] mBlockModes;
+        private @KeyStoreKeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
+        private @KeyStoreKeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
+        private @KeyStoreKeyProperties.DigestEnum String[] mDigests;
+        private @KeyStoreKeyProperties.BlockModeEnum String[] mBlockModes;
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
@@ -356,7 +356,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
          */
-        public Builder setEncryptionPaddings(String... paddings) {
+        public Builder setEncryptionPaddings(
+                @KeyStoreKeyProperties.EncryptionPaddingEnum String... paddings) {
             mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
             return this;
         }
@@ -368,7 +369,8 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
          */
-        public Builder setSignaturePaddings(String... paddings) {
+        public Builder setSignaturePaddings(
+                @KeyStoreKeyProperties.SignaturePaddingEnum String... paddings) {
             mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(paddings);
             return this;
         }
@@ -381,7 +383,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * <p>For HMAC keys, the default is the digest specified in {@link Key#getAlgorithm()}. For
          * asymmetric signing keys this constraint must be specified.
          */
-        public Builder setDigests(String... digests) {
+        public Builder setDigests(@KeyStoreKeyProperties.DigestEnum String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
             return this;
         }
@@ -392,7 +394,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>This must be specified for encryption/decryption keys.
          */
-        public Builder setBlockModes(String... blockModes) {
+        public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
             mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
             return this;
         }

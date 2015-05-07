@@ -262,7 +262,8 @@ public final class KeyChain {
      *     unavailable.
      */
     public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasCallback response,
-            String[] keyTypes, Principal[] issuers, String host, int port, String alias) {
+            @KeyStoreKeyProperties.AlgorithmEnum String[] keyTypes, Principal[] issuers,
+            String host, int port, String alias) {
         choosePrivateKeyAlias(activity, response, keyTypes, issuers, host, port, null, alias);
     }
 
@@ -306,9 +307,8 @@ public final class KeyChain {
      *     unavailable.
      */
     public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasCallback response,
-                                             String[] keyTypes, Principal[] issuers,
-                                             String host, int port, String url,
-                                             String alias) {
+            @KeyStoreKeyProperties.AlgorithmEnum String[] keyTypes, Principal[] issuers,
+            String host, int port, String url, String alias) {
         /*
          * TODO currently keyTypes, issuers are unused. They are meant
          * to follow the semantics and purpose of X509KeyManager
@@ -431,9 +431,11 @@ public final class KeyChain {
      * specific {@code PrivateKey} type indicated by {@code algorithm} (e.g.,
      * "RSA").
      */
-    public static boolean isKeyAlgorithmSupported(String algorithm) {
+    public static boolean isKeyAlgorithmSupported(
+            @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
         final String algUpper = algorithm.toUpperCase(Locale.US);
-        return "EC".equals(algUpper) || "RSA".equals(algUpper);
+        return KeyStoreKeyProperties.Algorithm.EC.equals(algUpper)
+                || KeyStoreKeyProperties.Algorithm.RSA.equals(algUpper);
     }
 
     /**
@@ -443,7 +445,8 @@ public final class KeyChain {
      * hardware support that can be used to bind keys to the device in a way
      * that makes it non-exportable.
      */
-    public static boolean isBoundKeyAlgorithm(String algorithm) {
+    public static boolean isBoundKeyAlgorithm(
+            @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
         if (!isKeyAlgorithmSupported(algorithm)) {
             return false;
         }

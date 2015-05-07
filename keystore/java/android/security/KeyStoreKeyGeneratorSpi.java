@@ -129,8 +129,8 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         int keySizeBits = (spec.getKeySize() != -1) ? spec.getKeySize() : mDefaultKeySizeBits;
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keySizeBits);
         @KeyStoreKeyProperties.PurposeEnum int purposes = spec.getPurposes();
-        int[] keymasterBlockModes = KeymasterUtils.getKeymasterBlockModesFromJcaBlockModes(
-                spec.getBlockModes());
+        int[] keymasterBlockModes =
+                KeyStoreKeyProperties.BlockMode.allToKeymaster(spec.getBlockModes());
         if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
                 && (spec.isRandomizedEncryptionRequired())) {
             for (int keymasterBlockMode : keymasterBlockModes) {
@@ -138,8 +138,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                     throw new IllegalStateException(
                             "Randomized encryption (IND-CPA) required but may be violated by block"
                             + " mode: "
-                            + KeymasterUtils.getJcaBlockModeFromKeymasterBlockMode(
-                                    keymasterBlockMode)
+                            + KeyStoreKeyProperties.BlockMode.fromKeymaster(keymasterBlockMode)
                             + ". See KeyGeneratorSpec documentation.");
                 }
             }
@@ -152,7 +151,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
         args.addInts(
                 KeymasterDefs.KM_TAG_PADDING,
-                KeymasterUtils.getKeymasterPaddingsFromJcaEncryptionPaddings(
+                KeyStoreKeyProperties.EncryptionPadding.allToKeymaster(
                         spec.getEncryptionPaddings()));
         KeymasterUtils.addUserAuthArgs(args,
                 spec.getContext(),
@@ -189,8 +188,9 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             throw new IllegalStateException(
                     "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
         }
-        String keyAlgorithmJCA =
-                KeymasterUtils.getJcaSecretKeyAlgorithm(mKeymasterAlgorithm, mKeymasterDigest);
+        @KeyStoreKeyProperties.AlgorithmEnum String keyAlgorithmJCA =
+                KeyStoreKeyProperties.Algorithm.fromKeymasterSecretKeyAlgorithm(
+                        mKeymasterAlgorithm, mKeymasterDigest);
         return new KeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
     }
 

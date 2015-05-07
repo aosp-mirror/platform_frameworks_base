@@ -54,13 +54,13 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
 
     public static class RSA extends AndroidKeyPairGenerator {
         public RSA() {
-            super("RSA");
+            super(KeyStoreKeyProperties.Algorithm.RSA);
         }
     }
 
     public static class EC extends AndroidKeyPairGenerator {
         public EC() {
-            super("EC");
+            super(KeyStoreKeyProperties.Algorithm.EC);
         }
     }
 
@@ -83,15 +83,15 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
     private android.security.KeyStore mKeyStore;
 
     private KeyPairGeneratorSpec mSpec;
-    private String mKeyAlgorithm;
+    private @KeyStoreKeyProperties.AlgorithmEnum String mKeyAlgorithm;
     private int mKeyType;
     private int mKeySize;
 
-    protected AndroidKeyPairGenerator(String algorithm) {
+    protected AndroidKeyPairGenerator(@KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
         mAlgorithm = algorithm;
     }
 
-    public String getAlgorithm() {
+    public @KeyStoreKeyProperties.AlgorithmEnum String getAlgorithm() {
         return mAlgorithm;
     }
 
@@ -197,7 +197,7 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
         return certGen.generate(privateKey);
     }
 
-    private String getKeyAlgorithm(KeyPairGeneratorSpec spec) {
+    private @KeyStoreKeyProperties.AlgorithmEnum String getKeyAlgorithm(KeyPairGeneratorSpec spec) {
         String result = spec.getKeyType();
         if (result != null) {
             return result;
@@ -248,10 +248,11 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
         }
     }
 
-    private static String getDefaultSignatureAlgorithmForKeyAlgorithm(String algorithm) {
-        if ("RSA".equalsIgnoreCase(algorithm)) {
+    private static String getDefaultSignatureAlgorithmForKeyAlgorithm(
+            @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
+        if (KeyStoreKeyProperties.Algorithm.RSA.equalsIgnoreCase(algorithm)) {
             return "sha256WithRSA";
-        } else if ("EC".equalsIgnoreCase(algorithm)) {
+        } else if (KeyStoreKeyProperties.Algorithm.EC.equalsIgnoreCase(algorithm)) {
             return "sha256WithECDSA";
         } else {
             throw new IllegalArgumentException("Unsupported key type " + algorithm);
@@ -287,7 +288,7 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
         }
 
         KeyPairGeneratorSpec spec = (KeyPairGeneratorSpec) params;
-        String keyAlgorithm = getKeyAlgorithm(spec);
+        @KeyStoreKeyProperties.AlgorithmEnum String keyAlgorithm = getKeyAlgorithm(spec);
         int keyType = KeyStore.getKeyTypeForAlgorithm(keyAlgorithm);
         if (keyType == -1) {
             throw new InvalidAlgorithmParameterException(
