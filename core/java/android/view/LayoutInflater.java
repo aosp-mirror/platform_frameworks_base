@@ -860,10 +860,10 @@ public abstract class LayoutInflater {
             if (layout == 0) {
                 final String value = attrs.getAttributeValue(null, "layout");
                 if (value == null) {
-                    throw new InflateException("You must specifiy a layout in the"
+                    throw new InflateException("You must specify a layout in the"
                             + " include tag: <include layout=\"@layout/layoutID\" />");
                 } else {
-                    throw new InflateException("You must specifiy a valid layout "
+                    throw new InflateException("You must specify a valid layout "
                             + "reference. The layout ID " + value + " is not valid.");
                 }
             } else {
