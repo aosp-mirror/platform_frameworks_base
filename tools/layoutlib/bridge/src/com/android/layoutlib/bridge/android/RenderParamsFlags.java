@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.SessionParams.Key;
 
 /**
@@ -31,10 +32,21 @@ public final class RenderParamsFlags {
             new Key<String>("rootTag", String.class);
     public static final Key<Boolean> FLAG_KEY_DISABLE_BITMAP_CACHING =
             new Key<Boolean>("disableBitmapCaching", Boolean.class);
-    public static final Key<Boolean> FLAG_KEY_RECYCLER_VIEW_SUPPORT =
-            new Key<Boolean>("recyclerViewSupport", Boolean.class);
     public static final Key<Boolean> FLAG_KEY_RENDER_ALL_DRAWABLE_STATES =
             new Key<Boolean>("renderAllDrawableStates", Boolean.class);
+    /**
+     * To tell LayoutLib that the IDE supports RecyclerView.
+     * <p/>
+     * Default is false.
+     */
+    public static final Key<Boolean> FLAG_KEY_RECYCLER_VIEW_SUPPORT =
+            new Key<Boolean>("recyclerViewSupport", Boolean.class);
+    /**
+     * The application package name. Used via
+     * {@link com.android.ide.common.rendering.api.LayoutlibCallback#getFlag(Key)}
+     */
+    public static final Key<String> FLAG_KEY_APPLICATION_PACKAGE =
+            new Key<String>("applicationPackage", String.class);
 
     // Disallow instances.
     private RenderParamsFlags() {}
