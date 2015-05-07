@@ -261,7 +261,7 @@ public class Main {
                 new ResourceRepository(new FolderWrapper(TEST_RES_DIR + APP_TEST_RES), false) {
             @NonNull
             @Override
-            protected ResourceItem createResourceItem(String name) {
+            protected ResourceItem createResourceItem(@NonNull String name) {
                 return new ResourceItem(name);
             }
         };
@@ -381,17 +381,17 @@ public class Main {
                 }
 
                 @Override
-                public void warning(String msgFormat, Object... args) {
+                public void warning(@NonNull String msgFormat, Object... args) {
                     failWithMsg(msgFormat, args);
                 }
 
                 @Override
-                public void info(String msgFormat, Object... args) {
+                public void info(@NonNull String msgFormat, Object... args) {
                     // pass.
                 }
 
                 @Override
-                public void verbose(String msgFormat, Object... args) {
+                public void verbose(@NonNull String msgFormat, Object... args) {
                     // pass.
                 }
             };
@@ -399,7 +399,7 @@ public class Main {
         return mLogger;
     }
 
-    private static void failWithMsg(String msgFormat, Object... args) {
-        fail(msgFormat == null || args == null ? "" : String.format(msgFormat, args));
+    private static void failWithMsg(@NonNull String msgFormat, Object... args) {
+        fail(args == null ? "" : String.format(msgFormat, args));
     }
 }
