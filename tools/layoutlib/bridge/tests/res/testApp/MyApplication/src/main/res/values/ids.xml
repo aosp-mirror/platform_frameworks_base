@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="button" />
+    <item type="id" name="button2" />
+    <item type="id" name="checkBox" />
+    <item type="id" name="checkedTextView" />
+    <item type="id" name="dialerFilter" />
+    <item type="id" name="editText" />
+    <item type="id" name="editText2" />
+    <item type="id" name="editText3" />
+    <item type="id" name="editText4" />
+    <item type="id" name="editText5" />
+    <item type="id" name="editText6" />
+    <item type="id" name="editText7" />
+    <item type="id" name="editText8" />
+    <item type="id" name="editText9" />
+    <item type="id" name="extractEditText" />
+    <item type="id" name="frameLayout" />
+    <item type="id" name="gridLayout" />
+    <item type="id" name="gridView" />
+    <item type="id" name="imageButton" />
+    <item type="id" name="imageView" />
+    <item type="id" name="linearLayout" />
+    <item type="id" name="linearLayout2" />
+    <item type="id" name="listView" />
+    <item type="id" name="progressBar" />
+    <item type="id" name="progressBar2" />
+    <item type="id" name="progressBar3" />
+    <item type="id" name="progressBar4" />
+    <item type="id" name="quickContactBadge" />
+    <item type="id" name="radioButton" />
+    <item type="id" name="radioButton2" />
+    <item type="id" name="ratingBar" />
+    <item type="id" name="scrollView" />
+    <item type="id" name="searchView" />
+    <item type="id" name="seekBar" />
+    <item type="id" name="spinner" />
+    <item type="id" name="switch1" />
+    <item type="id" name="switch2" />
+    <item type="id" name="tabHost" />
+    <item type="id" name="textView" />
+    <item type="id" name="textView2" />
+    <item type="id" name="textView3" />
+    <item type="id" name="textView4" />
+    <item type="id" name="textureView" />
+    <item type="id" name="zoomControls" />
+</resources>
