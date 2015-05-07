@@ -14,6 +14,15 @@
      limitations under the License.
 -->
 
-<nine-patch xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/text_cursor_mtrl_alpha"
-    android:tint="?attr/colorControlActivated" />
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+       android:inset="2dp">
+    <shape
+        android:tint="?attr/colorControlActivated"
+        android:shape="rectangle">
+        <size
+            android:height="2dp"
+            android:width="2dp" />
+        <solid
+            android:color="@color/white" />
+    </shape>
+</inset>
