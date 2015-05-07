@@ -1791,8 +1791,9 @@ public class ListPopupWindow {
 
     private class ResizePopupRunnable implements Runnable {
         public void run() {
-            if (mDropDownList != null && mDropDownList.getCount() > mDropDownList.getChildCount() &&
-                    mDropDownList.getChildCount() <= mListItemExpandMaximum) {
+            if (mDropDownList != null && mDropDownList.isAttachedToWindow()
+                    && mDropDownList.getCount() > mDropDownList.getChildCount()
+                    && mDropDownList.getChildCount() <= mListItemExpandMaximum) {
                 mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
                 show();
             }
