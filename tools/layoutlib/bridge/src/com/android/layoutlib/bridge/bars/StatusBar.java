@@ -25,7 +25,9 @@ import com.android.resources.Density;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
@@ -40,6 +42,19 @@ public class StatusBar extends CustomBar {
     private final int mSimulatedPlatformVersion;
     /** Status bar background color attribute name. */
     private static final String ATTR_COLOR = "statusBarColor";
+
+    /**
+     * Constructor to be used when creating the {@link StatusBar} as a regular control. This
+     * is currently used by the theme editor.
+     */
+    public StatusBar(Context context, AttributeSet attrs) throws XmlPullParserException {
+        this((BridgeContext) context,
+                Density.getEnum(((BridgeContext) context).getMetrics().densityDpi),
+                LinearLayout.HORIZONTAL, // In this mode, it doesn't need to be render vertically
+                ((BridgeContext) context).getConfiguration().getLayoutDirection() ==
+                        View.LAYOUT_DIRECTION_RTL,
+                context.getApplicationInfo().targetSdkVersion);
+    }
 
     public StatusBar(BridgeContext context, Density density, int direction, boolean RtlEnabled,
             int simulatedPlatformVersion) throws XmlPullParserException {
