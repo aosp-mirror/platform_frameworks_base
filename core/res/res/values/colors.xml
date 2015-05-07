@@ -174,4 +174,6 @@
     <color name="Pink_800">#ffad1457</color>
     <color name="Red_700">#ffc53929</color>
     <color name="Red_800">#ffb93221</color>
+
+    <color name="chooser_service_row_background_color">#fff5f5f5</color>
 </resources>
