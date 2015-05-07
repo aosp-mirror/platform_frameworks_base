@@ -294,8 +294,10 @@ public class MidiService extends IMidiManager.Stub {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder("Device: ");
+            StringBuilder sb = new StringBuilder("Device Info: ");
             sb.append(mDeviceInfo);
+            sb.append(" Status: ");
+            sb.append(mDeviceStatus);
             sb.append(" UID: ");
             sb.append(mUid);
             return sb.toString();
