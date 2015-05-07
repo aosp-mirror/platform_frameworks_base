@@ -16,19 +16,15 @@
 
 package android.view;
 
-import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.MergeCookie;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
-import com.android.layoutlib.bridge.android.support.RecyclerViewUtil.LayoutManagerType;
 import com.android.layoutlib.bridge.impl.ParserFactory;
-import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
@@ -232,22 +228,6 @@ public final class BridgeInflater extends LayoutInflater {
             Object viewKey = getViewKeyFromParser(attrs, bc, mResourceReference, mIsInMerge);
             if (viewKey != null) {
                 bc.addViewKey(view, viewKey);
-            }
-            if (RenderSessionImpl.isInstanceOf(view, RecyclerViewUtil.CN_RECYCLER_VIEW)) {
-                String type = attrs.getAttributeValue(BridgeConstants.NS_RESOURCES,
-                                BridgeConstants.ATTR_LAYOUT_MANAGER_TYPE);
-                if (type != null) {
-                    LayoutManagerType layoutManagerType = LayoutManagerType.getByLogicalName(type);
-                    if (layoutManagerType == null) {
-                        layoutManagerType = LayoutManagerType.getByClassName(type);
-                    }
-                    if (layoutManagerType == null) {
-                        // add the classname itself.
-                        bc.addCookie(view, type);
-                    } else {
-                        bc.addCookie(view, layoutManagerType);
-                    }
-                }
             }
         }
     }
