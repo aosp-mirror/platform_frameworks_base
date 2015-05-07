@@ -1119,6 +1119,8 @@
         </activity>
         <activity android:name="com.android.internal.app.WindowDecorActionBarTestActivity">
         </activity>
+        <activity android:name="com.android.internal.policy.PhoneWindowActionModeTestActivity">
+        </activity>
 
         <receiver android:name="android.app.activity.AbortReceiver">
             <intent-filter android:priority="1">
