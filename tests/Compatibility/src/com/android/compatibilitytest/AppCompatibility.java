@@ -30,6 +30,7 @@ import android.util.Log;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -102,7 +103,11 @@ public class AppCompatibility extends InstrumentationTestCase {
             // otherwise raise an
             // exception with the first error encountered.
             assertNull(getStackTrace(err), err);
-            assertTrue("App crashed after launch.", processStillUp(packageName));
+            try {
+                assertTrue("App crashed after launch.", processStillUp(packageName));
+            } finally {
+                returnHome();
+            }
         } else {
             Log.d(TAG, "Missing argument, use " + PACKAGE_TO_LAUNCH +
                     " to specify the package to launch");
@@ -138,6 +143,19 @@ public class AppCompatibility extends InstrumentationTestCase {
         }
     }
 
+    private void returnHome() {
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Send the "home" intent and wait 2 seconds for us to get there
+        mContext.startActivity(homeIntent);
+        try {
+            Thread.sleep(mWorkspaceLaunchTimeout);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+    }
+
     /**
      * Launches and activity and queries for errors.
      *
@@ -150,9 +168,6 @@ public class AppCompatibility extends InstrumentationTestCase {
         // the recommended way to see if this is a tv or not.
         boolean isleanback = !mPackageManager.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN)
             && !mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Intent intent;
         if (isleanback) {
             Log.d(TAG, "Leanback and relax! " + packageName);
@@ -169,14 +184,6 @@ public class AppCompatibility extends InstrumentationTestCase {
 
         try {
             Thread.sleep(mAppLaunchTimeout);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-
-        // Send the "home" intent and wait 2 seconds for us to get there
-        mContext.startActivity(homeIntent);
-        try {
-            Thread.sleep(mWorkspaceLaunchTimeout);
         } catch (InterruptedException e) {
             // ignore
         }
@@ -198,6 +205,12 @@ public class AppCompatibility extends InstrumentationTestCase {
         return null;
     }
 
+    private boolean ensureForegroundActivity(RunningAppProcessInfo info) {
+        Log.d(TAG, String.format("ensureForegroundActivity: proc=%s, pid=%d, state=%d",
+                info.processName, info.pid, info.processState));
+        return info.processState == ActivityManager.PROCESS_STATE_TOP;
+    }
+
     /**
      * Determine if a given package is still running.
      *
@@ -207,19 +220,32 @@ public class AppCompatibility extends InstrumentationTestCase {
     private boolean processStillUp(String packageName) {
         String processName = getProcessName(packageName);
         List<RunningAppProcessInfo> runningApps = mActivityManager.getRunningAppProcesses();
+        List<RunningAppProcessInfo> relatedProcs = new ArrayList<>();
         for (RunningAppProcessInfo app : runningApps) {
             if (app.processName.equalsIgnoreCase(processName)) {
-                Log.d(TAG, "Found process " + app.processName);
+                if (!ensureForegroundActivity(app)) {
+                    Log.w(TAG, "Found process but it's not top activity.");
+                    return false;
+                }
                 return true;
             }
             for (String relatedPackage : app.pkgList) {
-                if (relatedPackage.equalsIgnoreCase(processName)) {
-                    Log.d(TAG, "Found process " + app.processName);
-                    return true;
+                if (relatedPackage.equalsIgnoreCase(packageName)) {
+                    relatedProcs.add(app);
                 }
             }
         }
-        Log.d(TAG, "Failed to find process " + processName + " with package name "
+        // now that we are here, we've found no RAPI's directly matching processName, but
+        // potentially a List of them with one of related packages being processName
+        if (!relatedProcs.isEmpty()) {
+            for (RunningAppProcessInfo app : relatedProcs) {
+                if (ensureForegroundActivity(app)) {
+                    return true;
+                }
+            }
+            Log.w(TAG, "Found related processes, but none has top activity.");
+        }
+        Log.w(TAG, "Failed to find process " + processName + " with package name "
                 + packageName);
         return false;
     }
