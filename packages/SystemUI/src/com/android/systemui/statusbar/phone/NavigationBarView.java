@@ -144,7 +144,7 @@ public class NavigationBarView extends LinearLayout {
         @Override
         public void onClick(View view) {
             ((InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE))
-                    .showInputMethodPicker(true /* showAuxiliarySubtypes */);
+                    .showInputMethodPicker();
         }
     };
 

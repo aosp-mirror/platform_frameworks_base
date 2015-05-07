@@ -2236,8 +2236,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void showInputMethodPickerFromClient(
-            IInputMethodClient client, int auxiliarySubtypeMode) {
+    public void showInputMethodPickerFromClient(IInputMethodClient client) {
         if (!calledFromValidUser()) {
             return;
         }
@@ -2250,8 +2249,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Always call subtype picker, because subtype picker is a superset of input method
             // picker.
-            mHandler.sendMessage(mCaller.obtainMessageI(
-                    MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode));
+            mHandler.sendEmptyMessage(MSG_SHOW_IM_SUBTYPE_PICKER);
         }
     }
 
@@ -2597,25 +2595,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         SomeArgs args;
         switch (msg.what) {
             case MSG_SHOW_IM_SUBTYPE_PICKER:
-                final boolean showAuxSubtypes;
-                switch (msg.arg1) {
-                    case InputMethodManager.SHOW_IM_PICKER_MODE_AUTO:
-                        // This is undocumented so far, but IMM#showInputMethodPicker() has been
-                        // implemented so that auxiliary subtypes will be excluded when the soft
-                        // keyboard is invisible.
-                        showAuxSubtypes = mInputShown;
-                        break;
-                    case InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES:
-                        showAuxSubtypes = true;
-                        break;
-                    case InputMethodManager.SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES:
-                        showAuxSubtypes = false;
-                        break;
-                    default:
-                        Slog.e(TAG, "Unknown subtype picker mode = " + msg.arg1);
-                        return false;
-                }
-                showInputMethodMenu(showAuxSubtypes);
+                showInputMethodMenu();
                 return true;
 
             case MSG_SHOW_IM_SUBTYPE_ENABLER:
@@ -2898,8 +2878,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 && mKeyguardManager.isKeyguardLocked() && mKeyguardManager.isKeyguardSecure();
     }
 
-    private void showInputMethodMenu(boolean showAuxSubtypes) {
-        if (DEBUG) Slog.v(TAG, "Show switching menu. showAuxSubtypes=" + showAuxSubtypes);
+    private void showInputMethodMenu() {
+        if (DEBUG) Slog.v(TAG, "Show switching menu");
 
         final Context context = mContext;
         final boolean isScreenLocked = isScreenLocked();
@@ -2920,7 +2900,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             final List<ImeSubtypeListItem> imList =
                     mSwitchingController.getSortedInputMethodAndSubtypeListLocked(
-                            true /* showSubtypes */, showAuxSubtypes, isScreenLocked);
+                            true /* showSubtypes */, mInputShown, isScreenLocked);
 
             if (lastInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {
                 final InputMethodSubtype currentSubtype = getCurrentInputMethodSubtypeLocked();
