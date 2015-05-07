@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.internal.policy;
 
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -28,10 +28,11 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
-import android.view.HapticFeedbackConstants;
 import android.view.FallbackEventHandler;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
+import android.view.View;
+import com.android.internal.policy.PhoneWindow;
 
 /**
  * @hide
