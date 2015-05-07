@@ -247,13 +247,6 @@ public final class InputMethodManager {
     /** @hide */
     public static final int DISPATCH_HANDLED = 1;
 
-    /** @hide */
-    public static final int SHOW_IM_PICKER_MODE_AUTO = 0;
-    /** @hide */
-    public static final int SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES = 1;
-    /** @hide */
-    public static final int SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES = 2;
-
     final IInputMethodManager mService;
     final Looper mMainLooper;
     
@@ -1897,28 +1890,9 @@ public final class InputMethodManager {
         }
     }
 
-    /**
-     * Shows the input method chooser dialog.
-     *
-     * @param showAuxiliarySubtypes Set true to show auxiliary input methods.
-     * @hide
-     */
-    public void showInputMethodPicker(boolean showAuxiliarySubtypes) {
-        synchronized (mH) {
-            try {
-                final int mode = showAuxiliarySubtypes ?
-                        SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES:
-                        SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES;
-                mService.showInputMethodPickerFromClient(mClient, mode);
-            } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-            }
-        }
-    }
-
     private void showInputMethodPickerLocked() {
         try {
-            mService.showInputMethodPickerFromClient(mClient, SHOW_IM_PICKER_MODE_AUTO);
+            mService.showInputMethodPickerFromClient(mClient);
         } catch (RemoteException e) {
             Log.w(TAG, "IME died: " + mCurId, e);
         }
