@@ -27,6 +27,7 @@ import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,6 +67,7 @@ import android.widget.Toolbar;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 
@@ -188,6 +190,16 @@ public class DocumentsActivity extends BaseActivity {
                 new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
             } else {
                 new RestoreStackTask().execute();
+            }
+
+            // Show a failure dialog if there was a failed operation.
+            final Intent intent = getIntent();
+            final DocumentStack dstStack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
+            final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
+            if (failure != 0) {
+                final ArrayList<DocumentInfo> failedSrcList =
+                        intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);
+                FailureDialogFragment.show(getFragmentManager(), failure, failedSrcList, dstStack);
             }
         } else {
             onCurrentDirectoryChanged(ANIM_NONE);
