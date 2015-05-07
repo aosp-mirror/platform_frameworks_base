@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileView;
@@ -75,6 +76,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleClick() {
+        super.handleClick();
         if (mDataController.isMobileDataSupported()) {
             showDetail(true);
         } else {
@@ -116,6 +118,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 R.string.accessibility_quick_settings_mobile,
                 signalContentDesc, dataContentDesc,
                 state.label);
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_CELLULAR;
     }
 
     // Remove the period from the network name
@@ -224,6 +231,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         @Override
         public void setToggleState(boolean state) {
             mDataController.setMobileDataEnabled(state);
+        }
+
+        @Override
+        public int getMetricsCategory() {
+            return MetricsLogger.QS_DATAUSAGEDETAIL;
         }
 
         @Override
