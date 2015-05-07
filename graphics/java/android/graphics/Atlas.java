@@ -21,10 +21,12 @@ package android.graphics;
  */
 public class Atlas {
     /**
-     * This flag indicates whether the packing algorithm will attempt
-     * to rotate entries to make them fit better in the atlas.
+     * WARNING: These flag values are part of the on-disk configuration information,
+     * do not change their values.
      */
-    public static final int FLAG_ALLOW_ROTATIONS = 0x1;
+
+    /** DELETED: FLAG_ROTATION = 0x01 */
+
     /**
      * This flag indicates whether the packing algorithm should leave
      * an empty 1 pixel wide border around each bitmap. This border can
@@ -52,9 +54,7 @@ public class Atlas {
 
     /**
      * Represents a bitmap packed in the atlas. Each entry has a location in
-     * pixels in the atlas and a rotation flag. If the entry was rotated, the
-     * bitmap must be rotated by 90 degrees (in either direction as long as
-     * the origin remains the same) before being rendered into the atlas.
+     * pixels in the atlas and a rotation flag.
      */
     public static class Entry {
         /**
@@ -65,11 +65,6 @@ public class Atlas {
          * Location, in pixels, of the bitmap on the Y axis in the atlas.
          */
         public int y;
-
-        /**
-         * If true, the bitmap must be rotated 90 degrees in the atlas.
-         */
-        public boolean rotated;
     }
 
     private final Policy mPolicy;
@@ -239,7 +234,6 @@ public class Atlas {
 
         private final SplitDecision mSplitDecision;
 
-        private final boolean mAllowRotation;
         private final int mPadding;
 
         /**
@@ -263,7 +257,6 @@ public class Atlas {
         }
 
         SlicePolicy(int width, int height, int flags, SplitDecision splitDecision) {
-            mAllowRotation = (flags & FLAG_ALLOW_ROTATIONS) != 0;
             mPadding = (flags & FLAG_ADD_PADDING) != 0 ? 1 : 0;
 
             // The entire atlas is empty at first, minus padding
@@ -360,26 +353,9 @@ public class Atlas {
          *
          * @return True if the rectangle was packed in the atlas, false otherwise
          */
-        @SuppressWarnings("SuspiciousNameCombination")
         private boolean insert(Cell cell, Cell prev, int width, int height, Entry entry) {
-            boolean rotated = false;
-
-            // If the rectangle doesn't fit we'll try to rotate it
-            // if possible before giving up
             if (cell.width < width || cell.height < height) {
-                if (mAllowRotation) {
-                    if (cell.width < height || cell.height < width) {
-                        return false;
-                    }
-
-                    // Rotate the rectangle
-                    int temp = width;
-                    width = height;
-                    height = temp;
-                    rotated = true;
-                } else {
-                    return false;
-                }
+                return false;
             }
 
             // Remaining free space after packing the rectangle
@@ -433,7 +409,6 @@ public class Atlas {
             // Return the location and rotation of the packed rectangle
             entry.x = cell.x;
             entry.y = cell.y;
-            entry.rotated = rotated;
 
             return true;
         }
