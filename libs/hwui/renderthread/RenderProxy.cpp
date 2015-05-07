@@ -353,7 +353,6 @@ CREATE_BRIDGE2(overrideProperty, const char* name, const char* value) {
 }
 
 void RenderProxy::overrideProperty(const char* name, const char* value) {
-    RenderThread& thread = RenderThread::getInstance();
     SETUP_TASK(overrideProperty);
     args->name = name;
     args->value = value;

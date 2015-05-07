@@ -1857,7 +1857,7 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
                jintArray limits)
 {
     if (kLogApi) {
-        ALOGD("nScriptForEach, con(%p), s(%p), slot(%i) ains(%p) aout(%lli)", (RsContext)con, (void *)script, slot, ains, aout);
+        ALOGD("nScriptForEach, con(%p), s(%p), slot(%i) ains(%p) aout(%" PRId64 ")", (RsContext)con, (void *)script, slot, ains, aout);
     }
 
     jint   in_len = 0;
