@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
@@ -93,6 +94,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleClick() {
+        super.handleClick();
         mState.copyTo(mStateBeforeClick);
         mController.setWifiEnabled(!mState.enabled);
     }
@@ -156,6 +158,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             wifiName = r.getString(R.string.accessibility_wifi_name, state.label);
         }
         state.dualLabelContentDescription = wifiName;
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_WIFI;
     }
 
     @Override
@@ -271,6 +278,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             if (DEBUG) Log.d(TAG, "setToggleState " + state);
             mController.setWifiEnabled(state);
             showDetail(false);
+        }
+
+        @Override
+        public int getMetricsCategory() {
+            return MetricsLogger.QS_WIFI_DETAILS;
         }
 
         @Override

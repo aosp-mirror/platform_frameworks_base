@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import android.provider.Settings.Secure;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -86,6 +87,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleClick() {
+        super.handleClick();
         mSetting.setValue(mState.value ? 0 : 1);
         mEnable.setAllowAnimation(true);
         mDisable.setAllowAnimation(true);
@@ -112,6 +114,11 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.icon = enabled ? mEnable : mDisable;
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_COLORINVERSION;
     }
 
     @Override
