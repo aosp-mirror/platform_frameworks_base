@@ -119,7 +119,6 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
     // long0: SkBitmap*, the native bitmap object
     // long1: x position
     // long2: y position
-    // long3: rotated, 1 if the bitmap must be rotated, 0 otherwise
     private long[] mAtlasMap;
 
     /**
@@ -236,7 +235,7 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
         /**
          * Renders a list of bitmaps into the atlas. The position of each bitmap
          * was decided by the packing algorithm and will be honored by this
-         * method. If need be this method will also rotate bitmaps.
+         * method.
          *
          * @param buffer The buffer to render the atlas entries into
          * @param atlas The atlas to pack the bitmaps into
@@ -280,16 +279,11 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
 
                     canvas.save();
                     canvas.translate(entry.x, entry.y);
-                    if (entry.rotated) {
-                        canvas.translate(bitmap.getHeight(), 0.0f);
-                        canvas.rotate(90.0f);
-                    }
                     canvas.drawBitmap(bitmap, 0.0f, 0.0f, null);
                     canvas.restore();
                     atlasMap[mapIndex++] = bitmap.refSkPixelRef();
                     atlasMap[mapIndex++] = entry.x;
                     atlasMap[mapIndex++] = entry.y;
-                    atlasMap[mapIndex++] = entry.rotated ? 1 : 0;
                 }
             }
 
