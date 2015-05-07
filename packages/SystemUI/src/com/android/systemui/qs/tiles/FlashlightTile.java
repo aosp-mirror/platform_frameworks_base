@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import android.app.ActivityManager;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -59,6 +60,7 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     protected void handleClick() {
+        super.handleClick();
         if (ActivityManager.isUserAMonkey()) {
             return;
         }
@@ -81,6 +83,11 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
                 ? R.string.accessibility_quick_settings_flashlight_on
                 : R.string.accessibility_quick_settings_flashlight_off;
         state.contentDescription = mContext.getString(onOrOffId);
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_FLASHLIGHT;
     }
 
     @Override

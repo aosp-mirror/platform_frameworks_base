@@ -29,6 +29,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -66,8 +67,16 @@ public abstract class QSTile<TState extends State> implements Listenable {
     private boolean mAnnounceNextStateChange;
 
     abstract protected TState newTileState();
-    abstract protected void handleClick();
     abstract protected void handleUpdateState(TState state, Object arg);
+
+    /**
+     * Declare the category of this tile.
+     *
+     * Categories are defined in {@link com.android.internal.logging.MetricsLogger}
+     * or if there is no relevant existing category you may define one in
+     * {@link com.android.systemui.qs.QSTile}.
+     */
+    abstract public int getMetricsCategory();
 
     protected QSTile(Host host) {
         mHost = host;
@@ -97,6 +106,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         View createDetailView(Context context, View convertView, ViewGroup parent);
         Intent getSettingsIntent();
         void setToggleState(boolean state);
+        int getMetricsCategory();
     }
 
     // safe to call from any thread
@@ -160,12 +170,20 @@ public abstract class QSTile<TState extends State> implements Listenable {
         handleRefreshState(null);
     }
 
+    protected void handleClick() {
+        MetricsLogger.action(mContext, getMetricsCategory(), getMetricsPackage());
+    };
+
     protected void handleSecondaryClick() {
         // optional
     }
 
     protected void handleLongClick() {
         // optional
+    }
+
+    protected String getMetricsPackage() {
+        return "";
     }
 
     protected void handleRefreshState(Object arg) {

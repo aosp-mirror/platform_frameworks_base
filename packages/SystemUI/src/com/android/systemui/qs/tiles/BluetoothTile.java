@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
@@ -74,6 +75,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleClick() {
+        super.handleClick();
         final boolean isEnabled = (Boolean)mState.value;
         mController.setBluetoothEnabled(!isEnabled);
     }
@@ -132,6 +134,11 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     }
 
     @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_BLUETOOTH;
+    }
+
+    @Override
     protected String composeChangeAnnouncement() {
         if (mState.value) {
             return mContext.getString(R.string.accessibility_quick_settings_bluetooth_changed_on);
@@ -179,6 +186,11 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         public void setToggleState(boolean state) {
             mController.setBluetoothEnabled(state);
             showDetail(false);
+        }
+
+        @Override
+        public int getMetricsCategory() {
+            return MetricsLogger.QS_BLUETOOTH_DETAILS;
         }
 
         @Override
