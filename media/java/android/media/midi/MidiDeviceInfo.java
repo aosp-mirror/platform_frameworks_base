@@ -298,6 +298,9 @@ public final class MidiDeviceInfo implements Parcelable {
 
     @Override
     public String toString() {
+        // This is a hack to force the mProperties Bundle to unparcel so we can
+        // print all the names and values.
+        mProperties.getString(PROPERTY_NAME);
         return ("MidiDeviceInfo[mType=" + mType +
                 ",mInputPortCount=" + mInputPortCount +
                 ",mOutputPortCount=" + mOutputPortCount +
