@@ -45,7 +45,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.layoutlib.bridge.android.SessionParamsFlags;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
 import com.android.layoutlib.bridge.bars.AppCompatActionBar;
 import com.android.layoutlib.bridge.bars.BridgeActionBar;
@@ -403,7 +403,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // it can instantiate the custom Fragment.
             Fragment_Delegate.setLayoutlibCallback(params.getLayoutlibCallback());
 
-            String rootTag = params.getFlag(SessionParamsFlags.FLAG_KEY_ROOT_TAG);
+            String rootTag = params.getFlag(RenderParamsFlags.FLAG_KEY_ROOT_TAG);
             boolean isPreference = "PreferenceScreen".equals(rootTag);
             View view;
             if (isPreference) {
