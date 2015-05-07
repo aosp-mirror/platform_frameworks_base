@@ -218,10 +218,12 @@ public final class KeyStoreParameter implements ProtectionParameter {
 
     /**
      * Gets the duration of time (seconds) for which this key can be used after the user is
-     * successfully authenticated.
+     * successfully authenticated. This has effect only if user authentication is required.
      *
-     * @return duration in seconds or {@code -1} if not restricted. {@code 0} means authentication
-     *         is required for every use of the key.
+     * @return duration in seconds or {@code -1} if authentication is required for every use of the
+     *         key.
+     *
+     * @see #isUserAuthenticationRequired()
      */
     public int getUserAuthenticationValidityDurationSeconds() {
         return mUserAuthenticationValidityDurationSeconds;
@@ -462,7 +464,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>By default, the user needs to authenticate for every use of the key.
          *
-         * @param seconds duration in seconds or {@code 0} if the user needs to authenticate for
+         * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
          *        every use of the key.
          *
          * @see #setUserAuthenticationRequired(boolean)
