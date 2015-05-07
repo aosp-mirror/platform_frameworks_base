@@ -1,0 +1,60 @@
+page.title=M Developer Preview
+page.tags=preview
+meta.tags="preview"
+fullpage=true
+page.viewport_width=970
+section.landing=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<section class="dac-expand dac-hero dac-light">
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-1of2 col-push-1of2 dac-hero-figure">
+        <img class="dac-hero-image" src="/design/media/hero-material-design.png">
+      </div>
+      <div class="col-1of2 col-pull-1of2">
+        <h1 class="dac-hero-title">M Developer Preview</h1>
+        <p class="dac-hero-description">
+          Get ready for the next official release of the platform. Test your apps
+          and give us feedback!
+        </p>
+        <a class="dac-hero-cta" href="{@docRoot}preview/setup-sdk.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Set up the Preview SDK
+        </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/api-overview.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Review the API changes
+        </a><br>
+        <a class="dac-hero-cta" href="https://code.google.com/p/android-developer-preview/">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Report issues
+        </a><br>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dac-section dac-gray dac-small dac-invert"><div class="wrap">
+  <h2 class="norule">Latest</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/latest"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>
+
+
+<section class="dac-section"><div class="wrap">
+  <h1 class="dac-section-title">Resources</h1>
+  <div class="dac-section-subtitle">
+    Check out these resources to help you get started with the M Developer Preview.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:preview/landing/resources"
+       data-cardSizes="6x6"
+       data-maxResults="6"></div>
+</div></section>
+
+
