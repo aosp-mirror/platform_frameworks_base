@@ -16,17 +16,13 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
               android:id="@+id/date_picker_header"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:paddingBottom="18dp"
               android:paddingStart="?attr/dialogPreferredPadding"
               android:paddingEnd="?attr/dialogPreferredPadding"
-              android:orientation="vertical"
-              tools:background="@color/accent_material_light"
-              tools:paddingStart="24dp"
-              tools:paddingEnd="24dp">
+              android:orientation="vertical">
 
     <!-- Top padding should stay on this view so that
          the touch target is a bit larger. -->
@@ -35,10 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
-        android:textAppearance="@style/TextAppearance.Material.DatePicker.YearLabel"
-        tools:text="2015"
-        tools:textSize="@dimen/date_picker_year_label_size"
-        tools:textColor="@color/white" />
+        android:textAppearance="@style/TextAppearance.Material.DatePicker.YearLabel" />
 
     <TextView
         android:id="@+id/date_picker_header_date"
@@ -47,9 +40,6 @@
         android:textAppearance="@style/TextAppearance.Material.DatePicker.DateLabel"
         android:gravity="start"
         android:maxLines="2"
-        android:ellipsize="none"
-        tools:text="Thu, Sep 30"
-        tools:textSize="@dimen/date_picker_date_label_size"
-        tools:textColor="@color/white" />
+        android:ellipsize="none" />
 
 </LinearLayout>
