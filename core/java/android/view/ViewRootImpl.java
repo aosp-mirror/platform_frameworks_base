@@ -76,6 +76,7 @@ import android.widget.Scroller;
 
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
