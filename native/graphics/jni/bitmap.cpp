@@ -62,7 +62,7 @@ int AndroidBitmap_lockPixels(JNIEnv* env, jobject jbitmap, void** addrPtr) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    SkPixelRef* pixelRef = GraphicsJNI::getSkPixelRef(env, jbitmap);
+    SkPixelRef* pixelRef = GraphicsJNI::refSkPixelRef(env, jbitmap);
     if (!pixelRef) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
@@ -71,9 +71,9 @@ int AndroidBitmap_lockPixels(JNIEnv* env, jobject jbitmap, void** addrPtr) {
     void* addr = pixelRef->pixels();
     if (NULL == addr) {
         pixelRef->unlockPixels();
+        pixelRef->unref();
         return ANDROID_BITMAP_RESULT_ALLOCATION_FAILED;
     }
-    pixelRef->ref();
 
     if (addrPtr) {
         *addrPtr = addr;
@@ -86,7 +86,7 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    SkPixelRef* pixelRef = GraphicsJNI::getSkPixelRef(env, jbitmap);
+    SkPixelRef* pixelRef = GraphicsJNI::refSkPixelRef(env, jbitmap);
     if (!pixelRef) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
@@ -98,6 +98,12 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
     pixelRef->notifyPixelsChanged();
 
     pixelRef->unlockPixels();
+    // Awkward in that we need to double-unref as the call to get the SkPixelRef
+    // did a ref(), so we need to unref() for the local ref and for the previous
+    // AndroidBitmap_lockPixels(). However this keeps GraphicsJNI a bit safer
+    // if others start using it without knowing about android::Bitmap's "fun"
+    // ref counting mechanism(s).
+    pixelRef->unref();
     pixelRef->unref();
 
     return ANDROID_BITMAP_RESULT_SUCCESS;
