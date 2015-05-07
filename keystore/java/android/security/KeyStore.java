@@ -20,8 +20,10 @@ import com.android.org.conscrypt.NativeConstants;
 
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
@@ -191,15 +193,6 @@ public class KeyStore {
         }
     }
 
-    public boolean password(String password) {
-        try {
-            return mBinder.password(password) == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
-    }
-
     public boolean lock() {
         try {
             return mBinder.lock() == NO_ERROR;
@@ -209,14 +202,29 @@ public class KeyStore {
         }
     }
 
-    public boolean unlock(String password) {
+    /**
+     * Attempt to unlock the keystore for {@code user} with the password {@code password}.
+     * This is required before keystore entries created with FLAG_ENCRYPTED can be accessed or
+     * created.
+     *
+     * @param user Android user ID to operate on
+     * @param password user's keystore password. Should be the most recent value passed to
+     * {@link #onUserPasswordChanged} for the user.
+     *
+     * @return whether the keystore was unlocked.
+     */
+    public boolean unlock(int userId, String password) {
         try {
-            mError = mBinder.unlock(password);
+            mError = mBinder.unlock(userId, password);
             return mError == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
         }
+    }
+
+    public boolean unlock(String password) {
+        return unlock(UserHandle.getUserId(Process.myUid()), password);
     }
 
     public boolean isEmpty() {
@@ -515,6 +523,30 @@ public class KeyStore {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
         }
+    }
+
+    /**
+     * Notify keystore that a user's password has changed.
+     *
+     * @param userId the user whose password changed.
+     * @param newPassword the new password or "" if the password was removed.
+     */
+    public boolean onUserPasswordChanged(int userId, String newPassword) {
+        // Parcel.cpp doesn't support deserializing null strings and treats them as "". Make that
+        // explicit here.
+        if (newPassword == null) {
+            newPassword = "";
+        }
+        try {
+            return mBinder.onUserPasswordChanged(userId, newPassword) == NO_ERROR;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
+    public boolean onUserPasswordChanged(String newPassword) {
+        return onUserPasswordChanged(UserHandle.getUserId(Process.myUid()), newPassword);
     }
 
     /**
