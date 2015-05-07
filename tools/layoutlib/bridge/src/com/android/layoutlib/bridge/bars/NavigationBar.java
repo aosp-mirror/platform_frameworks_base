@@ -21,6 +21,10 @@ import com.android.resources.Density;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,6 +32,21 @@ public class NavigationBar extends CustomBar {
 
     /** Navigation bar background color attribute name. */
     private static final String ATTR_COLOR = "navigationBarColor";
+
+    /**
+     * Constructor to be used when creating the {@link NavigationBar} as a regular control.
+     * This is currently used by the theme editor.
+     */
+    public NavigationBar(Context context, AttributeSet attrs)
+            throws XmlPullParserException {
+        this((BridgeContext) context,
+                Density.getEnum(((BridgeContext) context).getMetrics().densityDpi),
+                LinearLayout.HORIZONTAL, // In this mode, it doesn't need to be render vertically
+                ((BridgeContext) context).getConfiguration().getLayoutDirection() ==
+                        View.LAYOUT_DIRECTION_RTL,
+                (context.getApplicationInfo().flags & ApplicationInfo.FLAG_SUPPORTS_RTL) != 0,
+                context.getApplicationInfo().targetSdkVersion);
+    }
 
     public NavigationBar(BridgeContext context, Density density, int orientation, boolean isRtl,
             boolean rtlEnabled, int simulatedPlatformVersion) throws XmlPullParserException {

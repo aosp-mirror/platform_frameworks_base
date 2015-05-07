@@ -74,7 +74,7 @@ public class Config {
     }
 
     public static String getTime(int platformVersion) {
-        if (platformVersion == 0) {
+        if (isGreaterOrEqual(platformVersion, LOLLIPOP_MR1)) {
             return "5:10";
         }
         if (platformVersion < GINGERBREAD) {
@@ -117,7 +117,7 @@ public class Config {
     }
 
     public static String getWifiIconType(int platformVersion) {
-        return platformVersion == 0 ? "xml" : "png";
+        return isGreaterOrEqual(platformVersion, LOLLIPOP) ? "xml" : "png";
     }
 
     /**
