@@ -1210,15 +1210,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
           // between Theme.AppCompat.Light and Theme.AppCompat is Theme.Material (for v21).
             boolean isThemeAppCompat = false;
             for (int i = 0; i < 50; i++) {
+                if (defaultTheme == null) {
+                    break;
+                }
                 // for loop ensures that we don't run into cyclic theme inheritance.
                 if (defaultTheme.getName().startsWith("Theme.AppCompat")) {
                     isThemeAppCompat = true;
                     break;
                 }
                 defaultTheme = resources.getParent(defaultTheme);
-                if (defaultTheme == null) {
-                    break;
-                }
             }
             mIsThemeAppCompat = isThemeAppCompat;
         }
