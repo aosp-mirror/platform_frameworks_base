@@ -59,7 +59,8 @@ interface IInputMethodManager {
             int controlFlags, int softInputMode, int windowFlags,
             in EditorInfo attribute, IInputContext inputContext);
 
-    void showInputMethodPickerFromClient(in IInputMethodClient client);
+    void showInputMethodPickerFromClient(in IInputMethodClient client,
+            int auxiliarySubtypeMode);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     void setInputMethod(in IBinder token, String id);
     void setInputMethodAndSubtype(in IBinder token, String id, in InputMethodSubtype subtype);
