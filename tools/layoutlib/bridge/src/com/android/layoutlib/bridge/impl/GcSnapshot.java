@@ -35,6 +35,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -615,8 +616,22 @@ public class GcSnapshot {
                 return;
             }
 
-            int width = layer.getImage().getWidth();
-            int height = layer.getImage().getHeight();
+            int width;
+            int height;
+            Rectangle clipBounds = originalGraphics.getClipBounds();
+            if (clipBounds != null) {
+                if (clipBounds.width == 0 || clipBounds.height == 0) {
+                    // Clip is 0 so no need to paint anything.
+                    return;
+                }
+                // If we have clipBounds available, use them as they will always be
+                // smaller than the full layer size.
+                width = clipBounds.width;
+                height = clipBounds.height;
+            } else {
+                width = layer.getImage().getWidth();
+                height = layer.getImage().getHeight();
+            }
 
             // Create a temporary image to which the color filter will be applied.
             BufferedImage image = new BufferedImage(width, height,
