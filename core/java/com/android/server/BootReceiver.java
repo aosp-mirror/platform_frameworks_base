@@ -44,8 +44,11 @@ public class BootReceiver extends BroadcastReceiver {
 
     // Maximum size of a logged event (files get truncated if they're longer).
     // Give userdebug builds a larger max to capture extra debug, esp. for last_kmsg.
+
+    // For b/20829534, temporarily raise the size of the tombstone that
+    // will be saved.
     private static final int LOG_SIZE =
-        SystemProperties.getInt("ro.debuggable", 0) == 1 ? 98304 : 65536;
+        SystemProperties.getInt("ro.debuggable", 0) == 1 ? 262144 : 65536;
 
     private static final File TOMBSTONE_DIR = new File("/data/tombstones");
 
