@@ -112,9 +112,6 @@ private:
     Texture* const mDelegate;
 }; // struct DelegateTexture
 
-/**
- * TODO: This method does not take the rotation flag into account
- */
 void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
     const float width = float(mTexture->width);
     const float height = float(mTexture->height);
@@ -128,7 +125,6 @@ void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
         // pointers on 64 bit architectures.
         const int x = static_cast<int>(map[i++]);
         const int y = static_cast<int>(map[i++]);
-        bool rotated = map[i++] > 0;
 
         // Bitmaps should never be null, we're just extra paranoid
         if (!pixelRef) continue;
@@ -142,7 +138,7 @@ void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
         texture->width = pixelRef->info().width();
         texture->height = pixelRef->info().height();
 
-        Entry* entry = new Entry(pixelRef, x, y, rotated, texture, mapper, *this);
+        Entry* entry = new Entry(pixelRef, texture, mapper, *this);
         texture->uvMapper = &entry->uvMapper;
 
         mEntries.add(entry->pixelRef, entry);
