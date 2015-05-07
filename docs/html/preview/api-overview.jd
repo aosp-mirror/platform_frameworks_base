@@ -1,5 +1,5 @@
 page.title=API Overview
-excludeFromSuggestions=true
+page.keywords=preview,sdk,compatibility
 sdk.platform.apiLevel=22
 @jd:body
 
