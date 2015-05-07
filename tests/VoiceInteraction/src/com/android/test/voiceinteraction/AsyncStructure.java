@@ -20,7 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewAssistStructure;
+import android.view.ViewStructure;
 import android.widget.TextView;
 
 /**
@@ -32,9 +32,9 @@ public class AsyncStructure extends TextView {
     }
 
     @Override
-    public void onProvideVirtualAssistStructure(ViewAssistStructure structure) {
+    public void onProvideVirtualStructure(ViewStructure structure) {
         structure.setChildCount(1);
-        final ViewAssistStructure child = structure.asyncNewChild(0);
+        final ViewStructure child = structure.asyncNewChild(0);
         final int width = getWidth();
         final int height = getHeight();
         (new Thread() {

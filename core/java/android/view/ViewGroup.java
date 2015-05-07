@@ -2878,12 +2878,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Dispatch creation of {@link ViewAssistStructure} down the hierarchy.  This implementation
+     * Dispatch creation of {@link ViewStructure} down the hierarchy.  This implementation
      * adds in all child views of the view group, in addition to calling the default View
      * implementation.
      */
-    public void dispatchProvideAssistStructure(ViewAssistStructure structure) {
-        super.dispatchProvideAssistStructure(structure);
+    public void dispatchProvideStructure(ViewStructure structure) {
+        super.dispatchProvideStructure(structure);
         if (!isAssistBlocked()) {
             if (structure.getChildCount() == 0) {
                 final int childrenCount = getChildCount();
@@ -2898,8 +2898,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 ? getChildDrawingOrder(childrenCount, i) : i;
                         final View child = (preorderedList == null)
                                 ? children[childIndex] : preorderedList.get(childIndex);
-                        ViewAssistStructure cstructure = structure.newChild(i);
-                        child.dispatchProvideAssistStructure(cstructure);
+                        ViewStructure cstructure = structure.newChild(i);
+                        child.dispatchProvideStructure(cstructure);
                     }
                 }
             }

@@ -114,7 +114,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAssistStructure;
+import android.view.ViewStructure;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup.LayoutParams;
@@ -8713,8 +8713,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void onProvideAssistStructure(ViewAssistStructure structure) {
-        super.onProvideAssistStructure(structure);
+    public void onProvideStructure(ViewStructure structure) {
+        super.onProvideStructure(structure);
         final boolean isPassword = hasPasswordTransformationMethod();
         if (!isPassword) {
             structure.setText(getText(), getSelectionStart(), getSelectionEnd());

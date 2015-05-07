@@ -26,13 +26,11 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Insets;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -46,7 +44,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.VelocityTracker;
-import android.view.ViewAssistStructure;
+import android.view.ViewStructure;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1363,8 +1361,8 @@ public class Switch extends CompoundButton {
     }
 
     @Override
-    public void onProvideAssistStructure(ViewAssistStructure structure) {
-        super.onProvideAssistStructure(structure);
+    public void onProvideStructure(ViewStructure structure) {
+        super.onProvideStructure(structure);
         CharSequence switchText = isChecked() ? mTextOn : mTextOff;
         if (!TextUtils.isEmpty(switchText)) {
             CharSequence oldText = structure.getText();

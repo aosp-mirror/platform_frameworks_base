@@ -653,6 +653,10 @@ public final class ViewRootImpl implements ViewParent,
         return (mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE) != 0;
     }
 
+    public int getWindowFlags() {
+        return mWindowAttributes.flags;
+    }
+
     public CharSequence getTitle() {
         return mWindowAttributes.getTitle();
     }

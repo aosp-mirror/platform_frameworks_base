@@ -2347,11 +2347,6 @@
              be saved. -->
         <attr name="saveEnabled" format="boolean" />
 
-        <!-- If true, no {@link android.view.ViewAssistStructure} data will be collected from
-             this view or any of its children.  The default is false, allowing assist structure
-             to be reported by it. -->
-        <attr name="assistBlocked" format="boolean" />
-
         <!-- Specifies whether to filter touches when the view's window is obscured by
              another visible window.  When set to true, the view will not receive touches
              whenever a toast, dialog or other window appears above the view's window.

@@ -290,6 +290,7 @@ package android {
 
   public static final class R.attr {
     ctor public R.attr();
+    field public static final int __reserved0 = 16844020; // 0x10104f4
     field public static final int absListViewStyle = 16842858; // 0x101006a
     field public static final int accessibilityEventTypes = 16843648; // 0x1010380
     field public static final int accessibilityFeedbackType = 16843650; // 0x1010382
@@ -373,7 +374,6 @@ package android {
     field public static final int anyDensity = 16843372; // 0x101026c
     field public static final int apduServiceBanner = 16843757; // 0x10103ed
     field public static final int apiKey = 16843281; // 0x1010211
-    field public static final int assistBlocked = 16844020; // 0x10104f4
     field public static final int author = 16843444; // 0x10102b4
     field public static final int authorities = 16842776; // 0x1010018
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
@@ -38286,7 +38286,7 @@ package android.view {
     method public boolean dispatchNestedPreScroll(int, int, int[], int[]);
     method public boolean dispatchNestedScroll(int, int, int, int, int[]);
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
-    method public void dispatchProvideAssistStructure(android.view.ViewAssistStructure);
+    method public void dispatchProvideStructure(android.view.ViewStructure);
     method protected void dispatchRestoreInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSaveInstanceState(android.util.SparseArray<android.os.Parcelable>);
     method protected void dispatchSetActivated(boolean);
@@ -38466,7 +38466,6 @@ package android.view {
     method public void invalidateOutline();
     method public boolean isAccessibilityFocused();
     method public boolean isActivated();
-    method public boolean isAssistBlocked();
     method public boolean isAttachedToWindow();
     method public boolean isClickable();
     method public boolean isDirty();
@@ -38548,8 +38547,8 @@ package android.view {
     method protected void onMeasure(int, int);
     method protected void onOverScrolled(int, int, boolean, boolean);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
-    method public void onProvideAssistStructure(android.view.ViewAssistStructure);
-    method public void onProvideVirtualAssistStructure(android.view.ViewAssistStructure);
+    method public void onProvideStructure(android.view.ViewStructure);
+    method public void onProvideVirtualStructure(android.view.ViewStructure);
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method public void onRtlPropertiesChanged(int);
     method protected android.os.Parcelable onSaveInstanceState();
@@ -38612,7 +38611,6 @@ package android.view {
     method public void setActivated(boolean);
     method public void setAlpha(float);
     method public void setAnimation(android.view.animation.Animation);
-    method public void setAssistBlocked(boolean);
     method public void setBackground(android.graphics.drawable.Drawable);
     method public void setBackgroundColor(int);
     method public deprecated void setBackgroundDrawable(android.graphics.drawable.Drawable);
@@ -38975,40 +38973,8 @@ package android.view {
     method public static android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
   }
 
-  public abstract class ViewAssistStructure {
+  public abstract deprecated class ViewAssistStructure extends android.view.ViewStructure {
     ctor public ViewAssistStructure();
-    method public abstract void asyncCommit();
-    method public abstract android.view.ViewAssistStructure asyncNewChild(int);
-    method public abstract void clearExtras();
-    method public abstract android.os.Bundle editExtras();
-    method public abstract int getChildCount();
-    method public abstract java.lang.CharSequence getHint();
-    method public abstract java.lang.CharSequence getText();
-    method public abstract int getTextSelectionEnd();
-    method public abstract int getTextSelectionStart();
-    method public abstract android.view.ViewAssistStructure newChild(int);
-    method public abstract void setAccessibilityFocused(boolean);
-    method public abstract void setActivated(boolean);
-    method public abstract void setAssistBlocked(boolean);
-    method public abstract void setCheckable(boolean);
-    method public abstract void setChecked(boolean);
-    method public abstract void setChildCount(int);
-    method public abstract void setClassName(java.lang.String);
-    method public abstract void setClickable(boolean);
-    method public abstract void setContentDescription(java.lang.CharSequence);
-    method public abstract void setDimens(int, int, int, int, int, int);
-    method public abstract void setEnabled(boolean);
-    method public abstract void setFocusable(boolean);
-    method public abstract void setFocused(boolean);
-    method public abstract void setHint(java.lang.CharSequence);
-    method public abstract void setId(int, java.lang.String, java.lang.String, java.lang.String);
-    method public abstract void setLongClickable(boolean);
-    method public abstract void setSelected(boolean);
-    method public abstract void setStylusButtonPressable(boolean);
-    method public abstract void setText(java.lang.CharSequence);
-    method public abstract void setText(java.lang.CharSequence, int, int);
-    method public abstract void setTextPaint(android.text.TextPaint);
-    method public abstract void setVisibility(int);
   }
 
   public class ViewConfiguration {
@@ -39383,6 +39349,41 @@ package android.view {
     method public android.view.ViewPropertyAnimator yBy(float);
     method public android.view.ViewPropertyAnimator z(float);
     method public android.view.ViewPropertyAnimator zBy(float);
+  }
+
+  public abstract class ViewStructure {
+    ctor public ViewStructure();
+    method public abstract void asyncCommit();
+    method public abstract android.view.ViewAssistStructure asyncNewChild(int);
+    method public abstract int getChildCount();
+    method public abstract android.os.Bundle getExtras();
+    method public abstract java.lang.CharSequence getHint();
+    method public abstract java.lang.CharSequence getText();
+    method public abstract int getTextSelectionEnd();
+    method public abstract int getTextSelectionStart();
+    method public abstract boolean hasExtras();
+    method public abstract android.view.ViewAssistStructure newChild(int);
+    method public abstract void setAccessibilityFocused(boolean);
+    method public abstract void setActivated(boolean);
+    method public abstract void setCheckable(boolean);
+    method public abstract void setChecked(boolean);
+    method public abstract void setChildCount(int);
+    method public abstract void setClassName(java.lang.String);
+    method public abstract void setClickable(boolean);
+    method public abstract void setContentDescription(java.lang.CharSequence);
+    method public abstract void setDimens(int, int, int, int, int, int);
+    method public abstract void setEnabled(boolean);
+    method public abstract void setFocusable(boolean);
+    method public abstract void setFocused(boolean);
+    method public abstract void setHint(java.lang.CharSequence);
+    method public abstract void setId(int, java.lang.String, java.lang.String, java.lang.String);
+    method public abstract void setLongClickable(boolean);
+    method public abstract void setSelected(boolean);
+    method public abstract void setStylusButtonPressable(boolean);
+    method public abstract void setText(java.lang.CharSequence);
+    method public abstract void setText(java.lang.CharSequence, int, int);
+    method public abstract void setTextPaint(android.text.TextPaint);
+    method public abstract void setVisibility(int);
   }
 
   public final class ViewStub extends android.view.View {
@@ -41975,7 +41976,7 @@ package android.webkit {
     method public abstract boolean onKeyUp(int, android.view.KeyEvent);
     method public abstract void onMeasure(int, int);
     method public abstract void onOverScrolled(int, int, boolean, boolean);
-    method public abstract void onProvideVirtualAssistStructure(android.view.ViewAssistStructure);
+    method public abstract void onProvideVirtualAssistStructure(android.view.ViewStructure);
     method public abstract void onScrollChanged(int, int, int, int);
     method public abstract void onSizeChanged(int, int, int, int);
     method public abstract void onStartTemporaryDetach();
