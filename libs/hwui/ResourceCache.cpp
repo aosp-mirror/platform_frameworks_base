@@ -59,21 +59,6 @@ void ResourceCache::unlock() {
     mLock.unlock();
 }
 
-const SkBitmap* ResourceCache::insert(const SkBitmap& bitmapResource) {
-    Mutex::Autolock _l(mLock);
-
-    BitmapKey bitmapKey(bitmapResource);
-    ssize_t index = mBitmapCache.indexOfKey(bitmapKey);
-    if (index == NAME_NOT_FOUND) {
-        SkBitmap* cachedBitmap = new SkBitmap(bitmapResource);
-        index = mBitmapCache.add(bitmapKey, cachedBitmap);
-        return cachedBitmap;
-    }
-
-    mBitmapCache.keyAt(index).mRefCount++;
-    return mBitmapCache.valueAt(index);
-}
-
 void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType) {
     Mutex::Autolock _l(mLock);
     incrementRefcountLocked(resource, resourceType);
@@ -98,11 +83,6 @@ void ResourceCache::decrementRefcount(void* resource) {
     decrementRefcountLocked(resource);
 }
 
-void ResourceCache::decrementRefcount(const SkBitmap* bitmapResource) {
-    Mutex::Autolock _l(mLock);
-    decrementRefcountLocked(bitmapResource);
-}
-
 void ResourceCache::decrementRefcount(const Res_png_9patch* patchResource) {
     decrementRefcount((void*) patchResource);
 }
@@ -117,23 +97,6 @@ void ResourceCache::decrementRefcountLocked(void* resource) {
     ref->refCount--;
     if (ref->refCount == 0) {
         deleteResourceReferenceLocked(resource, ref);
-    }
-}
-
-void ResourceCache::decrementRefcountLocked(const SkBitmap* bitmapResource) {
-    BitmapKey bitmapKey(*bitmapResource);
-    ssize_t index = mBitmapCache.indexOfKey(bitmapKey);
-
-    LOG_ALWAYS_FATAL_IF(index == NAME_NOT_FOUND,
-                    "Decrementing the reference of an untracked Bitmap");
-
-    const BitmapKey& cacheEntry = mBitmapCache.keyAt(index);
-    if (cacheEntry.mRefCount == 1) {
-        // delete the bitmap and remove it from the cache
-        delete mBitmapCache.valueAt(index);
-        mBitmapCache.removeItemsAt(index);
-    } else {
-        cacheEntry.mRefCount--;
     }
 }
 
@@ -188,39 +151,6 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
     }
     mCache->removeItem(resource);
     delete ref;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Bitmap Key
-///////////////////////////////////////////////////////////////////////////////
-
-void BitmapKey::operator=(const BitmapKey& other) {
-    this->mRefCount = other.mRefCount;
-    this->mBitmapDimensions = other.mBitmapDimensions;
-    this->mPixelRefOrigin = other.mPixelRefOrigin;
-    this->mPixelRefStableID = other.mPixelRefStableID;
-}
-
-bool BitmapKey::operator==(const BitmapKey& other) const {
-    return mPixelRefStableID == other.mPixelRefStableID &&
-           mPixelRefOrigin == other.mPixelRefOrigin &&
-           mBitmapDimensions == other.mBitmapDimensions;
-}
-
-bool BitmapKey::operator<(const BitmapKey& other) const {
-    if (mPixelRefStableID != other.mPixelRefStableID) {
-        return mPixelRefStableID < other.mPixelRefStableID;
-    }
-    if (mPixelRefOrigin.x() != other.mPixelRefOrigin.x()) {
-        return mPixelRefOrigin.x() < other.mPixelRefOrigin.x();
-    }
-    if (mPixelRefOrigin.y() != other.mPixelRefOrigin.y()) {
-        return mPixelRefOrigin.y() < other.mPixelRefOrigin.y();
-    }
-    if (mBitmapDimensions.width() != other.mBitmapDimensions.width()) {
-        return mBitmapDimensions.width() < other.mBitmapDimensions.width();
-    }
-    return mBitmapDimensions.height() < other.mBitmapDimensions.height();
 }
 
 }; // namespace uirenderer

@@ -41,10 +41,6 @@ void DisplayListData::cleanupResources() {
     ResourceCache& resourceCache = ResourceCache::getInstance();
     resourceCache.lock();
 
-    for (size_t i = 0; i < bitmapResources.size(); i++) {
-        resourceCache.decrementRefcountLocked(bitmapResources.itemAt(i));
-    }
-
     for (size_t i = 0; i < patchResources.size(); i++) {
         resourceCache.decrementRefcountLocked(patchResources.itemAt(i));
     }
@@ -59,7 +55,6 @@ void DisplayListData::cleanupResources() {
         delete path;
     }
 
-    bitmapResources.clear();
     patchResources.clear();
     pathResources.clear();
     paints.clear();
