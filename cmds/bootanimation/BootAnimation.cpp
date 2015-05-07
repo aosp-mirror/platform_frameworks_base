@@ -630,7 +630,10 @@ bool BootAnimation::movie()
                     }
                     glDisable(GL_SCISSOR_TEST);
                 }
-                glDrawTexiOES(xc, yc, 0, animation.width, animation.height);
+                // specify the y center as ceiling((mHeight - animation.height) / 2)
+                // which is equivalent to mHeight - (yc + animation.height)
+                glDrawTexiOES(xc, mHeight - (yc + animation.height),
+                              0, animation.width, animation.height);
                 eglSwapBuffers(mDisplay, mSurface);
 
                 nsecs_t now = systemTime();
