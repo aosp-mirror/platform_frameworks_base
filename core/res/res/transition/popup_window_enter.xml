@@ -16,17 +16,14 @@
 
 <transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
                android:transitionOrdering="together">
-    <!-- Start from location of epicenter, move to popup location. -->
-    <transition
-        class="com.android.internal.transition.EpicenterTranslate"
-        android:duration="300" />
-
     <!-- Start from size of epicenter, expand to full width/height. -->
     <transition
-        class="com.android.internal.transition.EpicenterClipReveal"
-        android:centerClipBounds="true"
-        android:duration="300" />
+        class="com.android.internal.transition.EpicenterTranslateClipReveal"
+        android:duration="250" />
 
     <!-- Quickly fade in. -->
-    <fade android:duration="100" />
+    <fade
+        android:duration="100"
+        android:fromAlpha="0.1"
+        android:toAlpha="1.0" />
 </transitionSet>
