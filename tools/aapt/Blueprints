@@ -110,11 +110,6 @@ cc_binary {
     cflags: aaptCFlags,
     srcs: aaptMain,
     include_dirs: aaptCIncludes,
-    host_ldlibs: [
-        "-lrt",
-        "-ldl",
-        "-lpthread",
-    ],
     target: {
         not_windows: {
             host_ldlibs: ["-lz"],
