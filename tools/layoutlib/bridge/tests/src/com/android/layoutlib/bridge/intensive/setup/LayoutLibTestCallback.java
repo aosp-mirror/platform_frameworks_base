@@ -23,8 +23,8 @@ import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
-import com.android.resources.ResourceType;
 import com.android.ide.common.resources.IntArrayWrapper;
+import com.android.resources.ResourceType;
 import com.android.util.Pair;
 import com.android.utils.ILogger;
 
@@ -35,6 +35,8 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import com.google.android.collect.Maps;
+
+import static org.junit.Assert.fail;
 
 @SuppressWarnings("deprecation") // For Pair
 public class LayoutLibTestCallback extends LayoutlibCallback {
@@ -121,7 +123,7 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
 
     @Override
     public ILayoutPullParser getParser(String layoutName) {
-        org.junit.Assert.fail("This method shouldn't be called by this version of LayoutLib.");
+        fail("This method shouldn't be called by this version of LayoutLib.");
         return null;
     }
 

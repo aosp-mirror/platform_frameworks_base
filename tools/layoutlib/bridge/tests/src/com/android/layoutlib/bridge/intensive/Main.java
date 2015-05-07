@@ -275,14 +275,27 @@ public class Main {
                 ConfigGenerator.getEnumMap(attrs), getLayoutLog());
     }
 
-    /**
-     * Create a new rendering session and test that rendering /layout/activity.xml on nexus 5
-     * doesn't throw any exceptions.
-     */
+    /** Text activity.xml */
     @Test
-    public void testRendering() throws ClassNotFoundException {
+    public void testActivity() throws ClassNotFoundException {
+        renderAndVerify("activity.xml", "activity.png");
+
+    }
+
+    /** Test allwidgets.xml */
+    @Test
+    public void testAllWidgets() throws ClassNotFoundException {
+        renderAndVerify("allwidgets.xml", "allwidgets.png");
+    }
+
+    /**
+     * Create a new rendering session and test that rendering given layout on nexus 5
+     * doesn't throw any exceptions and matches the provided image.
+     */
+    private void renderAndVerify(String layoutFileName, String goldenFileName)
+            throws ClassNotFoundException {
         // Create the layout pull parser.
-        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/activity.xml");
+        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutFileName);
         // Create LayoutLibCallback.
         LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
         layoutLibCallback.initResources();
@@ -301,7 +314,7 @@ public class Main {
                     session.getResult().getErrorMessage());
         }
         try {
-            String goldenImagePath = APP_TEST_DIR + "/golden/activity.png";
+            String goldenImagePath = APP_TEST_DIR + "/golden/" + goldenFileName;
             ImageUtils.requireSimilar(goldenImagePath, session.getImage());
         } catch (IOException e) {
             getLogger().error(e, e.getMessage());
@@ -309,7 +322,7 @@ public class Main {
     }
 
     /**
-     * Uses Theme.Material and Target sdk version as 21.
+     * Uses Theme.Material and Target sdk version as 22.
      */
     private SessionParams getSessionParams(LayoutPullParser layoutParser,
             ConfigGenerator configGenerator, LayoutLibTestCallback layoutLibCallback) {
@@ -327,7 +340,7 @@ public class Main {
                 resourceResolver,
                 layoutLibCallback,
                 0,
-                21, // TODO: Make it more configurable to run tests for various versions.
+                22, // TODO: Make it more configurable to run tests for various versions.
                 getLayoutLog());
     }
 
