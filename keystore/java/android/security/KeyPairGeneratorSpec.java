@@ -629,6 +629,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
+         * <p><b>NOTE: This has currently no effect.
+         *
          * @see #setKeyValidityEnd(Date)
          */
         public Builder setKeyValidityStart(Date startDate) {
@@ -640,6 +642,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Sets the time instant after which the key is no longer valid.
          *
          * <p>By default, the key is valid at any instant.
+         *
+         * <p><b>NOTE: This has currently no effect.
          *
          * @see #setKeyValidityStart(Date)
          * @see #setKeyValidityForConsumptionEnd(Date)
@@ -656,6 +660,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
+         * <p><b>NOTE: This has currently no effect.
+         *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
         public Builder setKeyValidityForOriginationEnd(Date endDate) {
@@ -669,6 +675,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
+         * <p><b>NOTE: This has currently no effect.
+         *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
         public Builder setKeyValidityForConsumptionEnd(Date endDate) {
@@ -680,6 +688,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Sets the set of purposes for which the key can be used.
          *
          * <p>This must be specified for all keys. There is no default.
+         *
+         * <p><b>NOTE: This has currently no effect.
          */
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
             mPurposes = purposes;
@@ -691,6 +701,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * to use the key with any other digest will be rejected.
          *
          * <p>This must be specified for keys which are used for signing/verification.
+         *
+         * <p><b>NOTE: This has currently no effect.
          */
         public Builder setDigests(@KeyStoreKeyProperties.DigestEnum String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
@@ -703,6 +715,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * rejected.
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
+         *
+         * <p><b>NOTE: This has currently no effect.
          */
         public Builder setEncryptionPaddings(
                 @KeyStoreKeyProperties.EncryptionPaddingEnum String... paddings) {
@@ -716,6 +730,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * rejected.
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
+         *
+         * <p><b>NOTE: This has currently no effect.
          */
         public Builder setSignaturePaddings(
                 @KeyStoreKeyProperties.SignaturePaddingEnum String... paddings) {
@@ -728,6 +744,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Attempts to use the key with any other block modes will be rejected.
          *
          * <p>This must be specified for encryption/decryption keys.
+         *
+         * <p><b>NOTE: This has currently no effect.
          */
         public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
             mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
@@ -753,6 +771,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <li>If you are using RSA encryption without padding, consider switching to padding
          * schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
          * </ul>
+         *
+         * <p><b>NOTE: This has currently no effect.
          */
         public Builder setRandomizedEncryptionRequired(boolean required) {
             mRandomizedEncryptionRequired = required;
@@ -775,6 +795,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>This restriction applies only to private key operations. Public key operations are not
          * restricted.
          *
+         * <p><b>NOTE: This has currently no effect.
+         *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
         public Builder setUserAuthenticationRequired(boolean required) {
@@ -790,6 +812,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This restriction applies only to private key operations. Public key operations are not
          * restricted.
+         *
+         * <p><b>NOTE: This has currently no effect.
          *
          * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
          *        every use of the key.
