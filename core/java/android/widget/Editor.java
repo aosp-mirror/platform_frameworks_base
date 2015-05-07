@@ -688,44 +688,101 @@ public class Editor {
     private int getWordStart(int offset) {
         // FIXME - For this and similar methods we're not doing anything to check if there's
         // a LocaleSpan in the text, this may be something we should try handling or checking for.
-        int retOffset = getWordIteratorWithText().getBeginning(offset);
-        if (retOffset == BreakIterator.DONE) retOffset = offset;
-        return retOffset;
-    }
-
-    private int getWordEnd(int offset, boolean includePunctuation) {
-        int retOffset = getWordIteratorWithText().getEnd(offset);
-        if (retOffset == BreakIterator.DONE) {
-            retOffset = offset;
-        } else if (includePunctuation) {
-            retOffset = handlePunctuation(retOffset);
-        }
-        return retOffset;
-    }
-
-    private boolean isEndBoundary(int offset) {
-        int thisEnd = getWordEnd(offset, false);
-        return offset == thisEnd;
-    }
-
-    private boolean isStartBoundary(int offset) {
-        int thisStart = getWordStart(offset);
-        return thisStart == offset;
-    }
-
-    private int handlePunctuation(int offset) {
-        // FIXME - Check with UX how repeated ending punctuation should be handled.
-        // FIXME - Check with UX if / how we would handle non sentence ending characters.
-        // FIXME - Consider punctuation in different languages.
-        CharSequence text = mTextView.getText();
-        if (offset < text.length()) {
-            int c = Character.codePointAt(text, offset);
-            if (c == 0x002e /* period */|| c == 0x003f /* question mark */
-                    || c == 0x0021 /* exclamation mark */) {
-                offset = Character.offsetByCodePoints(text, offset, 1);
+        int retOffset = getWordIteratorWithText().prevBoundary(offset);
+        if (isPunctBoundaryBehind(retOffset, true /* isStart */)) {
+            // If we're on a punctuation boundary we should continue to get the
+            // previous offset until we're not longer on a punctuation boundary.
+            retOffset = getWordIteratorWithText().prevBoundary(retOffset);
+            while (!isPunctBoundaryBehind(retOffset, false /* isStart */)
+                    && retOffset != BreakIterator.DONE) {
+                retOffset = getWordIteratorWithText().prevBoundary(retOffset);
             }
         }
-        return offset;
+        if (retOffset == BreakIterator.DONE) {
+            return offset;
+        }
+        return retOffset;
+    }
+
+    private int getWordEnd(int offset) {
+        int retOffset = getWordIteratorWithText().nextBoundary(offset);
+        if (isPunctBoundaryForward(retOffset, true /* isStart */)) {
+            // If we're on a punctuation boundary we should continue to get the
+            // next offset until we're no longer on a punctuation boundary.
+            retOffset = getWordIteratorWithText().nextBoundary(retOffset);
+            while (!isPunctBoundaryForward(retOffset, false /* isStart */)
+                    && retOffset != BreakIterator.DONE) {
+                retOffset = getWordIteratorWithText().nextBoundary(retOffset);
+            }
+        }
+        if (retOffset == BreakIterator.DONE) {
+            return offset;
+        }
+        return retOffset;
+    }
+
+    /**
+     * Checks for punctuation boundaries for the provided offset and the
+     * previous character.
+     *
+     * @param offset The offset to check from.
+     * @param isStart Whether the boundary being checked for is at the start or
+     *            end of a punctuation sequence.
+     * @return Whether this is a punctuation boundary.
+     */
+    private boolean isPunctBoundaryBehind(int offset, boolean isStart) {
+        CharSequence text = mTextView.getText();
+        if (offset == BreakIterator.DONE || offset > text.length() || offset == 0) {
+            return false;
+        }
+        int cp = Character.codePointAt(text, offset);
+        int prevCp = Character.codePointBefore(text, offset);
+
+        if (isPunctuation(cp)) {
+            // If it's the start, the current cp and the prev cp are
+            // punctuation. If it's at the end of a punctuation sequence the
+            // current is punctuation and the prev is not.
+            return isStart ? isPunctuation(prevCp) : !isPunctuation(prevCp);
+        }
+        return false;
+    }
+
+    /**
+     * Checks for punctuation boundaries for the provided offset and the next
+     * character.
+     *
+     * @param offset The offset to check from.
+     * @param isStart Whether the boundary being checked for is at the start or
+     *            end of a punctuation sequence.
+     * @return Whether this is a punctuation boundary.
+     */
+    private boolean isPunctBoundaryForward(int offset, boolean isStart) {
+        CharSequence text = mTextView.getText();
+        if (offset == BreakIterator.DONE || offset > text.length() || offset == 0) {
+            return false;
+        }
+        int cp = Character.codePointBefore(text, offset);
+        int nextCpOffset = Math.min(offset + Character.charCount(cp), text.length() - 1);
+        int nextCp = Character.codePointBefore(text, nextCpOffset);
+
+        if (isPunctuation(cp)) {
+            // If it's the start, the current cp and the next cp are
+            // punctuation. If it's at the end of a punctuation sequence the
+            // current is punctuation and the next is not.
+            return isStart ? isPunctuation(nextCp) : !isPunctuation(nextCp);
+        }
+        return false;
+    }
+
+    private boolean isPunctuation(int cp) {
+        int type = Character.getType(cp);
+        return (type == Character.CONNECTOR_PUNCTUATION ||
+                type == Character.DASH_PUNCTUATION ||
+                type == Character.END_PUNCTUATION ||
+                type == Character.FINAL_QUOTE_PUNCTUATION ||
+                type == Character.INITIAL_QUOTE_PUNCTUATION ||
+                type == Character.OTHER_PUNCTUATION ||
+                type == Character.START_PUNCTUATION);
     }
 
     /**
@@ -3901,7 +3958,7 @@ public class Editor {
             final int currLine = mTextView.getLineAtCoordinate(y);
             boolean positionCursor = false;
             int offset = trueOffset;
-            int end = getWordEnd(offset, true);
+            int end = getWordEnd(offset);
             int start = getWordStart(offset);
 
             if (offset < mPreviousOffset) {
@@ -3917,7 +3974,7 @@ public class Editor {
                     }
                 }
                 mTouchWordOffset = Math.max(trueOffset - offset, 0);
-                mInWord = !isStartBoundary(offset);
+                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionCursor = true;
             } else if (offset - mTouchWordOffset > mPreviousOffset) {
                 // User is shrinking the selection.
@@ -3926,7 +3983,7 @@ public class Editor {
                     offset = end;
                 }
                 offset -= mTouchWordOffset;
-                mInWord = !isEndBoundary(offset);
+                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionCursor = true;
             }
 
@@ -3999,8 +4056,7 @@ public class Editor {
             final int currLine = mTextView.getLineAtCoordinate(y);
             int offset = trueOffset;
             boolean positionCursor = false;
-
-            int end = getWordEnd(offset, true);
+            int end = getWordEnd(offset);
             int start = getWordStart(offset);
 
             if (offset > mPreviousOffset) {
@@ -4016,7 +4072,7 @@ public class Editor {
                     }
                 }
                 mTouchWordOffset = Math.max(offset - trueOffset, 0);
-                mInWord = !isEndBoundary(offset);
+                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionCursor = true;
             } else if (offset + mTouchWordOffset < mPreviousOffset) {
                 // User is shrinking the selection.
@@ -4026,7 +4082,7 @@ public class Editor {
                 }
                 offset += mTouchWordOffset;
                 positionCursor = true;
-                mInWord = !isStartBoundary(offset);
+                mInWord = !getWordIteratorWithText().isBoundary(offset);
             }
 
             if (positionCursor) {
@@ -4272,7 +4328,7 @@ public class Editor {
                         // We don't start "dragging" until the user is past the initial word that
                         // gets selected on long press.
                         int firstWordStart = getWordStart(mStartOffset);
-                        int firstWordEnd = getWordEnd(mStartOffset, false);
+                        int firstWordEnd = getWordEnd(mStartOffset);
                         if (offset > firstWordEnd || offset < firstWordStart) {
 
                             // Basically the goal in the below code is to have the highlight be
@@ -4312,7 +4368,7 @@ public class Editor {
 
                             // Need to adjust start offset based on direction of movement.
                             int newStart = mStartOffset < offset ? getWordStart(mStartOffset)
-                                    : getWordEnd(mStartOffset, true);
+                                    : getWordEnd(mStartOffset);
                             Selection.setSelection((Spannable) mTextView.getText(), newStart,
                                     offset);
                         }
