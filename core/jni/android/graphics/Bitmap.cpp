@@ -224,7 +224,7 @@ void Bitmap::reconfigure(const SkImageInfo& info, size_t rowBytes,
 }
 
 void Bitmap::reconfigure(const SkImageInfo& info) {
-    reconfigure(info, mPixelRef->rowBytes(), mPixelRef->colorTable());
+    reconfigure(info, info.minRowBytes(), nullptr);
 }
 
 void Bitmap::detachFromJava() {
