@@ -476,9 +476,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             tempRect.set(0, 0, width, height);
             view.getMatrix().mapRect(tempRect);
 
-            ViewGroup parent = (ViewGroup) view.getParent();
-            left = leftInParent - tempRect.left + parent.getScrollX();
-            top = topInParent - tempRect.top + parent.getScrollY();
+            left = leftInParent - tempRect.left;
+            top = topInParent - tempRect.top;
             right = left + width;
             bottom = top + height;
         }
@@ -506,7 +505,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             ViewGroup parent = (ViewGroup) view.getParent();
             Matrix matrix = new Matrix();
             parent.transformMatrixToLocal(matrix);
-
+            matrix.postTranslate(parent.getScrollX(), parent.getScrollY());
             mSharedElementParentMatrices.add(matrix);
         }
     }
@@ -521,6 +520,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 // Find the location in the view's parent
                 ViewGroup parent = (ViewGroup) viewParent;
                 parent.transformMatrixToLocal(matrix);
+                matrix.postTranslate(parent.getScrollX(), parent.getScrollY());
             }
         } else {
             // The indices of mSharedElementParentMatrices matches the
