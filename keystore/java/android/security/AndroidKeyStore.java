@@ -128,10 +128,11 @@ public class AndroidKeyStore extends KeyStoreSpi {
                 keymasterDigest = keymasterDigests.get(0);
             }
 
-            String keyAlgorithmString;
+            @KeyStoreKeyProperties.AlgorithmEnum String keyAlgorithmString;
             try {
-                keyAlgorithmString = KeymasterUtils.getJcaSecretKeyAlgorithm(
-                        keymasterAlgorithm, keymasterDigest);
+                keyAlgorithmString =
+                        KeyStoreKeyProperties.Algorithm.fromKeymasterSecretKeyAlgorithm(
+                                keymasterAlgorithm, keymasterDigest);
             } catch (IllegalArgumentException e) {
                 throw (UnrecoverableKeyException)
                         new UnrecoverableKeyException("Unsupported secret key type").initCause(e);
@@ -451,10 +452,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
         int keymasterAlgorithm;
         int keymasterDigest;
         try {
-            keymasterAlgorithm = KeymasterUtils.getKeymasterAlgorithmFromJcaSecretKeyAlgorithm(
+            keymasterAlgorithm = KeyStoreKeyProperties.Algorithm.toKeymasterSecretKeyAlgorithm(
                     keyAlgorithmString);
             keymasterDigest =
-                    KeymasterUtils.getKeymasterDigestfromJcaSecretKeyAlgorithm(keyAlgorithmString);
+                    KeyStoreKeyProperties.Algorithm.toKeymasterDigest(keyAlgorithmString);
         } catch (IllegalArgumentException e) {
             throw new KeyStoreException("Unsupported secret key algorithm: " + keyAlgorithmString);
         }
@@ -465,8 +466,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
         int[] keymasterDigests;
         if (params.isDigestsSpecified()) {
             // Digest(s) specified in parameters
-            keymasterDigests =
-                    KeymasterUtils.getKeymasterDigestsFromJcaDigestAlgorithms(params.getDigests());
+            keymasterDigests = KeyStoreKeyProperties.Digest.allToKeymaster(params.getDigests());
             if (keymasterDigest != -1) {
                 // Digest also specified in the JCA key algorithm name.
                 if (!com.android.internal.util.ArrayUtils.contains(
@@ -494,8 +494,8 @@ public class AndroidKeyStore extends KeyStoreSpi {
         }
 
         @KeyStoreKeyProperties.PurposeEnum int purposes = params.getPurposes();
-        int[] keymasterBlockModes = KeymasterUtils.getKeymasterBlockModesFromJcaBlockModes(
-                params.getBlockModes());
+        int[] keymasterBlockModes =
+                KeyStoreKeyProperties.BlockMode.allToKeymaster(params.getBlockModes());
         if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
                 && (params.isRandomizedEncryptionRequired())) {
             for (int keymasterBlockMode : keymasterBlockModes) {
@@ -503,8 +503,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
                     throw new KeyStoreException(
                             "Randomized encryption (IND-CPA) required but may be violated by block"
                             + " mode: "
-                            + KeymasterUtils.getJcaBlockModeFromKeymasterBlockMode(
-                                    keymasterBlockMode)
+                            + KeyStoreKeyProperties.BlockMode.fromKeymaster(keymasterBlockMode)
                             + ". See KeyStoreParameter documentation.");
                 }
             }
@@ -513,11 +512,11 @@ public class AndroidKeyStore extends KeyStoreSpi {
             args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
         }
         args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
-        int[] keymasterPaddings = ArrayUtils.concat(
-                KeymasterUtils.getKeymasterPaddingsFromJcaEncryptionPaddings(
-                        params.getEncryptionPaddings()),
-                KeymasterUtils.getKeymasterPaddingsFromJcaSignaturePaddings(
-                        params.getSignaturePaddings()));
+        if (params.getSignaturePaddings().length > 0) {
+            throw new KeyStoreException("Signature paddings not supported for symmetric keys");
+        }
+        int[] keymasterPaddings = KeyStoreKeyProperties.EncryptionPadding.allToKeymaster(
+                params.getEncryptionPaddings());
         args.addInts(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
         KeymasterUtils.addUserAuthArgs(args,
                 params.getContext(),

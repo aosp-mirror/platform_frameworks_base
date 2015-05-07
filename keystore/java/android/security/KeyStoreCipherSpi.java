@@ -494,7 +494,8 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         }
         if ((mIv != null) && (mIv.length > 0)) {
             try {
-                AlgorithmParameters params = AlgorithmParameters.getInstance("AES");
+                AlgorithmParameters params =
+                        AlgorithmParameters.getInstance(KeyStoreKeyProperties.Algorithm.AES);
                 params.init(new IvParameterSpec(mIv));
                 return params;
             } catch (NoSuchAlgorithmException e) {

@@ -32,10 +32,10 @@ public class KeyStoreKeySpec implements KeySpec {
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
     private final @KeyStoreKeyProperties.PurposeEnum int mPurposes;
-    private final String[] mEncryptionPaddings;
-    private final String[] mSignaturePaddings;
-    private final String[] mDigests;
-    private final String[] mBlockModes;
+    private final @KeyStoreKeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
+    private final @KeyStoreKeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
+    private final @KeyStoreKeyProperties.DigestEnum String[] mDigests;
+    private final @KeyStoreKeyProperties.BlockModeEnum String[] mBlockModes;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
     private final boolean mUserAuthenticationRequirementTeeEnforced;
@@ -51,10 +51,10 @@ public class KeyStoreKeySpec implements KeySpec {
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
             @KeyStoreKeyProperties.PurposeEnum int purposes,
-            String[] encryptionPaddings,
-            String[] signaturePaddings,
-            String[] digests,
-            String[] blockModes,
+            @KeyStoreKeyProperties.EncryptionPaddingEnum String[] encryptionPaddings,
+            @KeyStoreKeyProperties.SignaturePaddingEnum String[] signaturePaddings,
+            @KeyStoreKeyProperties.DigestEnum String[] digests,
+            @KeyStoreKeyProperties.BlockModeEnum String[] blockModes,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
             boolean userAuthenticationRequirementTeeEnforced) {
@@ -143,28 +143,28 @@ public class KeyStoreKeySpec implements KeySpec {
     /**
      * Gets the set of block modes with which the key can be used.
      */
-    public String[] getBlockModes() {
+    public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
 
     /**
      * Gets the set of padding modes with which the key can be used when encrypting/decrypting.
      */
-    public String[] getEncryptionPaddings() {
+    public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
 
     /**
      * Gets the set of padding modes with which the key can be used when signing/verifying.
      */
-    public String[] getSignaturePaddings() {
+    public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
         return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
     }
 
     /**
      * Gets the set of digest algorithms with which the key can be used.
      */
-    public String[] getDigests() {
+    public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
         return ArrayUtils.cloneIfNotEmpty(mDigests);
     }
 

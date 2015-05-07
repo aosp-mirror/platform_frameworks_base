@@ -85,13 +85,13 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     private final @KeyStoreKeyProperties.PurposeEnum int mPurposes;
 
-    private final String[] mDigests;
+    private final @KeyStoreKeyProperties.DigestEnum String[] mDigests;
 
-    private final String[] mEncryptionPaddings;
+    private final @KeyStoreKeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
 
-    private final String[] mSignaturePaddings;
+    private final @KeyStoreKeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
 
-    private final String[] mBlockModes;
+    private final @KeyStoreKeyProperties.BlockModeEnum String[] mBlockModes;
 
     private final boolean mRandomizedEncryptionRequired;
 
@@ -138,10 +138,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
             @KeyStoreKeyProperties.PurposeEnum int purposes,
-            String[] digests,
-            String[] encryptionPaddings,
-            String[] signaturePaddings,
-            String[] blockModes,
+            @KeyStoreKeyProperties.DigestEnum String[] digests,
+            @KeyStoreKeyProperties.EncryptionPaddingEnum String[] encryptionPaddings,
+            @KeyStoreKeyProperties.SignaturePaddingEnum String[] signaturePaddings,
+            @KeyStoreKeyProperties.BlockModeEnum String[] blockModes,
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds) {
@@ -246,7 +246,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Returns the key type (e.g., "EC", "RSA") specified by this parameter.
      */
-    public String getKeyType() {
+    public @KeyStoreKeyProperties.AlgorithmEnum String getKeyType() {
         return mKeyType;
     }
 
@@ -352,28 +352,28 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Gets the set of digest algorithms with which the key can be used.
      */
-    public String[] getDigests() {
+    public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
         return ArrayUtils.cloneIfNotEmpty(mDigests);
     }
 
     /**
      * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
      */
-    public String[] getEncryptionPaddings() {
+    public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
 
     /**
      * Gets the set of padding schemes with which the key can be used when signing/verifying.
      */
-    public String[] getSignaturePaddings() {
+    public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
         return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
     }
 
     /**
      * Gets the set of block modes with which the key can be used.
      */
-    public String[] getBlockModes() {
+    public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
 
@@ -468,13 +468,13 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
         private @KeyStoreKeyProperties.PurposeEnum int mPurposes;
 
-        private String[] mDigests;
+        private @KeyStoreKeyProperties.DigestEnum String[] mDigests;
 
-        private String[] mEncryptionPaddings;
+        private @KeyStoreKeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
 
-        private String[] mSignaturePaddings;
+        private @KeyStoreKeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
 
-        private String[] mBlockModes;
+        private @KeyStoreKeyProperties.BlockModeEnum String[] mBlockModes;
 
         private boolean mRandomizedEncryptionRequired = true;
 
@@ -511,7 +511,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the key type (e.g., EC, RSA) of the keypair to be created.
          */
-        public Builder setKeyType(String keyType) throws NoSuchAlgorithmException {
+        public Builder setKeyType(@KeyStoreKeyProperties.AlgorithmEnum String keyType)
+                throws NoSuchAlgorithmException {
             if (keyType == null) {
                 throw new NullPointerException("keyType == null");
             } else {
@@ -691,7 +692,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for keys which are used for signing/verification.
          */
-        public Builder setDigests(String... digests) {
+        public Builder setDigests(@KeyStoreKeyProperties.DigestEnum String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
             return this;
         }
@@ -703,7 +704,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
          */
-        public Builder setEncryptionPaddings(String... paddings) {
+        public Builder setEncryptionPaddings(
+                @KeyStoreKeyProperties.EncryptionPaddingEnum String... paddings) {
             mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
             return this;
         }
@@ -715,7 +717,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
          */
-        public Builder setSignaturePaddings(String... paddings) {
+        public Builder setSignaturePaddings(
+                @KeyStoreKeyProperties.SignaturePaddingEnum String... paddings) {
             mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(paddings);
             return this;
         }
@@ -726,7 +729,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for encryption/decryption keys.
          */
-        public Builder setBlockModes(String... blockModes) {
+        public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
             mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
             return this;
         }
