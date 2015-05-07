@@ -287,7 +287,7 @@ public abstract class RemoteDisplayProvider {
      */
     public PendingIntent getSettingsPendingIntent() {
         if (mSettingsPendingIntent == null) {
-            Intent settingsIntent = new Intent(Settings.ACTION_WIFI_DISPLAY_SETTINGS);
+            Intent settingsIntent = new Intent(Settings.ACTION_CAST_SETTINGS);
             settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                     | Intent.FLAG_ACTIVITY_CLEAR_TOP);
