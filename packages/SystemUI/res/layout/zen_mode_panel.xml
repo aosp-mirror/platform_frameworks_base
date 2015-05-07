@@ -52,7 +52,7 @@
             android:layout_alignParentEnd="true"
             android:background="@drawable/btn_borderless_rect"
             android:clickable="true"
-            android:contentDescription="@string/accessibility_desc_confirm"
+            android:contentDescription="@string/accessibility_desc_close"
             android:scaleType="center"
             android:src="@drawable/ic_close"
             android:tint="@android:color/white" />
