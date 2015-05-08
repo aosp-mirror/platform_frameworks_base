@@ -1695,6 +1695,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     vis = 0;
                 }
                 mImeWindowVis = vis;
+                mInputShown = ((mImeWindowVis & InputMethodService.IME_VISIBLE) != 0);
                 mBackDisposition = backDisposition;
                 final boolean iconVisibility = ((vis & (InputMethodService.IME_ACTIVE)) != 0)
                         && (mWindowManagerService.isHardKeyboardAvailable()
