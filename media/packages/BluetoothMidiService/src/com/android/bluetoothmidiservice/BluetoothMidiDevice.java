@@ -92,7 +92,6 @@ public final class BluetoothMidiDevice {
                         mBluetoothGatt.discoverServices());
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "Disconnected from GATT server.");
-                // FIXME synchronize?
                 close();
             }
         }
@@ -121,8 +120,8 @@ public final class BluetoothMidiDevice {
                     }
                 }
             } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
-                // FIXME - report error back to client?
+                Log.e(TAG, "onServicesDiscovered received: " + status);
+                close();
             }
         }
 
@@ -137,9 +136,12 @@ public final class BluetoothMidiDevice {
 
             BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
                     CLIENT_CHARACTERISTIC_CONFIG);
-            // FIXME null check
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            mBluetoothGatt.writeDescriptor(descriptor);
+            if (descriptor != null) {
+                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                mBluetoothGatt.writeDescriptor(descriptor);
+            } else {
+                Log.e(TAG, "No CLIENT_CHARACTERISTIC_CONFIG for device " + mBluetoothDevice);
+            }
         }
 
         @Override
@@ -244,16 +246,18 @@ public final class BluetoothMidiDevice {
         }.start();
     }
 
-    void close() {
+    private void close() {
+        synchronized (mBluetoothDevice) {
         mEventScheduler.close();
-        if (mDeviceServer != null) {
-            IoUtils.closeQuietly(mDeviceServer);
-            mDeviceServer = null;
-            mService.deviceClosed(mBluetoothDevice);
-        }
-        if (mBluetoothGatt != null) {
-            mBluetoothGatt.close();
-            mBluetoothGatt = null;
+            if (mDeviceServer != null) {
+                IoUtils.closeQuietly(mDeviceServer);
+                mDeviceServer = null;
+                mService.deviceClosed(mBluetoothDevice);
+            }
+            if (mBluetoothGatt != null) {
+                mBluetoothGatt.close();
+                mBluetoothGatt = null;
+            }
         }
     }
 
