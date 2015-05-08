@@ -20,7 +20,6 @@ import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
-
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.XmlUtils;
 
@@ -62,6 +61,7 @@ import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.ViewDebug;
+import android.view.ViewHierarchyEncoder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1806,10 +1806,25 @@ public class Resources {
             for (int i = 0, j = N - 1; i < themes.length; i += 2, --j) {
                 final int resId = mKey.mResId[i];
                 final boolean forced = mKey.mForce[i];
-                themes[i] = getResourceName(resId);
+                try {
+                    themes[i] = getResourceName(resId);
+                } catch (NotFoundException e) {
+                    themes[i] = Integer.toHexString(i);
+                }
                 themes[i + 1] = forced ? "forced" : "not forced";
             }
             return themes;
+        }
+
+        /** @hide */
+        public void encode(@NonNull ViewHierarchyEncoder encoder) {
+            encoder.beginObject(this);
+            // TODO: revert after getTheme() is fixed
+            String[] properties = new String[0]; // getTheme();
+            for (int i = 0; i < properties.length; i += 2) {
+                encoder.addProperty(properties[i], properties[i+1]);
+            }
+            encoder.endObject();
         }
 
         /**

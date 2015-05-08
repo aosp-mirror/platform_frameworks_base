@@ -229,14 +229,24 @@ public class DdmHandleViewDebug extends ChunkHandler {
     private Chunk dumpHierarchy(View rootView, ByteBuffer in) {
         boolean skipChildren = in.getInt() > 0;
         boolean includeProperties = in.getInt() > 0;
+        boolean v2 = in.hasRemaining() && in.getInt() > 0;
 
-        ByteArrayOutputStream b = new ByteArrayOutputStream(1024);
+        long start = System.currentTimeMillis();
+
+        ByteArrayOutputStream b = new ByteArrayOutputStream(2*1024*1024);
         try {
-            ViewDebug.dump(rootView, skipChildren, includeProperties, b);
-        } catch (IOException e) {
+            if (v2) {
+                ViewDebug.dumpv2(rootView, b);
+            } else {
+                ViewDebug.dump(rootView, skipChildren, includeProperties, b);
+            }
+        } catch (IOException | InterruptedException e) {
             return createFailChunk(1, "Unexpected error while obtaining view hierarchy: "
                     + e.getMessage());
         }
+
+        long end = System.currentTimeMillis();
+        Log.d(TAG, "Time to obtain view hierarchy (ms): " + (end - start));
 
         byte[] data = b.toByteArray();
         return new Chunk(CHUNK_VURT, data, 0, data.length);

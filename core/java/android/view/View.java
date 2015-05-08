@@ -22353,4 +22353,138 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final String output = bits + " " + name;
         found.put(key, output);
     }
+
+    /** {@hide} */
+    void encode(@NonNull ViewHierarchyEncoder stream) {
+        stream.beginObject(this);
+        encodeProperties(stream);
+        stream.endObject();
+    }
+
+    /** {@hide} */
+    @CallSuper
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
+        Object resolveId = ViewDebug.resolveId(getContext(), mID);
+        if (resolveId instanceof String) {
+            stream.addProperty("id", (String) resolveId);
+        } else {
+            stream.addProperty("id", mID);
+        }
+
+        stream.addProperty("misc:transformation.alpha",
+                mTransformationInfo != null ? mTransformationInfo.mAlpha : 0);
+        stream.addProperty("misc:transitionName", getTransitionName());
+
+        // layout
+        stream.addProperty("layout:left", mLeft);
+        stream.addProperty("layout:right", mRight);
+        stream.addProperty("layout:top", mTop);
+        stream.addProperty("layout:bottom", mBottom);
+        stream.addProperty("layout:width", getWidth());
+        stream.addProperty("layout:height", getHeight());
+        stream.addProperty("layout:layoutDirection", getLayoutDirection());
+        stream.addProperty("layout:layoutRtl", isLayoutRtl());
+        stream.addProperty("layout:hasTransientState", hasTransientState());
+        stream.addProperty("layout:baseline", getBaseline());
+
+        // layout params
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        if (layoutParams != null) {
+            stream.addPropertyKey("layoutParams");
+            layoutParams.encode(stream);
+        }
+
+        // scrolling
+        stream.addProperty("scrolling:scrollX", mScrollX);
+        stream.addProperty("scrolling:scrollY", mScrollY);
+
+        // padding
+        stream.addProperty("padding:paddingLeft", mPaddingLeft);
+        stream.addProperty("padding:paddingRight", mPaddingRight);
+        stream.addProperty("padding:paddingTop", mPaddingTop);
+        stream.addProperty("padding:paddingBottom", mPaddingBottom);
+        stream.addProperty("padding:userPaddingRight", mUserPaddingRight);
+        stream.addProperty("padding:userPaddingLeft", mUserPaddingLeft);
+        stream.addProperty("padding:userPaddingBottom", mUserPaddingBottom);
+        stream.addProperty("padding:userPaddingStart", mUserPaddingStart);
+        stream.addProperty("padding:userPaddingEnd", mUserPaddingEnd);
+
+        // measurement
+        stream.addProperty("measurement:minHeight", mMinHeight);
+        stream.addProperty("measurement:minWidth", mMinWidth);
+        stream.addProperty("measurement:measuredWidth", mMeasuredWidth);
+        stream.addProperty("measurement:measuredHeight", mMeasuredHeight);
+
+        // drawing
+        stream.addProperty("drawing:elevation", getElevation());
+        stream.addProperty("drawing:translationX", getTranslationX());
+        stream.addProperty("drawing:translationY", getTranslationY());
+        stream.addProperty("drawing:translationZ", getTranslationZ());
+        stream.addProperty("drawing:rotation", getRotation());
+        stream.addProperty("drawing:rotationX", getRotationX());
+        stream.addProperty("drawing:rotationY", getRotationY());
+        stream.addProperty("drawing:scaleX", getScaleX());
+        stream.addProperty("drawing:scaleY", getScaleY());
+        stream.addProperty("drawing:pivotX", getPivotX());
+        stream.addProperty("drawing:pivotY", getPivotY());
+        stream.addProperty("drawing:opaque", isOpaque());
+        stream.addProperty("drawing:alpha", getAlpha());
+        stream.addProperty("drawing:transitionAlpha", getTransitionAlpha());
+        stream.addProperty("drawing:shadow", hasShadow());
+        stream.addProperty("drawing:solidColor", getSolidColor());
+        stream.addProperty("drawing:layerType", mLayerType);
+        stream.addProperty("drawing:willNotDraw", willNotDraw());
+        stream.addProperty("drawing:hardwareAccelerated", isHardwareAccelerated());
+        stream.addProperty("drawing:willNotCacheDrawing", willNotCacheDrawing());
+        stream.addProperty("drawing:drawingCacheEnabled", isDrawingCacheEnabled());
+        stream.addProperty("drawing:overlappingRendering", hasOverlappingRendering());
+
+        // focus
+        stream.addProperty("focus:hasFocus", hasFocus());
+        stream.addProperty("focus:isFocused", isFocused());
+        stream.addProperty("focus:isFocusable", isFocusable());
+        stream.addProperty("focus:isFocusableInTouchMode", isFocusableInTouchMode());
+
+        stream.addProperty("misc:clickable", isClickable());
+        stream.addProperty("misc:pressed", isPressed());
+        stream.addProperty("misc:selected", isSelected());
+        stream.addProperty("misc:touchMode", isInTouchMode());
+        stream.addProperty("misc:hovered", isHovered());
+        stream.addProperty("misc:activated", isActivated());
+
+        stream.addProperty("misc:visibility", getVisibility());
+        stream.addProperty("misc:fitsSystemWindows", getFitsSystemWindows());
+        stream.addProperty("misc:filterTouchesWhenObscured", getFilterTouchesWhenObscured());
+
+        stream.addProperty("misc:enabled", isEnabled());
+        stream.addProperty("misc:soundEffectsEnabled", isSoundEffectsEnabled());
+        stream.addProperty("misc:hapticFeedbackEnabled", isHapticFeedbackEnabled());
+
+        // theme attributes
+        Resources.Theme theme = getContext().getTheme();
+        if (theme != null) {
+            stream.addPropertyKey("theme");
+            theme.encode(stream);
+        }
+
+        // view attribute information
+        int n = mAttributes != null ? mAttributes.length : 0;
+        stream.addProperty("meta:__attrCount__", n/2);
+        for (int i = 0; i < n; i += 2) {
+            stream.addProperty("meta:__attr__" + mAttributes[i], mAttributes[i+1]);
+        }
+
+        stream.addProperty("misc:scrollBarStyle", getScrollBarStyle());
+
+        // text
+        stream.addProperty("text:textDirection", getTextDirection());
+        stream.addProperty("text:textAlignment", getTextAlignment());
+
+        // accessibility
+        CharSequence contentDescription = getContentDescription();
+        stream.addProperty("accessibility:contentDescription",
+                contentDescription == null ? "" : contentDescription.toString());
+        stream.addProperty("accessibility:labelFor", getLabelFor());
+        stream.addProperty("accessibility:importantForAccessibility", getImportantForAccessibility());
+    }
 }
