@@ -234,6 +234,14 @@ public class UserManagerService extends IUserManager.Stub {
                 mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
                 initDefaultGuestRestrictions();
                 readUserListLocked();
+                sInstance = this;
+            }
+        }
+    }
+
+    void systemReady() {
+        synchronized (mInstallLock) {
+            synchronized (mPackagesLock) {
                 // Prune out any partially created/partially removed users.
                 ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
                 for (int i = 0; i < mUsers.size(); i++) {
@@ -248,12 +256,8 @@ public class UserManagerService extends IUserManager.Stub {
                             + " (name=" + ui.name + ")");
                     removeUserStateLocked(ui.id);
                 }
-                sInstance = this;
             }
         }
-    }
-
-    void systemReady() {
         userForeground(UserHandle.USER_OWNER);
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
