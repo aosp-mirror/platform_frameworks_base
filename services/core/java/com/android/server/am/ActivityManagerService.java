@@ -14121,6 +14121,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean dumpDetails = false;
         boolean dumpFullDetails = false;
         boolean dumpDalvik = false;
+        boolean dumpSummaryOnly = false;
         boolean oomOnly = false;
         boolean isCompact = false;
         boolean localOnly = false;
@@ -14141,6 +14142,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dumpDalvik = true;
             } else if ("-c".equals(opt)) {
                 isCompact = true;
+            } else if ("-s".equals(opt)) {
+                dumpDetails = true;
+                dumpSummaryOnly = true;
             } else if ("--oom".equals(opt)) {
                 oomOnly = true;
             } else if ("--local".equals(opt)) {
@@ -14148,10 +14152,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else if ("--package".equals(opt)) {
                 packages = true;
             } else if ("-h".equals(opt)) {
-                pw.println("meminfo dump options: [-a] [-d] [-c] [--oom] [process]");
+                pw.println("meminfo dump options: [-a] [-d] [-c] [-s] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
                 pw.println("  -d: include dalvik details.");
                 pw.println("  -c: dump in a compact machine-parseable representation.");
+                pw.println("  -s: dump only summary of application memory usage.");
                 pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("  --local: only collect details locally, don't call process.");
                 pw.println("  --package: interpret process arg as package, dumping all");
@@ -14212,7 +14217,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             mi.dalvikPrivateDirty = (int)tmpLong[0];
                         }
                         ActivityThread.dumpMemInfoTable(pw, mi, isCheckinRequest, dumpFullDetails,
-                                dumpDalvik, pid, r.baseName, 0, 0, 0, 0, 0, 0);
+                                dumpDalvik, dumpSummaryOnly, pid, r.baseName, 0, 0, 0, 0, 0, 0);
                         if (isCheckinRequest) {
                             pw.println();
                         }
@@ -14278,7 +14283,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (dumpDetails) {
                     if (localOnly) {
                         ActivityThread.dumpMemInfoTable(pw, mi, isCheckinRequest, dumpFullDetails,
-                                dumpDalvik, pid, r.processName, 0, 0, 0, 0, 0, 0);
+                                dumpDalvik, dumpSummaryOnly, pid, r.processName, 0, 0, 0, 0, 0, 0);
                         if (isCheckinRequest) {
                             pw.println();
                         }
@@ -14286,7 +14291,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         try {
                             pw.flush();
                             thread.dumpMemInfo(fd, mi, isCheckinRequest, dumpFullDetails,
-                                    dumpDalvik, innerArgs);
+                                    dumpDalvik, dumpSummaryOnly, innerArgs);
                         } catch (RemoteException e) {
                             if (!isCheckinRequest) {
                                 pw.println("Got RemoteException!");
