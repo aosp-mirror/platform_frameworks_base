@@ -15067,8 +15067,8 @@ package android.media {
     method public int getNotificationMarkerPosition();
     method public int getPlayState();
     method public int getPlaybackHeadPosition();
+    method public android.media.PlaybackParams getPlaybackParams();
     method public int getPlaybackRate();
-    method public android.media.PlaybackSettings getPlaybackSettings();
     method public int getPositionNotificationPeriod();
     method public android.media.AudioDeviceInfo getPreferredOutputDevice();
     method public android.media.AudioDeviceInfo getRoutedDevice();
@@ -15085,10 +15085,10 @@ package android.media {
     method public int setLoopPoints(int, int, int);
     method public int setNotificationMarkerPosition(int);
     method public int setPlaybackHeadPosition(int);
+    method public void setPlaybackParams(android.media.PlaybackParams);
     method public void setPlaybackPositionUpdateListener(android.media.AudioTrack.OnPlaybackPositionUpdateListener);
     method public void setPlaybackPositionUpdateListener(android.media.AudioTrack.OnPlaybackPositionUpdateListener, android.os.Handler);
     method public int setPlaybackRate(int);
-    method public void setPlaybackSettings(android.media.PlaybackSettings);
     method public int setPositionNotificationPeriod(int);
     method public boolean setPreferredOutputDevice(android.media.AudioDeviceInfo);
     method protected deprecated void setState(int);
@@ -16088,9 +16088,9 @@ package android.media {
     method public int getAudioSessionId();
     method public int getCurrentPosition();
     method public int getDuration();
-    method public android.media.PlaybackSettings getPlaybackSettings();
+    method public android.media.PlaybackParams getPlaybackParams();
     method public int getSelectedTrack(int) throws java.lang.IllegalStateException;
-    method public android.media.SyncSettings getSyncSettings();
+    method public android.media.SyncParams getSyncParams();
     method public android.media.MediaTimestamp getTimestamp();
     method public android.media.MediaPlayer.TrackInfo[] getTrackInfo() throws java.lang.IllegalStateException;
     method public int getVideoHeight();
@@ -16126,11 +16126,11 @@ package android.media {
     method public void setOnTimedMetaDataListener(android.media.MediaPlayer.OnTimedMetaDataListener);
     method public void setOnTimedTextListener(android.media.MediaPlayer.OnTimedTextListener);
     method public void setOnVideoSizeChangedListener(android.media.MediaPlayer.OnVideoSizeChangedListener);
+    method public void setPlaybackParams(android.media.PlaybackParams);
     method public void setPlaybackRate(float, int);
-    method public void setPlaybackSettings(android.media.PlaybackSettings);
     method public void setScreenOnWhilePlaying(boolean);
     method public void setSurface(android.view.Surface);
-    method public void setSyncSettings(android.media.SyncSettings);
+    method public void setSyncParams(android.media.SyncParams);
     method public void setVideoScalingMode(int);
     method public void setVolume(float, float);
     method public void setWakeMode(android.content.Context, int);
@@ -16449,18 +16449,18 @@ package android.media {
     ctor public MediaSync();
     method public final android.view.Surface createInputSurface();
     method public void flush();
-    method public android.media.PlaybackSettings getPlaybackSettings();
-    method public android.media.SyncSettings getSyncSettings();
+    method public android.media.PlaybackParams getPlaybackParams();
+    method public android.media.SyncParams getSyncParams();
     method public android.media.MediaTimestamp getTimestamp();
-    method public void queueAudio(java.nio.ByteBuffer, int, int, long);
+    method public void queueAudio(java.nio.ByteBuffer, int, long);
     method public final void release();
     method public void setAudioTrack(android.media.AudioTrack);
     method public void setCallback(android.media.MediaSync.Callback, android.os.Handler);
     method public void setOnErrorListener(android.media.MediaSync.OnErrorListener, android.os.Handler);
+    method public void setPlaybackParams(android.media.PlaybackParams);
     method public void setPlaybackRate(float, int);
-    method public void setPlaybackSettings(android.media.PlaybackSettings);
     method public void setSurface(android.view.Surface);
-    method public void setSyncSettings(android.media.SyncSettings);
+    method public void setSyncParams(android.media.SyncParams);
     field public static final int MEDIASYNC_ERROR_AUDIOTRACK_FAIL = 1; // 0x1
     field public static final int MEDIASYNC_ERROR_SURFACE_FAIL = 2; // 0x2
     field public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0; // 0x0
@@ -16508,15 +16508,15 @@ package android.media {
     method public abstract void onAudioTrackRouting(android.media.AudioTrack);
   }
 
-  public final class PlaybackSettings {
-    ctor public PlaybackSettings();
-    method public android.media.PlaybackSettings allowDefaults();
+  public final class PlaybackParams {
+    ctor public PlaybackParams();
+    method public android.media.PlaybackParams allowDefaults();
     method public int getAudioFallbackMode();
     method public float getPitch();
     method public float getSpeed();
-    method public android.media.PlaybackSettings setAudioFallbackMode(int);
-    method public android.media.PlaybackSettings setPitch(float);
-    method public android.media.PlaybackSettings setSpeed(float);
+    method public android.media.PlaybackParams setAudioFallbackMode(int);
+    method public android.media.PlaybackParams setPitch(float);
+    method public android.media.PlaybackParams setSpeed(float);
     field public static final int AUDIO_FALLBACK_MODE_DEFAULT = 0; // 0x0
     field public static final int AUDIO_FALLBACK_MODE_FAIL = 2; // 0x2
     field public static final int AUDIO_FALLBACK_MODE_MUTE = 1; // 0x1
@@ -16707,17 +16707,17 @@ package android.media {
     method public abstract void onLoadComplete(android.media.SoundPool, int, int);
   }
 
-  public final class SyncSettings {
-    ctor public SyncSettings();
-    method public android.media.SyncSettings allowDefaults();
+  public final class SyncParams {
+    ctor public SyncParams();
+    method public android.media.SyncParams allowDefaults();
     method public int getAudioAdjustMode();
     method public float getFrameRate();
     method public int getSyncSource();
     method public float getTolerance();
-    method public android.media.SyncSettings setAudioAdjustMode(int);
-    method public android.media.SyncSettings setFrameRate(float);
-    method public android.media.SyncSettings setSyncSource(int);
-    method public android.media.SyncSettings setTolerance(float);
+    method public android.media.SyncParams setAudioAdjustMode(int);
+    method public android.media.SyncParams setFrameRate(float);
+    method public android.media.SyncParams setSyncSource(int);
+    method public android.media.SyncParams setTolerance(float);
     field public static final int AUDIO_ADJUST_MODE_DEFAULT = 0; // 0x0
     field public static final int AUDIO_ADJUST_MODE_RESAMPLE = 2; // 0x2
     field public static final int AUDIO_ADJUST_MODE_STRETCH = 1; // 0x1

@@ -22,31 +22,31 @@ import java.lang.annotation.RetentionPolicy;
 import android.annotation.IntDef;
 
 /**
- * Structure for common A/V sync settings.
+ * Structure for common A/V sync params.
  *
- * Used by {@link MediaSync} {link MediaSync#getSyncSettings()} and
- * {link MediaSync#setSyncSettings(SyncSettings)}
+ * Used by {@link MediaSync} {link MediaSync#getSyncParams()} and
+ * {link MediaSync#setSyncParams(SyncParams)}
  * to control A/V sync behavior.
  * <p> <strong>audio adjust mode:</strong>
  * select handling of audio track when changing playback speed due to sync.
  * <ul>
- * <li> {@link SyncSettings#AUDIO_ADJUST_MODE_DEFAULT}:
+ * <li> {@link SyncParams#AUDIO_ADJUST_MODE_DEFAULT}:
  *   System will determine best handling. </li>
- * <li> {@link SyncSettings#AUDIO_ADJUST_MODE_STRETCH}:
+ * <li> {@link SyncParams#AUDIO_ADJUST_MODE_STRETCH}:
  *   Change the speed of audio playback without altering its pitch.</li>
- * <li> {@link SyncSettings#AUDIO_ADJUST_MODE_RESAMPLE}:
+ * <li> {@link SyncParams#AUDIO_ADJUST_MODE_RESAMPLE}:
  *   Change the speed of audio playback by resampling the audio.</li>
  * </ul>
  * <p> <strong>sync source:</strong> select
  * clock source for sync.
  * <ul>
- * <li> {@link SyncSettings#SYNC_SOURCE_DEFAULT}:
+ * <li> {@link SyncParams#SYNC_SOURCE_DEFAULT}:
  *   System will determine best selection.</li>
- * <li> {@link SyncSettings#SYNC_SOURCE_SYSTEM_CLOCK}:
+ * <li> {@link SyncParams#SYNC_SOURCE_SYSTEM_CLOCK}:
  *   Use system clock for sync source.</li>
- * <li> {@link SyncSettings#SYNC_SOURCE_AUDIO}:
+ * <li> {@link SyncParams#SYNC_SOURCE_AUDIO}:
  *   Use audio track for sync source.</li>
- * <li> {@link SyncSettings#SYNC_SOURCE_VSYNC}:
+ * <li> {@link SyncParams#SYNC_SOURCE_VSYNC}:
  *   Syncronize media to vsync.</li>
  * </ul>
  * <p> <strong>tolerance:</strong> specifies the amount of allowed playback rate
@@ -55,7 +55,7 @@ import android.annotation.IntDef;
  * <p> <strong>frameRate:</strong> initial hint for video frame rate. Used when
  * sync source is vsync.
  */
-public final class SyncSettings {
+public final class SyncParams {
     /** @hide */
     @IntDef(
         value = {
@@ -155,14 +155,14 @@ public final class SyncSettings {
      */
     public static final int AUDIO_ADJUST_MODE_RESAMPLE = 2;
 
-    // flags to indicate which settings are actually set
+    // flags to indicate which params are actually set
     private static final int SET_SYNC_SOURCE         = 1 << 0;
     private static final int SET_AUDIO_ADJUST_MODE   = 1 << 1;
     private static final int SET_TOLERANCE           = 1 << 2;
     private static final int SET_FRAME_RATE          = 1 << 3;
     private int mSet = 0;
 
-    // settings
+    // params
     private int mAudioAdjustMode = AUDIO_ADJUST_MODE_STRETCH;
     private int mSyncSource = SYNC_SOURCE_DEFAULT;
     private float mTolerance = 0.f;
@@ -173,9 +173,9 @@ public final class SyncSettings {
      * Otherwise a {@link java.lang.IllegalArgumentException} exception
      * is raised when getting those properties
      * which have defaults but have never been set.
-     * @return this <code>SyncSettings</code> instance.
+     * @return this <code>SyncParams</code> instance.
      */
-    public SyncSettings allowDefaults() {
+    public SyncParams allowDefaults() {
         mSet |= SET_SYNC_SOURCE | SET_AUDIO_ADJUST_MODE | SET_TOLERANCE;
         return this;
     }
@@ -183,9 +183,9 @@ public final class SyncSettings {
     /**
      * Sets the audio adjust mode.
      * @param audioAdjustMode
-     * @return this <code>SyncSettings</code> instance.
+     * @return this <code>SyncParams</code> instance.
      */
-    public SyncSettings setAudioAdjustMode(@AudioAdjustMode int audioAdjustMode) {
+    public SyncParams setAudioAdjustMode(@AudioAdjustMode int audioAdjustMode) {
         mAudioAdjustMode = audioAdjustMode;
         mSet |= SET_AUDIO_ADJUST_MODE;
         return this;
@@ -206,9 +206,9 @@ public final class SyncSettings {
     /**
      * Sets the sync source.
      * @param syncSource
-     * @return this <code>SyncSettings</code> instance.
+     * @return this <code>SyncParams</code> instance.
      */
-    public SyncSettings setSyncSource(@SyncSource int syncSource) {
+    public SyncParams setSyncSource(@SyncSource int syncSource) {
         mSyncSource = syncSource;
         mSet |= SET_SYNC_SOURCE;
         return this;
@@ -231,9 +231,9 @@ public final class SyncSettings {
      * @param tolerance A non-negative number representing
      *     the maximum deviation of the playback rate from the playback rate
      *     set. ({@code abs(actual_rate - set_rate) / set_rate})
-     * @return this <code>SyncSettings</code> instance.
+     * @return this <code>SyncParams</code> instance.
      */
-    public SyncSettings setTolerance(float tolerance) {
+    public SyncParams setTolerance(float tolerance) {
         mTolerance = tolerance;
         mSet |= SET_TOLERANCE;
         return this;
@@ -257,9 +257,9 @@ public final class SyncSettings {
      * Sets the video frame rate hint to be used. By default the frame rate is unspecified.
      * @param frameRate A non-negative number used as an initial hint on
      *     the video frame rate to be used when using vsync as the sync source.
-     * @return this <code>SyncSettings</code> instance.
+     * @return this <code>SyncParams</code> instance.
      */
-    public SyncSettings setFrameRate(float frameRate) {
+    public SyncParams setFrameRate(float frameRate) {
         mFrameRate = frameRate;
         mSet |= SET_FRAME_RATE;
         return this;

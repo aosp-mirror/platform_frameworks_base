@@ -47,12 +47,12 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaFormat;
 import android.media.MediaTimeProvider;
-import android.media.PlaybackSettings;
+import android.media.PlaybackParams;
 import android.media.SubtitleController;
 import android.media.SubtitleController.Anchor;
 import android.media.SubtitleData;
 import android.media.SubtitleTrack.RenderingWidget;
-import android.media.SyncSettings;
+import android.media.SyncParams;
 
 import com.android.internal.app.IAppOpsService;
 
@@ -481,7 +481,7 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
- * <tr><td>setPlaybackSettings</p></td>
+ * <tr><td>setPlaybackParams</p></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
@@ -1408,68 +1408,68 @@ public class MediaPlayer implements SubtitleController.Listener
      * @throws IllegalArgumentException if audioMode is not supported.
      */
     public void setPlaybackRate(float rate, @PlaybackRateAudioMode int audioMode) {
-        PlaybackSettings settings = new PlaybackSettings();
-        settings.allowDefaults();
+        PlaybackParams params = new PlaybackParams();
+        params.allowDefaults();
         switch (audioMode) {
         case PLAYBACK_RATE_AUDIO_MODE_DEFAULT:
-            settings.setSpeed(rate).setPitch(1.0f);
+            params.setSpeed(rate).setPitch(1.0f);
             break;
         case PLAYBACK_RATE_AUDIO_MODE_STRETCH:
-            settings.setSpeed(rate).setPitch(1.0f)
-                    .setAudioFallbackMode(settings.AUDIO_FALLBACK_MODE_FAIL);
+            params.setSpeed(rate).setPitch(1.0f)
+                    .setAudioFallbackMode(params.AUDIO_FALLBACK_MODE_FAIL);
             break;
         case PLAYBACK_RATE_AUDIO_MODE_RESAMPLE:
-            settings.setSpeed(rate).setPitch(rate);
+            params.setSpeed(rate).setPitch(rate);
             break;
         default:
             final String msg = "Audio playback mode " + audioMode + " is not supported";
             throw new IllegalArgumentException(msg);
         }
-        setPlaybackSettings(settings);
+        setPlaybackParams(params);
     }
 
     /**
-     * Sets playback rate using {@link PlaybackSettings}.
+     * Sets playback rate using {@link PlaybackParams}.
      *
-     * @param settings the playback settings.
+     * @param params the playback params.
      *
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
-     * @throws IllegalArgumentException if settings is not supported.
+     * @throws IllegalArgumentException if params is not supported.
      */
-    public native void setPlaybackSettings(@NonNull PlaybackSettings settings);
+    public native void setPlaybackParams(@NonNull PlaybackParams params);
 
     /**
-     * Gets the playback settings, containing the current playback rate.
+     * Gets the playback params, containing the current playback rate.
      *
-     * @return the playback settings.
+     * @return the playback params.
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
      */
     @NonNull
-    public native PlaybackSettings getPlaybackSettings();
+    public native PlaybackParams getPlaybackParams();
 
     /**
      * Sets A/V sync mode.
      *
-     * @param settings the A/V sync settings to apply
+     * @param params the A/V sync params to apply
      *
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
-     * @throws IllegalArgumentException if settings are not supported.
+     * @throws IllegalArgumentException if params are not supported.
      */
-    public native void setSyncSettings(@NonNull SyncSettings settings);
+    public native void setSyncParams(@NonNull SyncParams params);
 
     /**
      * Gets the A/V sync mode.
      *
-     * @return the A/V sync settings
+     * @return the A/V sync params
      *
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
      */
     @NonNull
-    public native SyncSettings getSyncSettings();
+    public native SyncParams getSyncParams();
 
     /**
      * Seeks to specified time position.
@@ -1507,7 +1507,7 @@ public class MediaPlayer implements SubtitleController.Listener
             return new MediaTimestamp(
                     getCurrentPosition() * 1000L,
                     System.nanoTime(),
-                    isPlaying() ? getPlaybackSettings().getSpeed() : 0.f);
+                    isPlaying() ? getPlaybackParams().getSpeed() : 0.f);
         } catch (IllegalStateException e) {
             return null;
         }

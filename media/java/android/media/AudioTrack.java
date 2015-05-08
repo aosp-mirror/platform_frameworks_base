@@ -908,13 +908,13 @@ public class AudioTrack
     }
 
     /**
-     * Returns the current playback settings.
-     * See {@link #setPlaybackSettings(PlaybackSettings)} to set playback settings
-     * @return current {@link PlaybackSettings}.
+     * Returns the current playback params.
+     * See {@link #setPlaybackParams(PlaybackParams)} to set playback params
+     * @return current {@link PlaybackParams}.
      * @throws IllegalStateException if track is not initialized.
      */
-    public @NonNull PlaybackSettings getPlaybackSettings() {
-        return native_get_playback_settings();
+    public @NonNull PlaybackParams getPlaybackParams() {
+        return native_get_playback_params();
     }
 
     /**
@@ -1294,7 +1294,7 @@ public class AudioTrack
      * playback to last twice as long, but will also result in a pitch shift down by one octave.
      * The valid sample rate range is from 1 Hz to twice the value returned by
      * {@link #getNativeOutputSampleRate(int)}.
-     * Use {@link #setPlaybackSettings(PlaybackSettings)} for speed control.
+     * Use {@link #setPlaybackParams(PlaybackParams)} for speed control.
      * @param sampleRateInHz the sample rate expressed in Hz
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
@@ -1311,24 +1311,24 @@ public class AudioTrack
 
 
     /**
-     * Sets the playback settings.
-     * This method returns failure if it cannot apply the playback settings.
+     * Sets the playback params.
+     * This method returns failure if it cannot apply the playback params.
      * One possible cause is that the parameters for speed or pitch are out of range.
      * Another possible cause is that the <code>AudioTrack</code> is streaming
      * (see {@link #MODE_STREAM}) and the
      * buffer size is too small. For speeds greater than 1.0f, the <code>AudioTrack</code> buffer
      * on configuration must be larger than the speed multiplied by the minimum size
      * {@link #getMinBufferSize(int, int, int)}) to allow proper playback.
-     * @param settings see {@link PlaybackSettings}. In particular,
+     * @param params see {@link PlaybackParams}. In particular,
      * speed, pitch, and audio mode should be set.
-     * @throws IllegalArgumentException if the settings are invalid or not accepted.
+     * @throws IllegalArgumentException if the params are invalid or not accepted.
      * @throws IllegalStateException if track is not initialized.
      */
-    public void setPlaybackSettings(@NonNull PlaybackSettings settings) {
-        if (settings == null) {
-            throw new IllegalArgumentException("settings is null");
+    public void setPlaybackParams(@NonNull PlaybackParams params) {
+        if (params == null) {
+            throw new IllegalArgumentException("params is null");
         }
-        native_set_playback_settings(settings);
+        native_set_playback_params(params);
     }
 
 
@@ -2353,8 +2353,8 @@ public class AudioTrack
     private native final int native_set_playback_rate(int sampleRateInHz);
     private native final int native_get_playback_rate();
 
-    private native final void native_set_playback_settings(@NonNull PlaybackSettings settings);
-    private native final @NonNull PlaybackSettings native_get_playback_settings();
+    private native final void native_set_playback_params(@NonNull PlaybackParams params);
+    private native final @NonNull PlaybackParams native_get_playback_params();
 
     private native final int native_set_marker_pos(int marker);
     private native final int native_get_marker_pos();

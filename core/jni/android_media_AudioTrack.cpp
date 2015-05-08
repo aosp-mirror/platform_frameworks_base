@@ -35,7 +35,7 @@
 
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
-#include "android_media_PlaybackSettings.h"
+#include "android_media_PlaybackParams.h"
 #include "android_media_DeviceCallback.h"
 
 // ----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ struct audio_attributes_fields_t {
 };
 static audio_track_fields_t      javaAudioTrackFields;
 static audio_attributes_fields_t javaAudioAttrFields;
-static PlaybackSettings::fields_t gPlaybackSettingsFields;
+static PlaybackParams::fields_t gPlaybackParamsFields;
 
 struct audiotrack_callback_cookie {
     jclass      audioTrack_class;
@@ -693,8 +693,8 @@ static jint android_media_AudioTrack_get_playback_rate(JNIEnv *env,  jobject thi
 
 
 // ----------------------------------------------------------------------------
-static void android_media_AudioTrack_set_playback_settings(JNIEnv *env,  jobject thiz,
-        jobject settings) {
+static void android_media_AudioTrack_set_playback_params(JNIEnv *env,  jobject thiz,
+        jobject params) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -702,10 +702,10 @@ static void android_media_AudioTrack_set_playback_settings(JNIEnv *env,  jobject
         return;
     }
 
-    PlaybackSettings pbs;
-    pbs.fillFromJobject(env, gPlaybackSettingsFields, settings);
+    PlaybackParams pbs;
+    pbs.fillFromJobject(env, gPlaybackParamsFields, params);
 
-    ALOGV("setPlaybackSettings: %d:%f %d:%f %d:%u %d:%u",
+    ALOGV("setPlaybackParams: %d:%f %d:%f %d:%u %d:%u",
             pbs.speedSet, pbs.audioRate.mSpeed,
             pbs.pitchSet, pbs.audioRate.mPitch,
             pbs.audioFallbackModeSet, pbs.audioRate.mFallbackMode,
@@ -719,8 +719,8 @@ static void android_media_AudioTrack_set_playback_settings(JNIEnv *env,  jobject
 
 
 // ----------------------------------------------------------------------------
-static jobject android_media_AudioTrack_get_playback_settings(JNIEnv *env,  jobject thiz,
-        jobject settings) {
+static jobject android_media_AudioTrack_get_playback_params(JNIEnv *env,  jobject thiz,
+        jobject params) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -728,13 +728,13 @@ static jobject android_media_AudioTrack_get_playback_settings(JNIEnv *env,  jobj
         return NULL;
     }
 
-    PlaybackSettings pbs;
+    PlaybackParams pbs;
     pbs.audioRate = lpTrack->getPlaybackRate();
     pbs.speedSet = true;
     pbs.pitchSet = true;
     pbs.audioFallbackModeSet = true;
     pbs.audioStretchModeSet = true;
-    return pbs.asJobject(env, gPlaybackSettingsFields);
+    return pbs.asJobject(env, gPlaybackParamsFields);
 }
 
 
@@ -1049,12 +1049,12 @@ static JNINativeMethod gMethods[] = {
                              "(I)I",     (void *)android_media_AudioTrack_set_playback_rate},
     {"native_get_playback_rate",
                              "()I",      (void *)android_media_AudioTrack_get_playback_rate},
-    {"native_set_playback_settings",
-                             "(Landroid/media/PlaybackSettings;)V",
-                                         (void *)android_media_AudioTrack_set_playback_settings},
-    {"native_get_playback_settings",
-                             "()Landroid/media/PlaybackSettings;",
-                                         (void *)android_media_AudioTrack_get_playback_settings},
+    {"native_set_playback_params",
+                             "(Landroid/media/PlaybackParams;)V",
+                                         (void *)android_media_AudioTrack_set_playback_params},
+    {"native_get_playback_params",
+                             "()Landroid/media/PlaybackParams;",
+                                         (void *)android_media_AudioTrack_get_playback_params},
     {"native_set_marker_pos","(I)I",     (void *)android_media_AudioTrack_set_marker_pos},
     {"native_get_marker_pos","()I",      (void *)android_media_AudioTrack_get_marker_pos},
     {"native_set_pos_update_period",
@@ -1144,8 +1144,8 @@ int register_android_media_AudioTrack(JNIEnv *env)
 
     env->DeleteLocalRef(audioAttrClass);
 
-    // initialize PlaybackSettings field info
-    gPlaybackSettingsFields.init(env);
+    // initialize PlaybackParams field info
+    gPlaybackParamsFields.init(env);
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }

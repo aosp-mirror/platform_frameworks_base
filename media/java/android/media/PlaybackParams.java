@@ -22,21 +22,21 @@ import java.lang.annotation.RetentionPolicy;
 import android.annotation.IntDef;
 
 /**
- * Structure for common playback settings.
+ * Structure for common playback params.
  *
- * Used by {@link AudioTrack} {@link AudioTrack#getPlaybackSettings()} and
- * {@link AudioTrack#setPlaybackSettings(PlaybackSettings)}
+ * Used by {@link AudioTrack} {@link AudioTrack#getPlaybackParams()} and
+ * {@link AudioTrack#setPlaybackParams(PlaybackParams)}
  * to control playback behavior.
  * <p> <strong>audio fallback mode:</strong>
  * select out-of-range parameter handling.
  * <ul>
- * <li> {@link PlaybackSettings#AUDIO_FALLBACK_MODE_DEFAULT}:
+ * <li> {@link PlaybackParams#AUDIO_FALLBACK_MODE_DEFAULT}:
  *   System will determine best handling. </li>
- * <li> {@link PlaybackSettings#AUDIO_FALLBACK_MODE_MUTE}:
- *   Play silence for settings normally out of range.</li>
- * <li> {@link PlaybackSettings#AUDIO_FALLBACK_MODE_FAIL}:
+ * <li> {@link PlaybackParams#AUDIO_FALLBACK_MODE_MUTE}:
+ *   Play silence for params normally out of range.</li>
+ * <li> {@link PlaybackParams#AUDIO_FALLBACK_MODE_FAIL}:
  *   Return {@link java.lang.IllegalArgumentException} from
- *   <code>AudioTrack.setPlaybackSettings(PlaybackSettings)</code>.</li>
+ *   <code>AudioTrack.setPlaybackParams(PlaybackParams)</code>.</li>
  * </ul>
  * <p> <strong>pitch:</strong> increases or decreases the tonal frequency of the audio content.
  * It is expressed as a multiplicative factor, where normal pitch is 1.0f.
@@ -52,7 +52,7 @@ import android.annotation.IntDef;
  * similar to {@link AudioTrack#setPlaybackRate(int)}.</li>
  * </ul>
  */
-public final class PlaybackSettings {
+public final class PlaybackParams {
     /** @hide */
     @IntDef(
         value = {
@@ -81,14 +81,14 @@ public final class PlaybackSettings {
     /** @hide */
     public static final int AUDIO_STRETCH_MODE_VOICE = 1;
 
-    // flags to indicate which settings are actually set
+    // flags to indicate which params are actually set
     private static final int SET_SPEED               = 1 << 0;
     private static final int SET_PITCH               = 1 << 1;
     private static final int SET_AUDIO_FALLBACK_MODE = 1 << 2;
     private static final int SET_AUDIO_STRETCH_MODE  = 1 << 3;
     private int mSet = 0;
 
-    // settings
+    // params
     private int mAudioFallbackMode = AUDIO_FALLBACK_MODE_DEFAULT;
     private int mAudioStretchMode = AUDIO_STRETCH_MODE_DEFAULT;
     private float mPitch = 1.0f;
@@ -99,9 +99,9 @@ public final class PlaybackSettings {
      * Otherwise a {@link java.lang.IllegalArgumentException} exception
      * is raised when getting those properties
      * which have defaults but have never been set.
-     * @return this <code>PlaybackSettings</code> instance.
+     * @return this <code>PlaybackParams</code> instance.
      */
-    public PlaybackSettings allowDefaults() {
+    public PlaybackParams allowDefaults() {
         mSet |= SET_AUDIO_FALLBACK_MODE | SET_AUDIO_STRETCH_MODE | SET_PITCH | SET_SPEED;
         return this;
     }
@@ -109,9 +109,9 @@ public final class PlaybackSettings {
     /**
      * Sets the audio fallback mode.
      * @param audioFallbackMode
-     * @return this <code>PlaybackSettings</code> instance.
+     * @return this <code>PlaybackParams</code> instance.
      */
-    public PlaybackSettings setAudioFallbackMode(@AudioFallbackMode int audioFallbackMode) {
+    public PlaybackParams setAudioFallbackMode(@AudioFallbackMode int audioFallbackMode) {
         mAudioFallbackMode = audioFallbackMode;
         mSet |= SET_AUDIO_FALLBACK_MODE;
         return this;
@@ -133,9 +133,9 @@ public final class PlaybackSettings {
      * @hide
      * Sets the audio stretch mode.
      * @param audioStretchMode
-     * @return this <code>PlaybackSettings</code> instance.
+     * @return this <code>PlaybackParams</code> instance.
      */
-    public PlaybackSettings setAudioStretchMode(@AudioStretchMode int audioStretchMode) {
+    public PlaybackParams setAudioStretchMode(@AudioStretchMode int audioStretchMode) {
         mAudioStretchMode = audioStretchMode;
         mSet |= SET_AUDIO_STRETCH_MODE;
         return this;
@@ -157,9 +157,9 @@ public final class PlaybackSettings {
     /**
      * Sets the pitch factor.
      * @param pitch
-     * @return this <code>PlaybackSettings</code> instance.
+     * @return this <code>PlaybackParams</code> instance.
      */
-    public PlaybackSettings setPitch(float pitch) {
+    public PlaybackParams setPitch(float pitch) {
         mPitch = pitch;
         mSet |= SET_PITCH;
         return this;
@@ -180,9 +180,9 @@ public final class PlaybackSettings {
     /**
      * Sets the speed factor.
      * @param speed
-     * @return this <code>PlaybackSettings</code> instance.
+     * @return this <code>PlaybackParams</code> instance.
      */
-    public PlaybackSettings setSpeed(float speed) {
+    public PlaybackParams setSpeed(float speed) {
         mSpeed = speed;
         mSet |= SET_SPEED;
         return this;

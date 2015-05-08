@@ -42,10 +42,10 @@ struct JMediaSync : public RefBase {
 
     status_t getPlayTimeForPendingAudioFrames(int64_t *outTimeUs);
 
-    status_t setPlaybackSettings(const AudioPlaybackRate& rate);
-    void getPlaybackSettings(AudioPlaybackRate* rate /* nonnull */);
-    status_t setSyncSettings(const AVSyncSettings& syncSettings);
-    void getSyncSettings(AVSyncSettings* syncSettings /* nonnull */);
+    status_t setPlaybackParams(const AudioPlaybackRate& rate);
+    void getPlaybackParams(AudioPlaybackRate* rate /* nonnull */);
+    status_t setSyncParams(const AVSyncSettings& syncParams);
+    void getSyncParams(AVSyncSettings* syncParams /* nonnull */);
     status_t setVideoFrameRateHint(float rate);
     float getVideoFrameRate();
 
