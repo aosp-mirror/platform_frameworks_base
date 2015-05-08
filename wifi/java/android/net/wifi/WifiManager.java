@@ -994,7 +994,7 @@ public class WifiManager {
             }
             synchronized(this) {
                 record = mService.reportActivityInfo();
-                if (record.isValid()) {
+                if (record != null && record.isValid()) {
                     return record;
                 } else {
                     return null;
