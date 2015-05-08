@@ -44,9 +44,6 @@
 
 //#define LOG_API ALOGE
 static constexpr bool kLogApi = false;
-static constexpr size_t kMaxNumberArgsAndBindings = 1000;
-static constexpr size_t kMaxNumberClosuresInScriptGroup = 1000000;
-static constexpr size_t kMaxNumberKernelArguments = 256;
 
 using namespace android;
 
@@ -376,7 +373,7 @@ nClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong kernelID,
       goto exit;
   }
 
-  if (numValues > kMaxNumberArgsAndBindings) {
+  if (numValues > RS_CLOSURE_MAX_NUMBER_ARGS_AND_BINDINGS) {
       ALOGE("Too many arguments or globals in closure creation");
       goto exit;
   }
@@ -461,7 +458,7 @@ nInvokeClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong invokeID,
 
   numValues = (size_t) fieldIDs_length;
 
-  if (numValues > kMaxNumberArgsAndBindings) {
+  if (numValues > RS_CLOSURE_MAX_NUMBER_ARGS_AND_BINDINGS) {
       ALOGE("Too many arguments or globals in closure creation");
       goto exit;
   }
@@ -526,7 +523,7 @@ nScriptGroup2Create(JNIEnv *_env, jobject _this, jlong con, jstring name,
 
   RsClosure* closures;
 
-  if (numClosures > (jsize) kMaxNumberClosuresInScriptGroup) {
+  if (numClosures > (jsize) RS_SCRIPT_GROUP_MAX_NUMBER_CLOSURES) {
     ALOGE("Too many closures in script group");
     goto exit;
   }
@@ -1877,7 +1874,7 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
 
     if (ains != nullptr) {
         in_len = _env->GetArrayLength(ains);
-        if (in_len > (jint)kMaxNumberKernelArguments) {
+        if (in_len > (jint)RS_KERNEL_MAX_ARGUMENTS) {
             ALOGE("Too many arguments in kernel launch.");
             // TODO (b/20758983): Report back to Java and throw an exception
             return;
