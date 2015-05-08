@@ -83,8 +83,7 @@ public class GhostView extends View {
             mView.mGhostView = null;
             final ViewGroup parent = (ViewGroup) mView.getParent();
             if (parent != null) {
-                parent.mRecreateDisplayList = true;
-                parent.updateDisplayListIfDirty();
+                parent.invalidate();
             }
         }
     }
