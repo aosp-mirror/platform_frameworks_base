@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.service.notification.ZenModeConfig.EventInfo.ANY_CALENDAR;
+
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -150,7 +152,7 @@ public class CalendarTracker {
                         eventId, owner, calendarId));
                 final boolean meetsTime = time >= begin && time < end;
                 final boolean meetsCalendar = visible
-                        && (filter.calendar == 0 || filter.calendar == calendarId)
+                        && (filter.calendar == ANY_CALENDAR || filter.calendar == calendarId)
                         && availability != Instances.AVAILABILITY_FREE;
                 if (meetsCalendar) {
                     if (DEBUG) Log.d(TAG, "  MEETS CALENDAR");
