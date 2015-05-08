@@ -50,7 +50,6 @@ public final class ConnectionRequest implements Parcelable {
      * @param handle The handle (e.g., phone number) to which the {@link Connection} is to connect.
      * @param extras Application-specific extra data.
      * @param videoState Determines the video state for the connection.
-     * @hide
      */
     public ConnectionRequest(
             PhoneAccountHandle accountHandle,
@@ -95,7 +94,6 @@ public final class ConnectionRequest implements Parcelable {
      * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @return The video state for the connection.
-     * @hide
      */
     public int getVideoState() {
         return mVideoState;
