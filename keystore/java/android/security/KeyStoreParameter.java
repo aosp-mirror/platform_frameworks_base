@@ -305,7 +305,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * <pre class="prettyprint">
      * KeyStoreParameter params = new KeyStoreParameter.Builder(mContext)
-     *         .setEncryptionRequired()
+     *         .setEncryptionRequired(true)
      *         .build();
      * </pre>
      */
@@ -338,12 +338,15 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Indicates that this {@link java.security.KeyStore} entry must be encrypted at rest. This
-         * will protect the entry with the secure lock screen credential (e.g., password, PIN, or
-         * pattern).
+         * Sets whether this {@link java.security.KeyStore} entry must be encrypted at rest.
+         * Encryption at rest will protect the entry with the secure lock screen credential (e.g.,
+         * password, PIN, or pattern).
          *
          * <p>Note that enabling this feature requires that the secure lock screen (e.g., password,
-         * PIN, pattern) is set up. Otherwise setting the {@code KeyStore} entry will fail.
+         * PIN, pattern) is set up, otherwise setting the {@code KeyStore} entry will fail.
+         * Moreover, this entry will be deleted when the secure lock screen is disabled or reset
+         * (e.g., by the user or a Device Administrator). Finally, this entry cannot be used until
+         * the user unlocks the secure lock screen after boot.
          *
          * @see KeyguardManager#isDeviceSecure()
          */
