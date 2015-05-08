@@ -1067,6 +1067,13 @@ public abstract class PackageManager {
     public static final String FEATURE_AUDIO_OUTPUT = "android.hardware.audio.output";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has professional audio level of functionality, performance, and acoustics.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_AUDIO_PRO = "android.hardware.audio.pro";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device is capable of communicating with
      * other devices via Bluetooth.
