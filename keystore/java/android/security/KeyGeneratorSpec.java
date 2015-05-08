@@ -306,16 +306,15 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          * secure lock screen credential (e.g., password, PIN, or pattern).
          *
          * <p>Note that this feature requires that the secure lock screen (e.g., password, PIN,
-         * pattern) is set up. Otherwise key generation will fail.
+         * pattern) is set up, otherwise key generation will fail. Moreover, this key will be
+         * deleted when the secure lock screen is disabled or reset (e.g., by the user or a Device
+         * Administrator). Finally, this key cannot be used until the user unlocks the secure lock
+         * screen after boot.
          *
          * @see KeyguardManager#isDeviceSecure()
          */
-        public Builder setEncryptionRequired(boolean required) {
-            if (required) {
-                mFlags |= KeyStore.FLAG_ENCRYPTED;
-            } else {
-                mFlags &= ~KeyStore.FLAG_ENCRYPTED;
-            }
+        public Builder setEncryptionRequired() {
+            mFlags |= KeyStore.FLAG_ENCRYPTED;
             return this;
         }
 

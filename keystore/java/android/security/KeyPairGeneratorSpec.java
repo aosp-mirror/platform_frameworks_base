@@ -654,11 +654,14 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Indicates that this key must be encrypted at rest. This will protect the key pair with
-         * the secure lock screen credential (e.g., password, PIN, or pattern).
+         * Indicates that this key pair must be encrypted at rest. This will protect the key pair
+         * with the secure lock screen credential (e.g., password, PIN, or pattern).
          *
          * <p>Note that this feature requires that the secure lock screen (e.g., password, PIN,
-         * pattern) is set up. Otherwise key pair generation will fail.
+         * pattern) is set up, otherwise key pair generation will fail. Moreover, this key pair will
+         * be deleted when the secure lock screen is disabled or reset (e.g., by the user or a
+         * Device Administrator). Finally, this key pair cannot be used until the user unlocks the
+         * secure lock screen after boot.
          *
          * @see KeyguardManager#isDeviceSecure()
          */
