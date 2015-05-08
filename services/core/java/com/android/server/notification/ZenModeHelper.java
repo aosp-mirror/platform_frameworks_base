@@ -22,6 +22,7 @@ import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
 import android.app.AppOpsManager;
+import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -142,11 +143,11 @@ public class ZenModeHelper {
     }
 
     public int getZenModeListenerInterruptionFilter() {
-        return getZenModeListenerInterruptionFilter(mZenMode);
+        return NotificationManager.zenModeToInterruptionFilter(mZenMode);
     }
 
-    public void requestFromListener(ComponentName name, int interruptionFilter) {
-        final int newZen = zenModeFromListenerInterruptionFilter(interruptionFilter, -1);
+    public void requestFromListener(ComponentName name, int filter) {
+        final int newZen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
         if (newZen != -1) {
             setManualZenMode(newZen, null,
                     "listener:" + (name != null ? name.flattenToShortString() : null));
@@ -390,37 +391,6 @@ public class ZenModeHelper {
     private void dispatchOnZenModeChanged() {
         for (Callback callback : mCallbacks) {
             callback.onZenModeChanged();
-        }
-    }
-
-    private static int getZenModeListenerInterruptionFilter(int zen) {
-        switch (zen) {
-            case Global.ZEN_MODE_OFF:
-                return NotificationListenerService.INTERRUPTION_FILTER_ALL;
-            case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                return NotificationListenerService.INTERRUPTION_FILTER_PRIORITY;
-            case Global.ZEN_MODE_ALARMS:
-                return NotificationListenerService.INTERRUPTION_FILTER_ALARMS;
-            case Global.ZEN_MODE_NO_INTERRUPTIONS:
-                return NotificationListenerService.INTERRUPTION_FILTER_NONE;
-            default:
-                return 0;
-        }
-    }
-
-    private static int zenModeFromListenerInterruptionFilter(int listenerInterruptionFilter,
-            int defValue) {
-        switch (listenerInterruptionFilter) {
-            case NotificationListenerService.INTERRUPTION_FILTER_ALL:
-                return Global.ZEN_MODE_OFF;
-            case NotificationListenerService.INTERRUPTION_FILTER_PRIORITY:
-                return Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-            case NotificationListenerService.INTERRUPTION_FILTER_ALARMS:
-                return Global.ZEN_MODE_ALARMS;
-            case NotificationListenerService.INTERRUPTION_FILTER_NONE:
-                return Global.ZEN_MODE_NO_INTERRUPTIONS;
-            default:
-                return defValue;
         }
     }
 

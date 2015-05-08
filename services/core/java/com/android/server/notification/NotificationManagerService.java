@@ -37,7 +37,6 @@ import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -233,7 +232,7 @@ public class NotificationManagerService extends SystemService {
             new ArrayMap<String, NotificationRecord>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
-    private final ArrayMap<String, Policy.Token> mPolicyTokens = new ArrayMap<>();
+    private final ArrayMap<String, Boolean> mPolicyAccess = new ArrayMap<>();
 
 
     // The last key in this list owns the hardware.
@@ -899,6 +898,7 @@ public class NotificationManagerService extends SystemService {
 
             @Override
             void onZenModeChanged() {
+                sendRegisteredOnlyBroadcast(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
                 synchronized(mNotificationList) {
                     updateInterruptionFilterLocked();
                 }
@@ -906,9 +906,12 @@ public class NotificationManagerService extends SystemService {
 
             @Override
             void onPolicyChanged() {
-                getContext().sendBroadcast(
-                        new Intent(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED)
-                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+                sendRegisteredOnlyBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
+            }
+
+            private void sendRegisteredOnlyBroadcast(String action) {
+                getContext().sendBroadcast(new Intent(action)
+                        .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
             }
         });
         final File systemDir = new File(Environment.getDataDirectory(), "system");
@@ -1607,6 +1610,19 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void setInterruptionFilter(String pkg, int filter) throws RemoteException {
+            enforcePolicyAccess(pkg, "setInterruptionFilter");
+            final int zen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
+            if (zen == -1) throw new IllegalArgumentException("Invalid filter: " + filter);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mZenModeHelper.setManualZenMode(zen, null, "setInterruptionFilter");
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void notifyConditions(String pkg, IConditionProvider provider,
                 Condition[] conditions) {
             final ManagedServiceInfo info = mConditionProviders.checkServiceToken(provider);
@@ -1641,16 +1657,19 @@ public class NotificationManagerService extends SystemService {
                     message);
         }
 
-        private void enforcePolicyToken(Policy.Token token, String method) {
-            if (!checkPolicyToken(token)) {
-                Slog.w(TAG, "Invalid notification policy token calling " + method);
-                throw new SecurityException("Invalid notification policy token");
+        private void enforcePolicyAccess(String pkg, String method) {
+            if (!checkPolicyAccess(pkg)) {
+                Slog.w(TAG, "Notification policy access denied calling " + method);
+                throw new SecurityException("Notification policy access denied");
             }
         }
 
-        private boolean checkPolicyToken(Policy.Token token) {
-            return mPolicyTokens.containsValue(token)
-                    || mListeners.mPolicyTokens.containsValue(token);
+        private boolean checkPackagePolicyAccess(String pkg) {
+            return Boolean.TRUE.equals(mPolicyAccess.get(pkg));
+        }
+
+        private boolean checkPolicyAccess(String pkg) {
+            return checkPackagePolicyAccess(pkg) || mListeners.isComponentEnabledForPackage(pkg);
         }
 
         @Override
@@ -1702,52 +1721,76 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public Policy.Token getPolicyTokenFromListener(INotificationListener listener) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                return mListeners.getPolicyToken(listener);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public void requestNotificationPolicyToken(String pkg,
+        public void requestNotificationPolicyAccess(String pkg,
                 INotificationManagerCallback callback) throws RemoteException {
             if (callback == null) {
-                Slog.w(TAG, "requestNotificationPolicyToken: no callback specified");
+                Slog.w(TAG, "requestNotificationPolicyAccess: no callback specified");
                 return;
             }
             if (pkg == null) {
-                Slog.w(TAG, "requestNotificationPolicyToken denied: no package specified");
-                callback.onPolicyToken(null);
+                Slog.w(TAG, "requestNotificationPolicyAccess denied: no package specified");
+                callback.onPolicyRequestResult(false);
                 return;
             }
-            Policy.Token token = null;
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
-                    token = mPolicyTokens.get(pkg);
-                    if (token == null) {
-                        token = new Policy.Token(new Binder());
-                        mPolicyTokens.put(pkg, token);
-                    }
-                    if (DBG) Slog.w(TAG, "requestNotificationPolicyToken granted for " + pkg);
+                    // immediately grant for now
+                    mPolicyAccess.put(pkg, true);
+                    if (DBG) Slog.w(TAG, "requestNotificationPolicyAccess granted for " + pkg);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-            callback.onPolicyToken(token);
+            callback.onPolicyRequestResult(true);
         }
 
         @Override
-        public boolean isNotificationPolicyTokenValid(String pkg, Policy.Token token) {
-            return checkPolicyToken(token);
+        public boolean isNotificationPolicyAccessGranted(String pkg) {
+            return checkPolicyAccess(pkg);
         }
 
         @Override
-        public Policy getNotificationPolicy(Policy.Token token) {
-            enforcePolicyToken(token, "getNotificationPolicy");
+        public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {
+            enforceSystemOrSystemUI("request policy access status for another package");
+            return checkPackagePolicyAccess(pkg);
+        }
+
+        @Override
+        public String[] getPackagesRequestingNotificationPolicyAccess()
+                throws RemoteException {
+            enforceSystemOrSystemUI("request policy access packages");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationList) {
+                    final String[] rt = new String[mPolicyAccess.size()];
+                    for (int i = 0; i < mPolicyAccess.size(); i++) {
+                        rt[i] = mPolicyAccess.keyAt(i);
+                    }
+                    return rt;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setNotificationPolicyAccessGranted(String pkg, boolean granted)
+                throws RemoteException {
+            enforceSystemOrSystemUI("grant notification policy access");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationList) {
+                    mPolicyAccess.put(pkg, granted);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public Policy getNotificationPolicy(String pkg) {
+            enforcePolicyAccess(pkg, "getNotificationPolicy");
             final long identity = Binder.clearCallingIdentity();
             try {
                 return mZenModeHelper.getNotificationPolicy();
@@ -1757,8 +1800,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setNotificationPolicy(Policy.Token token, Policy policy) {
-            enforcePolicyToken(token, "setNotificationPolicy");
+        public void setNotificationPolicy(String pkg, Policy policy) {
+            enforcePolicyAccess(pkg, "setNotificationPolicy");
             final long identity = Binder.clearCallingIdentity();
             try {
                 mZenModeHelper.setNotificationPolicy(policy);
@@ -1881,11 +1924,9 @@ public class NotificationManagerService extends SystemService {
                     pw.print(listener.component);
                 }
                 pw.println(')');
-                pw.print("    mPolicyTokens.keys: ");
-                pw.println(TextUtils.join(",", mPolicyTokens.keySet()));
-                pw.print("    mListeners.mPolicyTokens.keys: ");
-                pw.println(TextUtils.join(",", mListeners.mPolicyTokens.keySet()));
             }
+            pw.println("\n  Policy access:");
+            pw.print("    mPolicyAccess: "); pw.println(mPolicyAccess);
 
             pw.println("\n  Condition providers:");
             mConditionProviders.dump(pw, filter);
@@ -3138,16 +3179,10 @@ public class NotificationManagerService extends SystemService {
     public class NotificationListeners extends ManagedServices {
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
-        private final ArrayMap<ComponentName, Policy.Token> mPolicyTokens = new ArrayMap<>();
         private boolean mNotificationGroupsDesired;
 
         public NotificationListeners() {
             super(getContext(), mHandler, mNotificationList, mUserProfiles);
-        }
-
-        public Policy.Token getPolicyToken(INotificationListener listener) {
-            final ManagedServiceInfo info = checkServiceTokenLocked(listener);
-            return info == null ? null : mPolicyTokens.get(info.component);
         }
 
         @Override
@@ -3174,7 +3209,6 @@ public class NotificationManagerService extends SystemService {
             synchronized (mNotificationList) {
                 updateNotificationGroupsDesiredLocked();
                 update = makeRankingUpdateLocked(info);
-                mPolicyTokens.put(info.component, new Policy.Token(new Binder()));
             }
             try {
                 listener.onListenerConnected(update);
@@ -3191,7 +3225,6 @@ public class NotificationManagerService extends SystemService {
             }
             mLightTrimListeners.remove(removed);
             updateNotificationGroupsDesiredLocked();
-            mPolicyTokens.remove(removed.component);
         }
 
         public void setOnNotificationPostedTrimLocked(ManagedServiceInfo info, int trim) {

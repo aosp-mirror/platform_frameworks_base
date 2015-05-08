@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.Notification.Builder;
-import android.app.NotificationManager.Policy.Token;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -38,6 +37,7 @@ import android.provider.Settings.Global;
 import android.service.notification.IConditionListener;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.Objects;
@@ -106,6 +106,43 @@ public class NotificationManager
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_CHANGED
             = "android.app.action.NOTIFICATION_POLICY_CHANGED";
+
+    /**
+     * Intent that is broadcast when the state of getCurrentInterruptionFilter() changes.
+     * This broadcast is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_INTERRUPTION_FILTER_CHANGED
+            = "android.app.action.INTERRUPTION_FILTER_CHANGED";
+
+    /**
+     * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
+     *     Normal interruption filter.
+     */
+    public static final int INTERRUPTION_FILTER_ALL = 1;
+
+    /**
+     * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
+     *     Priority interruption filter.
+     */
+    public static final int INTERRUPTION_FILTER_PRIORITY = 2;
+
+    /**
+     * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
+     *     No interruptions filter.
+     */
+    public static final int INTERRUPTION_FILTER_NONE = 3;
+
+    /**
+     * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
+     *     Alarms only interruption filter.
+     */
+    public static final int INTERRUPTION_FILTER_ALARMS = 4;
+
+    /** {@link #getCurrentInterruptionFilter() Interruption filter} constant - returned when
+     * the value is unavailable for any reason.
+     */
+    public static final int INTERRUPTION_FILTER_UNKNOWN = 0;
 
     private static INotificationManager sService;
 
@@ -357,29 +394,29 @@ public class NotificationManager
     }
 
     /**
-     * Requests a notification policy token for the calling package.
+     * Requests the ability to read/modify notification policy for the calling package.
      *
-     * @param callback required, used to receive the granted token or the deny signal.
+     * @param callback required, used to receive the granted or the denied signal.
      * @param handler The handler used when receiving the result.
      *                If null, the current thread is used.
      */
-    public void requestNotificationPolicyToken(@NonNull final Policy.Token.RequestCallback callback,
+    public void requestPolicyAccess(@NonNull final NotificationPolicyAccessRequestCallback callback,
             @Nullable Handler handler) {
         checkRequired("callback", callback);
         final Handler h = handler != null ? handler : new Handler();
         INotificationManager service = getService();
         try {
-            service.requestNotificationPolicyToken(mContext.getOpPackageName(),
+            service.requestNotificationPolicyAccess(mContext.getOpPackageName(),
                     new INotificationManagerCallback.Stub() {
                 @Override
-                public void onPolicyToken(final Token token) throws RemoteException {
+                public void onPolicyRequestResult(final boolean granted) throws RemoteException {
                     h.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (token != null) {
-                                callback.onTokenGranted(token);
+                            if (granted) {
+                                callback.onAccessGranted();
                             } else {
-                                callback.onTokenDenied();
+                                callback.onAccessDenied();
                             }
                         }
                     });
@@ -389,16 +426,38 @@ public class NotificationManager
         }
     }
 
+    /** Callback for receiving the result of a policy access request. */
+    public static abstract class NotificationPolicyAccessRequestCallback {
+        /**
+         * Received if the request was granted for this package.
+         */
+        public abstract void onAccessGranted();
+
+        /**
+         * Received if the request was denied for this package.
+         */
+        public abstract void onAccessDenied();
+    }
+
     /**
-     * Checks a given notification policy token.
+     * Checks the ability to read/modify notification policy for the calling package.
      *
-     * Returns true if the token is still valid for managing policy.
+     * Returns true if the calling package can read/modify notification policy.
      */
-    public boolean isNotificationPolicyTokenValid(@NonNull Policy.Token token) {
-        if (token == null) return false;
+    public boolean isNotificationPolicyAccessGranted() {
         INotificationManager service = getService();
         try {
-            return service.isNotificationPolicyTokenValid(mContext.getOpPackageName(), token);
+            return service.isNotificationPolicyAccessGranted(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    /** @hide */
+    public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {
+        INotificationManager service = getService();
+        try {
+            return service.isNotificationPolicyAccessGrantedForPackage(pkg);
         } catch (RemoteException e) {
         }
         return false;
@@ -407,13 +466,13 @@ public class NotificationManager
     /**
      * Gets the current notification policy.
      *
-     * @param token A valid notification policy token is required to access the current policy.
+     * <p>
+     * Only available if policy access is granted.
      */
-    public Policy getNotificationPolicy(@NonNull Policy.Token token) {
-        checkRequired("token", token);
+    public Policy getNotificationPolicy() {
         INotificationManager service = getService();
         try {
-            return service.getNotificationPolicy(token);
+            return service.getNotificationPolicy(mContext.getOpPackageName());
         } catch (RemoteException e) {
         }
         return null;
@@ -422,17 +481,44 @@ public class NotificationManager
     /**
      * Sets the current notification policy.
      *
-     * @param token  A valid notification policy token is required to modify the current policy.
+     * <p>
+     * Only available if policy access is granted.
+     *
      * @param policy The new desired policy.
      */
-    public void setNotificationPolicy(@NonNull Policy.Token token, @NonNull Policy policy) {
-        checkRequired("token", token);
+    public void setNotificationPolicy(@NonNull Policy policy) {
         checkRequired("policy", policy);
         INotificationManager service = getService();
         try {
-            service.setNotificationPolicy(token, policy);
+            service.setNotificationPolicy(mContext.getOpPackageName(), policy);
         } catch (RemoteException e) {
         }
+    }
+
+    /** @hide */
+    public void setNotificationPolicyAccessGranted(String pkg, boolean granted) {
+        INotificationManager service = getService();
+        try {
+            service.setNotificationPolicyAccessGranted(pkg, granted);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /** @hide */
+    public ArraySet<String> getPackagesRequestingNotificationPolicyAccess() {
+        INotificationManager service = getService();
+        try {
+            final String[] pkgs = service.getPackagesRequestingNotificationPolicyAccess();
+            if (pkgs != null && pkgs.length > 0) {
+                final ArraySet<String> rt = new ArraySet<>(pkgs.length);
+                for (int i = 0; i < pkgs.length; i++) {
+                    rt.add(pkgs[i]);
+                }
+                return rt;
+            }
+        } catch (RemoteException e) {
+        }
+        return new ArraySet<String>();
     }
 
     private Context mContext;
@@ -477,24 +563,30 @@ public class NotificationManager
         /** Notification categories to prioritize. Bitmask of PRIORITY_CATEGORY_* constants. */
         public final int priorityCategories;
 
-        /** Notification senders to prioritize. One of:
+        /** Notification senders to prioritize for calls. One of:
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
-        public final int prioritySenders;
+        public final int priorityCallSenders;
 
-        public Policy(int priorityCategories, int prioritySenders) {
+        /** Notification senders to prioritize for messages. One of:
+         * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
+        public final int priorityMessageSenders;
+
+        public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders) {
             this.priorityCategories = priorityCategories;
-            this.prioritySenders = prioritySenders;
+            this.priorityCallSenders = priorityCallSenders;
+            this.priorityMessageSenders = priorityMessageSenders;
         }
 
         /** @hide */
         public Policy(Parcel source) {
-            this(source.readInt(), source.readInt());
+            this(source.readInt(), source.readInt(), source.readInt());
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(priorityCategories);
-            dest.writeInt(prioritySenders);
+            dest.writeInt(priorityCallSenders);
+            dest.writeInt(priorityMessageSenders);
         }
 
         @Override
@@ -504,7 +596,7 @@ public class NotificationManager
 
         @Override
         public int hashCode() {
-            return Objects.hash(priorityCategories, prioritySenders);
+            return Objects.hash(priorityCategories, priorityCallSenders, priorityMessageSenders);
         }
 
         @Override
@@ -513,14 +605,16 @@ public class NotificationManager
             if (o == this) return true;
             final Policy other = (Policy) o;
             return other.priorityCategories == priorityCategories
-                    && other.prioritySenders == prioritySenders;
+                    && other.priorityCallSenders == priorityCallSenders
+                    && other.priorityMessageSenders == priorityMessageSenders;
         }
 
         @Override
         public String toString() {
             return "NotificationManager.Policy["
                     + "priorityCategories=" + priorityCategoriesToString(priorityCategories)
-                    + ",prioritySenders=" + prioritySendersToString(prioritySenders)
+                    + ",priorityCallSenders=" + prioritySendersToString(priorityCallSenders)
+                    + ",priorityMessageSenders=" + prioritySendersToString(priorityMessageSenders)
                     + "]";
         }
 
@@ -574,75 +668,6 @@ public class NotificationManager
             }
         };
 
-        /**
-         * Represents a client-specific token required to manage notification policy.
-         */
-        public static class Token implements Parcelable {
-            private final IBinder mBinder;
-
-            /** @hide */
-            public Token(IBinder binder) {
-                if (binder == null) throw new IllegalArgumentException("Binder required for token");
-                mBinder = binder;
-            }
-
-            @Override
-            public int describeContents() {
-                return 0;
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(mBinder);
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (!(o instanceof Token)) return false;
-                if (o == this) return true;
-                final Token other = (Token) o;
-                return Objects.equals(other.mBinder, mBinder);
-            }
-
-            @Override
-            public String toString() {
-                return String.format("NotificationManager.Token[0x%08x]",
-                        System.identityHashCode(mBinder));
-            }
-
-            @Override
-            public void writeToParcel(Parcel dest, int flags) {
-                dest.writeStrongBinder(mBinder);
-            }
-
-            public static final Parcelable.Creator<Token> CREATOR
-                    = new Parcelable.Creator<Token>() {
-                @Override
-                public Token createFromParcel(Parcel in) {
-                    return new Token(in.readStrongBinder());
-                }
-
-                @Override
-                public Token[] newArray(int size) {
-                    return new Token[size];
-                }
-            };
-
-            /** Callback for receiving the result of a token request. */
-            public static abstract class RequestCallback {
-                /**
-                 * Received if the request was granted for this package.
-                 *
-                 * @param token can be used to manage notification policy.
-                 */
-                public abstract void onTokenGranted(Policy.Token token);
-
-                /**
-                 * Received if the request was denied for this package.
-                 */
-                public abstract void onTokenDenied();
-            }
-        }
     }
 
     /**
@@ -670,5 +695,70 @@ public class NotificationManager
             Log.e(TAG, "Unable to talk to notification manager. Woe!", e);
         }
         return new StatusBarNotification[0];
+    }
+
+    /**
+     * Gets the current notification interruption filter.
+     *
+     * <p>
+     * The interruption filter defines which notifications are allowed to interrupt the user
+     * (e.g. via sound &amp; vibration) and is applied globally.
+     * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
+     * unavailable.
+     *
+     * <p>
+     * Only available if policy access is granted.
+     */
+    public final int getCurrentInterruptionFilter() {
+        final INotificationManager service = getService();
+        try {
+            return zenModeToInterruptionFilter(service.getZenMode());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to talk to notification manager. Woe!", e);
+        }
+        return INTERRUPTION_FILTER_UNKNOWN;
+    }
+
+    /**
+     * Sets the current notification interruption filter.
+     *
+     * <p>
+     * The interruption filter defines which notifications are allowed to interrupt the user
+     * (e.g. via sound &amp; vibration) and is applied globally.
+     * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
+     * unavailable.
+     *
+     * <p>
+     * Only available if policy access is granted.
+     */
+    public final void setInterruptionFilter(int interruptionFilter) {
+        final INotificationManager service = getService();
+        try {
+            service.setInterruptionFilter(mContext.getOpPackageName(), interruptionFilter);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to talk to notification manager. Woe!", e);
+        }
+    }
+
+    /** @hide */
+    public static int zenModeToInterruptionFilter(int zen) {
+        switch (zen) {
+            case Global.ZEN_MODE_OFF: return INTERRUPTION_FILTER_ALL;
+            case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS: return INTERRUPTION_FILTER_PRIORITY;
+            case Global.ZEN_MODE_ALARMS: return INTERRUPTION_FILTER_ALARMS;
+            case Global.ZEN_MODE_NO_INTERRUPTIONS: return INTERRUPTION_FILTER_NONE;
+            default: return INTERRUPTION_FILTER_UNKNOWN;
+        }
+    }
+
+    /** @hide */
+    public static int zenModeFromInterruptionFilter(int interruptionFilter, int defValue) {
+        switch (interruptionFilter) {
+            case INTERRUPTION_FILTER_ALL: return Global.ZEN_MODE_OFF;
+            case INTERRUPTION_FILTER_PRIORITY: return Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+            case INTERRUPTION_FILTER_ALARMS: return Global.ZEN_MODE_ALARMS;
+            case INTERRUPTION_FILTER_NONE:  return Global.ZEN_MODE_NO_INTERRUPTIONS;
+            default: return defValue;
+        }
     }
 }
