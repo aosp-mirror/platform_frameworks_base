@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Keeps track of content providers by authority (name) and class. It separates the mapping by
@@ -184,13 +185,17 @@ public final class ProviderMap {
         }
     }
 
-    private boolean collectForceStopProvidersLocked(String name, int appId,
-            boolean doit, boolean evenPersistent, int userId,
+    private boolean collectPackageProvidersLocked(String packageName,
+            Set<String> filterByClasses, boolean doit, boolean evenPersistent,
             HashMap<ComponentName, ContentProviderRecord> providers,
             ArrayList<ContentProviderRecord> result) {
         boolean didSomething = false;
         for (ContentProviderRecord provider : providers.values()) {
-            if ((name == null || provider.info.packageName.equals(name))
+            final boolean sameComponent = packageName == null
+                    || (provider.info.packageName.equals(packageName)
+                        && (filterByClasses == null
+                            || filterByClasses.contains(provider.name.getClassName())));
+            if (sameComponent
                     && (provider.proc == null || evenPersistent || !provider.proc.persistent)) {
                 if (!doit) {
                     return true;
@@ -202,18 +207,18 @@ public final class ProviderMap {
         return didSomething;
     }
 
-    boolean collectForceStopProviders(String name, int appId,
+    boolean collectPackageProvidersLocked(String packageName, Set<String> filterByClasses,
             boolean doit, boolean evenPersistent, int userId,
             ArrayList<ContentProviderRecord> result) {
-        boolean didSomething = collectForceStopProvidersLocked(name, appId, doit,
-                evenPersistent, userId, mSingletonByClass, result);
+        boolean didSomething = collectPackageProvidersLocked(packageName, filterByClasses,
+                doit, evenPersistent, mSingletonByClass, result);
         if (!doit && didSomething) {
             return true;
         }
         if (userId == UserHandle.USER_ALL) {
-            for (int i=0; i<mProvidersByClassPerUser.size(); i++) {
-                if (collectForceStopProvidersLocked(name, appId, doit, evenPersistent,
-                        userId, mProvidersByClassPerUser.valueAt(i), result)) {
+            for (int i = 0; i < mProvidersByClassPerUser.size(); i++) {
+                if (collectPackageProvidersLocked(packageName, filterByClasses,
+                        doit, evenPersistent, mProvidersByClassPerUser.valueAt(i), result)) {
                     if (!doit) {
                         return true;
                     }
@@ -224,8 +229,8 @@ public final class ProviderMap {
             HashMap<ComponentName, ContentProviderRecord> items
                     = getProvidersByClass(userId);
             if (items != null) {
-                didSomething |= collectForceStopProvidersLocked(name, appId, doit,
-                        evenPersistent, userId, items, result);
+                didSomething |= collectPackageProvidersLocked(packageName, filterByClasses,
+                        doit, evenPersistent, items, result);
             }
         }
         return didSomething;

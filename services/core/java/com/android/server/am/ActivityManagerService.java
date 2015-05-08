@@ -5363,39 +5363,117 @@ public final class ActivityManagerService extends ActivityManagerNative
         return N > 0;
     }
 
-    private final boolean forceStopPackageLocked(String name, int appId,
+    private void cleanupDisabledPackageComponentsLocked(
+            String packageName, int userId, String[] changedClasses) {
+
+        Set<String> disabledClasses = null;
+        boolean packageDisabled = false;
+        IPackageManager pm = AppGlobals.getPackageManager();
+
+        if (changedClasses == null) {
+            // Nothing changed...
+            return;
+        }
+
+        // Determine enable/disable state of the package and its components.
+        int enabled = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+        for (int i = changedClasses.length - 1; i >= 0; i--) {
+            final String changedClass = changedClasses[i];
+
+            if (changedClass.equals(packageName)) {
+                try {
+                    // Entire package setting changed
+                    enabled = pm.getApplicationEnabledSetting(packageName,
+                            (userId != UserHandle.USER_ALL) ? userId : UserHandle.USER_OWNER);
+                } catch (RemoteException e) {
+                    // Can't happen...
+                }
+                packageDisabled = enabled != PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        && enabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+                if (packageDisabled) {
+                    // Entire package is disabled.
+                    // No need to continue to check component states.
+                    disabledClasses = null;
+                    break;
+                }
+            } else {
+                try {
+                    enabled = pm.getComponentEnabledSetting(
+                            new ComponentName(packageName, changedClass),
+                            (userId != UserHandle.USER_ALL) ? userId : UserHandle.USER_OWNER);
+                } catch (RemoteException e) {
+                    // Can't happen...
+                }
+                if (enabled != PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        && enabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+                    if (disabledClasses == null) {
+                        disabledClasses = new ArraySet<>(changedClasses.length);
+                    }
+                    disabledClasses.add(changedClass);
+                }
+            }
+        }
+
+        if (!packageDisabled && disabledClasses == null) {
+            // Nothing to do here...
+            return;
+        }
+
+        // Clean-up disabled activities.
+        if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
+                packageName, disabledClasses, true, false, userId) && mBooted) {
+            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.scheduleIdleLocked();
+        }
+
+        // Clean-up disabled tasks
+        cleanupDisabledPackageTasksLocked(packageName, disabledClasses, userId);
+
+        // Clean-up disabled services.
+        mServices.bringDownDisabledPackageServicesLocked(
+                packageName, disabledClasses, userId, false, true);
+
+        // Clean-up disabled providers.
+        ArrayList<ContentProviderRecord> providers = new ArrayList<>();
+        mProviderMap.collectPackageProvidersLocked(
+                packageName, disabledClasses, true, false, userId, providers);
+        for (int i = providers.size() - 1; i >= 0; i--) {
+            removeDyingProviderLocked(null, providers.get(i), true);
+        }
+    }
+
+    private final boolean forceStopPackageLocked(String packageName, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
             boolean evenPersistent, boolean uninstalling, int userId, String reason) {
         int i;
-        int N;
 
-        if (userId == UserHandle.USER_ALL && name == null) {
+        if (userId == UserHandle.USER_ALL && packageName == null) {
             Slog.w(TAG, "Can't force stop all processes of all users, that is insane!");
         }
 
-        if (appId < 0 && name != null) {
+        if (appId < 0 && packageName != null) {
             try {
                 appId = UserHandle.getAppId(
-                        AppGlobals.getPackageManager().getPackageUid(name, 0));
+                        AppGlobals.getPackageManager().getPackageUid(packageName, 0));
             } catch (RemoteException e) {
             }
         }
 
         if (doit) {
-            if (name != null) {
-                Slog.i(TAG, "Force stopping " + name + " appid=" + appId
+            if (packageName != null) {
+                Slog.i(TAG, "Force stopping " + packageName + " appid=" + appId
                         + " user=" + userId + ": " + reason);
             } else {
                 Slog.i(TAG, "Force stopping u" + userId + ": " + reason);
             }
 
             final ArrayMap<String, SparseArray<Long>> pmap = mProcessCrashTimes.getMap();
-            for (int ip=pmap.size()-1; ip>=0; ip--) {
+            for (int ip = pmap.size() - 1; ip >= 0; ip--) {
                 SparseArray<Long> ba = pmap.valueAt(ip);
-                for (i=ba.size()-1; i>=0; i--) {
+                for (i = ba.size() - 1; i >= 0; i--) {
                     boolean remove = false;
                     final int entUid = ba.keyAt(i);
-                    if (name != null) {
+                    if (packageName != null) {
                         if (userId == UserHandle.USER_ALL) {
                             if (UserHandle.getAppId(entUid) == appId) {
                                 remove = true;
@@ -5418,46 +5496,47 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        boolean didSomething = killPackageProcessesLocked(name, appId, userId,
+        boolean didSomething = killPackageProcessesLocked(packageName, appId, userId,
                 -100, callerWillRestart, true, doit, evenPersistent,
-                name == null ? ("stop user " + userId) : ("stop " + name));
+                packageName == null ? ("stop user " + userId) : ("stop " + packageName));
 
-        if (mStackSupervisor.forceStopPackageLocked(name, doit, evenPersistent, userId)) {
+        if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
+                packageName, null, doit, evenPersistent, userId)) {
             if (!doit) {
                 return true;
             }
             didSomething = true;
         }
 
-        if (mServices.forceStopLocked(name, userId, evenPersistent, doit)) {
+        if (mServices.bringDownDisabledPackageServicesLocked(
+                packageName, null, userId, evenPersistent, doit)) {
             if (!doit) {
                 return true;
             }
             didSomething = true;
         }
 
-        if (name == null) {
+        if (packageName == null) {
             // Remove all sticky broadcasts from this user.
             mStickyBroadcasts.remove(userId);
         }
 
-        ArrayList<ContentProviderRecord> providers = new ArrayList<ContentProviderRecord>();
-        if (mProviderMap.collectForceStopProviders(name, appId, doit, evenPersistent,
+        ArrayList<ContentProviderRecord> providers = new ArrayList<>();
+        if (mProviderMap.collectPackageProvidersLocked(packageName, null, doit, evenPersistent,
                 userId, providers)) {
             if (!doit) {
                 return true;
             }
             didSomething = true;
         }
-        N = providers.size();
-        for (i=0; i<N; i++) {
+        for (i = providers.size() - 1; i >= 0; i--) {
             removeDyingProviderLocked(null, providers.get(i), true);
         }
 
         // Remove transient permissions granted from/to this package/user
-        removeUriPermissionsForPackageLocked(name, userId, false);
+        removeUriPermissionsForPackageLocked(packageName, userId, false);
 
-        if (name == null || uninstalling) {
+        if (packageName == null || uninstalling) {
             // Remove pending intents.  For now we only do this when force
             // stopping users, because we have some problems when doing this
             // for packages -- app widgets are not currently cleaned up for
@@ -5476,7 +5555,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         it.remove();
                         continue;
                     }
-                    if (name == null) {
+                    if (packageName == null) {
                         // Stopping user, remove all objects for the user.
                         if (pir.key.userId != userId) {
                             // Not the same user, skip it.
@@ -5491,7 +5570,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // Different user, skip it.
                             continue;
                         }
-                        if (!pir.key.packageName.equals(name)) {
+                        if (!pir.key.packageName.equals(packageName)) {
                             // Different package, skip it.
                             continue;
                         }
@@ -5510,10 +5589,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (doit) {
-            if (purgeCache && name != null) {
+            if (purgeCache && packageName != null) {
                 AttributeCache ac = AttributeCache.instance();
                 if (ac != null) {
-                    ac.removePackage(name);
+                    ac.removePackage(packageName);
                 }
             }
             if (mBooted) {
@@ -8331,29 +8410,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private void removeTasksByRemovedPackageComponentsLocked(String packageName, int userId) {
-        final IPackageManager pm = AppGlobals.getPackageManager();
-        final HashSet<ComponentName> componentsKnownToExist = new HashSet<ComponentName>();
+    private void cleanupDisabledPackageTasksLocked(String packageName, Set<String> filterByClasses,
+            int userId) {
 
         for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
             TaskRecord tr = mRecentTasks.get(i);
-            if (tr.userId != userId) continue;
+            if (userId != UserHandle.USER_ALL && tr.userId != userId) {
+                continue;
+            }
 
             ComponentName cn = tr.intent.getComponent();
-            if (cn != null && cn.getPackageName().equals(packageName)) {
-                // Skip if component still exists in the package.
-                if (componentsKnownToExist.contains(cn)) continue;
-
-                try {
-                    ActivityInfo info = pm.getActivityInfo(cn, 0, userId);
-                    if (info != null) {
-                        componentsKnownToExist.add(cn);
-                    } else {
-                        removeTaskByIdLocked(tr.taskId, false);
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Activity info query failed. component=" + cn, e);
-                }
+            final boolean sameComponent = cn != null && cn.getPackageName().equals(packageName)
+                    && (filterByClasses == null || filterByClasses.contains(cn.getClassName()));
+            if (sameComponent) {
+                removeTaskByIdLocked(tr.taskId, false);
             }
         }
     }
@@ -16076,7 +16146,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
                                 } else {
-                                    removeTasksByRemovedPackageComponentsLocked(ssp, userId);
+                                    cleanupDisabledPackageComponentsLocked(ssp, userId,
+                                            intent.getStringArrayExtra(
+                                                    Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST));
                                     if (userId == UserHandle.USER_OWNER) {
                                         mTaskPersister.addOtherDeviceTasksToRecentsLocked(ssp);
                                     }
@@ -16094,9 +16166,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
                         mCompatModePackages.handlePackageAddedLocked(ssp, replacing);
 
-                        if (replacing) {
-                            removeTasksByRemovedPackageComponentsLocked(ssp, userId);
-                        }
                         if (userId == UserHandle.USER_OWNER) {
                             mTaskPersister.addOtherDeviceTasksToRecentsLocked(ssp);
                         }
