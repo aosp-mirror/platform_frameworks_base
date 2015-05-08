@@ -733,17 +733,20 @@ public class ZenModeConfig implements Parcelable {
                 && conditionId.getPathSegments().get(0).equals(EVENT_PATH);
         if (!isEvent) return null;
         final EventInfo rt = new EventInfo();
-        rt.calendar = tryParseLong(conditionId.getQueryParameter("calendar"), 0L);
+        rt.calendar = tryParseLong(conditionId.getQueryParameter("calendar"),
+                EventInfo.ANY_CALENDAR);
         rt.reply = tryParseInt(conditionId.getQueryParameter("reply"), 0);
         return rt;
     }
 
     public static class EventInfo {
+        public static final long ANY_CALENDAR = 0;
+
         public static final int REPLY_ANY_EXCEPT_NO = 0;
         public static final int REPLY_YES_OR_MAYBE = 1;
         public static final int REPLY_YES = 2;
 
-        public long calendar;  // CalendarContract.Calendars._ID, or 0 for any
+        public long calendar = ANY_CALENDAR;  // CalendarContract.Calendars._ID, or ANY_CALENDAR
         public int reply;
 
         @Override
