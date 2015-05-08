@@ -84,7 +84,7 @@ class AudioPortEventHandler {
                         ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
                         ArrayList<AudioPatch> patches = new ArrayList<AudioPatch>();
                         if (msg.what != AUDIOPORT_EVENT_SERVICE_DIED) {
-                            int status = AudioManager.updateAudioPortCache(ports, patches);
+                            int status = AudioManager.updateAudioPortCache(ports, patches, null);
                             if (status != AudioManager.SUCCESS) {
                                 return;
                             }
