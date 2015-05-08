@@ -179,7 +179,6 @@ public abstract class Conference implements Conferenceable {
 
     /**
      * Returns VideoProvider of the primary call. This can be null.
-     *  @hide
      */
     public VideoProvider getVideoProvider() {
         return null;
@@ -187,7 +186,6 @@ public abstract class Conference implements Conferenceable {
 
     /**
      * Returns video state of the primary call.
-     *  @hide
      */
     public int getVideoState() {
         return VideoProfile.VideoState.AUDIO_ONLY;
@@ -373,7 +371,6 @@ public abstract class Conference implements Conferenceable {
      * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @param videoState The new video state.
-     * @hide
      */
     public final void setVideoState(Connection c, int videoState) {
         Log.d(this, "setVideoState Conference: %s Connection: %s VideoState: %s",
@@ -387,7 +384,6 @@ public abstract class Conference implements Conferenceable {
      * Sets the video connection provider.
      *
      * @param videoProvider The video provider.
-     * @hide
      */
     public final void setVideoProvider(Connection c, Connection.VideoProvider videoProvider) {
         Log.d(this, "setVideoProvider Conference: %s Connection: %s VideoState: %s",

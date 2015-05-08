@@ -147,7 +147,6 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        /** @hide */
         public void answerVideo(String callId, int videoState) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callId;
