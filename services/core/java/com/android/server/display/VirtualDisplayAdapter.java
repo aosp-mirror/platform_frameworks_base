@@ -82,7 +82,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             appToken.linkToDeath(device, 0);
         } catch (RemoteException ex) {
             mVirtualDisplayDevices.remove(appToken);
-            device.destroyLocked();
+            device.destroyLocked(false);
             return null;
         }
 
@@ -110,7 +110,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
     public DisplayDevice releaseVirtualDisplayLocked(IBinder appToken) {
         VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
         if (device != null) {
-            device.destroyLocked();
+            device.destroyLocked(true);
             appToken.unlinkToDeath(device, 0);
         }
 
@@ -147,7 +147,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         if (device != null) {
             Slog.i(TAG, "Virtual display device released because application token died: "
                     + device.mOwnerPackageName);
-            device.destroyLocked();
+            device.destroyLocked(false);
             sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_REMOVED);
         }
     }
@@ -205,19 +205,19 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         @Override
         public void binderDied() {
             synchronized (getSyncRoot()) {
-                if (mSurface != null) {
-                    handleBinderDiedLocked(mAppToken);
-                }
+                handleBinderDiedLocked(mAppToken);
             }
         }
 
-        public void destroyLocked() {
+        public void destroyLocked(boolean binderAlive) {
             if (mSurface != null) {
                 mSurface.release();
                 mSurface = null;
             }
             SurfaceControl.destroyDisplay(getDisplayTokenLocked());
-            mCallback.dispatchDisplayStopped();
+            if (binderAlive) {
+                mCallback.dispatchDisplayStopped();
+            }
         }
 
         @Override
