@@ -38,6 +38,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -353,7 +354,7 @@ final class SettingsState {
             out = destination.startWrite();
 
             XmlSerializer serializer = Xml.newSerializer();
-            serializer.setOutput(out, "utf-8");
+            serializer.setOutput(out, StandardCharsets.UTF_8.name());
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_SETTINGS);
@@ -406,7 +407,7 @@ final class SettingsState {
         }
         try {
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, null);
+            parser.setInput(in, StandardCharsets.UTF_8.name());
             parseStateLocked(parser);
 
         } catch (XmlPullParserException | IOException e) {

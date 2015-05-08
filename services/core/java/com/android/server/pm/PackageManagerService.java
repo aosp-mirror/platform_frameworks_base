@@ -13054,7 +13054,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         try {
             final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(dataStream, "utf-8");
+            serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.startTag(null, TAG_PREFERRED_BACKUP);
 
@@ -13083,7 +13083,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         try {
             final XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(new ByteArrayInputStream(backup), null);
+            parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
 
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -13865,7 +13865,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 BufferedOutputStream str = new BufferedOutputStream(fout);
                 XmlSerializer serializer = new FastXmlSerializer();
                 try {
-                    serializer.setOutput(str, "utf-8");
+                    serializer.setOutput(str, StandardCharsets.UTF_8.name());
                     serializer.startDocument(null, true);
                     serializer.setFeature(
                             "http://xmlpull.org/v1/doc/features.html#indent-output", true);
