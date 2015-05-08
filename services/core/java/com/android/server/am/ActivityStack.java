@@ -81,6 +81,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * State and management of a single stack of activities.
@@ -4000,7 +4001,8 @@ final class ActivityStack {
         }
     }
 
-    boolean forceStopPackageLocked(String name, boolean doit, boolean evenPersistent, int userId) {
+    boolean finishDisabledPackageActivitiesLocked(String packageName, Set<String> filterByClasses,
+            boolean doit, boolean evenPersistent, int userId) {
         boolean didSomething = false;
         TaskRecord lastTask = null;
         ComponentName homeActivity = null;
@@ -4009,10 +4011,12 @@ final class ActivityStack {
             int numActivities = activities.size();
             for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
                 ActivityRecord r = activities.get(activityNdx);
-                final boolean samePackage = r.packageName.equals(name)
-                        || (name == null && r.userId == userId);
+                final boolean sameComponent =
+                        (r.packageName.equals(packageName) && (filterByClasses == null
+                                || filterByClasses.contains(r.realActivity.getClassName())))
+                        || (packageName == null && r.userId == userId);
                 if ((userId == UserHandle.USER_ALL || r.userId == userId)
-                        && (samePackage || r.task == lastTask)
+                        && (sameComponent || r.task == lastTask)
                         && (r.app == null || evenPersistent || !r.app.persistent)) {
                     if (!doit) {
                         if (r.finishing) {
@@ -4032,7 +4036,7 @@ final class ActivityStack {
                     }
                     didSomething = true;
                     Slog.i(TAG, "  Force finishing activity " + r);
-                    if (samePackage) {
+                    if (sameComponent) {
                         if (r.app != null) {
                             r.app.removed = true;
                         }

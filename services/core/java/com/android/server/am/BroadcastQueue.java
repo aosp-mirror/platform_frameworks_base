@@ -85,7 +85,7 @@ public final class BroadcastQueue {
      * a bunch of processes to execute IntentReceiver components.  Background-
      * and foreground-priority broadcasts are queued separately.
      */
-    final ArrayList<BroadcastRecord> mParallelBroadcasts = new ArrayList<BroadcastRecord>();
+    final ArrayList<BroadcastRecord> mParallelBroadcasts = new ArrayList<>();
 
     /**
      * List of all active broadcasts that are to be executed one at a time.
@@ -94,7 +94,7 @@ public final class BroadcastQueue {
      * broadcasts, separate background- and foreground-priority queues are
      * maintained.
      */
-    final ArrayList<BroadcastRecord> mOrderedBroadcasts = new ArrayList<BroadcastRecord>();
+    final ArrayList<BroadcastRecord> mOrderedBroadcasts = new ArrayList<>();
 
     /**
      * Historical data of past broadcasts, for debugging.  This is a ring buffer
