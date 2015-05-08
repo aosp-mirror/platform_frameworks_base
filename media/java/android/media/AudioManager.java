@@ -3402,7 +3402,17 @@ public class AudioManager {
      * @hide
      */
     public static int listAudioPorts(ArrayList<AudioPort> ports) {
-        return updateAudioPortCache(ports, null);
+        return updateAudioPortCache(ports, null, null);
+    }
+
+    /**
+     * Returns a list of descriptors for all audio ports managed by the audio framework as
+     * it was before the last update calback.
+     * @param ports An AudioPort ArrayList where the list will be returned.
+     * @hide
+     */
+    public static int listPreviousAudioPorts(ArrayList<AudioPort> ports) {
+        return updateAudioPortCache(null, null, ports);
     }
 
     /**
@@ -3411,17 +3421,42 @@ public class AudioManager {
      * @hide
      */
     public static int listAudioDevicePorts(ArrayList<AudioDevicePort> devices) {
+        if (devices == null) {
+            return ERROR_BAD_VALUE;
+        }
         ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
-        int status = updateAudioPortCache(ports, null);
+        int status = updateAudioPortCache(ports, null, null);
         if (status == SUCCESS) {
-            devices.clear();
-            for (int i = 0; i < ports.size(); i++) {
-                if (ports.get(i) instanceof AudioDevicePort) {
-                    devices.add((AudioDevicePort)ports.get(i));
-                }
-            }
+            filterDevicePorts(ports, devices);
         }
         return status;
+    }
+
+    /**
+     * Specialized version of listPreviousAudioPorts() listing only audio devices (AudioDevicePort)
+     * @see listPreviousAudioPorts(ArrayList<AudioPort>)
+     * @hide
+     */
+    public static int listPreviousAudioDevicePorts(ArrayList<AudioDevicePort> devices) {
+        if (devices == null) {
+            return ERROR_BAD_VALUE;
+        }
+        ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
+        int status = updateAudioPortCache(null, null, ports);
+        if (status == SUCCESS) {
+            filterDevicePorts(ports, devices);
+        }
+        return status;
+    }
+
+    private static void filterDevicePorts(ArrayList<AudioPort> ports,
+                                          ArrayList<AudioDevicePort> devices) {
+        devices.clear();
+        for (int i = 0; i < ports.size(); i++) {
+            if (ports.get(i) instanceof AudioDevicePort) {
+                devices.add((AudioDevicePort)ports.get(i));
+            }
+        }
     }
 
     /**
@@ -3474,7 +3509,7 @@ public class AudioManager {
      * @hide
      */
     public static int listAudioPatches(ArrayList<AudioPatch> patches) {
-        return updateAudioPortCache(null, patches);
+        return updateAudioPortCache(null, patches, null);
     }
 
     /**
@@ -3540,6 +3575,7 @@ public class AudioManager {
     static final int AUDIOPORT_GENERATION_INIT = 0;
     static Integer sAudioPortGeneration = new Integer(AUDIOPORT_GENERATION_INIT);
     static ArrayList<AudioPort> sAudioPortsCached = new ArrayList<AudioPort>();
+    static ArrayList<AudioPort> sPreviousAudioPortsCached = new ArrayList<AudioPort>();
     static ArrayList<AudioPatch> sAudioPatchesCached = new ArrayList<AudioPatch>();
 
     static int resetAudioPortGeneration() {
@@ -3551,7 +3587,8 @@ public class AudioManager {
         return generation;
     }
 
-    static int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches) {
+    static int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches,
+                                    ArrayList<AudioPort> previousPorts) {
         synchronized (sAudioPortGeneration) {
 
             if (sAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
@@ -3610,6 +3647,7 @@ public class AudioManager {
                     }
                 }
 
+                sPreviousAudioPortsCached = sAudioPortsCached;
                 sAudioPortsCached = newPorts;
                 sAudioPatchesCached = newPatches;
                 sAudioPortGeneration = portGeneration[0];
@@ -3621,6 +3659,10 @@ public class AudioManager {
             if (patches != null) {
                 patches.clear();
                 patches.addAll(sAudioPatchesCached);
+            }
+            if (previousPorts != null) {
+                previousPorts.clear();
+                previousPorts.addAll(sPreviousAudioPortsCached);
             }
         }
         return SUCCESS;
