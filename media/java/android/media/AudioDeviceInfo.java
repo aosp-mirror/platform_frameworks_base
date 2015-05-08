@@ -21,7 +21,7 @@ import android.util.SparseIntArray;
 /**
  * Class to provide information about the audio devices.
  */
-public class AudioDeviceInfo {
+public final class AudioDeviceInfo {
 
     /**
      * A device type associated with an unknown or uninitialized device.
@@ -112,7 +112,6 @@ public class AudioDeviceInfo {
     }
 
     /**
-     * @hide
      * @return The internal device ID.
      */
     public int getId() {
@@ -122,15 +121,15 @@ public class AudioDeviceInfo {
     /**
      * @return The human-readable name of the audio device.
      */
-    public String getName() {
+    public CharSequence getName() {
         return mPort.name();
     }
 
     /**
+     * @hide
      * @return The "address" string of the device. This generally contains device-specific
      * parameters.
      */
-    // TODO Is there a compelling reason to expose this?
     public String getAddress() {
         return mPort.address();
     }
@@ -157,15 +156,18 @@ public class AudioDeviceInfo {
     }
 
     /**
-     * @return An array of channel masks supported by the audio device (defined in
-     * AudioFormat.java).
+     * @return An array of channel masks ({@link AudioFormat#CHANNEL_IN_STEREO},
+     * {@link AudioFormat#CHANNEL_OUT_7POINT1) for which this audio device can be configured.
+     *
+     * @see AudioFormat
      */
     public int[] getChannelMasks() {
         return mPort.channelMasks();
     }
 
     /**
-     * @return An array of channel counts supported by the audio device.
+     * @return An array of channel counts (1, 2, 4....) for which this audio device
+     * can be configured.
      */
     public int[] getChannelCounts() {
         int[] masks = getChannelMasks();
@@ -179,8 +181,10 @@ public class AudioDeviceInfo {
     }
 
     /**
-     * @return An array of audio format IDs supported by the audio device (defined in
-     * AudioFormat.java)
+     * @return An array of audio format IDs (@link AudioFormat#ENCODING_PCM_16BIT,
+     * {@link AudioFormat#ENCODING_PCM_FLOAT}...) supported by the audio device.
+     *
+     * @see AudioFormat
      */
     public int[] getFormats() {
         return mPort.formats();
