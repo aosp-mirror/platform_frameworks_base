@@ -4068,10 +4068,13 @@
     <string name="zen_mode_downtime_feature_name">Downtime</string>
 
     <!-- Zen mode - name of default automatic schedule for weeknights. [CHAR LIMIT=40] -->
-    <string name="zen_mode_default_weeknights_name">Weeknights</string>
+    <string name="zen_mode_default_weeknights_name">Weeknight</string>
 
     <!-- Zen mode - name of default automatic schedule for weekends. [CHAR LIMIT=40] -->
-    <string name="zen_mode_default_weekends_name">Weekends</string>
+    <string name="zen_mode_default_weekends_name">Weekend</string>
+
+    <!-- Zen mode - name of default automatic calendar event-based rule. [CHAR LIMIT=40] -->
+    <string name="zen_mode_default_events_name">Event</string>
 
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by">Muted by <xliff:g id="third_party">%1$s</xliff:g></string>
