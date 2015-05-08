@@ -5945,7 +5945,6 @@ package android.app.admin {
     field public static final java.lang.String ACTION_SET_PROFILE_OWNER = "android.app.action.SET_PROFILE_OWNER";
     field public static final java.lang.String ACTION_START_ENCRYPTION = "android.app.action.START_ENCRYPTION";
     field public static final java.lang.String ACTION_SYSTEM_UPDATE_POLICY_CHANGED = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
-    field public static final int DO_NOT_ASK_CREDENTIALS_ON_BOOT = 2; // 0x2
     field public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
     field public static final int ENCRYPTION_STATUS_ACTIVE = 3; // 0x3
     field public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4; // 0x4
@@ -6013,6 +6012,7 @@ package android.app.admin {
     field public static final int PERMISSION_POLICY_AUTO_DENY = 2; // 0x2
     field public static final int PERMISSION_POLICY_AUTO_GRANT = 1; // 0x1
     field public static final int PERMISSION_POLICY_PROMPT = 0; // 0x0
+    field public static final int RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT = 2; // 0x2
     field public static final int RESET_PASSWORD_REQUIRE_ENTRY = 1; // 0x1
     field public static final int WIPE_EXTERNAL_STORAGE = 1; // 0x1
     field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
