@@ -18,6 +18,7 @@
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
+#include <SkRect.h>
 #include <ui/GraphicBuffer.h>
 #include <utils/StrongPointer.h>
 
@@ -47,7 +48,7 @@ public:
     // Returns true if the current surface changed, false if it was already current
     bool makeCurrent(EGLSurface surface);
     void beginFrame(EGLSurface surface, EGLint* width, EGLint* height);
-    bool swapBuffers(EGLSurface surface);
+    bool swapBuffers(EGLSurface surface, const SkRect& dirty, EGLint width, EGLint height);
     void cancelFrame();
 
     // Returns true iff the surface is now preserving buffers.
