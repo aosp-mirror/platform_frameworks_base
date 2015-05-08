@@ -816,10 +816,9 @@ final public class MediaCodec {
      * Thrown when an internal codec error occurs.
      */
     public final static class CodecException extends IllegalStateException {
-        CodecException(int errorCode, int actionCode, @Nullable String detailMessage, int reason) {
+        CodecException(int errorCode, int actionCode, @Nullable String detailMessage) {
             super(detailMessage);
             mErrorCode = errorCode;
-            mReason = reason;
             mActionCode = actionCode;
 
             // TODO get this from codec
@@ -847,21 +846,7 @@ final public class MediaCodec {
         }
 
         /**
-         * Retrieve the reason associated with a CodecException.
-         * The reason could be one of {@link #REASON_HARDWARE} or {@link #REASON_RECLAIMED}.
-         *
-         */
-        @ReasonCode
-        public int getReason() {
-            return mReason;
-        }
-
-        /**
-         * Retrieve the error code associated with a CodecException.
-         * This is opaque diagnostic information and may depend on
-         * hardware or API level.
-         *
-         * @hide
+         * Retrieve the error code associated with a CodecException
          */
         public int getErrorCode() {
             return mErrorCode;
@@ -878,22 +863,21 @@ final public class MediaCodec {
         }
 
         /**
-         * This indicates the exception is caused by the hardware.
+         * This indicates required resource was not able to be allocated.
          */
-        public static final int REASON_HARDWARE = 0;
+        public static final int ERROR_INSUFFICIENT_RESOURCE = 1100;
 
         /**
-         * This indicates the exception is because the resource manager reclaimed
-         * the media resource used by the codec.
+         * This indicates the resource manager reclaimed the media resource used by the codec.
          * <p>
          * With this exception, the codec must be released, as it has moved to terminal state.
          */
-        public static final int REASON_RECLAIMED = 1;
+        public static final int ERROR_RECLAIMED = 1101;
 
         /** @hide */
         @IntDef({
-            REASON_HARDWARE,
-            REASON_RECLAIMED,
+            ERROR_INSUFFICIENT_RESOURCE,
+            ERROR_RECLAIMED,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface ReasonCode {}
@@ -904,7 +888,6 @@ final public class MediaCodec {
 
         private final String mDiagnosticInfo;
         private final int mErrorCode;
-        private final int mReason;
         private final int mActionCode;
     }
 

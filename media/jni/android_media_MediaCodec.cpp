@@ -70,10 +70,10 @@ static struct CodecActionCodes {
     jint codecActionRecoverable;
 } gCodecActionCodes;
 
-static struct ExceptionReason {
-    jint reasonHardware;
-    jint reasonReclaimed;
-} gExceptionReason;
+static struct CodecErrorCodes {
+    jint errorInsufficientResource;
+    jint errorReclaimed;
+} gCodecErrorCodes;
 
 static struct {
     jclass clazz;
@@ -600,7 +600,7 @@ static jthrowable createCodecException(
             env, env->FindClass("android/media/MediaCodec$CodecException"));
     CHECK(clazz.get() != NULL);
 
-    const jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "(IILjava/lang/String;I)V");
+    const jmethodID ctor = env->GetMethodID(clazz.get(), "<init>", "(IILjava/lang/String;)V");
     CHECK(ctor != NULL);
 
     ScopedLocalRef<jstring> msgObj(
@@ -619,9 +619,19 @@ static jthrowable createCodecException(
         break;
     }
 
-    int reason =
-        (err == DEAD_OBJECT) ? gExceptionReason.reasonReclaimed : gExceptionReason.reasonHardware;
-    return (jthrowable)env->NewObject(clazz.get(), ctor, err, actionCode, msgObj.get(), reason);
+    /* translate OS errors to Java API CodecException errorCodes */
+    switch (err) {
+        case NO_MEMORY:
+            err = gCodecErrorCodes.errorInsufficientResource;
+            break;
+        case DEAD_OBJECT:
+            err = gCodecErrorCodes.errorReclaimed;
+            break;
+        default:  /* Other error codes go out as is. */
+            break;
+    }
+
+    return (jthrowable)env->NewObject(clazz.get(), ctor, err, actionCode, msgObj.get());
 }
 
 void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
@@ -1636,14 +1646,14 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     gCodecActionCodes.codecActionRecoverable =
         env->GetStaticIntField(clazz.get(), field);
 
-    field = env->GetStaticFieldID(clazz.get(), "REASON_HARDWARE", "I");
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_INSUFFICIENT_RESOURCE", "I");
     CHECK(field != NULL);
-    gExceptionReason.reasonHardware =
+    gCodecErrorCodes.errorInsufficientResource =
         env->GetStaticIntField(clazz.get(), field);
 
-    field = env->GetStaticFieldID(clazz.get(), "REASON_RECLAIMED", "I");
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_RECLAIMED", "I");
     CHECK(field != NULL);
-    gExceptionReason.reasonReclaimed =
+    gCodecErrorCodes.errorReclaimed =
         env->GetStaticIntField(clazz.get(), field);
 
     clazz.reset(env->FindClass("android/view/Surface"));
@@ -1690,6 +1700,11 @@ static void android_media_MediaCodec_native_setup(
     if (err == NAME_NOT_FOUND) {
         // fail and do not try again.
         jniThrowException(env, "java/lang/IllegalArgumentException",
+                String8::format("Failed to initialize %s, error %#x", tmp, err));
+        env->ReleaseStringUTFChars(name, tmp);
+        return;
+    } if (err == NO_MEMORY) {
+        throwCodecException(env, err, ACTION_CODE_TRANSIENT,
                 String8::format("Failed to initialize %s, error %#x", tmp, err));
         env->ReleaseStringUTFChars(name, tmp);
         return;

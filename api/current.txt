@@ -15414,11 +15414,11 @@ package android.media {
 
   public static final class MediaCodec.CodecException extends java.lang.IllegalStateException {
     method public java.lang.String getDiagnosticInfo();
-    method public int getReason();
+    method public int getErrorCode();
     method public boolean isRecoverable();
     method public boolean isTransient();
-    field public static final int REASON_HARDWARE = 0; // 0x0
-    field public static final int REASON_RECLAIMED = 1; // 0x1
+    field public static final int ERROR_INSUFFICIENT_RESOURCE = 1100; // 0x44c
+    field public static final int ERROR_RECLAIMED = 1101; // 0x44d
   }
 
   public static final class MediaCodec.CryptoException extends java.lang.RuntimeException {
