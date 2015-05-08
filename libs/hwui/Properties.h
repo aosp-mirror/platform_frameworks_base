@@ -158,6 +158,21 @@ enum DebugLevel {
  */
 #define PROPERTY_DISABLE_DRAW_REORDER "debug.hwui.disable_draw_reorder"
 
+/**
+ * Setting this property will enable or disable the dropping of frames with
+ * empty damage. Default is "true".
+ */
+#define PROPERTY_SKIP_EMPTY_DAMAGE "debug.hwui.skip_empty_damage"
+
+/**
+ * Setting this property will enable usage of EGL_KHR_swap_buffers_with_damage
+ * See: https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_swap_buffers_with_damage.txt
+ * Default is "false" temporarily
+ * TODO: Change to "true", make sure to remove the log in EglManager::swapBuffers
+ * before changing this to default to true!
+ */
+#define PROPERTY_SWAP_WITH_DAMAGE "debug.hwui.swap_with_damage"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
 ///////////////////////////////////////////////////////////////////////////////
@@ -288,6 +303,10 @@ public:
     static bool debugLayersUpdates;
     static bool debugOverdraw;
     static bool showDirtyRegions;
+    // TODO: Remove after stabilization period
+    static bool skipEmptyFrames;
+    // TODO: Remove after stabilization period
+    static bool swapBuffersWithDamage;
 
     static DebugLevel debugLevel;
     static OverdrawColorSet overdrawColorSet;
