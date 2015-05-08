@@ -3974,16 +3974,16 @@ public class Editor {
                     }
                 }
                 mTouchWordOffset = Math.max(trueOffset - offset, 0);
-                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionCursor = true;
-            } else if (offset - mTouchWordOffset > mPreviousOffset) {
+            } else if (offset - mTouchWordOffset > mPreviousOffset || currLine > mPrevLine) {
                 // User is shrinking the selection.
                 if (currLine > mPrevLine) {
                     // We're on a different line, so we'll snap to word boundaries.
-                    offset = end;
+                    offset = start;
+                    mTouchWordOffset = Math.max(trueOffset - offset, 0);
+                } else {
+                    offset -= mTouchWordOffset;
                 }
-                offset -= mTouchWordOffset;
-                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionCursor = true;
             }
 
@@ -3999,7 +3999,9 @@ public class Editor {
                     } else {
                         offset = alteredOffset;
                     }
+                    mTouchWordOffset = 0;
                 }
+                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionAtCursorOffset(offset, false);
             }
         }
@@ -4072,17 +4074,17 @@ public class Editor {
                     }
                 }
                 mTouchWordOffset = Math.max(offset - trueOffset, 0);
-                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionCursor = true;
-            } else if (offset + mTouchWordOffset < mPreviousOffset) {
+            } else if (offset + mTouchWordOffset < mPreviousOffset || currLine < mPrevLine) {
                 // User is shrinking the selection.
                 if (currLine < mPrevLine) {
                     // We're on a different line, so we'll snap to word boundaries.
-                    offset = start;
+                    offset = end;
+                    mTouchWordOffset = Math.max(offset - trueOffset, 0);
+                } else {
+                    offset += mTouchWordOffset;
                 }
-                offset += mTouchWordOffset;
                 positionCursor = true;
-                mInWord = !getWordIteratorWithText().isBoundary(offset);
             }
 
             if (positionCursor) {
@@ -4097,7 +4099,9 @@ public class Editor {
                     } else {
                         offset = Math.min(alteredOffset, length);
                     }
+                    mTouchWordOffset = 0;
                 }
+                mInWord = !getWordIteratorWithText().isBoundary(offset);
                 positionAtCursorOffset(offset, false);
             }
         }
