@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
+import android.view.ViewHierarchyEncoder;
 import com.android.internal.R;
 
 import android.annotation.DrawableRes;
@@ -458,5 +460,12 @@ public class CheckedTextView extends TextView implements Checkable {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setCheckable(true);
         info.setChecked(mChecked);
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
+        super.encodeProperties(stream);
+        stream.addProperty("text:checked", isChecked());
     }
 }
