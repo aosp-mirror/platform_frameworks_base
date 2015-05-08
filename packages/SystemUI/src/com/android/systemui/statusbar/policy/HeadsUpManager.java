@@ -25,6 +25,7 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pools;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -78,6 +79,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
     };
 
+    private final View mStatusBarWindowView;
+    private final int mStatusBarHeight;
     private PhoneStatusBar mBar;
     private int mSnoozeLengthMs;
     private ContentObserver mSettingsObserver;
@@ -92,8 +95,11 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     private boolean mIsExpanded;
     private boolean mHasPinnedNotification;
     private int[] mTmpTwoArray = new int[2];
+    private boolean mHeadsUpGoingAway;
+    private boolean mWaitingOnCollapseWhenGoingAway;
+    private boolean mIsObserving;
 
-    public HeadsUpManager(final Context context, ViewTreeObserver observer) {
+    public HeadsUpManager(final Context context, View statusBarWindowView) {
         Resources resources = context.getResources();
         mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
         mSnoozedPackages = new ArrayMap<>();
@@ -119,7 +125,24 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         context.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS), false,
                 mSettingsObserver);
-        observer.addOnComputeInternalInsetsListener(this);
+        mStatusBarWindowView = statusBarWindowView;
+        mStatusBarHeight = resources.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+    }
+
+    private void updateTouchableRegionListener() {
+        boolean shouldObserve = mHasPinnedNotification || mHeadsUpGoingAway
+                || mWaitingOnCollapseWhenGoingAway;
+        if (shouldObserve == mIsObserving) {
+            return;
+        }
+        if (shouldObserve) {
+            mStatusBarWindowView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+            mStatusBarWindowView.requestLayout();
+        } else {
+            mStatusBarWindowView.getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        }
+        mIsObserving = shouldObserve;
     }
 
     public void setBar(PhoneStatusBar bar) {
@@ -207,6 +230,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             return;
         }
         mHasPinnedNotification = hasPinnedNotification;
+        updateTouchableRegionListener();
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpPinnedModeChanged(hasPinnedNotification);
         }
@@ -326,7 +350,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-        if (!mIsExpanded && mHasPinnedNotification) {
+        if (mHasPinnedNotification) {
             int minX = Integer.MAX_VALUE;
             int maxX = 0;
             int minY = Integer.MAX_VALUE;
@@ -344,6 +368,9 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
 
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
             info.touchableRegion.set(minX, minY, maxX, maxY);
+        } else if (mHeadsUpGoingAway || mWaitingOnCollapseWhenGoingAway) {
+            info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+            info.touchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);
         }
     }
 
@@ -419,6 +446,10 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             mIsExpanded = isExpanded;
             if (isExpanded) {
                 unpinAll();
+                // make sure our state is sane
+                mWaitingOnCollapseWhenGoingAway = false;
+                mHeadsUpGoingAway = false;
+                updateTouchableRegionListener();
             }
         }
     }
@@ -441,6 +472,40 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             return aEntry == null ? 1 : -1;
         }
         return aEntry.compareTo(bEntry);
+    }
+
+    /**
+     * Set that we are exiting the headsUp pinned mode, but some notifications might still be
+     * animating out. This is used to keep the touchable regions in a sane state.
+     */
+    public void setHeadsUpGoingAway(boolean headsUpGoingAway) {
+        if (headsUpGoingAway != mHeadsUpGoingAway) {
+            mHeadsUpGoingAway = headsUpGoingAway;
+            if (!headsUpGoingAway) {
+                waitForStatusBarLayout();
+            }
+            updateTouchableRegionListener();
+        }
+    }
+
+    /**
+     * We need to wait on the whole panel to collapse, before we can remove the touchable region
+     * listener.
+     */
+    private void waitForStatusBarLayout() {
+        mWaitingOnCollapseWhenGoingAway = true;
+        mStatusBarWindowView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                    int oldLeft,
+                    int oldTop, int oldRight, int oldBottom) {
+                if (mStatusBarWindowView.getHeight() <= mStatusBarHeight) {
+                    mStatusBarWindowView.removeOnLayoutChangeListener(this);
+                    mWaitingOnCollapseWhenGoingAway = false;
+                    updateTouchableRegionListener();
+                }
+            }
+        });
     }
 
 
