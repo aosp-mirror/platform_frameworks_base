@@ -28593,9 +28593,9 @@ package android.security {
     method public int getPurposes();
     method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
-    method public boolean isTeeBacked();
+    method public boolean isInsideSecureHardware();
     method public boolean isUserAuthenticationRequired();
-    method public boolean isUserAuthenticationRequirementTeeEnforced();
+    method public boolean isUserAuthenticationRequirementEnforcedBySecureHardware();
   }
 
   public final class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
