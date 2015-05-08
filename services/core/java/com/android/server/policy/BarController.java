@@ -58,6 +58,9 @@ public class BarController {
     private int mTransientBarState;
     private boolean mPendingShow;
     private long mLastTranslucent;
+    private boolean mShowTransparent;
+    private boolean mSetUnHideFlagWhenNextTransparent;
+    private boolean mNoAnimationOnNextShow;
 
     public BarController(String tag, int transientFlag, int unhideFlag, int translucentFlag,
             int statusBarManagerId, int translucentWmFlag) {
@@ -72,6 +75,14 @@ public class BarController {
 
     public void setWindow(WindowState win) {
         mWin = win;
+    }
+
+    public void setShowTransparent(boolean transparent) {
+        if (transparent != mShowTransparent) {
+            mShowTransparent = transparent;
+            mSetUnHideFlagWhenNextTransparent = transparent;
+            mNoAnimationOnNextShow = true;
+        }
     }
 
     public void showTransient() {
@@ -135,7 +146,9 @@ public class BarController {
         }
         final boolean wasVis = mWin.isVisibleLw();
         final boolean wasAnim = mWin.isAnimatingLw();
-        final boolean change = show ? mWin.showLw(true) : mWin.hideLw(true);
+        final boolean change = show ? mWin.showLw(!mNoAnimationOnNextShow)
+                : mWin.hideLw(!mNoAnimationOnNextShow);
+        mNoAnimationOnNextShow = false;
         final int state = computeStateLw(wasVis, wasAnim, mWin, change);
         final boolean stateChanged = updateStateLw(state);
         return change || stateChanged;
@@ -231,6 +244,13 @@ public class BarController {
                 setTransientBarState(TRANSIENT_BAR_SHOWING);  // request accepted
             } else {
                 setTransientBarState(TRANSIENT_BAR_NONE);  // request denied
+            }
+        }
+        if (mShowTransparent) {
+            vis |= View.SYSTEM_UI_TRANSPARENT;
+            if (mSetUnHideFlagWhenNextTransparent) {
+                vis |= mUnhideFlag;
+                mSetUnHideFlagWhenNextTransparent = false;
             }
         }
         if (mTransientBarState != TRANSIENT_BAR_NONE) {
