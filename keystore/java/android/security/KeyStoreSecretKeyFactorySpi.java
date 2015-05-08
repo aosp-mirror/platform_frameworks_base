@@ -74,7 +74,7 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                     + " Keystore error: " + errorCode);
         }
 
-        boolean teeBacked;
+        boolean insideSecureHardware;
         @KeyStoreKeyProperties.OriginEnum int origin;
         int keySize;
         @KeyStoreKeyProperties.PurposeEnum int purposes;
@@ -85,11 +85,11 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         int keymasterHwEnforcedUserAuthenticators;
         try {
             if (keyCharacteristics.hwEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
-                teeBacked = true;
+                insideSecureHardware = true;
                 origin = KeyStoreKeyProperties.Origin.fromKeymaster(
                         keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else if (keyCharacteristics.swEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
-                teeBacked = false;
+                insideSecureHardware = false;
                 origin = KeyStoreKeyProperties.Origin.fromKeymaster(
                         keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else {
@@ -150,12 +150,12 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 !keyCharacteristics.getBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
         int userAuthenticationValidityDurationSeconds =
                 keyCharacteristics.getInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT, -1);
-        boolean userAuthenticationRequirementEnforcedInTee = (userAuthenticationRequired)
+        boolean userAuthenticationRequirementEnforcedBySecureHardware = (userAuthenticationRequired)
                 && (keymasterHwEnforcedUserAuthenticators != 0)
                 && (keymasterSwEnforcedUserAuthenticators == 0);
 
         return new KeyStoreKeySpec(entryAlias,
-                teeBacked,
+                insideSecureHardware,
                 origin,
                 keySize,
                 keyValidityStart,
@@ -168,7 +168,7 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 blockModes,
                 userAuthenticationRequired,
                 userAuthenticationValidityDurationSeconds,
-                userAuthenticationRequirementEnforcedInTee);
+                userAuthenticationRequirementEnforcedBySecureHardware);
     }
 
     @Override
