@@ -2,7 +2,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.net.NetworkCapabilities;
 
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -26,7 +26,7 @@ public class NetworkControllerEthernetTest extends NetworkControllerBaseTest {
     }
 
     protected void setEthernetState(boolean connected, boolean validated) {
-        setConnectivity(validated ? 100 : 0, NetworkCapabilities.TRANSPORT_ETHERNET, connected);
+        setConnectivity(NetworkCapabilities.TRANSPORT_ETHERNET, validated, connected);
     }
 
     protected void verifyLastEthernetIcon(boolean visible, int icon) {
