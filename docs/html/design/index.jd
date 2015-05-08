@@ -14,17 +14,14 @@ footer.hide=1
         <img class="dac-hero-image" src="/design/media/hero-material-design.png">
       </div>
       <div class="col-1of2 col-pull-1of2">
-        <h1 class="dac-hero-title">Up and running with Material Design</h1>
+        <h1 class="dac-hero-title">Up and running with material design</h1>
         <p class="dac-hero-description">
-          Android 5.0 introduces a design metaphor inspired by paper and ink that provides a reassuring sense of tactility.
+        Android uses a new design metaphor inspired by paper and ink that provides a reassuring
+        sense of tactility. Visit the <a href="http://www.google.com/design/spec/material-design/introduction">material design</a> site for more resources. 
         </p>
         <a class="dac-hero-cta" href="https://www.google.com/design/spec/material-design/introduction.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Introducing Material Design
-        </a><br>
-        <a class="dac-hero-cta" href="/design/material/index.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Material Design for Android
+          Introducing material design
         </a><br>
         <a class="dac-hero-cta" href="https://www.google.com/design/spec/resources/color-palettes.html">
           <span class="dac-sprite dac-auto-chevron"></span>
@@ -56,7 +53,7 @@ footer.hide=1
 <section class="dac-section dac-light"><div class="wrap">
   <h1 class="dac-section-title">Pure Android</h1>
   <div class="dac-section-subtitle">
-    This is a place holder paragraph. Some text here would povide some context.
+    Design around Android's capabilities and conventions to give users the best experience.
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:design/landing/pureandroid"
@@ -67,7 +64,7 @@ footer.hide=1
 <section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Resources</h1>
   <div class="dac-section-subtitle">
-    This is a place holder paragraph. Some text here would povide some context.
+    Essential downloads, stencils, and tools to help you create your design.
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:design/landing/resources"
