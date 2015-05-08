@@ -32,7 +32,7 @@ LOCAL_MODULE:= libjnigraphics
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
 # TODO: This is to work around b/19059885. Remove after root cause is fixed
-LOCAL_LDFLAGS_arm := -Wl,--hash-style=sysv
+LOCAL_LDFLAGS_arm := -Wl,--hash-style=both
 
 include $(BUILD_SHARED_LIBRARY)
 
