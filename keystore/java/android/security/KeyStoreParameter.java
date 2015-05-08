@@ -16,27 +16,89 @@
 
 package android.security;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 
 import java.security.Key;
 import java.security.KeyStore.ProtectionParameter;
+import java.security.cert.Certificate;
 import java.util.Date;
 
 import javax.crypto.Cipher;
 
 /**
- * Parameters specifying how to secure and restrict the use of a key being
- * imported into the
- * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore
- * facility</a>. The Android KeyStore facility is accessed through a
- * {@link java.security.KeyStore} API using the {@code AndroidKeyStore}
- * provider. The {@code context} passed in may be used to pop up some UI to ask
- * the user to unlock or initialize the Android KeyStore facility.
- * <p>
- * Any entries placed in the {@code KeyStore} may be retrieved later. Note that
- * there is only one logical instance of the {@code KeyStore} per application
- * UID so apps using the {@code sharedUid} facility will also share a
- * {@code KeyStore}.
+ * Parameters specifying how to secure and restrict the use of a key or key pair being imported into
+ * the <a href="{@docRoot}training/articles/keystore.html">Android KeyStore facility</a>. This class
+ * specifies whether user authentication is required for using the key, what uses the key is
+ * authorized for (e.g., only in {@code CTR} mode, or only for signing -- decryption not permitted),
+ * whether the key should be encrypted at rest, the key's and validity start and end dates.
+ *
+ * <p>To import a key or key pair into the Android KeyStore, create an instance of this class using
+ * the {@link Builder} and pass the instance into {@link java.security.KeyStore#setEntry(String, java.security.KeyStore.Entry, ProtectionParameter) KeyStore.setEntry}
+ * with the key or key pair being imported.
+ *
+ * <p>To obtain the secret/symmetric or private key from the Android KeyStore use
+ * {@link java.security.KeyStore#getKey(String, char[]) KeyStore.getKey(String, null)} or
+ * {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter) KeyStore.getEntry(String, null)}.
+ * To obtain the public key from the Android KeyStore use
+ * {@link java.security.KeyStore#getCertificate(String)} and then
+ * {@link Certificate#getPublicKey()}.
+ *
+ * <p>NOTE: The key material of keys stored in the Android KeyStore is not accessible.
+ *
+ * <p><h3>Example: Symmetric Key</h3>
+ * The following example illustrates how to import an AES key into the Android KeyStore under alias
+ * {@code key1} authorized to be used only for encryption/decryption in CBC mode with PKCS#7
+ * padding. The key must export its key material via {@link Key#getEncoded()} in {@code RAW} format.
+ * <pre> {@code
+ * SecretKey key = ...; // AES key
+ *
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * keyStore.setEntry(
+ *         "key1",
+ *         new KeyStore.SecretKeyEntry(key),
+ *         new KeyStoreParameter.Builder(context)
+ *                 .setPurposes(KeyStoreKeyProperties.Purpose.ENCRYPT
+ *                         | KeyStoreKeyProperties.Purpose.DECRYPT)
+ *                 .setBlockMode(KeyStoreKeyProperties.BlockMode.CBC)
+ *                 .setEncryptionPaddings(
+ *                         KeyStoreKeyProperties.EncryptionPaddings.PKCS7)
+ *                 .build());
+ * // Key imported, obtain a reference to it.
+ * SecretKey keyStoreKey = (SecretKey) keyStore.getKey("key1", null);
+ * // The original key can now be thrown away.
+ * }</pre>
+ *
+ * <p><h3>Example: Asymmetric Key Pair</h3>
+ * The following example illustrates how to import an EC key pair into the Android KeyStore under
+ * alias {@code key2} authorized to be used only for signing with SHA-256 digest and only if
+ * the user has been authenticated within the last ten minutes. Both the private and the public key
+ * must export their key material via {@link Key#getEncoded()} in {@code PKCS#8} and {@code X.509}
+ * format respectively.
+ * <pre> {@code
+ * PrivateKey privateKey = ...;   // EC private key
+ * Certificate[] certChain = ...; // Certificate chain with the first certificate
+ *                                // containing the corresponding EC public key.
+ *
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * keyStore.setEntry(
+ *         "key2",
+ *         new KeyStore.PrivateKeyEntry(privateKey, certChain),
+ *         new KeyStoreParameter.Builder(context)
+ *                 .setPurposes(KeyStoreKeyProperties.Purpose.SIGN)
+ *                 .setDigests(KeyStoreKeyProperties.Digest.SHA256)
+ *                 // Only permit this key to be used if the user
+ *                 // authenticated within the last ten minutes.
+ *                 .setUserAuthenticationRequired(true)
+ *                 .setUserAuthenticationValidityDurationSeconds(10 * 60)
+ *                 .build());
+ * // Key pair imported, obtain a reference to it.
+ * PrivateKey keyStorePrivateKey = (PrivateKey) keyStore.getKey("key2", null);
+ * PublicKey publicKey = keyStore.getCertificate("key2").getPublicKey();
+ * // The original private key can now be thrown away.
+ * }</pre>
  */
 public final class KeyStoreParameter implements ProtectionParameter {
     private final Context mContext;
@@ -107,8 +169,9 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Returns {@code true} if this parameter requires entries to be encrypted
-     * on the disk.
+     * Returns {@code true} if the {@link java.security.KeyStore} entry must be encrypted at rest.
+     * This will protect the entry with the secure lock screen credential (e.g., password, PIN, or
+     * pattern).
      */
     public boolean isEncryptionRequired() {
         return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
@@ -275,10 +338,14 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Indicates that this key must be encrypted at rest on storage. Note
-         * that enabling this will require that the user enable a strong lock
-         * screen (e.g., PIN, password) before creating or using the generated
-         * key is successful.
+         * Indicates that this {@link java.security.KeyStore} entry must be encrypted at rest. This
+         * will protect the entry with the secure lock screen credential (e.g., password, PIN, or
+         * pattern).
+         *
+         * <p>Note that enabling this feature requires that the secure lock screen (e.g., password,
+         * PIN, pattern) is set up. Otherwise setting the {@code KeyStore} entry will fail.
+         *
+         * @see KeyguardManager#isDeviceSecure()
          */
         public Builder setEncryptionRequired(boolean required) {
             if (required) {

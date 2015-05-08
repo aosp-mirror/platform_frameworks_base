@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -24,19 +25,53 @@ import java.util.Date;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 
 /**
- * {@link AlgorithmParameterSpec} for initializing a {@code KeyGenerator} that works with
- * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore facility</a>.
+ * {@link AlgorithmParameterSpec} for initializing a {@link KeyGenerator} of the
+ * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore facility</a>. This class
+ * specifies whether user authentication is required for using the key, what uses the key is
+ * authorized for (e.g., only in {@code CBC} mode), whether the key should be encrypted at rest, the
+ * key's and validity start and end dates.
  *
- * <p>The Android KeyStore facility is accessed through a {@link KeyGenerator} API using the
- * {@code AndroidKeyStore} provider. The {@code context} passed in may be used to pop up some UI to
- * ask the user to unlock or initialize the Android KeyStore facility.
+ * <p>To generate a key, create an instance of this class using the {@link Builder}, initialize a
+ * {@code KeyGenerator} of the desired key type (e.g., {@code AES} or {@code HmacSHA256}) from the
+ * {@code AndroidKeyStore} provider with the {@code KeyGeneratorSpec} instance, and then generate a
+ * key using {@link KeyGenerator#generateKey()}.
  *
- * <p>After generation, the {@code keyStoreAlias} is used with the
- * {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter)}
- * interface to retrieve the {@link SecretKey}.
+ * <p>The generated key will be returned by the {@code KeyGenerator} and also stored in the Android
+ * KeyStore under the alias specified in this {@code KeyGeneratorSpec}. To obtain the key from the
+ * Android KeyStore use
+ * {@link java.security.KeyStore#getKey(String, char[]) KeyStore.getKey(String, null)} or
+ * {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter) KeyStore.getEntry(String, null)}.
+ *
+ * <p>NOTE: The key material of the keys generating using the {@code KeyGeneratorSpec} is not
+ * accessible.
+ *
+ * <p><h3>Example</h3>
+ * The following example illustrates how to generate an HMAC key in the Android KeyStore under alias
+ * {@code key1} authorized to be used only for HMAC with SHA-256 digest and only if the user has
+ * been authenticated within the last five minutes.
+ * <pre> {@code
+ * KeyGenerator keyGenerator = KeyGenerator.getInstance(
+ *         KeyStoreKeyProperties.Algorithm.HMAC_SHA256,
+ *         "AndroidKeyStore");
+ * keyGenerator.initialize(
+ *         new KeyGeneratorSpec.Builder(context)
+ *                 .setAlias("key1")
+ *                 .setPurposes(KeyStoreKeyProperties.Purpose.SIGN
+ *                         | KeyStoreKeyProperties.Purpose.VERIFY)
+ *                 // Only permit this key to be used if the user authenticated
+ *                 // within the last five minutes.
+ *                 .setUserAuthenticationRequired(true)
+ *                 .setUserAuthenticationValidityDurationSeconds(5 * 60)
+ *                 .build());
+ * SecretKey key = keyGenerator.generateKey();
+ *
+ * // The key can also be obtained from the Android KeyStore any time as follows:
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * SecretKey key = (SecretKey) keyStore.getKey("key1", null);
+ * }</pre>
  */
 public class KeyGeneratorSpec implements AlgorithmParameterSpec {
 
@@ -207,7 +242,8 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns {@code true} if the key must be encrypted in the {@link java.security.KeyStore}.
+     * Returns {@code true} if the key must be encrypted at rest. This will protect the key with the
+     * secure lock screen credential (e.g., password, PIN, or pattern).
      */
     public boolean isEncryptionRequired() {
         return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
@@ -266,9 +302,13 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Indicates that this key must be encrypted at rest on storage. Note that enabling this
-         * will require that the user enable a strong lock screen (e.g., PIN, password) before
-         * creating or using the generated key is successful.
+         * Indicates that this key must be encrypted at rest. This will protect the key with the
+         * secure lock screen credential (e.g., password, PIN, or pattern).
+         *
+         * <p>Note that this feature requires that the secure lock screen (e.g., password, PIN,
+         * pattern) is set up. Otherwise key generation will fail.
+         *
+         * @see KeyguardManager#isDeviceSecure()
          */
         public Builder setEncryptionRequired(boolean required) {
             if (required) {
