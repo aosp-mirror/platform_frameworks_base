@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -29,6 +30,7 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1244,5 +1246,17 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
                 mSyncMode = SYNC_FIRST_POSITION;
             }
         }
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+
+        encoder.addProperty("scrolling:firstPosition", mFirstPosition);
+        encoder.addProperty("list:nextSelectedPosition", mNextSelectedPosition);
+        encoder.addProperty("list:nextSelectedRowId", mNextSelectedRowId);
+        encoder.addProperty("list:selectedPosition", mSelectedPosition);
+        encoder.addProperty("list:itemCount", mItemCount);
     }
 }

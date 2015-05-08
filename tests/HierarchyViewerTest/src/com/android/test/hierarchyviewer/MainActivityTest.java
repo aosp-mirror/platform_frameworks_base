@@ -75,7 +75,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals("android.widget.TextView",
                 textViewProperties.get(propertyNameTable.get("meta:__name__")));
 
-//        assertEquals(mActivity.getString(R.string.test),
-//                textViewProperties.get(propertyNameTable.get("text")));
+        assertEquals(mActivity.getString(R.string.test),
+                textViewProperties.get(propertyNameTable.get("text:text")));
     }
 }

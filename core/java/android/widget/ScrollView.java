@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -38,6 +39,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1785,6 +1787,13 @@ public class ScrollView extends FrameLayout {
         SavedState ss = new SavedState(superState);
         ss.scrollPosition = mScrollY;
         return ss;
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+        encoder.addProperty("fillViewport", mFillViewport);
     }
 
     static class SavedState extends BaseSavedState {
