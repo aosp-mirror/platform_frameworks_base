@@ -127,6 +127,7 @@
     <color name="screen_pinning_request_bg">#ff009688</color><!-- deep teal 500 -->
     <color name="screen_pinning_request_window_bg">#80000000</color>
 
+    <color name="segmented_buttons_background">#14FFFFFF</color><!-- 8% white -->
     <color name="segmented_button_selected">#FFFFFFFF</color>
     <color name="segmented_button_unselected">#FFB0BEC5</color><!-- blue grey 200 -->
 
