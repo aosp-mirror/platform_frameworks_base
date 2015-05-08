@@ -2683,7 +2683,9 @@
   <!-- NFC CardEmulation: dynamically load service resources -->
   <public type="attr" name="dynamicResources" />
 
-  <public type="attr" name="assistBlocked" />
+  <attr name="__reserved0" format="boolean" />
+  <public type="attr" name="__reserved0" />
+
   <public type="attr" name="stylusButtonPressable" />
   <public type="attr" name="supportsLaunchVoiceAssistFromKeyguard" />
   <public type="attr" name="scrollIndicators" />
