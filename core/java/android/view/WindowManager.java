@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Presentation;
 import android.content.Context;
@@ -2066,5 +2067,18 @@ public interface WindowManager extends ViewManager {
         }
 
         private CharSequence mTitle = "";
+
+        /** @hide */
+        @Override
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            super.encodeProperties(encoder);
+
+            encoder.addProperty("x", x);
+            encoder.addProperty("y", y);
+            encoder.addProperty("horizontalWeight", horizontalWeight);
+            encoder.addProperty("verticalWeight", verticalWeight);
+            encoder.addProperty("type", type);
+            encoder.addProperty("flags", flags);
+        }
     }
 }

@@ -6861,6 +6861,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
             return String.valueOf(size);
         }
+
+        /** @hide */
+        void encode(@NonNull ViewHierarchyEncoder encoder) {
+            encoder.beginObject(this);
+            encodeProperties(encoder);
+            encoder.endObject();
+        }
+
+        /** @hide */
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            encoder.addProperty("width", width);
+            encoder.addProperty("height", height);
+        }
     }
 
     /**
@@ -7329,6 +7342,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     bottomMargin,
                     paint);
         }
+
+        /** @hide */
+        @Override
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            super.encodeProperties(encoder);
+            encoder.addProperty("leftMargin", leftMargin);
+            encoder.addProperty("topMargin", topMargin);
+            encoder.addProperty("rightMargin", rightMargin);
+            encoder.addProperty("bottomMargin", bottomMargin);
+            encoder.addProperty("startMargin", startMargin);
+            encoder.addProperty("endMargin", endMargin);
+        }
     }
 
     /* Describes a touched view and the ids of the pointers that it has captured.
@@ -7664,5 +7689,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         sDebugLines[15] = y1;
 
         canvas.drawLines(sDebugLines, paint);
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+
+        encoder.addProperty("focus:descendantFocusability", getDescendantFocusability());
+        encoder.addProperty("drawing:clipChildren", getClipChildren());
+        encoder.addProperty("drawing:clipToPadding", getClipToPadding());
+        encoder.addProperty("drawing:childrenDrawingOrderEnabled", isChildrenDrawingOrderEnabled());
+        encoder.addProperty("drawing:persistentDrawingCache", getPersistentDrawingCache());
+
+        int n = getChildCount();
+        encoder.addProperty("meta:__childCount__", (short)n);
+        for (int i = 0; i < n; i++) {
+            encoder.addPropertyKey("meta:__child__" + i);
+            getChildAt(i).encode(encoder);
+        }
     }
 }
