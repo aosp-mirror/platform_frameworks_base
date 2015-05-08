@@ -181,6 +181,21 @@ static jlong nativeGetAuthenticatorId(JNIEnv *, jobject clazz) {
     return gContext.device->get_authenticator_id(gContext.device);
 }
 
+static jint nativeSetActiveGroup(JNIEnv *env, jobject clazz, jint gid, jbyteArray path) {
+    const int pathSize = env->GetArrayLength(path);
+    jbyte* pathData = env->GetByteArrayElements(path, 0);
+    if (pathSize >= PATH_MAX) {
+	ALOGE("Path name is too long\n");
+        return -1;
+    }
+    char path_name[PATH_MAX] = {0};
+    memcpy(path_name, pathData, pathSize);
+    ALOG(LOG_VERBOSE, LOG_TAG, "nativeSetActiveGroup() path: %s, gid: %d\n", path_name, gid);
+    int result = gContext.device->set_active_group(gContext.device, gid, path_name);
+    env->ReleaseByteArrayElements(path, pathData, 0);
+    return result;
+}
+
 static jint nativeOpenHal(JNIEnv* env, jobject clazz) {
     ALOG(LOG_VERBOSE, LOG_TAG, "nativeOpenHal()\n");
     int err;
@@ -242,6 +257,7 @@ static const JNINativeMethod g_methods[] = {
     { "nativeAuthenticate", "(JI)I", (void*)nativeAuthenticate },
     { "nativeStopAuthentication", "()I", (void*)nativeStopAuthentication },
     { "nativeEnroll", "([BII)I", (void*)nativeEnroll },
+    { "nativeSetActiveGroup", "(I[B)I", (void*)nativeSetActiveGroup },
     { "nativePreEnroll", "()J", (void*)nativePreEnroll },
     { "nativeStopEnrollment", "()I", (void*)nativeStopEnrollment },
     { "nativeRemove", "(II)I", (void*)nativeRemove },
