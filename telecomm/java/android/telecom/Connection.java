@@ -106,38 +106,32 @@ public abstract class Connection implements IConferenceable {
 
     /**
      * Local device supports receiving video.
-     * @hide
      */
     public static final int CAPABILITY_SUPPORTS_VT_LOCAL_RX = 0x00000100;
 
     /**
      * Local device supports transmitting video.
-     * @hide
      */
     public static final int CAPABILITY_SUPPORTS_VT_LOCAL_TX = 0x00000200;
 
     /**
      * Local device supports bidirectional video calling.
-     * @hide
      */
     public static final int CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL =
             CAPABILITY_SUPPORTS_VT_LOCAL_RX | CAPABILITY_SUPPORTS_VT_LOCAL_TX;
 
     /**
      * Remote device supports receiving video.
-     * @hide
      */
     public static final int CAPABILITY_SUPPORTS_VT_REMOTE_RX = 0x00000400;
 
     /**
      * Remote device supports transmitting video.
-     * @hide
      */
     public static final int CAPABILITY_SUPPORTS_VT_REMOTE_TX = 0x00000800;
 
     /**
      * Remote device supports bidirectional video calling.
-     * @hide
      */
     public static final int CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL =
             CAPABILITY_SUPPORTS_VT_REMOTE_RX | CAPABILITY_SUPPORTS_VT_REMOTE_TX;
@@ -187,14 +181,12 @@ public abstract class Connection implements IConferenceable {
 
     /**
      * Call can be upgraded to a video call.
-     * @hide
      */
     public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
 
     /**
      * For video calls, indicates whether the outgoing video for the call can be paused using
      * the {@link android.telecom.VideoProfile.VideoState#PAUSED} VideoState.
-     * @hide
      */
     public static final int CAPABILITY_CAN_PAUSE_VIDEO = 0x00100000;
 
@@ -1041,7 +1033,6 @@ public abstract class Connection implements IConferenceable {
      * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
      * @param videoState The new video state.
-     * @hide
      */
     public final void setVideoState(int videoState) {
         checkImmutable();
@@ -1105,7 +1096,6 @@ public abstract class Connection implements IConferenceable {
     /**
      * Sets the video connection provider.
      * @param videoProvider The video provider.
-     * @hide
      */
     public final void setVideoProvider(VideoProvider videoProvider) {
         checkImmutable();
@@ -1417,7 +1407,6 @@ public abstract class Connection implements IConferenceable {
      * a request to accept.
      *
      * @param videoState The video state in which to answer the connection.
-     * @hide
      */
     public void onAnswer(int videoState) {}
 
