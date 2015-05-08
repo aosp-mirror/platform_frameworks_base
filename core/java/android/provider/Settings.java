@@ -6156,6 +6156,17 @@ public final class Settings {
         */
        public static final String MOBILE_DATA = "mobile_data";
 
+       /**
+        * Whether the mobile data connection should remain active even when higher
+        * priority networks like WiFi are active, to help make network switching faster.
+        *
+        * See ConnectivityService for more info.
+        *
+        * (0 = disabled, 1 = enabled)
+        * @hide
+        */
+       public static final String MOBILE_DATA_ALWAYS_ON = "mobile_data_always_on";
+
        /** {@hide} */
        public static final String NETSTATS_ENABLED = "netstats_enabled";
        /** {@hide} */

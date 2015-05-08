@@ -190,7 +190,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /** Set of ifaces that are costly. */
     private HashSet<String> mMeteredIfaces = Sets.newHashSet();
 
-    private Context mContext;
+    final private Context mContext;
     private int mNetworkPreference;
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
@@ -344,6 +344,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private static final int EVENT_PROMPT_UNVALIDATED = 29;
 
+    /**
+     * used internally to (re)configure mobile data always-on settings.
+     */
+    private static final int EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON = 30;
+
     /** Handler used for internal events. */
     final private InternalHandler mHandler;
     /** Handler used for incoming {@link NetworkStateTracker} events. */
@@ -374,7 +379,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private PacManager mPacManager = null;
 
-    private SettingsObserver mSettingsObserver;
+    final private SettingsObserver mSettingsObserver;
 
     private UserManager mUserManager;
 
@@ -555,13 +560,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         if (DBG) log("ConnectivityService starting up");
 
-        NetworkCapabilities netCap = new NetworkCapabilities();
-        netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
-        mDefaultRequest = new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId());
-        NetworkRequestInfo nri = new NetworkRequestInfo(null, mDefaultRequest, new Binder(),
-                NetworkRequestInfo.REQUEST);
-        mNetworkRequests.put(mDefaultRequest, nri);
+        mDefaultRequest = createInternetRequestForTransport(-1);
+        mNetworkRequests.put(mDefaultRequest, new NetworkRequestInfo(
+                null, mDefaultRequest, new Binder(), NetworkRequestInfo.REQUEST));
+
+        mDefaultMobileDataRequest = createInternetRequestForTransport(
+                NetworkCapabilities.TRANSPORT_CELLULAR);
 
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
         handlerThread.start();
@@ -696,8 +700,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mInetLog = new ArrayList();
         }
 
-        mSettingsObserver = new SettingsObserver(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY);
-        mSettingsObserver.observe(mContext);
+        mSettingsObserver = new SettingsObserver(mContext, mHandler);
+        registerSettingsCallbacks();
 
         mDataConnectionStats = new DataConnectionStats(mContext);
         mDataConnectionStats.startMonitoring();
@@ -705,6 +709,44 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mPacManager = new PacManager(mContext, mHandler, EVENT_PROXY_HAS_CHANGED);
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+    }
+
+    private NetworkRequest createInternetRequestForTransport(int transportType) {
+        NetworkCapabilities netCap = new NetworkCapabilities();
+        netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+        if (transportType > -1) {
+            netCap.addTransportType(transportType);
+        }
+        return new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId());
+    }
+
+    private void handleMobileDataAlwaysOn() {
+        final boolean enable = (Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.MOBILE_DATA_ALWAYS_ON, 0) == 1);
+        final boolean isEnabled = (mNetworkRequests.get(mDefaultMobileDataRequest) != null);
+        if (enable == isEnabled) {
+            return;  // Nothing to do.
+        }
+
+        if (enable) {
+            handleRegisterNetworkRequest(new NetworkRequestInfo(
+                    null, mDefaultMobileDataRequest, new Binder(), NetworkRequestInfo.REQUEST));
+        } else {
+            handleReleaseNetworkRequest(mDefaultMobileDataRequest, Process.SYSTEM_UID);
+        }
+    }
+
+    private void registerSettingsCallbacks() {
+        // Watch for global HTTP proxy changes.
+        mSettingsObserver.observe(
+                Settings.Global.getUriFor(Settings.Global.HTTP_PROXY),
+                EVENT_APPLY_GLOBAL_HTTP_PROXY);
+
+        // Watch for whether or not to keep mobile data always on.
+        mSettingsObserver.observe(
+                Settings.Global.getUriFor(Settings.Global.MOBILE_DATA_ALWAYS_ON),
+                EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON);
     }
 
     private synchronized int nextNetworkRequestId() {
@@ -1491,6 +1533,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mContext.registerReceiver(mUserPresentReceiver, filter);
         }
 
+        // Configure whether mobile data is always on.
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON));
+
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SYSTEM_READY));
 
         mPermissionMonitor.startMonitoring();
@@ -2107,12 +2152,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     + nri.request + " because their intents matched.");
             handleReleaseNetworkRequest(existingRequest.request, getCallingUid());
         }
-        handleRegisterNetworkRequest(msg);
+        handleRegisterNetworkRequest(nri);
     }
 
-    private void handleRegisterNetworkRequest(Message msg) {
-        final NetworkRequestInfo nri = (NetworkRequestInfo) (msg.obj);
-
+    private void handleRegisterNetworkRequest(NetworkRequestInfo nri) {
         mNetworkRequests.put(nri.request, nri);
 
         // TODO: This logic may be better replaced with a call to rematchNetworkAndRequests
@@ -2423,7 +2466,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_REGISTER_NETWORK_REQUEST:
                 case EVENT_REGISTER_NETWORK_LISTENER: {
-                    handleRegisterNetworkRequest(msg);
+                    handleRegisterNetworkRequest((NetworkRequestInfo) msg.obj);
                     break;
                 }
                 case EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT: {
@@ -2444,6 +2487,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_PROMPT_UNVALIDATED: {
                     handlePromptUnvalidated((Network) msg.obj);
+                    break;
+                }
+                case EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON: {
+                    handleMobileDataAlwaysOn();
                     break;
                 }
                 case EVENT_SYSTEM_READY: {
@@ -2837,23 +2884,36 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private static class SettingsObserver extends ContentObserver {
-        private int mWhat;
-        private Handler mHandler;
-        SettingsObserver(Handler handler, int what) {
-            super(handler);
+        final private HashMap<Uri, Integer> mUriEventMap;
+        final private Context mContext;
+        final private Handler mHandler;
+
+        SettingsObserver(Context context, Handler handler) {
+            super(null);
+            mUriEventMap = new HashMap<Uri, Integer>();
+            mContext = context;
             mHandler = handler;
-            mWhat = what;
         }
 
-        void observe(Context context) {
-            ContentResolver resolver = context.getContentResolver();
-            resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.HTTP_PROXY), false, this);
+        void observe(Uri uri, int what) {
+            mUriEventMap.put(uri, what);
+            final ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(uri, false, this);
         }
 
         @Override
         public void onChange(boolean selfChange) {
-            mHandler.obtainMessage(mWhat).sendToTarget();
+            Slog.wtf(TAG, "Should never be reached.");
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            final Integer what = mUriEventMap.get(uri);
+            if (what != null) {
+                mHandler.obtainMessage(what.intValue()).sendToTarget();
+            } else {
+                loge("No matching event to send for URI=" + uri);
+            }
         }
     }
 
@@ -3642,6 +3702,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // Note: if mDefaultRequest is changed, NetworkMonitor needs to be updated.
     private final NetworkRequest mDefaultRequest;
+
+    // Request used to optionally keep mobile data active even when higher
+    // priority networks like Wi-Fi are active.
+    private final NetworkRequest mDefaultMobileDataRequest;
 
     private NetworkAgentInfo getDefaultNetwork() {
         return mNetworkForRequestId.get(mDefaultRequest.requestId);
