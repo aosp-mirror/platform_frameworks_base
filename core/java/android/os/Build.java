@@ -173,6 +173,27 @@ public class Build {
                 "ro.build.version.sdk", 0);
 
         /**
+         * The developer preview revision of a prerelease SDK. This value will always
+         * be <code>0</code> on production platform builds/devices.
+         *
+         * <p>When this value is nonzero, any new API added since the last
+         * officially published {@link #SDK_INT API level} is only guaranteed to be present
+         * on that specific preview revision. For example, an API <code>Activity.fooBar()</code>
+         * might be present in preview revision 1 but renamed or removed entirely in
+         * preview revision 2, which may cause an app attempting to call it to crash
+         * at runtime.</p>
+         *
+         * <p>Experimental apps targeting preview APIs should check this value for
+         * equality (<code>==</code>) with the preview SDK revision they were built for
+         * before using any prerelease platform APIs. Apps that detect a preview SDK revision
+         * other than the specific one they expect should fall back to using APIs from
+         * the previously published API level only to avoid unwanted runtime exceptions.
+         * </p>
+         */
+        public static final int PREVIEW_SDK_INT = SystemProperties.getInt(
+                "ro.build.version.preview_sdk", 0);
+
+        /**
          * The current development codename, or the string "REL" if this is
          * a release build.
          */
