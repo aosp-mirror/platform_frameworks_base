@@ -45,17 +45,20 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
+
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -75,6 +78,8 @@ import java.io.PrintWriter;
 public class DeviceIdleController extends SystemService {
     private static final String TAG = "DeviceIdleController";
 
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
     public static final String SERVICE_NAME = "deviceidle";
 
     private static final String ACTION_STEP_IDLE_STATE =
@@ -88,17 +93,20 @@ public class DeviceIdleController extends SystemService {
      * immediately after going inactive just because we don't want to be continually running
      * the significant motion sensor whenever the screen is off.
      */
-    private static final long DEFAULT_INACTIVE_TIMEOUT = 30*60*1000L;
+    private static final long DEFAULT_INACTIVE_TIMEOUT = !DEBUG ? 30*60*1000L
+            : 2 * 60 * 1000L;
     /**
      * This is the time, after seeing motion, that we wait after becoming inactive from
      * that until we start looking for motion again.
      */
-    private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT = 10*60*1000L;
+    private static final long DEFAULT_MOTION_INACTIVE_TIMEOUT = !DEBUG ? 10*60*1000L
+            : 60 * 1000L;
     /**
      * This is the time, after the inactive timeout elapses, that we will wait looking
      * for significant motion until we truly consider the device to be idle.
      */
-    private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT = 30*60*1000L;
+    private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT = !DEBUG ? 30*60*1000L
+            : 2 * 60 * 1000L;
     /**
      * This is the initial time, after being idle, that we will allow ourself to be back
      * in the IDLE_PENDING state allowing the system to run normally until we return to idle.
@@ -117,11 +125,13 @@ public class DeviceIdleController extends SystemService {
      * This is the initial time that we want to sit in the idle state before waking up
      * again to return to pending idle and allowing normal work to run.
      */
-    private static final long DEFAULT_IDLE_TIMEOUT = 60*60*1000L;
+    private static final long DEFAULT_IDLE_TIMEOUT = !DEBUG ? 60*60*1000L
+            : 5 * 60 * 1000L;
     /**
      * Maximum idle duration we will be allowed to use.
      */
-    private static final long DEFAULT_MAX_IDLE_TIMEOUT = 6*60*60*1000L;
+    private static final long DEFAULT_MAX_IDLE_TIMEOUT = !DEBUG ? 6*60*60*1000L
+            : 10 * 60 * 1000L;
     /**
      * Scaling factor to apply to current idle timeout each time we cycle through that state.
      */
@@ -130,7 +140,8 @@ public class DeviceIdleController extends SystemService {
      * This is the minimum time we will allow until the next upcoming alarm for us to
      * actually go in to idle mode.
      */
-    private static final long DEFAULT_MIN_TIME_TO_ALARM = 60*60*1000L;
+    private static final long DEFAULT_MIN_TIME_TO_ALARM = !DEBUG ? 60*60*1000L
+            : 5 * 60 * 1000L;
 
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
