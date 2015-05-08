@@ -103,8 +103,9 @@ public class AndroidKeyStore extends KeyStoreSpi {
                     keyAliasInKeystore, null, null, keyCharacteristics);
             if ((errorCode != KeymasterDefs.KM_ERROR_OK)
                     && (errorCode != android.security.KeyStore.NO_ERROR)) {
-                throw new UnrecoverableKeyException("Failed to load information about key."
-                        + " Error code: " + errorCode);
+                throw (UnrecoverableKeyException)
+                        new UnrecoverableKeyException("Failed to load information about key")
+                                .initCause(mKeyStore.getInvalidKeyException(alias, errorCode));
             }
 
             int keymasterAlgorithm =

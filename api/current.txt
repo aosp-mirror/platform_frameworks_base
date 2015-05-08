@@ -28432,7 +28432,7 @@ package android.security {
     method public android.security.KeyGeneratorSpec.Builder setAlias(java.lang.String);
     method public android.security.KeyGeneratorSpec.Builder setBlockModes(java.lang.String...);
     method public android.security.KeyGeneratorSpec.Builder setEncryptionPaddings(java.lang.String...);
-    method public android.security.KeyGeneratorSpec.Builder setEncryptionRequired(boolean);
+    method public android.security.KeyGeneratorSpec.Builder setEncryptionRequired();
     method public android.security.KeyGeneratorSpec.Builder setKeySize(int);
     method public android.security.KeyGeneratorSpec.Builder setKeyValidityEnd(java.util.Date);
     method public android.security.KeyGeneratorSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
