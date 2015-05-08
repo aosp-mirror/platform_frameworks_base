@@ -30167,6 +30167,8 @@ package android.telecom {
     method public android.telecom.Connection getPrimaryConnection();
     method public final int getState();
     method public final android.telecom.StatusHints getStatusHints();
+    method public android.telecom.Connection.VideoProvider getVideoProvider();
+    method public int getVideoState();
     method public void onAudioStateChanged(android.telecom.AudioState);
     method public void onConnectionAdded(android.telecom.Connection);
     method public void onDisconnect();
@@ -30186,6 +30188,8 @@ package android.telecom {
     method public final void setDisconnected(android.telecom.DisconnectCause);
     method public final void setOnHold();
     method public final void setStatusHints(android.telecom.StatusHints);
+    method public final void setVideoProvider(android.telecom.Connection, android.telecom.Connection.VideoProvider);
+    method public final void setVideoState(android.telecom.Connection, int);
     field public static final long CONNECT_TIME_NOT_SPECIFIED = 0L; // 0x0L
   }
 
@@ -30213,6 +30217,7 @@ package android.telecom {
     method public final android.telecom.Connection.VideoProvider getVideoProvider();
     method public final boolean isRingbackRequested();
     method public void onAbort();
+    method public void onAnswer(int);
     method public void onAnswer();
     method public void onAudioStateChanged(android.telecom.AudioState);
     method public void onDisconnect();
@@ -30242,7 +30247,11 @@ package android.telecom {
     method public final void setRingbackRequested(boolean);
     method public final void setRinging();
     method public final void setStatusHints(android.telecom.StatusHints);
+    method public final void setVideoProvider(android.telecom.Connection.VideoProvider);
+    method public final void setVideoState(int);
     method public static java.lang.String stateToString(int);
+    field public static final int CAPABILITY_CAN_PAUSE_VIDEO = 1048576; // 0x100000
+    field public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 524288; // 0x80000
     field public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
     field public static final int CAPABILITY_HOLD = 1; // 0x1
     field public static final int CAPABILITY_MANAGE_CONFERENCE = 128; // 0x80
@@ -30250,6 +30259,12 @@ package android.telecom {
     field public static final int CAPABILITY_MUTE = 64; // 0x40
     field public static final int CAPABILITY_RESPOND_VIA_TEXT = 32; // 0x20
     field public static final int CAPABILITY_SEPARATE_FROM_CONFERENCE = 4096; // 0x1000
+    field public static final int CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL = 768; // 0x300
+    field public static final int CAPABILITY_SUPPORTS_VT_LOCAL_RX = 256; // 0x100
+    field public static final int CAPABILITY_SUPPORTS_VT_LOCAL_TX = 512; // 0x200
+    field public static final int CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL = 3072; // 0xc00
+    field public static final int CAPABILITY_SUPPORTS_VT_REMOTE_RX = 1024; // 0x400
+    field public static final int CAPABILITY_SUPPORTS_VT_REMOTE_TX = 2048; // 0x800
     field public static final int CAPABILITY_SUPPORT_HOLD = 2; // 0x2
     field public static final int CAPABILITY_SWAP_CONFERENCE = 8; // 0x8
     field public static final int STATE_ACTIVE = 4; // 0x4
@@ -30295,10 +30310,12 @@ package android.telecom {
 
   public final class ConnectionRequest implements android.os.Parcelable {
     ctor public ConnectionRequest(android.telecom.PhoneAccountHandle, android.net.Uri, android.os.Bundle);
+    ctor public ConnectionRequest(android.telecom.PhoneAccountHandle, android.net.Uri, android.os.Bundle, int);
     method public int describeContents();
     method public android.telecom.PhoneAccountHandle getAccountHandle();
     method public android.net.Uri getAddress();
     method public android.os.Bundle getExtras();
+    method public int getVideoState();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telecom.ConnectionRequest> CREATOR;
   }
