@@ -39,6 +39,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -211,7 +212,7 @@ public class DeviceOwner {
         try {
             InputStream input = openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(input, null);
+            parser.setInput(input, StandardCharsets.UTF_8.name());
             int type;
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type!=XmlPullParser.START_TAG) {
@@ -269,7 +270,7 @@ public class DeviceOwner {
         try {
             OutputStream outputStream = startWrite();
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(outputStream, "utf-8");
+            out.setOutput(outputStream, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
 
             // Write device owner tag

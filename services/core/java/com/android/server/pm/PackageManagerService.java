@@ -12498,7 +12498,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 BufferedOutputStream str = new BufferedOutputStream(fout);
                 XmlSerializer serializer = new FastXmlSerializer();
                 try {
-                    serializer.setOutput(str, "utf-8");
+                    serializer.setOutput(str, StandardCharsets.UTF_8.name());
                     serializer.startDocument(null, true);
                     serializer.setFeature(
                             "http://xmlpull.org/v1/doc/features.html#indent-output", true);
