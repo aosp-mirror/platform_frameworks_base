@@ -736,7 +736,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
     }
 
     private void setupPassword() {
-        assertTrue(mAndroidKeyStore.password("1111"));
+        assertTrue(mAndroidKeyStore.onUserPasswordChanged("1111"));
         assertTrue(mAndroidKeyStore.isUnlocked());
 
         assertEquals(0, mAndroidKeyStore.saw("").length);
@@ -2089,7 +2089,7 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
             } catch (KeyStoreException success) {
             }
 
-            assertTrue(mAndroidKeyStore.password("1111"));
+            assertTrue(mAndroidKeyStore.onUserPasswordChanged("1111"));
             assertTrue(mAndroidKeyStore.isUnlocked());
 
             mKeyStore.setEntry(TEST_ALIAS_1, entry,
