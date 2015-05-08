@@ -20,5 +20,5 @@ import android.app.NotificationManager;
 
 /** @hide */
 oneway interface INotificationManagerCallback {
-    void onPolicyToken(in NotificationManager.Policy.Token token);
+    void onPolicyRequestResult(boolean granted);
 }

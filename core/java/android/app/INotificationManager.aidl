@@ -75,7 +75,7 @@ interface INotificationManager
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
     int getInterruptionFilterFromListener(in INotificationListener token);
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
-    NotificationManager.Policy.Token getPolicyTokenFromListener(in INotificationListener listener);
+    void setInterruptionFilter(String pkg, int interruptionFilter);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
@@ -87,10 +87,13 @@ interface INotificationManager
     oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
     oneway void requestZenModeConditions(in IConditionListener callback, int relevance);
-    oneway void requestNotificationPolicyToken(String pkg, in INotificationManagerCallback callback);
-    boolean isNotificationPolicyTokenValid(String pkg, in NotificationManager.Policy.Token token);
-    NotificationManager.Policy getNotificationPolicy(in NotificationManager.Policy.Token token);
-    void setNotificationPolicy(in NotificationManager.Policy.Token token, in NotificationManager.Policy policy);
+    oneway void requestNotificationPolicyAccess(String pkg, in INotificationManagerCallback callback);
+    boolean isNotificationPolicyAccessGranted(String pkg);
+    NotificationManager.Policy getNotificationPolicy(String pkg);
+    void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);
+    String[] getPackagesRequestingNotificationPolicyAccess();
+    boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
+    void setNotificationPolicyAccessGranted(String pkg, boolean granted);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);
