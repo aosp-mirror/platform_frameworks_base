@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_MEDIA_SYNC_SETTINGS_H_
-#define _ANDROID_MEDIA_SYNC_SETTINGS_H_
+#ifndef _ANDROID_MEDIA_SYNC_PARAMS_H_
+#define _ANDROID_MEDIA_SYNC_PARAMS_H_
 
 #include "jni.h"
 
@@ -23,7 +23,7 @@
 
 namespace android {
 
-struct SyncSettings {
+struct SyncParams {
     AVSyncSettings sync;
     float frameRate;
 
@@ -53,13 +53,13 @@ struct SyncSettings {
         void exit(JNIEnv *env);
     };
 
-    // fills this from an android.media.SyncSettings object
-    void fillFromJobject(JNIEnv *env, const fields_t& fields, jobject settings);
+    // fills this from an android.media.SyncParams object
+    void fillFromJobject(JNIEnv *env, const fields_t& fields, jobject params);
 
-    // returns this as a android.media.SyncSettings object
+    // returns this as a android.media.SyncParams object
     jobject asJobject(JNIEnv *env, const fields_t& fields);
 };
 
 }  // namespace android
 
-#endif  // _ANDROID_MEDIA_SYNC_SETTINGS_H_
+#endif  // _ANDROID_MEDIA_SYNC_PARAMS_H_
