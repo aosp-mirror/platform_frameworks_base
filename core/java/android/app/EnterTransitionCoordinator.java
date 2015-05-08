@@ -604,7 +604,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private boolean allowOverlappingTransitions() {
-        return mIsReturning ? getWindow().getAllowExitTransitionOverlap()
+        return mIsReturning ? getWindow().getAllowReturnTransitionOverlap()
                 : getWindow().getAllowEnterTransitionOverlap();
     }
 

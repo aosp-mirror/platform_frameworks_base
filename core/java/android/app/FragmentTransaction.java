@@ -172,14 +172,6 @@ public abstract class FragmentTransaction {
     public abstract FragmentTransaction setTransition(int transit);
 
     /**
-     * TODO: remove from API
-     * @hide
-     */
-    public FragmentTransaction setCustomTransition(int sceneRootId, int transitionId) {
-        return this;
-    }
-
-    /**
      * Used with to map a View from a removed or hidden Fragment to a View from a shown
      * or added Fragment.
      * @param sharedElement A View in a disappearing Fragment to match with a View in an
@@ -188,18 +180,6 @@ public abstract class FragmentTransaction {
      *             element.
      */
     public abstract FragmentTransaction addSharedElement(View sharedElement, String name);
-
-    /**
-     * TODO: remove from API
-     * @hide
-     */
-    public abstract FragmentTransaction setSharedElement(View sharedElement, String name);
-
-    /**
-     * TODO: remove from API
-     * @hide
-     */
-    public abstract FragmentTransaction setSharedElements(Pair<View, String>... sharedElements);
 
     /**
      * Set a custom style resource that will be used for resolving transit
