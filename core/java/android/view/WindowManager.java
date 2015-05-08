@@ -21,7 +21,6 @@ import android.annotation.SystemApi;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -1118,6 +1117,15 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 0x00000800;
+
+        /**
+         * Flag to force the status bar window to be visible all the time. If the bar is hidden when
+         * this flag is set it will be shown again and the bar will have a transparent background.
+         * This can only be set by {@link LayoutParams#TYPE_STATUS_BAR}.
+         *
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT = 0x00001000;
 
         /**
          * Control flags that are private to the platform.
