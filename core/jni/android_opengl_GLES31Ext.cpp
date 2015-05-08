@@ -125,6 +125,116 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining, jint *o
     return NULL;
 }
 
+class ByteArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jbyteArray array, jboolean* is_copy) {
+        return _env->GetByteArrayElements(array, is_copy);
+    }
+};
+class BooleanArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jbooleanArray array, jboolean* is_copy) {
+        return _env->GetBooleanArrayElements(array, is_copy);
+    }
+};
+class CharArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jcharArray array, jboolean* is_copy) {
+        return _env->GetCharArrayElements(array, is_copy);
+    }
+};
+class ShortArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jshortArray array, jboolean* is_copy) {
+        return _env->GetShortArrayElements(array, is_copy);
+    }
+};
+class IntArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jintArray array, jboolean* is_copy) {
+        return _env->GetIntArrayElements(array, is_copy);
+    }
+};
+class LongArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jlongArray array, jboolean* is_copy) {
+        return _env->GetLongArrayElements(array, is_copy);
+    }
+};
+class FloatArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jfloatArray array, jboolean* is_copy) {
+        return _env->GetFloatArrayElements(array, is_copy);
+    }
+};
+class DoubleArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jdoubleArray array, jboolean* is_copy) {
+        return _env->GetDoubleArrayElements(array, is_copy);
+    }
+};
+
+template<typename JTYPEARRAY, typename ARRAYGETTER>
+static void*
+getArrayPointer(JNIEnv *_env, JTYPEARRAY array, jboolean* is_copy) {
+    return ARRAYGETTER::Get(_env, array, is_copy);
+}
+
+class ByteArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jbyteArray array, jbyte* data, jboolean commit) {
+        _env->ReleaseByteArrayElements(array, data, commit ? 0 : JNI_ABORT);
+    }
+};
+class BooleanArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jbooleanArray array, jboolean* data, jboolean commit) {
+        _env->ReleaseBooleanArrayElements(array, data, commit ? 0 : JNI_ABORT);
+    }
+};
+class CharArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jcharArray array, jchar* data, jboolean commit) {
+        _env->ReleaseCharArrayElements(array, data, commit ? 0 : JNI_ABORT);
+    }
+};
+class ShortArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jshortArray array, jshort* data, jboolean commit) {
+        _env->ReleaseShortArrayElements(array, data, commit ? 0 : JNI_ABORT);
+    }
+};
+class IntArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jintArray array, jint* data, jboolean commit) {
+        _env->ReleaseIntArrayElements(array, data, commit ? 0 : JNI_ABORT);
+    }
+};
+class LongArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jlongArray array, jlong* data, jboolean commit) {
+        _env->ReleaseLongArrayElements(array, data, commit ? 0 : JNI_ABORT);
+    }
+};
+class FloatArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jfloatArray array, jfloat* data, jboolean commit) {
+        _env->ReleaseFloatArrayElements(array, data, commit ? 0 : JNI_ABORT);
+    }
+};
+class DoubleArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jdoubleArray array, jdouble* data, jboolean commit) {
+        _env->ReleaseDoubleArrayElements(array, data, commit ? 0 : JNI_ABORT);
+    }
+};
+
+template<typename JTYPEARRAY, typename NTYPEARRAY, typename ARRAYRELEASER>
+static void
+releaseArrayPointer(JNIEnv *_env, JTYPEARRAY array, NTYPEARRAY data, jboolean commit) {
+    ARRAYRELEASER::Release(_env, array, data, commit);
+}
+
 static void
 releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 {
@@ -228,7 +338,8 @@ static int getNeededCount(GLint pname) {
     return needed;
 }
 
-template <typename JTYPEARRAY, typename CTYPE, void GET(GLenum, CTYPE*)>
+template <typename JTYPEARRAY, typename ARRAYGETTER, typename NTYPEARRAY,
+          typename ARRAYRELEASER, typename CTYPE, void GET(GLenum, CTYPE*)>
 static void
 get
   (JNIEnv *_env, jobject _this, jint pname, JTYPEARRAY params_ref, jint offset) {
@@ -263,8 +374,8 @@ get
         _exceptionMessage = "length - offset < needed";
         goto exit;
     }
-    params_base = (CTYPE *)
-        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params_base = (CTYPE *) getArrayPointer<JTYPEARRAY, ARRAYGETTER>(
+        _env, params_ref, (jboolean *)0);
     params = params_base + offset;
 
     GET(
@@ -274,8 +385,8 @@ get
 
 exit:
     if (params_base) {
-        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
-            _exception ? JNI_ABORT: 0);
+        releaseArrayPointer<JTYPEARRAY, NTYPEARRAY, ARRAYRELEASER>(
+            _env, params_ref, params_base, !_exception);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -283,20 +394,21 @@ exit:
 }
 
 
-template <typename CTYPE, void GET(GLenum, CTYPE*)>
+template <typename CTYPE, typename JTYPEARRAY, typename ARRAYGETTER, typename NTYPEARRAY,
+          typename ARRAYRELEASER, void GET(GLenum, CTYPE*)>
 static void
 getarray
   (JNIEnv *_env, jobject _this, jint pname, jobject params_buf) {
     jint _exception = 0;
     const char * _exceptionType;
     const char * _exceptionMessage;
-    jarray _array = (jarray) 0;
+    JTYPEARRAY _array = (JTYPEARRAY) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     CTYPE *params = (CTYPE *) 0;
     int _needed = 0;
 
-    params = (CTYPE *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    params = (CTYPE *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     _remaining /= sizeof(CTYPE);    // convert from bytes to item count
     _needed = getNeededCount(pname);
     // if we didn't find this pname, we just assume the user passed
@@ -309,7 +421,8 @@ getarray
         goto exit;
     }
     if (params == NULL) {
-        char * _paramsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramsBase = (char *) getArrayPointer<JTYPEARRAY, ARRAYGETTER>(
+            _env, _array, (jboolean *) 0);
         params = (CTYPE *) (_paramsBase + _bufferOffset);
     }
     GET(
@@ -319,7 +432,8 @@ getarray
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+        releaseArrayPointer<JTYPEARRAY, NTYPEARRAY, ARRAYRELEASER>(
+            _env, _array, (NTYPEARRAY)params, _exception ? JNI_FALSE : JNI_TRUE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -359,7 +473,7 @@ android_glDebugMessageControlKHR__IIII_3IIZ
     }
     _remaining = _env->GetArrayLength(ids_ref) - offset;
     ids_base = (GLuint *)
-        _env->GetPrimitiveArrayCritical(ids_ref, (jboolean *)0);
+        _env->GetIntArrayElements(ids_ref, (jboolean *)0);
     ids = ids_base + offset;
 
     glDebugMessageControlKHR(
@@ -373,7 +487,7 @@ android_glDebugMessageControlKHR__IIII_3IIZ
 
 exit:
     if (ids_base) {
-        _env->ReleasePrimitiveArrayCritical(ids_ref, ids_base,
+        _env->ReleaseIntArrayElements(ids_ref, (jint*)ids_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -385,14 +499,14 @@ exit:
 static void
 android_glDebugMessageControlKHR__IIIILjava_nio_IntBuffer_2Z
   (JNIEnv *_env, jobject _this, jint source, jint type, jint severity, jint count, jobject ids_buf, jboolean enabled) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLuint *ids = (GLuint *) 0;
 
-    ids = (GLuint *)getPointer(_env, ids_buf, &_array, &_remaining, &_bufferOffset);
+    ids = (GLuint *)getPointer(_env, ids_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (ids == NULL) {
-        char * _idsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _idsBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         ids = (GLuint *) (_idsBase + _bufferOffset);
     }
     glDebugMessageControlKHR(
@@ -404,7 +518,7 @@ android_glDebugMessageControlKHR__IIIILjava_nio_IntBuffer_2Z
         (GLboolean)enabled
     );
     if (_array) {
-        releasePointer(_env, _array, ids, JNI_FALSE);
+        _env->ReleaseIntArrayElements(_array, (jint*)ids, JNI_ABORT);
     }
 }
 
@@ -784,7 +898,7 @@ android_glTexParameterIivEXT__II_3II
     }
     _remaining = _env->GetArrayLength(params_ref) - offset;
     params_base = (GLint *)
-        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+        _env->GetIntArrayElements(params_ref, (jboolean *)0);
     params = params_base + offset;
 
     glTexParameterIivEXT(
@@ -795,7 +909,7 @@ android_glTexParameterIivEXT__II_3II
 
 exit:
     if (params_base) {
-        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+        _env->ReleaseIntArrayElements(params_ref, (jint*)params_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -807,14 +921,14 @@ exit:
 static void
 android_glTexParameterIivEXT__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
 
-    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    params = (GLint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (params == NULL) {
-        char * _paramsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramsBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         params = (GLint *) (_paramsBase + _bufferOffset);
     }
     glTexParameterIivEXT(
@@ -823,7 +937,7 @@ android_glTexParameterIivEXT__IILjava_nio_IntBuffer_2
         (GLint *)params
     );
     if (_array) {
-        releasePointer(_env, _array, params, JNI_FALSE);
+        _env->ReleaseIntArrayElements(_array, (jint*)params, JNI_ABORT);
     }
 }
 
@@ -852,7 +966,7 @@ android_glTexParameterIuivEXT__II_3II
     }
     _remaining = _env->GetArrayLength(params_ref) - offset;
     params_base = (GLuint *)
-        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+        _env->GetIntArrayElements(params_ref, (jboolean *)0);
     params = params_base + offset;
 
     glTexParameterIuivEXT(
@@ -863,7 +977,7 @@ android_glTexParameterIuivEXT__II_3II
 
 exit:
     if (params_base) {
-        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+        _env->ReleaseIntArrayElements(params_ref, (jint*)params_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -875,14 +989,14 @@ exit:
 static void
 android_glTexParameterIuivEXT__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLuint *params = (GLuint *) 0;
 
-    params = (GLuint *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    params = (GLuint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (params == NULL) {
-        char * _paramsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramsBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         params = (GLuint *) (_paramsBase + _bufferOffset);
     }
     glTexParameterIuivEXT(
@@ -891,7 +1005,7 @@ android_glTexParameterIuivEXT__IILjava_nio_IntBuffer_2
         (GLuint *)params
     );
     if (_array) {
-        releasePointer(_env, _array, params, JNI_FALSE);
+        _env->ReleaseIntArrayElements(_array, (jint*)params, JNI_ABORT);
     }
 }
 
@@ -920,7 +1034,7 @@ android_glGetTexParameterIivEXT__II_3II
     }
     _remaining = _env->GetArrayLength(params_ref) - offset;
     params_base = (GLint *)
-        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+        _env->GetIntArrayElements(params_ref, (jboolean *)0);
     params = params_base + offset;
 
     glGetTexParameterIivEXT(
@@ -931,7 +1045,7 @@ android_glGetTexParameterIivEXT__II_3II
 
 exit:
     if (params_base) {
-        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+        _env->ReleaseIntArrayElements(params_ref, (jint*)params_base,
             _exception ? JNI_ABORT: 0);
     }
     if (_exception) {
@@ -943,14 +1057,14 @@ exit:
 static void
 android_glGetTexParameterIivEXT__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
 
-    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    params = (GLint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (params == NULL) {
-        char * _paramsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramsBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         params = (GLint *) (_paramsBase + _bufferOffset);
     }
     glGetTexParameterIivEXT(
@@ -959,7 +1073,7 @@ android_glGetTexParameterIivEXT__IILjava_nio_IntBuffer_2
         (GLint *)params
     );
     if (_array) {
-        releasePointer(_env, _array, params, JNI_TRUE);
+        _env->ReleaseIntArrayElements(_array, (jint*)params, 0);
     }
 }
 
@@ -988,7 +1102,7 @@ android_glGetTexParameterIuivEXT__II_3II
     }
     _remaining = _env->GetArrayLength(params_ref) - offset;
     params_base = (GLuint *)
-        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+        _env->GetIntArrayElements(params_ref, (jboolean *)0);
     params = params_base + offset;
 
     glGetTexParameterIuivEXT(
@@ -999,7 +1113,7 @@ android_glGetTexParameterIuivEXT__II_3II
 
 exit:
     if (params_base) {
-        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+        _env->ReleaseIntArrayElements(params_ref, (jint*)params_base,
             _exception ? JNI_ABORT: 0);
     }
     if (_exception) {
@@ -1011,14 +1125,14 @@ exit:
 static void
 android_glGetTexParameterIuivEXT__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLuint *params = (GLuint *) 0;
 
-    params = (GLuint *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    params = (GLuint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (params == NULL) {
-        char * _paramsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramsBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         params = (GLuint *) (_paramsBase + _bufferOffset);
     }
     glGetTexParameterIuivEXT(
@@ -1027,7 +1141,7 @@ android_glGetTexParameterIuivEXT__IILjava_nio_IntBuffer_2
         (GLuint *)params
     );
     if (_array) {
-        releasePointer(_env, _array, params, JNI_TRUE);
+        _env->ReleaseIntArrayElements(_array, (jint*)params, 0);
     }
 }
 
@@ -1056,7 +1170,7 @@ android_glSamplerParameterIivEXT__II_3II
     }
     _remaining = _env->GetArrayLength(param_ref) - offset;
     param_base = (GLint *)
-        _env->GetPrimitiveArrayCritical(param_ref, (jboolean *)0);
+        _env->GetIntArrayElements(param_ref, (jboolean *)0);
     param = param_base + offset;
 
     glSamplerParameterIivEXT(
@@ -1067,7 +1181,7 @@ android_glSamplerParameterIivEXT__II_3II
 
 exit:
     if (param_base) {
-        _env->ReleasePrimitiveArrayCritical(param_ref, param_base,
+        _env->ReleaseIntArrayElements(param_ref, (jint*)param_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -1079,14 +1193,14 @@ exit:
 static void
 android_glSamplerParameterIivEXT__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint sampler, jint pname, jobject param_buf) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLint *param = (GLint *) 0;
 
-    param = (GLint *)getPointer(_env, param_buf, &_array, &_remaining, &_bufferOffset);
+    param = (GLint *)getPointer(_env, param_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (param == NULL) {
-        char * _paramBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         param = (GLint *) (_paramBase + _bufferOffset);
     }
     glSamplerParameterIivEXT(
@@ -1095,7 +1209,7 @@ android_glSamplerParameterIivEXT__IILjava_nio_IntBuffer_2
         (GLint *)param
     );
     if (_array) {
-        releasePointer(_env, _array, param, JNI_FALSE);
+        _env->ReleaseIntArrayElements(_array, (jint*)param, JNI_ABORT);
     }
 }
 
@@ -1124,7 +1238,7 @@ android_glSamplerParameterIuivEXT__II_3II
     }
     _remaining = _env->GetArrayLength(param_ref) - offset;
     param_base = (GLuint *)
-        _env->GetPrimitiveArrayCritical(param_ref, (jboolean *)0);
+        _env->GetIntArrayElements(param_ref, (jboolean *)0);
     param = param_base + offset;
 
     glSamplerParameterIuivEXT(
@@ -1135,7 +1249,7 @@ android_glSamplerParameterIuivEXT__II_3II
 
 exit:
     if (param_base) {
-        _env->ReleasePrimitiveArrayCritical(param_ref, param_base,
+        _env->ReleaseIntArrayElements(param_ref, (jint*)param_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -1147,14 +1261,14 @@ exit:
 static void
 android_glSamplerParameterIuivEXT__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint sampler, jint pname, jobject param_buf) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLuint *param = (GLuint *) 0;
 
-    param = (GLuint *)getPointer(_env, param_buf, &_array, &_remaining, &_bufferOffset);
+    param = (GLuint *)getPointer(_env, param_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (param == NULL) {
-        char * _paramBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         param = (GLuint *) (_paramBase + _bufferOffset);
     }
     glSamplerParameterIuivEXT(
@@ -1163,7 +1277,7 @@ android_glSamplerParameterIuivEXT__IILjava_nio_IntBuffer_2
         (GLuint *)param
     );
     if (_array) {
-        releasePointer(_env, _array, param, JNI_FALSE);
+        _env->ReleaseIntArrayElements(_array, (jint*)param, JNI_ABORT);
     }
 }
 
@@ -1192,7 +1306,7 @@ android_glGetSamplerParameterIivEXT__II_3II
     }
     _remaining = _env->GetArrayLength(params_ref) - offset;
     params_base = (GLint *)
-        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+        _env->GetIntArrayElements(params_ref, (jboolean *)0);
     params = params_base + offset;
 
     glGetSamplerParameterIivEXT(
@@ -1203,7 +1317,7 @@ android_glGetSamplerParameterIivEXT__II_3II
 
 exit:
     if (params_base) {
-        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+        _env->ReleaseIntArrayElements(params_ref, (jint*)params_base,
             _exception ? JNI_ABORT: 0);
     }
     if (_exception) {
@@ -1215,14 +1329,14 @@ exit:
 static void
 android_glGetSamplerParameterIivEXT__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint sampler, jint pname, jobject params_buf) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLint *params = (GLint *) 0;
 
-    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    params = (GLint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (params == NULL) {
-        char * _paramsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramsBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         params = (GLint *) (_paramsBase + _bufferOffset);
     }
     glGetSamplerParameterIivEXT(
@@ -1231,7 +1345,7 @@ android_glGetSamplerParameterIivEXT__IILjava_nio_IntBuffer_2
         (GLint *)params
     );
     if (_array) {
-        releasePointer(_env, _array, params, JNI_TRUE);
+        _env->ReleaseIntArrayElements(_array, (jint*)params, 0);
     }
 }
 
@@ -1260,7 +1374,7 @@ android_glGetSamplerParameterIuivEXT__II_3II
     }
     _remaining = _env->GetArrayLength(params_ref) - offset;
     params_base = (GLuint *)
-        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+        _env->GetIntArrayElements(params_ref, (jboolean *)0);
     params = params_base + offset;
 
     glGetSamplerParameterIuivEXT(
@@ -1271,7 +1385,7 @@ android_glGetSamplerParameterIuivEXT__II_3II
 
 exit:
     if (params_base) {
-        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+        _env->ReleaseIntArrayElements(params_ref, (jint*)params_base,
             _exception ? JNI_ABORT: 0);
     }
     if (_exception) {
@@ -1283,14 +1397,14 @@ exit:
 static void
 android_glGetSamplerParameterIuivEXT__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint sampler, jint pname, jobject params_buf) {
-    jarray _array = (jarray) 0;
+    jintArray _array = (jintArray) 0;
     jint _bufferOffset = (jint) 0;
     jint _remaining;
     GLuint *params = (GLuint *) 0;
 
-    params = (GLuint *)getPointer(_env, params_buf, &_array, &_remaining, &_bufferOffset);
+    params = (GLuint *)getPointer(_env, params_buf, (jarray*)&_array, &_remaining, &_bufferOffset);
     if (params == NULL) {
-        char * _paramsBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
+        char * _paramsBase = (char *)_env->GetIntArrayElements(_array, (jboolean *) 0);
         params = (GLuint *) (_paramsBase + _bufferOffset);
     }
     glGetSamplerParameterIuivEXT(
@@ -1299,7 +1413,7 @@ android_glGetSamplerParameterIuivEXT__IILjava_nio_IntBuffer_2
         (GLuint *)params
     );
     if (_array) {
-        releasePointer(_env, _array, params, JNI_TRUE);
+        _env->ReleaseIntArrayElements(_array, (jint*)params, 0);
     }
 }
 
