@@ -2824,6 +2824,13 @@ public class MediaPlayer implements SubtitleController.Listener
                         mSubtitleController.selectDefaultTrack();
                     }
                     break;
+                case MEDIA_INFO_BUFFERING_START:
+                case MEDIA_INFO_BUFFERING_END:
+                    TimeProvider timeProvider = mTimeProvider;
+                    if (timeProvider != null) {
+                        timeProvider.onBuffering(msg.arg1 == MEDIA_INFO_BUFFERING_START);
+                    }
+                    break;
                 }
 
                 if (mOnInfoListener != null) {
@@ -3362,6 +3369,7 @@ public class MediaPlayer implements SubtitleController.Listener
         private MediaPlayer mPlayer;
         private boolean mPaused = true;
         private boolean mStopped = true;
+        private boolean mBuffering;
         private long mLastReportedTime;
         private long mTimeAdjustment;
         // since we are expecting only a handful listeners per stream, there is
@@ -3455,12 +3463,22 @@ public class MediaPlayer implements SubtitleController.Listener
         }
 
         /** @hide */
+        public void onBuffering(boolean buffering) {
+            synchronized (this) {
+                if (DEBUG) Log.d(TAG, "onBuffering: " + buffering);
+                mBuffering = buffering;
+                scheduleNotification(REFRESH_AND_NOTIFY_TIME, 0 /* delay */);
+            }
+        }
+
+        /** @hide */
         public void onStopped() {
             synchronized(this) {
                 if (DEBUG) Log.d(TAG, "onStopped");
                 mPaused = true;
                 mStopped = true;
                 mSeeking = false;
+                mBuffering = false;
                 scheduleNotification(NOTIFY_STOP, 0 /* delay */);
             }
         }
@@ -3481,6 +3499,7 @@ public class MediaPlayer implements SubtitleController.Listener
                 synchronized(this) {
                     mStopped = false;
                     mSeeking = true;
+                    mBuffering = false;
                     scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
                 }
             }
@@ -3683,7 +3702,7 @@ public class MediaPlayer implements SubtitleController.Listener
                         nanoTime >= mLastNanoTime + MAX_NS_WITHOUT_POSITION_CHECK) {
                     try {
                         mLastTimeUs = mPlayer.getCurrentPosition() * 1000L;
-                        mPaused = !mPlayer.isPlaying();
+                        mPaused = !mPlayer.isPlaying() || mBuffering;
                         if (DEBUG) Log.v(TAG, (mPaused ? "paused" : "playing") + " at " + mLastTimeUs);
                     } catch (IllegalStateException e) {
                         if (mPausing) {
