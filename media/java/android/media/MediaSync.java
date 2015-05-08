@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioTrack;
-import android.media.PlaybackSettings;
+import android.media.PlaybackParams;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -62,7 +62,7 @@ import java.util.List;
  *   // videoDecoder.releaseOutputBuffer(videoOutputBufferIx, videoPresentationTimeNs);
  *   // More details are available as below.
  *   ...
- *   sync.queueAudio(audioByteBuffer, bufferIndex, size, audioPresentationTimeUs); // non-blocking.
+ *   sync.queueAudio(audioByteBuffer, bufferIndex, audioPresentationTimeUs); // non-blocking.
  *   // The audioByteBuffer and bufferIndex will be returned via callback.
  *   // More details are available as below.
  *   ...
@@ -112,7 +112,7 @@ import java.util.List;
  * initial underrun.
  * <p>
  */
-final public class MediaSync {
+public final class MediaSync {
     /**
      * MediaSync callback interface. Used to notify the user asynchronously
      * of various MediaSync events.
@@ -170,14 +170,12 @@ final public class MediaSync {
     private static class AudioBuffer {
         public ByteBuffer mByteBuffer;
         public int mBufferIndex;
-        public int mSizeInBytes;
         long mPresentationTimeUs;
 
         public AudioBuffer(@NonNull ByteBuffer byteBuffer, int bufferIndex,
-                           int sizeInBytes, long presentationTimeUs) {
+                           long presentationTimeUs) {
             mByteBuffer = byteBuffer;
             mBufferIndex = bufferIndex;
-            mSizeInBytes = sizeInBytes;
             mPresentationTimeUs = presentationTimeUs;
         }
     }
@@ -413,18 +411,18 @@ final public class MediaSync {
      * @throws IllegalArgumentException if audioMode is not supported.
      */
     public void setPlaybackRate(float rate, @PlaybackRateAudioMode int audioMode) {
-        PlaybackSettings rateSettings = new PlaybackSettings();
-        rateSettings.allowDefaults();
+        PlaybackParams rateParams = new PlaybackParams();
+        rateParams.allowDefaults();
         switch (audioMode) {
             case PLAYBACK_RATE_AUDIO_MODE_DEFAULT:
-                rateSettings.setSpeed(rate).setPitch(1.0f);
+                rateParams.setSpeed(rate).setPitch(1.0f);
                 break;
             case PLAYBACK_RATE_AUDIO_MODE_STRETCH:
-                rateSettings.setSpeed(rate).setPitch(1.0f)
-                        .setAudioFallbackMode(rateSettings.AUDIO_FALLBACK_MODE_FAIL);
+                rateParams.setSpeed(rate).setPitch(1.0f)
+                        .setAudioFallbackMode(rateParams.AUDIO_FALLBACK_MODE_FAIL);
                 break;
             case PLAYBACK_RATE_AUDIO_MODE_RESAMPLE:
-                rateSettings.setSpeed(rate).setPitch(rate);
+                rateParams.setSpeed(rate).setPitch(rate);
                 break;
             default:
             {
@@ -432,19 +430,19 @@ final public class MediaSync {
                 throw new IllegalArgumentException(msg);
             }
         }
-        setPlaybackSettings(rateSettings);
+        setPlaybackParams(rateParams);
     }
 
     /**
-     * Sets playback rate using {@link PlaybackSettings}.
+     * Sets playback rate using {@link PlaybackParams}.
      * <p>
-     * When using MediaSync with {@link AudioTrack}, set playback settings using this
+     * When using MediaSync with {@link AudioTrack}, set playback params using this
      * call instead of calling it directly on the track, so that the sync is aware of
-     * the settings change.
+     * the params change.
      * <p>
      * This call also works if there is no audio track.
      *
-     * @param settings the playback settings to use. {@link PlaybackSettings#getSpeed
+     * @param params the playback params to use. {@link PlaybackParams#getSpeed
      *     Speed} is the ratio between desired playback rate and normal one. 1.0 means
      *     normal playback speed. 0.0 means pause. Value larger than 1.0 means faster playback,
      *     while value between 0.0 and 1.0 for slower playback. <b>Note:</b> the normal rate
@@ -453,11 +451,11 @@ final public class MediaSync {
      *
      * @throws IllegalStateException if the internal sync engine or the audio track has not
      *     been initialized.
-     * @throws IllegalArgumentException if the settings are not supported.
+     * @throws IllegalArgumentException if the params are not supported.
      */
-    public void setPlaybackSettings(@NonNull PlaybackSettings settings) {
+    public void setPlaybackParams(@NonNull PlaybackParams params) {
         synchronized(mAudioLock) {
-            mPlaybackRate = native_setPlaybackSettings(settings);;
+            mPlaybackRate = native_setPlaybackParams(params);;
         }
         if (mPlaybackRate != 0.0 && mAudioThread != null) {
             postRenderAudio(0);
@@ -465,7 +463,7 @@ final public class MediaSync {
     }
 
     /**
-     * Gets the playback rate using {@link PlaybackSettings}.
+     * Gets the playback rate using {@link PlaybackParams}.
      *
      * @return the playback rate being used.
      *
@@ -473,40 +471,40 @@ final public class MediaSync {
      *     been initialized.
      */
     @NonNull
-    public native PlaybackSettings getPlaybackSettings();
+    public native PlaybackParams getPlaybackParams();
 
-    private native float native_setPlaybackSettings(@NonNull PlaybackSettings settings);
+    private native float native_setPlaybackParams(@NonNull PlaybackParams params);
 
     /**
      * Sets A/V sync mode.
      *
-     * @param settings the A/V sync settings to apply
+     * @param params the A/V sync params to apply
      *
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
-     * @throws IllegalArgumentException if settings are not supported.
+     * @throws IllegalArgumentException if params are not supported.
      */
-    public void setSyncSettings(@NonNull SyncSettings settings) {
+    public void setSyncParams(@NonNull SyncParams params) {
         synchronized(mAudioLock) {
-            mPlaybackRate = native_setSyncSettings(settings);;
+            mPlaybackRate = native_setSyncParams(params);;
         }
         if (mPlaybackRate != 0.0 && mAudioThread != null) {
             postRenderAudio(0);
         }
     }
 
-    private native float native_setSyncSettings(@NonNull SyncSettings settings);
+    private native float native_setSyncParams(@NonNull SyncParams params);
 
     /**
      * Gets the A/V sync mode.
      *
-     * @return the A/V sync settings
+     * @return the A/V sync params
      *
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
      */
     @NonNull
-    public native SyncSettings getSyncSettings();
+    public native SyncParams getSyncParams();
 
     /**
      * Flushes all buffers from the sync object.
@@ -567,23 +565,20 @@ final public class MediaSync {
      *     to the client via registered callback.
      * @param bufferIndex the buffer index used to identify audioData. It will be returned to
      *     the client along with audioData. This helps applications to keep track of audioData.
-     * @param sizeInBytes number of bytes to queue.
      * @param presentationTimeUs the presentation timestamp in microseconds for the first frame
      *     in the buffer.
      * @throws IllegalStateException if audio track is not set or internal configureation
      *     has not been done correctly.
      */
     public void queueAudio(
-            @NonNull ByteBuffer audioData, int bufferIndex, int sizeInBytes,
-            long presentationTimeUs) {
+            @NonNull ByteBuffer audioData, int bufferIndex, long presentationTimeUs) {
         if (mAudioTrack == null || mAudioThread == null) {
             throw new IllegalStateException(
                     "AudioTrack is NOT set or audio thread is not created");
         }
 
         synchronized(mAudioLock) {
-            mAudioBuffers.add(new AudioBuffer(
-                    audioData, bufferIndex, sizeInBytes, presentationTimeUs));
+            mAudioBuffers.add(new AudioBuffer(audioData, bufferIndex, presentationTimeUs));
         }
 
         if (mPlaybackRate != 0.0) {
@@ -605,18 +600,19 @@ final public class MediaSync {
                     }
 
                     AudioBuffer audioBuffer = mAudioBuffers.get(0);
+                    int size = audioBuffer.mByteBuffer.remaining();
                     int sizeWritten = mAudioTrack.write(
                             audioBuffer.mByteBuffer,
-                            audioBuffer.mSizeInBytes,
+                            size,
                             AudioTrack.WRITE_NON_BLOCKING);
                     if (sizeWritten > 0) {
                         if (audioBuffer.mPresentationTimeUs != -1) {
                             native_updateQueuedAudioData(
-                                    audioBuffer.mSizeInBytes, audioBuffer.mPresentationTimeUs);
+                                    size, audioBuffer.mPresentationTimeUs);
                             audioBuffer.mPresentationTimeUs = -1;
                         }
 
-                        if (sizeWritten == audioBuffer.mSizeInBytes) {
+                        if (sizeWritten == size) {
                             postReturnByteBuffer(audioBuffer);
                             mAudioBuffers.remove(0);
                             if (!mAudioBuffers.isEmpty()) {
@@ -624,8 +620,6 @@ final public class MediaSync {
                             }
                             return;
                         }
-
-                        audioBuffer.mSizeInBytes -= sizeWritten;
                     }
                     long pendingTimeMs = TimeUnit.MICROSECONDS.toMillis(
                             native_getPlayTimeForPendingAudioFrames());

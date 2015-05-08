@@ -38,8 +38,8 @@
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
 #include "android_media_MediaDataSource.h"
-#include "android_media_PlaybackSettings.h"
-#include "android_media_SyncSettings.h"
+#include "android_media_PlaybackParams.h"
+#include "android_media_SyncParams.h"
 #include "android_media_Utils.h"
 
 #include "android_os_Parcel.h"
@@ -69,8 +69,8 @@ struct fields_t {
 };
 static fields_t fields;
 
-static PlaybackSettings::fields_t gPlaybackSettingsFields;
-static SyncSettings::fields_t gSyncSettingsFields;
+static PlaybackParams::fields_t gPlaybackParamsFields;
+static SyncParams::fields_t gSyncParamsFields;
 
 static Mutex sLock;
 
@@ -428,7 +428,7 @@ android_media_MediaPlayer_isPlaying(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MediaPlayer_setPlaybackSettings(JNIEnv *env, jobject thiz, jobject settings)
+android_media_MediaPlayer_setPlaybackParams(JNIEnv *env, jobject thiz, jobject params)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -436,32 +436,32 @@ android_media_MediaPlayer_setPlaybackSettings(JNIEnv *env, jobject thiz, jobject
         return;
     }
 
-    PlaybackSettings pbs;
-    pbs.fillFromJobject(env, gPlaybackSettingsFields, settings);
-    ALOGV("setPlaybackSettings: %d:%f %d:%f %d:%u %d:%u",
-            pbs.speedSet, pbs.audioRate.mSpeed,
-            pbs.pitchSet, pbs.audioRate.mPitch,
-            pbs.audioFallbackModeSet, pbs.audioRate.mFallbackMode,
-            pbs.audioStretchModeSet, pbs.audioRate.mStretchMode);
+    PlaybackParams pbp;
+    pbp.fillFromJobject(env, gPlaybackParamsFields, params);
+    ALOGV("setPlaybackParams: %d:%f %d:%f %d:%u %d:%u",
+            pbp.speedSet, pbp.audioRate.mSpeed,
+            pbp.pitchSet, pbp.audioRate.mPitch,
+            pbp.audioFallbackModeSet, pbp.audioRate.mFallbackMode,
+            pbp.audioStretchModeSet, pbp.audioRate.mStretchMode);
 
     AudioPlaybackRate rate;
     status_t err = mp->getPlaybackSettings(&rate);
     if (err == OK) {
         bool updatedRate = false;
-        if (pbs.speedSet) {
-            rate.mSpeed = pbs.audioRate.mSpeed;
+        if (pbp.speedSet) {
+            rate.mSpeed = pbp.audioRate.mSpeed;
             updatedRate = true;
         }
-        if (pbs.pitchSet) {
-            rate.mPitch = pbs.audioRate.mPitch;
+        if (pbp.pitchSet) {
+            rate.mPitch = pbp.audioRate.mPitch;
             updatedRate = true;
         }
-        if (pbs.audioFallbackModeSet) {
-            rate.mFallbackMode = pbs.audioRate.mFallbackMode;
+        if (pbp.audioFallbackModeSet) {
+            rate.mFallbackMode = pbp.audioRate.mFallbackMode;
             updatedRate = true;
         }
-        if (pbs.audioStretchModeSet) {
-            rate.mStretchMode = pbs.audioRate.mStretchMode;
+        if (pbp.audioStretchModeSet) {
+            rate.mStretchMode = pbp.audioRate.mStretchMode;
             updatedRate = true;
         }
         if (updatedRate) {
@@ -474,7 +474,7 @@ android_media_MediaPlayer_setPlaybackSettings(JNIEnv *env, jobject thiz, jobject
 }
 
 static jobject
-android_media_MediaPlayer_getPlaybackSettings(JNIEnv *env, jobject thiz)
+android_media_MediaPlayer_getPlaybackParams(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -482,24 +482,24 @@ android_media_MediaPlayer_getPlaybackSettings(JNIEnv *env, jobject thiz)
         return NULL;
     }
 
-    PlaybackSettings pbs;
-    AudioPlaybackRate &audioRate = pbs.audioRate;
+    PlaybackParams pbp;
+    AudioPlaybackRate &audioRate = pbp.audioRate;
     process_media_player_call(
             env, thiz, mp->getPlaybackSettings(&audioRate),
             "java/lang/IllegalStateException", "unexpected error");
     ALOGV("getPlaybackSettings: %f %f %d %d",
             audioRate.mSpeed, audioRate.mPitch, audioRate.mFallbackMode, audioRate.mStretchMode);
 
-    pbs.speedSet = true;
-    pbs.pitchSet = true;
-    pbs.audioFallbackModeSet = true;
-    pbs.audioStretchModeSet = true;
+    pbp.speedSet = true;
+    pbp.pitchSet = true;
+    pbp.audioFallbackModeSet = true;
+    pbp.audioStretchModeSet = true;
 
-    return pbs.asJobject(env, gPlaybackSettingsFields);
+    return pbp.asJobject(env, gPlaybackParamsFields);
 }
 
 static void
-android_media_MediaPlayer_setSyncSettings(JNIEnv *env, jobject thiz, jobject settings)
+android_media_MediaPlayer_setSyncParams(JNIEnv *env, jobject thiz, jobject params)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -507,33 +507,33 @@ android_media_MediaPlayer_setSyncSettings(JNIEnv *env, jobject thiz, jobject set
         return;
     }
 
-    SyncSettings scs;
-    scs.fillFromJobject(env, gSyncSettingsFields, settings);
-    ALOGV("setSyncSettings: %d:%d %d:%d %d:%f %d:%f",
-          scs.syncSourceSet, scs.sync.mSource,
-          scs.audioAdjustModeSet, scs.sync.mAudioAdjustMode,
-          scs.toleranceSet, scs.sync.mTolerance,
-          scs.frameRateSet, scs.frameRate);
+    SyncParams scp;
+    scp.fillFromJobject(env, gSyncParamsFields, params);
+    ALOGV("setSyncParams: %d:%d %d:%d %d:%f %d:%f",
+          scp.syncSourceSet, scp.sync.mSource,
+          scp.audioAdjustModeSet, scp.sync.mAudioAdjustMode,
+          scp.toleranceSet, scp.sync.mTolerance,
+          scp.frameRateSet, scp.frameRate);
 
     AVSyncSettings avsync;
     float videoFrameRate;
     status_t err = mp->getSyncSettings(&avsync, &videoFrameRate);
     if (err == OK) {
-        bool updatedSync = scs.frameRateSet;
-        if (scs.syncSourceSet) {
-            avsync.mSource = scs.sync.mSource;
+        bool updatedSync = scp.frameRateSet;
+        if (scp.syncSourceSet) {
+            avsync.mSource = scp.sync.mSource;
             updatedSync = true;
         }
-        if (scs.audioAdjustModeSet) {
-            avsync.mAudioAdjustMode = scs.sync.mAudioAdjustMode;
+        if (scp.audioAdjustModeSet) {
+            avsync.mAudioAdjustMode = scp.sync.mAudioAdjustMode;
             updatedSync = true;
         }
-        if (scs.toleranceSet) {
-            avsync.mTolerance = scs.sync.mTolerance;
+        if (scp.toleranceSet) {
+            avsync.mTolerance = scp.sync.mTolerance;
             updatedSync = true;
         }
         if (updatedSync) {
-            err = mp->setSyncSettings(avsync, scs.frameRateSet ? scs.frameRate : -1.f);
+            err = mp->setSyncSettings(avsync, scp.frameRateSet ? scp.frameRate : -1.f);
         }
     }
     process_media_player_call(
@@ -542,7 +542,7 @@ android_media_MediaPlayer_setSyncSettings(JNIEnv *env, jobject thiz, jobject set
 }
 
 static jobject
-android_media_MediaPlayer_getSyncSettings(JNIEnv *env, jobject thiz)
+android_media_MediaPlayer_getSyncParams(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -550,30 +550,30 @@ android_media_MediaPlayer_getSyncSettings(JNIEnv *env, jobject thiz)
         return NULL;
     }
 
-    SyncSettings scs;
-    scs.frameRate = -1.f;
+    SyncParams scp;
+    scp.frameRate = -1.f;
     process_media_player_call(
-            env, thiz, mp->getSyncSettings(&scs.sync, &scs.frameRate),
+            env, thiz, mp->getSyncSettings(&scp.sync, &scp.frameRate),
             "java/lang/IllegalStateException", "unexpected error");
 
     ALOGV("getSyncSettings: %d %d %f %f",
-            scs.sync.mSource, scs.sync.mAudioAdjustMode, scs.sync.mTolerance, scs.frameRate);
+            scp.sync.mSource, scp.sync.mAudioAdjustMode, scp.sync.mTolerance, scp.frameRate);
 
-    // sanity check settings
-    if (scs.sync.mSource >= AVSYNC_SOURCE_MAX
-            || scs.sync.mAudioAdjustMode >= AVSYNC_AUDIO_ADJUST_MODE_MAX
-            || scs.sync.mTolerance < 0.f
-            || scs.sync.mTolerance >= AVSYNC_TOLERANCE_MAX) {
+    // sanity check params
+    if (scp.sync.mSource >= AVSYNC_SOURCE_MAX
+            || scp.sync.mAudioAdjustMode >= AVSYNC_AUDIO_ADJUST_MODE_MAX
+            || scp.sync.mTolerance < 0.f
+            || scp.sync.mTolerance >= AVSYNC_TOLERANCE_MAX) {
         jniThrowException(env,  "java/lang/IllegalStateException", NULL);
         return NULL;
     }
 
-    scs.syncSourceSet = true;
-    scs.audioAdjustModeSet = true;
-    scs.toleranceSet = true;
-    scs.frameRateSet = scs.frameRate >= 0.f;
+    scp.syncSourceSet = true;
+    scp.audioAdjustModeSet = true;
+    scp.toleranceSet = true;
+    scp.frameRateSet = scp.frameRate >= 0.f;
 
-    return scs.asJobject(env, gSyncSettingsFields);
+    return scp.asJobject(env, gSyncParamsFields);
 }
 
 static void
@@ -860,8 +860,8 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 
     env->DeleteLocalRef(clazz);
 
-    gPlaybackSettingsFields.init(env);
-    gSyncSettingsFields.init(env);
+    gPlaybackParamsFields.init(env);
+    gSyncParamsFields.init(env);
 }
 
 static void
@@ -1050,10 +1050,10 @@ static JNINativeMethod gMethods[] = {
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer_getVideoWidth},
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer_getVideoHeight},
-    {"setPlaybackSettings", "(Landroid/media/PlaybackSettings;)V", (void *)android_media_MediaPlayer_setPlaybackSettings},
-    {"getPlaybackSettings", "()Landroid/media/PlaybackSettings;", (void *)android_media_MediaPlayer_getPlaybackSettings},
-    {"setSyncSettings",     "(Landroid/media/SyncSettings;)V",  (void *)android_media_MediaPlayer_setSyncSettings},
-    {"getSyncSettings",     "()Landroid/media/SyncSettings;",   (void *)android_media_MediaPlayer_getSyncSettings},
+    {"setPlaybackParams", "(Landroid/media/PlaybackParams;)V", (void *)android_media_MediaPlayer_setPlaybackParams},
+    {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer_getPlaybackParams},
+    {"setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer_setSyncParams},
+    {"getSyncParams",     "()Landroid/media/SyncParams;",   (void *)android_media_MediaPlayer_getSyncParams},
     {"seekTo",              "(I)V",                             (void *)android_media_MediaPlayer_seekTo},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer_isPlaying},

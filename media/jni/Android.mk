@@ -20,7 +20,7 @@ LOCAL_SRC_FILES:= \
     android_media_MediaScanner.cpp \
     android_media_MediaSync.cpp \
     android_media_ResampleInputStream.cpp \
-    android_media_SyncSettings.cpp \
+    android_media_SyncParams.cpp \
     android_media_Utils.cpp \
     android_mtp_MtpDatabase.cpp \
     android_mtp_MtpDevice.cpp \
