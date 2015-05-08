@@ -476,6 +476,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mTopIsFullscreen;
     boolean mForceStatusBar;
     boolean mForceStatusBarFromKeyguard;
+    private boolean mForceStatusBarTransparent;
     boolean mHideLockScreen;
     boolean mForcingShowNavBar;
     int mForcingShowNavBarLayer;
@@ -4129,6 +4130,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mAppsThatDismissKeyguard.clear();
         mForceStatusBar = false;
         mForceStatusBarFromKeyguard = false;
+        mForceStatusBarTransparent = false;
         mForcingShowNavBar = false;
         mForcingShowNavBarLayer = -1;
 
@@ -4154,8 +4156,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mForcingShowNavBar = true;
             mForcingShowNavBarLayer = win.getSurfaceLayer();
         }
-        if (attrs.type == TYPE_STATUS_BAR && (attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
-            mForceStatusBarFromKeyguard = true;
+        if (attrs.type == TYPE_STATUS_BAR) {
+            if ((attrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+                mForceStatusBarFromKeyguard = true;
+            }
+            if ((attrs.privateFlags & PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT) != 0) {
+                mForceStatusBarTransparent = true;
+            }
         }
 
         boolean appWindow = attrs.type >= FIRST_APPLICATION_WINDOW
@@ -4302,7 +4309,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (DEBUG_LAYOUT) Slog.i(TAG, "force=" + mForceStatusBar
                     + " forcefkg=" + mForceStatusBarFromKeyguard
                     + " top=" + mTopFullscreenOpaqueWindowState);
-            if (mForceStatusBar || mForceStatusBarFromKeyguard) {
+            boolean shouldBeTransparent = mForceStatusBarTransparent
+                    && !mForceStatusBar
+                    && !mForceStatusBarFromKeyguard;
+            if (!shouldBeTransparent) {
+                mStatusBarController.setShowTransparent(false /* transparent */);
+            } else if (!mStatusBar.isVisibleLw()) {
+                mStatusBarController.setShowTransparent(true /* transparent */);
+            }
+            if (mForceStatusBar || mForceStatusBarFromKeyguard || mForceStatusBarTransparent) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Showing status bar: forced");
                 if (mStatusBarController.setBarShowingLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT;
