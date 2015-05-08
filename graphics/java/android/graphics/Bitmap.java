@@ -330,6 +330,7 @@ public final class Bitmap implements Parcelable {
      * @return The current generation ID for this bitmap.
      */
     public int getGenerationId() {
+        if (mRecycled) return 0;
         return nativeGenerationId(mFinalizer.mNativeBitmap);
     }
 
@@ -1040,6 +1041,7 @@ public final class Bitmap implements Parcelable {
      * @see BitmapFactory.Options#inPremultiplied
      */
     public final boolean isPremultiplied() {
+        if (mRecycled) return false;
         return nativeIsPremultiplied(mFinalizer.mNativeBitmap);
     }
 
@@ -1064,6 +1066,7 @@ public final class Bitmap implements Parcelable {
      * @see BitmapFactory.Options#inPremultiplied
      */
     public final void setPremultiplied(boolean premultiplied) {
+        checkRecycled("setPremultiplied called on a recycled bitmap");
         mRequestPremultiplied = premultiplied;
         nativeSetPremultiplied(mFinalizer.mNativeBitmap, premultiplied);
     }
@@ -1200,6 +1203,7 @@ public final class Bitmap implements Parcelable {
      * that config, otherwise return null.
      */
     public final Config getConfig() {
+        if (mRecycled) return Config.ARGB_8888;
         return Config.nativeToConfig(nativeConfig(mFinalizer.mNativeBitmap));
     }
 
@@ -1212,6 +1216,7 @@ public final class Bitmap implements Parcelable {
      * it will return true by default.
      */
     public final boolean hasAlpha() {
+        if (mRecycled) return false;
         return nativeHasAlpha(mFinalizer.mNativeBitmap);
     }
 
@@ -1226,6 +1231,7 @@ public final class Bitmap implements Parcelable {
      * non-opaque per-pixel alpha values.
      */
     public void setHasAlpha(boolean hasAlpha) {
+        checkRecycled("setHasAlpha called on a recycled bitmap");
         nativeSetHasAlpha(mFinalizer.mNativeBitmap, hasAlpha, mRequestPremultiplied);
     }
 
@@ -1247,6 +1253,7 @@ public final class Bitmap implements Parcelable {
      * @see #setHasMipMap(boolean)
      */
     public final boolean hasMipMap() {
+        if (mRecycled) return false;
         return nativeHasMipMap(mFinalizer.mNativeBitmap);
     }
 
@@ -1271,6 +1278,7 @@ public final class Bitmap implements Parcelable {
      * @see #hasMipMap()
      */
     public final void setHasMipMap(boolean hasMipMap) {
+        checkRecycled("setHasMipMap called on a recycled bitmap");
         nativeSetHasMipMap(mFinalizer.mNativeBitmap, hasMipMap);
     }
 
