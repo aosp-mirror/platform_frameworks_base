@@ -754,7 +754,7 @@ public class VoiceInteractionManagerService extends SystemService {
         public boolean activeServiceSupportsAssist() {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
-                return mImpl != null && mImpl.mInfo.getSupportsAssist();
+                return mImpl != null && mImpl.mInfo != null && mImpl.mInfo.getSupportsAssist();
             }
         }
 
@@ -762,7 +762,8 @@ public class VoiceInteractionManagerService extends SystemService {
         public boolean activeServiceSupportsLaunchFromKeyguard() throws RemoteException {
             enforceCallingPermission(Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE);
             synchronized (this) {
-                return mImpl != null && mImpl.mInfo.getSupportsLaunchFromKeyguard();
+                return mImpl != null && mImpl.mInfo != null
+                        && mImpl.mInfo.getSupportsLaunchFromKeyguard();
             }
         }
 
