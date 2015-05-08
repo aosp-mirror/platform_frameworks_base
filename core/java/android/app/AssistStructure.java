@@ -35,6 +35,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewAssistStructure;
 import android.view.ViewRootImpl;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import java.util.ArrayList;
@@ -140,7 +141,14 @@ final public class AssistStructure implements Parcelable {
             mTitle = root.getTitle();
             mRoot = new ViewNode();
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
-            view.dispatchProvideAssistStructure(builder);
+            if ((root.getWindowFlags()&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+                // This is a secure window, so it doesn't want a screenshot, and that
+                // means we should also not copy out its view hierarchy.
+                view.onProvideStructure(builder);
+                builder.setAssistBlocked(true);
+                return;
+            }
+            view.dispatchProvideStructure(builder);
         }
 
         WindowNode(Parcel in, PooledStringReader preader) {
@@ -652,7 +660,7 @@ final public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public Bundle editExtras() {
+        public Bundle getExtras() {
             if (mNode.mExtras != null) {
                 return mNode.mExtras;
             }
@@ -661,8 +669,8 @@ final public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void clearExtras() {
-            mNode.mExtras = null;
+        public boolean hasExtras() {
+            return mNode.mExtras != null;
         }
 
         @Override

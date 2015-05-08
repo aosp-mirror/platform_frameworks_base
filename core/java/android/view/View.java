@@ -633,7 +633,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </p>
  *
  * @attr ref android.R.styleable#View_alpha
- * @attr ref android.R.styleable#View_assistBlocked
  * @attr ref android.R.styleable#View_background
  * @attr ref android.R.styleable#View_clickable
  * @attr ref android.R.styleable#View_contentDescription
@@ -2533,7 +2532,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             PFLAG3_SCROLL_INDICATOR_END >> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
 
     /**
-     * <p>Indicates that we are allowing {@link android.view.ViewAssistStructure} to traverse
+     * <p>Indicates that we are allowing {@link ViewStructure} to traverse
      * into this view.<p>
      */
     static final int PFLAG3_ASSIST_BLOCKED = 0x100;
@@ -4048,11 +4047,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (!a.getBoolean(attr, true)) {
                         viewFlagValues |= SAVE_DISABLED;
                         viewFlagMasks |= SAVE_DISABLED_MASK;
-                    }
-                    break;
-                case com.android.internal.R.styleable.View_assistBlocked:
-                    if (a.getBoolean(attr, false)) {
-                        mPrivateFlags3 |= PFLAG3_ASSIST_BLOCKED;
                     }
                     break;
                 case com.android.internal.R.styleable.View_duplicateParentState:
@@ -6163,7 +6157,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param structure Fill in with structured view data.  The default implementation
      * fills in all data that can be inferred from the view itself.
      */
-    public void onProvideAssistStructure(ViewAssistStructure structure) {
+    public void onProvideStructure(ViewStructure structure) {
         final int id = mID;
         if (id > 0 && (id&0xff000000) != 0 && (id&0x00ff0000) != 0
                 && (id&0x0000ffff) != 0) {
@@ -6217,6 +6211,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         structure.setContentDescription(getContentDescription());
     }
 
+    /** @hide */
+    public void onProvideAssistStructure(ViewStructure structure) {
+        onProvideStructure(structure);
+    }
+
     /**
      * Called when assist structure is being retrieved from a view as part of
      * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData} to
@@ -6225,19 +6224,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view's virtual accessibility nodes, if any.  You can override this for a more
      * optimal implementation providing this data.
      */
-    public void onProvideVirtualAssistStructure(ViewAssistStructure structure) {
+    public void onProvideVirtualStructure(ViewStructure structure) {
         AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
         if (provider != null) {
             AccessibilityNodeInfo info = createAccessibilityNodeInfo();
             Log.i("View", "Provider of " + this + ": children=" + info.getChildCount());
             structure.setChildCount(1);
-            ViewAssistStructure root = structure.newChild(0);
-            populateVirtualAssistStructure(root, provider, info);
+            ViewStructure root = structure.newChild(0);
+            populateVirtualStructure(root, provider, info);
             info.recycle();
         }
     }
 
-    private void populateVirtualAssistStructure(ViewAssistStructure structure,
+    /** @hide */
+    public void onProvideVirtualAssistStructure(ViewStructure structure) {
+        onProvideVirtualStructure(structure);
+    }
+
+    private void populateVirtualStructure(ViewStructure structure,
             AccessibilityNodeProvider provider, AccessibilityNodeInfo info) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
                 null, null, null);
@@ -6288,19 +6292,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             for (int i=0; i<NCHILDREN; i++) {
                 AccessibilityNodeInfo cinfo = provider.createAccessibilityNodeInfo(
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
-                ViewAssistStructure child = structure.newChild(i);
-                populateVirtualAssistStructure(child, provider, cinfo);
+                ViewStructure child = structure.newChild(i);
+                populateVirtualStructure(child, provider, cinfo);
                 cinfo.recycle();
             }
         }
     }
 
     /**
-     * Dispatch creation of {@link ViewAssistStructure} down the hierarchy.  The default
-     * implementation calls {@link #onProvideAssistStructure} and
-     * {@link #onProvideVirtualAssistStructure}.
+     * Dispatch creation of {@link ViewStructure} down the hierarchy.  The default
+     * implementation calls {@link #onProvideStructure} and
+     * {@link #onProvideVirtualStructure}.
      */
-    public void dispatchProvideAssistStructure(ViewAssistStructure structure) {
+    public void dispatchProvideStructure(ViewStructure structure) {
         if (!isAssistBlocked()) {
             onProvideAssistStructure(structure);
             onProvideVirtualAssistStructure(structure);
@@ -7904,8 +7908,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide
      * Indicates whether this view will participate in data collection through
-     * {@link android.view.ViewAssistStructure}.  If true, it will not provide any data
+     * {@link ViewStructure}.  If true, it will not provide any data
      * for itself or its children.  If false, the normal data collection will be allowed.
      *
      * @return Returns false if assist data collection is not blocked, else true.
@@ -7918,17 +7923,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide
      * Controls whether assist data collection from this view and its children is enabled
-     * (that is, whether {@link #onProvideAssistStructure} and
-     * {@link #onProvideVirtualAssistStructure} will be called).  The default value is false,
+     * (that is, whether {@link #onProvideStructure} and
+     * {@link #onProvideVirtualStructure} will be called).  The default value is false,
      * allowing normal assist collection.  Setting this to false will disable assist collection.
      *
      * @param enabled Set to true to <em>disable</em> assist data collection, or false
      * (the default) to allow it.
      *
      * @see #isAssistBlocked()
-     * @see #onProvideAssistStructure
-     * @see #onProvideVirtualAssistStructure
+     * @see #onProvideStructure
+     * @see #onProvideVirtualStructure
      * @attr ref android.R.styleable#View_assistBlocked
      */
     public void setAssistBlocked(boolean enabled) {

@@ -41,7 +41,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAssistStructure;
+import android.view.ViewStructure;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
@@ -2428,7 +2428,7 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
-    public void onProvideVirtualAssistStructure(ViewAssistStructure structure) {
+    public void onProvideVirtualStructure(ViewStructure structure) {
         mProvider.getViewDelegate().onProvideVirtualAssistStructure(structure);
     }
 
