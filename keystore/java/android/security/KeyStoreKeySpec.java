@@ -16,12 +16,49 @@
 
 package android.security;
 
+import java.security.PrivateKey;
 import java.security.spec.KeySpec;
 import java.util.Date;
 
+import javax.crypto.SecretKey;
+
 /**
  * Information about a key from the <a href="{@docRoot}training/articles/keystore.html">Android
- * KeyStore</a>.
+ * KeyStore</a>. This class describes whether the key material is available in
+ * plaintext outside of secure hardware, whether user authentication is required for using the key
+ * and whether this requirement is enforced by secure hardware, the key's origin, what uses the key
+ * is authorized for (e.g., only in {@code CBC} mode, or signing only), whether the key should be
+ * encrypted at rest, the key's and validity start and end dates.
+ *
+ * <p><h3>Example: Symmetric Key</h3>
+ * The following example illustrates how to obtain a {@link KeyStoreKeySpec} describing the provided
+ * Android KeyStore {@link SecretKey}.
+ * <pre> {@code
+ * SecretKey key = ...; // Android KeyStore key
+ *
+ * SecretKeyFactory factory = SecretKeyFactory.getInstance(key.getAlgorithm(), "AndroidKeyStore");
+ * KeyStoreKeySpec spec;
+ * try &#123;
+ *     spec = (KeyStoreKeySpec) factory.getKeySpec(key, KeyStoreKeySpec.class);
+ * &#125; catch (InvalidKeySpecException e) &#123;
+ *     // Not an Android KeyStore key.
+ * &#125;
+ * }</pre>
+ *
+ * <p><h3>Example: Private Key</h3>
+ * The following example illustrates how to obtain a {@link KeyStoreKeySpec} describing the provided
+ * Android KeyStore {@link PrivateKey}.
+ * <pre> {@code
+ * PrivateKey key = ...; // Android KeyStore key
+ *
+ * KeyFactory factory = KeyFactory.getInstance(key.getAlgorithm(), "AndroidKeyStore");
+ * KeyStoreKeySpec spec;
+ * try &#123;
+ *     spec = factory.getKeySpec(key, KeyStoreKeySpec.class);
+ * &#125; catch (InvalidKeySpecException e) &#123;
+ *     // Not an Android KeyStore key.
+ * &#125;
+ * }</pre>
  */
 public class KeyStoreKeySpec implements KeySpec {
     private final String mKeystoreAlias;

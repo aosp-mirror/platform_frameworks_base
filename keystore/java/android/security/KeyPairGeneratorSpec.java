@@ -16,10 +16,12 @@
 
 package android.security;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.text.TextUtils;
 
 import java.math.BigInteger;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -29,26 +31,64 @@ import java.util.Date;
 import javax.security.auth.x500.X500Principal;
 
 /**
- * This provides the required parameters needed for initializing the
- * {@code KeyPairGenerator} that works with
- * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore
- * facility</a>. The Android KeyStore facility is accessed through a
- * {@link java.security.KeyPairGenerator} API using the {@code AndroidKeyStore}
- * provider. The {@code context} passed in may be used to pop up some UI to ask
- * the user to unlock or initialize the Android KeyStore facility.
- * <p>
- * After generation, the {@code keyStoreAlias} is used with the
- * {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter)}
- * interface to retrieve the {@link PrivateKey} and its associated
- * {@link Certificate} chain.
- * <p>
- * The KeyPair generator will create a self-signed certificate with the subject
- * as its X.509v3 Subject Distinguished Name and as its X.509v3 Issuer
- * Distinguished Name along with the other parameters specified with the
- * {@link Builder}.
- * <p>
- * The self-signed X.509 certificate may be replaced at a later time by a
- * certificate signed by a real Certificate Authority.
+ * {@link AlgorithmParameterSpec} for initializing a {@link KeyPairGenerator} of the
+ * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore facility</a>. This class
+ * specifies whether user authentication is required for using the private key, what uses the
+ * private key is authorized for (e.g., only for signing -- decryption not permitted), whether the
+ * private key should be encrypted at rest, the private key's and validity start and end dates.
+ *
+ * <p>To generate a key pair, create an instance of this class using the {@link Builder}, initialize
+ * a {@code KeyPairGenerator} of the desired key type (e.g., {@code EC} or {@code RSA}) from the
+ * {@code AndroidKeyStore} provider with the {@code KeyPairGeneratorSpec} instance, and then
+ * generate a key pair using {@link KeyPairGenerator#generateKeyPair()}.
+ *
+ * <p>The generated key pair will be returned by the {@code KeyPairGenerator} and also stored in the
+ * Android KeyStore under the alias specified in this {@code KeyPairGeneratorSpec}. To obtain the
+ * private key from the Android KeyStore use
+ * {@link java.security.KeyStore#getKey(String, char[]) KeyStore.getKey(String, null)} or
+ * {@link java.security.KeyStore#getEntry(String, java.security.KeyStore.ProtectionParameter) KeyStore.getEntry(String, null)}.
+ * To obtain the public key from the Android KeyStore use
+ * {@link java.security.KeyStore#getCertificate(String)} and then
+ * {@link Certificate#getPublicKey()}.
+ *
+ * <p>A self-signed X.509 certificate will be also generated and stored in the Android KeyStore.
+ * This is because the {@link java.security.KeyStore} abstraction does not support storing key pairs
+ * without a certificate. The subject, serial number, and validity dates of the certificate can be
+ * specified in this {@code KeyPairGeneratorSpec}. The self-signed certificate may be replaced at a
+ * later time by a certificate signed by a Certificate Authority (CA).
+ *
+ * <p>NOTE: The key material of the private keys generating using the {@code KeyPairGeneratorSpec}
+ * is not accessible. The key material of the public keys is accessible.
+ *
+ * <p><h3>Example</h3>
+ * The following example illustrates how to generate an EC key pair in the Android KeyStore under
+ * alias {@code key2} authorized to be used only for signing using SHA-256, SHA-384, or SHA-512
+ * digest and only if the user has been authenticated within the last five minutes.
+ * <pre> {@code
+ * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
+ *         KeyStoreKeyProperties.Algorithm.EC,
+ *         "AndroidKeyStore");
+ * keyPairGenerator.initialize(
+ *         new KeyGeneratorSpec.Builder(context)
+ *                 .setAlias("key2")
+ *                 .setPurposes(KeyStoreKeyProperties.Purpose.SIGN
+ *                         | KeyStoreKeyProperties.Purpose.VERIFY)
+ *                 .setDigests(KeyStoreKeyProperties.Digest.SHA256
+ *                         | KeyStoreKeyProperties.Digest.SHA384
+ *                         | KeyStoreKeyProperties.Digest.SHA512)
+ *                 // Only permit this key to be used if the user authenticated
+ *                 // within the last five minutes.
+ *                 .setUserAuthenticationRequired(true)
+ *                 .setUserAuthenticationValidityDurationSeconds(5 * 60)
+ *                 .build());
+ * KeyPair keyPair = keyPairGenerator.generateKey();
+ *
+ * // The key pair can also be obtained from the Android KeyStore any time as follows:
+ * KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+ * keyStore.load(null);
+ * PrivateKey privateKey = (PrivateKey) keyStore.getKey("key2", null);
+ * PublicKey publicKey = keyStore.getCertificate("key2").getPublicKey();
+ * }</pre>
  */
 public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
@@ -307,8 +347,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns {@code true} if this parameter will require generated keys to be
-     * encrypted in the {@link java.security.KeyStore}.
+     * Returns {@code true} if the key must be encrypted at rest. This will protect the key pair
+     * with the secure lock screen credential (e.g., password, PIN, or pattern).
      */
     public boolean isEncryptionRequired() {
         return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
@@ -614,10 +654,13 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Indicates that this key must be encrypted at rest on storage. Note
-         * that enabling this will require that the user enable a strong lock
-         * screen (e.g., PIN, password) before creating or using the generated
-         * key is successful.
+         * Indicates that this key must be encrypted at rest. This will protect the key pair with
+         * the secure lock screen credential (e.g., password, PIN, or pattern).
+         *
+         * <p>Note that this feature requires that the secure lock screen (e.g., password, PIN,
+         * pattern) is set up. Otherwise key pair generation will fail.
+         *
+         * @see KeyguardManager#isDeviceSecure()
          */
         public Builder setEncryptionRequired() {
             mFlags |= KeyStore.FLAG_ENCRYPTED;
@@ -688,6 +731,12 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Sets the set of purposes for which the key can be used.
          *
          * <p>This must be specified for all keys. There is no default.
+         *
+         * <p>If the set of purposes for which the key can be used does not contain
+         * {@link KeyStoreKeyProperties.Purpose#SIGN}, the self-signed certificate generated by
+         * {@link KeyPairGenerator} of {@code AndroidKeyStore} provider will contain an invalid
+         * signature. This is OK if the certificate is only used for obtaining the public key from
+         * Android KeyStore.
          *
          * <p><b>NOTE: This has currently no effect.
          */
