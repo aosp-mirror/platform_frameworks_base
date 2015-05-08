@@ -16,9 +16,10 @@
 
 #include "EglManager.h"
 
-#include "../Caches.h"
-#include "../renderstate/RenderState.h"
+#include "Caches.h"
+#include "Properties.h"
 #include "RenderThread.h"
+#include "renderstate/RenderState.h"
 
 #include <cutils/log.h>
 #include <cutils/properties.h>
@@ -261,7 +262,8 @@ void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
     mInFrame = true;
 }
 
-bool EglManager::swapBuffers(EGLSurface surface) {
+bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
+        EGLint width, EGLint height) {
     mInFrame = false;
 
 #if WAIT_FOR_GPU_COMPLETION
@@ -271,7 +273,37 @@ bool EglManager::swapBuffers(EGLSurface surface) {
     }
 #endif
 
+#ifdef EGL_KHR_swap_buffers_with_damage
+    if (CC_UNLIKELY(Properties::swapBuffersWithDamage)) {
+        SkIRect idirty;
+        dirty.roundOut(&idirty);
+        /*
+         * EGL_KHR_swap_buffers_with_damage spec states:
+         *
+         * The rectangles are specified relative to the bottom-left of the surface
+         * and the x and y components of each rectangle specify the bottom-left
+         * position of that rectangle.
+         *
+         * HWUI does everything with 0,0 being top-left, so need to map
+         * the rect
+         */
+        EGLint y = height - (idirty.y() + idirty.height());
+        // layout: {x, y, width, height}
+        EGLint rects[4] = { idirty.x(), y, idirty.width(), idirty.height() };
+        EGLint numrects = dirty.isEmpty() ? 0 : 1;
+        // TODO: Remove prior to enabling this path by default
+        ALOGD("Swap buffers with damage %d: %d, %d, %d, %d (src="
+                RECT_STRING ")",
+                dirty.isEmpty() ? 0 : 1, rects[0], rects[1], rects[2], rects[3],
+                SK_RECT_ARGS(dirty));
+        eglSwapBuffersWithDamageKHR(mEglDisplay, surface, rects, numrects);
+    } else {
+        eglSwapBuffers(mEglDisplay, surface);
+    }
+#else
     eglSwapBuffers(mEglDisplay, surface);
+#endif
+
     EGLint err = eglGetError();
     if (CC_LIKELY(err == EGL_SUCCESS)) {
         return true;
