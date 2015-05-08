@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -35,6 +36,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -1693,6 +1695,13 @@ public class HorizontalScrollView extends FrameLayout {
         ss.scrollPosition = mScrollX;
         ss.isLayoutRtl = isLayoutRtl();
         return ss;
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+        encoder.addProperty("layout:fillViewPort", mFillViewport);
     }
 
     static class SavedState extends BaseSavedState {

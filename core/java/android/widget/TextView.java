@@ -120,6 +120,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
+import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -2844,7 +2845,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             @ViewDebug.IntToString(from = Typeface.BOLD_ITALIC, to = "BOLD_ITALIC")
     })
     public int getTypefaceStyle() {
-        return mTextPaint.getTypeface().getStyle();
+        Typeface typeface = mTextPaint.getTypeface();
+        return typeface != null ? typeface.getStyle() : Typeface.NORMAL;
     }
 
     /**
@@ -9554,6 +9556,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else {
             Selection.removeSelection((Spannable) text);
         }
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
+        super.encodeProperties(stream);
+
+        TruncateAt ellipsize = getEllipsize();
+        stream.addProperty("text:ellipsize", ellipsize == null ? null : ellipsize.name());
+        stream.addProperty("text:textSize", getTextSize());
+        stream.addProperty("text:scaledTextSize", getScaledTextSize());
+        stream.addProperty("text:typefaceStyle", getTypefaceStyle());
+        stream.addProperty("text:selectionStart", getSelectionStart());
+        stream.addProperty("text:selectionEnd", getSelectionEnd());
+        stream.addProperty("text:curTextColor", mCurTextColor);
+        stream.addProperty("text:text", mText == null ? null : mText.toString());
+        stream.addProperty("text:gravity", mGravity);
     }
 
     /**

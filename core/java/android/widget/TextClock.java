@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -32,6 +33,7 @@ import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
+import android.view.ViewHierarchyEncoder;
 
 import com.android.internal.R;
 
@@ -545,5 +547,19 @@ public class TextClock extends TextView {
     private void onTimeChanged() {
         mTime.setTimeInMillis(System.currentTimeMillis());
         setText(DateFormat.format(mFormat, mTime));
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
+        super.encodeProperties(stream);
+
+        CharSequence s = getFormat12Hour();
+        stream.addProperty("format12Hour", s == null ? null : s.toString());
+
+        s = getFormat24Hour();
+        stream.addProperty("format24Hour", s == null ? null : s.toString());
+        stream.addProperty("format", mFormat == null ? null : mFormat.toString());
+        stream.addProperty("hasSeconds", mHasSeconds);
     }
 }

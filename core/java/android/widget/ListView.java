@@ -23,6 +23,7 @@ import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
 import android.annotation.IdRes;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -40,6 +41,7 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -3937,5 +3939,13 @@ public class ListView extends AbsListView {
         final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(
                 position, 1, 0, 1, isHeading, isSelected);
         info.setCollectionItemInfo(itemInfo);
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+
+        encoder.addProperty("recycleOnMeasure", recycleOnMeasure());
     }
 }
