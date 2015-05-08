@@ -1653,9 +1653,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Queries whether {@link #DO_NOT_ASK_CREDENTIALS_ON_BOOT} flag is set.
+     * Queries whether {@link #RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT} flag is set.
      *
-     * @return true if DO_NOT_ASK_CREDENTIALS_ON_BOOT flag is set.
+     * @return true if RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT flag is set.
      * @hide
      */
     public boolean getDoNotAskCredentialsOnBoot() {
@@ -1753,7 +1753,7 @@ public class DevicePolicyManager {
      * is ignored. Once the flag is set, it cannot be reverted back without resetting the
      * device to factory defaults.
      */
-    public static final int DO_NOT_ASK_CREDENTIALS_ON_BOOT = 0x0002;
+    public static final int RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT = 0x0002;
 
     /**
      * Force a new device unlock password (the password needed to access the
@@ -1779,7 +1779,7 @@ public class DevicePolicyManager {
      *
      * @param password The new password for the user. Null or empty clears the password.
      * @param flags May be 0 or combination of {@link #RESET_PASSWORD_REQUIRE_ENTRY} and
-     *              {@link #DO_NOT_ASK_CREDENTIALS_ON_BOOT}.
+     *              {@link #RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT}.
      * @return Returns true if the password was applied, or false if it is
      * not acceptable for the current constraints.
      */

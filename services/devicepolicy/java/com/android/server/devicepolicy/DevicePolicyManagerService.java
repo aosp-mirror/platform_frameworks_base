@@ -2897,7 +2897,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         boolean callerIsDeviceOwnerAdmin = isCallerDeviceOwnerOrInitializer(callingUid);
         boolean doNotAskCredentialsOnBoot =
-                (flags & DevicePolicyManager.DO_NOT_ASK_CREDENTIALS_ON_BOOT) != 0;
+                (flags & DevicePolicyManager.RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT) != 0;
         if (callerIsDeviceOwnerAdmin && doNotAskCredentialsOnBoot) {
             setDoNotAskCredentialsOnBoot();
         }
