@@ -378,6 +378,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Delay in notifying task stack change listeners (in millis)
     static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 1000;
 
+    // Necessary ApplicationInfo flags to mark an app as persistent
+    private static final int PERSISTENT_MASK =
+            ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT;
+
     /** All system services */
     SystemServiceManager mSystemServiceManager;
 
@@ -9948,10 +9952,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         String proc = customProcess != null ? customProcess : info.processName;
         BatteryStatsImpl.Uid.Proc ps = null;
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+        final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
         if (isolated) {
             if (isolatedUid == 0) {
-                int userId = UserHandle.getUserId(uid);
                 int stepsLeft = Process.LAST_ISOLATED_UID - Process.FIRST_ISOLATED_UID + 1;
                 while (true) {
                     if (mNextIsolatedProcessUid < Process.FIRST_ISOLATED_UID
@@ -9975,7 +9979,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 uid = isolatedUid;
             }
         }
-        return new ProcessRecord(stats, info, proc, uid);
+        final ProcessRecord r = new ProcessRecord(stats, info, proc, uid);
+        if (!mBooted && !mBooting
+                && userId == UserHandle.USER_OWNER
+                && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
+            r.persistent = true;
+        }
+        return r;
     }
 
     final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated,
@@ -10007,8 +10017,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + info.packageName + ": " + e);
         }
 
-        if ((info.flags&(ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT))
-                == (ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT)) {
+        if ((info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
             app.persistent = true;
             app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
         }
