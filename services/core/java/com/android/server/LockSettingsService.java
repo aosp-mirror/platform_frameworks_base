@@ -356,28 +356,23 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mStorage.hasPattern(userId);
     }
 
-    private void maybeUpdateKeystore(String password, int userHandle) {
+    private void setKeystorePassword(String password, int userHandle) {
         final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
         final KeyStore ks = KeyStore.getInstance();
 
         final List<UserInfo> profiles = um.getProfiles(userHandle);
-        boolean shouldReset = TextUtils.isEmpty(password);
-
-        // For historical reasons, don't wipe a non-empty keystore if we have a single user with a
-        // single profile.
-        if (userHandle == UserHandle.USER_OWNER && profiles.size() == 1) {
-            if (!ks.isEmpty()) {
-                shouldReset = false;
-            }
-        }
-
         for (UserInfo pi : profiles) {
-            final int profileUid = UserHandle.getUid(pi.id, Process.SYSTEM_UID);
-            if (shouldReset) {
-                ks.resetUid(profileUid);
-            } else {
-                ks.passwordUid(password, profileUid);
-            }
+            ks.onUserPasswordChanged(pi.id, password);
+        }
+    }
+
+    private void unlockKeystore(String password, int userHandle) {
+        final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+        final KeyStore ks = KeyStore.getInstance();
+
+        final List<UserInfo> profiles = um.getProfiles(userHandle);
+        for (UserInfo pi : profiles) {
+            ks.unlock(pi.id, password);
         }
     }
 
@@ -423,7 +418,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (pattern == null) {
             getGateKeeperService().clearSecureUserId(userId);
             mStorage.writePatternHash(null, userId);
-            maybeUpdateKeystore(null, userId);
+            setKeystorePassword(null, userId);
             return;
         }
 
@@ -451,7 +446,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (password == null) {
             getGateKeeperService().clearSecureUserId(userId);
             mStorage.writePasswordHash(null, userId);
-            maybeUpdateKeystore(null, userId);
+            setKeystorePassword(null, userId);
             return;
         }
 
@@ -484,7 +479,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 toEnrollBytes);
 
         if (hash != null) {
-            maybeUpdateKeystore(toEnroll, userId);
+            setKeystorePassword(toEnroll, userId);
         }
 
         return hash;
@@ -530,7 +525,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             byte[] hash = mLockPatternUtils.patternToHash(
                     mLockPatternUtils.stringToPattern(pattern));
             if (Arrays.equals(hash, storedHash.hash)) {
-                maybeUpdateKeystore(pattern, userId);
+                unlockKeystore(pattern, userId);
                 // migrate password to GateKeeper
                 setLockPattern(pattern, null, userId);
                 if (!hasChallenge) {
@@ -556,7 +551,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         // pattern has matched
-        maybeUpdateKeystore(pattern, userId);
+        unlockKeystore(pattern, userId);
         return token;
 
     }
@@ -599,7 +594,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (storedHash.version == CredentialHash.VERSION_LEGACY) {
             byte[] hash = mLockPatternUtils.passwordToHash(password, userId);
             if (Arrays.equals(hash, storedHash.hash)) {
-                maybeUpdateKeystore(password, userId);
+                unlockKeystore(password, userId);
                 // migrate password to GateKeeper
                 setLockPassword(password, null, userId);
                 if (!hasChallenge) {
@@ -625,7 +620,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         // password has matched
-        maybeUpdateKeystore(password, userId);
+        unlockKeystore(password, userId);
         return token;
     }
 
