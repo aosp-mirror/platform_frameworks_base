@@ -2656,6 +2656,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityRecord getHomeActivity() {
+        return getHomeActivityForUser(UserHandle.USER_ALL);
+    }
+
+    ActivityRecord getHomeActivityForUser(int userId) {
         final ArrayList<TaskRecord> tasks = mHomeStack.getAllTasks();
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = tasks.get(taskNdx);
@@ -2663,7 +2667,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 final ArrayList<ActivityRecord> activities = task.mActivities;
                 for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                     final ActivityRecord r = activities.get(activityNdx);
-                    if (r.isHomeActivity()) {
+                    if (r.isHomeActivity()
+                            && ((userId == UserHandle.USER_ALL) || (r.userId == userId))) {
                         return r;
                     }
                 }
