@@ -71,10 +71,7 @@ import java.io.IOException;
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.ALARM_SERVICE)}.
  */
-public class AlarmManager
-{
-    private static final String TAG = "AlarmManager";
-
+public class AlarmManager {
     /**
      * Alarm time in {@link System#currentTimeMillis System.currentTimeMillis()}
      * (wall clock time in UTC), which will wake up the device when
@@ -558,7 +555,93 @@ public class AlarmManager
             long intervalMillis, PendingIntent operation) {
         setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, 0, operation, null, null);
     }
-    
+
+    /**
+     * Like {@link #set(int, long, PendingIntent)}, but this alarm will be allowed to execute
+     * even when the system is in low-power idle modes.  This type of alarm must <b>only</b>
+     * be used for situations where it is actually required that the alarm go off while in
+     * idle -- a reasonable example would be for a calendar notification that should make a
+     * sound so the user is aware of it.  These alarms can significantly impact the power use
+     * of the device when idle (and thus cause significant battery blame to the app scheduling
+     * them), so they should be used with care.
+     *
+     * <p>Unlike other alarms, the system is free to reschedule this type of alarm to happen
+     * out of order with any other alarms, even those from the same app.  This will clearly happen
+     * when the device is idle (since this alarm can go off while idle, when any other alarms
+     * from the app will be held until later), but may also happen even when not idle.</p>
+     *
+     * <p>Regardless of the app's target SDK version, this call always allows batching of the
+     * alarm.</p>
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param triggerAtMillis time in milliseconds that the alarm should go
+     * off, using the appropriate clock (depending on the alarm type).
+     * @param operation Action to perform when the alarm goes off;
+     * typically comes from {@link PendingIntent#getBroadcast
+     * IntentSender.getBroadcast()}.
+     *
+     * @see #set(int, long, PendingIntent)
+     * @see #setExactAndAllowWhileIdle
+     * @see #cancel
+     * @see android.content.Context#sendBroadcast
+     * @see android.content.Context#registerReceiver
+     * @see android.content.Intent#filterEquals
+     * @see #ELAPSED_REALTIME
+     * @see #ELAPSED_REALTIME_WAKEUP
+     * @see #RTC
+     * @see #RTC_WAKEUP
+     */
+    public void setAndAllowWhileIdle(int type, long triggerAtMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, 0, FLAG_ALLOW_WHILE_IDLE, operation,
+                null, null);
+    }
+
+    /**
+     * Like {@link #setExact(int, long, PendingIntent)}, but this alarm will be allowed to execute
+     * even when the system is in low-power idle modes.  If you don't need exact scheduling of
+     * the alarm but still need to execute while idle, consider using
+     * {@link #setAndAllowWhileIdle}.  This type of alarm must <b>only</b>
+     * be used for situations where it is actually required that the alarm go off while in
+     * idle -- a reasonable example would be for a calendar notification that should make a
+     * sound so the user is aware of it.  These alarms can significantly impact the power use
+     * of the device when idle (and thus cause significant battery blame to the app scheduling
+     * them), so they should be used with care.
+     *
+     * <p>Unlike other alarms, the system is free to reschedule this type of alarm to happen
+     * out of order with any other alarms, even those from the same app.  This will clearly happen
+     * when the device is idle (since this alarm can go off while idle, when any other alarms
+     * from the app will be held until later), but may also happen even when not idle.
+     * Note that the OS will allow itself more flexibility for scheduling these alarms than
+     * regular exact alarms, since the application has opted into this behavior.  When the
+     * device is idle it may take even more liberties with scheduling in order to optimize
+     * for battery life.</p>
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param triggerAtMillis time in milliseconds that the alarm should go
+     *        off, using the appropriate clock (depending on the alarm type).
+     * @param operation Action to perform when the alarm goes off;
+     *        typically comes from {@link PendingIntent#getBroadcast
+     *        IntentSender.getBroadcast()}.
+     *
+     * @see #set
+     * @see #setRepeating
+     * @see #setWindow
+     * @see #cancel
+     * @see android.content.Context#sendBroadcast
+     * @see android.content.Context#registerReceiver
+     * @see android.content.Intent#filterEquals
+     * @see #ELAPSED_REALTIME
+     * @see #ELAPSED_REALTIME_WAKEUP
+     * @see #RTC
+     * @see #RTC_WAKEUP
+     */
+    public void setExactAndAllowWhileIdle(int type, long triggerAtMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_ALLOW_WHILE_IDLE, operation,
+                null, null);
+    }
+
     /**
      * Remove any alarms with a matching {@link Intent}.
      * Any alarm, of any type, whose Intent matches this one (as defined by
