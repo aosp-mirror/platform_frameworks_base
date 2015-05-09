@@ -17,9 +17,9 @@
 package android.util;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
-import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -37,11 +37,7 @@ public class Xml_Delegate {
     @LayoutlibDelegate
     /*package*/ static XmlPullParser newPullParser() {
         try {
-            KXmlParser parser = new KXmlParser();
-            // The prebuilt kxml2 library with the IDE doesn't support DOCECL.
-//            parser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, true);
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-            return parser;
+            return ParserFactory.instantiateParser(null);
         } catch (XmlPullParserException e) {
             throw new AssertionError();
         }
