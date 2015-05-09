@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.content.ComponentName;
 
 /**
  * Activity manager local system service interface.
@@ -48,4 +49,10 @@ public abstract class ActivityManagerInternal {
          */
         public abstract void release();
     }
+
+    /**
+     * Returns home activity for the specified user.
+     * @param userId ID of the user or {@link android.os.UserHandle#USER_ALL}
+     */
+    public abstract ComponentName getHomeActivityForUser(int userId);
 }
