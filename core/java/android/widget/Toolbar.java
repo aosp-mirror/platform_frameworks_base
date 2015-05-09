@@ -590,7 +590,7 @@ public class Toolbar extends ViewGroup {
                 mTitleTextView.setSingleLine();
                 mTitleTextView.setEllipsize(TextUtils.TruncateAt.END);
                 if (mTitleTextAppearance != 0) {
-                    mTitleTextView.setTextAppearance(context, mTitleTextAppearance);
+                    mTitleTextView.setTextAppearance(mTitleTextAppearance);
                 }
                 if (mTitleTextColor != 0) {
                     mTitleTextView.setTextColor(mTitleTextColor);
@@ -644,7 +644,7 @@ public class Toolbar extends ViewGroup {
                 mSubtitleTextView.setSingleLine();
                 mSubtitleTextView.setEllipsize(TextUtils.TruncateAt.END);
                 if (mSubtitleTextAppearance != 0) {
-                    mSubtitleTextView.setTextAppearance(context, mSubtitleTextAppearance);
+                    mSubtitleTextView.setTextAppearance(mSubtitleTextAppearance);
                 }
                 if (mSubtitleTextColor != 0) {
                     mSubtitleTextView.setTextColor(mSubtitleTextColor);
@@ -670,7 +670,7 @@ public class Toolbar extends ViewGroup {
     public void setTitleTextAppearance(Context context, @StyleRes int resId) {
         mTitleTextAppearance = resId;
         if (mTitleTextView != null) {
-            mTitleTextView.setTextAppearance(context, resId);
+            mTitleTextView.setTextAppearance(resId);
         }
     }
 
@@ -681,7 +681,7 @@ public class Toolbar extends ViewGroup {
     public void setSubtitleTextAppearance(Context context, @StyleRes int resId) {
         mSubtitleTextAppearance = resId;
         if (mSubtitleTextView != null) {
-            mSubtitleTextView.setTextAppearance(context, resId);
+            mSubtitleTextView.setTextAppearance(resId);
         }
     }
 
