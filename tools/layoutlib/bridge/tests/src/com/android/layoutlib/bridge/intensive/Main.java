@@ -35,7 +35,8 @@ import com.android.resources.Density;
 import com.android.resources.Navigation;
 import com.android.utils.ILogger;
 
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import android.annotation.NonNull;
@@ -84,11 +85,11 @@ public class Main {
     /** Location of the app's res dir inside {@link #TEST_RES_DIR}*/
     private static final String APP_TEST_RES = APP_TEST_DIR + "/src/main/res";
 
-    private LayoutLog mLayoutLibLog;
-    private FrameworkResources mFrameworkRepo;
-    private ResourceRepository mProjectResources;
-    private ILogger mLogger;
-    private Bridge mBridge;
+    private static LayoutLog sLayoutLibLog;
+    private static FrameworkResources sFrameworkRepo;
+    private static ResourceRepository sProjectResources;
+    private static  ILogger sLogger;
+    private static Bridge sBridge;
 
     static {
         // Test that System Properties are properly set.
@@ -257,15 +258,15 @@ public class Main {
     /**
      * Initialize the bridge and the resource maps.
      */
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         File data_dir = new File(PLATFORM_DIR, "data");
         File res = new File(data_dir, "res");
-        mFrameworkRepo = new FrameworkResources(new FolderWrapper(res));
-        mFrameworkRepo.loadResources();
-        mFrameworkRepo.loadPublicResources(getLogger());
+        sFrameworkRepo = new FrameworkResources(new FolderWrapper(res));
+        sFrameworkRepo.loadResources();
+        sFrameworkRepo.loadPublicResources(getLogger());
 
-        mProjectResources =
+        sProjectResources =
                 new ResourceRepository(new FolderWrapper(TEST_RES_DIR + APP_TEST_RES), false) {
             @NonNull
             @Override
@@ -273,13 +274,13 @@ public class Main {
                 return new ResourceItem(name);
             }
         };
-        mProjectResources.loadResources();
+        sProjectResources.loadResources();
 
         File fontLocation = new File(data_dir, "fonts");
         File buildProp = new File(PLATFORM_DIR, "build.prop");
         File attrs = new File(res, "values" + File.separator + "attrs.xml");
-        mBridge = new Bridge();
-        mBridge.init(ConfigGenerator.loadProperties(buildProp), fontLocation,
+        sBridge = new Bridge();
+        sBridge.init(ConfigGenerator.loadProperties(buildProp), fontLocation,
                 ConfigGenerator.getEnumMap(attrs), getLayoutLog());
     }
 
@@ -299,6 +300,15 @@ public class Main {
     @Test
     public void testArrayCheck() throws ClassNotFoundException {
         renderAndVerify("array_check.xml", "array_check.png");
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        sLayoutLibLog = null;
+        sFrameworkRepo = null;
+        sProjectResources = null;
+        sLogger = null;
+        sBridge = null;
     }
 
     /** Test expand_layout.xml */
@@ -345,7 +355,7 @@ public class Main {
             throws ClassNotFoundException {
         // TODO: Set up action bar handler properly to test menu rendering.
         // Create session params.
-        RenderSession session = mBridge.createSession(params);
+        RenderSession session = sBridge.createSession(params);
         if (!session.getResult().isSuccess()) {
             getLogger().error(session.getResult().getException(),
                     session.getResult().getErrorMessage());
@@ -390,8 +400,8 @@ public class Main {
             String themeName, RenderingMode renderingMode, int targetSdk) {
         FolderConfiguration config = configGenerator.getFolderConfig();
         ResourceResolver resourceResolver =
-                ResourceResolver.create(mProjectResources.getConfiguredResources(config),
-                        mFrameworkRepo.getConfiguredResources(config),
+                ResourceResolver.create(sProjectResources.getConfiguredResources(config),
+                        sFrameworkRepo.getConfiguredResources(config),
                         themeName, false);
         return new SessionParams(
                 layoutParser,
@@ -405,9 +415,9 @@ public class Main {
                 getLayoutLog());
     }
 
-    private LayoutLog getLayoutLog() {
-        if (mLayoutLibLog == null) {
-            mLayoutLibLog = new LayoutLog() {
+    private static LayoutLog getLayoutLog() {
+        if (sLayoutLibLog == null) {
+            sLayoutLibLog = new LayoutLog() {
                 @Override
                 public void warning(String tag, String message, Object data) {
                     System.out.println("Warning " + tag + ": " + message);
@@ -440,12 +450,12 @@ public class Main {
                 }
             };
         }
-        return mLayoutLibLog;
+        return sLayoutLibLog;
     }
 
-    private ILogger getLogger() {
-        if (mLogger == null) {
-            mLogger = new ILogger() {
+    private static ILogger getLogger() {
+        if (sLogger == null) {
+            sLogger = new ILogger() {
                 @Override
                 public void error(Throwable t, String msgFormat, Object... args) {
                     if (t != null) {
@@ -470,7 +480,7 @@ public class Main {
                 }
             };
         }
-        return mLogger;
+        return sLogger;
     }
 
     private static void failWithMsg(@NonNull String msgFormat, Object... args) {
