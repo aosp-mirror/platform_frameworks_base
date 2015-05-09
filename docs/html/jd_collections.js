@@ -118,6 +118,25 @@ var RESOURCE_COLLECTIONS = {
       "https://www.youtube.com/watch?v=5Be2mJzP-Uw&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX"
     ]
   },
+  "google/landing/services": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/analytics/devguides/collection/android/",
+      "https://developers.google.com/maps/documentation/android/",
+      "https://developers.google.com/+/mobile/android/sign-in",
+      "https://developers.google.com/places/android/",
+      "https://developers.google.com/gcm/android/",
+      "https://developers.google.com/maps/documentation/android/"
+    ]
+  },
+  "google/landing/googleplay": {
+    "title": "",
+    "resources": [
+      "google/play/billing/index.html",
+      "google/play/billing/billing_subscriptions.html",
+      "google/play/developer-api.html"
+    ]
+  },
   "develop/landing/courses": {
     "title": "",
     "resources": [
@@ -297,7 +316,6 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/easy-signin.html",
       "distribute/engage/deep-linking.html",
       "distribute/engage/ads.html",
-      "distribute/engage/appindexing.html",
       "distribute/engage/intents.html",
       "distribute/engage/analytics.html",
       "distribute/engage/game-services.html",
@@ -472,6 +490,22 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "google/play/billing/index.html",
       "https://support.google.com/googleplay/android-developer/answer/138294"
+    ]
+  },
+  "distribute/googleplay/cast": {
+    "title": "Google Cast",
+    "resources": [
+      "https://developers.google.com/cast/docs/ux_guidelines",
+      "https://developers.google.com/cast/docs/android_sender",
+      "http://www.github.com/googlecast"
+    ]
+  },
+  "distribute/googleplay/cardboard": {
+    "title": "Google Cast",
+    "resources": [
+      "https://www.google.com/get/cardboard/",
+      "https://developers.google.com/cardboard/android/download",
+      "http://www.google.com/design/spec-vr"
     ]
   },
   "distribute/googleplay/gpfe/highlight": {

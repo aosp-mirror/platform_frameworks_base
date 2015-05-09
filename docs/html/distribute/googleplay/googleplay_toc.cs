@@ -19,7 +19,7 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/guide.html">
-          <span class="en">Finding Success on Google Play</span>
+    <span class="en">Finding Success on <span style="white-space:nowrap">Google Play</span></span>
         </a>
     </div>
   </li>
@@ -38,6 +38,18 @@
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/auto.html">
           <span class="en">Distributing to <span style="white-space:nowrap">Android Auto</span></span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cast.html">
+          <span class="en">Stream Your Content<span style="white-space:nowrap">with Cast</span></span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cardboard.html">
+          <span class="en"><span style="white-space:nowrap">Build VR with Cardboard</span></span>
         </a>
     </div>
   </li>
