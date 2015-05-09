@@ -2055,7 +2055,7 @@ public class Editor {
         shadowView.setText(text);
         shadowView.setTextColor(mTextView.getTextColors());
 
-        shadowView.setTextAppearance(mTextView.getContext(), R.styleable.Theme_textAppearanceLarge);
+        shadowView.setTextAppearance(R.styleable.Theme_textAppearanceLarge);
         shadowView.setGravity(Gravity.CENTER);
 
         shadowView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,

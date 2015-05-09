@@ -713,7 +713,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
         for (int i = 1, count = mDayNamesHeader.getChildCount(); i < count; i++) {
             label = (TextView) mDayNamesHeader.getChildAt(i);
             if (mWeekDayTextAppearanceResId > -1) {
-                label.setTextAppearance(mContext, mWeekDayTextAppearanceResId);
+                label.setTextAppearance(mWeekDayTextAppearanceResId);
             }
             if (i < mDaysPerWeek + 1) {
                 label.setText(mDayNamesShort[i - 1]);
