@@ -3,5 +3,54 @@ page.title=Preview Program Overview
 @jd:body
 
 <p>
-  This is an overview of the program. Bacon.
+  The M Developer Preview program is an opportunity for you to test the compatibility of your apps
+  with the next platform release, try out early versions of new API features, and provide feedback
+  to the Android team. The program includes update releases during course of the program to allow
+  you to follow the progress of feature development and fixes, leading up to the official release
+  of the platform, as shown in Figure 1.
+</p>
+
+<img src="{@docRoot}preview/images/m-preview-timeline.png"
+  alt="Preview program timeline" id="figure1" style="margin-top: 15px;">
+<p class="img-caption">
+  <b>Figure 1.</b> Timeline for the M Developer Preview program.
+</p>
+
+<p>
+  We strongly encourage you to provide feedback for the M Preview releases through our <a href=
+  "https://code.google.com/p/android-developer-preview/">issue tracker</a>. Issues reported early
+  in the program have a better chance of being addressed before the official release, so reports
+  provided by June 30, 2015 receive priority processing by the Android team.
+</p>
+
+<p>
+  To get started testing your app:
+</p>
+
+<ul>
+  <li>Review the <a href="{@docRoot}preview/api-overview.html">
+	API Overview</a> and <a href=
+	"{@docRoot}preview/api-changes.html">Behavior Changes</a> to
+	get an idea of what's new and how it affects your app.
+  </li>
+
+  <li>Setup for testing and development by following the instructions for <a href=
+  "{@docRoot}preview/setup-sdk.html">Setting up the Preview
+  SDK</a> and configuring test devices.
+  </li>
+
+  <li>Review the <a href="{@docRoot}preview/reference.html">M
+  Preview API Reference</a> and <a href=
+  "{@docRoot}preview/samples.html">M Preview samples</a> to
+  gain more insight into new API features and how to use them in your app.
+  </li>
+
+  <li>Join the <a href="https://plus.google.com/communities/101985907812750684586">M Preview
+  Google+ developer community</a> to get the latest developer updates and connect with other
+  developers working with the preview.
+  </li>
+</ul>
+
+<p>
+  Thanks in advance for your participation in the developer preview program!
 </p>
