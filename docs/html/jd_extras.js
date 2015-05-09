@@ -173,22 +173,22 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "title":"Introduction to Android Studio",
     "titleFriendly":"",
-    "summary":"A high level introduction to Android Studio, the new IDE for Android application development. Learn why you should migrate your projects to Android Studio now and how it can help you be more productive as a developer. Rich layout editor, handy suggestions and fixes, new Android project view - these are just some of the things you can expect from the IDE, which is built on the successful IntelliJ IDEA.",
-    "url":"http://www.youtube.com/watch?v=K2dodTXARqc",
+    "summary":"Learn why you should migrate your projects to Android Studio now and how it can help you be more productive as a developer. Rich layout editor, handy suggestions and fixes, new Android project view - these are just some of the things you can expect from the IDE, which is built on the successful IntelliJ IDEA.",
+    "url":"https://www.youtube.com/watch?v=K2dodTXARqc&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ&index=1",
     "group":"",
-    "keywords": [],
+    "keywords": ["studio", "tools"],
     "tags": [
     ],
     "image":"http://i1.ytimg.com/vi/K2dodTXARqc/maxresdefault.jpg",
     "type":"video"
   },
   {
-    "title":"DevBytes: Google Play Services 7.3",
+    "title":"Google Play Services 7.3",
     "titleFriendly":"",
     "summary":"Google Play Services 7.3 brings a ton of great new features to help you BUILD BETTER APPS! This update brings the ability to connect multiple wearables simultaneously to a single phone.",
-    "url":"http://www.youtube.com/watch?v=FOn64iqlphk",
+    "url":"https://www.youtube.com/watch?v=FOn64iqlphk&index=1&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
     "group":"",
-    "keywords": [],
+    "keywords": ["google play services"],
     "tags": [
     ],
     "image":"http://i1.ytimg.com/vi/FOn64iqlphk/maxresdefault.jpg",
@@ -207,12 +207,12 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"video"
   },
   {
-    "title":"Android TV: Introduction to Android TV",
+    "title":"Introduction to Android TV",
     "titleFriendly":"",
     "summary":"Android TV brings the Android platform to the living room with rich content and entertaining app experiences. In this video, Timothy introduces the design philosophy and developer components that make building TV experiences easier than ever before.",
-    "url":"http://www.youtube.com/watch?v=6K_jxccHv5M",
+    "url":"https://www.youtube.com/watch?v=6K_jxccHv5M&index=1&list=PLOU2XLYxmsILFBfx66ens76VMLMEPJAB0",
     "group":"",
-    "keywords": [],
+    "keywords": ["tv"],
     "tags": [
     ],
     "image":"http://i1.ytimg.com/vi/6K_jxccHv5M/maxresdefault.jpg",
@@ -221,10 +221,10 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "title":"Under the Hood of Android Auto",
     "titleFriendly":"",
-    "summary":"Your car contains some serious technology. Learn about the Android Auto architecture, which enables you to control Android apps and services running on your phone through your car. In this talk, we'll highlight the key characteristics of the Android Auto protocol, which enables your Android phone to talk to compatible cars. We'll also take a look at some of the details of the Android Auto rendering subsystem, which uses Binders and the Android VirtualDisplay API to composite UI from multiple Android apps. Finally, we'll discuss how we're enhancing the Google Maps app by integrating with the Android Auto platform.",
-    "url":"http://www.youtube.com/watch?v=KNKGM4ss5Sc",
+    "summary":"Your car contains some serious technology. Learn about the Android Auto architecture, which enables you to control Android apps and services running on your phone through your car. ",
+    "url":"https://www.youtube.com/watch?v=KNKGM4ss5Sc&index=4&list=PLWz5rJ2EKKc9BdE_PSLNIGjXXr3h_orXM",
     "group":"",
-    "keywords": [],
+    "keywords": ["auto"],
     "tags": [
     ],
     "image":"http://i1.ytimg.com/vi/KNKGM4ss5Sc/maxresdefault.jpg",
@@ -2131,7 +2131,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Animation",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2144,7 +2144,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Style",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2157,7 +2157,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Layout",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2170,7 +2170,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Components",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2183,7 +2183,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Patterns",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2196,7 +2196,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Usability",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2209,7 +2209,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Color Palettes",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2222,7 +2222,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Layout Templates",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2235,7 +2235,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Sticker Sheets & Icons",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "material design",
     "titleFriendly": ""
   },
   {
@@ -2248,13 +2248,30 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Typography: Roboto and Noto Sans fonts",
     "summary": "",
     "keywords": [],
-    "type": "design",
+    "type": "materialdesign",
+    "titleFriendly": ""
+  },
+    {
+    "lang": "en",
+    "group": "",
+    "tags": [
+      "icons",
+      "material",
+      "iconography"
+    ],
+    "url": "https://www.google.com/design/icons/index.html",
+    "timestamp": null,
+    "image": "images/cards/card-material-icons-16x9_2x.jpg",
+    "title": "Material icon collection",
+    "summary": "",
+    "keywords": ["icons"],
+    "type": "material design",
     "titleFriendly": ""
   },
   {
     "title":"Android Wear Materials",
     "titleFriendly":"",
-    "summary":"You may use these materials without restriction to facilitate your app design and implementation. Drag and drop your way to beautifully designed Android apps. The stencils feature the rich typography, colors, interactive controls, and icons found throughout…",
+    "summary":"Drag and drop your way to beautifully designed Android Wear apps.",
     "url":"design/downloads/index.html#Wear",
     "group":"",
     "keywords": ["icons","stencils","color swatches"],
@@ -2264,13 +2281,74 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"design"
   },
   {
+    "title":"UX Design for Mobile Developers",
+    "titleFriendly":"",
+    "summary":"Learn how to design a 5-star app.",
+    "url":"https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
+    "group":"",
+    "keywords": ["mobile","ux","design"],
+    "tags": ["courses"],
+    "image":"images/cards/course-ud849.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Developing Android Apps",
+    "titleFriendly":"",
+    "summary":"Learn Android and build an app!",
+    "url":"https://www.udacity.com/course/developing-android-apps--ud853",
+    "group":"",
+    "keywords": ["start","firstapp","sdk"],
+    "tags": ["courses"],
+    "image":"images/cards/course-ud853.jpg",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Android Performance",
+    "titleFriendly":"",
+    "summary":"Optimize your apps for speed and usability.",
+    "url":"https://www.udacity.com/course/android-performance--ud825",
+    "group":"",
+    "keywords": ["performance","battery"],
+    "tags": ["courses"],
+    "image":"images/cards/course-ud825.png",
+    "lang":"en",
+    "type":"online course"
+  },
+  {
+    "title":"Watch Faces for Android Wear",
+    "titleFriendly":"",
+    "summary":"Watch faces let you customize the most prominent UI feature of Android wearables. The API is simple enough for rapid development and flexible enough to build something awesome.",
+    "url":"https://www.youtube.com/watch?v=AK38PJZmIW8&list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef",
+    "group":"",
+    "keywords": ["wear", "wearable", "watch face"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/AK38PJZmIW8/maxresdefault.jpg",
+    "lang":"en",
+    "type":"video"
+  },
+
+  {
+    "title":"Android Support Library",
+    "titleFriendly":"",
+    "summary":"These essential components help you build a great app that works on the huge variety of Android devices, faster.",
+    "url":"https://www.youtube.com/watch?v=3PIc-DuEU2s&index=1&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX",
+    "group":"",
+    "keywords": ["support", "compatibility"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/3PIc-DuEU2s/maxresdefault.jpg",
+    "lang":"en",
+    "type":"Video"
+  },
+  {
     "tags": [
       "android",
       "developerstory",
       "googleplay",
       "featured"
     ],
-    "title": "Android Developer Story: Jelly Button Games — Growing globally through data driven development",
+    "title": "Android Developer Storys: Jelly Button Games — Growing globally through data driven development",
     "type": "youtube",
     "url": "http://www.youtube.com/watch?v=Pd49vTkvu0U"
   },

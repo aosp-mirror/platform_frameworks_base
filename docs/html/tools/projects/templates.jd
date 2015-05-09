@@ -1,4 +1,7 @@
 page.title=Using Code Templates
+page.image=images/cards/card-using-code-templates_16x9_2x.png
+page.metaDescription=Quickly create Android app projects with various UI or functional components. 
+page.tags=studio,templates,firstapp
 @jd:body
 
   <div id="qv-wrapper">
@@ -26,7 +29,7 @@ page.title=Using Code Templates
     </div>
   </div>
 
-
+<img style="float:right" src="{@docRoot}images/cards/card-using-code-templates_16x9_2x.png">
 <p>The SDK tools provide templates for quickly creating Android application projects with the basic
   structure or for adding components to your existing application modules. The code templates
   provided by the Android SDK follow the Android design and development guidelines to get you on the
