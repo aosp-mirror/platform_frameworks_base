@@ -10,7 +10,10 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 </div>
 
 <div class="actions-bar dac-expand dac-invert">
-  <div class="wrap">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
     <div class="actions">
       <div><a href="{@docRoot}sdk/index.html">
         <span class="dac-sprite dac-auto-chevron-large"></span>
@@ -32,7 +35,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   </div><!-- end .wrap -->
 </div><!-- end .actions-bar -->
 
-<section class="dac-section dac-section-light"><div class="wrap">
+<section class="dac-section dac-section-light" id="build-apps"><div class="wrap">
   <h1 class="dac-section-title">Build Beautiful Apps</h1>
   <div class="dac-section-subtitle">
     See what’s new or find the resources to get you started with designing and developing for Android.

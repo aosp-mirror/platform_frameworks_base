@@ -1,0 +1,46 @@
+page.title=Drive installs from Google Search
+page.metaDescription=Surface the content of your apps in Google Search and link it to app installs.
+meta.tags="getusers", "search", "appindexing"
+page.image=images/cards/google-search_2x.png
+@jd:body
+
+<p>Google Search now helps users discover your app, with App Indexing. When users
+search with Google on their Android device the results will include details of
+relevant, indexed apps. The search results will include an install button that
+takes users to your app in the Google Play store. And when your app is
+installed, the user will be taken straight to the right content within it.</p>
+
+<div class="figure-left">
+<img src="{@docRoot}images/distribute/appindexing.gif">
+</div>
+
+<p>This free service expands your opportunities to turn the investment you’ve made
+in creating an outstanding app or game into installs. </p>
+
+<p>Start now by adding deep linking support to your app, verifying your app’s
+official website, and defining deep links. To learn how, check out these <a
+href="https://developers.google.com/app-indexing/webmasters/details">instructions</a>. </p>
+
+<p>Once your app is index, links to its content will join the 30 billion app index
+links already available to Google Search.</p>
+
+<h2 id=tips>Tips</h2>
+
+<ul>
+  <li> App Indexing will also be used as a ranking signal for all users on Android,
+regardless of whether they have your app installed or not. 
+  <li> App Indexing also helps drive use of your app — when your app is installed on a
+user’s device, search results will include deep links to your app that bring
+the user straight to the relevant app content.
+  <li> Use the App Indexing API to help users discover relevant content in your app
+before they complete a query with auto-completions.
+</ul>
+
+<h2 id=related_resources>Related resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/appindexing"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+

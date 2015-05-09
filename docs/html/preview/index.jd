@@ -17,44 +17,36 @@ footer.hide=1
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">M Developer Preview</h1>
         <p class="dac-hero-description">
-          Get ready for the next official release of the platform. Test your apps
-          and give us feedback!
+          Get ready for the next official release of the platform. The preview program gives
+          you an advance look at new APIs, features, and behaviors coming to Android.
+          Test your apps and give us feedback!
         </p>
-        <a class="dac-hero-cta" href="{@docRoot}preview/setup-sdk.html">
+
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Set up the Preview SDK
+          Preview Program Overview
         </a><br>
         <a class="dac-hero-cta" href="{@docRoot}preview/api-overview.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Review the API changes
         </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}preview/setup-sdk.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Set up the Preview SDK
+        </a><br>
         <a class="dac-hero-cta" href="https://code.google.com/p/android-developer-preview/">
           <span class="dac-sprite dac-auto-chevron"></span>
           Report issues
         </a><br>
+
       </div>
+    </div>
+
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:preview/landing/resources"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>
     </div>
   </div>
 </section>
-
-<section class="dac-section dac-gray dac-small dac-invert"><div class="wrap">
-  <h2 class="norule">Latest</h2>
-  <div class="resource-widget resource-flow-layout col-16"
-       data-query="collection:develop/landing/latest"
-       data-cardSizes="6x6"
-       data-maxResults="3"></div>
-</div></section>
-
-
-<section class="dac-section"><div class="wrap">
-  <h1 class="dac-section-title">Resources</h1>
-  <div class="dac-section-subtitle">
-    Check out these resources to help you get started with the M Developer Preview.
-  </div>
-  <div class="resource-widget resource-flow-layout col-16"
-       data-query="collection:preview/landing/resources"
-       data-cardSizes="6x6"
-       data-maxResults="6"></div>
-</div></section>
-
-

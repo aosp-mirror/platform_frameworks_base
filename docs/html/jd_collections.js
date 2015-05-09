@@ -104,18 +104,29 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://www.youtube.com/watch?v=AK38PJZmIW8&list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef",
       "https://www.youtube.com/watch?v=6K_jxccHv5M&index=1&list=PLOU2XLYxmsILFBfx66ens76VMLMEPJAB0",
-      "https://www.youtube.com/watch?v=KNKGM4ss5Sc&index=4&list=PLWz5rJ2EKKc9BdE_PSLNIGjXXr3h_orXM"
+      "https://www.youtube.com/watch?v=ctiaVxgclsg&list=PLWz5rJ2EKKc9BdE_PSLNIGjXXr3h_orXM"
     ]
   },
   "develop/landing/tools": {
     "title": "",
     "resources": [
-      "https://www.youtube.com/watch?v=K2dodTXARqc&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ&index=1",
-      "https://www.youtube.com/watch?v=3PIc-DuEU2s&index=1&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX",
-      "https://www.youtube.com/watch?v=FOn64iqlphk&index=1&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf"
+      "https://www.youtube.com/watch?v=K2dodTXARqc&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
+      "https://www.youtube.com/watch?v=3PIc-DuEU2s&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX",
+      "https://www.youtube.com/watch?v=cD7NPxuuXYY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
+      "https://www.youtube.com/watch?v=JLLnhwtDoHw&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
+      "https://www.youtube.com/watch?v=2I6fuD20qlY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
+      "https://www.youtube.com/watch?v=5Be2mJzP-Uw&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX"
     ]
   },
   "develop/landing/courses": {
+    "title": "",
+    "resources": [
+      "https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
+      "https://www.udacity.com/course/developing-android-apps--ud853",
+      "https://www.udacity.com/course/android-performance--ud825"
+    ]
+  },
+  "preview/landing/herolinks": {
     "title": "",
     "resources": [
       "https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
@@ -143,12 +154,12 @@ var RESOURCE_COLLECTIONS = {
   "distribute/landing/more": {
     "title": "",
     "resources": [
-      "distribute/users/promote-with-ads.html",
-      "distribute/monetize/ads.html",
-      "distribute/analyze/index.html",
-      "distribute/engage/deep-linking.html",
-      "distribute/engage/easy-signin.html",
-      "https://cloud.google.com/docs/"
+    "distribute/users/promote-with-ads.html",
+    "distribute/monetize/ads.html",
+    "distribute/analyze/index.html",
+    "distribute/engage/deep-linking.html",
+    "distribute/engage/easy-signin.html",
+    "https://cloud.google.com/docs/"
     ]
   },
   "distribute/edu/videos/stories": {
@@ -271,10 +282,11 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/users/know-your-user.html",
       "distribute/users/your-listing.html",
-      "distribute/users/build-buzz.html",
-      "distribute/users/build-community.html",
       "distribute/users/expand-to-new-markets.html",
-      "distribute/users/promote-with-ads.html"
+      "distribute/users/promote-with-ads.html",
+      "distribute/users/appindexing.html",
+      "distribute/users/build-buzz.html",
+      "distribute/users/build-community.html"
     ]
   },
   "distribute/engagelanding": {
@@ -284,8 +296,11 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/gcm.html",
       "distribute/engage/easy-signin.html",
       "distribute/engage/deep-linking.html",
-      "distribute/engage/game-services.html",
+      "distribute/engage/ads.html",
+      "distribute/engage/appindexing.html",
+      "distribute/engage/intents.html",
       "distribute/engage/analytics.html",
+      "distribute/engage/game-services.html",
       "distribute/engage/app-updates.html",
       "distribute/engage/community.html",
       "distribute/engage/video.html"
@@ -541,8 +556,10 @@ var RESOURCE_COLLECTIONS = {
   "distribute/users/promotewithads": {
     "title": "",
     "resources": [
-      "http://www.google.com/ads/admob/#subid=us-en-et-dac",
-      "distribute/essentials/optimizing-your-app.html"
+      "https://support.google.com/adwords/answer/6032059",
+      "https://support.google.com/adwords/answer/6032073",
+      "https://support.google.com/adwords/answer/6167164",
+      "https://support.google.com/adwords/answer/6167162"
     ]
   },
   "distribute/users/buildbuzz": {
@@ -572,6 +589,14 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/groups/answer/46601",
       "https://support.google.com/plus/topic/2888488",
       "http://www.youtube.com/yt/dev/"
+    ]
+  },
+  "distribute/users/appindexing": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/app-indexing/",
+      "https://developers.google.com/app-indexing/webmasters/details",
+      "distribute/engage/search.html"
     ]
   },
   "distribute/toolsreference/bestpractices/apps": {
@@ -795,6 +820,31 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "design/patterns/widgets.html",
       "guide/topics/appwidgets/index.html"
+    ]
+  },
+  "distribute/engage/reengage": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/adwords/answer/6032073",
+      "distribute/engage/deep-linking.html",
+      "https://support.google.com/adwords/answer/6167162",
+      "distribute/users/promote-with-ads.html"
+    ]
+  },
+  "distribute/engage/appindexing": {
+    "title": "",
+    "resources": [
+      "distribute/engage/intents.html",
+      "distribute/engage/appindexing.html",
+      "distribute/users/appindexing.html"
+    ]
+  },
+  "distribute/engage/intents": {
+    "title": "",
+    "resources": [
+      "guide/components/intents-filters.html",
+      "distribute/engage/appindexing.html",
+      "distribute/engage/ads.html"
     ]
   },
   "distribute/getusers/expandnewmarkets": {
@@ -1223,6 +1273,17 @@ var RESOURCE_COLLECTIONS = {
       "training/monetization/ads-and-ux.html"
     ]
   },
+  "distribute/monetize/admob": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/admob/topic/2784623",
+      "https://developers.google.com/mobile-ads-sdk/download",
+      "http://analyticsacademy.withgoogle.com/mobile-app",
+      "http://support.google.com/googleplay/android-developer/topic/2985714",
+      "https://support.google.com/admob/answer/2753860",
+      "https://support.google.com/admob/"
+    ]
+  },
   "distribute/monetize/paymentmethods": {
     "title": "",
     "resources": [
@@ -1233,9 +1294,12 @@ var RESOURCE_COLLECTIONS = {
   "preview/landing/resources": {
     "title": "",
     "resources": [
+      "preview/overview.html",
       "preview/api-overview.html",
       "preview/setup-sdk.html",
-      "preview/samples.html"
+      "preview/samples.html",
+      "preview/reference.html",
+      "preview/support.html"
     ]
   },
   "autolanding": {

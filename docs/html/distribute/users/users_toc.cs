@@ -11,18 +11,6 @@
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/build-buzz.html">
-          <span class="en">Build Buzz</span>
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/build-community.html">
-          <span class="en">Build Community</span>
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/expand-to-new-markets.html">
           <span class="en">Expand to New Markets</span>
         </a>
@@ -31,6 +19,24 @@
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/promote-with-ads.html">
           <span class="en">Promote with Ads</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/appindexing.html">
+          <span class="en">Drive Installs through Search</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/build-buzz.html">
+          <span class="en">Build Buzz</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/build-community.html">
+          <span class="en">Build Community</span>
         </a>
     </div>
   </li>

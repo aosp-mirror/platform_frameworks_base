@@ -24,7 +24,7 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/monetize/ads.html">
-          <span class="en">Ads</span>
+          <span class="en">AdMob Ads</span>
         </a>
     </div>
   </li>
