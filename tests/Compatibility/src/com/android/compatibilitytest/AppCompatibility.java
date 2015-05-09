@@ -208,7 +208,8 @@ public class AppCompatibility extends InstrumentationTestCase {
     private boolean ensureForegroundActivity(RunningAppProcessInfo info) {
         Log.d(TAG, String.format("ensureForegroundActivity: proc=%s, pid=%d, state=%d",
                 info.processName, info.pid, info.processState));
-        return info.processState == ActivityManager.PROCESS_STATE_TOP;
+        return info.processState == ActivityManager.PROCESS_STATE_TOP
+            || info.processState == ActivityManager.PROCESS_STATE_TOP_SLEEPING;
     }
 
     /**
