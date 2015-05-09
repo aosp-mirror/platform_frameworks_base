@@ -66,6 +66,7 @@ var RESOURCE_COLLECTIONS = {
       "https://www.google.com/design/spec/resources/layout-templates.html",
       "https://www.google.com/design/spec/resources/sticker-sheets-icons.html",
       "https://www.google.com/design/spec/resources/roboto-noto-fonts.html",
+      "https://www.google.com/design/icons/index.html",
       "design/downloads/index.html#Wear"
     ]
   },
@@ -98,20 +99,28 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
     ]
   },
-  "develop/landing/devbytes": {
+  "develop/landing/ubicomp": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=K2dodTXARqc",
-      "http://www.youtube.com/watch?v=FOn64iqlphk",
-      "http://www.youtube.com/watch?v=p4gmvHyuZzw",
-      "http://www.youtube.com/watch?v=tDmnGNkTtlE",
-      "http://www.youtube.com/watch?v=6K_jxccHv5M",
-      "http://www.youtube.com/watch?v=KNKGM4ss5Sc"
+      "https://www.youtube.com/watch?v=AK38PJZmIW8&list=PLWz5rJ2EKKc-kIrPiq098QH9dOle-fLef",
+      "https://www.youtube.com/watch?v=6K_jxccHv5M&index=1&list=PLOU2XLYxmsILFBfx66ens76VMLMEPJAB0",
+      "https://www.youtube.com/watch?v=KNKGM4ss5Sc&index=4&list=PLWz5rJ2EKKc9BdE_PSLNIGjXXr3h_orXM"
+    ]
+  },
+  "develop/landing/tools": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=K2dodTXARqc&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ&index=1",
+      "https://www.youtube.com/watch?v=3PIc-DuEU2s&index=1&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX",
+      "https://www.youtube.com/watch?v=FOn64iqlphk&index=1&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf"
     ]
   },
   "develop/landing/courses": {
     "title": "",
     "resources": [
+      "https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
+      "https://www.udacity.com/course/developing-android-apps--ud853",
+      "https://www.udacity.com/course/android-performance--ud825"
     ]
   },
   "distribute/landing/carousel": {
