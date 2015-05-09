@@ -21,8 +21,11 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
+import android.Manifest;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.bluetooth.BluetoothA2dp;
@@ -37,7 +40,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -82,11 +88,13 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
+import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -102,6 +110,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -645,6 +654,8 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_USER_BACKGROUND);
+        intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
         intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
@@ -668,7 +679,7 @@ public class AudioService extends IAudioService.Stub {
             setRotationForAudioSystem();
         }
 
-        context.registerReceiver(mReceiver, intentFilter);
+        context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
 
         LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
     }
@@ -4975,9 +4986,57 @@ public class AudioService extends IAudioService.Stub {
                         0,
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
+            } else if (action.equals(Intent.ACTION_USER_BACKGROUND)) {
+                // Disable audio recording for the background user/profile
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                if (userId >= 0) {
+                    // TODO Kill recording streams instead of killing processes holding permission
+                    UserInfo userInfo = UserManagerService.getInstance().getUserInfo(userId);
+                    killBackgroundUserProcessesWithRecordAudioPermission(userInfo);
+                }
+                UserManagerService.getInstance().setSystemControlledUserRestriction(
+                        UserManager.DISALLOW_RECORD_AUDIO, true, userId);
+            } else if (action.equals(Intent.ACTION_USER_FOREGROUND)) {
+                // Enable audio recording for foreground user/profile
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                UserManagerService.getInstance().setSystemControlledUserRestriction(
+                        UserManager.DISALLOW_RECORD_AUDIO, false, userId);
             }
         }
     } // end class AudioServiceBroadcastReceiver
+
+    private void killBackgroundUserProcessesWithRecordAudioPermission(UserInfo oldUser) {
+        PackageManager pm = mContext.getPackageManager();
+        // Find the home activity of the user. It should not be killed to avoid expensive restart,
+        // when the user switches back. For managed profiles, we should kill all recording apps
+        ComponentName homeActivityName = null;
+        if (!oldUser.isManagedProfile()) {
+            homeActivityName = LocalServices.getService(ActivityManagerInternal.class)
+                    .getHomeActivityForUser(oldUser.id);
+        }
+        final String[] permissions = { Manifest.permission.RECORD_AUDIO };
+        List<PackageInfo> packages;
+        try {
+            packages = AppGlobals.getPackageManager()
+                    .getPackagesHoldingPermissions(permissions, 0, oldUser.id).getList();
+        } catch (RemoteException e) {
+            throw new AndroidRuntimeException(e);
+        }
+        for (int j = packages.size() - 1; j >= 0; j--) {
+            PackageInfo pkg = packages.get(j);
+            if (homeActivityName != null
+                    && pkg.packageName.equals(homeActivityName.getPackageName())
+                    && pkg.applicationInfo.isSystemApp()) {
+                continue;
+            }
+            try {
+                ActivityManagerNative.getDefault().killUid(pkg.applicationInfo.uid,
+                        "killBackgroundUserProcessesWithAudioRecordPermission");
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error calling killUid", e);
+            }
+        }
+    }
 
     //==========================================================================================
     // RemoteControlDisplay / RemoteControlClient / Remote info

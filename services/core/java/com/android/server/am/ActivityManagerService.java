@@ -19951,6 +19951,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return token;
             }
         }
+
+        @Override
+        public ComponentName getHomeActivityForUser(int userId) {
+            synchronized (ActivityManagerService.this) {
+                ActivityRecord homeActivity = mStackSupervisor.getHomeActivityForUser(userId);
+                return homeActivity.realActivity;
+            }
+        }
     }
 
     private final class SleepTokenImpl extends SleepToken {
