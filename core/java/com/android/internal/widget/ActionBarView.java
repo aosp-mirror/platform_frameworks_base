@@ -813,14 +813,14 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
             mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
 
             if (mTitleStyleRes != 0) {
-                mTitleView.setTextAppearance(mContext, mTitleStyleRes);
+                mTitleView.setTextAppearance(mTitleStyleRes);
             }
             if (mTitle != null) {
                 mTitleView.setText(mTitle);
             }
 
             if (mSubtitleStyleRes != 0) {
-                mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
+                mSubtitleView.setTextAppearance(mSubtitleStyleRes);
             }
             if (mSubtitle != null) {
                 mSubtitleView.setText(mSubtitle);
