@@ -242,6 +242,7 @@ class MountService extends IMountService.Stub
 
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADD_PRIMARY = 2;
+    private static final int VERSION_FIX_PRIMARY = 3;
 
     private static final String TAG_VOLUMES = "volumes";
     private static final String ATTR_VERSION = "version";
@@ -1187,8 +1188,17 @@ class MountService extends IMountService.Stub
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
     }
 
+    private String getDefaultPrimaryStorageUuid() {
+        if (SystemProperties.getBoolean(StorageManager.PROP_PRIMARY_PHYSICAL, false)) {
+            return StorageManager.UUID_PRIMARY_PHYSICAL;
+        } else {
+            return StorageManager.UUID_PRIVATE_INTERNAL;
+        }
+    }
+
     private void readSettingsLocked() {
         mRecords.clear();
+        mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
 
         FileInputStream fis = null;
         try {
@@ -1202,16 +1212,13 @@ class MountService extends IMountService.Stub
                     final String tag = in.getName();
                     if (TAG_VOLUMES.equals(tag)) {
                         final int version = readIntAttribute(in, ATTR_VERSION, VERSION_INIT);
-                        if (version >= VERSION_ADD_PRIMARY) {
+                        final boolean primaryPhysical = SystemProperties.getBoolean(
+                                StorageManager.PROP_PRIMARY_PHYSICAL, false);
+                        final boolean validAttr = (version >= VERSION_FIX_PRIMARY)
+                                || (version >= VERSION_ADD_PRIMARY && !primaryPhysical);
+                        if (validAttr) {
                             mPrimaryStorageUuid = readStringAttribute(in,
                                     ATTR_PRIMARY_STORAGE_UUID);
-                        } else {
-                            if (SystemProperties.getBoolean(StorageManager.PROP_PRIMARY_PHYSICAL,
-                                    false)) {
-                                mPrimaryStorageUuid = StorageManager.UUID_PRIMARY_PHYSICAL;
-                            } else {
-                                mPrimaryStorageUuid = StorageManager.UUID_PRIVATE_INTERNAL;
-                            }
                         }
 
                     } else if (TAG_VOLUME.equals(tag)) {
@@ -1240,7 +1247,7 @@ class MountService extends IMountService.Stub
             out.setOutput(fos, "utf-8");
             out.startDocument(null, true);
             out.startTag(null, TAG_VOLUMES);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_ADD_PRIMARY);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_FIX_PRIMARY);
             writeStringAttribute(out, ATTR_PRIMARY_STORAGE_UUID, mPrimaryStorageUuid);
             final int size = mRecords.size();
             for (int i = 0; i < size; i++) {
@@ -1482,7 +1489,7 @@ class MountService extends IMountService.Stub
             // If this had been primary storage, revert back to internal and
             // reset vold so we bind into new volume into place.
             if (Objects.equals(mPrimaryStorageUuid, fsUuid)) {
-                mPrimaryStorageUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+                mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
                 resetIfReadyAndConnected();
             }
 
@@ -1497,11 +1504,13 @@ class MountService extends IMountService.Stub
                 final String fsUuid = mRecords.keyAt(i);
                 mCallbacks.notifyVolumeForgotten(fsUuid);
             }
-
             mRecords.clear();
-            writeSettingsLocked();
 
-            mPrimaryStorageUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+            if (!Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, mPrimaryStorageUuid)) {
+                mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
+            }
+
+            writeSettingsLocked();
             resetIfReadyAndConnected();
         }
     }
@@ -1522,13 +1531,8 @@ class MountService extends IMountService.Stub
         waitForReady();
 
         synchronized (mLock) {
-            final VolumeInfo from = Preconditions.checkNotNull(
-                    findStorageForUuid(mPrimaryStorageUuid));
-            final VolumeInfo to = Preconditions.checkNotNull(
-                    findStorageForUuid(volumeUuid));
-
-            if (Objects.equals(from, to)) {
-                throw new IllegalArgumentException("Primary storage already at " + from);
+            if (Objects.equals(mPrimaryStorageUuid, volumeUuid)) {
+                throw new IllegalArgumentException("Primary storage already at " + volumeUuid);
             }
 
             if (mMoveCallback != null) {
@@ -1537,10 +1541,26 @@ class MountService extends IMountService.Stub
             mMoveCallback = callback;
             mMoveTargetUuid = volumeUuid;
 
-            try {
-                mConnector.execute("volume", "move_storage", from.id, to.id);
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+            // When moving to/from primary physical volume, we probably just nuked
+            // the current storage location, so we have nothing to move.
+            if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, mPrimaryStorageUuid)
+                    || Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL, volumeUuid)) {
+                Slog.d(TAG, "Skipping move to/from primary physical");
+                onMoveStatusLocked(MOVE_STATUS_COPY_FINISHED);
+                onMoveStatusLocked(PackageManager.MOVE_SUCCEEDED);
+                resetIfReadyAndConnected();
+
+            } else {
+                final VolumeInfo from = Preconditions.checkNotNull(
+                        findStorageForUuid(mPrimaryStorageUuid));
+                final VolumeInfo to = Preconditions.checkNotNull(
+                        findStorageForUuid(volumeUuid));
+
+                try {
+                    mConnector.execute("volume", "move_storage", from.id, to.id);
+                } catch (NativeDaemonConnectorException e) {
+                    throw e.rethrowAsParcelableException();
+                }
             }
         }
     }
