@@ -271,16 +271,6 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
-    public void setMassStorageBackingFile(String path) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        if (mDeviceManager != null) {
-            mDeviceManager.setMassStorageBackingFile(path);
-        } else {
-            throw new IllegalStateException("USB device mode not supported");
-        }
-    }
-
-    @Override
     public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         mDeviceManager.allowUsbDebugging(alwaysAllow, publicKey);
