@@ -1160,6 +1160,7 @@ public final class Bitmap implements Parcelable {
      * @return number of bytes between rows of the native bitmap pixels.
      */
     public final int getRowBytes() {
+        if (mRecycled) return 0;
         return nativeRowBytes(mFinalizer.mNativeBitmap);
     }
 
@@ -1557,6 +1558,7 @@ public final class Bitmap implements Parcelable {
      *  If other is null, return false.
      */
     public boolean sameAs(Bitmap other) {
+        checkRecycled("Can't sameAs on a recycled bitmap!");
         return this == other || (other != null
                 && nativeSameAs(mFinalizer.mNativeBitmap, other.mFinalizer.mNativeBitmap));
     }
@@ -1576,6 +1578,7 @@ public final class Bitmap implements Parcelable {
         // TODO: Consider having this start an async upload?
         // With inPurgeable no-op'd there's currently no use for this
         // method, but it could have interesting future uses.
+        checkRecycled("Can't prepareToDraw on a recycled bitmap!");
     }
 
     /**
@@ -1584,6 +1587,7 @@ public final class Bitmap implements Parcelable {
      * @hide
      * */
     public final long refSkPixelRef() {
+        checkRecycled("Can't refSkPixelRef on a recycled bitmap!");
         return nativeRefPixelRef(mNativePtr);
     }
 
