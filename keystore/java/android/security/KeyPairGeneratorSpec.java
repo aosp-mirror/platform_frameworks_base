@@ -17,6 +17,9 @@
 package android.security;
 
 import android.app.KeyguardManager;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -286,6 +289,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Returns the key type (e.g., "EC", "RSA") specified by this parameter.
      */
+    @Nullable
     public @KeyStoreKeyProperties.AlgorithmEnum String getKeyType() {
         return mKeyType;
     }
@@ -303,6 +307,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Returns the {@link AlgorithmParameterSpec} that will be used for creation
      * of the key pair.
      */
+    @NonNull
     public AlgorithmParameterSpec getAlgorithmParameterSpec() {
         return mSpec;
     }
@@ -311,6 +316,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Gets the subject distinguished name to be used on the X.509 certificate
      * that will be put in the {@link java.security.KeyStore}.
      */
+    @NonNull
     public X500Principal getSubjectDN() {
         return mSubjectDN;
     }
@@ -319,6 +325,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Gets the serial number to be used on the X.509 certificate that will be
      * put in the {@link java.security.KeyStore}.
      */
+    @NonNull
     public BigInteger getSerialNumber() {
         return mSerialNumber;
     }
@@ -327,6 +334,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Gets the start date to be used on the X.509 certificate that will be put
      * in the {@link java.security.KeyStore}.
      */
+    @NonNull
     public Date getStartDate() {
         return mStartDate;
     }
@@ -335,6 +343,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Gets the end date to be used on the X.509 certificate that will be put in
      * the {@link java.security.KeyStore}.
      */
+    @NonNull
     public Date getEndDate() {
         return mEndDate;
     }
@@ -359,6 +368,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityStart() {
         return mKeyValidityStart;
     }
@@ -369,6 +379,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityForConsumptionEnd() {
         return mKeyValidityForConsumptionEnd;
     }
@@ -378,6 +389,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityForOriginationEnd() {
         return mKeyValidityForOriginationEnd;
     }
@@ -392,6 +404,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Gets the set of digest algorithms with which the key can be used.
      */
+    @NonNull
     public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
         return ArrayUtils.cloneIfNotEmpty(mDigests);
     }
@@ -399,6 +412,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
      */
+    @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
@@ -406,6 +420,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Gets the set of padding schemes with which the key can be used when signing/verifying.
      */
+    @NonNull
     public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
         return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
     }
@@ -413,6 +428,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Gets the set of block modes with which the key can be used.
      */
+    @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
@@ -528,7 +544,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * some UI to ask the user to unlock or initialize the Android KeyStore
          * facility.
          */
-        public Builder(Context context) {
+        public Builder(@NonNull Context context) {
             if (context == null) {
                 throw new NullPointerException("context == null");
             }
@@ -540,7 +556,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * {@link java.security.KeyStore} instance using the
          * {@code AndroidKeyStore} provider.
          */
-        public Builder setAlias(String alias) {
+        @NonNull
+        public Builder setAlias(@NonNull String alias) {
             if (alias == null) {
                 throw new NullPointerException("alias == null");
             }
@@ -551,7 +568,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         /**
          * Sets the key type (e.g., EC, RSA) of the keypair to be created.
          */
-        public Builder setKeyType(@KeyStoreKeyProperties.AlgorithmEnum String keyType)
+        @NonNull
+        public Builder setKeyType(@NonNull @KeyStoreKeyProperties.AlgorithmEnum String keyType)
                 throws NoSuchAlgorithmException {
             if (keyType == null) {
                 throw new NullPointerException("keyType == null");
@@ -569,6 +587,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * key type of RSA this will set the modulus size and for a key type of
          * EC it will select a curve with a matching field size.
          */
+        @NonNull
         public Builder setKeySize(int keySize) {
             if (keySize < 0) {
                 throw new IllegalArgumentException("keySize < 0");
@@ -581,7 +600,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Sets the algorithm-specific key generation parameters. For example, for RSA keys
          * this may be an instance of {@link java.security.spec.RSAKeyGenParameterSpec}.
          */
-        public Builder setAlgorithmParameterSpec(AlgorithmParameterSpec spec) {
+        public Builder setAlgorithmParameterSpec(@NonNull AlgorithmParameterSpec spec) {
             if (spec == null) {
                 throw new NullPointerException("spec == null");
             }
@@ -597,7 +616,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
          * newer platforms the subject defaults to {@code CN=fake} if not specified.
          */
-        public Builder setSubject(X500Principal subject) {
+        @NonNull
+        public Builder setSubject(@NonNull X500Principal subject) {
             if (subject == null) {
                 throw new NullPointerException("subject == null");
             }
@@ -613,7 +633,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
          * newer platforms the serial number defaults to {@code 1} if not specified.
          */
-        public Builder setSerialNumber(BigInteger serialNumber) {
+        @NonNull
+        public Builder setSerialNumber(@NonNull BigInteger serialNumber) {
             if (serialNumber == null) {
                 throw new NullPointerException("serialNumber == null");
             }
@@ -629,7 +650,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
          * newer platforms the date defaults to {@code Jan 1 1970} if not specified.
          */
-        public Builder setStartDate(Date startDate) {
+        @NonNull
+        public Builder setStartDate(@NonNull Date startDate) {
             if (startDate == null) {
                 throw new NullPointerException("startDate == null");
             }
@@ -645,7 +667,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1 LOLLIPOP_MR1} and older platforms. On
          * newer platforms the date defaults to {@code Jan 1 2048} if not specified.
          */
-        public Builder setEndDate(Date endDate) {
+        @NonNull
+        public Builder setEndDate(@NonNull Date endDate) {
             if (endDate == null) {
                 throw new NullPointerException("endDate == null");
             }
@@ -665,6 +688,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see KeyguardManager#isDeviceSecure()
          */
+        @NonNull
         public Builder setEncryptionRequired() {
             mFlags |= KeyStore.FLAG_ENCRYPTED;
             return this;
@@ -679,6 +703,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setKeyValidityEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityStart(Date startDate) {
             mKeyValidityStart = startDate;
             return this;
@@ -695,6 +720,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * @see #setKeyValidityForConsumptionEnd(Date)
          * @see #setKeyValidityForOriginationEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityEnd(Date endDate) {
             setKeyValidityForOriginationEnd(endDate);
             setKeyValidityForConsumptionEnd(endDate);
@@ -710,6 +736,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityForOriginationEnd(Date endDate) {
             mKeyValidityForOriginationEnd = endDate;
             return this;
@@ -725,6 +752,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityForConsumptionEnd(Date endDate) {
             mKeyValidityForConsumptionEnd = endDate;
             return this;
@@ -743,6 +771,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p><b>NOTE: This has currently no effect.
          */
+        @NonNull
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
             mPurposes = purposes;
             return this;
@@ -756,6 +785,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p><b>NOTE: This has currently no effect.
          */
+        @NonNull
         public Builder setDigests(@KeyStoreKeyProperties.DigestEnum String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
             return this;
@@ -770,6 +800,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p><b>NOTE: This has currently no effect.
          */
+        @NonNull
         public Builder setEncryptionPaddings(
                 @KeyStoreKeyProperties.EncryptionPaddingEnum String... paddings) {
             mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
@@ -785,6 +816,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p><b>NOTE: This has currently no effect.
          */
+        @NonNull
         public Builder setSignaturePaddings(
                 @KeyStoreKeyProperties.SignaturePaddingEnum String... paddings) {
             mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(paddings);
@@ -799,6 +831,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p><b>NOTE: This has currently no effect.
          */
+        @NonNull
         public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
             mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
             return this;
@@ -826,6 +859,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p><b>NOTE: This has currently no effect.
          */
+        @NonNull
         public Builder setRandomizedEncryptionRequired(boolean required) {
             mRandomizedEncryptionRequired = required;
             return this;
@@ -851,6 +885,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
+        @NonNull
         public Builder setUserAuthenticationRequired(boolean required) {
             mUserAuthenticationRequired = required;
             return this;
@@ -872,7 +907,9 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setUserAuthenticationRequired(boolean)
          */
-        public Builder setUserAuthenticationValidityDurationSeconds(int seconds) {
+        @NonNull
+        public Builder setUserAuthenticationValidityDurationSeconds(
+                @IntRange(from = -1) int seconds) {
             mUserAuthenticationValidityDurationSeconds = seconds;
             return this;
         }
@@ -883,6 +920,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * @throws IllegalArgumentException if a required field is missing
          * @return built instance of {@code KeyPairGeneratorSpec}
          */
+        @NonNull
         public KeyPairGeneratorSpec build() {
             return new KeyPairGeneratorSpec(mContext,
                     mKeystoreAlias,
