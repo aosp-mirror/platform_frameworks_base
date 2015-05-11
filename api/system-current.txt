@@ -29244,7 +29244,6 @@ package android.renderscript {
     method public void copyTo(short[]);
     method public void copyTo(int[]);
     method public void copyTo(float[]);
-    method public void copyToFieldPacker(int, int, int, int, android.renderscript.FieldPacker);
     method public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
     method public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap);
     method public static android.renderscript.Allocation createCubemapFromCubeFaces(android.renderscript.RenderScript, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
