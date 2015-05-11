@@ -83,9 +83,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Hanapin"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Camera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telepono"</string>
+    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="128158454631118828">"I-unlock"</string>
     <string name="unlock_label" msgid="8779712358041029439">"i-unlock"</string>
     <string name="phone_label" msgid="2320074140205331708">"buksan ang telepono"</string>
+    <!-- no translation found for voice_assist_label (3956854378310019854) -->
+    <skip />
     <string name="camera_label" msgid="7261107956054836961">"buksan ang camera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Pumili ng bagong layout ng gawain"</string>
     <string name="cancel" msgid="6442560571259935130">"Kanselahin"</string>
@@ -121,10 +125,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX na dalawang bar."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX na tatlong bar."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Puno ang signal ng WiMAX."</string>
-    <!-- no translation found for accessibility_ethernet_disconnected (5896059303377589469) -->
-    <skip />
-    <!-- no translation found for accessibility_ethernet_connected (2692130313069182636) -->
-    <skip />
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Nadiskonekta ang Ethernet."</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Nakakonekta ang Ethernet."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Walang signal."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"Hindi nakakonekta."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Walang mga bar."</string>
@@ -166,15 +168,14 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Hindi pinansin ang <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Na-dismiss ang lahat ng kamakailang application."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Sinisimulan ang <xliff:g id="APP">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
-    <skip />
+    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Na-dismiss ang notification."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Notification shade."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Mga mabilisang setting."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Lock screen."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Mga Setting"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Overview"</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"Kumpirmahin"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"Isara"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"User na si <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Na-off ang wifi."</string>
@@ -315,8 +316,12 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Nasa ibaba ang mga notification na hindi masyadong mahalaga"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Pinduting muli upang buksan"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Mag-swipe pataas upang i-unlock"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"Mag-swipe pakanan para sa telepono"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"Mag-swipe pakaliwa para sa camera"</string>
+    <!-- no translation found for phone_hint (4872890986869209950) -->
+    <skip />
+    <!-- no translation found for voice_hint (8939888732119726665) -->
+    <skip />
+    <!-- no translation found for camera_hint (7939688436797157483) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Ganap na katahimikan"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Priyoridad lang"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Mga alarm lang"</string>
@@ -362,23 +367,15 @@
     <string name="disable_vpn" msgid="4435534311510272506">"I-disable ang VPN"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Idiskonekta ang VPN"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Pinapamahalaan ang iyong device ng <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nMagagawa ng iyong administrator na subaybayan at pamahalaan ang iyong mga setting, corporate na access, mga app, data na nauugnay sa iyong device at ang impormasyon ng lokasyon ng iyong device. Para sa higit pang impormasyon, makipag-ugnayan sa iyong administrator."</string>
-    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="996222259035614736">"Nagbigay ka ng pahitulot sa app upang mag-set up ng VPN na koneksyon.\n\nMaaaring subaybayan ng app na ito ang iyong aktibidad sa device at network, kabilang ang mga email, app at website."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Pinapamahalaan ang iyong device ng <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nMagagawa ng iyong administrator na subaybayan at pamahalaan ang iyong mga setting, corporate na access, mga app, data na nauugnay sa iyong device at ang impormasyon ng lokasyon ng iyong device.\n\nNakakonekta ka sa isang VPN, na maaaring subaybayan ang iyong aktibidad sa network, kasama ang mga email, app at website.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa iyong administrator."</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
-    <skip />
-    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Pinapamahalaan ang iyong profile ng <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nMay kakayahan ang iyong administrator sa pagsubaybay ng iyong aktibidad sa network kabilang ang mga email, app at website.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa iyong administrator.\n\nNakakonekta ka rin sa isang VPN, na maaaring sumubaybay sa iyong aktibidad sa network."</string>
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
+    <string name="monitoring_description_app" msgid="6947928635272782570">"Nakakonekta ka sa <xliff:g id="APPLICATION">%1$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network kabilang ang mga email, app at website."</string>
+    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Nakakonekta ka sa <xliff:g id="APPLICATION">%1$s</xliff:g>, na maaaring sumubaybay sa iyong personal na aktibidad sa network, kabilang ang mga email, app at website."</string>
+    <string name="monitoring_description_app_work" msgid="808687576155832307">"Pinapamahalaan ang iyong profile sa trabaho ng <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Nakakonekta ito sa <xliff:g id="APPLICATION">%2$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app at website.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa iyong administrator."</string>
+    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Pinapamahalaan ang iyong profile sa trabaho ng <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Nakakonekta ito sa <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app at website.\n\nNakakonekta ka rin sa <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, na maaaring sumubaybay sa iyong personal na aktibidad sa network."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Pinapamahalaan ang iyong device ng <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nMaaaring subaybayan at pamahalaan ng iyong administrator ang mga setting, corporate na access, app, data na nauugnay sa iyong device at ang impormasyon ng lokasyon ng iyong device.\n\nNakakonekta ka sa <xliff:g id="APPLICATION">%2$s</xliff:g>, na maaaring subaybayan ang iyong aktibidad sa network, kabilang ang mga email, app at website.\n\nPara sa higit pang impormasyon, makipag-ugnayan sa iyong administrator."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Mananatiling naka-lock ang device hanggang sa manu-mano mong i-unlock"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Kunin ang notification nang mas mabilis"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Tingnan ang mga ito bago ka mag-unlock"</string>
@@ -388,6 +385,10 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Itago lahat"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Tapusin ngayon"</string>
+    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
+    <skip />
+    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
+    <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"Naka-pin ang screen"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Pinapanatili nitong nasa view ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Pangkalahatang-ideya nang sabay upang mag-unpin."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Pinapanatili nitong nasa view ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Pangkalahatang-ideya upang mag-unpin."</string>

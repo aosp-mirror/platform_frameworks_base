@@ -83,9 +83,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"ရှာဖွေရန်"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ကင်မရာ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ဖုန်း"</string>
+    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="128158454631118828">"သော့ဖွင့်ရန်"</string>
     <string name="unlock_label" msgid="8779712358041029439">"သော့ဖွင့်ရန်"</string>
     <string name="phone_label" msgid="2320074140205331708">"ဖုန်းကို ဖွင့်ရန်"</string>
+    <!-- no translation found for voice_assist_label (3956854378310019854) -->
+    <skip />
     <string name="camera_label" msgid="7261107956054836961">"ကင်မရာ ဖွင့်ရန်"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"အလုပ်သစ်စီစဥ်မှုကို ရွေးပါ။"</string>
     <string name="cancel" msgid="6442560571259935130">"ထားတော့"</string>
@@ -121,10 +125,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"ဝိုင်မက်စ် ၂ ဘားရှိ"</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"ဝိုင်မက်စ် ၃ ဘား"</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"ဝိုင်မက်စ် အပြည့်ရှိ"</string>
-    <!-- no translation found for accessibility_ethernet_disconnected (5896059303377589469) -->
-    <skip />
-    <!-- no translation found for accessibility_ethernet_connected (2692130313069182636) -->
-    <skip />
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Ethernet နှင့်ချိတ်ဆက်မှုပြတ်တောက်"</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Ethernet ချိတ်ဆက်ထား။"</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"အချက်ပြမှု မရှိပါ"</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"ချိတ်ဆက်မထားပါ"</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"၀ ဘား"</string>
@@ -166,15 +168,14 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ထုတ်ထားသည်။"</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"မကြာသေးမီက အပလီကေးရှင်းများအားလုံး ဖယ်ထုတ်ပြီးပါပြီ။"</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g>ကို စတင်နေသည်။"</string>
-    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
-    <skip />
+    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g><xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"အကြောင်းကြားချက်ကိုဖယ်ရှားပြီး"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"အ​ကြောင်းကြားစာအကွက်"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"အမြန်လုပ် အပြင်အဆင်"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"မျက်နှာပြင် သော့ပိတ်ရန်"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ဆက်တင်များ"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ခြုံကြည့်မှု။"</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"အတည်ပြုရန်"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"ပိတ်ရန်"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"သုံးစွဲသူ <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>။"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"ကြိုးမဲ့ ပိတ်ထား။"</string>
@@ -315,8 +316,12 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"အရေးပါမှု နည်းသည့် အကြောင်းကြားချက်များ အောက်မှာ"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"ဖွင့်ရန် ထပ်ပြီး ထိပါ"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"သော့ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"ဖုန်း အတွက် ညာသို့ ပွတ်ဆွဲပါ"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"ကင်မရာ အတွက် ဘယ်သို့ ပွတ်ဆွဲပါ"</string>
+    <!-- no translation found for phone_hint (4872890986869209950) -->
+    <skip />
+    <!-- no translation found for voice_hint (8939888732119726665) -->
+    <skip />
+    <!-- no translation found for camera_hint (7939688436797157483) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"လုံးဝ တိတ်ဆိတ်ခြင်း"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ဦးစားပေးများသာ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"နှိုးစက်များသာ"</string>
@@ -380,6 +385,10 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"အားလုံး ဝှက်ထားရန်"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>။ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"ယခု အဆုံးသတ်ရန်"</string>
+    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
+    <skip />
+    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
+    <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"သင်ပင်ဖြုတ်သည့် တိုင်အောင် ၎င်းအား မြင်ကွင်းတွင် ထားရှိပါမည်။ ပင်ဖြုတ်ရန် အနောက်နှင့် ခြုံငုံကြည့်ခြင်းကို ဖိ၍ နှိပ်ထားနိုင်သည်။"</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"သင်ပင်ဖြုတ်သည့် တိုင်အောင် ၎င်းအား မြင်ကွင်းတွင် ထားရှိပါမည်။ ပင်ဖြုတ်ရန် ခြုံငုံကြည့်ခြင်းကို ဖိ၍ နှိပ်ထားနိုင်သည်။"</string>
