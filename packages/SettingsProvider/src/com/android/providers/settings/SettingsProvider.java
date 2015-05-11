@@ -35,6 +35,7 @@ import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.hardware.camera2.utils.ArrayUtils;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -52,9 +53,11 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -1788,7 +1791,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 118;
+            private static final int SETTINGS_VERSION = 119;
 
             private final int mUserId;
 
@@ -1890,6 +1893,20 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 int currentVersion = oldVersion;
+
+                // v119: Reset zen + ringer mode.
+                if (currentVersion == 118) {
+                    if (userId == UserHandle.USER_OWNER) {
+                        final SettingsState globalSettings = getGlobalSettingsLocked();
+                        globalSettings.updateSettingLocked(Settings.Global.ZEN_MODE,
+                                Integer.toString(Settings.Global.ZEN_MODE_OFF),
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                        globalSettings.updateSettingLocked(Settings.Global.MODE_RINGER,
+                                Integer.toString(AudioManager.RINGER_MODE_NORMAL),
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 119;
+                }
 
                 // vXXX: Add new settings above this point.
 
