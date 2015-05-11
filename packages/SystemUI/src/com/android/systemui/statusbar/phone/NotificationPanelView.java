@@ -729,7 +729,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     private boolean handleQsTouch(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
+        final int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN && getExpandedFraction() == 1f
                 && mStatusBar.getBarState() != StatusBarState.KEYGUARD && !mQsExpanded
                 && mQsExpansionEnabled) {
 
@@ -750,16 +751,21 @@ public class NotificationPanelView extends PanelView implements
                 return true;
             }
         }
-        if (event.getActionMasked() == MotionEvent.ACTION_CANCEL
-                || event.getActionMasked() == MotionEvent.ACTION_UP) {
+        if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
             mConflictingQsExpansionGesture = false;
         }
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()
+        if (action == MotionEvent.ACTION_DOWN && isFullyCollapsed()
                 && mQsExpansionEnabled) {
             mTwoFingerQsExpandPossible = true;
         }
-        if (mTwoFingerQsExpandPossible && event.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN
-                && event.getPointerCount() == 2
+        final int pointerCount = event.getPointerCount();
+        final boolean twoFingerDrag = action == MotionEvent.ACTION_POINTER_DOWN
+                && pointerCount == 2;
+        final boolean stylusClickDrag = action == MotionEvent.ACTION_DOWN
+                && pointerCount == 1 && event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
+                && (event.isButtonPressed(MotionEvent.BUTTON_SECONDARY)
+                        || event.isButtonPressed(MotionEvent.BUTTON_TERTIARY));
+        if (mTwoFingerQsExpandPossible && (twoFingerDrag || stylusClickDrag)
                 && event.getY(event.getActionIndex()) < mStatusBarMinHeight) {
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN_QS, 1);
             mQsExpandImmediate = true;
