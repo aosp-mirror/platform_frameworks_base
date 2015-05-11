@@ -72,6 +72,7 @@
             android:focusable="true"
             android:minWidth="91dp"
             android:text="@string/volume_zen_end_now"
+            android:textColor="@color/system_accent_color"
             android:textAppearance="@style/TextAppearance.QS.DetailButton" />
     </LinearLayout>
 
