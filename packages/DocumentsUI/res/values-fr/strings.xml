@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Appuyez pour en savoir plus."</string>
     <string name="retry" msgid="7564024179122207376">"Réessayer"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Les fichiers suivants n\'ont pas été copiés : <xliff:g id="LIST">%1$s</xliff:g>."</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> fichier a bien été copié dans le Presse-papiers.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> fichiers ont bien été copiés dans le Presse-papiers.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Impossible de coller les fichiers sélectionnés à cet endroit."</string>
 </resources>

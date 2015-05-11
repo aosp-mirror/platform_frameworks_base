@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"ប៉ះ ដើម្បីមើលព័ត៌មានលម្អិត"</string>
     <string name="retry" msgid="7564024179122207376">"ព្យាយាមម្ដងទៀត"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ឯកសារទាំងនេះមិនបានចម្លងទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other">បានចម្លងឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g> ទៅតម្បៀតខ្ទាស់។</item>
+      <item quantity="one">បានចម្លងឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g> ទៅតម្បៀតខ្ទាស់។</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"មិនអាចបិទភ្ជាប់ឯកសារដែលបានជ្រើសទៅក្នុងទីតាំងនេះបានទេ។"</string>
 </resources>

@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"விவரங்களைப் பார்க்க, தொடவும்"</string>
     <string name="retry" msgid="7564024179122207376">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"நகலெடுக்கப்படாத கோப்புகள்: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other">கிளிப்போர்டிற்கு <xliff:g id="COUNT_1">%1$d</xliff:g> கோப்புகள் நகலெடுக்கப்பட்டன.</item>
+      <item quantity="one">கிளிப்போர்டிற்கு <xliff:g id="COUNT_0">%1$d</xliff:g> கோப்பு நகலெடுக்கப்பட்டது.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"தேர்ந்தெடுத்த கோப்புகளை இங்கு ஒட்ட முடியாது."</string>
 </resources>

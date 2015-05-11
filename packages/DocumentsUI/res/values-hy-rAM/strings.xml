@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Հպեք՝ մանրամասները դիտելու համար"</string>
     <string name="retry" msgid="7564024179122207376">"Կրկնել"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Հետևյալ ֆայլերը չեն պատճենվել՝ <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ պատճենվեց սեղմատախտակին:</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ պատճենվեց սեղմատախտակին:</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Հնարավոր չէ տեղադրել ընտրված ֆայլերը այս տեղադրությունում:"</string>
 </resources>

@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"వివరాలను వీక్షించడానికి తాకండి"</string>
     <string name="retry" msgid="7564024179122207376">"మళ్లీ ప్రయత్నించు"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ఈ ఫైల్‌లు కాపీ చేయబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other">క్లిప్‌బోర్డ్‌కి <xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేసారు.</item>
+      <item quantity="one">క్లిప్‌బోర్డ్‌కి <xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేసారు.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"ఈ స్థానంలో ఎంచుకున్న ఫైల్‌లను అతికించలేరు."</string>
 </resources>
