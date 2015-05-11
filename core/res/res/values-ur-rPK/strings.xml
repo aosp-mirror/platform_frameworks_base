@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"‎%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"‎%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"آف"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi ترجیحی"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"سیلولر ترجیحی"</string>
@@ -416,7 +417,7 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ایپ کو ٹیبلیٹ پر بلوٹوتھ کی ترتیب دیکھنے اور جوڑا بنائے ہوئے آلات کے ساتھ کنکشنز بنانے اور قبول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"‏ایپ کو TV پر بلوٹوتھ کی کنفیگریشن دیکھنے اور جوڑا بنائے ہوئے آلات کے ساتھ کنکشنز بنانے اور قبول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ایپ کو فون پر بلوٹوتھ کی ترتیب دیکھنے اور جوڑا بنائے ہوئے آلات کے ساتھ کنکشنز بنانے اور قبول کرنے کی اجازت دیتا ہے۔"</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"‏Near Field کمیونیکیشن کو کنٹرول کریں"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"‏Near Field کمیونیکیشن کنٹرول کریں"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"‏ایپ کو Near Field Communication (NFC)‎ ٹیگز، کارڈز اور ریڈرز کے ساتھ مواصلت کرنے کی اجازت دیٹا ہے۔"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"اپنے اسکرین لاک کو غیر فعال کریں"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ایپ کو کلیدی لاک اور کسی بھی متعلقہ پاس ورڈ سیکیورٹی کو غیر فعال کرنے کی اجازت دیتا ہے۔ مثلاً، کوئی آنے والی فون کال موصول ہونے کے وقت فون کلیدی لاک کو غیر فعال کرتا ہے، پھر کال پوری ہوجانے پر کلیدی لاک کو دوبارہ فعال کردیتا ہے۔"</string>
@@ -692,7 +693,7 @@
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"‏SIM کارڈ غیر مقفل ہو رہا ہے…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"آپ نے اپنا پاس ورڈ <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"‏آپ نے اپنا PIN <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"‏آپ نے <xliff:g id="NUMBER_0">%d</xliff:g> بار اپنا PIN غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"‏آپ نے اپنے غیر مقفل کرنے کے پیٹرن کو <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے اپنے Google سائن ان کا استعمال کرکے اپنے ٹیبلٹ کو غیر مقفل کرنے کیلئے کہا جائے گا۔ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> سیکنڈز بعد دوبارہ کوشش کریں۔"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"‏آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے اپنا Google سائن ان استعمال کرکے اپنا TV غیر مقفل کرنے کو کہا جائے گا۔‎\n\n <xliff:g id="NUMBER_2">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"‏آپ نے اپنے غیر مقفل کرنے کے پیٹرن کو <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے اپنے Google سائن ان کا استعمال کرکے اپنے فون کو غیر مقفل کرنے کیلئے کہا جائے گا۔ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> سیکنڈز بعد دوبارہ کوشش کریں۔"</string>
@@ -1309,7 +1310,7 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"غلط صارف نام یا پاس ورڈ۔"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"‏اپنا صارف نام یا پاس ورڈ بھول گئے؟\n"<b>"google.com/accounts/recovery"</b>" ملاحظہ کریں۔"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"اکاؤنٹ چیک کیا جا رہا ہے…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏آپ نے اپنا PIN <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏آپ نے <xliff:g id="NUMBER_0">%d</xliff:g> بار اپنا PIN غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"آپ نے اپنا پاس ورڈ <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"آپ نے ٹیبلیٹ کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ <xliff:g id="NUMBER_1">%d</xliff:g> مزید ناکام کوششوں کے بعد، ٹیبلیٹ فیکٹری ڈیفالٹ پر دوبارہ ترتیب دے دیا جائے گا اور صارف کا سبھی ڈیٹا ضائع ہو جائے گا۔"</string>
@@ -1458,10 +1459,9 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"پن ہٹانے سے پہلے غیر مقفل کرنے کا پیٹرن طلب کریں"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"پن ہٹانے سے پہلے پاس ورڈ طلب کریں"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"آپ کے منتظم کی جانب سے انسٹال کر دیا گیا"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"آپ کے منتظم نے اپ ڈيٹ کر دیا"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"آپ کے منتظم کی جانب سے حذف کر دیا گیا"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"بیٹری کی میعاد بہتر کرنے میں مدد کرنے کیلئے، بیٹری کی بچت آپ کے آلہ کی کارکردگی کم کر دیتی ہے اور وائبریشن، مقام کی سروسز اور پس منظر کا بیشتر ڈیٹا محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر مبنی دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری کی بچت خود بخود آف ہو جاتی ہے۔"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"بیٹری کی میعاد بہتر کرنے میں مدد کرنے کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی کم کر دیتی ہے اور وائبریشن، مقام کی سروسز اور پس منظر کا بیشتر ڈیٹا محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر منحصر دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری سیور خود بخود آف ہو جاتی ہے۔"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">‏%1$d منٹ کیلئے (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> تک)</item>
       <item quantity="one">ایک منٹ کیلئے (تک <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"سکیڑیں"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ڈسٹرب نہ کریں"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ڈاؤن ٹائم"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"ہفتہ کی راتوں کو"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"ویک اینڈز کو"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> کے ذریعے خاموش کردہ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"آپ کے آلہ میں ایک داخلی مسئلہ ہے اور جب تک آپ فیکٹری ڈیٹا کو دوبارہ ترتیب نہیں دے دیتے ہیں، ہوسکتا ہے کہ یہ غیر مستحکم رہے۔"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"آپ کے آلہ میں ایک داخلی مسئلہ ہے۔ تفصیلات کیلئے اپنے مینوفیکچرر سے رابطہ کریں۔"</string>

@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"გამორთული"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"სასურველია Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"სასურველია ფიჭური ინტერნეტი"</string>
@@ -1458,8 +1459,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ფიქსაციის მოხსნამდე განბლოკვის ნიმუშის მოთხოვნა"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ფიქსაციის მოხსნამდე პაროლის მოთხოვნა"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"თქვენი ადმინისტრატორის მიერ დაყენებული"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"თქვენი ადმინისტრატორის მიერ წაშლილი"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ელემენტის მოქმედების ვადის გაუმჯობესებისათვის, ელემენტის დამზოგი ამცირებს თქვენი მოწყობილობის შესრულებას და ზღუდავს ვიბრაციას, ადგილმდებარეობის მომსახურებებს და ძირითად ფონურ მონაცემებს. ელ-ფოსტა, შეტყობინებები და სხვა სინქრონიზაციაზე დაყრდნობილი აპლიკაციების განახლება არ მოხდება მათ გახსნეამდე. \n\n ელემენტის დამზოგველი ავტომატურად გამოირთვება, როდესაც თქვენს მოწყობილობას დამტენთან შეაერთებთ."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"აკეცვა"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"არ შემაწუხოთ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ავარიული პაუზა"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"კვირის ღამეებისას"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"შაბათ-კვირას"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"დადუმებულია <xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ის მიერ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ფიქსირდება თქვენი მოწყობილობის შიდა პრობლემა. დეტალებისათვის, მიმართეთ თქვენს მწარმოებელს."</string>

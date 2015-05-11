@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"निष्क्रिय"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi मनपराइयो"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"सेलुलर मनपराइयो"</string>
@@ -274,10 +275,8 @@
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP सन्देशहरू प्राप्त गर्न र प्रशोधन गर्न अनुप्रयोगलाई अनुमति दिन्छ। यो अनुमतिमा मोनिटर गर्ने वा तपाईँलाई पठाइएका सन्देशहरू तपाईँलाई नदेखाई मेट्ने क्षमता समावेश हुन्छ।"</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"चलिरहेका अनुप्रयोगहरू पुनःबहाली गर्नुहोस्"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"वर्तमानमा र भरखरै चलिरहेका कार्यहरू बारेको सूचना पुनःबहाली गर्न अनुप्रयोगलाई अनुमित दिन्छ। यसले उपकरणमा प्रयोग भएका अनुप्रयोगहरूको बारेमा सूचना पत्ता लगाउन अनुप्रयोगलाई अनुमति दिन सक्छ।"</string>
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (5979288447973722097) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"प्रोफाइल र यन्त्र मालिकहरू व्यवस्थापन गर्नुहोस्"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"अनुप्रयोगहरूलाई प्रोफाइल र यन्त्र मालिकहरू सेट गर्न अनुमति दिनुहोस्।"</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चलिरहेका अनुप्रयोगहरूलाई पुनःक्रम गराउनुहोस्"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"कामहरूलाई अग्रभाग र पृष्ठभूमिमा सार्न अनुप्रयोगलाई अनुमति दिन्छ। अनुप्रयोगले यो तपाईँको इनपुट बिना नै गर्न सक्छ।"</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड सक्षम गर्नुहोस्"</string>
@@ -1087,13 +1086,13 @@
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"निकाल्नुहोस्"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"अन्वेषण गर्नुहोस्"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> हराइरहेको"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"यो यन्त्र पुनःहाल्नुहोस्"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"यो यन्त्र पुनःसम्मिलित गर्नुहोस्"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> सार्दै"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"डेटा सार्दै..."</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"सबै सार्नुहोस्"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"सार्ने कार्य सकियो"</string>
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"डेटा <xliff:g id="NAME">%s</xliff:g> मा सारियो"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"डेटा सार्न सकिएन"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"डेटा मूल स्थानबाट छुट्यो"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"डेटा मूल स्थानबाट छाडियो"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"कुनै मिल्ने गतिविधि पाइएन।"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"मिडिया परिणाम दिशानिर्देश गर्नुहोस्"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"मिडिया परिणामलाई अन्य बाहिरी उपकरणहरूसँग लैजानको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
@@ -1466,8 +1465,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"पिन निकाल्नुअघि खोल्ने रूपरेखा सोध्नुहोस्"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"तपाईँको प्रशासकद्वारा स्थापना गरिएको"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"तपाईँको प्रशासकद्वारा अद्यावधिक गरिएको"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"तपाईँको प्रशासकद्वारा हटाइएको"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री रक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री रक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1492,8 +1490,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त पार्नुहोस्"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"अवरोध नपुर्याउँनुहोस्"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"डाउनटाइम"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"सप्ताह रातहरू"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"सप्ताहन्त"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारा मौन गरिएको"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ, र तपाईंले फ्याक्ट्री डाटा रिसेट नगर्दासम्म यो अस्थिर रहन्छ।"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ। विवरणहरूको लागि आफ्नो निर्मातासँग सम्पर्क गर्नुहोस्।"</string>

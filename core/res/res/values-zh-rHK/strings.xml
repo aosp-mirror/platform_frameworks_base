@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首選 Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"首選流動數據"</string>
@@ -1458,8 +1459,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理員安裝"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收合"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"請勿干擾"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"休息時間"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"星期一至星期五晚"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"週末"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"靜音設定者：<xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"您裝置的系統發生問題，回復原廠設定後即可解決該問題。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"您裝置的系統發生問題，請聯絡您的製造商瞭解詳情。"</string>

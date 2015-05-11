@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"বন্ধ আছে"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"পছন্দের Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"পছন্দের মোবাইল নেটওয়ার্ক"</string>
@@ -1458,8 +1459,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"আনপিন করার আগে আনলক প্যাটার্ন চান"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"আনপিন করার আগে পাসওয়ার্ড চান"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"আপনার প্রশাসক দ্বারা ইনস্টল করা হয়েছে"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"আপনার প্রশাসক দ্বারা আপডেট করা হয়েছে"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"আপনার প্রশাসক দ্বারা মুছে ফেলা হয়েছে"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ব্যাটরির লাইফ উন্নত করতে সহায়তা করতে, ব্যাটারি সাশ্রয়কারী আপনার ডিভাইসের কার্যসম্পাদনা হ্রাস করে এবং কম্পন, অবস্থান পরিষেবাসমূহ এবং অধিকাংশ ব্যাকগ্রাউন্ড ডেটা সীমিত করে৷ ইমেল, বার্তাপ্রেরণ এবং অন্যান্য অ্যাপ্লিকেশানগুলিকে যেগুলি সিঙ্কের উপর নির্ভর করে সেগুলিকে আপনি না খোলা পর্যন্ত নাও আপডেট হতে পারে৷\n\nআপনার ডিভাইসটিকে যখন চার্জ করা হয় তখন ব্যাটারি সাশ্রয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়৷"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"সঙ্কুচিত করুন"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"বিরক্ত করবেন না"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ডাউনটাইম"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"প্রতি সোম-শুক্র রাত"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"সপ্তাহান্ত"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> দ্বারা নিঃশব্দ করা হয়েছে"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>
