@@ -533,7 +533,7 @@
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_contacts">Contacts</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_contacts">access and modify your contacts</string>
+    <string name="permgroupdesc_contacts">access your contacts</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_location">Location</string>
@@ -548,12 +548,12 @@
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calendar">Calendar</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_calendar">access and modify your calendar</string>
+    <string name="permgroupdesc_calendar">access your calendar</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_sms">SMS</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_sms">access and modify SMS</string>
+    <string name="permgroupdesc_sms">view and manage SMS messages</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_dictionary">User Dictionary</string>
@@ -568,22 +568,22 @@
     <!-- Title of a category of application permissioncds, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_microphone">use device microphone</string>
+    <string name="permgroupdesc_microphone">record audio</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_camera">Camera</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_camera">use device camera</string>
+    <string name="permgroupdesc_camera">take pictures and record video</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_phone">Phone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_phone">use device telephony</string>
+    <string name="permgroupdesc_phone">make and manage phone calls</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_sensors">Sensors</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_sensors">access sensors and wearables</string>
+    <string name="permgroupdesc_sensors">access data from sensors and wearable devices</string>
 
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
