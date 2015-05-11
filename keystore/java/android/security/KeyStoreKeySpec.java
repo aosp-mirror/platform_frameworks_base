@@ -16,6 +16,9 @@
 
 package android.security;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.security.PrivateKey;
 import java.security.spec.KeySpec;
 import java.util.Date;
@@ -150,6 +153,7 @@ public class KeyStoreKeySpec implements KeySpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityStart() {
         return mKeyValidityStart;
     }
@@ -159,6 +163,7 @@ public class KeyStoreKeySpec implements KeySpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityForConsumptionEnd() {
         return mKeyValidityForConsumptionEnd;
     }
@@ -168,6 +173,7 @@ public class KeyStoreKeySpec implements KeySpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityForOriginationEnd() {
         return mKeyValidityForOriginationEnd;
     }
@@ -182,6 +188,7 @@ public class KeyStoreKeySpec implements KeySpec {
     /**
      * Gets the set of block modes with which the key can be used.
      */
+    @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
@@ -189,6 +196,7 @@ public class KeyStoreKeySpec implements KeySpec {
     /**
      * Gets the set of padding modes with which the key can be used when encrypting/decrypting.
      */
+    @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
@@ -196,6 +204,7 @@ public class KeyStoreKeySpec implements KeySpec {
     /**
      * Gets the set of padding modes with which the key can be used when signing/verifying.
      */
+    @NonNull
     public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
         return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
     }
@@ -203,6 +212,7 @@ public class KeyStoreKeySpec implements KeySpec {
     /**
      * Gets the set of digest algorithms with which the key can be used.
      */
+    @NonNull
     public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
         return ArrayUtils.cloneIfNotEmpty(mDigests);
     }
