@@ -3985,48 +3985,6 @@ package android.app {
     field public java.lang.String serviceDetails;
   }
 
-  public final class AssistAction {
-    method public static void updateAssistData(android.os.Bundle, android.os.Bundle);
-    field public static final java.lang.String ASSIST_ACTION_KEY = "android:assist_action";
-    field public static final java.lang.String KEY_ACTION_OBJECT = "object";
-    field public static final java.lang.String KEY_ACTION_STATUS = "actionStatus";
-    field public static final java.lang.String KEY_DESCRIPTION = "description";
-    field public static final java.lang.String KEY_ID = "@id";
-    field public static final java.lang.String KEY_NAME = "name";
-    field public static final java.lang.String KEY_TYPE = "@type";
-    field public static final java.lang.String KEY_URL = "url";
-    field public static final java.lang.String STATUS_TYPE_ACTIVE = "ActiveActionStatus";
-    field public static final java.lang.String STATUS_TYPE_COMPLETED = "CompletedActionStatus";
-    field public static final java.lang.String TYPE_ADD_ACTION = "AddAction";
-    field public static final java.lang.String TYPE_BOOKMARK_ACTION = "BookmarkAction";
-    field public static final java.lang.String TYPE_LIKE_ACTION = "LikeAction";
-    field public static final java.lang.String TYPE_LISTEN_ACTION = "ListenAction";
-    field public static final java.lang.String TYPE_VIEW_ACTION = "ViewAction";
-    field public static final java.lang.String TYPE_WANT_ACTION = "WantAction";
-    field public static final java.lang.String TYPE_WATCH_ACTION = "WatchAction";
-  }
-
-  public static final class AssistAction.ActionBuilder {
-    ctor public AssistAction.ActionBuilder();
-    method public android.os.Bundle build();
-    method public android.app.AssistAction.ActionBuilder set(java.lang.String, java.lang.String);
-    method public android.app.AssistAction.ActionBuilder set(java.lang.String, android.os.Bundle);
-    method public android.app.AssistAction.ActionBuilder setObject(android.os.Bundle);
-    method public android.app.AssistAction.ActionBuilder setType(java.lang.String);
-  }
-
-  public static final class AssistAction.ThingBuilder {
-    ctor public AssistAction.ThingBuilder();
-    method public android.os.Bundle build();
-    method public android.app.AssistAction.ThingBuilder set(java.lang.String, java.lang.String);
-    method public android.app.AssistAction.ThingBuilder set(java.lang.String, android.os.Bundle);
-    method public android.app.AssistAction.ThingBuilder setDescription(java.lang.String);
-    method public android.app.AssistAction.ThingBuilder setId(java.lang.String);
-    method public android.app.AssistAction.ThingBuilder setName(java.lang.String);
-    method public android.app.AssistAction.ThingBuilder setType(java.lang.String);
-    method public android.app.AssistAction.ThingBuilder setUrl(android.net.Uri);
-  }
-
   public class AssistContent implements android.os.Parcelable {
     ctor public AssistContent();
     method public int describeContents();
