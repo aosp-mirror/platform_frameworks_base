@@ -6350,7 +6350,7 @@ package android.app.usage {
   }
 
   public final class UsageStatsManager {
-    method public boolean isAppIdle(java.lang.String);
+    method public boolean isAppInactive(java.lang.String);
     method public java.util.Map<java.lang.String, android.app.usage.UsageStats> queryAndAggregateUsageStats(long, long);
     method public java.util.List<android.app.usage.ConfigurationStats> queryConfigurations(int, long, long);
     method public android.app.usage.UsageEvents queryEvents(long, long);
