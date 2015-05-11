@@ -185,9 +185,9 @@ public class MediaRecorder
     /**
      * Defines the audio source.
      * An audio source defines both a default physical source of audio signal, and a recording
-     * configuration; it's also known as a capture preset. These constants are for instance used
+     * configuration. These constants are for instance used
      * in {@link MediaRecorder#setAudioSource(int)} or
-     * {@link AudioRecord.Builder#setCapturePreset(int)}.
+     * {@link AudioRecord.Builder#setAudioSource(int)}.
      */
     public final class AudioSource {
 
