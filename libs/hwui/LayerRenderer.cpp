@@ -195,6 +195,12 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
         ALOGW("Could not obtain an FBO");
         return NULL;
     }
+ 
+    if (width == 0 && height == 0) {
+        ALOGW("Trying to obtain a zero-size layer, setting fall-back size 512x768");
+        width = 512;
+        height = 768;
+    }
 
     caches.activeTexture(0);
     Layer* layer = caches.layerCache.get(renderState, width, height);
