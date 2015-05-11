@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"‏شريحة SIM مؤمّنة بكود PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"إلغاء القفل باستخدام النقش."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"تأمين الجهاز بالوجه."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"‏إلغاء القفل باستخدام رمز PIN."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"إلغاء القفل باستخدام كلمة المرور."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"منطقة النقش."</string>
