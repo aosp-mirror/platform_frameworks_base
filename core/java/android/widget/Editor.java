@@ -3902,6 +3902,9 @@ public class Editor {
         @Override
         public void updatePosition(float x, float y) {
             positionAtCursorOffset(mTextView.getOffsetForPosition(x, y), false);
+            if (mSelectionActionMode != null) {
+                mSelectionActionMode.invalidate();
+            }
         }
 
         @Override
