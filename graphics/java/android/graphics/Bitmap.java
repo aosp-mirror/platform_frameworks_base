@@ -1558,7 +1558,10 @@ public final class Bitmap implements Parcelable {
      *  If other is null, return false.
      */
     public boolean sameAs(Bitmap other) {
-        checkRecycled("Can't sameAs on a recycled bitmap!");
+        checkRecycled("Can't call sameAs on a recycled bitmap!");
+        if (other.isRecycled()) {
+            throw new IllegalArgumentException("Can't compare to a recycled bitmap!");
+        }
         return this == other || (other != null
                 && nativeSameAs(mFinalizer.mNativeBitmap, other.mFinalizer.mNativeBitmap));
     }
