@@ -423,11 +423,17 @@
          point on the move. A value of 0 means no periodic scans will be used in the framework. -->
     <integer translatable="false" name="config_wifi_framework_scan_interval">300000</integer>
 
-    <!-- Integer indicating disconnect mode scan interval in milliseconds -->
-    <integer translatable="false" name="config_wifi_disconnected_scan_interval">15000</integer>
+    <!-- Integer indicating disconnect mode short scan interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_disconnected_short_scan_interval">15000</integer>
 
-    <!-- Integer indicating associated partial scan interval in milliseconds -->
-    <integer translatable="false" name="config_wifi_framework_associated_scan_interval">20000</integer>
+    <!-- Integer indicating disconnect mode long scan interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_disconnected_long_scan_interval">120000</integer>
+
+    <!-- Integer indicating associated partial scan short interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_associated_short_scan_interval">20000</integer>
+
+    <!-- Integer indicating associated partial scan long interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_associated_long_scan_interval">180000</integer>
 
     <!-- Integer indicating associated full scan backoff, representing a fraction: xx/8 -->
     <integer translatable="false" name="config_wifi_framework_associated_full_scan_backoff">12</integer>

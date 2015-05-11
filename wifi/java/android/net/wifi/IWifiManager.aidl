@@ -152,17 +152,20 @@ interface IWifiManager
 
     int getVerboseLoggingLevel();
 
+    void enableAggressiveHandover(int enabled);
     int getAggressiveHandover();
 
-    void enableAggressiveHandover(int enabled);
-
+    void setAllowScansWithTraffic(int enabled);
     int getAllowScansWithTraffic();
 
-    void setAllowScansWithTraffic(int enabled);
+    void setAllowScansWhileAssociated(int enabled);
+    int getAllowScansWhileAssociated();
 
-    boolean getAllowScansWhileAssociated();
+    void setAllowNetworkSwitchingWhileAssociated(int enabled);
+    int getAllowNetworkSwitchingWhileAssociated();
 
-    void setAllowScansWhileAssociated(boolean enabled);
+    void setHalBasedAutojoinOffload(int enabled);
+    int getHalBasedAutojoinOffload();
 
     WifiConnectionStatistics getConnectionStatistics();
 

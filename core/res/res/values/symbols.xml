@@ -310,7 +310,10 @@
   <java-symbol type="integer" name="config_wifi_framework_current_association_hysteresis_low" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_penalty_factor" />
-  <java-symbol type="integer" name="config_wifi_framework_associated_scan_interval" />
+  <java-symbol type="integer" name="config_wifi_disconnected_short_scan_interval" />
+  <java-symbol type="integer" name="config_wifi_disconnected_long_scan_interval" />
+  <java-symbol type="integer" name="config_wifi_associated_short_scan_interval" />
+  <java-symbol type="integer" name="config_wifi_associated_long_scan_interval" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_backoff" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_max_interval" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_max_total_dwell_time" />
@@ -380,7 +383,6 @@
   <java-symbol type="integer" name="config_shortPressOnSleepBehavior" />
   <java-symbol type="integer" name="config_wifi_framework_scan_interval" />
   <java-symbol type="integer" name="config_wifi_supplicant_scan_interval" />
-  <java-symbol type="integer" name="config_wifi_disconnected_scan_interval" />
   <java-symbol type="integer" name="config_wifi_scan_interval_p2p_connected" />
   <java-symbol type="bool" name="config_wifi_hal_pno_enable" />
   <java-symbol type="integer" name="db_connection_pool_size" />
