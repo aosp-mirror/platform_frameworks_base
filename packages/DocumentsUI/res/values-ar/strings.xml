@@ -80,4 +80,13 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"المس لعرض التفاصيل"</string>
     <string name="retry" msgid="7564024179122207376">"إعادة المحاولة"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"لم يتم نسخ هذه الملفات: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="zero">لم يتم نسخ أي ملف (<xliff:g id="COUNT_1">%1$d</xliff:g>) إلى الحافظة.</item>
+      <item quantity="two">تم نسخ ملفين اثنين (<xliff:g id="COUNT_1">%1$d</xliff:g>) إلى الحافظة.</item>
+      <item quantity="few">تم نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> ملفات إلى الحافظة.</item>
+      <item quantity="many">تم نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> ملفًا إلى الحافظة.</item>
+      <item quantity="other">تم نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات إلى الحافظة.</item>
+      <item quantity="one">تم نسخ ملف واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>) إلى الحافظة.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"لا يمكن لصق الملفات المحددة في هذا الموقع."</string>
 </resources>

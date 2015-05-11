@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"ສຳ​ພັດເພື່ອເບິ່ງລາຍລະອຽດ"</string>
     <string name="retry" msgid="7564024179122207376">"ລອງໃໝ່"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ໄຟ​ລ໌​ເຫຼົ່າ​ນີ້​ບໍ່​ຖື​ກ​ອັດ​ສຳ​ເນົາ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other">ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟ​ລ໌​ໃສ່​ຄ​ລິບບອດ​ແລ້ວ.</item>
+      <item quantity="one">ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟ​ລ໌​ໃສ່​ຄ​ລິບບອດ​ແລ້ວ.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"ບໍ່​ສາ​ມາດ​ແປະ​ໄຟ​ລ໌​ເລືອກ​ໄວ້​ຢູ່​ໃນ​ທີ່​ຕັ້ງ​ນີ້​ໄດ້."</string>
 </resources>

@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Chạm để xem chi tiết"</string>
     <string name="retry" msgid="7564024179122207376">"Thử lại"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Những tệp này chưa được sao chép: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other">Đã sao chép <xliff:g id="COUNT_1">%1$d</xliff:g> tệp vào khay nhớ tạm.</item>
+      <item quantity="one">Đã sao chép <xliff:g id="COUNT_0">%1$d</xliff:g> tệp vào khay nhớ tạm.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Không thể dán tệp được chọn ở vị trí này."</string>
 </resources>

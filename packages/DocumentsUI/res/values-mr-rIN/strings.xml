@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"तपशील पाहण्यासाठी स्पर्श करा"</string>
     <string name="retry" msgid="7564024179122207376">"पुन्हा प्रयत्न करा"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"या फायली कॉपी झाल्या नाहीत: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="one">क्लिपबोर्डवर <xliff:g id="COUNT_1">%1$d</xliff:g> फाईल कॉपी केली.</item>
+      <item quantity="other">क्लिपबोर्डवर <xliff:g id="COUNT_1">%1$d</xliff:g> फायली कॉपी केल्या.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"या स्थानामध्ये निवडलेल्या फायली पेस्ट करू शकत नाही."</string>
 </resources>

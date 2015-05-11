@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Raak om besonderhede te bekyk"</string>
     <string name="retry" msgid="7564024179122207376">"Herprobeer"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Hierdie lêers is nie gekopieer nie: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other">Het <xliff:g id="COUNT_1">%1$d</xliff:g> lêers na die knipbord gekopieer.</item>
+      <item quantity="one">Het <xliff:g id="COUNT_0">%1$d</xliff:g> lêer na die knipbord gekopieer.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Kan nie die geselekteerde lêers in hierdie ligging plak nie."</string>
 </resources>

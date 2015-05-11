@@ -76,4 +76,11 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Klepnutím zobrazíte podrobné informácie"</string>
     <string name="retry" msgid="7564024179122207376">"Skúsiť znova"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tieto súbory neboli skopírované: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="few">Do schránky boli skopírované <xliff:g id="COUNT_1">%1$d</xliff:g> súbory.</item>
+      <item quantity="many">Do schránky bolo skopírovaného <xliff:g id="COUNT_1">%1$d</xliff:g> súboru.</item>
+      <item quantity="other">Do schránky bolo skopírovaných <xliff:g id="COUNT_1">%1$d</xliff:g> súborov.</item>
+      <item quantity="one">Do schránky bol skopírovaný <xliff:g id="COUNT_0">%1$d</xliff:g> súbor.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Do tohto umiestnenia nie je možné prilepiť vybraté súbory"</string>
 </resources>

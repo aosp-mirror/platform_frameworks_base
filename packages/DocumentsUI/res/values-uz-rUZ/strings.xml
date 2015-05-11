@@ -20,9 +20,9 @@
     <string name="title_open" msgid="4353228937663917801">"Ochish"</string>
     <string name="title_save" msgid="2433679664882857999">"Saqlash"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Jild yaratish"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"Katakchalar ko‘rinishida"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"Katak ko‘rinishida"</string>
     <string name="menu_list" msgid="7279285939892417279">"Ro‘yxat ko‘rinishida"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"Saralash:"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Saralash"</string>
     <string name="menu_search" msgid="3816712084502856974">"Izlash"</string>
     <string name="menu_settings" msgid="6008033148948428823">"Sozlamalar"</string>
     <string name="menu_open" msgid="432922957274920903">"Ochish"</string>
@@ -31,7 +31,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"O‘chirish"</string>
     <string name="menu_select" msgid="8711270657353563424">"“<xliff:g id="DIRECTORY">^1</xliff:g>” jildini tanlash"</string>
     <string name="menu_select_all" msgid="4320518282375109902">"Barchasini tanlash"</string>
-    <string name="menu_copy" msgid="3612326052677229148">"...ga nusxalash"</string>
+    <string name="menu_copy" msgid="3612326052677229148">"Nusxalash…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ichki xotirani ko‘rsatish"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD kartani ko‘rsatish"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ichki xotirani berkitish"</string>
@@ -39,7 +39,7 @@
     <string name="menu_file_size_show" msgid="3240323619260823076">"Fayl hajmini ko‘rsatish"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Fayl hajmini berkitish"</string>
     <string name="button_copy" msgid="8706475544635021302">"Nusxalash"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> belgilandi"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ta tanlandi"</string>
     <string name="sort_name" msgid="9183560467917256779">"Nomi bo‘yicha"</string>
     <string name="sort_date" msgid="586080032956151448">"Tahrir sanasi bo‘yicha"</string>
     <string name="sort_size" msgid="3350681319735474741">"Hajmi bo‘yicha"</string>
@@ -54,7 +54,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Yorliqlar"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Qurilmalar"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Ko‘proq dasturlar"</string>
-    <string name="empty" msgid="7858882803708117596">"Hech nima yo‘q"</string>
+    <string name="empty" msgid="7858882803708117596">"Hech narsa yo‘q"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Fayl ochilmadi"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Ba’zi hujjatlar o‘chirilmadi"</string>
     <string name="share_via" msgid="8966594246261344259">"Quyidagi orqali ulashish"</string>
@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Batafsil ma’lumot olish uchun bosing"</string>
     <string name="retry" msgid="7564024179122207376">"Qayta urinish"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Ushbu fayllardan nusxa olinmadi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta fayldan vaqtinchalik xotiraga nusxa olindi</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta fayldan vaqtinchalik xotiraga nusxa olindi</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Tanlangan fayllarni ushbu joylashuvga o‘tkazib bo‘lmadi."</string>
 </resources>

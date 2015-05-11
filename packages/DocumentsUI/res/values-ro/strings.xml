@@ -74,4 +74,10 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Atingeți pentru a afișa detaliile"</string>
     <string name="retry" msgid="7564024179122207376">"Reîncercați"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Aceste fișiere nu au fost copiate: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="few">Au fost copiate <xliff:g id="COUNT_1">%1$d</xliff:g> fișiere în clipboard.</item>
+      <item quantity="other">Au fost copiate <xliff:g id="COUNT_1">%1$d</xliff:g> de fișiere în clipboard.</item>
+      <item quantity="one">A fost copiat <xliff:g id="COUNT_0">%1$d</xliff:g> fișier în clipboard.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Fișierele selectate nu au putut fi inserate în această locație."</string>
 </resources>

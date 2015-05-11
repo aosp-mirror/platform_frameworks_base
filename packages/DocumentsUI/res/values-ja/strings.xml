@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"タップして詳細をご覧ください"</string>
     <string name="retry" msgid="7564024179122207376">"再試行"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ファイル（<xliff:g id="LIST">%1$s</xliff:g>）をコピーできませんでした"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>件のファイルをクリップボードにコピーしました。</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>件のファイルをクリップボードにコピーしました。</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"選択したファイルをこの場所に貼り付けることはできません。"</string>
 </resources>

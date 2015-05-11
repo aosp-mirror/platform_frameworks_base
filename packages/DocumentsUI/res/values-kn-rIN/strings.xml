@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="retry" msgid="7564024179122207376">"ಮರುಪ್ರಯತ್ನಿಸು"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ಈ ಫೈಲ್‌ಗಳನ್ನು ನಕಲು ಮಾಡಿಲ್ಲ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="one">ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ <xliff:g id="COUNT_1">%1$d</xliff:g> ಫೈಲ್‌ಗಳನ್ನು ನಕಲಿಸಲಾಗಿದೆ.</item>
+      <item quantity="other">ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ <xliff:g id="COUNT_1">%1$d</xliff:g> ಫೈಲ್‌ಗಳನ್ನು ನಕಲಿಸಲಾಗಿದೆ.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"ಆಯ್ಕೆ ಮಾಡಲಾದ ಫೈಲ್‌ಗಳನ್ನು ಈ ಸ್ಥಳದಲ್ಲಿ ಅಂಟಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
 </resources>

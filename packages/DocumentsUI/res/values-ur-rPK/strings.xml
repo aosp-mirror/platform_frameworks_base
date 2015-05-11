@@ -31,7 +31,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"حذف کریں"</string>
     <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" منتخب کریں"</string>
     <string name="menu_select_all" msgid="4320518282375109902">"سبھی منتخب کریں"</string>
-    <string name="menu_copy" msgid="3612326052677229148">"اس پر کاپی ہو رہی ہے…"</string>
+    <string name="menu_copy" msgid="3612326052677229148">"اس میں کاپی کریں…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"داخلی اسٹوریج دکھائیں"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"‏SD کارڈ دکھائیں"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"داخلی اسٹوریج چھپائیں"</string>
@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"تفصیلات دیکھنے کیلئے ٹچ کریں"</string>
     <string name="retry" msgid="7564024179122207376">"دوبارہ کوشش کریں"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"یہ فائلز کاپی نہیں کی گئیں: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلز کلپ بورڈ پر کاپی کی گئیں۔</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل کلپ بورڈ پر کاپی کی گئی۔</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"اس مقام پر منتخب کردہ فائلز کو پیسٹ نہیں کیا جا سکتا ہے۔"</string>
 </resources>

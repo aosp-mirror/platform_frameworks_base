@@ -72,4 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"세부정보를 보려면 터치하세요."</string>
     <string name="retry" msgid="7564024179122207376">"다시 시도"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"다음 파일이 복사되지 않았습니다. <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 클립보드에 복사함</item>
+      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 클립보드에 복사함</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"선택한 파일을 이 위치에 붙여넣을 수 없습니다."</string>
 </resources>
