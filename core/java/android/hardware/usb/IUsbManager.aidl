@@ -85,9 +85,6 @@ interface IUsbManager
     /* Sets the current USB function. */
     void setCurrentFunction(String function, boolean makeDefault);
 
-    /* Sets the file path for USB mass storage backing file. */
-    void setMassStorageBackingFile(String path);
-
     /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
      * the public key to list of host keys that the user has approved.
      */

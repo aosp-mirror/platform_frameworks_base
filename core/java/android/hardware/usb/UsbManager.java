@@ -410,28 +410,6 @@ public class UsbManager {
         }
     }
 
-    private static boolean propertyContainsFunction(String property, String function) {
-        String functions = SystemProperties.get(property, "");
-        int index = functions.indexOf(function);
-        if (index < 0) return false;
-        if (index > 0 && functions.charAt(index - 1) != ',') return false;
-        int charAfter = index + function.length();
-        if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
-        return true;
-    }
-
-    /**
-     * Returns true if the specified USB function is currently enabled.
-     *
-     * @param function name of the USB function
-     * @return true if the USB function is enabled.
-     *
-     * {@hide}
-     */
-    public boolean isFunctionEnabled(String function) {
-        return propertyContainsFunction("sys.usb.config", function);
-    }
-
     /**
      * Returns the current default USB function.
      *
@@ -463,21 +441,6 @@ public class UsbManager {
             mService.setCurrentFunction(function, makeDefault);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in setCurrentFunction", e);
-        }
-    }
-
-    /**
-     * Sets the file path for USB mass storage backing file.
-     *
-     * @param path backing file path
-     *
-     * {@hide}
-     */
-    public void setMassStorageBackingFile(String path) {
-        try {
-            mService.setMassStorageBackingFile(path);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setDefaultFunction", e);
         }
     }
 }
