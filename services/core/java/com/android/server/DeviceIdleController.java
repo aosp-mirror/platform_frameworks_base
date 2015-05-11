@@ -142,6 +142,7 @@ public class DeviceIdleController extends SystemService {
     private PendingIntent mAlarmIntent;
     private Intent mIdleIntent;
     private Display mCurDisplay;
+    private boolean mIdleDisabled;
     private boolean mScreenOn;
     private boolean mCharging;
     private boolean mSigMotionActive;
@@ -187,9 +188,15 @@ public class DeviceIdleController extends SystemService {
     private final ArrayMap<String, Integer> mPowerSaveWhitelistUserApps = new ArrayMap<>();
 
     /**
-     * UIDs that have been white-listed to opt out of power save restrictions.
+     * App IDs that have been white-listed to opt out of power save restrictions.
      */
     private final SparseBooleanArray mPowerSaveWhitelistAppIds = new SparseBooleanArray();
+
+    /**
+     * Current app IDs that are in the complete power save white list.  This array can
+     * be shared with others because it will not be modified once set.
+     */
+    private int[] mPowerSaveWhitelistAppIdArray = new int[0];
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -381,6 +388,8 @@ public class DeviceIdleController extends SystemService {
                 filter.addAction(ACTION_STEP_IDLE_STATE);
                 getContext().registerReceiver(mReceiver, filter);
 
+                mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAppIdArray);
+
                 mDisplayManager.registerDisplayListener(mDisplayListener, null);
                 updateDisplayLocked();
             }
@@ -445,12 +454,7 @@ public class DeviceIdleController extends SystemService {
 
     public int[] getAppIdWhitelistInternal() {
         synchronized (this) {
-            int size = mPowerSaveWhitelistAppIds.size();
-            int[] appids = new int[size];
-            for (int i = 0; i < size; i++) {
-                appids[i] = mPowerSaveWhitelistAppIds.keyAt(i);
-            }
-            return appids;
+            return mPowerSaveWhitelistAppIdArray;
         }
     }
 
@@ -499,7 +503,7 @@ public class DeviceIdleController extends SystemService {
     }
 
     void becomeInactiveIfAppropriateLocked() {
-        if (!mScreenOn && !mCharging && mState == STATE_ACTIVE) {
+        if (!mScreenOn && !mCharging && !mIdleDisabled && mState == STATE_ACTIVE) {
             // Screen has turned off; we are now going to become inactive and start
             // waiting to see if we will ultimately go idle.
             mState = STATE_INACTIVE;
@@ -624,6 +628,15 @@ public class DeviceIdleController extends SystemService {
         }
         for (int i=0; i<mPowerSaveWhitelistUserApps.size(); i++) {
             mPowerSaveWhitelistAppIds.put(mPowerSaveWhitelistUserApps.valueAt(i), true);
+        }
+        int size = mPowerSaveWhitelistAppIds.size();
+        int[] appids = new int[size];
+        for (int i = 0; i < size; i++) {
+            appids[i] = mPowerSaveWhitelistAppIds.keyAt(i);
+        }
+        mPowerSaveWhitelistAppIdArray = appids;
+        if (mLocalPowerManager != null) {
+            mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAppIdArray);
         }
     }
 
@@ -763,6 +776,10 @@ public class DeviceIdleController extends SystemService {
         pw.println("Commands:");
         pw.println("  step");
         pw.println("    Immediately step to next state, without waiting for alarm.");
+        pw.println("  disable");
+        pw.println("    Completely disable device idle mode.");
+        pw.println("  enable");
+        pw.println("    Re-enable device idle mode after it had previously been disabled.");
         pw.println("  whitelist");
         pw.println("    Add (prefix with +) or remove (prefix with -) packages.");
     }
@@ -782,10 +799,30 @@ public class DeviceIdleController extends SystemService {
                 if ("-h".equals(arg)) {
                     dumpHelp(pw);
                     return;
+                } else if ("-a".equals(arg)) {
+                    // Ignore, we always dump all.
                 } else if ("step".equals(arg)) {
                     synchronized (this) {
                         stepIdleStateLocked();
                         pw.print("Stepped to: "); pw.println(stateToString(mState));
+                    }
+                    return;
+                } else if ("disable".equals(arg)) {
+                    synchronized (this) {
+                        if (!mIdleDisabled) {
+                            mIdleDisabled = true;
+                            becomeActiveLocked("disabled");
+                            pw.println("Idle mode disabled");
+                        }
+                    }
+                    return;
+                } else if ("enable".equals(arg)) {
+                    synchronized (this) {
+                        if (mIdleDisabled) {
+                            mIdleDisabled = false;
+                            becomeInactiveIfAppropriateLocked();
+                            pw.println("Idle mode enabled");
+                        }
                     }
                     return;
                 } else if ("whitelist".equals(arg)) {
@@ -853,6 +890,7 @@ public class DeviceIdleController extends SystemService {
             }
             pw.print("  mSigMotionSensor="); pw.println(mSigMotionSensor);
             pw.print("  mCurDisplay="); pw.println(mCurDisplay);
+            pw.print("  mIdleDisabled="); pw.println(mIdleDisabled);
             pw.print("  mScreenOn="); pw.println(mScreenOn);
             pw.print("  mCharging="); pw.println(mCharging);
             pw.print("  mSigMotionActive="); pw.println(mSigMotionActive);
