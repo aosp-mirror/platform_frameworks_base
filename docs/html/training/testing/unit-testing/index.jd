@@ -1,0 +1,63 @@
+page.title=Building Effective Unit Tests
+page.tags=testing,androidjunitrunner,junit,unit test
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+        <h2>
+          You should also read
+        </h2>
+        <ul>
+          <li>
+            <a href="{@docRoot}tools/testing-support-library/index.html">Testing Support Library</a>
+          </li>
+        </ul>
+</div>
+</div>
+
+<p>Unit tests are the fundamental tests in your app testing strategy. By creating and running unit
+tests against your code, you can easily verify that the logic of individual units is correct.
+Running unit tests after every build helps you to
+quickly catch and fix software regressions introduced by code changes to your app.
+</p>
+
+<p>A unit test generally exercises the functionality of the smallest possible unit of code (which
+could be a method, class, or component) in a repeatable way. You should build unit tests when you
+need to verify the logic of specific code in your app. For example, if you are unit testing a
+class, your test might check that the class is in the right state. Typically, the unit of code
+is tested in isolation; your test affects and monitors changes to that unit only. A
+<a href="http://en.wikipedia.org/wiki/Mock_object" class="external-link">mocking framework</a>
+can be used to isolate your unit from its dependencies.</p>
+
+<p class="note"><strong>Note:</strong> Unit tests are not suitable for testing
+complex UI interaction events. Instead, you should use the UI testing frameworks, as described in
+<a href="{@docRoot}training/testing/ui-testing/index.html">Automating UI Tests</a>.</p>
+
+<p>For testing Android apps, you typically create these types of automated unit tests:</p>
+
+<ul>
+<li><strong>Local tests:</strong> Unit tests that run on your local machine only. These tests are
+compiled to run locally on the Java Virtual Machine (JVM) to minimize execution time. Use this
+approach to run unit tests that have no dependencies on the Android framework or have dependencies
+that can be filled by using mock objects.</li>
+<li><strong>Instrumented tests:</strong> Unit tests that run on an Android device or emulator.
+These tests have access to instrumentation information, such as the
+{@link android.content.Context} for the app under test. Use this approach to run unit tests that
+have Android dependencies which cannot be easily filled by using mock objects.</li>
+</ul>
+
+<p>The lessons in this class teach you how to build these types of automated unit tests.</p>
+
+<h2>Lessons</h2>
+<dl>
+  <dt><strong><a href="local-unit-tests.html">
+Building Local Unit Tests</a></strong></dt>
+    <dd>Learn how to build unit tests that run on your local machine.</dd>
+  <dt><strong><a href="instrumented-unit-tests.html">
+Building Instrumented Unit Tests</a></strong></dt>
+    <dd>Learn how to build unit tests that run on an Android device or emulator.</dd>
+</dl>
