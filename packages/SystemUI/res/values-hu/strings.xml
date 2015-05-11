@@ -83,9 +83,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Keresés"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
+    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Feloldás"</string>
     <string name="unlock_label" msgid="8779712358041029439">"feloldás"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefon megnyitása"</string>
+    <!-- no translation found for voice_assist_label (3956854378310019854) -->
+    <skip />
     <string name="camera_label" msgid="7261107956054836961">"kamera megnyitása"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Új feladatelrendezés kiválasztása"</string>
     <string name="cancel" msgid="6442560571259935130">"Mégse"</string>
@@ -121,10 +125,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX-jel: két sáv."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX-jel: három sáv."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX-jel: teljes."</string>
-    <!-- no translation found for accessibility_ethernet_disconnected (5896059303377589469) -->
-    <skip />
-    <!-- no translation found for accessibility_ethernet_connected (2692130313069182636) -->
-    <skip />
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Ethernet leválasztva."</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Ethernet csatlakoztatva."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Nincs jel."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"Nincs csatlakozva."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Nincs sáv."</string>
@@ -166,15 +168,14 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> eltávolítva."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Az összes alkalmazás eltávolítva a nemrég használtak közül."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"A(z) <xliff:g id="APP">%s</xliff:g> indítása."</string>
-    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
-    <skip />
+    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Értesítés elvetve."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Értesítési felület."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Gyorsbeállítások."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Lezárási képernyő."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Beállítások"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Áttekintés."</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"Megerősítés"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"Bezárás"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Felhasználó: <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi kikapcsolva."</string>
@@ -315,8 +316,12 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"A kevésbé sürgős értesítések lentebb vannak"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Érintse meg ismét a megnyitáshoz"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Húzza felfelé az ujját a feloldáshoz"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"A telefon eléréséhez csúsztassa ujját jobbra"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"A fényképezőgép eléréséhez csúsztassa ujját balra"</string>
+    <!-- no translation found for phone_hint (4872890986869209950) -->
+    <skip />
+    <!-- no translation found for voice_hint (8939888732119726665) -->
+    <skip />
+    <!-- no translation found for camera_hint (7939688436797157483) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Teljes némítás"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Csak prioritásos"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Csak riasztások"</string>
@@ -362,23 +367,15 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN letiltása"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-kapcsolat bontása"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Az eszközt a következő felügyeli:<xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nRendszergazdája ellenőrizheti és módosíthatja a beállításokat, vállalati hozzáféréseket, alkalmazásokat, az eszközéhez társított adatokat és eszköze helyadatait. További tájékoztatásért forduljon rendszergazdájához."</string>
-    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="996222259035614736">"Engedélyezte egy alkalmazásnak, hogy VPN-kapcsolatot létesítsen.\n\nEz az alkalmazás (az e-mailekre, alkalmazásokra és a webhelyekre is kiterjedően) figyelemmel kísérheti az Ön eszközét és hálózati tevékenységét."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Eszközét a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nRendszergazdája figyelemmel kísérheti és módosíthatja beállításait, vállalati hozzáféréseit, alkalmazásait, az eszközéhez társított adatokat és eszköze helyadatait.\n\n Ön egy VPN-hez is kapcsolódik, amely (az e-mailekre, alkalmazásokra és webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi tájékoztatásért forduljon rendszergazdájához."</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
-    <skip />
-    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Munkaprofilját a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nA rendszergazda (az e-mailekre, alkalmazásokra és a webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi információért forduljon a rendszergazdához.\n\nÖn egy VPN-hez is csatlakozik, amely szintén figyelemmel kísérheti hálózati tevékenységét."</string>
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
+    <string name="monitoring_description_app" msgid="6947928635272782570">"Ön a következőhöz csatlakozik: <xliff:g id="APPLICATION">%1$s</xliff:g>, amely figyelheti hálózati tevékenységét, beleértve az e-mailt, az alkalmazásokat és a webhelyeket."</string>
+    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Ön a következőhöz csatlakozik: <xliff:g id="APPLICATION">%1$s</xliff:g>, amely figyelheti személyes hálózati tevékenységét, beleértve az e-mailt, az alkalmazásokat és a webhelyeket."</string>
+    <string name="monitoring_description_app_work" msgid="808687576155832307">"Munkaprofilját a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ez a következőhöz csatlakozik: <xliff:g id="APPLICATION">%2$s</xliff:g>, amely figyelheti hálózati tevékenységét, beleértve az e-mailt, az alkalmazásokat és a webhelyeket.\n\nTovábbi információért forduljon a rendszergazdához."</string>
+    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Munkaprofilját a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>. A következőhöz csatlakozik: <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, amely figyelheti hálózati tevékenységét, beleértve az e-mailt, az alkalmazásokat és a webhelyeket.\n\nCsatlakozik továbbá a következőhöz: <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, amely szintén figyelemmel kísérheti személyes hálózati tevékenységét."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Eszközét a következő felügyeli: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nA rendszergazda figyelemmel kísérheti és módosíthatja beállításait, vállalati hozzáféréseit, alkalmazásait, az eszközéhez társított adatokat és eszköze helyadatait.\n\nÖn a következőhöz csatlakozik: <xliff:g id="APPLICATION">%2$s</xliff:g>, amely (az e-mailekre, alkalmazásokra és webhelyekre is kiterjedően) figyelemmel kísérheti hálózati tevékenységét.\n\nTovábbi információért forduljon a rendszergazdához."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Az eszköz addig zárolva marad, amíg kézileg fel nem oldja"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Gyorsabban megkaphatja az értesítéseket"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Már a képernyőzár feloldása előtt megtekintheti őket"</string>
@@ -388,6 +385,10 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Az összes elrejtése"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Befejezés most"</string>
+    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
+    <skip />
+    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
+    <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"A képernyő rögzítve van"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Megjelenítve tartja addig, amíg Ön fel nem oldja fel a rögzítést. A rögzítés feloldásához tartsa egyszerre lenyomva a Vissza és az Áttekintés lehetőséget."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva az Áttekintés lehetőséget."</string>
