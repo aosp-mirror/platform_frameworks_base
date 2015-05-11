@@ -15029,8 +15029,8 @@ package android.media {
     ctor public AudioRecord.Builder();
     method public android.media.AudioRecord build() throws java.lang.UnsupportedOperationException;
     method public android.media.AudioRecord.Builder setAudioFormat(android.media.AudioFormat) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioRecord.Builder setAudioSource(int) throws java.lang.IllegalArgumentException;
     method public android.media.AudioRecord.Builder setBufferSizeInBytes(int) throws java.lang.IllegalArgumentException;
-    method public android.media.AudioRecord.Builder setCapturePreset(int) throws java.lang.IllegalArgumentException;
   }
 
   public static abstract interface AudioRecord.OnRecordPositionUpdateListener {
