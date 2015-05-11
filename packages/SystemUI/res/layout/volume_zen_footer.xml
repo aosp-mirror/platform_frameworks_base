@@ -41,8 +41,7 @@
             android:layout_width="@dimen/volume_button_size"
             android:layout_height="@dimen/volume_button_size"
             android:layout_marginEnd="7dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_dnd" />
+            android:scaleType="center" />
 
         <LinearLayout
             android:layout_width="0dp"

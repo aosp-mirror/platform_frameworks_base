@@ -21,6 +21,7 @@ import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -38,6 +39,7 @@ public class ZenFooter extends LinearLayout {
     private final Context mContext;
     private final SpTexts mSpTexts;
 
+    private ImageView mIcon;
     private TextView mSummaryLine1;
     private TextView mSummaryLine2;
     private TextView mEndNowButton;
@@ -55,6 +57,7 @@ public class ZenFooter extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mIcon = (ImageView) findViewById(R.id.volume_zen_icon);
         mSummaryLine1 = (TextView) findViewById(R.id.volume_zen_summary_line_1);
         mSummaryLine2 = (TextView) findViewById(R.id.volume_zen_summary_line_2);
         mEndNowButton = (TextView) findViewById(R.id.volume_zen_end_now);
@@ -115,6 +118,7 @@ public class ZenFooter extends LinearLayout {
     }
 
     public void update() {
+        mIcon.setImageResource(isZenNone() ? R.drawable.ic_dnd_total_silence : R.drawable.ic_dnd);
         final String line1 =
                 isZenPriority() ? mContext.getString(R.string.interruption_level_priority)
                 : isZenAlarms() ? mContext.getString(R.string.interruption_level_alarms)
