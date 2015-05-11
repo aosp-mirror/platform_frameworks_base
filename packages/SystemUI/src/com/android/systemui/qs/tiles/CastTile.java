@@ -86,7 +86,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleClick() {
-        super.handleClick();
+        MetricsLogger.action(mContext, getMetricsCategory());
         showDetail(true);
     }
 
@@ -246,6 +246,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         @Override
         public void onDetailItemClick(Item item) {
             if (item == null || item.tag == null) return;
+            MetricsLogger.action(mContext, MetricsLogger.QS_CAST_SELECT);
             final CastDevice device = (CastDevice) item.tag;
             mController.startCasting(device);
         }
@@ -253,6 +254,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         @Override
         public void onDetailItemDisconnect(Item item) {
             if (item == null || item.tag == null) return;
+            MetricsLogger.action(mContext, MetricsLogger.QS_CAST_DISCONNECT);
             final CastDevice device = (CastDevice) item.tag;
             mController.stopCasting(device);
         }

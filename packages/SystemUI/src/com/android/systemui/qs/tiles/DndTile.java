@@ -89,7 +89,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void handleClick() {
-        super.handleClick();
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         if (mState.value) {
             mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
         } else {
@@ -209,6 +209,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
         @Override
         public void setToggleState(boolean state) {
+            MetricsLogger.action(mContext, MetricsLogger.QS_DND_TOGGLE, state);
             if (!state) {
                 mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
                 showDetail(false);
