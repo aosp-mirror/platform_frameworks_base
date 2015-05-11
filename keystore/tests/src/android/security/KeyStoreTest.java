@@ -817,6 +817,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
                 true, args, null, out);
         IBinder token = result.token;
@@ -881,14 +884,18 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
             hexToBytes("591ccb10d410ed26dc5ba74a31362870"),
             hexToBytes("b6ed21b99ca6f4f9f153e7b1beafed1d"),
             hexToBytes("23304b7a39f9f3ff067d8d8f9e24ecc7")};
+        KeymasterArguments beginArgs = new KeymasterArguments();
+        beginArgs.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        beginArgs.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        beginArgs.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         for (int i = 0; i < testVectors.length; i++) {
             byte[] cipherText = doOperation(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, testVectors[i],
-                    new KeymasterArguments());
+                    beginArgs);
             MoreAsserts.assertEquals(cipherVectors[i], cipherText);
         }
         for (int i = 0; i < testVectors.length; i++) {
             byte[] plainText = doOperation(name, KeymasterDefs.KM_PURPOSE_DECRYPT,
-                    cipherVectors[i], new KeymasterArguments());
+                    cipherVectors[i], beginArgs);
             MoreAsserts.assertEquals(testVectors[i], plainText);
         }
     }
@@ -912,6 +919,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
         KeymasterArguments out = new KeymasterArguments();
         args = new KeymasterArguments();
+        args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addInt(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
+        args.addInt(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
                 true, args, null, out);
         assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
