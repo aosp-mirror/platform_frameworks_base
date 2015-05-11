@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi preferred"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobile preferred"</string>
@@ -1483,8 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Collapse"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Do not disturb"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Downtime"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Weeknights"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Weekends"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Weeknight"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Weekend"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Event"</string>
     <string name="muted_by" msgid="6147073845094180001">"Muted by <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"There\'s an internal problem with your device. Contact your manufacturer for details."</string>

@@ -131,6 +131,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"כבוי"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi מועדף"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"סלולרי מועדף"</string>
@@ -1476,8 +1477,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"בקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"בקש סיסמה לפני ביטול הצמדה"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"הותקנה על ידי מנהל המערכת שלך"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"עודכן על ידי מנהל המערכת שלך"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"נמחקה על ידי מנהל המערכת שלך"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1510,8 +1510,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"כווץ"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"נא לא להפריע"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"זמן השבתה"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"לילות בימי חול"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"סופי שבוע"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ערב ביום חול"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"סוף השבוע"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"אירוע"</string>
     <string name="muted_by" msgid="6147073845094180001">"הושתק על ידי <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"קיימת בעיה פנימית במכשיר שלך, וייתכן שהתפקוד שלו לא יהיה יציב עד שתבצע איפוס לנתוני היצרן."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"קיימת בעיה פנימית במכשיר שלך. לקבלת פרטים, צור קשר עם היצרן."</string>

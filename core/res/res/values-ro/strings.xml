@@ -130,6 +130,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Dezactivată"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Se preferă conexiunea Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Se preferă conexiunea mobilă"</string>
@@ -1467,8 +1468,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicită modelul pentru deblocare înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicită parola înainte de a anula fixarea"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalat de administrator"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizat de un administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Șters de administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pentru a îmbunătăți autonomia bateriei, funcția de economisire a energiei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nFuncția de economisire a energiei se dezactivează automat când dispozitivul se încarcă."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1497,8 +1497,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Restrângeți"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nu deranja"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Inactivitate"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Serile zilelor lucrătoare"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Weekenduri"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"Dezactivate de <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"A apărut o problemă internă pe dispozitiv, iar acesta poate fi instabil până la revenirea la setările din fabrică."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"A apărut o problemă internă pe dispozitiv. Pentru detalii, contactați producătorul."</string>

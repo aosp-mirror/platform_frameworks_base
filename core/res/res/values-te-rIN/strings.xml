@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ఆఫ్‌లో ఉంది"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fiకి ప్రాధాన్యత"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"సెల్యులార్‌కి ప్రాధాన్యత"</string>
@@ -1458,8 +1459,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ నమూనా కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"మీ నిర్వాహకుడు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు ఎక్కువ నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"అంతరాయం కలిగించవద్దు"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ముఖ్యమైన పనిలో ఉన్నప్పుడు"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"వారపురాత్రులు"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"వారాంతాలు"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ద్వారా మ్యూట్ చేయబడింది"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>

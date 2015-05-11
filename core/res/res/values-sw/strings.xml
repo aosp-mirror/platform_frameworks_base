@@ -129,6 +129,9 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Imezimwa"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi inapedelewa"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mitandao ya simu za mkononi inapendelewa"</string>
@@ -1079,7 +1082,7 @@
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Ondoa"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Chunguza"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> haipo"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"Weka tena kifaa hiki"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Weka kifaa hiki tena"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Inahamisha <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Inahamisha data"</string>
     <string name="ext_media_move_success_title" msgid="8575300932957954671">"Imekamilisha kuhamisha"</string>
@@ -1458,8 +1461,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Omba mchoro wa kufungua kabla hujabandua"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Omba nenosiri kabla hujabandua"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Kilisakinishwa na msimamizi wako"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Kimesasiswa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1486,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Kunja"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Usinisumbue"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Wakati wa hali tuli"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Usiku wa siku za wiki"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Wikiendi"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"Sauti imezimwa na <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Kuna hitilafu ya ndani ya kifaa chako, na huenda kisiwe thabiti mpaka urejeshe mipangilio ya kiwandani."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Kuna hitilafu ya ndani ya kifaa chako. Wasiliana na mtengenezaji wa kifaa chako kwa maelezo."</string>

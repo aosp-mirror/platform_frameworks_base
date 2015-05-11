@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ပိတ်ထားရသည်"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ဝိုင်ဖိုင်အား ပိုနှစ်သက်သော"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ဆယ်လူလာအား ပိုနှစ်သက်သော"</string>
@@ -1483,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ခေါက်ရန်"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"မနှောက်ယှက်ပါနှင့်"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ကျချိန်"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"ရုံးရက်ညများ"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"စနေတနင်္ဂနွေများ"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေ၏။ အသေးစိတ်သိရန်အတွက် ပစ္စည်းထုတ်လုပ်သူအား ဆက်သွယ်ပါ။"</string>
