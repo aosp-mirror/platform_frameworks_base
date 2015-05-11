@@ -83,9 +83,11 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Search"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Camera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Phone"</string>
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Assist"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Unlock"</string>
     <string name="unlock_label" msgid="8779712358041029439">"unlock"</string>
     <string name="phone_label" msgid="2320074140205331708">"open phone"</string>
+    <string name="voice_assist_label" msgid="3956854378310019854">"open voice assist"</string>
     <string name="camera_label" msgid="7261107956054836961">"open camera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Select new task layout"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancel"</string>
@@ -121,10 +123,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX two bars."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX three bars."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX signal full."</string>
-    <!-- no translation found for accessibility_ethernet_disconnected (5896059303377589469) -->
-    <skip />
-    <!-- no translation found for accessibility_ethernet_connected (2692130313069182636) -->
-    <skip />
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Ethernet disconnected."</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Ethernet connected."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"No signal."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"Not connected."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Zero bars."</string>
@@ -166,15 +166,14 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> dismissed."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"All recent applications dismissed."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Starting <xliff:g id="APP">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
-    <skip />
+    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notification dismissed."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Notification shade."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Quick settings."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Lock screen."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Settings"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Overview."</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"Confirm"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"Close"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"User <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi turned off."</string>
@@ -315,8 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Less urgent notifications below"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Touch again to open"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Swipe up to unlock"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"Swipe right for phone"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"Swipe left for camera"</string>
+    <string name="phone_hint" msgid="4872890986869209950">"Swipe from icon for phone"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Swipe from icon for voice assist"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Swipe from icon for camera"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Total silence"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Priority only"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarms only"</string>
@@ -380,6 +380,8 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Hide all"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"End now"</string>
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expand"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Collapse"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Screen is pinned"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"This keeps it in view until you unpin. Touch and hold Back and Overview at the same time to unpin."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"This keeps it in view until you unpin. Touch and hold Overview to unpin."</string>

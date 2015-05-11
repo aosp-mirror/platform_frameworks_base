@@ -83,9 +83,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Rechercher"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Appareil photo"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Téléphone"</string>
+    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Déverrouiller"</string>
     <string name="unlock_label" msgid="8779712358041029439">"déverrouiller"</string>
     <string name="phone_label" msgid="2320074140205331708">"Ouvrir le téléphone"</string>
+    <!-- no translation found for voice_assist_label (3956854378310019854) -->
+    <skip />
     <string name="camera_label" msgid="7261107956054836961">"Ouvrir l\'appareil photo"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Sélectionner un nouveau format de tâche"</string>
     <string name="cancel" msgid="6442560571259935130">"Annuler"</string>
@@ -121,10 +125,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Signal WiMAX : moyen"</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"Signal WiMAX : bon"</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"Signal WiMAX : excellent"</string>
-    <!-- no translation found for accessibility_ethernet_disconnected (5896059303377589469) -->
-    <skip />
-    <!-- no translation found for accessibility_ethernet_connected (2692130313069182636) -->
-    <skip />
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Ethernet déconnecté."</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Ethernet connecté."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Aucun signal"</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"Non connecté"</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Aucun signal"</string>
@@ -168,15 +170,14 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Application \"<xliff:g id="APP">%s</xliff:g>\" ignorée."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Toutes les applications récentes ont été supprimées."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Lancement de <xliff:g id="APP">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
-    <skip />
+    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notification masquée"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Volet des notifications"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Paramètres rapides"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Écran de verrouillage"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Paramètres"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Aperçu"</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"Confirmer"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"Fermer"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Utilisateur : <xliff:g id="USER">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi désactivé"</string>
@@ -317,8 +318,12 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifications moins urgentes affichées ci-dessous"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Touchez à nouveau pour ouvrir"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Glissez vers le haut pour déverrouiller"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"Balayez l\'écran vers la droite pour accéder au téléphone"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"Balayez l\'écran vers la gauche pour accéder à l\'appareil photo"</string>
+    <!-- no translation found for phone_hint (4872890986869209950) -->
+    <skip />
+    <!-- no translation found for voice_hint (8939888732119726665) -->
+    <skip />
+    <!-- no translation found for camera_hint (7939688436797157483) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Aucune interruption"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Priorités seulement"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Alarmes uniquement"</string>
@@ -364,23 +369,15 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Désactiver le RPV"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Déconnecter le RPV"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Votre appareil est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux contenus de l\'entreprise, les applications, les données associées à cet appareil et les données de localisation de celui-ci. Pour en savoir plus, communiquez avec votre administrateur."</string>
-    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="996222259035614736">"Vous avez autorisé une application à configurer une connexion RPV.\n\nCette application peut contrôler l\'activité de votre appareil et votre activité sur le réseau, y compris les courriels, les applications et les sites Web."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Votre appareil est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux contenus de l\'entreprise, les applications, les données associées à cet appareil et les données de localisation de celui-ci.\n\nVous êtes connecté à un RPV qui peut contrôler votre activité sur le réseau (courriels, applications et sites Web).\n\nPour en savoir plus, communiquez avec votre administrateur."</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
-    <skip />
-    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler votre activité sur le réseau, y compris les courriels, les applications et les sites Web.\n\nPour en savoir plus, communiquez avec votre administrateur.\n\nVous êtes également connecté à un RPV qui peut contrôler votre activité sur le réseau."</string>
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"RPV"</string>
+    <string name="monitoring_description_app" msgid="6947928635272782570">"Vous êtes connecté à <xliff:g id="APPLICATION">%1$s</xliff:g>. Cette application peut contrôler votre activité sur le réseau, y compris les courriels, les applications et les sites Web."</string>
+    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Vous êtes connecté à <xliff:g id="APPLICATION">%1$s</xliff:g>. Cette application peut contrôler votre activité personnelle sur le réseau, y compris les courriels, les applications et les sites Web."</string>
+    <string name="monitoring_description_app_work" msgid="808687576155832307">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Il est connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>. Cette application peut contrôler votre activité sur le réseau, y compris les courriel, les applications et les sites Web.\n\nPour en savoir plus, communiquer avec votre administrateur."</string>
+    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Il est connecté à <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>. Cette application peut contrôler votre activité sur le réseau, y compris les e-mails, les applications et les sites Web.\n\nVous êtes également connecté à <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>. Cette application peut contrôler votre activité personnelle sur le réseau."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Votre appareil est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVotre administrateur peut contrôler et gérer les paramètres, l\'accès aux contenus de l\'entreprise, les applications, les données associées à cet appareil et ses données de localisation.\n\nVous êtes connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>, qui peut contrôler votre activité réseau, y compris les courriels, les applications et les  sites Web.\n\nPour en savoir plus, communiquez avec votre administrateur."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Voir les notifications plus rapidement"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
@@ -390,6 +387,10 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Tout masquer"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Arrêter maintenant"</string>
+    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
+    <skip />
+    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
+    <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"L\'écran est épinglé"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez un doigt simultanément sur « Retour » et « Aperçu »."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Aperçu »."</string>
