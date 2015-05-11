@@ -265,28 +265,23 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mStorage.hasPattern(userId);
     }
 
-    private void maybeUpdateKeystore(String password, int userHandle) {
+    private void setKeystorePassword(String password, int userHandle) {
         final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
         final KeyStore ks = KeyStore.getInstance();
 
         final List<UserInfo> profiles = um.getProfiles(userHandle);
-        boolean shouldReset = TextUtils.isEmpty(password);
-
-        // For historical reasons, don't wipe a non-empty keystore if we have a single user with a
-        // single profile.
-        if (userHandle == UserHandle.USER_OWNER && profiles.size() == 1) {
-            if (!ks.isEmpty()) {
-                shouldReset = false;
-            }
-        }
-
         for (UserInfo pi : profiles) {
-            final int profileUid = UserHandle.getUid(pi.id, Process.SYSTEM_UID);
-            if (shouldReset) {
-                ks.resetUid(profileUid);
-            } else {
-                ks.passwordUid(password, profileUid);
-            }
+            ks.onUserPasswordChanged(pi.id, password);
+        }
+    }
+
+    private void unlockKeystore(String password, int userHandle) {
+        final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+        final KeyStore ks = KeyStore.getInstance();
+
+        final List<UserInfo> profiles = um.getProfiles(userHandle);
+        for (UserInfo pi : profiles) {
+            ks.unlock(pi.id, password);
         }
     }
 
@@ -294,7 +289,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void setLockPattern(String pattern, int userId) throws RemoteException {
         checkWritePermission(userId);
 
-        maybeUpdateKeystore(pattern, userId);
+        setKeystorePassword(pattern, userId);
 
         final byte[] hash = LockPatternUtils.patternToHash(
                 LockPatternUtils.stringToPattern(pattern));
@@ -305,7 +300,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void setLockPassword(String password, int userId) throws RemoteException {
         checkWritePermission(userId);
 
-        maybeUpdateKeystore(password, userId);
+        setKeystorePassword(password, userId);
 
         mStorage.writePasswordHash(mLockPatternUtils.passwordToHash(password, userId), userId);
     }
@@ -322,7 +317,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         boolean matched = Arrays.equals(hash, storedHash);
         if (matched && !TextUtils.isEmpty(pattern)) {
-            maybeUpdateKeystore(pattern, userId);
+            unlockKeystore(pattern, userId);
         }
         return matched;
     }
@@ -340,7 +335,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         boolean matched = Arrays.equals(hash, storedHash);
         if (matched && !TextUtils.isEmpty(password)) {
-            maybeUpdateKeystore(password, userId);
+            unlockKeystore(password, userId);
         }
         return matched;
     }
