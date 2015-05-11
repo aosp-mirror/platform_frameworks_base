@@ -46,8 +46,6 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final String TAG = "ExitTransitionCoordinator";
     private static final long MAX_WAIT_MS = 1000;
 
-    private boolean mExitComplete;
-
     private Bundle mSharedElementBundle;
 
     private boolean mExitNotified;
@@ -165,7 +163,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             @Override
             public void onTransitionEnd(Transition transition) {
                 transition.removeListener(this);
-                if (mExitComplete) {
+                if (isViewsTransitionComplete()) {
                     delayCancel();
                 }
             }
@@ -310,14 +308,14 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             viewsTransition = configureTransition(getViewsTransition(), true);
         }
         if (viewsTransition == null) {
-            exitTransitionComplete();
+            viewsTransitionComplete();
         } else {
             final ArrayList<View> transitioningViews = mTransitioningViews;
             viewsTransition.addListener(new ContinueTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
                     transition.removeListener(this);
-                    exitTransitionComplete();
+                    viewsTransitionComplete();
                     if (mIsHidden && transitioningViews != null) {
                         showViews(transitioningViews, true);
                     }
@@ -373,19 +371,15 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         }
     }
 
-    private void exitTransitionComplete() {
-        mExitComplete = true;
-        notifyComplete();
-    }
-
     protected boolean isReadyToNotify() {
         return mSharedElementBundle != null && mResultReceiver != null && mIsBackgroundReady;
     }
 
-    private void sharedElementTransitionComplete() {
+    @Override
+    protected void sharedElementTransitionComplete() {
         mSharedElementBundle = mExitSharedElementBundle == null
                 ? captureSharedElementState() : captureExitSharedElementsState();
-        notifyComplete();
+        super.sharedElementTransitionComplete();
     }
 
     private Bundle captureExitSharedElementsState() {
@@ -403,6 +397,11 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             }
         }
         return bundle;
+    }
+
+    @Override
+    protected void onTransitionsComplete() {
+        notifyComplete();
     }
 
     protected void notifyComplete() {
@@ -433,7 +432,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private void notifyExitComplete() {
-        if (!mExitNotified && mExitComplete) {
+        if (!mExitNotified && isViewsTransitionComplete()) {
             mExitNotified = true;
             mResultReceiver.send(MSG_EXIT_TRANSITION_COMPLETE, null);
             mResultReceiver = null; // done talking
