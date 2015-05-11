@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -67,6 +68,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     private boolean mAnnounceNextStateChange;
 
     abstract protected TState newTileState();
+    abstract protected void handleClick();
     abstract protected void handleUpdateState(TState state, Object arg);
 
     /**
@@ -170,20 +172,12 @@ public abstract class QSTile<TState extends State> implements Listenable {
         handleRefreshState(null);
     }
 
-    protected void handleClick() {
-        MetricsLogger.action(mContext, getMetricsCategory(), getMetricsPackage());
-    };
-
     protected void handleSecondaryClick() {
         // optional
     }
 
     protected void handleLongClick() {
         // optional
-    }
-
-    protected String getMetricsPackage() {
-        return "";
     }
 
     protected void handleRefreshState(Object arg) {

@@ -84,7 +84,7 @@ public class IntentTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleClick() {
-        super.handleClick();
+        MetricsLogger.action(mContext, getMetricsCategory(), mIntentPackage);
         sendIntent("click", mOnClick, mOnClickUri);
     }
 
@@ -137,16 +137,12 @@ public class IntentTile extends QSTile<QSTile.State> {
         mOnLongClick = intent.getParcelableExtra("onLongClick");
         mOnLongClickUri = intent.getStringExtra("onLongClickUri");
         mIntentPackage = intent.getStringExtra("package");
+        mIntentPackage = mIntentPackage == null ? "" : mIntentPackage;
     }
 
     @Override
     public int getMetricsCategory() {
         return MetricsLogger.QS_INTENT;
-    }
-
-    @Override
-    protected String getMetricsPackage() {
-        return mIntentPackage == null ? "" : mIntentPackage;
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
