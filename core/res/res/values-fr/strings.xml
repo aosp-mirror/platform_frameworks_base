@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Désactivé"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi de préférence"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobile de préférence"</string>
@@ -1458,8 +1459,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installé par votre administrateur"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Supprimé par votre administrateur"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pour améliorer l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil, et il désactive le vibreur, les services de localisation et la plupart des données en arrière-plan. La messagerie électronique, les SMS/MMS et les autres applications basées sur la synchronisation ne sont mises à jour que si vous les ouvrez.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Réduire"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne pas déranger"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Temps d\'arrêt"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Soirs de semaine"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Week-ends"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"Son coupé par : <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Un problème interne lié à votre appareil est survenu. Ce dernier risque d\'être instable jusqu\'à ce que vous rétablissiez la configuration d\'usine."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Un problème interne lié à votre appareil est survenu. Veuillez contacter le fabricant pour en savoir plus."</string>

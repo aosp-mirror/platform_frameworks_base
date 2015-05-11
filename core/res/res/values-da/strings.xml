@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Fra"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"WiFi-netværk er foretrukket"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Mobilnetværk er foretrukket"</string>
@@ -1083,7 +1084,7 @@
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Flytter <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Flytter data"</string>
     <string name="ext_media_move_success_title" msgid="8575300932957954671">"Flytningen er gennemført"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Data flyttes til <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Data flyttet til <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Dine data kunne ikke flyttes"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Dine data er stadig på den oprindelige placering"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Der blev ikke fundet nogen matchende aktiviteter."</string>
@@ -1458,8 +1459,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bed om oplåsningsmønster ved deaktivering"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bed om adgangskode inden frigørelse"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installeret af din administrator"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Opdateret af administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet af din administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batterisparefunktionen hjælper med at forlænge batteriets levetid ved at reducere enhedens ydeevne og begrænse vibration, placeringstjenester og det meste baggrundsdata. E-mail, beskedfunktioner og andre apps, der benytter synkronisering, opdateres muligvis ikke, medmindre du åbner dem.\n\nBatterisparefunktionen slukker automatisk, når enheden oplader."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Vil ikke forstyrres"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Nedetid"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Hverdagsaftener"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Weekender"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"Lyden blev afbrudt af <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Der er et internt problem med enheden, og den vil muligvis være ustabil, indtil du gendanner fabriksdataene."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Der er et internt problem med enheden. Kontakt producenten for at få yderligere oplysninger."</string>

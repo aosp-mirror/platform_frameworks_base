@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"முடக்கப்பட்டுள்ளது"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"செல்லுலாருக்கு முன்னுரிமை"</string>
@@ -1085,7 +1086,7 @@
     <string name="ext_media_move_success_title" msgid="8575300932957954671">"நகர்த்தப்பட்டது"</string>
     <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g>க்குத் தரவு நகர்த்தப்பட்டது"</string>
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"தரவை நகர்த்த முடியவில்லை"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"அசல் இடத்திலிருந்து தரவு நகர்த்தப்பட்டது"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"அசல் இடத்திலிருந்து தரவு நகர்த்தப்படவில்லை"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"பொருந்தும் செயல்பாடுகள் கண்டறியப்படவில்லை."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"மீடியா அவுட்புட்டை வழிசெலுத்துதல்"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"மீடியாவைப் பிற வெளிப்புறச் சாதனங்களுக்கு வெளியீடாக வழிகாட்ட பயன்பாட்டை அனுமதிக்கிறது."</string>
@@ -1458,8 +1459,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"நிர்வாகி நிறுவினார்"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"நிர்வாகி நீக்கிவிட்டார்"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகளானது அவற்றைத் திறக்கும்வரையில் புதுப்பிக்கப்படாமல் போகக்கூடும்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"சுருக்கு"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"தொந்தரவு செய்ய வேண்டாம்"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"செயலற்ற நேரம்"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"வார நாட்களின் இரவுகள்"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"வார இறுதி நாட்கள்"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ஒலியடக்கினார்"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது, அதனை ஆரம்பநிலைக்கு மீட்டமைக்கும் வரை நிலையற்று இயங்கலாம்."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது. விவரங்களுக்கு சாதன தயாரிப்பாளரைத் தொடர்புகொள்ளவும்."</string>
