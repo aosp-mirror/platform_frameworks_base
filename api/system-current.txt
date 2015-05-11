@@ -8477,7 +8477,6 @@ package android.content {
     field public static final java.lang.String EXTRA_CHANGED_PACKAGE_LIST = "android.intent.extra.changed_package_list";
     field public static final java.lang.String EXTRA_CHANGED_UID_LIST = "android.intent.extra.changed_uid_list";
     field public static final java.lang.String EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER = "android.intent.extra.CHOOSER_REFINEMENT_INTENT_SENDER";
-    field public static final java.lang.String EXTRA_CHOOSER_TARGETS = "android.intent.extra.CHOOSER_TARGETS";
     field public static final java.lang.String EXTRA_CHOSEN_COMPONENT = "android.intent.extra.CHOSEN_COMPONENT";
     field public static final java.lang.String EXTRA_CHOSEN_COMPONENT_INTENT_SENDER = "android.intent.extra.CHOSEN_COMPONENT_INTENT_SENDER";
     field public static final java.lang.String EXTRA_DATA_REMOVED = "android.intent.extra.DATA_REMOVED";
@@ -30698,10 +30697,8 @@ package android.service.chooser {
   public final class ChooserTarget implements android.os.Parcelable {
     ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.app.PendingIntent);
     ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.content.IntentSender);
-    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.content.Intent);
     method public int describeContents();
     method public android.graphics.Bitmap getIcon();
-    method public android.content.Intent getIntent();
     method public android.content.IntentSender getIntentSender();
     method public float getScore();
     method public java.lang.CharSequence getTitle();

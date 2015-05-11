@@ -3365,14 +3365,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
 
     /**
-     * A Parcelable[] of {@link android.service.chooser.ChooserTarget ChooserTarget} objects
-     * as set with {@link #putExtra(String, Parcelable[])} representing additional app-specific
-     * targets to place at the front of the list of choices. Shown to the user with
-     * {@link #ACTION_CHOOSER}.
-     */
-    public static final String EXTRA_CHOOSER_TARGETS = "android.intent.extra.CHOOSER_TARGETS";
-
-    /**
      * A Bundle forming a mapping of potential target package names to different extras Bundles
      * to add to the default intent extras in {@link #EXTRA_INTENT} when used with
      * {@link #ACTION_CHOOSER}. Each key should be a package name. The package need not
