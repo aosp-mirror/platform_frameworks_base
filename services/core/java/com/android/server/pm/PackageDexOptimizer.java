@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dalvik.system.DexFile;
-import dalvik.system.StaleDexCacheError;
 
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
@@ -112,61 +111,60 @@ final class PackageDexOptimizer {
             }
 
             for (String path : paths) {
-                try {
-                    final int dexoptNeeded;
-                    if (forceDex) {
-                        dexoptNeeded = DexFile.DEX2OAT_NEEDED;
-                    } else {
-                        dexoptNeeded = DexFile.getDexOptNeeded(path,
-                                pkg.packageName, dexCodeInstructionSet, defer);
+                final int dexoptNeeded;
+                if (forceDex) {
+                    dexoptNeeded = DexFile.DEX2OAT_NEEDED;
+                } else {
+                    try {
+                        dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
+                                dexCodeInstructionSet, defer);
+                    } catch (IOException ioe) {
+                        Slog.w(TAG, "IOException reading apk: " + path, ioe);
+                        return DEX_OPT_FAILED;
                     }
+                }
 
-                    if (!forceDex && defer && dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                        // We're deciding to defer a needed dexopt. Don't bother dexopting for other
-                        // paths and instruction sets. We'll deal with them all together when we process
-                        // our list of deferred dexopts.
-                        addPackageForDeferredDexopt(pkg);
-                        return DEX_OPT_DEFERRED;
-                    }
+                if (!forceDex && defer && dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                    // We're deciding to defer a needed dexopt. Don't bother dexopting for other
+                    // paths and instruction sets. We'll deal with them all together when we process
+                    // our list of deferred dexopts.
+                    addPackageForDeferredDexopt(pkg);
+                    return DEX_OPT_DEFERRED;
+                }
 
-                    if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                        final String dexoptType;
-                        String oatDir = null;
-                        if (dexoptNeeded == DexFile.DEX2OAT_NEEDED) {
-                            dexoptType = "dex2oat";
+                if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                    final String dexoptType;
+                    String oatDir = null;
+                    if (dexoptNeeded == DexFile.DEX2OAT_NEEDED) {
+                        dexoptType = "dex2oat";
+                        try {
                             oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
-                        } else if (dexoptNeeded == DexFile.PATCHOAT_NEEDED) {
-                            dexoptType = "patchoat";
-                        } else if (dexoptNeeded == DexFile.SELF_PATCHOAT_NEEDED) {
-                            dexoptType = "self patchoat";
-                        } else {
-                            throw new IllegalStateException("Invalid dexopt needed: " + dexoptNeeded);
-                        }
-                        Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
-                                + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
-                                + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
-                                + " oatDir = " + oatDir);
-                        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                        final int ret = mPackageManagerService.mInstaller.dexopt(path, sharedGid,
-                                !pkg.isForwardLocked(), pkg.packageName, dexCodeInstructionSet,
-                                dexoptNeeded, vmSafeMode, debuggable, oatDir);
-                        if (ret < 0) {
+                        } catch (IOException ioe) {
+                            Slog.w(TAG, "Unable to create oatDir for package: " + pkg.packageName);
                             return DEX_OPT_FAILED;
                         }
+                    } else if (dexoptNeeded == DexFile.PATCHOAT_NEEDED) {
+                        dexoptType = "patchoat";
+                    } else if (dexoptNeeded == DexFile.SELF_PATCHOAT_NEEDED) {
+                        dexoptType = "self patchoat";
+                    } else {
+                        throw new IllegalStateException("Invalid dexopt needed: " + dexoptNeeded);
+                    }
+
+                    Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
+                            + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
+                            + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
+                            + " oatDir = " + oatDir);
+                    final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                    final int ret = mPackageManagerService.mInstaller.dexopt(path, sharedGid,
+                            !pkg.isForwardLocked(), pkg.packageName, dexCodeInstructionSet,
+                            dexoptNeeded, vmSafeMode, debuggable, oatDir);
+
+                    // Dex2oat might fail due to compiler / verifier errors. We soldier on
+                    // regardless, and attempt to interpret the app as a safety net.
+                    if (ret == 0) {
                         performedDexOpt = true;
                     }
-                } catch (FileNotFoundException e) {
-                    Slog.w(TAG, "Apk not found for dexopt: " + path);
-                    return DEX_OPT_FAILED;
-                } catch (IOException e) {
-                    Slog.w(TAG, "IOException reading apk: " + path, e);
-                    return DEX_OPT_FAILED;
-                } catch (StaleDexCacheError e) {
-                    Slog.w(TAG, "StaleDexCacheError when reading apk: " + path, e);
-                    return DEX_OPT_FAILED;
-                } catch (Exception e) {
-                    Slog.w(TAG, "Exception when doing dexopt : ", e);
-                    return DEX_OPT_FAILED;
                 }
             }
 
