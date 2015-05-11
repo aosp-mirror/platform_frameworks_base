@@ -1087,9 +1087,7 @@
     <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ဒေတာမရွှေ့နိုင်ပါ"</string>
     <string name="ext_media_move_failure_message" msgid="1978096440816403360">"မူရင်းနေရာတွင် ဒေတာ ကျန်ခဲ့၏"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"မီဒီယာထွက်ပေါက်အား လမ်းလွှဲပြောင်းခြင်း"</string>
-    <string name="activity_list_empty" msgid="1675388330786841066">"တိုက<U+103A>ဆိုင<U+103A>သော ပ<U+103C>ုလုပ<U+103A>ခ<U+103B>က
-                            <U+103A> ရ<U+103E>ာမတ<U+103D>ေ့ပ<U+102B>"</string>
-
+    <string name="activity_list_empty" msgid="1675388330786841066">"တိုက်ဆိုင်သော ပြုလုပ်ချက် ရှာမတွေ့ပါ"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"အပလီကေးရှင်းအား မီဒီယာ ထုတ်လွှတ်မှုကို အခြားပြင်ပ စက်ပစ္စည်းများသို့ လွှဲပြောင်းခွင့်ပြုပါ"</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"တပ်ဆင်ရေး ချိတ်ဆက်မှုများကို ဖတ်ရန်"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"အပလီကေးရှင်းအား တပ်ဆင်ရေး ချိတ်ဆက်မှုများကို ဖတ်ခွင့်ပြုသည်။ ၎င်းသည် ဖွင့်သုံးနေသည့် အထုပ်အား တပ်ဆင်မှုဆိုင်ရာ အသေးိစတ်များကို ကြည့်ရှုခွင့် ပြုသည်။"</string>
