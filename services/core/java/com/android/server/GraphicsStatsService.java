@@ -52,9 +52,9 @@ import java.util.ArrayList;
  * 2) ASHMEM_SIZE (for scratch space used during dumping)
  * 3) ASHMEM_SIZE * HISTORY_SIZE
  *
- * Currently ASHMEM_SIZE is 256 bytes and HISTORY_SIZE is 10. Assuming
+ * Currently ASHMEM_SIZE is 256 bytes and HISTORY_SIZE is 20. Assuming
  * the system then also has 10 active rendering processes in the worst case
- * this would end up using under 10KiB (8KiB for the buffers, plus some overhead
+ * this would end up using under 14KiB (12KiB for the buffers, plus some overhead
  * for userId, pid, package name, and a couple other objects)
  *
  *  @hide */
@@ -63,7 +63,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
     private static final String TAG = "GraphicsStatsService";
     private static final int ASHMEM_SIZE = 256;
-    private static final int HISTORY_SIZE = 10;
+    private static final int HISTORY_SIZE = 20;
 
     private final Context mContext;
     private final Object mLock = new Object();
