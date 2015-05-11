@@ -2793,17 +2793,16 @@ public class DevicePolicyManager {
      * @param who Which {@link DeviceAdminReceiver} this request is associated with, or null if not
      *        called by the device owner.
      * @param initializer Which {@link DeviceAdminReceiver} to make device initializer.
-     * @param initializerName The user-visible name of the device initializer.
      * @return whether the component was successfully registered as the device initializer.
      * @throws IllegalArgumentException if the componentname is null or invalid
      * @throws IllegalStateException if the caller is not device owner or the device has
      *         already been provisioned or a device initializer already exists.
      */
-    public boolean setDeviceInitializer(ComponentName who, ComponentName initializer,
-            String initializerName) throws IllegalArgumentException, IllegalStateException {
+    public boolean setDeviceInitializer(ComponentName who, ComponentName initializer)
+            throws IllegalArgumentException, IllegalStateException {
         if (mService != null) {
             try {
-                return mService.setDeviceInitializer(who, initializer, initializerName);
+                return mService.setDeviceInitializer(who, initializer);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set device initializer");
             }
