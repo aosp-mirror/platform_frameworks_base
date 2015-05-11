@@ -58,12 +58,6 @@ public final class ChooserTarget implements Parcelable {
     private IntentSender mIntentSender;
 
     /**
-     * A raw intent provided in lieu of an IntentSender. Will be filled in and sent
-     * by {@link #sendIntent(Context, Intent)}.
-     */
-    private Intent mIntent;
-
-    /**
      * The score given to this item. It can be normalized.
      */
     private float mScore;
@@ -146,43 +140,6 @@ public final class ChooserTarget implements Parcelable {
         mIntentSender = intentSender;
     }
 
-    /**
-     * Construct a deep link target for presentation by a chooser UI.
-     *
-     * <p>A target is composed of a title and an icon for presentation to the user.
-     * The UI presenting this target may truncate the title if it is too long to be presented
-     * in the available space, as well as crop, resize or overlay the supplied icon.</p>
-     *
-     * <p>The creator of a target may supply a ranking score. This score is assumed to be relative
-     * to the other targets supplied by the same
-     * {@link ChooserTargetService#onGetChooserTargets(ComponentName, IntentFilter) query}.
-     * Scores should be in the range from 0.0f (unlikely match) to 1.0f (very relevant match).
-     * Scores for a set of targets do not need to sum to 1.</p>
-     *
-     * <p>Before being sent, the Intent supplied will be
-     * {@link Intent#fillIn(Intent, int) filled in} by the Intent originally supplied
-     * to the chooser.</p>
-     *
-     * <p>Take care not to place custom {@link android.os.Parcelable} types into
-     * the Intent as extras, as the system will not be able to unparcel it to merge
-     * additional extras.</p>
-     *
-     * @param title title of this target that will be shown to a user
-     * @param icon icon to represent this target
-     * @param score ranking score for this target between 0.0f and 1.0f, inclusive
-     * @param intent Intent to fill in and send if the user chooses this target
-     */
-    public ChooserTarget(CharSequence title, Bitmap icon, float score, Intent intent) {
-        mTitle = title;
-        mIcon = icon;
-        if (score > 1.f || score < 0.f) {
-            throw new IllegalArgumentException("Score " + score + " out of range; "
-                    + "must be between 0.0f and 1.0f");
-        }
-        mScore = score;
-        mIntent = intent;
-    }
-
     ChooserTarget(Parcel in) {
         mTitle = in.readCharSequence();
         if (in.readInt() != 0) {
@@ -192,9 +149,6 @@ public final class ChooserTarget implements Parcelable {
         }
         mScore = in.readFloat();
         mIntentSender = IntentSender.readIntentSenderOrNullFromParcel(in);
-        if (in.readInt() != 0) {
-            mIntent = Intent.CREATOR.createFromParcel(in);
-        }
     }
 
     /**
@@ -241,18 +195,6 @@ public final class ChooserTarget implements Parcelable {
     }
 
     /**
-     * Returns the Intent supplied by the ChooserTarget's creator.
-     * This may be null if the creator specified an IntentSender or PendingIntent instead.
-     *
-     * <p>To fill in and send the intent, see {@link #sendIntent(Context, Intent)}.</p>
-     *
-     * @return the Intent supplied by the ChooserTarget's creator
-     */
-    public Intent getIntent() {
-        return mIntent;
-    }
-
-    /**
      * Fill in the IntentSender supplied by the ChooserTarget's creator and send it.
      *
      * @param context the sending Context; generally the Activity presenting the chooser UI
@@ -272,91 +214,8 @@ public final class ChooserTarget implements Parcelable {
                 Log.e(TAG, "sendIntent " + this + " failed", e);
                 return false;
             }
-        } else if (mIntent != null) {
-            try {
-                final Intent toSend = new Intent(mIntent);
-                toSend.fillIn(fillInIntent, 0);
-                context.startActivity(toSend);
-                return true;
-            } catch (Exception e) {
-                Log.e(TAG, "sendIntent " + this + " failed", e);
-                return false;
-            }
         } else {
-            Log.e(TAG, "sendIntent " + this + " failed - no IntentSender or Intent to send");
-            return false;
-        }
-    }
-
-    /**
-     * Same as {@link #sendIntent(Context, Intent)}, but offers a userId field to use
-     * for launching the {@link #getIntent() intent} using
-     * {@link Activity#startActivityAsCaller(Intent, Bundle, int)} if the
-     * {@link #getIntentSender() IntentSender} is not present. If the IntentSender is present,
-     * it will be invoked as usual with its own calling identity.
-     *
-     * @hide internal use only.
-     */
-    public boolean sendIntentAsCaller(Activity context, Intent fillInIntent, int userId) {
-        if (fillInIntent != null) {
-            fillInIntent.migrateExtraStreamToClipData();
-            fillInIntent.prepareToLeaveProcess();
-        }
-        if (mIntentSender != null) {
-            try {
-                mIntentSender.sendIntent(context, 0, fillInIntent, null, null);
-                return true;
-            } catch (IntentSender.SendIntentException e) {
-                Log.e(TAG, "sendIntent " + this + " failed", e);
-                return false;
-            }
-        } else if (mIntent != null) {
-            try {
-                final Intent toSend = new Intent(mIntent);
-                toSend.fillIn(fillInIntent, 0);
-                context.startActivityAsCaller(toSend, null, userId);
-                return true;
-            } catch (Exception e) {
-                Log.e(TAG, "sendIntent " + this + " failed", e);
-                return false;
-            }
-        } else {
-            Log.e(TAG, "sendIntent " + this + " failed - no IntentSender or Intent to send");
-            return false;
-        }
-    }
-
-    /**
-     * The UserHandle is only used if we're launching a raw intent. The IntentSender will be
-     * launched with its associated identity.
-     *
-     * @hide Internal use only
-     */
-    public boolean sendIntentAsUser(Activity context, Intent fillInIntent, UserHandle user) {
-        if (fillInIntent != null) {
-            fillInIntent.migrateExtraStreamToClipData();
-            fillInIntent.prepareToLeaveProcess();
-        }
-        if (mIntentSender != null) {
-            try {
-                mIntentSender.sendIntent(context, 0, fillInIntent, null, null);
-                return true;
-            } catch (IntentSender.SendIntentException e) {
-                Log.e(TAG, "sendIntent " + this + " failed", e);
-                return false;
-            }
-        } else if (mIntent != null) {
-            try {
-                final Intent toSend = new Intent(mIntent);
-                toSend.fillIn(fillInIntent, 0);
-                context.startActivityAsUser(toSend, user);
-                return true;
-            } catch (Exception e) {
-                Log.e(TAG, "sendIntent " + this + " failed", e);
-                return false;
-            }
-        } else {
-            Log.e(TAG, "sendIntent " + this + " failed - no IntentSender or Intent to send");
+            Log.e(TAG, "sendIntent " + this + " failed - no IntentSender to send");
             return false;
         }
     }
@@ -364,7 +223,7 @@ public final class ChooserTarget implements Parcelable {
     @Override
     public String toString() {
         return "ChooserTarget{"
-                + (mIntentSender != null ? mIntentSender.getCreatorPackage() : mIntent)
+                + (mIntentSender != null ? mIntentSender.getCreatorPackage() : null)
                 + ", "
                 + "'" + mTitle
                 + "', " + mScore + "}";
@@ -386,10 +245,6 @@ public final class ChooserTarget implements Parcelable {
         }
         dest.writeFloat(mScore);
         IntentSender.writeIntentSenderOrNullToParcel(mIntentSender, dest);
-        dest.writeInt(mIntent != null ? 1 : 0);
-        if (mIntent != null) {
-            mIntent.writeToParcel(dest, 0);
-        }
     }
 
     public static final Creator<ChooserTarget> CREATOR
