@@ -83,9 +83,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Kërko"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefoni"</string>
+    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Shkyç"</string>
     <string name="unlock_label" msgid="8779712358041029439">"shkyç"</string>
     <string name="phone_label" msgid="2320074140205331708">"hap telefonin"</string>
+    <!-- no translation found for voice_assist_label (3956854378310019854) -->
+    <skip />
     <string name="camera_label" msgid="7261107956054836961">"hap kamerën"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Zgjidh strukturën e re të detyrës"</string>
     <string name="cancel" msgid="6442560571259935130">"Anulo"</string>
@@ -121,10 +125,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX ka dy vija."</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX ka tre vija."</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX ka sinjal të plotë."</string>
-    <!-- no translation found for accessibility_ethernet_disconnected (5896059303377589469) -->
-    <skip />
-    <!-- no translation found for accessibility_ethernet_connected (2692130313069182636) -->
-    <skip />
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"Lidhja e eternetit u shkëput."</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"Lidhja e eternetit u lidh."</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"Nuk ka sinjal."</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"Nuk është i lidhur."</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"Zero vija."</string>
@@ -174,7 +176,8 @@
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Ekrani i kyçjes."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Cilësimet"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Përmbledhja."</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"Konfirmo"</string>
+    <!-- no translation found for accessibility_desc_close (7479755364962766729) -->
+    <skip />
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Përdoruesi <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi është i çaktivizuar."</string>
@@ -315,8 +318,12 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Njoftimet më pak urgjente, më poshtë!"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Prek sërish për ta hapur"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Rrëshqit për të shkyçur"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"Rrëshqit djathtas për të hapur telefonin"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"Rrëshqit majtas për kamerën"</string>
+    <!-- no translation found for phone_hint (4872890986869209950) -->
+    <skip />
+    <!-- no translation found for voice_hint (8939888732119726665) -->
+    <skip />
+    <!-- no translation found for camera_hint (7939688436797157483) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"Heshtje e plotë"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Vetëm me prioritet"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Vetëm alarmet"</string>
@@ -362,23 +369,15 @@
     <string name="disable_vpn" msgid="4435534311510272506">"Çaktivizo VPN-në"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"Shkëput VPN-në"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Pajisja jote menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratori yt mund të monitorojë dhe të menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat e lidhura me pajisjen tënde, si dhe informacionet e vendndodhjes së pajisjes tënde. Për më shumë informacione, kontakto me administratorin tënd."</string>
-    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="996222259035614736">"I dhe leje një aplikacioni që të konfigurojë një lidhje VPN.\n\nKy aplikacion mund të monitorojë pajisjen tënde dhe aktivitetin e rrjetit, duke përfshirë mail-at, aplikacionet dhe faqet e internetit."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Pajisja jote menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratori yt mund të monitorojë dhe të menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat e lidhura me pajisjen dhe informacionet e vendndodhjes së pajisjes.\n\nJe i lidhur me një rrjet VPN që mund të monitorojë aktivitetin tënd të rrjetit, duke përfshirë emailet, aplikacionet dhe sajtet e uebit.\n\nPër më shumë informacione, kontakto me administratorin."</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
-    <skip />
-    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Profili yt i punës menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratori yt mund të monitorojë aktivitetin tënd të rrjetit, duke përfshirë mail-at, aplikacionet dhe faqet e internetit.\n\nPër më shumë informacion, kontakto me administratorin tënd.\n\nJe i lidhur edhe me një VPN, që mund të monitorojë aktivitetin tënd të rrjetit."</string>
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
+    <string name="monitoring_description_app" msgid="6947928635272782570">"Je i lidhur me aplikacionin <xliff:g id="APPLICATION">%1$s</xliff:g>, që mund të monitorojë aktivitetin tënd në rrjet përfshirë mail-at, aplikacionet dhe faqet e internetit."</string>
+    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Je i lidhur me aplikacionin <xliff:g id="APPLICATION">%1$s</xliff:g>, që mund të monitorojë aktivitetin tënd personal në rrjet përfshirë mail-at, aplikacionet dhe faqet e internetit."</string>
+    <string name="monitoring_description_app_work" msgid="808687576155832307">"Profili yt i punës menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ai është i lidhur me <xliff:g id="APPLICATION">%2$s</xliff:g>, që mund të monitorojë aktivitetin tënd të punës në rrjet përfshirë mail-at, aplikacionet dhe faqet e internetit.\n\nPër më shumë informacion, kontakto me administratorin tënd."</string>
+    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Profili yt i punës menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ai është i lidhur me <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, që mund të monitorojë aktivitetin tënd të punës në rrjet përfshirë mail-at, aplikacionet dhe faqet e internetit.\n\nJe lidhur gjithashtu edhe me <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, që mund të monitorojë aktivitetin tënd personal në rrjet."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Pajisja jote menaxhohet nga <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratori mund të monitorojë dhe menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat që shoqërojnë pajisjen tënde si dhe informacionin e vendndodhjes së pajisjes.\n\nJe i lidhur me <xliff:g id="APPLICATION">%2$s</xliff:g>, që mund të monitorojë aktivitetin tënd të punës në rrjet përfshirë mail-at, aplikacionet dhe faqet e internetit.\n\nPër më shumë informacion, kontakto me administratorin tënd."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Pajisje do të qëndrojë e kyçur derisa ta shkyçësh manualisht"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Merr njoftime më shpejt"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Shikoji para se t\'i shkyçësh"</string>
@@ -388,6 +387,10 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Fshihi të gjitha"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Përfundo tani"</string>
+    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
+    <skip />
+    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
+    <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekrani u gozhdua"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Kjo e ruan në pamje derisa e heq nga gozhdimi. Prek dhe mbaj shtypur njëkohësisht \"Prapa\" dhe \"Përmbledhje\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Kjo e ruan në pamje derisa e heq nga gozhdimi. Prek dhe mbaj shtypur njëkohësisht \"Përmbledhje\" për ta hequr nga gozhdimi."</string>

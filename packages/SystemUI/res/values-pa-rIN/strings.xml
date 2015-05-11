@@ -83,9 +83,13 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"ਖੋਜੋ"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ਕੈਮਰਾ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ਫੋਨ"</string>
+    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
+    <skip />
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ਅਨਲੌਕ ਕਰੋ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ਅਨਲੌਕ ਕਰੋ"</string>
     <string name="phone_label" msgid="2320074140205331708">"ਫੋਨ ਖੋਲ੍ਹੋ"</string>
+    <!-- no translation found for voice_assist_label (3956854378310019854) -->
+    <skip />
     <string name="camera_label" msgid="7261107956054836961">"ਕੈਮਰਾ ਖੋਲ੍ਹੋ"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"ਨਵਾਂ ਕੰਮ ਲੇਆਉਟ ਚੁਣੋ"</string>
     <string name="cancel" msgid="6442560571259935130">"ਰੱਦ ਕਰੋ"</string>
@@ -121,10 +125,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX ਦੋ ਬਾਰਸ।"</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX ਤਿੰਨ ਬਾਰਸ।"</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX ਸਿਗਨਲ ਪੂਰਾ।"</string>
-    <!-- no translation found for accessibility_ethernet_disconnected (5896059303377589469) -->
-    <skip />
-    <!-- no translation found for accessibility_ethernet_connected (2692130313069182636) -->
-    <skip />
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"ਈਥਰਨੈੱਟ ਡਿਸਕਨੈਕਟ ਹੋ ਗਿਆ।"</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"ਈਥਰਨੈੱਟ ਕਨੈਕਟ ਹੋ ਗਿਆ।"</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"ਕੋਈ ਸਿਗਨਲ ਨਹੀਂ।"</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ।"</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"ਸਿਫ਼ਰ ਬਾਰਸ।"</string>
@@ -166,15 +168,14 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> ਰੱਦ ਕੀਤਾ।"</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"ਸਾਰੀਆਂ ਹਾਲੀਆ ਐਪਲੀਕੇਸ਼ਨਾਂ ਰੱਦ ਕੀਤੀਆਂ।"</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ।"</string>
-    <!-- no translation found for accessibility_recents_task_header (1437183540924535457) -->
-    <skip />
+    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ਸੂਚਨਾ ਰੱਦ ਕੀਤੀ।"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ਸੂਚਨਾ ਸ਼ੇਡ।"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ਲੌਕ ਸਕ੍ਰੀਨ।"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ਰੂਪ-ਰੇਖਾ।"</string>
-    <string name="accessibility_desc_confirm" msgid="3446792278337969766">"ਪੁਸ਼ਟੀ ਕਰੋ"</string>
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"ਬੰਦ ਕਰੋ"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ਉਪਭੋਗਤਾ <xliff:g id="USER">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi ਬੰਦ ਕੀਤਾ।"</string>
@@ -315,8 +316,12 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ਹੇਠਾਂ ਘੱਟ ਲਾਜ਼ਮੀ ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"ਖੋਲ੍ਹਣ ਲਈ ਦੁਬਾਰਾ ਛੋਹਵੋ"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"ਫੋਨ ਲਈ ਸੱਜੇ ਪਾਸੇ ਸਵਾਈਪ ਕਰੋ"</string>
-    <string name="camera_hint" msgid="5241441720959174226">"ਕੈਮਰੇ ਲਈ ਖੱਬੇ ਪਾਸੇ ਸਵਾਈਪ ਕਰੋ"</string>
+    <!-- no translation found for phone_hint (4872890986869209950) -->
+    <skip />
+    <!-- no translation found for voice_hint (8939888732119726665) -->
+    <skip />
+    <!-- no translation found for camera_hint (7939688436797157483) -->
+    <skip />
     <string name="interruption_level_none" msgid="6000083681244492992">"ਕੁਲ ਚੁੱਪੀ"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"ਕੇਵਲ ਤਰਜੀਹੀ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"ਕੇਵਲ ਅਲਾਰਮ"</string>
@@ -362,23 +367,15 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ਨੂੰ ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"ਤੁਹਾਡੀ ਡਿਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਵੱਲੋਂ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਬੰਧਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਸ, ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ। ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <!-- no translation found for monitoring_description_vpn (996222259035614736) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="996222259035614736">"ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਨੂੰ ਇੱਕ ਕਨੈਕਸ਼ਨ ਸੈੱਟ ਅੱਪ ਕਰਨ ਦੀ ਅਨੁਮਤੀ ਦਿੱਤੀ ਹੈ।\n\nਇਹ ਐਪ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈੱਬਪੰਨੇ ਸਮੇਤ ਆਪਣੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"ਤੁਹਾਡੀ ਡਿਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g>ਵੱਲੋਂ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਪ੍ਰਬੰਧਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਸ, ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ।\n\nਤੁਸੀਂ ਇੱਕ VPN ਨਾਲ ਵੀ ਕਨੈਕਟ ਕੀਤਾ ਹੈ, ਜੋ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦਾ ਹੈ, ਈਮੇਲਾਂ, ਐਪਸ ਅਤੇ ਵੈਬਸਾਈਟਾਂ ਸਮੇਤ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <!-- no translation found for monitoring_description_vpn_profile_owned (2054949132145039290) -->
-    <skip />
-    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app (6947928635272782570) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal (8506133233655324426) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_work (808687576155832307) -->
-    <skip />
-    <!-- no translation found for monitoring_description_app_personal_work (7711690793960304868) -->
-    <skip />
-    <!-- no translation found for monitoring_description_vpn_app_device_owned (4970443827043261703) -->
-    <skip />
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਤੁਹਾਡਾ ਪ੍ਰਸ਼ਾਸਕ ਈਮੇਲ, ਐਪਸ, ਅਤੇ ਵੈੱਬਪੰਨੇ ਸੰਤੇ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰਨ ਦੇ ਸਮਰੱਥ ਹੈ।\n\nਵਧੇਰੇ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।\n\nਤੁਸੀਂ VPN ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋ, ਜੋ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
+    <string name="monitoring_description_app" msgid="6947928635272782570">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈੱਬਪੰਨੇ ਸਮੇਤ ਆਪਣੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="monitoring_description_app_personal" msgid="8506133233655324426">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈੱਬਪੰਨੇ ਸਮੇਤ ਆਪਣੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="monitoring_description_app_work" msgid="808687576155832307">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਤੁਸੀਂ <xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈੱਬਪੰਨੇ ਸਮੇਤ ਆਪਣੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।\n\nਵਧੇਰੇ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
+    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਤੁਸੀਂ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈੱਬਪੰਨੇ ਸਮੇਤ ਆਪਣੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।\n\nਤੁਸੀਂ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋ, ਜੋ ਤੁਹਾਡੀ ਵਿਅਕਤੀਗਤ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰਦੀ ਹੈ।"</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"ਤੁਹਾਡੀ ਡਿਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਪ੍ਰਬੰਧਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਸ, ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਡਾਟਾ ਅਤੇ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਦੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ।\n\nਤੁਸੀਂ ਇੱਕ <xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈੱਬਪੰਨੇ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ਡਿਵਾਈਸ ਲੌਕ ਰਹੇਗੀ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਮੈਨੂਅਲੀ ਅਨਲੌਕ ਨਹੀਂ ਕਰਦੇ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ਤੇਜ਼ੀ ਨਾਲ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ਅਨਲੌਕ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਉਹਨਾਂ ਨੂੰ ਦੇਖੋ"</string>
@@ -388,6 +385,10 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"ਸਾਰੇ ਲੁਕਾਓ"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"ਹੁਣੇ ਸਮਾਪਤ ਕਰੋ"</string>
+    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
+    <skip />
+    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
+    <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"ਇਹ ਇਸਨੂੰ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿਨ ਕਰਨ ਲਈ ਪਿੱਛੇ ਅਤੇ ਰੂਪ-ਰੇਖਾ ਨੂੰ ਇੱਕੋ ਸਮੇਂ ਛੋਹਵੋ ਅਤੇ ਹੋਲਡ ਕਰੋ।"</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"ਇਹ ਇਸਨੂੰ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿਨ ਕਰਨ ਲਈ ਰੂਪ-ਰੇਖਾ ਨੂੰ ਛੋਹਵੋ ਅਤੇ ਹੋਲਡ ਕਰੋ।"</string>
