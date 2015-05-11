@@ -7763,7 +7763,6 @@ package android.content {
     field public static final java.lang.String ALARM_SERVICE = "alarm";
     field public static final java.lang.String APPWIDGET_SERVICE = "appwidget";
     field public static final java.lang.String APP_OPS_SERVICE = "appops";
-    field public static final java.lang.String AUDIO_DEVICES_SERVICE = "audio_devices_manager";
     field public static final java.lang.String AUDIO_SERVICE = "audio";
     field public static final java.lang.String BATTERY_SERVICE = "batterymanager";
     field public static final int BIND_ABOVE_CLIENT = 8; // 0x8
@@ -14728,12 +14727,12 @@ package android.media {
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
-  public class AudioDeviceInfo {
-    method public java.lang.String getAddress();
+  public final class AudioDeviceInfo {
     method public int[] getChannelCounts();
     method public int[] getChannelMasks();
     method public int[] getFormats();
-    method public java.lang.String getName();
+    method public int getId();
+    method public java.lang.CharSequence getName();
     method public int[] getSampleRates();
     method public int getType();
     method public boolean isSink();
@@ -14758,15 +14757,6 @@ package android.media {
     field public static final int TYPE_USB_DEVICE = 11; // 0xb
     field public static final int TYPE_WIRED_HEADPHONES = 4; // 0x4
     field public static final int TYPE_WIRED_HEADSET = 3; // 0x3
-  }
-
-  public class AudioDevicesManager {
-    method public void addOnAudioDeviceConnectionListener(android.media.OnAudioDeviceConnectionListener, android.os.Handler);
-    method public android.media.AudioDeviceInfo[] listDevices(int);
-    method public void removeOnAudioDeviceConnectionListener(android.media.OnAudioDeviceConnectionListener);
-    field public static final int LIST_DEVICES_ALL = 3; // 0x3
-    field public static final int LIST_DEVICES_INPUTS = 1; // 0x1
-    field public static final int LIST_DEVICES_OUTPUTS = 2; // 0x2
   }
 
   public class AudioFormat {
@@ -14839,11 +14829,13 @@ package android.media {
 
   public class AudioManager {
     method public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener);
+    method public void addOnAudioDeviceConnectionListener(android.media.OnAudioDeviceConnectionListener, android.os.Handler);
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
     method public void dispatchMediaKeyEvent(android.view.KeyEvent);
     method public int generateAudioSessionId();
+    method public android.media.AudioDeviceInfo[] getDevices(int);
     method public int getMode();
     method public java.lang.String getParameters(java.lang.String);
     method public java.lang.String getProperty(java.lang.String);
@@ -14868,6 +14860,7 @@ package android.media {
     method public deprecated void registerMediaButtonEventReceiver(android.app.PendingIntent);
     method public deprecated void registerRemoteControlClient(android.media.RemoteControlClient);
     method public deprecated boolean registerRemoteController(android.media.RemoteController);
+    method public void removeOnAudioDeviceConnectionListener(android.media.OnAudioDeviceConnectionListener);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public deprecated void setBluetoothA2dpOn(boolean);
     method public void setBluetoothScoOn(boolean);
@@ -14936,6 +14929,9 @@ package android.media {
     field public static final int FX_KEYPRESS_SPACEBAR = 6; // 0x6
     field public static final int FX_KEYPRESS_STANDARD = 5; // 0x5
     field public static final int FX_KEY_CLICK = 0; // 0x0
+    field public static final int GET_DEVICES_ALL = 3; // 0x3
+    field public static final int GET_DEVICES_INPUTS = 1; // 0x1
+    field public static final int GET_DEVICES_OUTPUTS = 2; // 0x2
     field public static final int MODE_CURRENT = -1; // 0xffffffff
     field public static final int MODE_INVALID = -2; // 0xfffffffe
     field public static final int MODE_IN_CALL = 2; // 0x2
@@ -14984,7 +14980,7 @@ package android.media {
 
   public class AudioRecord {
     ctor public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
-    method public void addOnAudioRecordRoutingListener(android.media.OnAudioRecordRoutingListener, android.os.Handler);
+    method public void addOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener, android.os.Handler);
     method public int getAudioFormat();
     method public int getAudioSessionId();
     method public int getAudioSource();
@@ -14995,7 +14991,7 @@ package android.media {
     method public int getNativeFrameCount() throws java.lang.IllegalStateException;
     method public int getNotificationMarkerPosition();
     method public int getPositionNotificationPeriod();
-    method public android.media.AudioDeviceInfo getPreferredInputDevice();
+    method public android.media.AudioDeviceInfo getPreferredDevice();
     method public int getRecordingState();
     method public android.media.AudioDeviceInfo getRoutedDevice();
     method public int getSampleRate();
@@ -15008,10 +15004,10 @@ package android.media {
     method public int read(java.nio.ByteBuffer, int);
     method public int read(java.nio.ByteBuffer, int, int);
     method public void release();
-    method public void removeOnAudioRecordRoutingListener(android.media.OnAudioRecordRoutingListener);
+    method public void removeOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener);
     method public int setNotificationMarkerPosition(int);
     method public int setPositionNotificationPeriod(int);
-    method public boolean setPreferredInputDevice(android.media.AudioDeviceInfo);
+    method public boolean setPreferredDevice(android.media.AudioDeviceInfo);
     method public void setRecordPositionUpdateListener(android.media.AudioRecord.OnRecordPositionUpdateListener);
     method public void setRecordPositionUpdateListener(android.media.AudioRecord.OnRecordPositionUpdateListener, android.os.Handler);
     method public void startRecording() throws java.lang.IllegalStateException;
@@ -15042,6 +15038,10 @@ package android.media {
     method public abstract void onPeriodicNotification(android.media.AudioRecord);
   }
 
+  public static abstract interface AudioRecord.OnRoutingChangedListener {
+    method public abstract void onRoutingChanged(android.media.AudioRecord);
+  }
+
   public final class AudioTimestamp {
     ctor public AudioTimestamp();
     field public long framePosition;
@@ -15052,7 +15052,7 @@ package android.media {
     ctor public AudioTrack(int, int, int, int, int, int) throws java.lang.IllegalArgumentException;
     ctor public AudioTrack(int, int, int, int, int, int, int) throws java.lang.IllegalArgumentException;
     ctor public AudioTrack(android.media.AudioAttributes, android.media.AudioFormat, int, int, int) throws java.lang.IllegalArgumentException;
-    method public void addOnAudioTrackRoutingListener(android.media.OnAudioTrackRoutingListener, android.os.Handler);
+    method public void addOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener, android.os.Handler);
     method public int attachAuxEffect(int);
     method public void flush();
     method public int getAudioFormat();
@@ -15071,7 +15071,7 @@ package android.media {
     method public android.media.PlaybackParams getPlaybackParams();
     method public int getPlaybackRate();
     method public int getPositionNotificationPeriod();
-    method public android.media.AudioDeviceInfo getPreferredOutputDevice();
+    method public android.media.AudioDeviceInfo getPreferredDevice();
     method public android.media.AudioDeviceInfo getRoutedDevice();
     method public int getSampleRate();
     method public int getState();
@@ -15081,7 +15081,7 @@ package android.media {
     method public void play() throws java.lang.IllegalStateException;
     method public void release();
     method public int reloadStaticData();
-    method public void removeOnAudioTrackRoutingListener(android.media.OnAudioTrackRoutingListener);
+    method public void removeOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener);
     method public int setAuxEffectSendLevel(float);
     method public int setLoopPoints(int, int, int);
     method public int setNotificationMarkerPosition(int);
@@ -15091,7 +15091,7 @@ package android.media {
     method public void setPlaybackPositionUpdateListener(android.media.AudioTrack.OnPlaybackPositionUpdateListener, android.os.Handler);
     method public int setPlaybackRate(int);
     method public int setPositionNotificationPeriod(int);
-    method public boolean setPreferredOutputDevice(android.media.AudioDeviceInfo);
+    method public boolean setPreferredDevice(android.media.AudioDeviceInfo);
     method protected deprecated void setState(int);
     method public deprecated int setStereoVolume(float, float);
     method public int setVolume(float);
@@ -15132,6 +15132,10 @@ package android.media {
   public static abstract interface AudioTrack.OnPlaybackPositionUpdateListener {
     method public abstract void onMarkerReached(android.media.AudioTrack);
     method public abstract void onPeriodicNotification(android.media.AudioTrack);
+  }
+
+  public static abstract interface AudioTrack.OnRoutingChangedListener {
+    method public abstract void onRoutingChanged(android.media.AudioTrack);
   }
 
   public class CamcorderProfile {
@@ -16499,14 +16503,6 @@ package android.media {
 
   public abstract interface OnAudioDeviceConnectionListener {
     method public abstract void onAudioDeviceConnection();
-  }
-
-  public abstract interface OnAudioRecordRoutingListener {
-    method public abstract void onAudioRecordRouting(android.media.AudioRecord);
-  }
-
-  public abstract interface OnAudioTrackRoutingListener {
-    method public abstract void onAudioTrackRouting(android.media.AudioTrack);
   }
 
   public final class PlaybackParams {
