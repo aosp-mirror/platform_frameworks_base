@@ -204,6 +204,10 @@ parent.link=index.html
 
     <li>Click the <strong>Start Method Profiling</strong> button.</li>
 
+    <li>In Android 4.4 and later, choose either trace-based profiling or sample-based profiling
+    with a specified sampling interval. For earlier versions of Android, only trace-based profiling
+    is available.</li>
+
     <li>Interact with your application to start the methods that you want to profile.</li>
 
     <li>Click the <strong>Stop Method Profiling</strong> button. DDMS stops profiling your
