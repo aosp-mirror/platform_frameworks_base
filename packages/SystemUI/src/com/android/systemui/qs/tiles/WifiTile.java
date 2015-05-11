@@ -94,8 +94,8 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleClick() {
-        super.handleClick();
         mState.copyTo(mStateBeforeClick);
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.enabled);
         mController.setWifiEnabled(!mState.enabled);
     }
 
@@ -276,6 +276,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         @Override
         public void setToggleState(boolean state) {
             if (DEBUG) Log.d(TAG, "setToggleState " + state);
+            MetricsLogger.action(mContext, MetricsLogger.QS_WIFI_TOGGLE, state);
             mController.setWifiEnabled(state);
             showDetail(false);
         }

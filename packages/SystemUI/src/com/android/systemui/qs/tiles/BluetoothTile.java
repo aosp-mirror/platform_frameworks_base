@@ -75,8 +75,8 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleClick() {
-        super.handleClick();
         final boolean isEnabled = (Boolean)mState.value;
+        MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setBluetoothEnabled(!isEnabled);
     }
 
@@ -184,6 +184,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
         @Override
         public void setToggleState(boolean state) {
+            MetricsLogger.action(mContext, MetricsLogger.QS_BLUETOOTH_TOGGLE, state);
             mController.setBluetoothEnabled(state);
             showDetail(false);
         }
