@@ -197,6 +197,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өчүк"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi тандалган"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Уюлдук тармак тандалган"</string>
@@ -1430,22 +1431,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"Орнотуу"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Чыгаруу"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Изилдөө"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> табылбай жатат"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Түзмөктү кайра сайыңыз"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> сактагычына ооштурулууда"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Дайындар ооштурулууда…"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Ооштуруу аяктады"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Дайындар <xliff:g id="NAME">%s</xliff:g> сактагычына ооштурулду"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Дайындар ооштурулбай калды"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Дайындар баштапкы ордунда калды"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Туура келген аракеттер табылбады."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа чыгарылышын багыттоо"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Колдонмого  медиа мазмунду башка тышкы түзмөктөргө багыттоо уруксатын берет."</string>
@@ -1883,8 +1876,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун кулпуну ачкан үлгү суралсын"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Администраторуңуз тарабынан орнотулган"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Администраторуңуз жаңырткан"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Администраторуңуз тарабынан жок кылынган"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареянын өмүрүн узартуу үчүн, батареяны үнөмдөгүч түзмөгүңүздүн ишинин майнаптуулугун азайтып, дирилдөө, жайгашкан жерди аныктоо кызматтары жана фондук дайындардын көпчүлүгүн чектеп коёт. Электрондук почта, билдирүү жазышуу жана башка шайкештештирүүгө байланыштуу колдонмолор ачылмайынча жаңыртылбай калышы мүмкүн.\n\nБатарея үнөмдөгүч түзмөгүңүз кубатталып жатканда автоматтык түрдө өчүп калат."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1909,8 +1901,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Жыйнап коюу"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Тынчымды алба"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Аракетсиз убакыт"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Иш түндөрү"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Дем алыш күндөрү"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> тарабынан үнсүздөлдү"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Түзмөгүңүздө ички көйгөй бар жана ал баштапкы абалга кайтарылмайынча туруктуу иштебей коюшу мүмкүн."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Түзмөгүңүздө ички көйгөй бар. Анын чоо-жайын билүү үчүн өндүрүүчүңүзгө кайрылыңыз."</string>

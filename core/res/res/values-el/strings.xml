@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ανενεργό"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Προτίμηση Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Προτίμηση δικτύου κινητής τηλεφωνίας"</string>
@@ -1458,8 +1459,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Να γίνεται ερώτηση για το μοτίβο ξεκλειδώματος, πριν από το ξεκαρφίτσωμα"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Να γίνεται ερώτηση για τον κωδικό πρόσβασης, πριν από το ξεκαρφίτσωμα"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Εγκαταστάθηκε από το διαχειριστή σας"</string>
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Ενημερώθηκε από το διαχειριστή σας"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Διαγράφηκε από το διαχειριστή σας"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Προκειμένου να βελτιώσει τη διάρκεια ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει λειτουργίες όπως η δόνηση, οι υπηρεσίες τοποθεσίας και τα περισσότερα δεδομένα παρασκηνίου. Το ηλεκτρονικό ταχυδρομείο, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται έως ότου τις ανοίξετε.\n\nΗ Εξοικονόμηση μπαταρίας απενεργοποιείται αυτόματα όταν η συσκευή σας φορτίζει."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1484,8 +1484,12 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Σύμπτυξη"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Μην ενοχλείτε"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Διακοπή λειτουργίας"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"Καθημερινές"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"Σαββατοκύριακα"</string>
+    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
+    <skip />
+    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"Σίγαση από <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Υπάρχει ένα εσωτερικό πρόβλημα με τη συσκευή σας και ενδέχεται να είναι ασταθής μέχρι την επαναφορά των εργοστασιακών ρυθμίσεων."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Υπάρχει ένα εσωτερικό πρόβλημα με τη συσκευή σας. Επικοινωνήστε με τον κατασκευαστή σας για λεπτομέρειες."</string>
