@@ -15,6 +15,8 @@
  */
 package android.security;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -217,6 +219,7 @@ public final class KeyChain {
      * successfully installed, otherwise {@link
      * Activity#RESULT_CANCELED} will be returned.
      */
+    @NonNull
     public static Intent createInstallIntent() {
         Intent intent = new Intent(ACTION_INSTALL);
         intent.setClassName(CERT_INSTALLER_PACKAGE,
@@ -261,9 +264,10 @@ public final class KeyChain {
      * @param alias The alias to preselect if available, or null if
      *     unavailable.
      */
-    public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasCallback response,
+    public static void choosePrivateKeyAlias(@NonNull Activity activity,
+            @NonNull KeyChainAliasCallback response,
             @KeyStoreKeyProperties.AlgorithmEnum String[] keyTypes, Principal[] issuers,
-            String host, int port, String alias) {
+            @Nullable String host, int port, @Nullable String alias) {
         choosePrivateKeyAlias(activity, response, keyTypes, issuers, host, port, null, alias);
     }
 
@@ -306,9 +310,10 @@ public final class KeyChain {
      * @param alias The alias to preselect if available, or null if
      *     unavailable.
      */
-    public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasCallback response,
+    public static void choosePrivateKeyAlias(@NonNull Activity activity,
+            @NonNull KeyChainAliasCallback response,
             @KeyStoreKeyProperties.AlgorithmEnum String[] keyTypes, Principal[] issuers,
-            String host, int port, String url, String alias) {
+            @Nullable String host, int port, @Nullable String url, @Nullable String alias) {
         /*
          * TODO currently keyTypes, issuers are unused. They are meant
          * to follow the semantics and purpose of X509KeyManager
@@ -361,7 +366,8 @@ public final class KeyChain {
      * returned via {@link KeyChainAliasCallback#alias}.
      * @throws KeyChainException if the alias was valid but there was some problem accessing it.
      */
-    public static PrivateKey getPrivateKey(Context context, String alias)
+    @Nullable
+    public static PrivateKey getPrivateKey(@NonNull Context context, @NonNull String alias)
             throws KeyChainException, InterruptedException {
         if (alias == null) {
             throw new NullPointerException("alias == null");
@@ -396,8 +402,9 @@ public final class KeyChain {
      * returned via {@link KeyChainAliasCallback#alias}.
      * @throws KeyChainException if the alias was valid but there was some problem accessing it.
      */
-    public static X509Certificate[] getCertificateChain(Context context, String alias)
-            throws KeyChainException, InterruptedException {
+    @Nullable
+    public static X509Certificate[] getCertificateChain(@NonNull Context context,
+            @NonNull String alias) throws KeyChainException, InterruptedException {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
@@ -432,7 +439,7 @@ public final class KeyChain {
      * "RSA").
      */
     public static boolean isKeyAlgorithmSupported(
-            @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
+            @NonNull @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
         final String algUpper = algorithm.toUpperCase(Locale.US);
         return KeyStoreKeyProperties.Algorithm.EC.equals(algUpper)
                 || KeyStoreKeyProperties.Algorithm.RSA.equals(algUpper);
@@ -446,7 +453,7 @@ public final class KeyChain {
      * that makes it non-exportable.
      */
     public static boolean isBoundKeyAlgorithm(
-            @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
+            @NonNull @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
         if (!isKeyAlgorithmSupported(algorithm)) {
             return false;
         }
@@ -455,7 +462,8 @@ public final class KeyChain {
     }
 
     /** @hide */
-    public static X509Certificate toCertificate(byte[] bytes) {
+    @NonNull
+    public static X509Certificate toCertificate(@NonNull byte[] bytes) {
         if (bytes == null) {
             throw new IllegalArgumentException("bytes == null");
         }
@@ -496,14 +504,14 @@ public final class KeyChain {
      *
      * Caller should call unbindService on the result when finished.
      */
-    public static KeyChainConnection bind(Context context) throws InterruptedException {
+    public static KeyChainConnection bind(@NonNull Context context) throws InterruptedException {
         return bindAsUser(context, Process.myUserHandle());
     }
 
     /**
      * @hide
      */
-    public static KeyChainConnection bindAsUser(Context context, UserHandle user)
+    public static KeyChainConnection bindAsUser(@NonNull Context context, UserHandle user)
             throws InterruptedException {
         if (context == null) {
             throw new NullPointerException("context == null");
@@ -537,7 +545,7 @@ public final class KeyChain {
         return new KeyChainConnection(context, keyChainServiceConnection, q.take());
     }
 
-    private static void ensureNotOnMainThread(Context context) {
+    private static void ensureNotOnMainThread(@NonNull Context context) {
         Looper looper = Looper.myLooper();
         if (looper != null && looper == context.getMainLooper()) {
             throw new IllegalStateException(

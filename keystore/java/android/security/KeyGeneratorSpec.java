@@ -16,6 +16,9 @@
 
 package android.security;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.text.TextUtils;
@@ -163,6 +166,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityStart() {
         return mKeyValidityStart;
     }
@@ -172,6 +176,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityForConsumptionEnd() {
         return mKeyValidityForConsumptionEnd;
     }
@@ -181,6 +186,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityForOriginationEnd() {
         return mKeyValidityForOriginationEnd;
     }
@@ -195,6 +201,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
      */
+    @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
@@ -202,6 +209,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Gets the set of block modes with which the key can be used.
      */
+    @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
@@ -269,7 +277,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          * {@code context} passed in may be used to pop up some UI to ask the user to unlock or
          * initialize the Android KeyStore facility.
          */
-        public Builder(Context context) {
+        public Builder(@NonNull Context context) {
             if (context == null) {
                 throw new NullPointerException("context == null");
             }
@@ -282,7 +290,8 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>The alias must be provided. There is no default.
          */
-        public Builder setAlias(String alias) {
+        @NonNull
+        public Builder setAlias(@NonNull String alias) {
             if (alias == null) {
                 throw new NullPointerException("alias == null");
             }
@@ -296,6 +305,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          * <p>By default, the key size will be determines based on the key algorithm. For example,
          * for {@code HmacSHA256}, the key size will default to {@code 256}.
          */
+        @NonNull
         public Builder setKeySize(int keySize) {
             mKeySize = keySize;
             return this;
@@ -313,6 +323,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see KeyguardManager#isDeviceSecure()
          */
+        @NonNull
         public Builder setEncryptionRequired() {
             mFlags |= KeyStore.FLAG_ENCRYPTED;
             return this;
@@ -325,6 +336,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setKeyValidityEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityStart(Date startDate) {
             mKeyValidityStart = startDate;
             return this;
@@ -339,6 +351,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          * @see #setKeyValidityForConsumptionEnd(Date)
          * @see #setKeyValidityForOriginationEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityEnd(Date endDate) {
             setKeyValidityForOriginationEnd(endDate);
             setKeyValidityForConsumptionEnd(endDate);
@@ -352,6 +365,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityForOriginationEnd(Date endDate) {
             mKeyValidityForOriginationEnd = endDate;
             return this;
@@ -365,6 +379,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityForConsumptionEnd(Date endDate) {
             mKeyValidityForConsumptionEnd = endDate;
             return this;
@@ -375,6 +390,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for all keys. There is no default.
          */
+        @NonNull
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
             mPurposes = purposes;
             return this;
@@ -387,6 +403,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
          */
+        @NonNull
         public Builder setEncryptionPaddings(
                 @KeyStoreKeyProperties.EncryptionPaddingEnum String... paddings) {
             mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
@@ -399,6 +416,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for encryption/decryption keys.
          */
+        @NonNull
         public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
             mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
             return this;
@@ -436,6 +454,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          * ciphertext.</li>
          * </ul>
          */
+        @NonNull
         public Builder setRandomizedEncryptionRequired(boolean required) {
             mRandomizedEncryptionRequired = required;
             return this;
@@ -456,6 +475,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
+        @NonNull
         public Builder setUserAuthenticationRequired(boolean required) {
             mUserAuthenticationRequired = required;
             return this;
@@ -472,7 +492,9 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @see #setUserAuthenticationRequired(boolean)
          */
-        public Builder setUserAuthenticationValidityDurationSeconds(int seconds) {
+        @NonNull
+        public Builder setUserAuthenticationValidityDurationSeconds(
+                @IntRange(from = -1) int seconds) {
             mUserAuthenticationValidityDurationSeconds = seconds;
             return this;
         }
@@ -482,6 +504,7 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
          *
          * @throws IllegalArgumentException if a required field is missing or violates a constraint.
          */
+        @NonNull
         public KeyGeneratorSpec build() {
             return new KeyGeneratorSpec(mContext,
                     mKeystoreAlias,
