@@ -174,6 +174,9 @@ public final class ViewRootImpl implements ViewParent,
     // so the window should no longer be active.
     boolean mStopped = false;
 
+    // Set to true to stop input during an Activity Transition.
+    boolean mPausedForTransition = false;
+
     boolean mLastInCompatMode = false;
 
     SurfaceHolder.Callback2 mSurfaceHolderCallback;
@@ -982,13 +985,23 @@ public final class ViewRootImpl implements ViewParent,
         return null;
     }
 
-    void setStopped(boolean stopped) {
+    void setWindowStopped(boolean stopped) {
         if (mStopped != stopped) {
             mStopped = stopped;
-            if (!stopped) {
+            if (!mStopped) {
                 scheduleTraversals();
             }
         }
+    }
+
+    /**
+     * Block the input events during an Activity Transition. The KEYCODE_BACK event is allowed
+     * through to allow quick reversal of the Activity Transition.
+     *
+     * @param paused true to pause, false to resume.
+     */
+    public void setPausedForTransition(boolean paused) {
+        mPausedForTransition = paused;
     }
 
     @Override
@@ -3637,8 +3650,9 @@ public final class ViewRootImpl implements ViewParent,
             if (mView == null || !mAdded) {
                 Slog.w(TAG, "Dropping event due to root view being removed: " + q.mEvent);
                 return true;
-            } else if ((!mAttachInfo.mHasWindowFocus || mStopped)
-                    && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+            } else if ((!mAttachInfo.mHasWindowFocus
+                    && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) || mStopped
+                    || (mPausedForTransition && !isBack(q.mEvent))) {
                 // This is a focus event and the window doesn't currently have input focus or
                 // has stopped. This could be an event that came back from the previous stage
                 // but the window has lost focus or stopped in the meantime.
@@ -3659,6 +3673,14 @@ public final class ViewRootImpl implements ViewParent,
         void dump(String prefix, PrintWriter writer) {
             if (mNext != null) {
                 mNext.dump(prefix, writer);
+            }
+        }
+
+        private boolean isBack(InputEvent event) {
+            if (event instanceof KeyEvent) {
+                return ((KeyEvent) event).getKeyCode() == KeyEvent.KEYCODE_BACK;
+            } else {
+                return false;
             }
         }
     }
@@ -6228,7 +6250,7 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
-        if (mView == null) {
+        if (mView == null || mStopped || mPausedForTransition) {
             return false;
         }
         // Intercept accessibility focus events fired by virtual nodes to keep

@@ -586,7 +586,7 @@ final class AccessibilityInteractionController {
         }
     }
 
-    private void perfromAccessibilityActionUiThread(Message message) {
+    private void performAccessibilityActionUiThread(Message message) {
         final int flags = message.arg1;
         final int accessibilityViewId = message.arg2;
 
@@ -602,7 +602,8 @@ final class AccessibilityInteractionController {
 
         boolean succeeded = false;
         try {
-            if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null) {
+            if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null ||
+                    mViewRootImpl.mStopped || mViewRootImpl.mPausedForTransition) {
                 return;
             }
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
@@ -1146,7 +1147,7 @@ final class AccessibilityInteractionController {
                     findAccessibilityNodeInfoByAccessibilityIdUiThread(message);
                 } break;
                 case MSG_PERFORM_ACCESSIBILITY_ACTION: {
-                    perfromAccessibilityActionUiThread(message);
+                    performAccessibilityActionUiThread(message);
                 } break;
                 case MSG_FIND_ACCESSIBILITY_NODE_INFOS_BY_VIEW_ID: {
                     findAccessibilityNodeInfosByViewIdUiThread(message);
