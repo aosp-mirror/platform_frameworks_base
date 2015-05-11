@@ -19956,7 +19956,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         public ComponentName getHomeActivityForUser(int userId) {
             synchronized (ActivityManagerService.this) {
                 ActivityRecord homeActivity = mStackSupervisor.getHomeActivityForUser(userId);
-                return homeActivity.realActivity;
+                return homeActivity == null ? null : homeActivity.realActivity;
             }
         }
     }

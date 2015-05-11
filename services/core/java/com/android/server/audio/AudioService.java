@@ -20,6 +20,7 @@ import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
+import static android.os.Process.FIRST_APPLICATION_UID;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -5024,6 +5025,10 @@ public class AudioService extends IAudioService.Stub {
         }
         for (int j = packages.size() - 1; j >= 0; j--) {
             PackageInfo pkg = packages.get(j);
+            // Skip system processes
+            if (UserHandle.getAppId(pkg.applicationInfo.uid) < FIRST_APPLICATION_UID) {
+                continue;
+            }
             if (homeActivityName != null
                     && pkg.packageName.equals(homeActivityName.getPackageName())
                     && pkg.applicationInfo.isSystemApp()) {
