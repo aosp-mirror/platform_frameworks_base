@@ -50,9 +50,7 @@
         android:layout_toEndOf="@id/volume_row_icon"
         android:layout_toStartOf="@+id/volume_settings_button"
         android:paddingEnd="8dp"
-        android:paddingStart="8dp"
-        android:progressTint="@android:color/white"
-        android:thumbTint="@android:color/white" />
+        android:paddingStart="8dp" />
 
     <com.android.keyguard.AlphaOptimizedImageButton
         android:id="@+id/volume_settings_button"
