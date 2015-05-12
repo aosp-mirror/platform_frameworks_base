@@ -78,8 +78,6 @@ public class UsbDeviceManager {
             "/sys/class/android_usb/android0/functions";
     private static final String STATE_PATH =
             "/sys/class/android_usb/android0/state";
-    private static final String MASS_STORAGE_FILE_PATH =
-            "/sys/class/android_usb/android0/f_mass_storage/lun/file";
     private static final String RNDIS_ETH_ADDR_PATH =
             "/sys/class/android_usb/android0/f_rndis/ethaddr";
     private static final String AUDIO_SOURCE_PCM_PATH =
@@ -832,8 +830,6 @@ public class UsbDeviceManager {
                         + FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());
                 pw.println("    Kernel function list: "
                         + FileUtils.readTextFile(new File(FUNCTIONS_PATH), 0, null).trim());
-                pw.println("    Mass storage backing file: "
-                        + FileUtils.readTextFile(new File(MASS_STORAGE_FILE_PATH), 0, null).trim());
             } catch (IOException e) {
                 pw.println("IOException: " + e);
             }
@@ -864,15 +860,6 @@ public class UsbDeviceManager {
     public void setCurrentFunctions(String functions, boolean makeDefault) {
         if (DEBUG) Slog.d(TAG, "setCurrentFunctions(" + functions + ") default: " + makeDefault);
         mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions, makeDefault);
-    }
-
-    public void setMassStorageBackingFile(String path) {
-        if (path == null) path = "";
-        try {
-            FileUtils.stringToFile(MASS_STORAGE_FILE_PATH, path);
-        } catch (IOException e) {
-           Slog.e(TAG, "failed to write to " + MASS_STORAGE_FILE_PATH);
-        }
     }
 
     private void readOemUsbOverrideConfig() {
