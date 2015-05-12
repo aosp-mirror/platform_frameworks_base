@@ -16,8 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.media.AudioAttributes.USAGE_ALARM;
-import static android.media.AudioAttributes.USAGE_MEDIA;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
@@ -32,6 +30,7 @@ import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
+import android.media.AudioSystem;
 import android.media.VolumePolicy;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,7 +40,6 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.service.notification.IConditionListener;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
@@ -300,6 +298,7 @@ public class ZenModeHelper {
         if (zen == mZenMode) return false;
         ZenLog.traceSetZenMode(zen, reason);
         mZenMode = zen;
+        updateRingerModeAffectedStreams();
         setZenModeSetting(mZenMode);
         if (setRingerMode) {
             applyZenToRingerMode();
@@ -307,6 +306,12 @@ public class ZenModeHelper {
         applyRestrictions();
         mHandler.postDispatchOnZenModeChanged();
         return true;
+    }
+
+    private void updateRingerModeAffectedStreams() {
+        if (mAudioManager != null) {
+            mAudioManager.updateRingerModeAffectedStreamsInternal();
+        }
     }
 
     private int computeZenMode(ArraySet<ZenRule> automaticRulesOut) {
@@ -334,11 +339,6 @@ public class ZenModeHelper {
         final boolean muteCalls = zen && !mConfig.allowCalls && !mConfig.allowRepeatCallers
                 || mEffectsSuppressed;
         applyRestrictions(muteCalls, USAGE_NOTIFICATION_RINGTONE);
-
-        // alarm/media restrictions
-        final boolean zenNone = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        applyRestrictions(zenNone, USAGE_ALARM);
-        applyRestrictions(zenNone, USAGE_MEDIA);
     }
 
     private void applyRestrictions(boolean mute, int usage) {
@@ -523,6 +523,7 @@ public class ZenModeHelper {
                                 && mZenMode != Global.ZEN_MODE_ALARMS) {
                             newZen = Global.ZEN_MODE_ALARMS;
                         }
+                        mPreviousRingerMode = ringerModeOld;
                     }
                     break;
                 case AudioManager.RINGER_MODE_VIBRATE:
@@ -586,6 +587,24 @@ public class ZenModeHelper {
         @Override
         public boolean canVolumeDownEnterSilent() {
             return mZenMode == Global.ZEN_MODE_OFF;
+        }
+
+        @Override
+        public int getRingerModeAffectedStreams(int streams) {
+            // ringtone, notification and system streams are always affected by ringer mode
+            streams |= (1 << AudioSystem.STREAM_RING) |
+                       (1 << AudioSystem.STREAM_NOTIFICATION) |
+                       (1 << AudioSystem.STREAM_SYSTEM);
+
+            // alarm and music streams are only affected by ringer mode when in total silence
+            if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                streams |= (1 << AudioSystem.STREAM_ALARM) |
+                           (1 << AudioSystem.STREAM_MUSIC);
+            } else {
+                streams &= ~((1 << AudioSystem.STREAM_ALARM) |
+                             (1 << AudioSystem.STREAM_MUSIC));
+            }
+            return streams;
         }
     }
 
