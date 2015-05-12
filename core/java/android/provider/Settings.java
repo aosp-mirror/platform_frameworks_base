@@ -324,23 +324,7 @@ public final class Settings {
             "android.settings.BLUETOOTH_SETTINGS";
 
     /**
-     * Activity Action: Show settings to allow configuration of Wifi Displays.
-     * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
-     * <p>
-     * Input: Nothing.
-     * <p>
-     * Output: Nothing.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_WIFI_DISPLAY_SETTINGS =
-            "android.settings.WIFI_DISPLAY_SETTINGS";
-
-    /**
-     * Activity Action: Show settings to allow configuration of
-     * {@link android.media.routing.MediaRouteService media route providers}.
+     * Activity Action: Show settings to allow configuration of cast endpoints.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
