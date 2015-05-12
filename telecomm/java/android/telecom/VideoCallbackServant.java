@@ -98,7 +98,7 @@ final class VideoCallbackServant {
                     break;
                 }
                 case MSG_CHANGE_CAMERA_CAPABILITIES: {
-                    mDelegate.changeCameraCapabilities((CameraCapabilities) msg.obj);
+                    mDelegate.changeCameraCapabilities((VideoProfile.CameraCapabilities) msg.obj);
                     break;
                 }
                 case MSG_CHANGE_VIDEO_QUALITY: {
@@ -148,7 +148,8 @@ final class VideoCallbackServant {
         }
 
         @Override
-        public void changeCameraCapabilities(CameraCapabilities cameraCapabilities)
+        public void changeCameraCapabilities(
+                VideoProfile.CameraCapabilities cameraCapabilities)
                 throws RemoteException {
             mHandler.obtainMessage(MSG_CHANGE_CAMERA_CAPABILITIES, cameraCapabilities)
                     .sendToTarget();
