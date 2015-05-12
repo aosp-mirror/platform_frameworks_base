@@ -446,18 +446,40 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void grantPermission(String packageName, String permissionName, UserHandle user) {
+    public void grantRuntimePermission(String packageName, String permissionName,
+            UserHandle user) {
         try {
-            mPM.grantPermission(packageName, permissionName, user.getIdentifier());
+            mPM.grantRuntimePermission(packageName, permissionName, user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
     }
 
     @Override
-    public void revokePermission(String packageName, String permissionName, UserHandle user) {
+    public void revokeRuntimePermission(String packageName, String permissionName,
+            UserHandle user) {
         try {
-            mPM.revokePermission(packageName, permissionName, user.getIdentifier());
+            mPM.revokeRuntimePermission(packageName, permissionName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public int getPermissionFlags(String permissionName, String packageName, UserHandle user) {
+        try {
+            return mPM.getPermissionFlags(permissionName, packageName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public void updatePermissionFlags(String permissionName, String packageName,
+            int flagMask, int flagValues, UserHandle user) {
+        try {
+            mPM.updatePermissionFlags(permissionName, packageName, flagMask,
+                    flagValues, user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }

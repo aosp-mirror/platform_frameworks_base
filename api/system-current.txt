@@ -9506,6 +9506,7 @@ package android.content.pm {
     method public abstract android.content.pm.PackageInstaller getPackageInstaller();
     method public abstract java.lang.String[] getPackagesForUid(int);
     method public abstract java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
+    method public abstract int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.PermissionInfo getPermissionInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int getPreferredActivities(java.util.List<android.content.IntentFilter>, java.util.List<android.content.ComponentName>, java.lang.String);
@@ -9523,7 +9524,7 @@ package android.content.pm {
     method public abstract android.graphics.drawable.Drawable getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public abstract java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public abstract android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
-    method public abstract void grantPermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract boolean hasSystemFeature(java.lang.String);
     method public abstract boolean isSafeMode();
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
@@ -9539,10 +9540,11 @@ package android.content.pm {
     method public abstract android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
     method public abstract android.content.pm.ProviderInfo resolveContentProvider(java.lang.String, int);
     method public abstract android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
-    method public abstract void revokePermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract void setApplicationEnabledSetting(java.lang.String, int, int);
     method public abstract void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public abstract void setInstallerPackageName(java.lang.String, java.lang.String);
+    method public abstract void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);
     method public abstract void verifyPendingInstall(int, int);
     field public static final java.lang.String ACTION_REQUEST_PERMISSIONS = "android.content.pm.action.REQUEST_PERMISSIONS";
     field public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0; // 0x0
@@ -9628,6 +9630,10 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_WEBVIEW = "android.software.webview";
     field public static final java.lang.String FEATURE_WIFI = "android.hardware.wifi";
     field public static final java.lang.String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
+    field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
+    field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
+    field public static final int FLAG_PERMISSION_USER_FIXED = 2; // 0x2
+    field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
     field public static final int GET_ACTIVITIES = 1; // 0x1
     field public static final int GET_CONFIGURATIONS = 16384; // 0x4000
     field public static final int GET_DISABLED_COMPONENTS = 512; // 0x200
@@ -9680,6 +9686,7 @@ package android.content.pm {
     field public static final int INSTALL_PARSE_FAILED_NO_CERTIFICATES = -103; // 0xffffff99
     field public static final int INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION = -102; // 0xffffff9a
     field public static final int INSTALL_SUCCEEDED = 1; // 0x1
+    field public static final int MASK_PERMISSION_FLAGS = 15; // 0xf
     field public static final int MATCH_ALL = 131072; // 0x20000
     field public static final int MATCH_DEFAULT_ONLY = 65536; // 0x10000
     field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 3600000L; // 0x36ee80L
@@ -9698,6 +9705,9 @@ package android.content.pm {
   public static class PackageManager.NameNotFoundException extends android.util.AndroidException {
     ctor public PackageManager.NameNotFoundException();
     ctor public PackageManager.NameNotFoundException(java.lang.String);
+  }
+
+  public static abstract class PackageManager.PermissionFlags implements java.lang.annotation.Annotation {
   }
 
   public class PackageStats implements android.os.Parcelable {
@@ -34040,6 +34050,7 @@ package android.test.mock {
     method public android.content.pm.PackageInstaller getPackageInstaller();
     method public java.lang.String[] getPackagesForUid(int);
     method public java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
+    method public int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
     method public android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.PermissionInfo getPermissionInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int getPreferredActivities(java.util.List<android.content.IntentFilter>, java.util.List<android.content.ComponentName>, java.lang.String);
@@ -34057,7 +34068,7 @@ package android.test.mock {
     method public android.graphics.drawable.Drawable getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
-    method public void grantPermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public boolean hasSystemFeature(java.lang.String);
     method public boolean isSafeMode();
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
@@ -34073,11 +34084,12 @@ package android.test.mock {
     method public android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
     method public android.content.pm.ProviderInfo resolveContentProvider(java.lang.String, int);
     method public android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
-    method public void revokePermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public void setApplicationEnabledSetting(java.lang.String, int, int);
     method public void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public boolean setDefaultBrowserPackageName(java.lang.String, int);
     method public void setInstallerPackageName(java.lang.String, java.lang.String);
+    method public void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);
     method public void verifyPendingInstall(int, int);
   }
 

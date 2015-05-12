@@ -20,10 +20,13 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import android.util.SparseArray;
 import com.android.internal.util.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -55,14 +58,7 @@ public final class PermissionsState {
     /** The permission operation failed. */
     public static final int PERMISSION_OPERATION_FAILURE = 3;
 
-    public static final int[] USERS_ALL = {UserHandle.USER_ALL};
-
-    public static final int[] USERS_NONE = {};
-
     private static final int[] NO_GIDS = {};
-
-    private static final int FLAG_INSTALL_PERMISSIONS = 1 << 0;
-    private static final int FLAG_RUNTIME_PERMISSIONS = 1 << 1;
 
     private ArrayMap<String, PermissionData> mPermissions;
 
@@ -147,14 +143,16 @@ public final class PermissionsState {
     }
 
     /**
-     * Grant a runtime permission.
+     * Grant a runtime permission for a given device user.
      *
      * @param permission The permission to grant.
+     * @param userId The device user id.
      * @return The operation result which is either {@link #PERMISSION_OPERATION_SUCCESS},
      *     or {@link #PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED}, or {@link
      *     #PERMISSION_OPERATION_FAILURE}.
      */
     public int grantRuntimePermission(BasePermission permission, int userId) {
+        enforceValidUserId(userId);
         if (userId == UserHandle.USER_ALL) {
             return PERMISSION_OPERATION_FAILURE;
         }
@@ -162,30 +160,22 @@ public final class PermissionsState {
     }
 
     /**
-     * Revoke a runtime permission for a given device user.
+     *  Revoke a runtime permission for a given device user.
      *
      * @param permission The permission to revoke.
      * @param userId The device user id.
      * @return The operation result which is either {@link #PERMISSION_OPERATION_SUCCESS},
      *     or {@link #PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED}, or {@link
      *     #PERMISSION_OPERATION_FAILURE}.
+     *
+     * @see android.content.pm.PackageManager.PermissionFlags
      */
     public int revokeRuntimePermission(BasePermission permission, int userId) {
+        enforceValidUserId(userId);
         if (userId == UserHandle.USER_ALL) {
             return PERMISSION_OPERATION_FAILURE;
         }
         return revokePermission(permission, userId);
-    }
-
-    /**
-     * Gets whether this state has a given permission, regardless if
-     * it is install time or runtime one.
-     *
-     * @param name The permission name.
-     * @return Whether this state has the permission.
-     */
-    public boolean hasPermission(String name) {
-        return mPermissions != null && mPermissions.get(name) != null;
     }
 
     /**
@@ -197,6 +187,7 @@ public final class PermissionsState {
      * @return Whether this state has the permission.
      */
     public boolean hasRuntimePermission(String name, int userId) {
+        enforceValidUserId(userId);
         return !hasInstallPermission(name) && hasPermission(name, userId);
     }
 
@@ -208,36 +199,6 @@ public final class PermissionsState {
      */
     public boolean hasInstallPermission(String name) {
         return hasPermission(name, UserHandle.USER_ALL);
-    }
-
-    /**
-     * Revokes a permission for all users regardless if it is an install or
-     * a runtime permission.
-     *
-     * @param permission The permission to revoke.
-     * @return The operation result which is either {@link #PERMISSION_OPERATION_SUCCESS},
-     *     or {@link #PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED}, or {@link
-     *     #PERMISSION_OPERATION_FAILURE}.
-     */
-    public int revokePermission(BasePermission permission) {
-        if (!hasPermission(permission.name)) {
-            return PERMISSION_OPERATION_FAILURE;
-        }
-
-        int result = PERMISSION_OPERATION_SUCCESS;
-
-        PermissionData permissionData = mPermissions.get(permission.name);
-        for (int userId : permissionData.getUserIds()) {
-            if (revokePermission(permission, userId)
-                    == PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
-                result = PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
-                break;
-            }
-        }
-
-        mPermissions.remove(permission.name);
-
-        return result;
     }
 
     /**
@@ -256,20 +217,7 @@ public final class PermissionsState {
         }
 
         PermissionData permissionData = mPermissions.get(name);
-        return permissionData != null && permissionData.hasUserId(userId);
-    }
-
-    /**
-     * Gets all permissions regardless if they are install or runtime.
-     *
-     * @return The permissions or an empty set.
-     */
-    public Set<String> getPermissions() {
-        if (mPermissions != null) {
-            return mPermissions.keySet();
-        }
-
-        return Collections.emptySet();
+        return permissionData != null && permissionData.isGranted(userId);
     }
 
     /**
@@ -280,25 +228,122 @@ public final class PermissionsState {
      * @return The permissions or an empty set.
      */
     public Set<String> getPermissions(int userId) {
-        return getPermissionsInternal(FLAG_INSTALL_PERMISSIONS | FLAG_RUNTIME_PERMISSIONS, userId);
+        enforceValidUserId(userId);
+
+        if (mPermissions == null) {
+            return Collections.emptySet();
+        }
+
+        Set<String> permissions = new ArraySet<>();
+
+        final int permissionCount = mPermissions.size();
+        for (int i = 0; i < permissionCount; i++) {
+            String permission = mPermissions.keyAt(i);
+
+            if (hasInstallPermission(permission)) {
+                permissions.add(permission);
+            }
+
+            if (userId != UserHandle.USER_ALL) {
+                if (hasRuntimePermission(permission, userId)) {
+                    permissions.add(permission);
+                }
+            }
+        }
+
+        return permissions;
     }
 
     /**
-     * Gets all runtime permissions.
+     * Gets the state for an install permission or null if no such.
      *
-     * @return The permissions or an empty set.
+     * @param name The permission name.
+     * @return The permission state.
      */
-    public Set<String> getRuntimePermissions(int userId) {
-        return getPermissionsInternal(FLAG_RUNTIME_PERMISSIONS, userId);
+    public PermissionState getInstallPermissionState(String name) {
+        return getPermissionState(name, UserHandle.USER_ALL);
     }
 
     /**
-     * Gets all install permissions.
+     * Gets the state for a runtime permission or null if no such.
      *
-     * @return The permissions or an empty set.
+     * @param name The permission name.
+     * @param userId The device user id.
+     * @return The permission state.
      */
-    public Set<String> getInstallPermissions() {
-        return getPermissionsInternal(FLAG_INSTALL_PERMISSIONS, UserHandle.USER_ALL);
+    public PermissionState getRuntimePermissionState(String name, int userId) {
+        enforceValidUserId(userId);
+        return getPermissionState(name, userId);
+    }
+
+    /**
+     * Gets all install permission states.
+     *
+     * @return The permission states or an empty set.
+     */
+    public List<PermissionState> getInstallPermissionStates() {
+        return getPermissionStatesInternal(UserHandle.USER_ALL);
+    }
+
+    /**
+     * Gets all runtime permission states.
+     *
+     * @return The permission states or an empty set.
+     */
+    public List<PermissionState> getRuntimePermissionStates(int userId) {
+        enforceValidUserId(userId);
+        return getPermissionStatesInternal(userId);
+    }
+
+    /**
+     * Gets the flags for a permission regardless if it is install or
+     * runtime permission.
+     *
+     * @param name The permission name.
+     * @return The permission state or null if no such.
+     */
+    public int getPermissionFlags(String name, int userId) {
+        PermissionState installPermState = getInstallPermissionState(name);
+        if (installPermState != null) {
+            return installPermState.getFlags();
+        }
+        PermissionState runtimePermState = getRuntimePermissionState(name, userId);
+        if (runtimePermState != null) {
+            return runtimePermState.getFlags();
+        }
+        return 0;
+    }
+
+    /**
+     * Update the flags associated with a given permission.
+     * @param permission The permission whose flags to update.
+     * @param userId The user for which to update.
+     * @param flagMask Mask for which flags to change.
+     * @param flagValues New values for the mask flags.
+     * @return Whether the permission flags changed.
+     */
+    public boolean updatePermissionFlags(BasePermission permission, int userId,
+            int flagMask, int flagValues) {
+        enforceValidUserId(userId);
+
+        final boolean mayChangeFlags = flagValues != 0 || flagMask != 0;
+
+        if (mPermissions == null) {
+            if (!mayChangeFlags) {
+                return false;
+            }
+            ensurePermissionData(permission);
+        }
+
+        PermissionData permissionData = mPermissions.get(permission.name);
+        if (permissionData == null) {
+            if (!mayChangeFlags) {
+                return false;
+            }
+            permissionData = ensurePermissionData(permission);
+        }
+
+        return permissionData.updateFlags(userId, flagMask, flagValues);
     }
 
     /**
@@ -357,36 +402,37 @@ public final class PermissionsState {
         mPermissions = null;
     }
 
-    private Set<String> getPermissionsInternal(int flags, int userId) {
+    private PermissionState getPermissionState(String name, int userId) {
+        if (mPermissions == null) {
+            return null;
+        }
+        PermissionData permissionData = mPermissions.get(name);
+        if (permissionData == null) {
+            return null;
+        }
+        return permissionData.getPermissionState(userId);
+    }
+
+    private List<PermissionState> getPermissionStatesInternal(int userId) {
         enforceValidUserId(userId);
 
         if (mPermissions == null) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
-        if (userId == UserHandle.USER_ALL) {
-            flags = FLAG_INSTALL_PERMISSIONS;
-        }
-
-        Set<String> permissions = new ArraySet<>();
+        List<PermissionState> permissionStates = new ArrayList<>();
 
         final int permissionCount = mPermissions.size();
         for (int i = 0; i < permissionCount; i++) {
-            String permission = mPermissions.keyAt(i);
+            PermissionData permissionData = mPermissions.valueAt(i);
 
-            if ((flags & FLAG_INSTALL_PERMISSIONS) != 0) {
-                if (hasInstallPermission(permission)) {
-                    permissions.add(permission);
-                }
-            }
-            if ((flags & FLAG_RUNTIME_PERMISSIONS) != 0) {
-                if (hasRuntimePermission(permission, userId)) {
-                    permissions.add(permission);
-                }
+            PermissionState permissionState = permissionData.getPermissionState(userId);
+            if (permissionState != null) {
+                permissionStates.add(permissionState);
             }
         }
 
-        return  permissions;
+        return  permissionStates;
     }
 
     private int grantPermission(BasePermission permission, int userId) {
@@ -397,17 +443,9 @@ public final class PermissionsState {
         final boolean hasGids = !ArrayUtils.isEmpty(permission.computeGids(userId));
         final int[] oldGids = hasGids ? computeGids(userId) : NO_GIDS;
 
-        if (mPermissions == null) {
-            mPermissions = new ArrayMap<>();
-        }
+        PermissionData permissionData = ensurePermissionData(permission);
 
-        PermissionData permissionData = mPermissions.get(permission.name);
-        if (permissionData == null) {
-            permissionData = new PermissionData(permission);
-            mPermissions.put(permission.name, permissionData);
-        }
-
-        if (!permissionData.addUserId(userId)) {
+        if (!permissionData.grant(userId)) {
             return PERMISSION_OPERATION_FAILURE;
         }
 
@@ -431,16 +469,12 @@ public final class PermissionsState {
 
         PermissionData permissionData = mPermissions.get(permission.name);
 
-        if (!permissionData.removeUserId(userId)) {
+        if (!permissionData.revoke(userId)) {
             return PERMISSION_OPERATION_FAILURE;
         }
 
-        if (permissionData.getUserIds() == USERS_NONE) {
-            mPermissions.remove(permission.name);
-        }
-
-        if (mPermissions.isEmpty()) {
-            mPermissions = null;
+        if (permissionData.isDefault()) {
+            ensureNoPermissionData(permission.name);
         }
 
         if (hasGids) {
@@ -468,9 +502,31 @@ public final class PermissionsState {
         }
     }
 
+    private PermissionData ensurePermissionData(BasePermission permission) {
+        if (mPermissions == null) {
+            mPermissions = new ArrayMap<>();
+        }
+        PermissionData permissionData = mPermissions.get(permission.name);
+        if (permissionData == null) {
+            permissionData = new PermissionData(permission);
+            mPermissions.put(permission.name, permissionData);
+        }
+        return permissionData;
+    }
+
+    private void ensureNoPermissionData(String name) {
+        if (mPermissions == null) {
+            return;
+        }
+        mPermissions.remove(name);
+        if (mPermissions.isEmpty()) {
+            mPermissions = null;
+        }
+    }
+
     private static final class PermissionData {
         private final BasePermission mPerm;
-        private int[] mUserIds = USERS_NONE;
+        private SparseArray<PermissionState> mUserStates = new SparseArray<>();
 
         public PermissionData(BasePermission perm) {
             mPerm = perm;
@@ -478,11 +534,11 @@ public final class PermissionsState {
 
         public PermissionData(PermissionData other) {
             this(other.mPerm);
-
-            if (other.mUserIds == USERS_ALL || other.mUserIds == USERS_NONE) {
-                mUserIds = other.mUserIds;
-            } else {
-                mUserIds = Arrays.copyOf(other.mUserIds, other.mUserIds.length);
+            final int otherStateCount = other.mUserStates.size();
+            for (int i = 0; i < otherStateCount; i++) {
+                final int otherUserId = other.mUserStates.keyAt(i);
+                PermissionState otherState = other.mUserStates.valueAt(i);
+                mUserStates.put(otherUserId, new PermissionState(otherState));
             }
         }
 
@@ -490,53 +546,146 @@ public final class PermissionsState {
             return mPerm.computeGids(userId);
         }
 
-        public int[] getUserIds() {
-            return mUserIds;
-        }
-
-        public boolean hasUserId(int userId) {
-            if (mUserIds == USERS_ALL) {
-                return true;
+        public boolean isGranted(int userId) {
+            if (isInstallPermission()) {
+                userId = UserHandle.USER_ALL;
             }
 
-            if (userId != UserHandle.USER_ALL) {
-                return ArrayUtils.contains(mUserIds, userId);
+            PermissionState userState = mUserStates.get(userId);
+            if (userState == null) {
+                return false;
+            }
+
+            return userState.mGranted;
+        }
+
+        public boolean grant(int userId) {
+            if (!isCompatibleUserId(userId)) {
+                return false;
+            }
+
+            if (isGranted(userId)) {
+                return false;
+            }
+
+            PermissionState userState = mUserStates.get(userId);
+            if (userState == null) {
+                userState = new PermissionState(mPerm.name);
+                mUserStates.put(userId, userState);
+            }
+
+            userState.mGranted = true;
+
+            return true;
+        }
+
+        public boolean revoke(int userId) {
+            if (!isCompatibleUserId(userId)) {
+                return false;
+            }
+
+            if (!isGranted(userId)) {
+                return false;
+            }
+
+            PermissionState userState = mUserStates.get(userId);
+            userState.mGranted = false;
+
+            if (userState.isDefault()) {
+                mUserStates.remove(userId);
+            }
+
+            return true;
+        }
+
+        public PermissionState getPermissionState(int userId) {
+            return mUserStates.get(userId);
+        }
+
+        public int getFlags(int userId) {
+            PermissionState userState = mUserStates.get(userId);
+            if (userState != null) {
+                return userState.mFlags;
+            }
+            return 0;
+        }
+
+        public boolean isDefault() {
+            return mUserStates.size() <= 0;
+        }
+
+        public static boolean isInstallPermissionKey(int userId) {
+            return userId == UserHandle.USER_ALL;
+        }
+
+        public boolean updateFlags(int userId, int flagMask, int flagValues) {
+            if (isInstallPermission()) {
+                userId = UserHandle.USER_ALL;
+            }
+
+            if (!isCompatibleUserId(userId)) {
+                return false;
+            }
+
+            final int newFlags = flagValues & flagMask;
+
+            PermissionState userState = mUserStates.get(userId);
+            if (userState != null) {
+                final int oldFlags = userState.mFlags;
+                userState.mFlags = (userState.mFlags & ~flagMask) | newFlags;
+                if (userState.isDefault()) {
+                    mUserStates.remove(userId);
+                }
+                return userState.mFlags != oldFlags;
+            } else if (newFlags != 0) {
+                userState = new PermissionState(mPerm.name);
+                userState.mFlags = newFlags;
+                mUserStates.put(userId, userState);
+                return true;
             }
 
             return false;
         }
 
-        public boolean addUserId(int userId) {
-            if (hasUserId(userId)) {
-                return false;
-            }
-
-            if (userId == UserHandle.USER_ALL) {
-                mUserIds = USERS_ALL;
-                return true;
-            }
-
-            mUserIds = ArrayUtils.appendInt(mUserIds, userId);
-
-            return true;
+        private boolean isCompatibleUserId(int userId) {
+            return isDefault() || !(isInstallPermission() ^ isInstallPermissionKey(userId));
         }
 
-        public boolean removeUserId(int userId) {
-            if (!hasUserId(userId)) {
-                return false;
-            }
+        private boolean isInstallPermission() {
+            return mUserStates.size() == 1
+                    && mUserStates.get(UserHandle.USER_ALL) != null;
+        }
+    }
 
-            if (mUserIds == USERS_ALL) {
-                mUserIds = UserManagerService.getInstance().getUserIds();
-            }
+    public static final class PermissionState {
+        private final String mName;
+        private boolean mGranted;
+        private int mFlags;
 
-            mUserIds = ArrayUtils.removeInt(mUserIds, userId);
+        public PermissionState(String name) {
+            mName = name;
+        }
 
-            if (mUserIds.length == 0) {
-                mUserIds = USERS_NONE;
-            }
+        public PermissionState(PermissionState other) {
+            mName = other.mName;
+            mGranted = other.mGranted;
+            mFlags = other.mFlags;
+        }
 
-            return true;
+        public boolean isDefault() {
+            return !mGranted && mFlags == 0;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public boolean isGranted() {
+            return mGranted;
+        }
+
+        public int getFlags() {
+            return mFlags;
         }
     }
 }

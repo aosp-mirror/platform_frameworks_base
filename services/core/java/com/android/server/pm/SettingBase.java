@@ -21,11 +21,13 @@ import android.content.pm.ApplicationInfo;
 import java.util.Arrays;
 
 abstract class SettingBase {
+    private static final int[] USERS_NONE = new int[0];
+
     int pkgFlags;
     int pkgPrivateFlags;
 
     protected final PermissionsState mPermissionsState;
-    private int[] mPermissionsUpdatedForUserIds = PermissionsState.USERS_NONE;
+    private int[] mPermissionsUpdatedForUserIds = USERS_NONE;
 
     SettingBase(int pkgFlags, int pkgPrivateFlags) {
         setFlags(pkgFlags);
@@ -53,7 +55,7 @@ abstract class SettingBase {
             return;
         }
 
-        if (userIds == PermissionsState.USERS_NONE || userIds == PermissionsState.USERS_ALL) {
+        if (userIds == USERS_NONE) {
             mPermissionsUpdatedForUserIds = userIds;
         } else {
             mPermissionsUpdatedForUserIds = Arrays.copyOf(userIds, userIds.length);
