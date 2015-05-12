@@ -1791,7 +1791,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 119;
+            private static final int SETTINGS_VERSION = 120;
 
             private final int mUserId;
 
@@ -1906,6 +1906,17 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 119;
+                }
+
+                // v120: Add double tap to wake setting.
+                if (currentVersion == 119) {
+                    SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    secureSettings.insertSettingLocked(Settings.Secure.DOUBLE_TAP_TO_WAKE,
+                            getContext().getResources().getBoolean(
+                                    R.bool.def_double_tap_to_wake) ? "1" : "0",
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+
+                    currentVersion = 120;
                 }
 
                 // vXXX: Add new settings above this point.
