@@ -1358,7 +1358,7 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
         uint32_t dimensionLimit = 128; // Smallest image dimension crop margin from.
         if (imageWidth >= dimensionLimit && imageHeight >= dimensionLimit) {
             uint32_t defaultCropOrigin[] = {margin, margin};
-            uint32_t defaultCropSize[] = {imageWidth - margin, imageHeight - margin};
+            uint32_t defaultCropSize[] = {imageWidth - 2 * margin, imageHeight - 2 * margin};
             BAIL_IF_INVALID(writer->addEntry(TAG_DEFAULTCROPORIGIN, 2, defaultCropOrigin,
                     TIFF_IFD_0), env, TAG_DEFAULTCROPORIGIN, writer);
             BAIL_IF_INVALID(writer->addEntry(TAG_DEFAULTCROPSIZE, 2, defaultCropSize,
