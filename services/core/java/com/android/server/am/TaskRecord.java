@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
@@ -90,6 +91,7 @@ final class TaskRecord {
     private static final String ATTR_CALLING_UID = "calling_uid";
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
     private static final String ATTR_RESIZEABLE = "resizeable";
+    private static final String ATTR_PRIVILEGED = "privileged";
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
@@ -127,6 +129,9 @@ final class TaskRecord {
                             // the root activity.
     int mLockTaskMode;      // Which tasklock mode to launch this task in. One of
                             // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
+    private boolean mPrivileged;    // The root activity application of this task holds
+                                    // privileged permissions.
+
     /** Can't be put in lockTask mode. */
     final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
     /** Can enter lockTask with user approval if not already in lockTask. */
@@ -245,7 +250,7 @@ final class TaskRecord {
             long _firstActiveTime, long _lastActiveTime, long lastTimeMoved,
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
             int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
-            int callingUid, String callingPackage, boolean resizeable) {
+            int callingUid, String callingPackage, boolean resizeable, boolean privileged) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -281,6 +286,7 @@ final class TaskRecord {
         mCallingUid = callingUid;
         mCallingPackage = callingPackage;
         mResizeable = resizeable;
+        mPrivileged = privileged;
     }
 
     void touchActiveTime() {
@@ -381,6 +387,7 @@ final class TaskRecord {
         }
         mResizeable = info.resizeable;
         mLockTaskMode = info.lockTaskLaunchMode;
+        mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
         setLockTaskAuth();
     }
 
@@ -734,14 +741,6 @@ final class TaskRecord {
         performClearTaskAtIndexLocked(0);
     }
 
-    private boolean isPrivileged() {
-        final ProcessRecord proc = mService.mProcessNames.get(mCallingPackage, mCallingUid);
-        if (proc != null) {
-                return (proc.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
-        }
-        return false;
-    }
-
     void setLockTaskAuth() {
         switch (mLockTaskMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
@@ -750,12 +749,12 @@ final class TaskRecord {
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_NEVER:
-                mLockTaskAuth = isPrivileged() ?
+                mLockTaskAuth = mPrivileged ?
                         LOCK_TASK_AUTH_DONT_LOCK : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_ALWAYS:
-                mLockTaskAuth = isPrivileged() ?
+                mLockTaskAuth = mPrivileged ?
                         LOCK_TASK_AUTH_LAUNCHABLE: LOCK_TASK_AUTH_PINNABLE;
                 break;
 
@@ -930,6 +929,7 @@ final class TaskRecord {
         out.attribute(null, ATTR_CALLING_UID, String.valueOf(mCallingUid));
         out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
         out.attribute(null, ATTR_RESIZEABLE, String.valueOf(mResizeable));
+        out.attribute(null, ATTR_PRIVILEGED, String.valueOf(mPrivileged));
 
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
@@ -993,6 +993,7 @@ final class TaskRecord {
         int callingUid = -1;
         String callingPackage = "";
         boolean resizeable = false;
+        boolean privileged = false;
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -1048,6 +1049,8 @@ final class TaskRecord {
                 callingPackage = attrValue;
             } else if (ATTR_RESIZEABLE.equals(attrName)) {
                 resizeable = Boolean.valueOf(attrValue);
+            } else if (ATTR_PRIVILEGED.equals(attrName)) {
+                privileged = Boolean.valueOf(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -1107,7 +1110,7 @@ final class TaskRecord {
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
-                callingUid, callingPackage, resizeable);
+                callingUid, callingPackage, resizeable, privileged);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
             activities.get(activityNdx).task = task;
