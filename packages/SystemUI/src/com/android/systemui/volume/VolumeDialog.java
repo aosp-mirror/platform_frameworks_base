@@ -26,6 +26,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -107,6 +108,8 @@ public class VolumeDialog {
     private final LayoutTransition mLayoutTransition;
     private final Object mSafetyWarningLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
+    private final ColorStateList mActiveSliderTint;
+    private final ColorStateList mInactiveSliderTint;
 
     private boolean mShowing;
     private boolean mExpanded;
@@ -152,6 +155,8 @@ public class VolumeDialog {
         lp.gravity = Gravity.TOP;
         window.setAttributes(lp);
 
+        mActiveSliderTint = loadColorStateList(R.color.system_accent_color);
+        mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
         mDialog.setContentView(R.layout.volume_dialog);
         mDialogView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog);
         mDialogContentView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog_content);
@@ -188,6 +193,10 @@ public class VolumeDialog {
 
         controller.addCallback(mControllerCallbackH, mHandler);
         controller.getState();
+    }
+
+    private ColorStateList loadColorStateList(int colorResId) {
+        return ColorStateList.valueOf(mContext.getColor(colorResId));
     }
 
     private void updateWindowWidthH() {
@@ -524,6 +533,8 @@ public class VolumeDialog {
             }
             Util.setVisOrInvis(row.settingsButton, false);
             row.header.setAlpha(mExpanded && isActive ? 1 : 0.5f);
+            row.slider.setProgressTintList(isActive ? mActiveSliderTint : mInactiveSliderTint);
+            row.slider.setThumbTintList(isActive ? mActiveSliderTint : mInactiveSliderTint);
         }
     }
 
