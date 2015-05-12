@@ -213,7 +213,7 @@
     <string name="unlock_label">unlock</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="phone_label">open phone</string>
-    <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
+    <!-- Click action label for accessibility for the voice assist button. This is not shown on-screen and is an accessibility label for the icon which launches the voice assist from the lock screen.[CHAR LIMIT=NONE] -->
     <string name="voice_assist_label">open voice assist</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="camera_label">open camera</string>
