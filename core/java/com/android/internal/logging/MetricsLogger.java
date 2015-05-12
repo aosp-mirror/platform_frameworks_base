@@ -18,6 +18,7 @@ package com.android.internal.logging;
 
 import android.content.Context;
 import android.os.Build;
+import android.view.View;
 
 /**
  * Log all the things.
@@ -33,6 +34,10 @@ public class MetricsLogger implements MetricsConstants {
     public static final int ACTION_BAN_APP_NOTES = 146;
     public static final int NOTIFICATION_ZEN_MODE_EVENT_RULE = 147;
     public static final int ACTION_DISMISS_ALL_NOTES = 148;
+    public static final int QS_DND_DETAILS = 149;
+    public static final int QS_BLUETOOTH_DETAILS = 150;
+    public static final int QS_CAST_DETAILS = 151;
+    public static final int QS_WIFI_DETAILS = 152;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
@@ -41,11 +46,25 @@ public class MetricsLogger implements MetricsConstants {
         EventLogTags.writeSysuiViewVisibility(category, 100);
     }
 
-    public static void hidden(Context context, int category) {
+    public static void hidden(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");
         }
         EventLogTags.writeSysuiViewVisibility(category, 0);
+    }
+
+    public static void visibility(Context context, int category, boolean visibile)
+            throws IllegalArgumentException {
+        if (visibile) {
+            visible(context, category);
+        } else {
+            hidden(context, category);
+        }
+    }
+
+    public static void visibility(Context context, int category, int vis)
+            throws IllegalArgumentException {
+        visibility(context, category, vis == View.VISIBLE);
     }
 
     public static void action(Context context, int category) {
