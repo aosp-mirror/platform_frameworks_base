@@ -29,8 +29,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.database.DataSetObserver;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -51,10 +51,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import com.android.internal.R;
 
@@ -74,6 +72,8 @@ public class ChooserActivity extends ResolverActivity {
     private IntentSender mRefinementIntentSender;
     private RefinementResultReceiver mRefinementResultReceiver;
 
+    private Intent mReferrerFillInIntent;
+
     private ChooserListAdapter mChooserListAdapter;
 
     private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
@@ -81,7 +81,7 @@ public class ChooserActivity extends ResolverActivity {
     private static final int CHOOSER_TARGET_SERVICE_RESULT = 1;
     private static final int CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT = 2;
 
-    private Handler mTargetResultHandler = new Handler() {
+    private final Handler mChooserHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -175,6 +175,8 @@ public class ChooserActivity extends ResolverActivity {
                 initialIntents[i] = in;
             }
         }
+
+        mReferrerFillInIntent = new Intent().putExtra(Intent.EXTRA_REFERRER, getReferrer());
 
         mChosenComponentSender = intent.getParcelableExtra(
                 Intent.EXTRA_CHOSEN_COMPONENT_INTENT_SENDER);
@@ -346,7 +348,7 @@ public class ChooserActivity extends ResolverActivity {
         if (!mServiceConnections.isEmpty()) {
             if (DEBUG) Log.d(TAG, "queryTargets setting watchdog timer for "
                     + WATCHDOG_TIMEOUT_MILLIS + "ms");
-            mTargetResultHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
+            mChooserHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
                     WATCHDOG_TIMEOUT_MILLIS);
         }
     }
@@ -379,7 +381,7 @@ public class ChooserActivity extends ResolverActivity {
             unbindService(conn);
         }
         mServiceConnections.clear();
-        mTargetResultHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
     }
 
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
@@ -435,7 +437,7 @@ public class ChooserActivity extends ResolverActivity {
         private final ResolveInfo mBackupResolveInfo;
         private final ChooserTarget mChooserTarget;
         private Drawable mBadgeIcon = null;
-        private final Drawable mDisplayIcon;
+        private Drawable mDisplayIcon;
         private final Intent mFillInIntent;
         private final int mFillInFlags;
 
@@ -451,7 +453,9 @@ public class ChooserActivity extends ResolverActivity {
                     }
                 }
             }
-            mDisplayIcon = new BitmapDrawable(getResources(), chooserTarget.getIcon());
+            final Icon icon = chooserTarget.getIcon();
+            // TODO do this in the background
+            mDisplayIcon = icon != null ? icon.loadDrawable(ChooserActivity.this) : null;
 
             if (sourceInfo != null) {
                 mBackupResolveInfo = null;
@@ -497,9 +501,12 @@ public class ChooserActivity extends ResolverActivity {
                     ? mSourceInfo.getResolvedIntent() : getTargetIntent();
             if (result == null) {
                 Log.e(TAG, "ChooserTargetInfo#getFillInIntent: no fillIn intent available");
-            } else if (mFillInIntent != null) {
+            } else {
                 result = new Intent(result);
-                result.fillIn(mFillInIntent, mFillInFlags);
+                if (mFillInIntent != null) {
+                    result.fillIn(mFillInIntent, mFillInFlags);
+                }
+                result.fillIn(mReferrerFillInIntent, 0);
             }
             return result;
         }
@@ -867,7 +874,7 @@ public class ChooserActivity extends ResolverActivity {
                 msg.what = CHOOSER_TARGET_SERVICE_RESULT;
                 msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
                         ChooserTargetServiceConnection.this);
-                mTargetResultHandler.sendMessage(msg);
+                mChooserHandler.sendMessage(msg);
             }
         };
 

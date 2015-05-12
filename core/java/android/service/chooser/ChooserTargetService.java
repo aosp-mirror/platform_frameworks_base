@@ -107,7 +107,7 @@ public abstract class ChooserTargetService extends Service {
      * <p>The returned list should be sorted such that the most relevant targets appear first.
      * Any PendingIntents used to construct the resulting ChooserTargets should always be prepared
      * to have the relevant data fields filled in by the sender. See
-     * {@link ChooserTarget#ChooserTarget(CharSequence, android.graphics.Bitmap, float, android.app.PendingIntent) ChooserTarget}.</p>
+     * {@link ChooserTarget#ChooserTarget(CharSequence, android.graphics.drawable.Icon, float, android.app.PendingIntent) ChooserTarget}.</p>
      *
      * <p><em>Important:</em> Calls to this method from other applications will occur on
      * a binder thread, not on your app's main thread. Make sure that access to relevant data
