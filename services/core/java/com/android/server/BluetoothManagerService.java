@@ -41,6 +41,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -52,6 +53,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.util.HashMap;
@@ -1737,17 +1739,32 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
-        writer.println("enabled: " + mEnable);
-        writer.println("state: " + mState);
-        writer.println("address: " + mAddress);
-        writer.println("name: " + mName);
+        writer.println("Bluetooth Status");
+        writer.println("  enabled: " + mEnable);
+        writer.println("  state: " + mState);
+        writer.println("  address: " + mAddress);
+        writer.println("  name: " + mName + "\n");
+        writer.flush();
+
         if (mBluetooth == null) {
             writer.println("Bluetooth Service not connected");
         } else {
+            ParcelFileDescriptor pfd = null;
             try {
-                writer.println(mBluetooth.dump());
+                pfd = ParcelFileDescriptor.dup(fd);
+                mBluetooth.dump(pfd);
             } catch (RemoteException re) {
                 writer.println("RemoteException while calling Bluetooth Service");
+            } catch (IOException ioe) {
+                writer.println("IOException attempting to dup() fd");
+            } finally {
+                if (pfd != null) {
+                    try {
+                        pfd.close();
+                    } catch (IOException ioe) {
+                        writer.println("IOException attempting to close() fd");
+                    }
+                }
             }
         }
     }
