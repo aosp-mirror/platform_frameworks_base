@@ -20,6 +20,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -494,7 +495,7 @@ public abstract class InCallService extends Service {
          *
          * @param uri URI of image to display.
          */
-        public abstract void setPauseImage(String uri);
+        public abstract void setPauseImage(Uri uri);
 
         /**
          * Callback class which invokes callbacks after video call actions occur.

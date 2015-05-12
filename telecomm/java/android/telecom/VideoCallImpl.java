@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -303,7 +304,7 @@ public class VideoCallImpl extends VideoCall {
     }
 
     /** {@inheritDoc} */
-    public void setPauseImage(String uri) {
+    public void setPauseImage(Uri uri) {
         try {
             mVideoProvider.setPauseImage(uri);
         } catch (RemoteException e) {

@@ -390,10 +390,10 @@ public abstract class Conference implements IConferenceable {
 
     /**
      * Set the video state for the conference.
-     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoProfile.VideoState#TX_ENABLED},
-     * {@link VideoProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED}.
      *
      * @param videoState The new video state.
      */

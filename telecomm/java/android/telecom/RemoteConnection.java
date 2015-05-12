@@ -379,7 +379,7 @@ public final class RemoteConnection {
             }
         }
 
-        public void setPauseImage(String uri) {
+        public void setPauseImage(Uri uri) {
             try {
                 mVideoProviderBinder.setPauseImage(uri);
             } catch (RemoteException e) {
