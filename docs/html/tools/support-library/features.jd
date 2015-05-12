@@ -373,9 +373,8 @@ com.android.support:recyclerview-v7:21.0.0
   developer guide.</p>
 
 <p class="note">
-  <strong>Note:</strong> Use of RenderScript with the support library is supported with the Android
-  Eclipse plugin and Ant build tools. It is <em>not currently</em> supported with Android Studio or
-  Gradle-based builds.
+  <strong>Note:</strong> Use of RenderScript with the support library is supported with Android
+  Studio and Gradle-based builds, as well as the Eclipse plugin and Ant build tools.
 </p>
 
 
