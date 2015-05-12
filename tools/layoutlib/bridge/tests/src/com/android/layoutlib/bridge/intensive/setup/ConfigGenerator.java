@@ -21,12 +21,11 @@ import com.android.ide.common.resources.configuration.CountryCodeQualifier;
 import com.android.ide.common.resources.configuration.DensityQualifier;
 import com.android.ide.common.resources.configuration.FolderConfiguration;
 import com.android.ide.common.resources.configuration.KeyboardStateQualifier;
-import com.android.ide.common.resources.configuration.LanguageQualifier;
 import com.android.ide.common.resources.configuration.LayoutDirectionQualifier;
+import com.android.ide.common.resources.configuration.LocaleQualifier;
 import com.android.ide.common.resources.configuration.NavigationMethodQualifier;
 import com.android.ide.common.resources.configuration.NetworkCodeQualifier;
 import com.android.ide.common.resources.configuration.NightModeQualifier;
-import com.android.ide.common.resources.configuration.RegionQualifier;
 import com.android.ide.common.resources.configuration.ScreenDimensionQualifier;
 import com.android.ide.common.resources.configuration.ScreenOrientationQualifier;
 import com.android.ide.common.resources.configuration.ScreenRatioQualifier;
@@ -158,10 +157,9 @@ public class ConfigGenerator {
         config.setUiModeQualifier(new UiModeQualifier(UiMode.NORMAL));
         config.setNightModeQualifier(new NightModeQualifier(NightMode.NOTNIGHT));
         config.setCountryCodeQualifier(new CountryCodeQualifier());
-        config.setLanguageQualifier(new LanguageQualifier());
         config.setLayoutDirectionQualifier(new LayoutDirectionQualifier());
         config.setNetworkCodeQualifier(new NetworkCodeQualifier());
-        config.setRegionQualifier(new RegionQualifier());
+        config.setLocaleQualifier(new LocaleQualifier());
         config.setVersionQualifier(new VersionQualifier());
         return config;
     }
