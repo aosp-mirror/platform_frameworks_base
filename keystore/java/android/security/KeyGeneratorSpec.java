@@ -192,14 +192,20 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of purposes for which the key can be used.
+     * Gets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which the
+     * key can be used.
+     *
+     * @see KeyStoreKeyProperties.Purpose
      */
     public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
     /**
-     * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
+     * Gets the set of padding schemes (e.g., {@code PKCS7Padding}, {@code NoPadding}) with which
+     * the key can be used when encrypting/decrypting.
+     *
+     * @see KeyStoreKeyProperties.EncryptionPadding
      */
     @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
@@ -207,7 +213,9 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of block modes with which the key can be used.
+     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used.
+     *
+     * @see KeyStoreKeyProperties.BlockMode
      */
     @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
@@ -386,9 +394,12 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of purposes for which the key can be used.
+         * Sets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which
+         * the key can be used.
          *
          * <p>This must be specified for all keys. There is no default.
+         *
+         * @see KeyStoreKeyProperties.Purpose
          */
         @NonNull
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
@@ -397,11 +408,13 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of padding schemes with which the key can be used when
-         * encrypting/decrypting. Attempts to use the key with any other padding scheme will be
-         * rejected.
+         * Sets the set of padding schemes (e.g., {@code PKCS7Padding}, {@code NoPadding}) with
+         * which the key can be used when encrypting/decrypting. Attempts to use the key with any
+         * other padding scheme will be rejected.
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
+         *
+         * @see KeyStoreKeyProperties.EncryptionPadding
          */
         @NonNull
         public Builder setEncryptionPaddings(
@@ -411,10 +424,13 @@ public class KeyGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of block modes with which the key can be used when encrypting/decrypting.
-         * Attempts to use the key with any other block modes will be rejected.
+         * Sets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be
+         * used when encrypting/decrypting. Attempts to use the key with any other block modes will
+         * be rejected.
          *
          * <p>This must be specified for encryption/decryption keys.
+         *
+         * @see KeyStoreKeyProperties.BlockMode
          */
         @NonNull
         public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
