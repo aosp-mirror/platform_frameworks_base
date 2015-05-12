@@ -30169,7 +30169,6 @@ package android.telecom {
 
   public static abstract class Connection.VideoProvider {
     ctor public Connection.VideoProvider();
-    method public void changeCallDataUsage(long);
     method public void changeCameraCapabilities(android.telecom.VideoProfile.CameraCapabilities);
     method public void changePeerDimensions(int, int);
     method public void changeVideoQuality(int);
@@ -30181,11 +30180,12 @@ package android.telecom {
     method public abstract void onSetCamera(java.lang.String);
     method public abstract void onSetDeviceOrientation(int);
     method public abstract void onSetDisplaySurface(android.view.Surface);
-    method public abstract void onSetPauseImage(java.lang.String);
+    method public abstract void onSetPauseImage(android.net.Uri);
     method public abstract void onSetPreviewSurface(android.view.Surface);
     method public abstract void onSetZoom(float);
     method public void receiveSessionModifyRequest(android.telecom.VideoProfile);
     method public void receiveSessionModifyResponse(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
+    method public void setCallDataUsage(long);
     field public static final int SESSION_EVENT_CAMERA_FAILURE = 5; // 0x5
     field public static final int SESSION_EVENT_CAMERA_READY = 6; // 0x6
     field public static final int SESSION_EVENT_RX_PAUSE = 1; // 0x1
@@ -30292,7 +30292,7 @@ package android.telecom {
     method public abstract void setCamera(java.lang.String);
     method public abstract void setDeviceOrientation(int);
     method public abstract void setDisplaySurface(android.view.Surface);
-    method public abstract void setPauseImage(java.lang.String);
+    method public abstract void setPauseImage(android.net.Uri);
     method public abstract void setPreviewSurface(android.view.Surface);
     method public abstract void setZoom(float);
     method public abstract void unregisterCallback(android.telecom.InCallService.VideoCall.Callback);
@@ -30517,6 +30517,11 @@ package android.telecom {
     field public static final int QUALITY_HIGH = 1; // 0x1
     field public static final int QUALITY_LOW = 3; // 0x3
     field public static final int QUALITY_MEDIUM = 2; // 0x2
+    field public static final int STATE_AUDIO_ONLY = 0; // 0x0
+    field public static final int STATE_BIDIRECTIONAL = 3; // 0x3
+    field public static final int STATE_PAUSED = 4; // 0x4
+    field public static final int STATE_RX_ENABLED = 2; // 0x2
+    field public static final int STATE_TX_ENABLED = 1; // 0x1
   }
 
   public static final class VideoProfile.CameraCapabilities implements android.os.Parcelable {
@@ -30529,18 +30534,12 @@ package android.telecom {
   }
 
   public static class VideoProfile.VideoState {
-    ctor public VideoProfile.VideoState();
     method public static boolean isAudioOnly(int);
     method public static boolean isBidirectional(int);
     method public static boolean isPaused(int);
     method public static boolean isReceptionEnabled(int);
     method public static boolean isTransmissionEnabled(int);
     method public static java.lang.String videoStateToString(int);
-    field public static final int AUDIO_ONLY = 0; // 0x0
-    field public static final int BIDIRECTIONAL = 3; // 0x3
-    field public static final int PAUSED = 4; // 0x4
-    field public static final int RX_ENABLED = 2; // 0x2
-    field public static final int TX_ENABLED = 1; // 0x1
   }
 
 }
