@@ -35,7 +35,7 @@ import java.util.Objects;
  *
  * See {@link PhoneAccount}, {@link TelecomManager}.
  */
-public class PhoneAccountHandle implements Parcelable {
+public final class PhoneAccountHandle implements Parcelable {
     private final ComponentName mComponentName;
     private final String mId;
     private final UserHandle mUserHandle;

@@ -28426,15 +28426,6 @@ package android.telecom {
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
 
-  public final class CameraCapabilities implements android.os.Parcelable {
-    ctor public CameraCapabilities(int, int);
-    method public int describeContents();
-    method public int getHeight();
-    method public int getWidth();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telecom.CameraCapabilities> CREATOR;
-  }
-
   public abstract class Conference implements android.telecom.IConferenceable {
     ctor public Conference(android.telecom.PhoneAccountHandle);
     method public final boolean addConnection(android.telecom.Connection);
@@ -28556,7 +28547,7 @@ package android.telecom {
 
   public static abstract class Connection.VideoProvider {
     ctor public Connection.VideoProvider();
-    method public void changeCameraCapabilities(android.telecom.CameraCapabilities);
+    method public void changeCameraCapabilities(android.telecom.VideoProfile.CameraCapabilities);
     method public void changePeerDimensions(int, int);
     method public void changeVideoQuality(int);
     method public void handleCallSessionEvent(int);
@@ -28692,14 +28683,14 @@ package android.telecom {
     ctor public InCallService.VideoCall.Callback();
     method public abstract void onCallDataUsageChanged(long);
     method public abstract void onCallSessionEvent(int);
-    method public abstract void onCameraCapabilitiesChanged(android.telecom.CameraCapabilities);
+    method public abstract void onCameraCapabilitiesChanged(android.telecom.VideoProfile.CameraCapabilities);
     method public abstract void onPeerDimensionsChanged(int, int);
     method public abstract void onSessionModifyRequestReceived(android.telecom.VideoProfile);
     method public abstract void onSessionModifyResponseReceived(int, android.telecom.VideoProfile, android.telecom.VideoProfile);
     method public abstract void onVideoQualityChanged(int);
   }
 
-  public class PhoneAccount implements android.os.Parcelable {
+  public final class PhoneAccount implements android.os.Parcelable {
     method public static android.telecom.PhoneAccount.Builder builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
     method public android.graphics.drawable.Drawable createIconDrawable(android.content.Context);
     method public int describeContents();
@@ -28751,7 +28742,7 @@ package android.telecom {
     method public android.telecom.PhoneAccount.Builder setSupportedUriSchemes(java.util.List<java.lang.String>);
   }
 
-  public class PhoneAccountHandle implements android.os.Parcelable {
+  public final class PhoneAccountHandle implements android.os.Parcelable {
     ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String);
     ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String, android.os.UserHandle);
     method public int describeContents();
@@ -28906,6 +28897,15 @@ package android.telecom {
     field public static final int STATE_PAUSED = 4; // 0x4
     field public static final int STATE_RX_ENABLED = 2; // 0x2
     field public static final int STATE_TX_ENABLED = 1; // 0x1
+  }
+
+  public static final class VideoProfile.CameraCapabilities implements android.os.Parcelable {
+    ctor public VideoProfile.CameraCapabilities(int, int);
+    method public int describeContents();
+    method public int getHeight();
+    method public int getWidth();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.VideoProfile.CameraCapabilities> CREATOR;
   }
 
   public static class VideoProfile.VideoState {

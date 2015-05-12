@@ -47,7 +47,7 @@ import java.util.MissingResourceException;
  * should supply a valid {@link PhoneAccountHandle} that references the connection service
  * implementation Telecom will use to interact with the app.
  */
-public class PhoneAccount implements Parcelable {
+public final class PhoneAccount implements Parcelable {
 
     /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for

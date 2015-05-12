@@ -575,7 +575,8 @@ public abstract class InCallService extends Service {
              *
              * @param cameraCapabilities The changed camera capabilities.
              */
-            public abstract void onCameraCapabilitiesChanged(CameraCapabilities cameraCapabilities);
+            public abstract void onCameraCapabilitiesChanged(
+                    VideoProfile.CameraCapabilities cameraCapabilities);
         }
     }
 }
