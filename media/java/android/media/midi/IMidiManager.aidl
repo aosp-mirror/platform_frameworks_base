@@ -26,7 +26,7 @@ import android.os.IBinder;
 /** @hide */
 interface IMidiManager
 {
-    MidiDeviceInfo[] getDeviceList();
+    MidiDeviceInfo[] getDevices();
 
     // for device creation & removal notifications
     void registerListener(IBinder token, in IMidiDeviceListener listener);
