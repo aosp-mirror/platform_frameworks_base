@@ -311,7 +311,7 @@ TessellationCache::TessellationCache()
 
     mCache.setOnEntryRemovedListener(&mBufferRemovedListener);
     mShadowCache.setOnEntryRemovedListener(&mBufferPairRemovedListener);
-    mDebugEnabled = readDebugLevel() & kDebugCaches;
+    mDebugEnabled = Properties::debugLevel & kDebugCaches;
 }
 
 TessellationCache::~TessellationCache() {

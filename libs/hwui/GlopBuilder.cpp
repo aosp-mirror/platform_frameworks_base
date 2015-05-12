@@ -588,8 +588,8 @@ void GlopBuilder::build() {
 
     // Enable debug highlight when what we're about to draw is tested against
     // the stencil buffer and if stencil highlight debugging is on
-    mDescription.hasDebugHighlight = !mCaches.debugOverdraw
-            && mCaches.debugStencilClip == Caches::kStencilShowHighlight
+    mDescription.hasDebugHighlight = !Properties::debugOverdraw
+            && Properties::debugStencilClip == StencilClipDebug::ShowHighlight
             && mRenderState.stencil().isTestEnabled();
 
     // serialize shader info into ShaderData

@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -412,6 +413,13 @@ public class ThreadedRenderer extends HardwareRenderer {
         nTrimMemory(level);
     }
 
+    public static void overrideProperty(@NonNull String name, @NonNull String value) {
+        if (name == null || value == null) {
+            throw new IllegalArgumentException("name and value must be non-null");
+        }
+        nOverrideProperty(name, value);
+    }
+
     public static void dumpProfileData(byte[] data, FileDescriptor fd) {
         nDumpProfileData(data, fd);
     }
@@ -510,6 +518,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native void nDestroyHardwareResources(long nativeProxy);
     private static native void nTrimMemory(int level);
+    private static native void nOverrideProperty(String name, String value);
 
     private static native void nFence(long nativeProxy);
     private static native void nStopDrawing(long nativeProxy);

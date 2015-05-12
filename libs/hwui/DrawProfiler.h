@@ -16,8 +16,10 @@
 #ifndef DRAWPROFILER_H
 #define DRAWPROFILER_H
 
-#include <utils/Timers.h>
+#include "Properties.h"
 #include "Rect.h"
+
+#include <utils/Timers.h>
 
 namespace android {
 namespace uirenderer {
@@ -29,7 +31,7 @@ public:
     DrawProfiler();
     ~DrawProfiler();
 
-    bool loadSystemProperties();
+    bool consumeProperties();
     void setDensity(float density);
 
     void startFrame(nsecs_t recordDurationNanos = 0);
@@ -43,12 +45,6 @@ public:
     void dumpData(int fd);
 
 private:
-    enum ProfileType {
-        kNone,
-        kConsole,
-        kBars,
-    };
-
     typedef struct {
         float record;
         float prepare;
@@ -65,20 +61,18 @@ private:
     void drawCurrentFrame(OpenGLRenderer* canvas);
     void drawThreshold(OpenGLRenderer* canvas);
 
-    ProfileType loadRequestedProfileType();
+    ProfileType mType = ProfileType::None;
+    float mDensity = 0;
 
-    ProfileType mType;
-    float mDensity;
+    FrameTimingData* mData = nullptr;
+    int mDataSize = 0;
 
-    FrameTimingData* mData;
-    int mDataSize;
+    int mCurrentFrame = -1;
+    nsecs_t mPreviousTime = 0;
 
-    int mCurrentFrame;
-    nsecs_t mPreviousTime;
-
-    int mVerticalUnit;
-    int mHorizontalUnit;
-    int mThresholdStroke;
+    int mVerticalUnit = 0;
+    int mHorizontalUnit = 0;
+    int mThresholdStroke = 0;
 
     /*
      * mRects represents an array of rect shapes, divided into NUM_ELEMENTS
@@ -87,11 +81,11 @@ private:
      * OpenGLRenderer:drawRects() that makes up all the FrameTimingData:record
      * information.
      */
-    float** mRects;
+    float** mRects = nullptr;
 
-    bool mShowDirtyRegions;
+    bool mShowDirtyRegions = false;
     SkRect mDirtyRegion;
-    bool mFlashToggle;
+    bool mFlashToggle = false;
 };
 
 } /* namespace uirenderer */
