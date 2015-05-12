@@ -7759,7 +7759,7 @@ package android.content {
     field public static final java.lang.String MIDI_SERVICE = "midi";
     field public static final int MODE_APPEND = 32768; // 0x8000
     field public static final int MODE_ENABLE_WRITE_AHEAD_LOGGING = 8; // 0x8
-    field public static final int MODE_MULTI_PROCESS = 4; // 0x4
+    field public static final deprecated int MODE_MULTI_PROCESS = 4; // 0x4
     field public static final int MODE_PRIVATE = 0; // 0x0
     field public static final deprecated int MODE_WORLD_READABLE = 1; // 0x1
     field public static final deprecated int MODE_WORLD_WRITEABLE = 2; // 0x2

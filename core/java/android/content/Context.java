@@ -134,7 +134,15 @@ public abstract class Context {
      * explicitly set if desired.
      *
      * @see #getSharedPreferences
+     *
+     * @deprecated MODE_MULTI_PROCESS does not work reliably in
+     * some versions of Android, and furthermore does not provide any
+     * mechanism for reconciling concurrent modifications across
+     * processes.  Applications should not attempt to use it.  Instead,
+     * they should use an explicit cross-process data management
+     * approach such as {@link android.content.ContentProvider ContentProvider}.
      */
+    @Deprecated
     public static final int MODE_MULTI_PROCESS = 0x0004;
 
     /**
@@ -604,11 +612,7 @@ public abstract class Context {
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
      * default operation, {@link #MODE_WORLD_READABLE}
-     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.  The bit
-     * {@link #MODE_MULTI_PROCESS} can also be used if multiple processes
-     * are mutating the same SharedPreferences file.  {@link #MODE_MULTI_PROCESS}
-     * is always on in apps targeting Gingerbread (Android 2.3) and below, and
-     * off by default in later versions.
+     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.
      *
      * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
@@ -616,7 +620,6 @@ public abstract class Context {
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
-     * @see #MODE_MULTI_PROCESS
      */
     public abstract SharedPreferences getSharedPreferences(String name,
             int mode);
