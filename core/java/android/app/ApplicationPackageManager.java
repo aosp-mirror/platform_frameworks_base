@@ -1571,9 +1571,15 @@ final class ApplicationPackageManager extends PackageManager {
         final VolumeInfo currentVol = getPrimaryStorageCurrentVolume();
         final List<VolumeInfo> vols = storage.getVolumes();
         final List<VolumeInfo> candidates = new ArrayList<>();
-        for (VolumeInfo vol : vols) {
-            if (Objects.equals(vol, currentVol) || isPrimaryStorageCandidateVolume(vol)) {
-                candidates.add(vol);
+        if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL,
+                storage.getPrimaryStorageUuid()) && currentVol != null) {
+            // TODO: support moving primary physical to emulated volume
+            candidates.add(currentVol);
+        } else {
+            for (VolumeInfo vol : vols) {
+                if (Objects.equals(vol, currentVol) || isPrimaryStorageCandidateVolume(vol)) {
+                    candidates.add(vol);
+                }
             }
         }
         return candidates;
@@ -1590,12 +1596,7 @@ final class ApplicationPackageManager extends PackageManager {
             return false;
         }
 
-        // We can move to public volumes on legacy devices
-        if ((vol.getType() == VolumeInfo.TYPE_PUBLIC) && vol.getDisk().isDefaultPrimary()) {
-            return true;
-        }
-
-        // Otherwise we can move to any private volume
+        // We can move to any private volume
         return (vol.getType() == VolumeInfo.TYPE_PRIVATE);
     }
 
