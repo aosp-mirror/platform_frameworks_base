@@ -519,10 +519,11 @@ aidl_files := \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/net/NetworkRequest.aidl \
 	frameworks/base/core/java/android/net/LinkAddress.aidl \
-	frameworks/base/core/java/android/view/Surface.aidl \
-	frameworks/base/core/java/android/view/WindowContentFrameStats.aidl \
+	frameworks/base/core/java/android/view/Display.aidl \
 	frameworks/base/core/java/android/view/InputDevice.aidl \
 	frameworks/base/core/java/android/view/InputEvent.aidl \
+	frameworks/base/core/java/android/view/Surface.aidl \
+	frameworks/base/core/java/android/view/WindowContentFrameStats.aidl \
 	frameworks/base/core/java/android/view/inputmethod/InputMethodSubtype.aidl \
 	frameworks/base/core/java/android/view/inputmethod/CursorAnchorInfo.aidl \
 	frameworks/base/core/java/android/view/inputmethod/CompletionInfo.aidl \
