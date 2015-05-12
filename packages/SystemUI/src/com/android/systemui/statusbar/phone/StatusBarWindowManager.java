@@ -129,8 +129,9 @@ public class StatusBarWindowManager {
     }
 
     private void applyHeight(State state) {
-        boolean expanded = state.isKeyguardShowingAndNotOccluded() || state.statusBarExpanded
-                || state.keyguardFadingAway || state.bouncerShowing || state.headsUpShowing;
+        boolean expanded = !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
+                || state.statusBarExpanded || state.keyguardFadingAway || state.bouncerShowing
+                || state.headsUpShowing);
         if (expanded) {
             mLpChanged.height = ViewGroup.LayoutParams.MATCH_PARENT;
         } else {
@@ -256,6 +257,16 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    /**
+     * Force the window to be collapsed, even if it should theoretically be expanded.
+     * Used for when a heads-up comes in but we still need to wait for the touchable regions to
+     * be computed.
+     */
+    public void setForceWindowCollapsed(boolean force) {
+        mCurrentState.forceCollapsed = force;
+        apply(mCurrentState);
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
@@ -267,6 +278,7 @@ public class StatusBarWindowManager {
         boolean qsExpanded;
         boolean headsUpShowing;
         boolean forceStatusBarVisible;
+        boolean forceCollapsed;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.

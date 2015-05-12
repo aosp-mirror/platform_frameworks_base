@@ -619,7 +619,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     R.color.notification_panel_solid_background)));
         }
 
-        mHeadsUpManager = new HeadsUpManager(context, mNotificationPanel.getViewTreeObserver());
+        mHeadsUpManager = new HeadsUpManager(context, mStatusBarWindow);
         mHeadsUpManager.setBar(this);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
@@ -1869,21 +1869,34 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
         if (inPinnedMode) {
+            // We need to ensure that the touchable region is updated before the window will be
+            // resized, in order to not catch any touches. A layout will ensure that
+            // onComputeInternalInsets will be called and after that we can resize the layout. Let's
+            // make sure that the window stays small for one frame until the touchableRegion is set.
+            mNotificationPanel.requestLayout();
             mStatusBarWindowManager.setHeadsUpShowing(true);
             mStatusBarWindowManager.setForceStatusBarVisible(true);
-        } else {
-            Runnable endRunnable = new Runnable() {
+            mStatusBarWindowManager.setForceWindowCollapsed(true);
+            mNotificationPanel.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (!mHeadsUpManager.hasPinnedHeadsUp()) {
-                        mStatusBarWindowManager.setHeadsUpShowing(false);
-                    }
+                    mStatusBarWindowManager.setForceWindowCollapsed(false);
                 }
-            };
+            });
+        } else {
             if (!mNotificationPanel.isFullyCollapsed()) {
-                endRunnable.run();
+                mStatusBarWindowManager.setHeadsUpShowing(false);
             } else {
-                mStackScroller.runAfterAnimationFinished(endRunnable);
+                mHeadsUpManager.setHeadsUpGoingAway(true);
+                mStackScroller.runAfterAnimationFinished(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!mHeadsUpManager.hasPinnedHeadsUp()) {
+                            mStatusBarWindowManager.setHeadsUpShowing(false);
+                            mHeadsUpManager.setHeadsUpGoingAway(false);
+                        }
+                    }
+                });
             }
         }
     }
