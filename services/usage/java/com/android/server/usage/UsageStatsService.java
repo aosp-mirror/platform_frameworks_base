@@ -718,10 +718,10 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public boolean isAppIdle(String packageName, int userId) {
+        public boolean isAppInactive(String packageName, int userId) {
             try {
                 userId = ActivityManagerNative.getDefault().handleIncomingUser(Binder.getCallingPid(),
-                        Binder.getCallingUid(), userId, false, true, "isAppIdle", null);
+                        Binder.getCallingUid(), userId, false, true, "isAppInactive", null);
             } catch (RemoteException re) {
                 return false;
             }
@@ -734,7 +734,7 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public void setAppIdle(String packageName, boolean idle, int userId) {
+        public void setAppInactive(String packageName, boolean idle, int userId) {
             final int callingUid = Binder.getCallingUid();
             try {
                 userId = ActivityManagerNative.getDefault().handleIncomingUser(

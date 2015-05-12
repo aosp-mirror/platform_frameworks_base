@@ -142,8 +142,8 @@ public class Am extends BaseCommand {
                 "       am task resizeable <TASK_ID> [true|false]\n" +
                 "       am task resize <TASK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am get-config\n" +
-                "       am set-idle [--user <USER_ID>] <PACKAGE> true|false\n" +
-                "       am get-idle [--user <USER_ID>] <PACKAGE>\n" +
+                "       am set-inactive [--user <USER_ID>] <PACKAGE> true|false\n" +
+                "       am get-inactive [--user <USER_ID>] <PACKAGE>\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -284,9 +284,9 @@ public class Am extends BaseCommand {
                 "am get-config: retrieve the configuration and any recent configurations\n" +
                 "  of the device\n" +
                 "\n" +
-                "am set-idle: sets the idle state of an app\n" +
+                "am set-inactive: sets the inactive state of an app\n" +
                 "\n" +
-                "am get-idle: returns the idle state of an app\n" +
+                "am get-inactive: returns the inactive state of an app\n" +
                 "\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
@@ -395,10 +395,10 @@ public class Am extends BaseCommand {
             runTask();
         } else if (op.equals("get-config")) {
             runGetConfig();
-        } else if (op.equals("set-idle")) {
-            runSetIdle();
-        } else if (op.equals("get-idle")) {
-            runGetIdle();
+        } else if (op.equals("set-inactive")) {
+            runSetInactive();
+        } else if (op.equals("get-inactive")) {
+            runGetInactive();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -2030,7 +2030,7 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runSetIdle() throws Exception {
+    private void runSetInactive() throws Exception {
         int userId = UserHandle.USER_OWNER;
 
         String opt;
@@ -2047,10 +2047,10 @@ public class Am extends BaseCommand {
 
         IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
                 Context.USAGE_STATS_SERVICE));
-        usm.setAppIdle(packageName, Boolean.parseBoolean(value), userId);
+        usm.setAppInactive(packageName, Boolean.parseBoolean(value), userId);
     }
 
-    private void runGetIdle() throws Exception {
+    private void runGetInactive() throws Exception {
         int userId = UserHandle.USER_OWNER;
 
         String opt;
@@ -2066,7 +2066,7 @@ public class Am extends BaseCommand {
 
         IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
                 Context.USAGE_STATS_SERVICE));
-        boolean isIdle = usm.isAppIdle(packageName, userId);
+        boolean isIdle = usm.isAppInactive(packageName, userId);
         System.out.println("Idle=" + isIdle);
     }
 

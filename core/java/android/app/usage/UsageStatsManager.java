@@ -220,15 +220,15 @@ public final class UsageStatsManager {
     }
 
     /**
-     * Returns whether the specified app is currently considered idle. This will be true if the
+     * Returns whether the specified app is currently considered inactive. This will be true if the
      * app hasn't been used directly or indirectly for a period of time defined by the system. This
      * could be of the order of several hours or days.
      * @param packageName The package name of the app to query
-     * @return whether the app is currently considered idle
+     * @return whether the app is currently considered inactive
      */
-    public boolean isAppIdle(String packageName) {
+    public boolean isAppInactive(String packageName) {
         try {
-            return mService.isAppIdle(packageName, UserHandle.myUserId());
+            return mService.isAppInactive(packageName, UserHandle.myUserId());
         } catch (RemoteException e) {
             // fall through and return default
         }
