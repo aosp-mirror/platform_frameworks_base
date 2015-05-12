@@ -311,8 +311,7 @@ public class StackScrollAlgorithm {
                     StackViewState viewState = resultState.getViewStateForView(
                             nextChild);
                     // The child below the dragged one must be fully visible
-                    if (!NotificationStackScrollLayout.isPinnedHeadsUp(draggedView)
-                            || NotificationStackScrollLayout.isPinnedHeadsUp(nextChild)) {
+                    if (ambientState.isShadeExpanded()) {
                         viewState.alpha = 1;
                     }
                 }
@@ -508,8 +507,18 @@ public class StackScrollAlgorithm {
             }
             StackViewState childState = resultState.getViewStateForView(row);
             boolean isTopEntry = topHeadsUpEntry == row;
+            if (mIsExpanded) {
+                if (isTopEntry) {
+                    childState.height += row.getHeadsUpHeight() - mCollapsedSize;
+                }
+                childState.height = Math.max(childState.height, row.getHeadsUpHeight());
+                // Ensure that the heads up is always visible even when scrolled off from the bottom
+                float bottomPosition = ambientState.getMaxHeadsUpTranslation() - childState.height;
+                childState.yTranslation = Math.min(childState.yTranslation,
+                        bottomPosition);
+            }
             if (row.isPinned()) {
-                childState.yTranslation = 0;
+                childState.yTranslation = Math.max(childState.yTranslation, 0);
                 childState.height = row.getHeadsUpHeight();
                 if (!isTopEntry) {
                     // Ensure that a headsUp doesn't vertically extend further than the heads-up at
@@ -519,15 +528,6 @@ public class StackScrollAlgorithm {
                     childState.yTranslation = topState.yTranslation + topState.height
                             - childState.height;
                 }
-            } else if (mIsExpanded) {
-                if (isTopEntry) {
-                    childState.height += row.getHeadsUpHeight() - mCollapsedSize;
-                }
-                childState.height = Math.max(childState.height, row.getHeadsUpHeight());
-                // Ensure that the heads up is always visible even when scrolled of from the bottom
-                float bottomPosition = ambientState.getMaxHeadsUpTranslation() - childState.height;
-                childState.yTranslation = Math.min(childState.yTranslation,
-                        bottomPosition);
             }
         }
     }

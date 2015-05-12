@@ -115,6 +115,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (mFraction != fraction) {
             mFraction = fraction;
             scheduleUpdate();
+            if (mPinnedHeadsUpCount != 0) {
+                updateHeadsUpScrim(false);
+            }
         }
     }
 
@@ -425,12 +428,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private float calculateHeadsUpAlpha() {
+        float alpha;
         if (mPinnedHeadsUpCount >= 2) {
-            return 1.0f;
+            alpha = 1.0f;
         } else if (mPinnedHeadsUpCount == 0) {
-            return 0.0f;
+            alpha = 0.0f;
         } else {
-            return 1.0f - mTopHeadsUpDragAmount;
+            alpha = 1.0f - mTopHeadsUpDragAmount;
         }
+        float expandFactor = (1.0f - mFraction);
+        expandFactor = Math.max(expandFactor, 0.0f);
+        return alpha * expandFactor;
     }
 }

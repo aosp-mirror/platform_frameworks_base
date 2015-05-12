@@ -1602,9 +1602,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (DEBUG_MEDIA) {
             Log.v(TAG, "DEBUG_MEDIA: updating album art for notification " + mMediaNotificationKey
-                + " metadata=" + mMediaMetadata
-                + " metaDataChanged=" + metaDataChanged
-                + " state=" + mState);
+                    + " metadata=" + mMediaMetadata
+                    + " metaDataChanged=" + metaDataChanged
+                    + " state=" + mState);
         }
 
         Bitmap artworkBitmap = null;
@@ -1872,24 +1872,30 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     @Override
     public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
         if (inPinnedMode) {
-            // We need to ensure that the touchable region is updated before the window will be
-            // resized, in order to not catch any touches. A layout will ensure that
-            // onComputeInternalInsets will be called and after that we can resize the layout. Let's
-            // make sure that the window stays small for one frame until the touchableRegion is set.
-            mNotificationPanel.requestLayout();
             mStatusBarWindowManager.setHeadsUpShowing(true);
             mStatusBarWindowManager.setForceStatusBarVisible(true);
-            mStatusBarWindowManager.setForceWindowCollapsed(true);
-            mNotificationPanel.post(new Runnable() {
-                @Override
-                public void run() {
-                    mStatusBarWindowManager.setForceWindowCollapsed(false);
-                }
-            });
+            if (mNotificationPanel.isFullyCollapsed()) {
+                // We need to ensure that the touchable region is updated before the window will be
+                // resized, in order to not catch any touches. A layout will ensure that
+                // onComputeInternalInsets will be called and after that we can resize the layout. Let's
+                // make sure that the window stays small for one frame until the touchableRegion is set.
+                mNotificationPanel.requestLayout();
+                mStatusBarWindowManager.setForceWindowCollapsed(true);
+                mNotificationPanel.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mStatusBarWindowManager.setForceWindowCollapsed(false);
+                    }
+                });
+            }
         } else {
-            if (!mNotificationPanel.isFullyCollapsed()) {
+            if (!mNotificationPanel.isFullyCollapsed() || mNotificationPanel.isTracking()) {
+                // We are currently tracking or is open and the shade doesn't need to be kept
+                // open artificially.
                 mStatusBarWindowManager.setHeadsUpShowing(false);
             } else {
+                // we need to keep the panel open artificially, let's wait until the animation
+                // is finished.
                 mHeadsUpManager.setHeadsUpGoingAway(true);
                 mStackScroller.runAfterAnimationFinished(new Runnable() {
                     @Override
