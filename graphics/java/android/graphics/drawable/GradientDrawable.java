@@ -133,7 +133,7 @@ public class GradientDrawable extends Drawable {
 
     private GradientState mGradientState;
 
-    private final Paint mFillPaint = new Paint();
+    private final Paint mFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Rect mPadding;
     private Paint mStrokePaint;   // optional, set by the caller
     private ColorFilter mColorFilter;   // optional, set by the caller
@@ -323,7 +323,7 @@ public class GradientDrawable extends Drawable {
 
     private void setStrokeInternal(int width, int color, float dashWidth, float dashGap) {
         if (mStrokePaint == null)  {
-            mStrokePaint = new Paint();
+            mStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mStrokePaint.setStyle(Paint.Style.STROKE);
         }
         mStrokePaint.setStrokeWidth(width);
@@ -1802,7 +1802,7 @@ public class GradientDrawable extends Drawable {
         mPadding = state.mPadding;
 
         if (state.mStrokeWidth >= 0) {
-            mStrokePaint = new Paint();
+            mStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mStrokePaint.setStyle(Paint.Style.STROKE);
             mStrokePaint.setStrokeWidth(state.mStrokeWidth);
 
