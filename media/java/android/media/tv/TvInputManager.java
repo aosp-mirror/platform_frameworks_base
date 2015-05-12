@@ -1367,12 +1367,12 @@ public final class TvInputManager {
         }
 
         /**
-         * Notifies of any structural changes (format or size) of the {@link Surface}
-         * passed by {@link #setSurface}.
+         * Notifies of any structural changes (format or size) of the surface passed in
+         * {@link #setSurface}.
          *
-         * @param format The new PixelFormat of the {@link Surface}.
-         * @param width The new width of the {@link Surface}.
-         * @param height The new height of the {@link Surface}.
+         * @param format The new PixelFormat of the surface.
+         * @param width The new width of the surface.
+         * @param height The new height of the surface.
          * @hide
          */
         @SystemApi
