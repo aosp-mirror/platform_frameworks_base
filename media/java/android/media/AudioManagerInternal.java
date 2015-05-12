@@ -43,6 +43,8 @@ public abstract class AudioManagerInternal {
 
     public abstract int getVolumeControllerUid();
 
+    public abstract void updateRingerModeAffectedStreamsInternal();
+
     public interface RingerModeDelegate {
         /** Called when external ringer mode is evaluated, returns the new internal ringer mode */
         int onSetRingerModeExternal(int ringerModeOld, int ringerModeNew, String caller,
@@ -53,5 +55,7 @@ public abstract class AudioManagerInternal {
                 int ringerModeExternal, VolumePolicy policy);
 
         boolean canVolumeDownEnterSilent();
+
+        int getRingerModeAffectedStreams(int streams);
     }
 }
