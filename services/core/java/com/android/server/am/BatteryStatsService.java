@@ -178,6 +178,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     // These are for direct use by the activity manager...
 
+    /**
+     * Remove a UID from the BatteryStats and BatteryStats' external dependencies.
+     */
+    void removeUid(int uid) {
+        synchronized (mStats) {
+            mStats.removeUidStatsLocked(uid);
+        }
+    }
+
     void addIsolatedUid(int isolatedUid, int appUid) {
         synchronized (mStats) {
             mStats.addIsolatedUidLocked(isolatedUid, appUid);
