@@ -26,7 +26,7 @@ namespace android {
 
 struct AudioPlaybackRate;
 class AudioTrack;
-struct IGraphicBufferProducer;
+class IGraphicBufferProducer;
 struct MediaClock;
 class MediaSync;
 
