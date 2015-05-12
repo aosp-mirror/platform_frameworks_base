@@ -238,6 +238,7 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#TextView_letterSpacing
  * @attr ref android.R.styleable#TextView_fontFeatureSettings
  * @attr ref android.R.styleable#TextView_breakStrategy
+ * @attr ref android.R.styleable#TextView_hyphenationFrequency
  * @attr ref android.R.styleable#TextView_leftIndents
  * @attr ref android.R.styleable#TextView_rightIndents
  */
@@ -555,6 +556,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private float mSpacingAdd = 0.0f;
 
     private int mBreakStrategy;
+    private int mHyphenationFrequency;
     private int[] mLeftIndents;
     private int[] mRightIndents;
 
@@ -696,6 +698,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float letterSpacing = 0;
         String fontFeatureSettings = null;
         mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
+        mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
 
         final Resources.Theme theme = context.getTheme();
 
@@ -1152,6 +1155,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_breakStrategy:
                 mBreakStrategy = a.getInt(attr, Layout.BREAK_STRATEGY_SIMPLE);
+                break;
+
+            case com.android.internal.R.styleable.TextView_hyphenationFrequency:
+                mHyphenationFrequency = a.getInt(attr, Layout.HYPHENATION_FREQUENCY_NONE);
                 break;
 
             case com.android.internal.R.styleable.TextView_leftIndents:
@@ -3047,6 +3054,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Layout.BreakStrategy
     public int getBreakStrategy() {
         return mBreakStrategy;
+    }
+
+    /**
+     * Sets the hyphenation frequency. The default value for both TextView and EditText, which is set
+     * from the theme, is {@link Layout#HYPHENATION_FREQUENCY_NORMAL}.
+     *
+     * @attr ref android.R.styleable#TextView_hyphenationFrequency
+     * @see #getHyphenationFrequency()
+     */
+    public void setHyphenationFrequency(@Layout.HyphenationFrequency int hyphenationFrequency) {
+        mHyphenationFrequency = hyphenationFrequency;
+        if (mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
+    }
+
+    /**
+     * @return the currently set hyphenation frequency.
+     *
+     * @attr ref android.R.styleable#TextView_hyphenationFrequency
+     * @see #setHyphenationFrequency(int)
+     */
+    @Layout.HyphenationFrequency
+    public int getHyphenationFrequency() {
+        return mHyphenationFrequency;
     }
 
     /**
@@ -6637,7 +6671,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setTextDir(mTextDir)
                         .setLineSpacing(mSpacingAdd, mSpacingMult)
                         .setIncludePad(mIncludePad)
-                        .setBreakStrategy(mBreakStrategy);
+                        .setBreakStrategy(mBreakStrategy)
+                        .setHyphenationFrequency(mHyphenationFrequency);
                 if (mLeftIndents != null || mRightIndents != null) {
                     builder.setIndents(mLeftIndents, mRightIndents);
                 }
@@ -6678,7 +6713,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Layout result = null;
         if (mText instanceof Spannable) {
             result = new DynamicLayout(mText, mTransformed, mTextPaint, wantWidth,
-                    alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad, mBreakStrategy,
+                    alignment, mTextDir, mSpacingMult, mSpacingAdd, mIncludePad,
+                    mBreakStrategy, mHyphenationFrequency,
                     getKeyListener() == null ? effectiveEllipsize : null, ellipsisWidth);
         } else {
             if (boring == UNKNOWN_BORING) {
@@ -6726,7 +6762,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setTextDir(mTextDir)
                     .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
-                    .setBreakStrategy(mBreakStrategy);
+                    .setBreakStrategy(mBreakStrategy)
+                    .setHyphenationFrequency(mHyphenationFrequency);
             if (mLeftIndents != null || mRightIndents != null) {
                 builder.setIndents(mLeftIndents, mRightIndents);
             }

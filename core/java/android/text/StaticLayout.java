@@ -92,6 +92,7 @@ public class StaticLayout extends Layout {
             b.mEllipsize = null;
             b.mMaxLines = Integer.MAX_VALUE;
             b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
+            b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
 
             b.mMeasuredText = MeasuredText.obtain();
             return b;
@@ -276,6 +277,19 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Set hyphenation frequency, to control the amount of automatic hyphenation used. The
+         * default is {@link Layout#HYPHENATION_FREQUENCY_NONE}.
+         *
+         * @param hyphenationFrequency hyphenation frequency for the paragraph
+         * @return this builder, useful for chaining
+         * @see android.widget.TextView#setHyphenationFrequency
+         */
+        public Builder setHyphenationFrequency(@HyphenationFrequency int hyphenationFrequency) {
+            mHyphenationFrequency = hyphenationFrequency;
+            return this;
+        }
+
+        /**
          * Set indents. Arguments are arrays holding an indent amount, one per line, measured in
          * pixels. For lines past the last element in the array, the last element repeats.
          *
@@ -302,7 +316,8 @@ public class StaticLayout extends Layout {
          * the native code is as follows.
          *
          * For each paragraph, do a nSetupParagraph, which sets paragraph text, line width, tab
-         * stops, break strategy (and possibly other parameters in the future).
+         * stops, break strategy, and hyphenation frequency (and possibly other parameters in the
+         * future).
          *
          * Then, for each run within the paragraph:
          *  - setLocale (this must be done at least for the first run, optional afterwards)
@@ -377,6 +392,7 @@ public class StaticLayout extends Layout {
         TextUtils.TruncateAt mEllipsize;
         int mMaxLines;
         int mBreakStrategy;
+        int mHyphenationFrequency;
 
         Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -644,7 +660,7 @@ public class StaticLayout extends Layout {
 
             nSetupParagraph(b.mNativePtr, chs, paraEnd - paraStart,
                     firstWidth, firstWidthLineCount, restWidth,
-                    variableTabStops, TAB_INCREMENT, b.mBreakStrategy);
+                    variableTabStops, TAB_INCREMENT, b.mBreakStrategy, b.mHyphenationFrequency);
 
             // measurement has to be done before performing line breaking
             // but we don't want to recompute fontmetrics or span ranges the
@@ -1153,7 +1169,7 @@ public class StaticLayout extends Layout {
     // Set up paragraph text and settings; done as one big method to minimize jni crossings
     private static native void nSetupParagraph(long nativePtr, char[] text, int length,
             float firstWidth, int firstWidthLineCount, float restWidth,
-            int[] variableTabStops, int defaultTabStop, int breakStrategy);
+            int[] variableTabStops, int defaultTabStop, int breakStrategy, int hyphenationFrequency);
 
     private static native float nAddStyleRun(long nativePtr, long nativePaint,
             long nativeTypeface, int start, int end, boolean isRtl);
