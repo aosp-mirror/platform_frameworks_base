@@ -2001,7 +2001,6 @@ public final class ViewRootImpl implements ViewParent,
                 mLastWasImTarget = imTarget;
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null && imTarget) {
-                    imm.startGettingWindowFocus(mView);
                     imm.onWindowFocus(mView, mView.findFocus(),
                             mWindowAttributes.softInputMode,
                             !mHasHadWindowFocus, mWindowAttributes.flags);
@@ -3305,10 +3304,6 @@ public final class ViewRootImpl implements ViewParent,
 
                     InputMethodManager imm = InputMethodManager.peekInstance();
                     if (mView != null) {
-                        if (hasWindowFocus && imm != null && mLastWasImTarget &&
-                                !isInLocalFocusMode()) {
-                            imm.startGettingWindowFocus(mView);
-                        }
                         mAttachInfo.mKeyDispatchState.reset();
                         mView.dispatchWindowFocusChanged(hasWindowFocus);
                         mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
