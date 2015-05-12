@@ -177,13 +177,16 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
      * @throws IllegalArgumentException if the request targets no Surfaces or Surfaces that are not
-     *                                  configured as outputs for this session; or a reprocess
-     *                                  capture request is submitted in a non-reprocessible capture
-     *                                  session; or the reprocess capture request was created with
-     *                                  a {@link TotalCaptureResult} from a different session; or
-     *                                  the capture targets a Surface in the middle of being
-     *                                  {@link #prepare prepared}; or the handler is null, the
-     *                                  listener is not null, and the calling thread has no looper.
+     *                                  configured as outputs for this session; or the request
+     *                                  targets a set of Surfaces that cannot be submitted
+     *                                  simultaneously in a reprocessible capture session; or a
+     *                                  reprocess capture request is submitted in a
+     *                                  non-reprocessible capture session; or the reprocess capture
+     *                                  request was created with a {@link TotalCaptureResult} from
+     *                                  a different session; or the capture targets a Surface in
+     *                                  the middle of being {@link #prepare prepared}; or the
+     *                                  handler is null, the listener is not null, and the calling
+     *                                  thread has no looper.
      *
      * @see #captureBurst
      * @see #setRepeatingRequest
@@ -233,14 +236,16 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                               was explicitly closed, a new session has been created
      *                               or the camera device has been closed.
      * @throws IllegalArgumentException If the requests target no Surfaces, or the requests target
-     *                                  Surfaces not currently configured as outputs; or a reprocess
-     *                                  capture request is submitted in a non-reprocessible capture
-     *                                  session; or one of the reprocess capture requests was
-     *                                  created with a {@link TotalCaptureResult} from a different
-     *                                  session; or one of the captures targets a Surface in the
-     *                                  middle of being {@link #prepare prepared}; or if the handler
-     *                                  is null, the listener is not null, and the calling thread
-     *                                  has no looper.
+     *                                  Surfaces not currently configured as outputs; or one of the
+     *                                  requests targets a set of Surfaces that cannot be submitted
+     *                                  simultaneously in a reprocessible capture session; or a
+     *                                  reprocess capture request is submitted in a
+     *                                  non-reprocessible capture session; or one of the reprocess
+     *                                  capture requests was created with a
+     *                                  {@link TotalCaptureResult} from a different session; or one
+     *                                  of the captures targets a Surface in the middle of being
+     *                                  {@link #prepare prepared}; or if the handler is null, the
+     *                                  listener is not null, and the calling thread has no looper.
      *
      * @see #capture
      * @see #setRepeatingRequest
