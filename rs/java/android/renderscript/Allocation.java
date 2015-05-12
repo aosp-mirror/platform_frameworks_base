@@ -1422,6 +1422,8 @@ public class Allocation extends BaseObj {
     }
 
     /**
+     * @hide
+     *
      * This is only intended to be used by auto-generated code reflected from
      * the RenderScript script files and should not be used by developers.
      *
