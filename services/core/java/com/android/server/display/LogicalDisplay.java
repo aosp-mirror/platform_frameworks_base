@@ -73,8 +73,7 @@ final class LogicalDisplay {
     // True if the logical display has unique content.
     private boolean mHasContent;
 
-    // The pending requested refresh rate. 0 if no request is pending.
-    private float mRequestedRefreshRate;
+    private int mRequestedModeId;
 
     // The display offsets to apply to the display projection.
     private int mDisplayOffsetX;
@@ -219,9 +218,10 @@ final class LogicalDisplay {
             mBaseDisplayInfo.logicalWidth = deviceInfo.width;
             mBaseDisplayInfo.logicalHeight = deviceInfo.height;
             mBaseDisplayInfo.rotation = Surface.ROTATION_0;
-            mBaseDisplayInfo.refreshRate = deviceInfo.refreshRate;
-            mBaseDisplayInfo.supportedRefreshRates = Arrays.copyOf(
-                    deviceInfo.supportedRefreshRates, deviceInfo.supportedRefreshRates.length);
+            mBaseDisplayInfo.modeId = deviceInfo.modeId;
+            mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
+            mBaseDisplayInfo.supportedModes = Arrays.copyOf(
+                    deviceInfo.supportedModes, deviceInfo.supportedModes.length);
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
             mBaseDisplayInfo.physicalXDpi = deviceInfo.xDpi;
             mBaseDisplayInfo.physicalYDpi = deviceInfo.yDpi;
@@ -259,14 +259,19 @@ final class LogicalDisplay {
      */
     public void configureDisplayInTransactionLocked(DisplayDevice device,
             boolean isBlanked) {
-        final DisplayInfo displayInfo = getDisplayInfoLocked();
-        final DisplayDeviceInfo displayDeviceInfo = device.getDisplayDeviceInfoLocked();
-
         // Set the layer stack.
         device.setLayerStackInTransactionLocked(isBlanked ? BLANK_LAYER_STACK : mLayerStack);
 
-        // Set the refresh rate
-        device.requestRefreshRateLocked(mRequestedRefreshRate);
+        // Set the mode.
+        if (device == mPrimaryDisplayDevice) {
+            device.requestModeInTransactionLocked(mRequestedModeId);
+        } else {
+            device.requestModeInTransactionLocked(0);  // Revert to default.
+        }
+
+        // Only grab the display info now as it may have been changed based on the requests above.
+        final DisplayInfo displayInfo = getDisplayInfoLocked();
+        final DisplayDeviceInfo displayDeviceInfo = device.getDisplayDeviceInfoLocked();
 
         // Set the viewport.
         // This is the area of the logical display that we intend to show on the
@@ -351,20 +356,17 @@ final class LogicalDisplay {
     }
 
     /**
-     * Requests the given refresh rate.
-     * @param requestedRefreshRate The desired refresh rate.
+     * Requests the given mode.
      */
-    public void setRequestedRefreshRateLocked(float requestedRefreshRate) {
-        mRequestedRefreshRate = requestedRefreshRate;
+    public void setRequestedModeIdLocked(int modeId) {
+        mRequestedModeId = modeId;
     }
 
     /**
-     * Gets the pending requested refresh rate.
-     *
-     * @return The pending refresh rate requested
+     * Returns the pending requested mode.
      */
-    public float getRequestedRefreshRateLocked() {
-        return mRequestedRefreshRate;
+    public int getRequestedModeIdLocked() {
+        return mRequestedModeId;
     }
 
     /**
@@ -393,7 +395,7 @@ final class LogicalDisplay {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
-        pw.println("mRequestedRefreshRate=" + mRequestedRefreshRate);
+        pw.println("mRequestedMode=" + mRequestedModeId);
         pw.println("mDisplayOffset=(" + mDisplayOffsetX + ", " + mDisplayOffsetY + ")");
         pw.println("mPrimaryDisplayDevice=" + (mPrimaryDisplayDevice != null ?
                 mPrimaryDisplayDevice.getNameLocked() : "null"));

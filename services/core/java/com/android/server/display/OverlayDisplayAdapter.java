@@ -197,6 +197,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         private final long mDisplayPresentationDeadlineNanos;
         private final int mDensityDpi;
         private final boolean mSecure;
+        private final Display.Mode mMode;
 
         private int mState;
         private SurfaceTexture mSurfaceTexture;
@@ -217,6 +218,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             mSecure = secure;
             mState = state;
             mSurfaceTexture = surfaceTexture;
+            mMode = createMode(width, height, refreshRate);
         }
 
         public void destroyLocked() {
@@ -251,8 +253,9 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.uniqueId = getUniqueId();
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
-                mInfo.refreshRate = mRefreshRate;
-                mInfo.supportedRefreshRates = new float[] { mRefreshRate };
+                mInfo.modeId = mMode.getModeId();
+                mInfo.defaultModeId = mMode.getModeId();
+                mInfo.supportedModes = new Display.Mode[] { mMode };
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;

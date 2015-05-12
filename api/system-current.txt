@@ -36771,6 +36771,7 @@ package android.view {
     method public int getFlags();
     method public deprecated int getHeight();
     method public void getMetrics(android.util.DisplayMetrics);
+    method public android.view.Display.Mode getMode();
     method public java.lang.String getName();
     method public deprecated int getOrientation();
     method public deprecated int getPixelFormat();
@@ -36782,7 +36783,8 @@ package android.view {
     method public int getRotation();
     method public void getSize(android.graphics.Point);
     method public int getState();
-    method public float[] getSupportedRefreshRates();
+    method public android.view.Display.Mode[] getSupportedModes();
+    method public deprecated float[] getSupportedRefreshRates();
     method public deprecated int getWidth();
     method public boolean isValid();
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
@@ -36795,6 +36797,16 @@ package android.view {
     field public static final int STATE_OFF = 1; // 0x1
     field public static final int STATE_ON = 2; // 0x2
     field public static final int STATE_UNKNOWN = 0; // 0x0
+  }
+
+  public static final class Display.Mode implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getModeId();
+    method public int getPhysicalHeight();
+    method public int getPhysicalWidth();
+    method public float getRefreshRate();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.view.Display.Mode> CREATOR;
   }
 
   public class DragEvent implements android.os.Parcelable {
@@ -39590,7 +39602,8 @@ package android.view {
     field public float horizontalWeight;
     field public deprecated int memoryType;
     field public java.lang.String packageName;
-    field public float preferredRefreshRate;
+    field public int preferredDisplayModeId;
+    field public deprecated float preferredRefreshRate;
     field public int rotationAnimation;
     field public float screenBrightness;
     field public int screenOrientation;

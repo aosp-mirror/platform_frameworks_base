@@ -165,6 +165,8 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         private static final int PENDING_SURFACE_CHANGE = 0x01;
         private static final int PENDING_RESIZE = 0x02;
 
+        private static final float REFRESH_RATE = 60.0f;
+
         private final IBinder mAppToken;
         private final int mOwnerUid;
         final String mOwnerPackageName;
@@ -181,6 +183,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         private boolean mStopped;
         private int mPendingChanges;
         private int mUniqueIndex;
+        private Display.Mode mMode;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName,
@@ -193,6 +196,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             mName = name;
             mWidth = width;
             mHeight = height;
+            mMode = createMode(width, height, REFRESH_RATE);
             mDensityDpi = densityDpi;
             mSurface = surface;
             mFlags = flags;
@@ -262,6 +266,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 sendTraversalRequestLocked();
                 mWidth = width;
                 mHeight = height;
+                mMode = createMode(width, height, REFRESH_RATE);
                 mDensityDpi = densityDpi;
                 mInfo = null;
                 mPendingChanges |= PENDING_RESIZE;
@@ -290,12 +295,13 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.uniqueId = getUniqueId();
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
-                mInfo.refreshRate = 60;
-                mInfo.supportedRefreshRates = new float[] { 60.0f };
+                mInfo.modeId = mMode.getModeId();
+                mInfo.defaultModeId = mMode.getModeId();
+                mInfo.supportedModes = new Display.Mode[] { mMode };
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
-                mInfo.presentationDeadlineNanos = 1000000000L / (int) mInfo.refreshRate; // 1 frame
+                mInfo.presentationDeadlineNanos = 1000000000L / (int) REFRESH_RATE; // 1 frame
                 mInfo.flags = 0;
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE

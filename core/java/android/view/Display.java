@@ -21,6 +21,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
@@ -619,18 +621,44 @@ public final class Display {
     public float getRefreshRate() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.refreshRate;
+            return mDisplayInfo.getMode().getRefreshRate();
         }
     }
 
     /**
      * Get the supported refresh rates of this display in frames per second.
+     * <p>
+     * This method only returns refresh rates for the display's default modes. For more options, use
+     * {@link #getSupportedModes()}.
+     *
+     * @deprecated use {@link #getSupportedModes()} instead
      */
+    @Deprecated
     public float[] getSupportedRefreshRates() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            final float[] refreshRates = mDisplayInfo.supportedRefreshRates;
-            return Arrays.copyOf(refreshRates, refreshRates.length);
+            return mDisplayInfo.getDefaultRefreshRates();
+        }
+    }
+
+    /**
+     * Returns the active mode of the display.
+     */
+    public Mode getMode() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.getMode();
+        }
+    }
+
+    /**
+     * Gets the supported modes of this display.
+     */
+    public Mode[] getSupportedModes() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            final Display.Mode[] modes = mDisplayInfo.supportedModes;
+            return Arrays.copyOf(modes, modes.length);
         }
     }
 
@@ -861,5 +889,153 @@ public final class Display {
      */
     public static boolean isSuspendedState(int state) {
         return state == STATE_OFF || state == STATE_DOZE_SUSPEND;
+    }
+
+    /**
+     * A mode supported by a given display.
+     *
+     * @see Display#getSupportedModes()
+     */
+    public static final class Mode implements Parcelable {
+        /**
+         * @hide
+         */
+        public static final Mode[] EMPTY_ARRAY = new Mode[0];
+
+        private final int mModeId;
+        private final int mWidth;
+        private final int mHeight;
+        private final float mRefreshRate;
+
+        /**
+         * @hide
+         */
+        public Mode(int modeId, int width, int height, float refreshRate) {
+            mModeId = modeId;
+            mWidth = width;
+            mHeight = height;
+            mRefreshRate = refreshRate;
+        }
+
+        /**
+         * Returns this mode's id.
+         */
+        public int getModeId() {
+            return mModeId;
+        }
+
+        /**
+         * Returns the physical width of the display in pixels when configured in this mode's
+         * resolution.
+         * <p>
+         * Note that due to application UI scaling, the number of pixels made available to
+         * applications when the mode is active (as reported by {@link Display#getWidth()} may
+         * differ from the mode's actual resolution (as reported by this function).
+         * <p>
+         * For example, applications running on a 4K display may have their UI laid out and rendered
+         * in 1080p and then scaled up. Applications can take advantage of the extra resolution by
+         * rendering content through a {@link android.view.SurfaceView} using full size buffers.
+         */
+        public int getPhysicalWidth() {
+            return mWidth;
+        }
+
+        /**
+         * Returns the physical height of the display in pixels when configured in this mode's
+         * resolution.
+         * <p>
+         * Note that due to application UI scaling, the number of pixels made available to
+         * applications when the mode is active (as reported by {@link Display#getHeight()} may
+         * differ from the mode's actual resolution (as reported by this function).
+         * <p>
+         * For example, applications running on a 4K display may have their UI laid out and rendered
+         * in 1080p and then scaled up. Applications can take advantage of the extra resolution by
+         * rendering content through a {@link android.view.SurfaceView} using full size buffers.
+         */
+        public int getPhysicalHeight() {
+            return mHeight;
+        }
+
+        /**
+         * Returns the refresh rate in frames per second.
+         */
+        public float getRefreshRate() {
+            return mRefreshRate;
+        }
+
+        /**
+         * Returns {@code true} if this mode matches the given parameters.
+         *
+         * @hide
+         */
+        public boolean matches(int width, int height, float refreshRate) {
+            return mWidth == width &&
+                    mHeight == height &&
+                    Float.floatToIntBits(mRefreshRate) == Float.floatToIntBits(refreshRate);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof Mode)) {
+                return false;
+            }
+            Mode that = (Mode) other;
+            return mModeId == that.mModeId && matches(that.mWidth, that.mHeight, that.mRefreshRate);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 1;
+            hash = hash * 17 + mModeId;
+            hash = hash * 17 + mWidth;
+            hash = hash * 17 + mHeight;
+            hash = hash * 17 + Float.floatToIntBits(mRefreshRate);
+            return hash;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("{")
+                    .append("id=").append(mModeId)
+                    .append(", width=").append(mWidth)
+                    .append(", height=").append(mHeight)
+                    .append(", fps=").append(mRefreshRate)
+                    .append("}")
+                    .toString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        private Mode(Parcel in) {
+            this(in.readInt(), in.readInt(), in.readInt(), in.readFloat());
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int parcelableFlags) {
+            out.writeInt(mModeId);
+            out.writeInt(mWidth);
+            out.writeInt(mHeight);
+            out.writeFloat(mRefreshRate);
+        }
+
+        @SuppressWarnings("hiding")
+        public static final Parcelable.Creator<Mode> CREATOR
+                = new Parcelable.Creator<Mode>() {
+            @Override
+            public Mode createFromParcel(Parcel in) {
+                return new Mode(in);
+            }
+
+            @Override
+            public Mode[] newArray(int size) {
+                return new Mode[size];
+            }
+        };
     }
 }

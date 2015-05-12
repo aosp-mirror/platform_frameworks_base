@@ -302,7 +302,8 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture,
                 int width, int height) {
-            mListener.onWindowCreated(surfaceTexture, mDefaultDisplayInfo.refreshRate,
+            mListener.onWindowCreated(surfaceTexture,
+                    mDefaultDisplayInfo.getMode().getRefreshRate(),
                     mDefaultDisplayInfo.presentationDeadlineNanos, mDefaultDisplayInfo.state);
         }
 
