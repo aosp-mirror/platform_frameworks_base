@@ -103,25 +103,56 @@ public class LauncherActivityInfo {
      * density DPI values from {@link DisplayMetrics}.
      * @see #getBadgedIcon(int)
      * @see DisplayMetrics
-     * @return The drawable associated with the activity
+     * @return The drawable associated with the activity.
      */
     public Drawable getIcon(int density) {
-        int iconRes = mResolveInfo.getIconResource();
-        Resources resources = null;
-        Drawable icon = null;
-        // Get the preferred density icon from the app's resources
-        if (density != 0 && iconRes != 0) {
-            try {
-                resources = mPm.getResourcesForApplication(mActivityInfo.applicationInfo);
-                icon = resources.getDrawableForDensity(iconRes, density);
-            } catch (NameNotFoundException | Resources.NotFoundException exc) {
-            }
-        }
+        final int iconRes = mResolveInfo.getIconResource();
+        Drawable icon = getDrawableForDensity(iconRes, density);
         // Get the default density icon
         if (icon == null) {
             icon = mResolveInfo.loadIcon(mPm);
         }
         return icon;
+    }
+
+    /**
+     * Returns the icon for this activity, without any badging for the profile.
+     * This function can get the icon no matter the icon needs to be badged or not.
+     * @param density The preferred density of the icon, zero for default density. Use
+     * density DPI values from {@link DisplayMetrics}.
+     * @see #getBadgedIcon(int)
+     * @see DisplayMetrics
+     * @return The drawable associated with the activity.
+     */
+    private Drawable getOriginalIcon(int density) {
+        final int iconRes = mResolveInfo.getIconResourceInternal();
+        Drawable icon = getDrawableForDensity(iconRes, density);
+        // Get the default density icon
+        if (icon == null) {
+            icon = mResolveInfo.loadIcon(mPm);
+        }
+        return icon;
+    }
+
+    /**
+     * Returns the drawable for this activity, without any badging for the profile.
+     * @param resource id of the drawable.
+     * @param density The preferred density of the icon, zero for default density. Use
+     * density DPI values from {@link DisplayMetrics}.
+     * @see DisplayMetrics
+     * @return The drawable associated with the resource id.
+     */
+    private Drawable getDrawableForDensity(int iconRes, int density) {
+        // Get the preferred density icon from the app's resources
+        if (density != 0 && iconRes != 0) {
+            try {
+                final Resources resources
+                        = mPm.getResourcesForApplication(mActivityInfo.applicationInfo);
+                return resources.getDrawableForDensity(iconRes, density);
+            } catch (NameNotFoundException | Resources.NotFoundException exc) {
+            }
+        }
+        return null;
     }
 
     /**
@@ -167,7 +198,7 @@ public class LauncherActivityInfo {
      * @return A badged icon for the activity.
      */
     public Drawable getBadgedIcon(int density) {
-        Drawable originalIcon = getIcon(density);
+        Drawable originalIcon = getOriginalIcon(density);
 
         if (originalIcon instanceof BitmapDrawable) {
             return mPm.getUserBadgedIcon(originalIcon, mUser);
