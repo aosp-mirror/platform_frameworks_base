@@ -21,6 +21,7 @@ import android.security.keymaster.KeymasterDefs;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.SecureRandom;
 
 /**
  * Assorted utility methods for implementing crypto operations on top of KeyStore.
@@ -28,6 +29,9 @@ import java.security.InvalidKeyException;
  * @hide
  */
 abstract class KeyStoreCryptoOperationUtils {
+
+    private static volatile SecureRandom sRng;
+
     private KeyStoreCryptoOperationUtils() {}
 
     /**
@@ -80,5 +84,29 @@ abstract class KeyStoreCryptoOperationUtils {
 
         // General cases
         return getInvalidKeyExceptionForInit(keyStore, key, beginOpResultCode);
+    }
+
+    /**
+     * Returns the requested number of random bytes to mix into keystore/keymaster RNG.
+     *
+     * @param rng RNG from which to obtain the random bytes or {@code null} for the platform-default
+     *        RNG.
+     */
+    static byte[] getRandomBytesToMixIntoKeystoreRng(SecureRandom rng, int sizeBytes) {
+        if (rng == null) {
+            rng = getRng();
+        }
+        byte[] result = new byte[sizeBytes];
+        rng.nextBytes(result);
+        return result;
+    }
+
+    private static SecureRandom getRng() {
+        // IMPLEMENTATION NOTE: It's OK to share a SecureRandom instance because SecureRandom is
+        // required to be thread-safe.
+        if (sRng == null) {
+            sRng = new SecureRandom();
+        }
+        return sRng;
     }
 }
