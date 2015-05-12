@@ -131,7 +131,7 @@ public class RenderScript {
 
     // this should be a monotonically increasing ID
     // used in conjunction with the API version of a device
-    static final long sMinorID = 1;
+    static final long sMinorVersion = 1;
 
     /**
      * Returns an identifier that can be used to identify a particular
@@ -140,8 +140,8 @@ public class RenderScript {
      * @return The minor RenderScript version number
      *
      */
-    public static long getMinorID() {
-        return sMinorID;
+    public static long getMinorVersion() {
+        return sMinorVersion;
     }
 
     /**
