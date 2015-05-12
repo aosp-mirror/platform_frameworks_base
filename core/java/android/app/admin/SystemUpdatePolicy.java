@@ -17,8 +17,15 @@
 package android.app.admin;
 
 import android.annotation.IntDef;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -28,7 +35,7 @@ import java.lang.annotation.RetentionPolicy;
  * @see DevicePolicyManager#setSystemUpdatePolicy
  * @see DevicePolicyManager#getSystemUpdatePolicy
  */
-public class SystemUpdatePolicy {
+public class SystemUpdatePolicy implements Parcelable {
 
     /** @hide */
     @IntDef({
@@ -38,6 +45,10 @@ public class SystemUpdatePolicy {
     @Retention(RetentionPolicy.SOURCE)
     @interface SystemUpdatePolicyType {}
 
+    /**
+     * Unknown policy type, used only internally.
+     */
+    private static final int TYPE_UNKNOWN = -1;
     /**
      * Install system update automatically as soon as one is available.
      */
@@ -63,45 +74,40 @@ public class SystemUpdatePolicy {
     private static final String KEY_POLICY_TYPE = "policy_type";
     private static final String KEY_INSTALL_WINDOW_START = "install_window_start";
     private static final String KEY_INSTALL_WINDOW_END = "install_window_end";
-
-    private PersistableBundle mPolicy;
-
-    public  SystemUpdatePolicy() {
-        mPolicy = new PersistableBundle();
-    }
-
     /**
-     * Construct an SystemUpdatePolicy object from a bundle.
-     * @hide
+     * The upper boundary of the daily maintenance window: 24 * 60 minutes.
      */
-    public SystemUpdatePolicy(PersistableBundle in) {
-        mPolicy = new PersistableBundle(in);
+    private static final int WINDOW_BOUNDARY = 24 * 60;
+
+    @SystemUpdatePolicyType
+    private int mPolicyType;
+
+    private int mMaintenanceWindowStart;
+    private int mMaintenanceWindowEnd;
+
+
+    private SystemUpdatePolicy() {
+        mPolicyType = TYPE_UNKNOWN;
     }
 
     /**
-     * Retrieve the underlying bundle where the policy is stored.
-     * @hide
-     */
-    public PersistableBundle getPolicyBundle() {
-        return new PersistableBundle(mPolicy);
-    }
-
-    /**
-     * Set the policy to: install update automatically as soon as one is available.
+     * Create a policy object and set it to install update automatically as soon as one is
+     * available.
      *
      * @see #TYPE_INSTALL_AUTOMATIC
      */
-    public void setAutomaticInstallPolicy() {
-        mPolicy.clear();
-        mPolicy.putInt(KEY_POLICY_TYPE, TYPE_INSTALL_AUTOMATIC);
+    public static SystemUpdatePolicy createAutomaticInstallPolicy() {
+        SystemUpdatePolicy policy = new SystemUpdatePolicy();
+        policy.mPolicyType = TYPE_INSTALL_AUTOMATIC;
+        return policy;
     }
 
     /**
-     * Set the policy to: new system update will only be installed automatically when the system
-     * clock is inside a daily maintenance window. If the start and end times are the same, the
-     * window is considered to include the WHOLE 24 hours, that is, updates can install at any time.
-     * If the given window in invalid, a {@link SystemUpdatePolicy.InvalidWindowException} will be
-     * thrown. If start time is later than end time, the window is considered spanning midnight,
+     * Create a policy object and set it to: new system update will only be installed automatically
+     * when the system clock is inside a daily maintenance window. If the start and end times are
+     * the same, the window is considered to include the WHOLE 24 hours, that is, updates can
+     * install at any time. If the given window in invalid, a {@link IllegalArgumentException} will
+     * be thrown. If start time is later than end time, the window is considered spanning midnight,
      * i.e. end time donates a time on the next day. The maintenance window will last for 30 days,
      * after which the system should revert back to its normal behavior as if no policy were set.
      *
@@ -111,25 +117,29 @@ public class SystemUpdatePolicy {
      *            midnight in the device's local time. Must be in the range of [0, 1440).
      * @see #TYPE_INSTALL_WINDOWED
      */
-    public void setWindowedInstallPolicy(int startTime, int endTime) throws InvalidWindowException{
-        if (startTime < 0 || startTime >= 1440 || endTime < 0 || endTime >= 1440) {
-            throw new InvalidWindowException("startTime and endTime must be inside [0, 1440)");
+    public static SystemUpdatePolicy createWindowedInstallPolicy(int startTime, int endTime) {
+        if (startTime < 0 || startTime >= WINDOW_BOUNDARY
+                || endTime < 0 || endTime >= WINDOW_BOUNDARY) {
+            throw new IllegalArgumentException("startTime and endTime must be inside [0, 1440)");
         }
-        mPolicy.clear();
-        mPolicy.putInt(KEY_POLICY_TYPE, TYPE_INSTALL_WINDOWED);
-        mPolicy.putInt(KEY_INSTALL_WINDOW_START, startTime);
-        mPolicy.putInt(KEY_INSTALL_WINDOW_END, endTime);
+        SystemUpdatePolicy policy = new SystemUpdatePolicy();
+        policy.mPolicyType = TYPE_INSTALL_WINDOWED;
+        policy.mMaintenanceWindowStart = startTime;
+        policy.mMaintenanceWindowEnd = endTime;
+        return policy;
     }
 
     /**
-     * Set the policy to: block installation for a maximum period of 30 days. After expiration the
-     * system should revert back to its normal behavior as if no policy were set.
+     * Create a policy object and set it to block installation for a maximum period of 30 days.
+     * After expiration the system should revert back to its normal behavior as if no policy were
+     * set.
      *
      * @see #TYPE_POSTPONE
      */
-    public void setPostponeInstallPolicy() {
-        mPolicy.clear();
-        mPolicy.putInt(KEY_POLICY_TYPE, TYPE_POSTPONE);
+    public static SystemUpdatePolicy createPostponeInstallPolicy() {
+        SystemUpdatePolicy policy = new SystemUpdatePolicy();
+        policy.mPolicyType = TYPE_POSTPONE;
+        return policy;
     }
 
     /**
@@ -140,7 +150,7 @@ public class SystemUpdatePolicy {
      */
     @SystemUpdatePolicyType
     public int getPolicyType() {
-        return mPolicy.getInt(KEY_POLICY_TYPE, -1);
+        return mPolicyType;
     }
 
     /**
@@ -150,8 +160,8 @@ public class SystemUpdatePolicy {
      * or -1 if the policy does not have a maintenance window.
      */
     public int getInstallWindowStart() {
-        if (getPolicyType() == TYPE_INSTALL_WINDOWED) {
-            return mPolicy.getInt(KEY_INSTALL_WINDOW_START, -1);
+        if (mPolicyType == TYPE_INSTALL_WINDOWED) {
+            return mMaintenanceWindowStart;
         } else {
             return -1;
         }
@@ -164,26 +174,98 @@ public class SystemUpdatePolicy {
      * or -1 if the policy does not have a maintenance window.
      */
     public int getInstallWindowEnd() {
-        if (getPolicyType() == TYPE_INSTALL_WINDOWED) {
-            return mPolicy.getInt(KEY_INSTALL_WINDOW_END, -1);
+        if (mPolicyType == TYPE_INSTALL_WINDOWED) {
+            return mMaintenanceWindowEnd;
         } else {
             return -1;
         }
     }
 
+    /**
+     * Return if this object represents a valid policy.
+     * @hide
+     */
+    public boolean isValid() {
+        if (mPolicyType == TYPE_INSTALL_AUTOMATIC || mPolicyType == TYPE_POSTPONE) {
+            return true;
+        } else if (mPolicyType == TYPE_INSTALL_WINDOWED) {
+            return mMaintenanceWindowStart >= 0 && mMaintenanceWindowStart < WINDOW_BOUNDARY
+                    && mMaintenanceWindowEnd >= 0 && mMaintenanceWindowEnd < WINDOW_BOUNDARY;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public String toString() {
-        return mPolicy.toString();
+        return String.format("SystemUpdatePolicy (type: %d, windowStart: %d, windowEnd: %d)",
+                mPolicyType, mMaintenanceWindowStart, mMaintenanceWindowEnd);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mPolicyType);
+        dest.writeInt(mMaintenanceWindowStart);
+        dest.writeInt(mMaintenanceWindowEnd);
+    }
+
+    public static final Parcelable.Creator<SystemUpdatePolicy> CREATOR =
+            new Parcelable.Creator<SystemUpdatePolicy>() {
+
+                @Override
+                public SystemUpdatePolicy createFromParcel(Parcel source) {
+                    SystemUpdatePolicy policy = new SystemUpdatePolicy();
+                    policy.mPolicyType = source.readInt();
+                    policy.mMaintenanceWindowStart = source.readInt();
+                    policy.mMaintenanceWindowEnd = source.readInt();
+                    return policy;
+                }
+
+                @Override
+                public SystemUpdatePolicy[] newArray(int size) {
+                    return new SystemUpdatePolicy[size];
+                }
+    };
+
+
+    /**
+     * @hide
+     */
+    public static SystemUpdatePolicy restoreFromXml(XmlPullParser parser) {
+        try {
+            SystemUpdatePolicy policy = new SystemUpdatePolicy();
+            String value = parser.getAttributeValue(null, KEY_POLICY_TYPE);
+            if (value != null) {
+                policy.mPolicyType = Integer.parseInt(value);
+
+                value = parser.getAttributeValue(null, KEY_INSTALL_WINDOW_START);
+                if (value != null) {
+                    policy.mMaintenanceWindowStart = Integer.parseInt(value);
+                }
+                value = parser.getAttributeValue(null, KEY_INSTALL_WINDOW_END);
+                if (value != null) {
+                    policy.mMaintenanceWindowEnd = Integer.parseInt(value);
+                }
+                return policy;
+            }
+        } catch (NumberFormatException e) {
+            // Fail through
+        }
+        return null;
     }
 
     /**
-     * Exception thrown by {@link SystemUpdatePolicy#setWindowedInstallPolicy(int, int)} in case the
-     * specified window is invalid.
+     * @hide
      */
-    public static class InvalidWindowException extends Exception {
-        public InvalidWindowException(String reason) {
-            super(reason);
-        }
+    public void saveToXml(XmlSerializer out) throws IOException {
+        out.attribute(null, KEY_POLICY_TYPE, Integer.toString(mPolicyType));
+        out.attribute(null, KEY_INSTALL_WINDOW_START, Integer.toString(mMaintenanceWindowStart));
+        out.attribute(null, KEY_INSTALL_WINDOW_END, Integer.toString(mMaintenanceWindowEnd));
     }
 }
 
