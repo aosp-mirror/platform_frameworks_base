@@ -29,28 +29,28 @@
             android:label="@string/title_activity_default"
             android:taskAffinity=""
             android:documentLaunchMode="always"
-            android:lockTaskMode="lockTaskModeDefault" >
+            android:lockTaskMode="normal" >
         </activity>
         <activity
             android:name="com.google.android.example.locktasktests.LockTaskNeverActivity"
             android:label="@string/title_activity_never"
             android:taskAffinity=""
             android:documentLaunchMode="always"
-            android:lockTaskMode="lockTaskModeNever" >
+            android:lockTaskMode="never" >
         </activity>
         <activity
             android:name="com.google.android.example.locktasktests.LockWhitelistedActivity"
             android:label="@string/title_activity_whitelist"
             android:taskAffinity=""
             android:documentLaunchMode="always"
-            android:lockTaskMode="lockTaskModeIfWhitelisted" >
+            android:lockTaskMode="if_whitelisted" >
         </activity>
         <activity
             android:name="com.google.android.example.locktasktests.LockAtLaunchActivity"
             android:label="@string/title_activity_always"
             android:taskAffinity=""
             android:documentLaunchMode="always"
-            android:lockTaskMode="lockTaskModeAlways" >
+            android:lockTaskMode="always" >
         </activity>
     </application>
 
