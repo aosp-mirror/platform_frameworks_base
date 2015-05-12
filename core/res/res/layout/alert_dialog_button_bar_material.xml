@@ -27,6 +27,7 @@
     android:paddingTop="4dp"
     android:paddingBottom="4dp"
     android:gravity="bottom"
+    android:allowStacking="@bool/allow_stacked_button_bar"
     style="?attr/buttonBarStyle">
 
     <Button
