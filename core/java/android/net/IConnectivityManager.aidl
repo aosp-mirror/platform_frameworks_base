@@ -106,13 +106,13 @@ interface IConnectivityManager
 
     ProxyInfo getDefaultProxy();
 
-    boolean prepareVpn(String oldPackage, String newPackage);
+    boolean prepareVpn(String oldPackage, String newPackage, int userId);
 
-    void setVpnPackageAuthorization(boolean authorized);
+    void setVpnPackageAuthorization(String packageName, int userId, boolean authorized);
 
     ParcelFileDescriptor establishVpn(in VpnConfig config);
 
-    VpnConfig getVpnConfig();
+    VpnConfig getVpnConfig(int userId);
 
     void startLegacyVpn(in VpnProfile profile);
 

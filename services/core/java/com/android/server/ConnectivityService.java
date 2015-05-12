@@ -1406,6 +1406,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     };
 
+    /**
+     * Require that the caller is either in the same user or has appropriate permission to interact
+     * across users.
+     *
+     * @param userId Target user for whatever operation the current IPC is supposed to perform.
+     */
+    private void enforceCrossUserPermission(int userId) {
+        if (userId == UserHandle.getCallingUserId()) {
+            // Not a cross-user call.
+            return;
+        }
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                "ConnectivityService");
+    }
+
     private void enforceInternetPermission() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.INTERNET,
@@ -2941,29 +2957,48 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     /**
      * Prepare for a VPN application.
-     * Permissions are checked in Vpn class.
+     * VPN permissions are checked in the {@link Vpn} class. If the caller is not {@code userId},
+     * {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
+     *
+     * @param oldPackage Package name of the application which currently controls VPN, which will
+     *                   be replaced. If there is no such application, this should should either be
+     *                   {@code null} or {@link VpnConfig.LEGACY_VPN}.
+     * @param newPackage Package name of the application which should gain control of VPN, or
+     *                   {@code null} to disable.
+     * @param userId User for whom to prepare the new VPN.
+     *
      * @hide
      */
     @Override
-    public boolean prepareVpn(String oldPackage, String newPackage) {
+    public boolean prepareVpn(@Nullable String oldPackage, @Nullable String newPackage,
+            int userId) {
+        enforceCrossUserPermission(userId);
         throwIfLockdownEnabled();
-        int user = UserHandle.getUserId(Binder.getCallingUid());
+
         synchronized(mVpns) {
-            return mVpns.get(user).prepare(oldPackage, newPackage);
+            return mVpns.get(userId).prepare(oldPackage, newPackage);
         }
     }
 
     /**
-     * Set whether the current VPN package has the ability to launch VPNs without
-     * user intervention. This method is used by system-privileged apps.
-     * Permissions are checked in Vpn class.
+     * Set whether the VPN package has the ability to launch VPNs without user intervention.
+     * This method is used by system-privileged apps.
+     * VPN permissions are checked in the {@link Vpn} class. If the caller is not {@code userId},
+     * {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
+     *
+     * @param packageName The package for which authorization state should change.
+     * @param userId User for whom {@code packageName} is installed.
+     * @param authorized {@code true} if this app should be able to start a VPN connection without
+     *                   explicit user approval, {@code false} if not.
+     *
      * @hide
      */
     @Override
-    public void setVpnPackageAuthorization(boolean authorized) {
-        int user = UserHandle.getUserId(Binder.getCallingUid());
+    public void setVpnPackageAuthorization(String packageName, int userId, boolean authorized) {
+        enforceCrossUserPermission(userId);
+
         synchronized(mVpns) {
-            mVpns.get(user).setPackageAuthorization(authorized);
+            mVpns.get(userId).setPackageAuthorization(packageName, authorized);
         }
     }
 
@@ -3065,16 +3100,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Returns the information of the ongoing VPN. This method is used by VpnDialogs and
-     * not available in ConnectivityManager.
+     * Returns the information of the ongoing VPN for {@code userId}. This method is used by
+     * VpnDialogs and not available in ConnectivityManager.
      * Permissions are checked in Vpn class.
      * @hide
      */
     @Override
-    public VpnConfig getVpnConfig() {
-        int user = UserHandle.getUserId(Binder.getCallingUid());
+    public VpnConfig getVpnConfig(int userId) {
+        enforceCrossUserPermission(userId);
         synchronized(mVpns) {
-            return mVpns.get(user).getVpnConfig();
+            return mVpns.get(userId).getVpnConfig();
         }
     }
 
@@ -4556,6 +4591,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public void factoryReset() {
         enforceConnectivityInternalPermission();
+        final int userId = UserHandle.getCallingUserId();
+
         // Turn airplane mode off
         setAirplaneMode(false);
 
@@ -4565,16 +4602,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         // Turn VPN off
-        VpnConfig vpnConfig = getVpnConfig();
+        VpnConfig vpnConfig = getVpnConfig(userId);
         if (vpnConfig != null) {
             if (vpnConfig.legacy) {
-                prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN);
+                prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN, userId);
             } else {
-                // Prevent this app from initiating VPN connections in the future without
-                // user intervention.
-                setVpnPackageAuthorization(false);
+                // Prevent this app (packagename = vpnConfig.user) from initiating VPN connections
+                // in the future without user intervention.
+                setVpnPackageAuthorization(vpnConfig.user, userId, false);
 
-                prepareVpn(vpnConfig.user, VpnConfig.LEGACY_VPN);
+                prepareVpn(vpnConfig.user, VpnConfig.LEGACY_VPN, userId);
             }
         }
     }
