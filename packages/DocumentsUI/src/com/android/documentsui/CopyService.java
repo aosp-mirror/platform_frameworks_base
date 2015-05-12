@@ -156,7 +156,7 @@ public class CopyService extends IntentService {
 
             if (mFailedFiles.size() > 0) {
                 final Context context = getApplicationContext();
-                final Intent navigateIntent = new Intent(context, StandaloneActivity.class);
+                final Intent navigateIntent = new Intent(context, DocumentsActivity.class);
                 navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
                 navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
                 navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, mFailedFiles);
@@ -200,7 +200,7 @@ public class CopyService extends IntentService {
         mIsCancelled = false;
 
         final Context context = getApplicationContext();
-        final Intent navigateIntent = new Intent(context, StandaloneActivity.class);
+        final Intent navigateIntent = new Intent(context, DocumentsActivity.class);
         navigateIntent.putExtra(EXTRA_STACK, (Parcelable) stack);
 
         mProgressBuilder = new Notification.Builder(this)
