@@ -36,7 +36,7 @@ public class MidiEventScheduler extends EventScheduler {
          * time.
          */
         @Override
-        public void onReceive(byte[] msg, int offset, int count, long timestamp)
+        public void onSend(byte[] msg, int offset, int count, long timestamp)
                 throws IOException {
             MidiEvent event = createScheduledEvent(msg, offset, count, timestamp);
             if (event != null) {
@@ -45,7 +45,7 @@ public class MidiEventScheduler extends EventScheduler {
         }
 
         @Override
-        public void flush() {
+        public void onFlush() {
             MidiEventScheduler.this.flush();
         }
     }

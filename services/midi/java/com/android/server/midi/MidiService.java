@@ -339,7 +339,7 @@ public class MidiService extends IMidiManager.Stub {
 
     private static final MidiDeviceInfo[] EMPTY_DEVICE_INFO_ARRAY = new MidiDeviceInfo[0];
 
-    public MidiDeviceInfo[] getDeviceList() {
+    public MidiDeviceInfo[] getDevices() {
         ArrayList<MidiDeviceInfo> deviceInfos = new ArrayList<MidiDeviceInfo>();
         int uid = Binder.getCallingUid();
 
