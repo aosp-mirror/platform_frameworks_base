@@ -23,4 +23,5 @@ interface IDeviceIdleController {
     String[] getSystemPowerWhitelist();
     String[] getFullPowerWhitelist();
     int[] getAppIdWhitelist();
+    boolean isPowerSaveWhitelistApp(String name);
 }

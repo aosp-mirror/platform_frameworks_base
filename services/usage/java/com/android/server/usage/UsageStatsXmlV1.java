@@ -26,6 +26,7 @@ import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
+import android.text.TextUtils;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -54,6 +55,7 @@ final class UsageStatsXmlV1 {
 
     // Time attributes stored as an offset of the beginTime.
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
+    private static final String BEGIN_IDLE_TIME_ATTR = "beginIdleTime";
     private static final String END_TIME_ATTR = "endTime";
     private static final String TIME_ATTR = "time";
 
@@ -69,7 +71,10 @@ final class UsageStatsXmlV1 {
         // Apply the offset to the beginTime to find the absolute time.
         stats.mLastTimeUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
                 parser, LAST_TIME_ACTIVE_ATTR);
-
+        final String beginIdleTime = parser.getAttributeValue(null, BEGIN_IDLE_TIME_ATTR);
+        if (!TextUtils.isEmpty(beginIdleTime)) {
+            stats.mBeginIdleTime = Long.parseLong(beginIdleTime);
+        }
         stats.mTotalTimeInForeground = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
         stats.mLastEvent = XmlUtils.readIntAttribute(parser, LAST_EVENT_ATTR);
     }
@@ -129,6 +134,7 @@ final class UsageStatsXmlV1 {
         XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, usageStats.mPackageName);
         XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, usageStats.mTotalTimeInForeground);
         XmlUtils.writeIntAttribute(xml, LAST_EVENT_ATTR, usageStats.mLastEvent);
+        XmlUtils.writeLongAttribute(xml, BEGIN_IDLE_TIME_ATTR, usageStats.mBeginIdleTime);
 
         xml.endTag(null, PACKAGE_TAG);
     }

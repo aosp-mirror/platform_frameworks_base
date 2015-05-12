@@ -80,7 +80,7 @@ class UserUsageStatsService {
         mUserId = userId;
     }
 
-    void init(final long currentTimeMillis) {
+    void init(final long currentTimeMillis, final long deviceUsageTime) {
         mDatabase.init(currentTimeMillis);
 
         int nullCount = 0;
@@ -135,7 +135,8 @@ class UserUsageStatsService {
         }
 
         if (mDatabase.isNewUpdate()) {
-            initializeDefaultsForApps(currentTimeMillis, mDatabase.isFirstUpdate());
+            initializeDefaultsForApps(currentTimeMillis, deviceUsageTime,
+                    mDatabase.isFirstUpdate());
         }
     }
 
@@ -145,7 +146,8 @@ class UserUsageStatsService {
      * @param firstUpdate if it is the first update, touch all installed apps, otherwise only
      *        touch the system apps
      */
-    private void initializeDefaultsForApps(long currentTimeMillis, boolean firstUpdate) {
+    private void initializeDefaultsForApps(long currentTimeMillis, long deviceUsageTime,
+            boolean firstUpdate) {
         PackageManager pm = mContext.getPackageManager();
         List<PackageInfo> packages = pm.getInstalledPackages(0, mUserId);
         final int packageCount = packages.size();
@@ -153,9 +155,10 @@ class UserUsageStatsService {
             final PackageInfo pi = packages.get(i);
             String packageName = pi.packageName;
             if (pi.applicationInfo != null && (firstUpdate || pi.applicationInfo.isSystemApp())
-                    && getLastPackageAccessTime(packageName) == -1) {
+                    && getBeginIdleTime(packageName) == -1) {
                 for (IntervalStats stats : mCurrentStats) {
                     stats.update(packageName, currentTimeMillis, Event.INTERACTION);
+                    stats.updateBeginIdleTime(packageName, deviceUsageTime);
                     mStatsChanged = true;
                 }
             }
@@ -170,7 +173,7 @@ class UserUsageStatsService {
         loadActiveStats(newTime, true);
     }
 
-    void reportEvent(UsageEvents.Event event) {
+    void reportEvent(UsageEvents.Event event, long deviceUsageTime) {
         if (DEBUG) {
             Slog.d(TAG, mLogPrefix + "Got usage event for " + event.mPackage
                     + "[" + event.mTimeStamp + "]: "
@@ -205,6 +208,7 @@ class UserUsageStatsService {
                 stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
             } else {
                 stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
+                stats.updateBeginIdleTime(event.mPackage, deviceUsageTime);
             }
         }
 
@@ -215,9 +219,9 @@ class UserUsageStatsService {
      * Sets the last timestamp for each of the intervals.
      * @param lastTimestamp
      */
-    void setLastTimestamp(String packageName, long lastTimestamp) {
+    void setBeginIdleTime(String packageName, long deviceUsageTime) {
         for (IntervalStats stats : mCurrentStats) {
-            stats.update(packageName, lastTimestamp, UsageEvents.Event.NONE);
+            stats.updateBeginIdleTime(packageName, deviceUsageTime);
         }
         notifyStatsChanged();
     }
@@ -376,13 +380,13 @@ class UserUsageStatsService {
         return new UsageEvents(results, table);
     }
 
-    long getLastPackageAccessTime(String packageName) {
+    long getBeginIdleTime(String packageName) {
         final IntervalStats yearly = mCurrentStats[UsageStatsManager.INTERVAL_YEARLY];
         UsageStats packageUsage;
         if ((packageUsage = yearly.packageStats.get(packageName)) == null) {
             return -1;
         } else {
-            return packageUsage.getLastTimeUsed();
+            return packageUsage.getBeginIdleTime();
         }
     }
 
@@ -506,23 +510,23 @@ class UserUsageStatsService {
     // -- DUMP related methods --
     //
 
-    void checkin(final IndentingPrintWriter pw) {
+    void checkin(final IndentingPrintWriter pw, final long screenOnTime) {
         mDatabase.checkinDailyFiles(new UsageStatsDatabase.CheckinAction() {
             @Override
             public boolean checkin(IntervalStats stats) {
-                printIntervalStats(pw, stats, false);
+                printIntervalStats(pw, stats, screenOnTime, false);
                 return true;
             }
         });
     }
 
-    void dump(IndentingPrintWriter pw) {
+    void dump(IndentingPrintWriter pw, final long screenOnTime) {
         // This is not a check-in, only dump in-memory stats.
         for (int interval = 0; interval < mCurrentStats.length; interval++) {
             pw.print("In-memory ");
             pw.print(intervalToString(interval));
             pw.println(" stats");
-            printIntervalStats(pw, mCurrentStats[interval], true);
+            printIntervalStats(pw, mCurrentStats[interval], screenOnTime, true);
         }
     }
 
@@ -540,7 +544,8 @@ class UserUsageStatsService {
         return Long.toString(elapsedTime);
     }
 
-    void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats, boolean prettyDates) {
+    void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats, long screenOnTime,
+            boolean prettyDates) {
         if (prettyDates) {
             pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
                     stats.beginTime, stats.endTime, sDateFormatFlags) + "\"");
@@ -559,6 +564,8 @@ class UserUsageStatsService {
             pw.printPair("package", usageStats.mPackageName);
             pw.printPair("totalTime", formatElapsedTime(usageStats.mTotalTimeInForeground, prettyDates));
             pw.printPair("lastTime", formatDateTime(usageStats.mLastTimeUsed, prettyDates));
+            pw.printPair("inactiveTime",
+                    formatElapsedTime(screenOnTime - usageStats.mBeginIdleTime, prettyDates));
             pw.println();
         }
         pw.decreaseIndent();

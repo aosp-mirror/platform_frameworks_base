@@ -69,14 +69,6 @@ public abstract class UsageStatsManagerInternal {
     public abstract boolean isAppIdle(String packageName, int userId);
 
     /**
-     * Returns the most recent time that the specified package was active for the given user.
-     * @param packageName The package to search.
-     * @param userId The user id of the user of interest.
-     * @return The timestamp of when the package was last used, or -1 if it hasn't been used.
-     */
-    public abstract long getLastPackageAccessTime(String packageName, int userId);
-
-    /**
      * Sets up a listener for changes to packages being accessed.
      * @param listener A listener within the system process.
      */

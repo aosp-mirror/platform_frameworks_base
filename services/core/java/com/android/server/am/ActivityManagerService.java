@@ -19490,7 +19490,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mStackSupervisor.resumeTopActivitiesLocked();
         }
         EventLogTags.writeAmSwitchUser(newUserId);
-        getUserManagerLocked().userForeground(newUserId);
+        getUserManagerLocked().onUserForeground(newUserId);
         sendUserSwitchBroadcastsLocked(oldUserId, newUserId);
     }
 
