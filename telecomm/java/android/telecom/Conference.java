@@ -462,7 +462,7 @@ public abstract class Conference implements Conferenceable {
      * @hide
      */
     @SystemApi
-    public final Connection getPrimaryConnection() {
+    public Connection getPrimaryConnection() {
         if (mUnmodifiableChildConnections == null || mUnmodifiableChildConnections.isEmpty()) {
             return null;
         }
