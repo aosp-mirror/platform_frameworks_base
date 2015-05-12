@@ -127,6 +127,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mPermissionsAccepted = false;
     @GuardedBy("mLock")
+    private boolean mRelinquished = false;
+    @GuardedBy("mLock")
     private boolean mDestroyed = false;
 
     private int mFinalStatus;
@@ -557,6 +559,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             user = new UserHandle(userId);
         }
 
+        mRelinquished = true;
         mPm.installStage(mPackageName, stageDir, stageCid, localObserver, params,
                 installerPackageName, installerUid, user);
     }
@@ -928,6 +931,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void abandon() {
+        if (mRelinquished) {
+            Slog.d(TAG, "Ignoring abandon after commit relinquished control");
+            return;
+        }
         destroyInternal();
         dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
     }
@@ -958,8 +965,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
         if (stageDir != null) {
-            FileUtils.deleteContents(stageDir);
-            stageDir.delete();
+            mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
         }
         if (stageCid != null) {
             PackageHelper.destroySdDir(stageCid);
@@ -990,6 +996,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.printPair("mProgress", mProgress);
         pw.printPair("mSealed", mSealed);
         pw.printPair("mPermissionsAccepted", mPermissionsAccepted);
+        pw.printPair("mRelinquished", mRelinquished);
         pw.printPair("mDestroyed", mDestroyed);
         pw.printPair("mBridges", mBridges.size());
         pw.printPair("mFinalStatus", mFinalStatus);
