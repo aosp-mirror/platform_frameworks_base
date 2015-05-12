@@ -52,7 +52,11 @@ import javax.crypto.Mac;
 public class EcIesParameterSpec implements AlgorithmParameterSpec {
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {PointFormat.UNCOMPRESSED, PointFormat.COMPRESSED})
+    @IntDef({
+        PointFormat.UNSPECIFIED,
+        PointFormat.UNCOMPRESSED,
+        PointFormat.COMPRESSED,
+        })
     public @interface PointFormatEnum {}
 
     /**
