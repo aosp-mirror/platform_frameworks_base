@@ -50,6 +50,8 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.google.android.collect.Sets;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
@@ -70,6 +72,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import libcore.io.IoUtils;
 
@@ -125,6 +128,10 @@ public class UserManagerService extends IUserManager.Stub {
     // Maximum number of managed profiles permitted is 1. This cannot be increased
     // without first making sure that the rest of the framework is prepared for it.
     private static final int MAX_MANAGED_PROFILES = 1;
+
+    // Set of user restrictions, which can only be enforced by the system
+    private static final Set<String> SYSTEM_CONTROLLED_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_RECORD_AUDIO);
 
     static final int WRITE_USER_MSG = 1;
     static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
@@ -500,7 +507,7 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean hasUserRestriction(String restrictionKey, int userId) {
         synchronized (mPackagesLock) {
             Bundle restrictions = mUserRestrictions.get(userId);
-            return restrictions != null ? restrictions.getBoolean(restrictionKey) : false;
+            return restrictions != null && restrictions.getBoolean(restrictionKey);
         }
     }
 
@@ -515,23 +522,57 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public void setUserRestriction(String key, boolean value, int userId) {
+        synchronized (mPackagesLock) {
+            if (!SYSTEM_CONTROLLED_RESTRICTIONS.contains(key)) {
+                Bundle restrictions = getUserRestrictions(userId);
+                restrictions.putBoolean(key, value);
+                setUserRestrictionsInternalLocked(restrictions, userId);
+            }
+        }
+    }
+
+    @Override
+    public void setSystemControlledUserRestriction(String key, boolean value, int userId) {
+        checkSystemOrRoot("setSystemControlledUserRestriction");
+        synchronized (mPackagesLock) {
+            Bundle restrictions = getUserRestrictions(userId);
+            restrictions.putBoolean(key, value);
+            setUserRestrictionsInternalLocked(restrictions, userId);
+        }
+    }
+
+    @Override
     public void setUserRestrictions(Bundle restrictions, int userId) {
         checkManageUsersPermission("setUserRestrictions");
         if (restrictions == null) return;
 
         synchronized (mPackagesLock) {
-            mUserRestrictions.get(userId).clear();
-            mUserRestrictions.get(userId).putAll(restrictions);
-            long token = Binder.clearCallingIdentity();
-            try {
-                mAppOpsService.setUserRestrictions(mUserRestrictions.get(userId), userId);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
-            } finally {
-                Binder.restoreCallingIdentity(token);
+            final Bundle oldUserRestrictions = mUserRestrictions.get(userId);
+            // Restore the original state of system controlled restrictions from oldUserRestrictions
+            for (String key : SYSTEM_CONTROLLED_RESTRICTIONS) {
+                restrictions.remove(key);
+                if (oldUserRestrictions.containsKey(key)) {
+                    restrictions.putBoolean(key, oldUserRestrictions.getBoolean(key));
+                }
             }
-            scheduleWriteUserLocked(mUsers.get(userId));
+            setUserRestrictionsInternalLocked(restrictions, userId);
         }
+    }
+
+    private void setUserRestrictionsInternalLocked(Bundle restrictions, int userId) {
+        final Bundle userRestrictions = mUserRestrictions.get(userId);
+        userRestrictions.clear();
+        userRestrictions.putAll(restrictions);
+        long token = Binder.clearCallingIdentity();
+        try {
+        mAppOpsService.setUserRestrictions(userRestrictions, userId);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        scheduleWriteUserLocked(mUsers.get(userId));
     }
 
     /**
@@ -566,6 +607,13 @@ public class UserManagerService extends IUserManager.Stub {
                         android.Manifest.permission.MANAGE_USERS,
                         uid, -1, true) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("You need MANAGE_USERS permission to: " + message);
+        }
+    }
+
+    private static void checkSystemOrRoot(String message) {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID && uid != 0) {
+            throw new SecurityException("Only system may call: " + message);
         }
     }
 
