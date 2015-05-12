@@ -48,10 +48,11 @@ struct JLineBreaksID {
 static jclass gLineBreaks_class;
 static JLineBreaksID gLineBreaks_fieldID;
 
-// set text and set a number of parameters for creating a layout (width, tabstops, strategy)
+// set text and set a number of parameters for creating a layout (width, tabstops, strategy,
+// hyphenFrequency)
 static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray text, jint length,
         jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
-        jintArray variableTabStops, jint defaultTabStop, jint strategy) {
+        jintArray variableTabStops, jint defaultTabStop, jint strategy, jint hyphenFrequency) {
     LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
     b->resize(length);
     env->GetCharArrayRegion(text, 0, length, b->buffer());
@@ -64,6 +65,7 @@ static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray tex
         b->setTabStops(stops.get(), stops.size(), defaultTabStop);
     }
     b->setStrategy(static_cast<BreakStrategy>(strategy));
+    b->setHyphenationFrequency(static_cast<HyphenationFrequency>(hyphenFrequency));
 }
 
 static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
@@ -177,7 +179,7 @@ static JNINativeMethod gMethods[] = {
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
     {"nLoadHyphenator", "(Ljava/lang/String;)J", (void*) nLoadHyphenator},
     {"nSetLocale", "(JLjava/lang/String;J)V", (void*) nSetLocale},
-    {"nSetupParagraph", "(J[CIFIF[III)V", (void*) nSetupParagraph},
+    {"nSetupParagraph", "(J[CIFIF[IIII)V", (void*) nSetupParagraph},
     {"nSetIndents", "(J[I)V", (void*) nSetIndents},
     {"nAddStyleRun", "(JJJIIZ)F", (void*) nAddStyleRun},
     {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},

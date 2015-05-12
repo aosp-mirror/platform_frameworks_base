@@ -725,6 +725,7 @@ package android {
     field public static final int horizontalScrollViewStyle = 16843603; // 0x1010353
     field public static final int horizontalSpacing = 16843028; // 0x1010114
     field public static final int host = 16842792; // 0x1010028
+    field public static final int hyphenationFrequency = 16844024; // 0x10104f8
     field public static final int icon = 16842754; // 0x1010002
     field public static final int iconPreview = 16843337; // 0x1010249
     field public static final int iconTint = 16843999; // 0x10104df
@@ -34367,6 +34368,9 @@ package android.text {
     field public static final int BREAK_STRATEGY_SIMPLE = 0; // 0x0
     field public static final int DIR_LEFT_TO_RIGHT = 1; // 0x1
     field public static final int DIR_RIGHT_TO_LEFT = -1; // 0xffffffff
+    field public static final int HYPHENATION_FREQUENCY_FULL = 2; // 0x2
+    field public static final int HYPHENATION_FREQUENCY_NONE = 0; // 0x0
+    field public static final int HYPHENATION_FREQUENCY_NORMAL = 1; // 0x1
   }
 
   public static final class Layout.Alignment extends java.lang.Enum {
@@ -34565,6 +34569,7 @@ package android.text {
     method public android.text.StaticLayout.Builder setBreakStrategy(int);
     method public android.text.StaticLayout.Builder setEllipsize(android.text.TextUtils.TruncateAt);
     method public android.text.StaticLayout.Builder setEllipsizedWidth(int);
+    method public android.text.StaticLayout.Builder setHyphenationFrequency(int);
     method public android.text.StaticLayout.Builder setIncludePad(boolean);
     method public android.text.StaticLayout.Builder setIndents(int[], int[]);
     method public android.text.StaticLayout.Builder setLineSpacing(float, float);
@@ -43971,6 +43976,7 @@ package android.widget {
     method public int getHighlightColor();
     method public java.lang.CharSequence getHint();
     method public final android.content.res.ColorStateList getHintTextColors();
+    method public int getHyphenationFrequency();
     method public int getImeActionId();
     method public java.lang.CharSequence getImeActionLabel();
     method public int getImeOptions();
@@ -44077,6 +44083,7 @@ package android.widget {
     method public final void setHintTextColor(int);
     method public final void setHintTextColor(android.content.res.ColorStateList);
     method public void setHorizontallyScrolling(boolean);
+    method public void setHyphenationFrequency(int);
     method public void setImeActionLabel(java.lang.CharSequence, int);
     method public void setImeOptions(int);
     method public void setIncludeFontPadding(boolean);
