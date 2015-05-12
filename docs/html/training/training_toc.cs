@@ -1875,6 +1875,24 @@ results."
         </ul>
       </li>
     </ul>
+    <ul>
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/unit-testing/index.html"
+         description="How to build effective unit tests for Android apps.">
+            Building Effective Unit Tests
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/testing/unit-testing/local-unit-tests.html">
+            <span class="en">Building Local Unit Tests</span>
+            </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/testing/unit-testing/instrumented-unit-tests.html">
+            <span class="en">Building Instrumented Unit Tests</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </li>
   <!-- End best Testing -->
 

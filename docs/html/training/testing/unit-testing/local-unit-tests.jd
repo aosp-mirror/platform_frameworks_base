@@ -1,0 +1,302 @@
+page.title=Building Local Unit Tests
+page.tags=testing,androidjunitrunner,junit,unit test,mock
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+
+  <ul>
+    <li>Android Plug-in for Gradle 1.1.0 or higher</li>
+  </ul>
+
+  <h2>This lesson teaches you to</h2>
+
+  <ol>
+    <li><a href="#setup">Set Up Your Testing Environment</a></li>
+    <li><a href="#build">Create a Local Unit Test Class</a></li>
+    <li><a href="#run">Run Local Unit Tests</a></li>
+  </ol>
+
+  <h2>Try it out</h2>
+
+  <ul>
+    <li>
+<a href="https://github.com/googlesamples/android-testing/tree/master/unittesting/BasicSample"
+class="external-link">Local Unit Tests Code Samples</a></li>
+  </ul>
+</div>
+</div>
+
+<p>If your unit test has no dependencies or only has simple dependencies on Android, you should run
+your test on a local development machine. This testing approach is efficient because it helps
+you avoid the overhead of loading the target app and unit test code onto a physical device or
+emulator every time your test is run. Consequently, the execution time for running your unit
+test is greatly reduced. With this approach, you normally use a mocking framework, like
+<a href="https://code.google.com/p/mockito/" class="external-link">Mockito</a>, to fulfill any
+dependency relationships.</p>
+
+<p><a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for Gradle</a>
+version 1.1.0 and higher allows you to create a source directory ({@code src/test/java}) in your
+project to store JUnit tests that you want to run on a local machine. This feature improves your
+project organization by letting you group your unit tests together into a single source set. You
+can run the tests from Android Studio or the command-line, and the plugin executes them on the
+local Java Virtual Machine (JVM) on your development machine. </p>
+
+<h2 id="setup">Set Up Your Testing Environment</h2>
+<p>Before building local unit tests, you must:</p>
+
+  <ul>
+      <li>
+        <strong>Set up your project structure.</strong> In your Gradle project, the source code for
+        the target app that you want to test is typically placed under the {@code app/src/main/java}
+        folder. The source code for your local unit tests must be placed under the
+        <code>app/src/test/java</code> folder.
+        To learn more about setting up your project directory, see
+        <a href="#run">Run Local Unit Tests</a> and
+        <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.
+      </li>
+
+      <li>
+        <strong>Specify your Android testing dependencies</strong>. In order to use JUnit 4 and
+        Mockito with your local unit tests, specify the following libraries in
+        the {@code build.gradle} file of your Android app module:
+
+        <pre>
+dependencies {
+    // Unit testing dependencies
+    testCompile 'junit:junit:4.12'
+    // Set this dependency if you want to use Mockito
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    // Set this dependency if you want to use Hamcrest matching
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
+}
+</pre>
+      </li>
+  </ul>
+
+<h2 id="build">Create a Local Unit Test Class</h2>
+<p>Your local unit test class should be written as a JUnit 4 test class.
+<a href="http://junit.org/" class="external-link">JUnit</a> is the most popular
+and widely-used unit testing framework for Java. The latest version of this framework, JUnit 4,
+allows you to write tests in a cleaner and more flexible way than its predecessor versions. Unlike
+the previous approach to Android unit testing based on JUnit 3, with JUnit 4, you do not need to
+extend the {@code junit.framework.TestCase} class. You also do not need to prefix your test method
+name with the {@code ‘test’} keyword, or use any classes in the {@code junit.framework} or
+{@code junit.extensions} package.</p>
+
+<p>To create a basic JUnit 4 test class, create a Java class that contains one or more test methods.
+A test method begins with the {@code &#64;Test} annotation and contains the code to exercise
+and verify a single functionality in the component that you want to test.</p>
+
+<p>The following example shows how you might implement a local unit test class. The test method
+{@code emailValidator_CorrectEmailSimple_ReturnsTrue} verifies that the {@code isValidEmail()}
+method in the app under test returns the correct result.</p>
+
+<pre>
+import org.junit.Test;
+import java.util.regex.Pattern;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class EmailValidatorTest {
+
+    &#64;Test
+    public void emailValidator_CorrectEmailSimple_ReturnsTrue() {
+        assertThat(EmailValidator.isValidEmail("name&#64;email.com"), is(true));
+    }
+    ...
+}
+</pre>
+
+<p>To test that components in your app return the expected results, use the
+<a href="http://junit.org/javadoc/latest/org/junit/Assert.html" class="external-link">
+junit.Assert</a> methods to perform validation checks (or <em>assertions</em>) to compare the state
+of the component under test against some expected value. To make tests more readable, you
+can use <a href="https://code.google.com/p/hamcrest/wiki/Tutorial" class="external-link">
+Hamcrest matchers</a> (such as the {@code is()} and {@code equalTo()} methods) to match the
+returned result against the expected result.</p>
+
+<p>In your JUnit 4 test class, you can use annotations to call out sections in your test code for
+special processing, such as:</p>
+
+<ul>
+<li>
+{@code &#64;Before}: Use this annotation to specify a block of code with test setup operations. This
+code block will be invoked before each test. You can have multiple {@code &#64;Before} methods but
+the order which these methods are called is not fixed.
+</li>
+<li>
+{@code &#64;After}: This annotation specifies a block of code with test tear-down operations. This
+code block will be called after every test method. You can define multiple {@code &#64;After}
+operations in your test code. Use this annotation to release any resources from memory.
+</li>
+<li>
+{@code &#64;Test}: Use this annotation to mark a test method. A single test class can contain
+multiple test methods, each prefixed with this annotation.
+</li>
+<li>
+{@code &#64;BeforeClass}: Use this annotation to specify static methods to be invoked only once per
+test class. This testing step is useful for expensive operations such as connecting to a database.
+</li>
+<li>
+{@code &#64;AfterClass}: Use this annotation to specify static methods to be invoked only after all
+tests in the class have been run. This testing step is useful for releasing any resources allocated
+in the {@code &#64;BeforeClass} block.
+</li>
+<li>
+{@code &#64;Test(timeout=&lt;milliseconds&gt;)}: Specifies a timeout period for the test. If the
+test starts but does not complete within the given timeout period, it automatically fails. You must
+specify the timeout period in milliseconds, for example: {@code &#64;Test(timeout=5000)}.
+</li>
+</ul>
+
+<h3 id="mocking-dependencies">Mocking Android dependencies</h3>
+<p>
+By default, the <a href="{@docRoot}tools/building/plugin-for-gradle.html">
+Android Plug-in for Gradle</a> executes your local unit tests against a modified
+version of the {@code android.jar} library, which does not contain any actual code. Instead, method
+calls to Android classes from your unit test throw an exception.
+</p>
+<p>
+You can use a mocking framework to stub out external dependencies in your code, to easily test that
+your component interacts with a dependency in an expected way. By substituting Android dependencies
+with mock objects, you can isolate your unit test from the rest of the Android system while
+verifying that the correct methods in those dependencies are called. The
+<a href="https://code.google.com/p/mockito/" class="external-link">Mockito</a> mocking framework
+for Java (version 1.9.5 and higher) offers compatibility with Android unit testing.
+With Mockito, you can configure mock objects to return some specific value when invoked.</p>
+
+<p>To add a mock object to your local unit test using this framework, follow this programming model:
+</p>
+
+<ol>
+<li>
+Include the Mockito library dependency in your {@code build.gradle} file, as described in
+<a href="#setup">Set Up Your Testing Environment</a>.
+</li>
+<li>At the beginning of your unit test class definition, add the
+{@code &#64;RunWith(MockitoJUnitRunner.class)} annotation. This annotation tells the Mockito test
+runner to validate that your usage of the framework is correct and simplifies the initialization of
+your mock objects.
+</li>
+<li>To create a mock object for an Android dependency, add the {@code &#64;Mock} annotation before
+the field declaration.</li>
+<li>To stub the behavior of the dependency, you can specify a condition and return
+value when the condition is met by using the {@code when()} and {@code thenReturn()} methods.
+</li>
+</ol>
+
+<p>
+The following example shows how you might create a unit test that uses a mock
+{@link android.content.Context} object.
+</p>
+
+<pre>
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
+import static org.mockito.Mockito.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import android.content.SharedPreferences;
+
+&#64;RunWith(MockitoJUnitRunner.class)
+public class UnitTestSample {
+
+    private static final String FAKE_STRING = "HELLO WORLD";
+
+    &#64;Mock
+    Context mMockContext;
+
+    &#64;Test
+    public void readStringFromContext_LocalizedString() {
+        // Given a mocked Context injected into the object under test...
+        when(mMockContext.getString(R.string.hello_word))
+                .thenReturn(FAKE_STRING);
+        ClassUnderTest myObjectUnderTest = new ClassUnderTest(mMockContext);
+
+        // ...when the string is returned from the object under test...
+        String result = myObjectUnderTest.getHelloWorldString();
+
+        // ...then the result should be the expected one.
+        assertThat(result, is(FAKE_STRING));
+    }
+}
+</pre>
+
+<p>
+To learn more about using the Mockito framework, see the
+<a href="http://site.mockito.org/mockito/docs/current/org/mockito/Mockito.html"
+class="external-link">Mockito API reference</a> and the
+{@code SharedPreferencesHelperTest} class in the
+<a href="https://github.com/googlesamples/android-testing/tree/master/unittesting/BasicSample"
+class="external-link">sample code</a>.
+</p>
+
+<h2 id="run">Run Local Unit Tests</h2>
+<p>
+The Android Plug-in for Gradle provides a default directory ({@code src/test/java}) for you to
+store unit test classes that you want to run on a local JVM. The plug-in compiles the test code in
+that directory and then executes the test app locally using the default test runner class.
+</p>
+<p>
+As with production code, you can create unit tests for a
+<a href="http://developer.android.com/tools/building/configuring-gradle.html#workBuildVariants"
+class="external-link">specific flavor or build type</a>. You should keep unit tests in a test
+source tree location that corresponds to your production source tree, such as:
+
+<table>
+<tr>
+<th>Path to Production Class</th>
+<th>Path to Local Unit Test Class</th>
+</tr>
+<tr>
+<td>{@code src/main/java/Foo.java}</td>
+<td>{@code src/test/java/FooTest.java}</td>
+</tr>
+<tr>
+<td>{@code src/debug/java/Foo.java}</td>
+<td>{@code src/testDebug/java/FooTest.java}</td>
+</tr>
+<tr>
+<td>{@code src/myFlavor/java/Foo.java}</td>
+<td>{@code src/testMyFlavor/java/FooTest.java}</td>
+</tr>
+</table>
+
+<h3 id="run-from-Android-Studio">Running local unit tests from Android Studio</h3>
+<p>
+To run local unit tests in your Gradle project from Android Studio:
+</p>
+<ol>
+<li>In the <strong>Project</strong> window, right click on the project and synchronize your project.
+</li>
+<li>Open the <strong>Build Variants</strong> window by clicking the left-hand tab, then change the
+test artifact to <em>Unit Tests</em>.
+</li>
+<li>In the <strong>Project</strong> window, drill down to your unit test class or method, then
+right-click and run it.
+</li>
+</ol>
+
+<p>Android Studio displays the results of the unit test execution in the <strong>Run</strong>
+window.</p>
+
+<h3 id="run-from-commandline">Running local unit tests from the command-line</h3>
+
+<p>To run local unit tests in your Gradle project from the command-line, call the {@code test} task
+command with the {@code --continue} option.</p>
+
+<pre>
+./gradlew test --continue
+</pre>
+
+<p>If there are failing tests, the command will display links to HTML reports (one per build
+variant). You can find the generated HTML test result reports in the
+{@code &lt;path_to_your_project&gt;/app/build/reports/tests/} directory, and the corresponding XML
+files in the {@code &lt;path_to_your_project&gt;/app/build/test-results/} directory.</p>

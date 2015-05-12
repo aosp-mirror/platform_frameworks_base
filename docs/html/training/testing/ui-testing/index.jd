@@ -72,5 +72,5 @@ Testing UI for a Single App</a></strong></dt>
     <dd>Learn how to test UI in a single app by using the Espresso testing framework.</dd>
   <dt><strong><a href="uiautomator-testing.html">
 Testing UI for Multiple Apps</a></strong></dt>
-    <dd>Learn how to test UI in multiple apps by using the UI Automator testing framework</dd>
+    <dd>Learn how to test UI in multiple apps by using the UI Automator testing framework.</dd>
 </dl>

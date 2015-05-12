@@ -1,0 +1,250 @@
+page.title=Building Instrumented Unit Tests
+page.tags=testing,androidjunitrunner,junit,unit test,mock,instrumentation
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+
+  <ul>
+    <li>Android 2.2 (API level 8) or higher</li>
+    <li><a href="{@docRoot}tools/testing-support-library/index.html">
+      Android Testing Support Library</a></li>
+  </ul>
+
+  <h2>This lesson teaches you to</h2>
+
+  <ol>
+    <li><a href="#setup">Set Up Your Testing Environment</a></li>
+    <li><a href="#build">Create a Instrumented Unit Test Class</a></li>
+    <li><a href="#run">Run Instrumented Unit Tests</a></li>
+  </ol>
+
+  <h2>Try it out</h2>
+
+  <ul>
+    <li>
+<a href="https://github.com/googlesamples/android-testing/tree/master/unittesting/BasicUnitAndroidTest"
+class="external-link">Instrumented Unit Tests Code Samples</a></li>
+  </ul>
+</div>
+</div>
+
+<p>
+Instrumented unit tests are unit tests that run on physical devices and emulators, instead of
+the Java Virtual Machine (JVM) on your local machine. You should create instrumented unit tests
+if your tests need access to instrumentation information (such as the target app's
+{@link android.content.Context}) or if they require the real implementation of an Android framework
+component (such as a {@link android.os.Parcelable} or {@link android.content.SharedPreferences}
+object). Using instrumented unit tests also helps to reduce the effort required to write and
+maintain mock code. You are still free to use a mocking framework, if you choose, to simulate any
+dependency relationships. Instrumented unit tests can take advantage of the Android framework APIs
+and supporting APIs, such as the Android Testing Support Library.
+</p>
+
+<h2 id="setup">Set Up Your Testing Environment</h2>
+<p>Before building instrumented unit tests, you must:</p>
+
+  <ul>
+      <li>
+        <strong>Install the Android Testing Support Library</strong>. The
+        <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+        {@code AndroidJUnitRunner}</a> API, located under the
+        {@code com.android.support.test.runner} package, allows you to
+        create and run instrumented unit tests.  To learn how to install the
+        library, see <a href="{@docRoot}tools/testing-support-library/index.html#setup">
+        Testing Support Library Setup</a>.
+      </li>
+
+      <li>
+        <strong>Set up your project structure.</strong> In your Gradle project, the source code for
+        the target app that you want to test is typically placed under the {@code app/src/main/java}
+        folder. The source code for instrumentatation tests, including your unit tests, must be
+        placed under the <code>app/src/androidTest/java</code> folder.
+        To learn more about setting up your project directory, see
+        <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.
+      </li>
+
+      <li>
+        <strong>Specify your Android testing dependencies</strong>. In order for the
+        <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for Gradle</a> to
+        correctly build and run your instrumented unit tests, you must specify the following
+        libraries in the {@code build.gradle} file of your Android app module:
+
+        <pre>
+dependencies {
+    androidTestCompile 'com.android.support.test:runner:0.2'
+    androidTestCompile 'com.android.support.test:rules:0.2'
+    // Set this dependency if you want to use Hamcrest matching
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
+}
+</pre>
+      </li>
+  </ul>
+
+<h2 id="build">Create an Instrumented Unit Test Class</h2>
+<p>
+Your instrumented unit test class should be written as a JUnit 4 test class. To learn more about
+creating JUnit 4 test classes and using JUnit 4 assertions and annotations, see
+<a href="local-unit-tests.html#build">Create a Local Unit Test Class</a>.
+</p>
+<p>To create an instrumented JUnit 4 test class, add the {@code &#64;RunWith(AndroidJUnit4.class)}
+annotation at the beginning of your test class definition. You also need to specify the
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+{@code AndroidJUnitRunner}</a> class
+provided in the Android Testing Support Library as your default test runner. This step is described
+in more detail in <a href="#run">Run Instrumented Unit Tests</a>.
+</p>
+
+<p>The following example shows how you might write an instrumented unit test to test that
+the {@link android.os.Parcelable} interface is implemented correctly for the
+{@code LogHistory} class:</p>
+
+<pre>
+import android.os.Parcel;
+import android.support.test.runner.AndroidJUnit4;
+import android.util.Pair;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import java.util.List;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
+&#64;RunWith(AndroidJUnit4.class)
+public class LogHistoryAndroidUnitTest {
+
+    public static final String TEST_STRING = "This is a string";
+    public static final long TEST_LONG = 12345678L;
+    private LogHistory mLogHistory;
+
+    &#64;Before
+    public void createLogHistory() {
+        mLogHistory = new LogHistory();
+    }
+
+    &#64;Test
+    public void logHistory_ParcelableWriteRead() {
+        // Set up the Parcelable object to send and receive.
+        mLogHistory.addEntry(TEST_STRING, TEST_LONG);
+
+        // Write the data.
+        Parcel parcel = Parcel.obtain();
+        mLogHistory.writeToParcel(parcel, mLogHistory.describeContents());
+
+        // After you're done with writing, you need to reset the parcel for reading.
+        parcel.setDataPosition(0);
+
+        // Read the data.
+        LogHistory createdFromParcel = LogHistory.CREATOR.createFromParcel(parcel);
+        List&lt;Pair&lt;String, Long&gt;&gt; createdFromParcelData = createdFromParcel.getData();
+
+        // Verify that the received data is correct.
+        assertThat(createdFromParcelData.size(), is(1));
+        assertThat(createdFromParcelData.get(0).first, is(TEST_STRING));
+        assertThat(createdFromParcelData.get(0).second, is(TEST_LONG));
+    }
+}
+</pre>
+
+<h3 id="test-suites">Creating a test suite</h3>
+<p>
+To organize the execution of your instrumented unit tests, you can group a collection of test
+classes in a <em>test suite</em> class and run these tests together. Test suites can be nested;
+your test suite can group other test suites and run all their component test classes together.
+</p>
+
+<p>
+A test suite is contained in a test package, similar to the main application package. By
+convention, the test suite package name usually ends with the {@code .suite} suffix (for example,
+{@code com.example.android.testing.mysample.suite}).
+</p>
+
+<p>
+To create a test suite for your unit tests, import the JUnit
+<a href="http://junit.sourceforge.net/javadoc/org/junit/runner/RunWith.html"
+class="external-link">{@code RunWith}</a> and
+<a href="http://junit.sourceforge.net/javadoc/org/junit/runners/Suite.html"
+class="external-link">{@code Suite}</a> classes. In your test suite, add the
+{@code &#64;RunWith(Suite.class)} and the {@code &#64;Suite.SuitClasses()} annotations. In
+the {@code &#64;Suite.SuiteClasses()} annotation, list the individual test classes or test
+suites as arguments.
+</p>
+
+<p>
+The following example shows how you might implement a test suite called {@code UnitTestSuite}
+that groups and runs the {@code CalculatorInstrumentationTest} and
+{@code CalculatorAddParameterizedTest} test classes together.
+</p>
+
+<pre>
+import com.example.android.testing.mysample.CalculatorAddParameterizedTest;
+import com.example.android.testing.mysample.CalculatorInstrumentationTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
+// Runs all unit tests.
+&#64;RunWith(Suite.class)
+&#64;Suite.SuiteClasses({CalculatorInstrumentationTest.class,
+        CalculatorAddParameterizedTest.class})
+public class UnitTestSuite {}
+</pre>
+
+<h2 id="run">Run Instrumented Unit Tests</h2>
+<p>
+The
+<a href="https://developer.android.com/tools/building/plugin-for-gradle.html">
+  Android Plug-in for Gradle</a>
+provides a default directory ({@code src/androidTest/java}) for you to store the instrumented unit
+and integration test classes and test suites that you want to run on a device. The plug-in compiles
+the test code in that directory and then executes the test app using a test runner class. You must
+set the
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+{@code AndroidJUnitRunner}</a> class provided in the
+<a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>
+as your default test runner.</p>
+</p>
+
+<p>To specify
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+{@code AndroidJUnitRunner}</a> as the default test instrumentation runner, add the following
+setting in your {@code build.gradle} file:</p>
+<pre>
+android {
+    defaultConfig {
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+}
+</pre>
+
+<h3 id="run-from-Android-Studio">Running instrumented unit tests from Android Studio</h3>
+<p>
+To run instrumented unit tests in your Gradle project from Android Studio:
+</p>
+<ol>
+<li>Open the <strong>Build Variants</strong> window by clicking the left-hand tab, then set the
+test artifact to <em>Android Instrumentation Tests</em>.
+</li>
+<li>In the <strong>Project</strong> window, drill down to your unit test class or method, then
+  right-click and run it using the Android Test configuration.
+</li>
+</ol>
+
+<p>Android Studio displays the results of the unit test execution in the <strong>Run</strong>
+window.</p>
+
+<h3 id="run-from-commandline">Running instrumented unit tests from the command-line</h3>
+
+<p>To run instrumented unit tests in your Gradle project from the command-line, call the
+  {@code connectedCheck} (or {@code cC}) task:</p>
+
+<pre>
+./gradlew cC
+</pre>
+
+<p>You can find the generated HTML test result reports in the
+{@code &lt;path_to_your_project&gt;/app/build/outputs/reports/androidTests/connected/} directory,
+and the corresponding XML files in the
+{@code &lt;path_to_your_project&gt;/app/build/outputs/androidTest-results/connected/} directory.</p>
