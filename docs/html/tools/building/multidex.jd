@@ -415,30 +415,40 @@ dependencies {
 <h2 id="testing">Testing Multidex Apps</h2>
 
 <p>
-  Testing apps that use multidex configuration require some additional steps and configuration.
-  Since the location of code for classes is not within a single DEX file, instrumentation tests do
-  not run properly unless configured for multidex.
+  When using instrumentation tests with multidex apps, additional configuration is required to
+  enable the test instrumentation. Because the location of code for classes in multidex apps is not
+  within a single DEX file, instrumentation tests do not run properly unless configured for
+  multidex.
 </p>
 
 <p>
-  When testing a multidex app with instrumentation tests, use
+  To test a multidex app with instrumentation tests, configure the
   <a href="{@docRoot}reference/com/android/test/runner/MultiDexTestRunner.html">
   MultiDexTestRunner</a> from the multidex testing support library. The following sample
-  {@code build.gradle} file, demonstrates how to configure your build to use this test runner:
+  {@code build.gradle} file demonstrates how to configure your build to use this test runner:
 </p>
 
 <pre>
 android {
   defaultConfig {
       ...
-      testInstrumentationRunner "android.support.multidex.MultiDexTestRunner"
+      testInstrumentationRunner "com.android.test.runner.MultiDexTestRunner"
   }
 }
+</pre>
 
+<p class="note">
+  <strong>Note:</strong> With Android Plugin for Gradle versions lower than 1.1, you need to add
+  the following dependency for <code>multidex-instrumentation</code>:
+<pre>
 dependencies {
-    androidTestCompile 'com.android.support:multidex-instrumentation:1.0.0'
+    androidTestCompile('com.android.support:multidex-instrumentation:1.0.1') {
+         exclude group: 'com.android.support', module: 'multidex'
+    }       
 }
 </pre>
+</p>
+
 
 <p>
   You may use the instrumentation test runner class directly or extend it to fit your testing
