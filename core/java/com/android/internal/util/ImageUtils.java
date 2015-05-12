@@ -66,7 +66,7 @@ public class ImageUtils {
                         COMPACT_BITMAP_SIZE, COMPACT_BITMAP_SIZE, Bitmap.Config.ARGB_8888
                 );
                 mTempCompactBitmapCanvas = new Canvas(mTempCompactBitmap);
-                mTempCompactBitmapPaint = new Paint();
+                mTempCompactBitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
                 mTempCompactBitmapPaint.setFilterBitmap(true);
             }
             mTempMatrix.reset();
