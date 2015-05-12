@@ -30,13 +30,13 @@ capabilities, etc.
 messages.
   <li> Support transmission of arbitrary length data for SysEx, etc.
   <li> Timestamps to avoid jitter.
-  <li> Support direction connection or “patching” of devices for lower latency.
+  <li> Support direction connection or &ldquo;patching&rdquo; of devices for lower latency.
 </ul>
 
 <h2 id=transports_supported>Transports Supported</h2>
 
 
-<p>The API is “transport agnostic”. But there are several transports currently
+<p>The API is &ldquo;transport agnostic&rdquo;. But there are several transports currently
 supported:</p>
 
 <ul>
@@ -83,7 +83,7 @@ MidiManager m = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
 information can be presented to a user, allowing them to choose a device.</p>
 
 <pre class=prettyprint>
-MidiDeviceInfo[] infos = m.getDeviceList();
+MidiDeviceInfo[] infos = m.getDevices();
 </pre>
 
 
@@ -116,9 +116,9 @@ int numOutputs = info.getOutputPortCount();
 </pre>
 
 
-<p>Note that “input” and “output” are from the standpoint of the device. So a
-synthesizer will have an “input” port that receives messages. A keyboard will
-have an “output” port that sends messages.</p>
+<p>Note that &ldquo;input&rdquo; and &ldquo;output&rdquo; are from the standpoint of the device. So a
+synthesizer will have an &ldquo;input&rdquo; port that receives messages. A keyboard will
+have an &ldquo;output&rdquo; port that sends messages.</p>
 
 <p>The MidiDeviceInfo has a bundle of properties.</p>
 
@@ -148,12 +148,11 @@ you need to provide a callback for completion. You can specify an optional
 Handler if you want the callback to occur on a specific Thread.</p>
 
 <pre class=prettyprint>
-m.openDevice(info, new MidiManager.DeviceOpenCallback() {
+m.openDevice(info, new MidiManager.OnDeviceOpenedListener() {
     &#64;Override
-    public void onDeviceOpened(MidiDeviceInfo deviceInfo,
-            MidiDevice device) {
+    public void onDeviceOpened(MidiDevice device) {
         if (device == null) {
-            Log.e(TAG, "could not open " + deviceInfo);
+            Log.e(TAG, "could not open device " + info);
         } else {
             ...
         }, new Handler(Looper.getMainLooper())
@@ -164,7 +163,7 @@ m.openDevice(info, new MidiManager.DeviceOpenCallback() {
 <h2 id=open_a_midi_input_port>Open a MIDI Input Port</h2>
 
 
-<p>If you want to send a message to a MIDI Device then you need to open an “input”
+<p>If you want to send a message to a MIDI Device then you need to open an &ldquo;input&rdquo;
 port with exclusive access.</p>
 
 <pre class=prettyprint>
@@ -199,7 +198,7 @@ consistent with the other audio and input timers.</p>
 <pre class=prettyprint>
 long now = System.nanoTime();
 long future = now + (2 * 1000000000);
-inputPort.sendWithTimestamp(buffer, offset, numBytes, future);
+inputPort.send(buffer, offset, numBytes, future);
 </pre>
 
 
@@ -212,7 +211,7 @@ inputPort.flush(); // discard events
 
 
 <p>If there were any MIDI NoteOff message left in the buffer then they will be
-discarded and you may get stuck notes. So we recommend sending “all notes off”
+discarded and you may get stuck notes. So we recommend sending &ldquo;all notes off&rdquo;
 after doing a flush.</p>
 
 <h2 id=receive_a_note>Receive a Note</h2>
@@ -223,7 +222,7 @@ connect your receiver to an output port of the device.</p>
 
 <pre class=prettyprint>
 class MyReceiver extends MidiReceiver {
-    public void onReceive(byte[] data, int offset,
+    public void onSend(byte[] data, int offset,
             int count, long timestamp) throws IOException {
         // parse MIDI or whatever
     }
@@ -264,7 +263,7 @@ AndroidManifest.xml file.</p>
 
 
 <p>The details of the resource in this example is stored in
-“res/xml/synth_device_info.xml”.</p>
+&ldquo;res/xml/synth_device_info.xml&rdquo;.</p>
 
 <pre class=prettyprint>
 &lt;devices>
@@ -279,7 +278,7 @@ AndroidManifest.xml file.</p>
 
 
 <p>You then define your server by extending android.media.midi.MidiDeviceService.
-Let’s assume you have a MySynthEngine class that extends MidiReceiver.</p>
+Let&lsquo;s assume you have a MySynthEngine class that extends MidiReceiver.</p>
 
 <pre class=prettyprint>
 import android.media.midi.MidiDeviceService;
