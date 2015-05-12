@@ -131,7 +131,7 @@ public interface IApplicationThread extends IInterface {
     void updatePackageCompatibilityInfo(String pkg, CompatibilityInfo info) throws RemoteException;
     void scheduleTrimMemory(int level) throws RemoteException;
     void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin, boolean dumpInfo,
-            boolean dumpDalvik, String[] args) throws RemoteException;
+            boolean dumpDalvik, boolean dumpSummaryOnly, String[] args) throws RemoteException;
     void dumpGfxInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void dumpDbInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void unstableProviderDied(IBinder provider) throws RemoteException;
