@@ -16,28 +16,34 @@
 #ifndef DRAWPROFILER_H
 #define DRAWPROFILER_H
 
+#include "FrameInfo.h"
 #include "Properties.h"
 #include "Rect.h"
+#include "utils/RingBuffer.h"
 
 #include <utils/Timers.h>
+
+#include <memory>
 
 namespace android {
 namespace uirenderer {
 
 class OpenGLRenderer;
 
-class DrawProfiler {
+// TODO: This is a bit awkward as it needs to match the thing in CanvasContext
+// A better abstraction here would be nice but iterators are painful
+// and RingBuffer having the size baked into the template is also painful
+// But making DrawProfiler also be templated is ALSO painful
+// At least this is a compile failure if this doesn't match, so there's that.
+typedef RingBuffer<FrameInfo, 120> FrameInfoSource;
+
+class FrameInfoVisualizer {
 public:
-    DrawProfiler();
-    ~DrawProfiler();
+    FrameInfoVisualizer(FrameInfoSource& source);
+    ~FrameInfoVisualizer();
 
     bool consumeProperties();
     void setDensity(float density);
-
-    void startFrame(nsecs_t recordDurationNanos = 0);
-    void markPlaybackStart();
-    void markPlaybackEnd();
-    void finishFrame();
 
     void unionDirty(SkRect* dirty);
     void draw(OpenGLRenderer* canvas);
@@ -45,13 +51,6 @@ public:
     void dumpData(int fd);
 
 private:
-    typedef struct {
-        float record;
-        float prepare;
-        float playback;
-        float swapBuffers;
-    } FrameTimingData;
-
     void createData();
     void destroyData();
 
@@ -61,14 +60,39 @@ private:
     void drawCurrentFrame(OpenGLRenderer* canvas);
     void drawThreshold(OpenGLRenderer* canvas);
 
+    static inline float duration(nsecs_t start, nsecs_t end) {
+        float duration = ((end - start) * 0.000001f);
+        return duration > 0.0f ? duration : 0.0f;
+    }
+
+    inline float recordDuration(size_t index) {
+        return duration(
+                mFrameSource[index][FrameInfoIndex::kIntendedVsync],
+                mFrameSource[index][FrameInfoIndex::kSyncStart]);
+    }
+
+    inline float prepareDuration(size_t index) {
+        return duration(
+                mFrameSource[index][FrameInfoIndex::kSyncStart],
+                mFrameSource[index][FrameInfoIndex::kIssueDrawCommandsStart]);
+    }
+
+    inline float issueDrawDuration(size_t index) {
+        return duration(
+                mFrameSource[index][FrameInfoIndex::kIssueDrawCommandsStart],
+                mFrameSource[index][FrameInfoIndex::kSwapBuffers]);
+    }
+
+    inline float swapBuffersDuration(size_t index) {
+        return duration(
+                mFrameSource[index][FrameInfoIndex::kSwapBuffers],
+                mFrameSource[index][FrameInfoIndex::kFrameCompleted]);
+    }
+
     ProfileType mType = ProfileType::None;
     float mDensity = 0;
 
-    FrameTimingData* mData = nullptr;
-    int mDataSize = 0;
-
-    int mCurrentFrame = -1;
-    nsecs_t mPreviousTime = 0;
+    FrameInfoSource& mFrameSource;
 
     int mVerticalUnit = 0;
     int mHorizontalUnit = 0;
@@ -81,11 +105,12 @@ private:
      * OpenGLRenderer:drawRects() that makes up all the FrameTimingData:record
      * information.
      */
-    float** mRects = nullptr;
+    std::unique_ptr<float*> mRects;
 
     bool mShowDirtyRegions = false;
     SkRect mDirtyRegion;
     bool mFlashToggle = false;
+    nsecs_t mLastFrameLogged = 0;
 };
 
 } /* namespace uirenderer */

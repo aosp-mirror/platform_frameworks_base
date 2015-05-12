@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "DrawProfiler.h"
-
-#include <cutils/compiler.h>
+#include "FrameInfoVisualizer.h"
 
 #include "OpenGLRenderer.h"
 
-#define DEFAULT_MAX_FRAMES 128
+#include <cutils/compiler.h>
 
 #define RETURN_IF_PROFILING_DISABLED() if (CC_LIKELY(mType == ProfileType::None)) return
 #define RETURN_IF_DISABLED() if (CC_LIKELY(mType == ProfileType::None && !mShowDirtyRegions)) return
-
-#define NANOS_TO_MILLIS_FLOAT(nanos) ((nanos) * 0.000001f)
 
 #define PROFILE_DRAW_WIDTH 3
 #define PROFILE_DRAW_THRESHOLD_STROKE_WIDTH 2
@@ -55,15 +51,16 @@ static int dpToPx(int dp, float density) {
     return (int) (dp * density + 0.5f);
 }
 
-DrawProfiler::DrawProfiler() {
+FrameInfoVisualizer::FrameInfoVisualizer(FrameInfoSource& source)
+        : mFrameSource(source) {
     setDensity(1);
 }
 
-DrawProfiler::~DrawProfiler() {
+FrameInfoVisualizer::~FrameInfoVisualizer() {
     destroyData();
 }
 
-void DrawProfiler::setDensity(float density) {
+void FrameInfoVisualizer::setDensity(float density) {
     if (CC_UNLIKELY(mDensity != density)) {
         mDensity = density;
         mVerticalUnit = dpToPx(PROFILE_DRAW_DP_PER_MS, density);
@@ -72,35 +69,7 @@ void DrawProfiler::setDensity(float density) {
     }
 }
 
-void DrawProfiler::startFrame(nsecs_t recordDurationNanos) {
-    RETURN_IF_PROFILING_DISABLED();
-    mData[mCurrentFrame].record = NANOS_TO_MILLIS_FLOAT(recordDurationNanos);
-    mPreviousTime = systemTime(CLOCK_MONOTONIC);
-}
-
-void DrawProfiler::markPlaybackStart() {
-    RETURN_IF_PROFILING_DISABLED();
-    nsecs_t now = systemTime(CLOCK_MONOTONIC);
-    mData[mCurrentFrame].prepare = NANOS_TO_MILLIS_FLOAT(now - mPreviousTime);
-    mPreviousTime = now;
-}
-
-void DrawProfiler::markPlaybackEnd() {
-    RETURN_IF_PROFILING_DISABLED();
-    nsecs_t now = systemTime(CLOCK_MONOTONIC);
-    mData[mCurrentFrame].playback = NANOS_TO_MILLIS_FLOAT(now - mPreviousTime);
-    mPreviousTime = now;
-}
-
-void DrawProfiler::finishFrame() {
-    RETURN_IF_PROFILING_DISABLED();
-    nsecs_t now = systemTime(CLOCK_MONOTONIC);
-    mData[mCurrentFrame].swapBuffers = NANOS_TO_MILLIS_FLOAT(now - mPreviousTime);
-    mPreviousTime = now;
-    mCurrentFrame = (mCurrentFrame + 1) % mDataSize;
-}
-
-void DrawProfiler::unionDirty(SkRect* dirty) {
+void FrameInfoVisualizer::unionDirty(SkRect* dirty) {
     RETURN_IF_DISABLED();
     // Not worth worrying about minimizing the dirty region for debugging, so just
     // dirty the entire viewport.
@@ -110,7 +79,7 @@ void DrawProfiler::unionDirty(SkRect* dirty) {
     }
 }
 
-void DrawProfiler::draw(OpenGLRenderer* canvas) {
+void FrameInfoVisualizer::draw(OpenGLRenderer* canvas) {
     RETURN_IF_DISABLED();
 
     if (mShowDirtyRegions) {
@@ -131,27 +100,21 @@ void DrawProfiler::draw(OpenGLRenderer* canvas) {
     }
 }
 
-void DrawProfiler::createData() {
-    if (mData) return;
+void FrameInfoVisualizer::createData() {
+    if (mRects.get()) return;
 
-    mDataSize = property_get_int32(PROPERTY_PROFILE_MAXFRAMES, DEFAULT_MAX_FRAMES);
-    if (mDataSize <= 0) mDataSize = 1;
-    if (mDataSize > 4096) mDataSize = 4096; // Reasonable maximum
-    mData = (FrameTimingData*) calloc(mDataSize, sizeof(FrameTimingData));
-    mRects = new float*[NUM_ELEMENTS];
+    mRects.reset(new float*[mFrameSource.capacity()]);
     for (int i = 0; i < NUM_ELEMENTS; i++) {
         // 4 floats per rect
-        mRects[i] = (float*) calloc(mDataSize, 4 * sizeof(float));
+        mRects.get()[i] = (float*) calloc(mFrameSource.capacity(), 4 * sizeof(float));
     }
-    mCurrentFrame = 0;
 }
 
-void DrawProfiler::destroyData() {
-    delete mData;
-    mData = nullptr;
+void FrameInfoVisualizer::destroyData() {
+    mRects.reset(nullptr);
 }
 
-void DrawProfiler::addRect(Rect& r, float data, float* shapeOutput) {
+void FrameInfoVisualizer::addRect(Rect& r, float data, float* shapeOutput) {
     r.top = r.bottom - (data * mVerticalUnit);
     shapeOutput[0] = r.left;
     shapeOutput[1] = r.top;
@@ -160,40 +123,40 @@ void DrawProfiler::addRect(Rect& r, float data, float* shapeOutput) {
     r.bottom = r.top;
 }
 
-void DrawProfiler::prepareShapes(const int baseline) {
+void FrameInfoVisualizer::prepareShapes(const int baseline) {
     Rect r;
     r.right = mHorizontalUnit;
-    for (int i = 0; i < mDataSize; i++) {
+    for (size_t i = 0; i < mFrameSource.size(); i++) {
         const int shapeIndex = i * 4;
         r.bottom = baseline;
-        addRect(r, mData[i].record, mRects[RECORD_INDEX] + shapeIndex);
-        addRect(r, mData[i].prepare, mRects[PREPARE_INDEX] + shapeIndex);
-        addRect(r, mData[i].playback, mRects[PLAYBACK_INDEX] + shapeIndex);
-        addRect(r, mData[i].swapBuffers, mRects[SWAPBUFFERS_INDEX] + shapeIndex);
+        addRect(r, recordDuration(i), mRects.get()[RECORD_INDEX] + shapeIndex);
+        addRect(r, prepareDuration(i), mRects.get()[PREPARE_INDEX] + shapeIndex);
+        addRect(r, issueDrawDuration(i), mRects.get()[PLAYBACK_INDEX] + shapeIndex);
+        addRect(r, swapBuffersDuration(i), mRects.get()[SWAPBUFFERS_INDEX] + shapeIndex);
         r.translate(mHorizontalUnit, 0);
     }
 }
 
-void DrawProfiler::drawGraph(OpenGLRenderer* canvas) {
+void FrameInfoVisualizer::drawGraph(OpenGLRenderer* canvas) {
     SkPaint paint;
     for (int i = 0; i < NUM_ELEMENTS; i++) {
         paint.setColor(ELEMENT_COLORS[i]);
-        canvas->drawRects(mRects[i], mDataSize * 4, &paint);
+        canvas->drawRects(mRects.get()[i], mFrameSource.capacity() * 4, &paint);
     }
 }
 
-void DrawProfiler::drawCurrentFrame(OpenGLRenderer* canvas) {
+void FrameInfoVisualizer::drawCurrentFrame(OpenGLRenderer* canvas) {
     // This draws a solid rect over the entirety of the current frame's shape
     // To do so we use the bottom of mRects[0] and the top of mRects[NUM_ELEMENTS-1]
     // which will therefore fully overlap the previously drawn rects
     SkPaint paint;
     paint.setColor(CURRENT_FRAME_COLOR);
-    const int i = mCurrentFrame * 4;
-    canvas->drawRect(mRects[0][i], mRects[NUM_ELEMENTS-1][i+1], mRects[0][i+2],
-            mRects[0][i+3], &paint);
+    const int i = (mFrameSource.size() - 1) * 4;
+    canvas->drawRect(mRects.get()[0][i], mRects.get()[NUM_ELEMENTS-1][i+1],
+            mRects.get()[0][i+2], mRects.get()[0][i+3], &paint);
 }
 
-void DrawProfiler::drawThreshold(OpenGLRenderer* canvas) {
+void FrameInfoVisualizer::drawThreshold(OpenGLRenderer* canvas) {
     SkPaint paint;
     paint.setColor(THRESHOLD_COLOR);
     paint.setStrokeWidth(mThresholdStroke);
@@ -205,7 +168,7 @@ void DrawProfiler::drawThreshold(OpenGLRenderer* canvas) {
     canvas->drawLines(pts, 4, &paint);
 }
 
-bool DrawProfiler::consumeProperties() {
+bool FrameInfoVisualizer::consumeProperties() {
     bool changed = false;
     ProfileType newType = Properties::getProfileType();
     if (newType != mType) {
@@ -226,29 +189,25 @@ bool DrawProfiler::consumeProperties() {
     return changed;
 }
 
-void DrawProfiler::dumpData(int fd) {
+void FrameInfoVisualizer::dumpData(int fd) {
     RETURN_IF_PROFILING_DISABLED();
 
     // This method logs the last N frames (where N is <= mDataSize) since the
     // last call to dumpData(). In other words if there's a dumpData(), draw frame,
     // dumpData(), the last dumpData() should only log 1 frame.
 
-    const FrameTimingData emptyData = {0, 0, 0, 0};
-
     FILE *file = fdopen(fd, "a");
     fprintf(file, "\n\tDraw\tPrepare\tProcess\tExecute\n");
 
-    for (int frameOffset = 1; frameOffset <= mDataSize; frameOffset++) {
-        int i = (mCurrentFrame + frameOffset) % mDataSize;
-        if (!memcmp(mData + i, &emptyData, sizeof(FrameTimingData))) {
+    for (size_t i = 0; i < mFrameSource.size(); i++) {
+        if (mFrameSource[i][FrameInfoIndex::kIntendedVsync] <= mLastFrameLogged) {
             continue;
         }
+        mLastFrameLogged = mFrameSource[i][FrameInfoIndex::kIntendedVsync];
         fprintf(file, "\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
-                mData[i].record, mData[i].prepare, mData[i].playback, mData[i].swapBuffers);
+                recordDuration(i), prepareDuration(i),
+                issueDrawDuration(i), swapBuffersDuration(i));
     }
-    // reset the buffer
-    memset(mData, 0, sizeof(FrameTimingData) * mDataSize);
-    mCurrentFrame = 0;
 
     fflush(file);
 }

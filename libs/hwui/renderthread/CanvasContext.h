@@ -18,9 +18,9 @@
 #define CANVASCONTEXT_H_
 
 #include "DamageAccumulator.h"
-#include "DrawProfiler.h"
 #include "IContextFactory.h"
 #include "FrameInfo.h"
+#include "FrameInfoVisualizer.h"
 #include "RenderNode.h"
 #include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
@@ -103,7 +103,7 @@ public:
     void stopDrawing();
     void notifyFramePending();
 
-    DrawProfiler& profiler() { return mProfiler; }
+    FrameInfoVisualizer& profiler() { return mProfiler; }
 
     void dumpFrames(int fd);
     void resetFrameStats();
@@ -140,12 +140,12 @@ private:
 
     const sp<RenderNode> mRootRenderNode;
 
-    DrawProfiler mProfiler;
     FrameInfo* mCurrentFrameInfo = nullptr;
-    // Ring buffer large enough for 1 second worth of frames
-    RingBuffer<FrameInfo, 60> mFrames;
+    // Ring buffer large enough for 2 seconds worth of frames
+    RingBuffer<FrameInfo, 120> mFrames;
     std::string mName;
     JankTracker mJankTracker;
+    FrameInfoVisualizer mProfiler;
 
     std::set<RenderNode*> mPrefetechedLayers;
 };

@@ -46,7 +46,8 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mRootRenderNode(rootRenderNode)
-        , mJankTracker(thread.timeLord().frameIntervalNanos()) {
+        , mJankTracker(thread.timeLord().frameIntervalNanos())
+        , mProfiler(mFrames) {
     mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
 }
@@ -218,7 +219,6 @@ void CanvasContext::draw() {
         return;
     }
 
-    profiler().markPlaybackStart();
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
     EGLint width, height;
@@ -251,8 +251,6 @@ void CanvasContext::draw() {
 
     bool drew = mCanvas->finish();
 
-    profiler().markPlaybackEnd();
-
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
     mCurrentFrameInfo->markSwapBuffers();
@@ -267,7 +265,6 @@ void CanvasContext::draw() {
     mCurrentFrameInfo->markFrameCompleted();
     mJankTracker.addFrame(*mCurrentFrameInfo);
     mRenderThread.jankTracker().addFrame(*mCurrentFrameInfo);
-    profiler().finishFrame();
 }
 
 // Called by choreographer to do an RT-driven animation
@@ -278,7 +275,6 @@ void CanvasContext::doFrame() {
 
     ATRACE_CALL();
 
-    profiler().startFrame();
     int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
     UiFrameInfoBuilder(frameInfo)
         .addFlag(FrameInfoFlags::kRTAnimation)
