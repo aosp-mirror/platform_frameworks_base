@@ -844,13 +844,13 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                     f.mFragmentManager = mParent != null
                             ? mParent.mChildFragmentManager : mHost.getFragmentManagerImpl();
                     f.mCalled = false;
-                    mHost.onFragmentAttach(f);
+                    f.onAttach(mHost.getContext());
                     if (!f.mCalled) {
                         throw new SuperNotCalledException("Fragment " + f
                                 + " did not call through to super.onAttach()");
                     }
                     if (f.mParentFragment == null) {
-                        mHost.onFragmentAttach(f);
+                        mHost.onAttachFragment(f);
                     }
 
                     if (!f.mRetaining) {
@@ -2107,7 +2107,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             fragment.mTag = tag;
             fragment.mInLayout = true;
             fragment.mFragmentManager = this;
-            mHost.onFragmentInflate(fragment, attrs, fragment.mSavedFragmentState);
+            fragment.onInflate(mHost.getContext(), attrs, fragment.mSavedFragmentState);
             addFragment(fragment, true);
         } else if (fragment.mInLayout) {
             // A fragment already exists and it is not one we restored from
@@ -2124,7 +2124,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             // from last saved state), then give it the attributes to
             // initialize itself.
             if (!fragment.mRetaining) {
-                mHost.onFragmentInflate(fragment, attrs, fragment.mSavedFragmentState);
+                fragment.onInflate(mHost.getContext(), attrs, fragment.mSavedFragmentState);
             }
         }
 
