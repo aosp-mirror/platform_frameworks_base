@@ -31,7 +31,6 @@ import android.util.Slog;
 
 import com.android.server.SystemService;
 
-import android.hardware.fingerprint.FingerprintUtils;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintService;
@@ -93,6 +92,7 @@ public class FingerprintService extends SystemService {
     private Context mContext;
     private int mHalDeviceId;
     private int mFailedAttempts;
+    private final FingerprintUtils mFingerprintUtils = FingerprintUtils.getInstance();
     private final Runnable mLockoutReset = new Runnable() {
         @Override
         public void run() {
@@ -172,7 +172,6 @@ public class FingerprintService extends SystemService {
      * @return true if the operation is done, i.e. authentication completed
      */
     boolean dispatchNotify(ClientMonitor clientMonitor, int type, int arg1, int arg2, int arg3) {
-        ContentResolver contentResolver = mContext.getContentResolver();
         boolean operationCompleted = false;
         int fpId;
         int groupId;
@@ -198,7 +197,7 @@ public class FingerprintService extends SystemService {
                 remaining = arg3;
                 operationCompleted = clientMonitor.sendEnrollResult(fpId, groupId, remaining);
                 if (remaining == 0) {
-                    addTemplateForUser(clientMonitor, contentResolver, fpId);
+                    addTemplateForUser(clientMonitor, fpId);
                     operationCompleted = true; // enroll completed
                 }
                 break;
@@ -207,7 +206,7 @@ public class FingerprintService extends SystemService {
                 groupId = arg2;
                 operationCompleted = clientMonitor.sendRemoved(fpId, groupId);
                 if (fpId != 0) {
-                    removeTemplateForUser(clientMonitor, contentResolver, fpId);
+                    removeTemplateForUser(clientMonitor, fpId);
                 }
                 break;
         }
@@ -252,16 +251,12 @@ public class FingerprintService extends SystemService {
         return false;
     }
 
-    private void removeTemplateForUser(ClientMonitor clientMonitor, ContentResolver contentResolver,
-            final int fingerId) {
-        FingerprintUtils.removeFingerprintIdForUser(fingerId, contentResolver,
-                clientMonitor.userId);
+    private void removeTemplateForUser(ClientMonitor clientMonitor, int fingerId) {
+        mFingerprintUtils.removeFingerprintIdForUser(mContext, fingerId, clientMonitor.userId);
     }
 
-    private void addTemplateForUser(ClientMonitor clientMonitor, ContentResolver contentResolver,
-            final int fingerId) {
-        FingerprintUtils.addFingerprintIdForUser(contentResolver, fingerId,
-                clientMonitor.userId);
+    private void addTemplateForUser(ClientMonitor clientMonitor, int fingerId) {
+        mFingerprintUtils.addFingerprintForUser(mContext, fingerId, clientMonitor.userId);
     }
 
     void startEnrollment(IBinder token, byte[] cryptoToken, int groupId,
@@ -345,24 +340,11 @@ public class FingerprintService extends SystemService {
     }
 
     public List<Fingerprint> getEnrolledFingerprints(int groupId) {
-        ContentResolver resolver = mContext.getContentResolver();
-        int[] ids = FingerprintUtils.getFingerprintIdsForUser(resolver, groupId);
-        List<Fingerprint> result = new ArrayList<Fingerprint>();
-        for (int i = 0; i < ids.length; i++) {
-            // TODO: persist names in Settings
-            CharSequence name = "Finger" + ids[i];
-            final int group = 0; // TODO
-            final int fingerId = ids[i];
-            final long deviceId = 0; // TODO
-            Fingerprint item = new Fingerprint(name, 0, ids[i], 0);
-            result.add(item);
-        }
-        return result;
+        return mFingerprintUtils.getFingerprintsForUser(mContext, groupId);
     }
 
     public boolean hasEnrolledFingerprints(int groupId) {
-        ContentResolver resolver = mContext.getContentResolver();
-        return FingerprintUtils.getFingerprintIdsForUser(resolver, groupId).length > 0;
+        return mFingerprintUtils.getFingerprintsForUser(mContext, groupId).size() > 0;
     }
 
     void checkPermission(String permission) {
@@ -596,7 +578,7 @@ public class FingerprintService extends SystemService {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Slog.w(TAG, "rename id=" + fingerId + ",gid=" + groupId + ",name=" + name);
+                    mFingerprintUtils.renameFingerprintForUser(mContext, fingerId, groupId, name);
                 }
             });
         }
