@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroupOverlay;
 import android.view.ViewParent;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.ImageView;
@@ -187,11 +188,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
      */
     public static final int MSG_SHARED_ELEMENT_DESTINATION = 107;
 
-    /**
-     * Send the shared element positions.
-     */
-    public static final int MSG_SEND_SHARED_ELEMENT_DESTINATION = 108;
-
     private Window mWindow;
     final protected ArrayList<String> mAllSharedElementNames;
     final protected ArrayList<View> mSharedElements = new ArrayList<View>();
@@ -207,6 +203,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             new ArrayList<GhostViewListeners>();
     private ArrayMap<View, Float> mOriginalAlphas = new ArrayMap<View, Float>();
     private ArrayList<Matrix> mSharedElementParentMatrices;
+    private boolean mSharedElementTransitionComplete;
+    private boolean mViewsTransitionComplete;
 
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
@@ -219,6 +217,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     protected void viewsReady(ArrayMap<String, View> sharedElements) {
+        final View decor = getDecor();
+        final ViewRootImpl viewRoot = decor == null ? null : decor.getViewRootImpl();
+        if (viewRoot != null) {
+            viewRoot.setPausedForTransition(true);
+        }
         sharedElements.retainAll(mAllSharedElementNames);
         if (mListener != null) {
             mListener.onMapSharedElements(mAllSharedElementNames, sharedElements);
@@ -877,6 +880,32 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                     });
         }
     }
+
+    protected boolean isViewsTransitionComplete() {
+        return mViewsTransitionComplete;
+    }
+
+    protected void viewsTransitionComplete() {
+        mViewsTransitionComplete = true;
+        startInputWhenTransitionsComplete();
+    }
+
+    protected void sharedElementTransitionComplete() {
+        mSharedElementTransitionComplete = true;
+        startInputWhenTransitionsComplete();
+    }
+    private void startInputWhenTransitionsComplete() {
+        if (mViewsTransitionComplete && mSharedElementTransitionComplete) {
+            final View decor = getDecor();
+            if (decor != null) {
+                final ViewRootImpl viewRoot = decor.getViewRootImpl();
+                viewRoot.setPausedForTransition(false);
+            }
+            onTransitionsComplete();
+        }
+    }
+
+    protected void onTransitionsComplete() {}
 
     protected class ContinueTransitionListener extends Transition.TransitionListenerAdapter {
         @Override

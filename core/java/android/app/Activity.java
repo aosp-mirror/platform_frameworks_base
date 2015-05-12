@@ -3841,10 +3841,7 @@ public class Activity extends ContextThemeWrapper
                 mStartedActivity = true;
             }
 
-            final View decor = mWindow != null ? mWindow.peekDecorView() : null;
-            if (decor != null) {
-                decor.cancelPendingInputEvents();
-            }
+            cancelInputsAndStartExitTransition(options);
             // TODO Consider clearing/flushing other event sources and events for child windows.
         } else {
             if (options != null) {
@@ -3854,6 +3851,18 @@ public class Activity extends ContextThemeWrapper
                 // existing applications that may have overridden it.
                 mParent.startActivityFromChild(this, intent, requestCode);
             }
+        }
+    }
+
+    /**
+     * Cancels pending inputs and if an Activity Transition is to be run, starts the transition.
+     *
+     * @param options The ActivityOptions bundle used to start an Activity.
+     */
+    private void cancelInputsAndStartExitTransition(Bundle options) {
+        final View decor = mWindow != null ? mWindow.peekDecorView() : null;
+        if (decor != null) {
+            decor.cancelPendingInputEvents();
         }
         if (options != null && !isTopOfTask()) {
             mActivityTransitionState.startExitOutTransition(this, options);
@@ -3872,9 +3881,6 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityForResultAsUser(Intent intent, int requestCode,
             @Nullable Bundle options, UserHandle user) {
-        if (options != null) {
-            mActivityTransitionState.startExitOutTransition(this, options);
-        }
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -3896,10 +3902,7 @@ public class Activity extends ContextThemeWrapper
             mStartedActivity = true;
         }
 
-        final View decor = mWindow != null ? mWindow.peekDecorView() : null;
-        if (decor != null) {
-            decor.cancelPendingInputEvents();
-        }
+        cancelInputsAndStartExitTransition(options);
     }
 
     /**
@@ -3925,6 +3928,7 @@ public class Activity extends ContextThemeWrapper
                 mToken, mEmbeddedID, -1, ar.getResultCode(),
                 ar.getResultData());
         }
+        cancelInputsAndStartExitTransition(options);
     }
 
     /**
@@ -3948,6 +3952,7 @@ public class Activity extends ContextThemeWrapper
                 mToken, mEmbeddedID, -1, ar.getResultCode(),
                 ar.getResultData());
         }
+        cancelInputsAndStartExitTransition(options);
     }
 
     /**
@@ -4380,6 +4385,7 @@ public class Activity extends ContextThemeWrapper
                 mToken, child.mEmbeddedID, requestCode,
                 ar.getResultCode(), ar.getResultData());
         }
+        cancelInputsAndStartExitTransition(options);
     }
 
     /**
@@ -4431,9 +4437,6 @@ public class Activity extends ContextThemeWrapper
     @Override
     public void startActivityForResult(
             String who, Intent intent, int requestCode, @Nullable Bundle options) {
-        if (options != null) {
-            mActivityTransitionState.startExitOutTransition(this, options);
-        }
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, who,
@@ -4443,6 +4446,7 @@ public class Activity extends ContextThemeWrapper
                 mToken, who, requestCode,
                 ar.getResultCode(), ar.getResultData());
         }
+        cancelInputsAndStartExitTransition(options);
     }
 
     /**
