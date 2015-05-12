@@ -42,19 +42,19 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import com.android.documentsui.FailureDialogFragment;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Activity providing a directly launchable file management activity.
+ * Standalone file management activity.
  */
 public class StandaloneActivity extends BaseActivity {
     public static final String TAG = "StandaloneFileManagement";
@@ -129,11 +129,16 @@ public class StandaloneActivity extends BaseActivity {
         state.acceptMimes = new String[] { "*/*" };
         state.allowMultiple = true;
         state.acceptMimes = new String[] { intent.getType() };
-        state.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
-        state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
-        state.showAdvanced = state.forceAdvanced
-                | LocalPreferences.getDisplayAdvancedDevices(this);
+
+        // These options are specific to the DocumentsActivity.
+        Preconditions.checkArgument(
+                !intent.hasExtra(Intent.EXTRA_LOCAL_ONLY));
+        Preconditions.checkArgument(
+                !intent.hasExtra(DocumentsContract.EXTRA_SHOW_ADVANCED));
+
+        state.showAdvanced = LocalPreferences.getDisplayAdvancedDevices(this);
         state.showSize = LocalPreferences.getDisplayFileSize(this);
+
         final DocumentStack stack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
         if (stack != null)
             state.stack = stack;

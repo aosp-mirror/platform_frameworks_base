@@ -473,7 +473,8 @@ public class DocumentsActivity extends BaseActivity {
             createDir.setVisible(false);
         }
 
-        advanced.setVisible(!(mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE));
+        advanced.setVisible(!(mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) &&
+                !mState.forceAdvanced);
         fileSize.setVisible(fileSizeVisible);
 
         settings.setVisible((mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE)
