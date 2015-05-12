@@ -2722,21 +2722,21 @@
              for example "top|bottom". -->
         <attr name="scrollIndicators">
             <!-- No scroll indicators are displayed. -->
-            <flag name="none" value="0x0000" />
+            <flag name="none" value="0x00" />
             <!-- Displays top scroll indicator when view can be scrolled up. -->
-            <flag name="top" value="0x0100" />
+            <flag name="top" value="0x01" />
             <!-- Displays bottom scroll indicator when vew can be scrolled down. -->
-            <flag name="bottom" value="0x0200" />
+            <flag name="bottom" value="0x02" />
             <!-- Displays left scroll indicator when vew can be scrolled left. -->
-            <flag name="left" value="0x0400" />
+            <flag name="left" value="0x04" />
             <!-- Displays right scroll indicator when vew can be scrolled right. -->
-            <flag name="right" value="0x0800" />
+            <flag name="right" value="0x08" />
             <!-- Displays right scroll indicator when vew can be scrolled in the
                  start direction. -->
-            <flag name="start" value="0x1000" />
+            <flag name="start" value="0x10" />
             <!-- Displays right scroll indicator when vew can be scrolled in the
                  end direction. -->
-            <flag name="end" value="0x2000" />
+            <flag name="end" value="0x20" />
         </attr>
 
     </declare-styleable>
