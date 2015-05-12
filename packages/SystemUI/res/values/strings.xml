@@ -1021,4 +1021,7 @@
     <string name="volume_stream_muted_dnd" translatable="false">%s silent — Total silence</string>
     <string name="volume_stream_limited_dnd" translatable="false">%s — Priority only</string>
     <string name="volume_stream_vibrate_dnd" translatable="false">%s vibrate — Priority only</string>
+
+    <!-- Name of special SystemUI debug settings -->
+    <string name="system_ui_tuner">SystemUI Tuner</string>
 </resources>

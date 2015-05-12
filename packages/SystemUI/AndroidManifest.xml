@@ -182,6 +182,20 @@
                 android:excludeFromRecents="true">
         </activity>
 
+        <activity android:name=".tuner.TunerActivity"
+                  android:enabled="false"
+                  android:icon="@drawable/icon"
+                  android:theme="@android:style/Theme.Material.Settings"
+                  android:label="@string/system_ui_tuner"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.category"
+                    android:value="com.android.settings.category.device" />
+        </activity>
+
         <!-- Alternate Recents -->
         <activity android:name=".recents.RecentsActivity"
                   android:label="@string/accessibility_desc_recent_apps"
