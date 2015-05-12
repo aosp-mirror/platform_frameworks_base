@@ -129,7 +129,9 @@ public final class GeofenceProxy {
 
     private void setGpsGeofenceLocked() {
         try {
-            mGeofenceHardware.setGpsGeofenceHardware(mGpsGeofenceHardware);
+            if (mGpsGeofenceHardware != null) {
+                mGeofenceHardware.setGpsGeofenceHardware(mGpsGeofenceHardware);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Error while connecting to GeofenceHardwareService");
         }
