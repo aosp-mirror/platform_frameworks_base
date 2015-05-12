@@ -18,6 +18,7 @@ package android.security;
 
 import android.app.ActivityThread;
 import android.app.Application;
+import android.app.KeyguardManager;
 import com.android.org.conscrypt.NativeConstants;
 
 import android.content.Context;
@@ -73,6 +74,19 @@ public class KeyStore {
 
     // Flags for "put" "import" and "generate"
     public static final int FLAG_NONE = 0;
+
+    /**
+     * Indicates that this key (or key pair) must be encrypted at rest. This will protect the key
+     * (or key pair) with the secure lock screen credential (e.g., password, PIN, or pattern).
+     *
+     * <p>Note that this requires that the secure lock screen (e.g., password, PIN, pattern) is set
+     * up, otherwise key (or key pair) generation or import will fail. Moreover, this key (or key
+     * pair) will be deleted when the secure lock screen is disabled or reset (e.g., by the user or
+     * a Device Administrator). Finally, this key (or key pair) cannot be used until the user
+     * unlocks the secure lock screen after boot.
+     *
+     * @see KeyguardManager#isDeviceSecure()
+     */
     public static final int FLAG_ENCRYPTED = 1;
 
     // States
@@ -582,7 +596,7 @@ public class KeyStore {
                 case NO_ERROR:
                     return new KeyStoreException(errorCode, "OK");
                 case LOCKED:
-                    return new KeyStoreException(errorCode, "Keystore locked");
+                    return new KeyStoreException(errorCode, "User authentication required");
                 case UNINITIALIZED:
                     return new KeyStoreException(errorCode, "Keystore not initialized");
                 case SYSTEM_ERROR:
@@ -619,6 +633,8 @@ public class KeyStore {
      */
     InvalidKeyException getInvalidKeyException(String keystoreKeyAlias, KeyStoreException e) {
         switch (e.getErrorCode()) {
+            case LOCKED:
+                return new UserNotAuthenticatedException();
             case KeymasterDefs.KM_ERROR_KEY_EXPIRED:
                 return new KeyExpiredException();
             case KeymasterDefs.KM_ERROR_KEY_NOT_YET_VALID:
