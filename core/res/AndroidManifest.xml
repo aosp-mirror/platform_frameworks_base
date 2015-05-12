@@ -2103,7 +2103,8 @@
 
     <!-- @SystemApi Allows an application to collect component usage
          statistics
-         <p>Not for use by third-party applications. -->
+         <p>Declaring the permission implies intention to use the API and the user of the
+         device can grant permission through the Settings application. -->
     <permission android:name="android.permission.PACKAGE_USAGE_STATS"
         android:protectionLevel="signature|development|appop" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
