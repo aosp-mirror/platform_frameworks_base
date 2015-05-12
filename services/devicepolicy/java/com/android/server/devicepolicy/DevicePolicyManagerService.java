@@ -161,7 +161,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String TAG_STATUS_BAR = "statusbar";
 
-    private static final String ATTR_ENABLED = "enabled";
+    private static final String ATTR_DISABLED = "disabled";
 
     private static final String DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML =
             "do-not-ask-credentials-on-boot";
@@ -313,7 +313,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // This is the list of component allowed to start lock task mode.
         List<String> mLockTaskPackages = new ArrayList<>();
 
-        boolean mStatusBarEnabledState = true;
+        boolean mStatusBarDisabled = false;
 
         ComponentName mRestrictionsProvider;
 
@@ -1476,9 +1476,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, TAG_LOCK_TASK_COMPONENTS);
             }
 
-            if (!policy.mStatusBarEnabledState) {
+            if (policy.mStatusBarDisabled) {
                 out.startTag(null, TAG_STATUS_BAR);
-                out.attribute(null, ATTR_ENABLED, Boolean.toString(policy.mStatusBarEnabledState));
+                out.attribute(null, ATTR_DISABLED, Boolean.toString(policy.mStatusBarDisabled));
                 out.endTag(null, TAG_STATUS_BAR);
             }
 
@@ -1615,8 +1615,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_LOCK_TASK_COMPONENTS.equals(tag)) {
                     policy.mLockTaskPackages.add(parser.getAttributeValue(null, "name"));
                 } else if (TAG_STATUS_BAR.equals(tag)) {
-                    policy.mStatusBarEnabledState = Boolean.parseBoolean(
-                            parser.getAttributeValue(null, ATTR_ENABLED));
+                    policy.mStatusBarDisabled = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_DISABLED));
                 } else if (DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML.equals(tag)) {
                     policy.doNotAskCredentialsOnBoot = true;
                 } else {
@@ -1678,8 +1678,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         updateMaximumTimeToLockLocked(policy);
         addDeviceInitializerToLockTaskPackagesLocked(userHandle);
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
-        if (!policy.mStatusBarEnabledState) {
-            setStatusBarEnabledStateInternal(policy.mStatusBarEnabledState, userHandle);
+        if (policy.mStatusBarDisabled) {
+            setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
         updatePreferredSetupActivityLocked(userHandle);
     }
@@ -4275,7 +4275,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             DevicePolicyData policy = getUserData(userId);
             policy.mPermissionPolicy = DevicePolicyManager.PERMISSION_POLICY_PROMPT;
             policy.mDelegatedCertInstallerPackage = null;
-            policy.mStatusBarEnabledState = true;
+            policy.mStatusBarDisabled = false;
             saveSettingsLocked(userId);
 
             long ident = Binder.clearCallingIdentity();
@@ -6026,7 +6026,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setKeyguardEnabledState(ComponentName who, boolean enabled) {
+    public boolean setKeyguardDisabled(ComponentName who, boolean disabled) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
@@ -6037,10 +6037,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             // disallow disabling the keyguard if a password is currently set
-            if (!enabled && utils.isSecure(userId)) {
+            if (disabled && utils.isSecure(userId)) {
                 return false;
             }
-            utils.setLockScreenDisabled(!enabled, userId);
+            utils.setLockScreenDisabled(disabled, userId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -6048,35 +6048,40 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setStatusBarEnabledState(ComponentName who, boolean enabled) {
+    public boolean setStatusBarDisabled(ComponentName who, boolean disabled) {
         int userId = UserHandle.getCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             DevicePolicyData policy = getUserData(userId);
-            if (policy.mStatusBarEnabledState != enabled) {
-                policy.mStatusBarEnabledState = enabled;
-                setStatusBarEnabledStateInternal(enabled, userId);
+            if (policy.mStatusBarDisabled != disabled) {
+                if (!setStatusBarDisabledInternal(disabled, userId)) {
+                    return false;
+                }
+                policy.mStatusBarDisabled = disabled;
                 saveSettingsLocked(userId);
             }
         }
+        return true;
     }
 
-    private void setStatusBarEnabledStateInternal(boolean enabled, int userId) {
+    private boolean setStatusBarDisabledInternal(boolean disabled, int userId) {
         long ident = Binder.clearCallingIdentity();
         try {
             IStatusBarService statusBarService = IStatusBarService.Stub.asInterface(
                     ServiceManager.checkService(Context.STATUS_BAR_SERVICE));
             if (statusBarService != null) {
-                int flags1 = enabled ? StatusBarManager.DISABLE_NONE : STATUS_BAR_DISABLE_MASK;
-                int flags2 = enabled ? StatusBarManager.DISABLE2_NONE : STATUS_BAR_DISABLE2_MASK;
+                int flags1 = disabled ? STATUS_BAR_DISABLE_MASK : StatusBarManager.DISABLE_NONE;
+                int flags2 = disabled ? STATUS_BAR_DISABLE2_MASK : StatusBarManager.DISABLE2_NONE;
                 statusBarService.disableForUser(flags1, mToken, mContext.getPackageName(), userId);
                 statusBarService.disable2ForUser(flags2, mToken, mContext.getPackageName(), userId);
+                return true;
             }
         } catch (RemoteException e) {
             Slog.e(LOG_TAG, "Failed to disable the status bar", e);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+        return false;
     }
 
     /**
