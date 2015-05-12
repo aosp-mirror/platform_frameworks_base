@@ -43,6 +43,9 @@ import javax.crypto.SecretKeyFactory;
 public abstract class KeyStoreKeyProperties {
     private KeyStoreKeyProperties() {}
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
             value = {Purpose.ENCRYPT, Purpose.DECRYPT, Purpose.SIGN, Purpose.VERIFY})
@@ -134,6 +137,9 @@ public abstract class KeyStoreKeyProperties {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
         Algorithm.RSA,
@@ -261,6 +267,9 @@ public abstract class KeyStoreKeyProperties {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
         BlockMode.ECB,
@@ -356,6 +365,9 @@ public abstract class KeyStoreKeyProperties {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
         EncryptionPadding.NONE,
@@ -445,6 +457,9 @@ public abstract class KeyStoreKeyProperties {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
         SignaturePadding.RSA_PKCS1,
@@ -514,6 +529,9 @@ public abstract class KeyStoreKeyProperties {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
         Digest.NONE,
@@ -652,6 +670,9 @@ public abstract class KeyStoreKeyProperties {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({Origin.GENERATED, Origin.IMPORTED, Origin.UNKNOWN})
     public @interface OriginEnum {}
