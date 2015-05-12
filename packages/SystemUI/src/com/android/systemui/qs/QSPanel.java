@@ -247,6 +247,12 @@ public class QSPanel extends ViewGroup {
         }
     }
 
+    private void drawTile(TileRecord r, QSTile.State state) {
+        final int visibility = state.visible ? VISIBLE : GONE;
+        setTileVisibility(r.tileView, visibility);
+        r.tileView.onStateChanged(state);
+    }
+
     private void addTile(final QSTile<?> tile) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
@@ -255,9 +261,9 @@ public class QSPanel extends ViewGroup {
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
             public void onStateChanged(QSTile.State state) {
-                int visibility = state.visible ? VISIBLE : GONE;
-                setTileVisibility(r.tileView, visibility);
-                r.tileView.onStateChanged(state);
+                if (!r.openingDetail) {
+                    drawTile(r, state);
+                }
             }
             @Override
             public void onShowDetail(boolean show) {
@@ -372,6 +378,9 @@ public class QSPanel extends ViewGroup {
             MetricsLogger.visible(mContext, detailAdapter.getMetricsCategory());
             setDetailRecord(r);
             listener = mHideGridContentWhenDone;
+            if (r instanceof TileRecord) {
+                ((TileRecord) r).openingDetail = true;
+            }
         } else {
             MetricsLogger.hidden(mContext, mDetailRecord.detailAdapter.getMetricsCategory());
             mClosingDetail = true;
@@ -557,6 +566,7 @@ public class QSPanel extends ViewGroup {
         int row;
         int col;
         boolean scanState;
+        boolean openingDetail;
     }
 
     private final AnimatorListenerAdapter mTeardownDetailWhenDone = new AnimatorListenerAdapter() {
@@ -572,6 +582,7 @@ public class QSPanel extends ViewGroup {
             // If we have been cancelled, remove the listener so that onAnimationEnd doesn't get
             // called, this will avoid accidentally turning off the grid when we don't want to.
             animation.removeListener(this);
+            redrawTile();
         };
 
         @Override
@@ -579,6 +590,15 @@ public class QSPanel extends ViewGroup {
             // Only hide content if still in detail state.
             if (mDetailRecord != null) {
                 setGridContentVisibility(false);
+                redrawTile();
+            }
+        }
+
+        private void redrawTile() {
+            if (mDetailRecord instanceof TileRecord) {
+                final TileRecord tileRecord = (TileRecord) mDetailRecord;
+                tileRecord.openingDetail = false;
+                drawTile(tileRecord, tileRecord.tile.getState());
             }
         }
     };
