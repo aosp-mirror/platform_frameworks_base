@@ -395,14 +395,20 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of purposes for which the key can be used.
+     * Gets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which the
+     * key can be used.
+     *
+     * @see KeyStoreKeyProperties.Purpose
      */
     public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
     /**
-     * Gets the set of digest algorithms with which the key can be used.
+     * Gets the set of digest algorithms (e.g., {@code SHA-256}, {@code SHA-384} with which the key
+     * can be used.
+     *
+     * @see KeyStoreKeyProperties.Digest
      */
     @NonNull
     public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
@@ -410,7 +416,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
+     * Gets the set of padding schemes (e.g., {@code PKCS1Padding}, {@code NoPadding}) with which
+     * the key can be used when encrypting/decrypting.
+     *
+     * @see KeyStoreKeyProperties.EncryptionPadding
      */
     @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
@@ -418,7 +427,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of padding schemes with which the key can be used when signing/verifying.
+     * Gets the set of padding schemes (e.g., {@code PSS}) with which the key can be used when
+     * signing/verifying.
+     *
+     * @see KeyStoreKeyProperties.SignaturePadding
      */
     @NonNull
     public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
@@ -426,7 +438,9 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of block modes with which the key can be used.
+     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used.
+     *
+     * @see KeyStoreKeyProperties.BlockMode
      */
     @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
@@ -759,7 +773,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of purposes for which the key can be used.
+         * Sets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which
+         * the key can be used.
          *
          * <p>This must be specified for all keys. There is no default.
          *
@@ -770,6 +785,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Android KeyStore.
          *
          * <p><b>NOTE: This has currently no effect.
+         *
+         * @see KeyStoreKeyProperties.Purpose
          */
         @NonNull
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
@@ -778,12 +795,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of digests with which the key can be used when signing/verifying. Attempts
-         * to use the key with any other digest will be rejected.
+         * Sets the set of digests algorithms (e.g., {@code SHA-256}, {@code SHA-384}) with which
+         * the key can be used when signing/verifying. Attempts to use the key with any other digest
+         * algorithm will be rejected.
          *
          * <p>This must be specified for keys which are used for signing/verification.
          *
          * <p><b>NOTE: This has currently no effect.
+         *
+         * @see KeyStoreKeyProperties.Digest
          */
         @NonNull
         public Builder setDigests(@KeyStoreKeyProperties.DigestEnum String... digests) {
@@ -792,13 +812,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of padding schemes with which the key can be used when
-         * encrypting/decrypting. Attempts to use the key with any other padding scheme will be
-         * rejected.
+         * Sets the set of padding schemes (e.g., {@code PKCS1Padding}, {@code NoPadding}) with
+         * which the key can be used when encrypting/decrypting. Attempts to use the key with any
+         * other padding scheme will be rejected.
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
          *
          * <p><b>NOTE: This has currently no effect.
+         *
+         * @see KeyStoreKeyProperties.EncryptionPadding
          */
         @NonNull
         public Builder setEncryptionPaddings(
@@ -808,13 +830,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of padding schemes with which the key can be used when
+         * Sets the set of padding schemes (e.g., {@code PSS}) with which the key can be used when
          * signing/verifying. Attempts to use the key with any other padding scheme will be
          * rejected.
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
          *
          * <p><b>NOTE: This has currently no effect.
+         *
+         * @see KeyStoreKeyProperties.SignaturePadding
          */
         @NonNull
         public Builder setSignaturePaddings(
@@ -824,12 +848,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of block modes with which the key can be used when encrypting/decrypting.
-         * Attempts to use the key with any other block modes will be rejected.
+         * Sets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be
+         * used when encrypting/decrypting. Attempts to use the key with any other block modes will
+         * be rejected.
          *
          * <p>This must be specified for encryption/decryption keys.
          *
          * <p><b>NOTE: This has currently no effect.
+         *
+         * @see KeyStoreKeyProperties.BlockMode
          */
         @NonNull
         public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
