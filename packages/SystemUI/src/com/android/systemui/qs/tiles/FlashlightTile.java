@@ -60,10 +60,10 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     protected void handleClick() {
-        super.handleClick();
         if (ActivityManager.isUserAMonkey()) {
             return;
         }
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         boolean newState = !mState.value;
         refreshState(newState ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
         mFlashlightController.setFlashlight(newState);

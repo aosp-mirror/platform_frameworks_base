@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -84,6 +85,7 @@ public class UserDetailView extends PseudoGridView {
         public void onClick(View view) {
             UserSwitcherController.UserRecord tag =
                     (UserSwitcherController.UserRecord) view.getTag();
+            MetricsLogger.action(mContext, MetricsLogger.QS_SWITCH_USER);
             switchTo(tag);
         }
     }
