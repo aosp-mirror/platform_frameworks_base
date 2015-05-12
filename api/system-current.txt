@@ -30478,59 +30478,38 @@ package android.security {
   }
 
   public abstract class KeyStoreKeyProperties {
-  }
-
-  public static abstract class KeyStoreKeyProperties.Algorithm {
-    field public static final java.lang.String AES = "AES";
-    field public static final java.lang.String EC = "EC";
-    field public static final java.lang.String HMAC_SHA1 = "HmacSHA1";
-    field public static final java.lang.String HMAC_SHA224 = "HmacSHA224";
-    field public static final java.lang.String HMAC_SHA256 = "HmacSHA256";
-    field public static final java.lang.String HMAC_SHA384 = "HmacSHA384";
-    field public static final java.lang.String HMAC_SHA512 = "HmacSHA512";
-    field public static final java.lang.String RSA = "RSA";
-  }
-
-  public static abstract class KeyStoreKeyProperties.BlockMode {
-    field public static final java.lang.String CBC = "CBC";
-    field public static final java.lang.String CTR = "CTR";
-    field public static final java.lang.String ECB = "ECB";
-    field public static final java.lang.String GCM = "GCM";
-  }
-
-  public static abstract class KeyStoreKeyProperties.Digest {
-    field public static final java.lang.String MD5 = "MD5";
-    field public static final java.lang.String NONE = "NONE";
-    field public static final java.lang.String SHA1 = "SHA-1";
-    field public static final java.lang.String SHA224 = "SHA-224";
-    field public static final java.lang.String SHA256 = "SHA-256";
-    field public static final java.lang.String SHA384 = "SHA-384";
-    field public static final java.lang.String SHA512 = "SHA-512";
-  }
-
-  public static abstract class KeyStoreKeyProperties.EncryptionPadding {
-    field public static final java.lang.String NONE = "NoPadding";
-    field public static final java.lang.String PKCS7 = "PKCS7Padding";
-    field public static final java.lang.String RSA_OAEP = "OAEPPadding";
-    field public static final java.lang.String RSA_PKCS1 = "PKCS1Padding";
-  }
-
-  public static abstract class KeyStoreKeyProperties.Origin {
-    field public static final int GENERATED = 1; // 0x1
-    field public static final int IMPORTED = 2; // 0x2
-    field public static final int UNKNOWN = 4; // 0x4
-  }
-
-  public static abstract class KeyStoreKeyProperties.Purpose {
-    field public static final int DECRYPT = 2; // 0x2
-    field public static final int ENCRYPT = 1; // 0x1
-    field public static final int SIGN = 4; // 0x4
-    field public static final int VERIFY = 8; // 0x8
-  }
-
-  public static abstract class KeyStoreKeyProperties.SignaturePadding {
-    field public static final java.lang.String RSA_PKCS1 = "PKCS1";
-    field public static final java.lang.String RSA_PSS = "PSS";
+    field public static final java.lang.String BLOCK_MODE_CBC = "CBC";
+    field public static final java.lang.String BLOCK_MODE_CTR = "CTR";
+    field public static final java.lang.String BLOCK_MODE_ECB = "ECB";
+    field public static final java.lang.String BLOCK_MODE_GCM = "GCM";
+    field public static final java.lang.String DIGEST_MD5 = "MD5";
+    field public static final java.lang.String DIGEST_NONE = "NONE";
+    field public static final java.lang.String DIGEST_SHA1 = "SHA-1";
+    field public static final java.lang.String DIGEST_SHA224 = "SHA-224";
+    field public static final java.lang.String DIGEST_SHA256 = "SHA-256";
+    field public static final java.lang.String DIGEST_SHA384 = "SHA-384";
+    field public static final java.lang.String DIGEST_SHA512 = "SHA-512";
+    field public static final java.lang.String ENCRYPTION_PADDING_NONE = "NoPadding";
+    field public static final java.lang.String ENCRYPTION_PADDING_PKCS7 = "PKCS7Padding";
+    field public static final java.lang.String ENCRYPTION_PADDING_RSA_OAEP = "OAEPPadding";
+    field public static final java.lang.String ENCRYPTION_PADDING_RSA_PKCS1 = "PKCS1Padding";
+    field public static final java.lang.String KEY_ALGORITHM_AES = "AES";
+    field public static final java.lang.String KEY_ALGORITHM_EC = "EC";
+    field public static final java.lang.String KEY_ALGORITHM_HMAC_SHA1 = "HmacSHA1";
+    field public static final java.lang.String KEY_ALGORITHM_HMAC_SHA224 = "HmacSHA224";
+    field public static final java.lang.String KEY_ALGORITHM_HMAC_SHA256 = "HmacSHA256";
+    field public static final java.lang.String KEY_ALGORITHM_HMAC_SHA384 = "HmacSHA384";
+    field public static final java.lang.String KEY_ALGORITHM_HMAC_SHA512 = "HmacSHA512";
+    field public static final java.lang.String KEY_ALGORITHM_RSA = "RSA";
+    field public static final int ORIGIN_GENERATED = 1; // 0x1
+    field public static final int ORIGIN_IMPORTED = 2; // 0x2
+    field public static final int ORIGIN_UNKNOWN = 4; // 0x4
+    field public static final int PURPOSE_DECRYPT = 2; // 0x2
+    field public static final int PURPOSE_ENCRYPT = 1; // 0x1
+    field public static final int PURPOSE_SIGN = 4; // 0x4
+    field public static final int PURPOSE_VERIFY = 8; // 0x8
+    field public static final java.lang.String SIGNATURE_PADDING_RSA_PKCS1 = "PKCS1";
+    field public static final java.lang.String SIGNATURE_PADDING_RSA_PSS = "PSS";
   }
 
   public class KeyStoreKeySpec implements java.security.spec.KeySpec {

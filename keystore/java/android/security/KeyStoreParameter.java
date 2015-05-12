@@ -62,11 +62,11 @@ import javax.crypto.Cipher;
  *         "key1",
  *         new KeyStore.SecretKeyEntry(key),
  *         new KeyStoreParameter.Builder(context)
- *                 .setPurposes(KeyStoreKeyProperties.Purpose.ENCRYPT
- *                         | KeyStoreKeyProperties.Purpose.DECRYPT)
- *                 .setBlockMode(KeyStoreKeyProperties.BlockMode.CBC)
+ *                 .setPurposes(KeyStoreKeyProperties.PURPOSE_ENCRYPT
+ *                         | KeyStoreKeyProperties.PURPOSE_DECRYPT)
+ *                 .setBlockMode(KeyStoreKeyProperties.BLOCK_MODE_CBC)
  *                 .setEncryptionPaddings(
- *                         KeyStoreKeyProperties.EncryptionPaddings.PKCS7)
+ *                         KeyStoreKeyProperties.ENCRYPTION_PADDING_PKCS7)
  *                 .build());
  * // Key imported, obtain a reference to it.
  * SecretKey keyStoreKey = (SecretKey) keyStore.getKey("key1", null);
@@ -90,8 +90,8 @@ import javax.crypto.Cipher;
  *         "key2",
  *         new KeyStore.PrivateKeyEntry(privateKey, certChain),
  *         new KeyStoreParameter.Builder(context)
- *                 .setPurposes(KeyStoreKeyProperties.Purpose.SIGN)
- *                 .setDigests(KeyStoreKeyProperties.Digest.SHA256)
+ *                 .setPurposes(KeyStoreKeyProperties.PURPOSE_SIGN)
+ *                 .setDigests(KeyStoreKeyProperties.DIGEST_SHA256)
  *                 // Only permit this key to be used if the user
  *                 // authenticated within the last ten minutes.
  *                 .setUserAuthenticationRequired(true)
@@ -211,20 +211,21 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Gets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which the
-     * key can be used.
+     * Gets the set of purposes (e.g., encrypt, decrypt, sign) for which the key can be used.
+     * Attempts to use the key for any other purpose will be rejected.
      *
-     * @see KeyStoreKeyProperties.Purpose
+     * <p>See {@link KeyStoreKeyProperties}.{@code PURPOSE} flags.
      */
     public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
     /**
-     * Gets the set of padding schemes (e.g., {@code PKCS7Padding}, {@code NoPadding}) with which
-     * the key can be used when encrypting/decrypting.
+     * Gets the set of padding schemes (e.g., {@code PKCS7Padding}, {@code PKCS1Padding},
+     * {@code NoPadding}) with which the key can be used when encrypting/decrypting. Attempts to use
+     * the key with any other padding scheme will be rejected.
      *
-     * @see KeyStoreKeyProperties.EncryptionPadding
+     * <p>See {@link KeyStoreKeyProperties}.{@code ENCRYPTION_PADDING} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
@@ -232,10 +233,11 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Gets the set of padding schemes (e.g., {@code PSS}) with which the key can be used when
-     * signing or verifying signatures.
+     * Gets the set of padding schemes (e.g., {@code PSS}, {@code PKCS#1}) with which the key
+     * can be used when signing/verifying. Attempts to use the key with any other padding scheme
+     * will be rejected.
      *
-     * @see KeyStoreKeyProperties.SignaturePadding
+     * <p>See {@link KeyStoreKeyProperties}.{@code SIGNATURE_PADDING} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
@@ -271,9 +273,11 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used.
+     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used
+     * when encrypting/decrypting. Attempts to use the key with any other block modes will be
+     * rejected.
      *
-     * @see KeyStoreKeyProperties.BlockMode
+     * <p>See {@link KeyStoreKeyProperties}.{@code BLOCK_MODE} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
@@ -388,7 +392,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityEnd(Date)
          */
@@ -403,7 +407,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityStart(Date)
          * @see #setKeyValidityForConsumptionEnd(Date)
@@ -421,7 +425,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
@@ -437,7 +441,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
@@ -448,14 +452,14 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Sets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which
-         * the key can be used.
+         * Sets the set of purposes (e.g., encrypt, decrypt, sign) for which the key can be used.
+         * Attempts to use the key for any other purpose will be rejected.
          *
          * <p>This must be specified for all keys. There is no default.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
-         * @see KeyStoreKeyProperties.Purpose
+         * <p>See {@link KeyStoreKeyProperties}.{@code PURPOSE} flags.
          */
         @NonNull
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
@@ -464,15 +468,15 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Sets the set of padding schemes (e.g., {@code PKCS7Padding}, {@code NoPadding}) with
-         * which the key can be used when encrypting/decrypting. Attempts to use the key with any
-         * other padding scheme will be rejected.
+         * Sets the set of padding schemes (e.g., {@code OAEPPadding}, {@code PKCS7Padding},
+         * {@code NoPadding}) with which the key can be used when encrypting/decrypting. Attempts to
+         * use the key with any other padding scheme will be rejected.
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
-         * @see KeyStoreKeyProperties.EncryptionPadding
+         * <p>See {@link KeyStoreKeyProperties}.{@code ENCRYPTION_PADDING} constants.
          */
         @NonNull
         public Builder setEncryptionPaddings(
@@ -482,15 +486,15 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Sets the set of padding schemes (e.g., {@code PSS}) with which the key can be used when
-         * signing/verifying. Attempts to use the key with any other padding scheme will be
-         * rejected.
+         * Sets the set of padding schemes (e.g., {@code PSS}, {@code PKCS#1}) with which the key
+         * can be used when signing/verifying. Attempts to use the key with any other padding scheme
+         * will be rejected.
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
-         * @see KeyStoreKeyProperties.SignaturePadding
+         * <p>See {@link KeyStoreKeyProperties}.{@code SIGNATURE_PADDING} constants.
          */
         @NonNull
         public Builder setSignaturePaddings(
@@ -509,7 +513,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * {@link Key#getAlgorithm()}. For asymmetric signing keys the set of digest algorithms
          * must be specified.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see KeyStoreKeyProperties.Digest
          */
@@ -520,15 +524,15 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Sets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be
-         * used when encrypting/decrypting. Attempts to use the key with any other block modes will
-         * be rejected.
+         * Sets the set of block modes (e.g., {@code CBC}, {@code CTR}, {@code ECB}) with which the
+         * key can be used when encrypting/decrypting. Attempts to use the key with any other block
+         * modes will be rejected.
          *
          * <p>This must be specified for encryption/decryption keys.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
-         * @see KeyStoreKeyProperties.BlockMode
+         * <p>See {@link KeyStoreKeyProperties}.{@code BLOCK_MODE} constants.
          */
         @NonNull
         public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
@@ -570,7 +574,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
          * </ul>
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          */
         @NonNull
         public Builder setRandomizedEncryptionRequired(boolean required) {
@@ -591,7 +595,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * <a href="{@docRoot}training/articles/keystore.html#UserAuthentication">More
          * information</a>.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
@@ -607,7 +611,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p>By default, the user needs to authenticate for every use of the key.
          *
-         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
+         * <p><b>NOTE: This has currently no effect on asymmetric key pairs.</b>
          *
          * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
          *        every use of the key.
