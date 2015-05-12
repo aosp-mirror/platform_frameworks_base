@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -25,6 +26,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 
 /**
@@ -34,6 +36,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         implements KeyguardSecurityView, EmergencyButton.EmergencyButtonCallback {
     protected KeyguardSecurityCallback mCallback;
     protected LockPatternUtils mLockPatternUtils;
+    protected AsyncTask<?, ?, ?> mPendingLockCheck;
     protected SecurityMessageDisplay mSecurityMessageDisplay;
     protected View mEcaView;
     protected boolean mEnableHaptics;
@@ -106,8 +109,27 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     protected void verifyPasswordAndUnlock() {
-        String entry = getPasswordText();
-        if (mLockPatternUtils.checkPassword(entry, KeyguardUpdateMonitor.getCurrentUser())) {
+        final String entry = getPasswordText();
+        setPasswordEntryEnabled(false);
+        if (mPendingLockCheck != null) {
+            mPendingLockCheck.cancel(false);
+        }
+        mPendingLockCheck = LockPatternChecker.checkPassword(
+                mLockPatternUtils,
+                entry,
+                KeyguardUpdateMonitor.getCurrentUser(),
+                new LockPatternChecker.OnCheckCallback() {
+                    @Override
+                    public void onChecked(boolean matched) {
+                        setPasswordEntryEnabled(true);
+                        mPendingLockCheck = null;
+                        onPasswordChecked(entry, matched);
+                    }
+                });
+    }
+
+    private void onPasswordChecked(String entry, boolean matched) {
+        if (matched) {
             mCallback.reportUnlockAttempt(true);
             mCallback.dismiss(true);
         } else {
@@ -165,7 +187,10 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     @Override
     public void onPause() {
-
+        if (mPendingLockCheck != null) {
+            mPendingLockCheck.cancel(false);
+            mPendingLockCheck = null;
+        }
     }
 
     @Override
