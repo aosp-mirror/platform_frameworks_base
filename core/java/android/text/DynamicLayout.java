@@ -79,7 +79,8 @@ public class DynamicLayout extends Layout
                          boolean includepad,
                          TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
         this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                spacingmult, spacingadd, includepad, StaticLayout.BREAK_STRATEGY_SIMPLE,
+                spacingmult, spacingadd, includepad,
+                StaticLayout.BREAK_STRATEGY_SIMPLE, StaticLayout.HYPHENATION_FREQUENCY_NONE,
                 ellipsize, ellipsizedWidth);
     }
 
@@ -96,7 +97,7 @@ public class DynamicLayout extends Layout
                          TextPaint paint,
                          int width, Alignment align, TextDirectionHeuristic textDir,
                          float spacingmult, float spacingadd,
-                         boolean includepad, int breakStrategy,
+                         boolean includepad, int breakStrategy, int hyphenationFrequency,
                          TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
         super((ellipsize == null)
                 ? display
@@ -122,6 +123,7 @@ public class DynamicLayout extends Layout
 
         mIncludePad = includepad;
         mBreakStrategy = breakStrategy;
+        mHyphenationFrequency = hyphenationFrequency;
 
         /*
          * This is annoying, but we can't refer to the layout until
@@ -293,7 +295,8 @@ public class DynamicLayout extends Layout
                 .setLineSpacing(getSpacingAdd(), getSpacingMultiplier())
                 .setEllipsizedWidth(mEllipsizedWidth)
                 .setEllipsize(mEllipsizeAt)
-                .setBreakStrategy(mBreakStrategy);
+                .setBreakStrategy(mBreakStrategy)
+                .setHyphenationFrequency(mHyphenationFrequency);
         reflowed.generate(b, false, true);
         int n = reflowed.getLineCount();
 
@@ -719,6 +722,7 @@ public class DynamicLayout extends Layout
     private int mEllipsizedWidth;
     private TextUtils.TruncateAt mEllipsizeAt;
     private int mBreakStrategy;
+    private int mHyphenationFrequency;
 
     private PackedIntVector mInts;
     private PackedObjectVector<Directions> mObjects;

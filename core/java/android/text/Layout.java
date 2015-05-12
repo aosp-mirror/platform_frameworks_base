@@ -71,6 +71,35 @@ public abstract class Layout {
      */
     public static final int BREAK_STRATEGY_BALANCED = 2;
 
+    /** @hide */
+    @IntDef({HYPHENATION_FREQUENCY_NORMAL, HYPHENATION_FREQUENCY_FULL,
+             HYPHENATION_FREQUENCY_NONE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HyphenationFrequency {}
+
+    /**
+     * Value for hyphenation frequency indicating no automatic hyphenation. Useful
+     * for backward compatibility, and for cases where the automatic hyphenation algorithm results
+     * in incorrect hyphenation. Mid-word breaks may still happen when a word is wider than the
+     * layout and there is otherwise no valid break. Soft hyphens are ignored and will not be used
+     * as suggestions for potential line breaks.
+     */
+    public static final int HYPHENATION_FREQUENCY_NONE = 0;
+
+    /**
+     * Value for hyphenation frequency indicating a light amount of automatic hyphenation, which
+     * is a conservative default. Useful for informal cases, such as short sentences or chat
+     * messages.
+     */
+    public static final int HYPHENATION_FREQUENCY_NORMAL = 1;
+
+    /**
+     * Value for hyphenation frequency indicating the full amount of automatic hyphenation, typical
+     * in typography. Useful for running text and where it's important to put the maximum amount of
+     * text in a screen with limited space.
+     */
+    public static final int HYPHENATION_FREQUENCY_FULL = 2;
+
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
