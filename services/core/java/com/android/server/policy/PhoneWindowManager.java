@@ -495,6 +495,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * be done once per window. */
     private WindowState mWinDismissingKeyguard;
 
+    /** When window is currently dismissing the keyguard, dismissing the keyguard must handle
+     * the keygaurd secure state change instantly case, e.g. the use case of inserting a PIN
+     * lock SIM card. This variable is used to record the previous keyguard secure state for
+     * monitoring secure state change on window dismissing keyguard. */
+    private boolean mSecureDismissingKeyguard;
+
     /** The window that is currently showing "over" the keyguard. If there is an app window
      * belonging to another app on top of this the keyguard shows. If there is a fullscreen
      * app window under this, still dismiss the keyguard but don't show the app underneath. Show
@@ -4238,9 +4244,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
                         if (DEBUG_LAYOUT) Slog.v(TAG,
                                 "Setting mDismissKeyguard true by win " + win);
-                        mDismissKeyguard = mWinDismissingKeyguard == win ?
-                                DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
+                        mDismissKeyguard = (mWinDismissingKeyguard == win
+                                && mSecureDismissingKeyguard == mKeyguardSecure)
+                                ? DISMISS_KEYGUARD_CONTINUE : DISMISS_KEYGUARD_START;
                         mWinDismissingKeyguard = win;
+                        mSecureDismissingKeyguard = mKeyguardSecure;
                         mForceStatusBarFromKeyguard = mShowingLockscreen && mKeyguardSecure;
                     } else if (mAppsToBeHidden.isEmpty() && showWhenLocked) {
                         if (DEBUG_LAYOUT) Slog.v(TAG,
@@ -4426,6 +4434,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else {
                 mWinDismissingKeyguard = null;
+                mSecureDismissingKeyguard = false;
                 mKeyguardHidden = false;
                 if (setKeyguardOccludedLw(false)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
