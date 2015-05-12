@@ -147,6 +147,23 @@ public class TrustManager {
         }
     }
 
+    /**
+     * Checks whether the specified user has been authenticated since the last boot.
+     *
+     * @param userId the user id of the user to check for
+     * @return true if the user has authenticated since boot, false otherwise
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     */
+    public boolean hasUserAuthenticatedSinceBoot(int userId) {
+        try {
+            return mService.hasUserAuthenticatedSinceBoot(userId);
+        } catch (RemoteException e) {
+            onError(e);
+            return false;
+        }
+    }
+
     private void onError(Exception e) {
         Log.e(TAG, "Error while calling TrustManagerService", e);
     }
