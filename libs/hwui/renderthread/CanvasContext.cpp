@@ -171,6 +171,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
     }
 
     if (CC_UNLIKELY(!mNativeWindow.get())) {
+        mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
         info.out.canDrawThisFrame = false;
         return;
     }
@@ -182,6 +183,10 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
     mNativeWindow->query(mNativeWindow.get(),
             NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &runningBehind);
     info.out.canDrawThisFrame = !runningBehind;
+
+    if (!info.out.canDrawThisFrame) {
+        mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
+    }
 
     if (info.out.hasAnimations || !info.out.canDrawThisFrame) {
         if (!info.out.requiresUiRedraw) {
@@ -284,8 +289,6 @@ void CanvasContext::doFrame() {
     prepareTree(info, frameInfo);
     if (info.out.canDrawThisFrame) {
         draw();
-    } else {
-        mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
     }
 }
 
