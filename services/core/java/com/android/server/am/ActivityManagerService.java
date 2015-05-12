@@ -16906,6 +16906,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
                     intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
                     intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                    if (!mProcessesReady) {
+                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    }
                     broadcastIntentLocked(null, null, intent,
                             null, null, 0, null, null, null, AppOpsManager.OP_NONE,
                             false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
