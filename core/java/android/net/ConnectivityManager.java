@@ -496,6 +496,8 @@ public class ConnectivityManager {
      * Tests if a given integer represents a valid network type.
      * @param networkType the type to be tested
      * @return a boolean.  {@code true} if the type is valid, else {@code false}
+     * @deprecated All APIs accepting a network type are deprecated. There should be no need to
+     *             validate a network type.
      */
     public static boolean isNetworkTypeValid(int networkType) {
         return networkType >= 0 && networkType <= MAX_NETWORK_TYPE;
