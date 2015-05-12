@@ -255,5 +255,43 @@ public class RadioAccessFamily implements Parcelable {
 
         return type;
     }
-}
 
+    public static int singleRafTypeFromString(String rafString) {
+        switch (rafString) {
+            case "GPRS":    return RAF_GPRS;
+            case "EDGE":    return RAF_EDGE;
+            case "UMTS":    return RAF_UMTS;
+            case "IS95A":   return RAF_IS95A;
+            case "IS95B":   return RAF_IS95B;
+            case "1XRTT":   return RAF_1xRTT;
+            case "EVDO_0":  return RAF_EVDO_0;
+            case "EVDO_A":  return RAF_EVDO_A;
+            case "HSDPA":   return RAF_HSDPA;
+            case "HSUPA":   return RAF_HSUPA;
+            case "HSPA":    return RAF_HSPA;
+            case "EVDO_B":  return RAF_EVDO_B;
+            case "EHRPD":   return RAF_EHRPD;
+            case "LTE":     return RAF_LTE;
+            case "HSPAP":   return RAF_HSPAP;
+            case "GSM":     return RAF_GSM;
+            case "TD_SCDMA":return RAF_TD_SCDMA;
+            case "HS":      return HS;
+            case "CDMA":    return CDMA;
+            case "EVDO":    return EVDO;
+            case "WCDMA":   return WCDMA;
+            default:        return RAF_UNKNOWN;
+        }
+    }
+
+    public static int rafTypeFromString(String rafList) {
+        rafList = rafList.toUpperCase();
+        String[] rafs = rafList.split("\\|");
+        int result = 0;
+        for(String raf : rafs) {
+            int rafType = singleRafTypeFromString(raf.trim());
+            if (rafType == RAF_UNKNOWN) return rafType;
+            result |= rafType;
+        }
+        return result;
+    }
+}
