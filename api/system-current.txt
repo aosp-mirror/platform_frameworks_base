@@ -19570,7 +19570,7 @@ package android.net {
     method public void ignoreNetworkWithCaptivePortal(android.net.Network, java.lang.String);
     method public boolean isActiveNetworkMetered();
     method public boolean isDefaultNetworkActive();
-    method public static boolean isNetworkTypeValid(int);
+    method public static deprecated boolean isNetworkTypeValid(int);
     method public void registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
     method public void releaseNetworkRequest(android.app.PendingIntent);
     method public void removeDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
