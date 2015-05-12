@@ -26,7 +26,7 @@ import java.util.Date;
 public class KeyStoreKeySpec implements KeySpec {
     private final String mKeystoreAlias;
     private final int mKeySize;
-    private final boolean mTeeBacked;
+    private final boolean mInsideSecureHardware;
     private final @KeyStoreKeyProperties.OriginEnum int mOrigin;
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
@@ -38,13 +38,13 @@ public class KeyStoreKeySpec implements KeySpec {
     private final @KeyStoreKeyProperties.BlockModeEnum String[] mBlockModes;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
-    private final boolean mUserAuthenticationRequirementTeeEnforced;
+    private final boolean mUserAuthenticationRequirementEnforcedBySecureHardware;
 
     /**
      * @hide
      */
     KeyStoreKeySpec(String keystoreKeyAlias,
-            boolean teeBacked,
+            boolean insideSecureHardware,
             @KeyStoreKeyProperties.OriginEnum int origin,
             int keySize,
             Date keyValidityStart,
@@ -57,9 +57,9 @@ public class KeyStoreKeySpec implements KeySpec {
             @KeyStoreKeyProperties.BlockModeEnum String[] blockModes,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean userAuthenticationRequirementTeeEnforced) {
+            boolean userAuthenticationRequirementEnforcedBySecureHardware) {
         mKeystoreAlias = keystoreKeyAlias;
-        mTeeBacked = teeBacked;
+        mInsideSecureHardware = insideSecureHardware;
         mOrigin = origin;
         mKeySize = keySize;
         mKeyValidityStart = keyValidityStart;
@@ -74,7 +74,8 @@ public class KeyStoreKeySpec implements KeySpec {
         mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
-        mUserAuthenticationRequirementTeeEnforced = userAuthenticationRequirementTeeEnforced;
+        mUserAuthenticationRequirementEnforcedBySecureHardware =
+                userAuthenticationRequirementEnforcedBySecureHardware;
     }
 
     /**
@@ -85,11 +86,12 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Returns {@code true} if the key is TEE-backed. Key material of TEE-backed keys is available
-     * in plaintext only inside the TEE.
+     * Returns {@code true} if the key resides inside secure hardware (e.g., Trusted Execution
+     * Environment (TEE) or Secure Element (SE)). Key material of such keys is available in
+     * plaintext only inside the secure hardware and is not exposed outside of it.
      */
-    public boolean isTeeBacked() {
-        return mTeeBacked;
+    public boolean isInsideSecureHardware() {
+        return mInsideSecureHardware;
     }
 
     /**
@@ -192,11 +194,12 @@ public class KeyStoreKeySpec implements KeySpec {
 
     /**
      * Returns {@code true} if the requirement that this key can only be used if the user has been
-     * authenticated if enforced by the TEE.
+     * authenticated if enforced by secure hardware (e.g., Trusted Execution Environment (TEE) or
+     * Secure Element (SE)).
      *
      * @see #isUserAuthenticationRequired()
      */
-    public boolean isUserAuthenticationRequirementTeeEnforced() {
-        return mUserAuthenticationRequirementTeeEnforced;
+    public boolean isUserAuthenticationRequirementEnforcedBySecureHardware() {
+        return mUserAuthenticationRequirementEnforcedBySecureHardware;
     }
 }
