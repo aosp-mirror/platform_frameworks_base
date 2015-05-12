@@ -16,7 +16,6 @@
 
 package com.android.ims.internal;
 
-import android.telecom.CameraCapabilities;
 import android.telecom.VideoProfile;
 
 /**
@@ -43,7 +42,7 @@ oneway interface IImsVideoCallCallback {
 
     void changeCallDataUsage(long dataUsage);
 
-    void changeCameraCapabilities(in CameraCapabilities cameraCapabilities);
+    void changeCameraCapabilities(in VideoProfile.CameraCapabilities cameraCapabilities);
 
     void changeVideoQuality(int videoQuality);
 }

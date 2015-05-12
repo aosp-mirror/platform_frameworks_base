@@ -742,7 +742,7 @@ public abstract class Connection implements Conferenceable {
          *
          * @param cameraCapabilities The changed camera capabilities.
          */
-        public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
+        public void changeCameraCapabilities(VideoProfile.CameraCapabilities cameraCapabilities) {
             if (mVideoCallbacks != null) {
                 try {
                     for (IVideoCallback callback : mVideoCallbacks.values()) {
