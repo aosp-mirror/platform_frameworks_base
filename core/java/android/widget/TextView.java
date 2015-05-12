@@ -669,11 +669,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final Resources res = getResources();
         final CompatibilityInfo compat = res.getCompatibilityInfo();
 
-        mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint = new TextPaint();
         mTextPaint.density = res.getDisplayMetrics().density;
         mTextPaint.setCompatibilityScaling(compat.applicationScale);
 
-        mHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mHighlightPaint = new Paint();
         mHighlightPaint.setCompatibilityScaling(compat.applicationScale);
 
         mMovement = getDefaultMovementMethod();
