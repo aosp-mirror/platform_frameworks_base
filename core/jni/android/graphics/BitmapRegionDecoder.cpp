@@ -212,26 +212,21 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
     region.fTop = start_y;
     region.fRight = start_x + width;
     region.fBottom = start_y + height;
-    SkBitmap* bitmap = NULL;
-    SkAutoTDelete<SkBitmap> adb;
+    SkBitmap bitmap;
 
     if (tileBitmap != NULL) {
         // Re-use bitmap.
-        bitmap = GraphicsJNI::getSkBitmapDeprecated(env, tileBitmap);
-    }
-    if (bitmap == NULL) {
-        bitmap = new SkBitmap;
-        adb.reset(bitmap);
+        GraphicsJNI::getSkBitmap(env, tileBitmap, &bitmap);
     }
 
-    if (!brd->decodeRegion(bitmap, region, prefColorType, sampleSize)) {
+    if (!brd->decodeRegion(&bitmap, region, prefColorType, sampleSize)) {
         return nullObjectReturn("decoder->decodeRegion returned false");
     }
 
     // update options (if any)
     if (NULL != options) {
-        env->SetIntField(options, gOptions_widthFieldID, bitmap->width());
-        env->SetIntField(options, gOptions_heightFieldID, bitmap->height());
+        env->SetIntField(options, gOptions_widthFieldID, bitmap.width());
+        env->SetIntField(options, gOptions_heightFieldID, bitmap.height());
         // TODO: set the mimeType field with the data from the codec.
         // but how to reuse a set of strings, rather than allocating new one
         // each time?
@@ -240,19 +235,16 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
     }
 
     if (tileBitmap != NULL) {
-        bitmap->notifyPixelsChanged();
+        bitmap.notifyPixelsChanged();
         return tileBitmap;
     }
 
-    // detach bitmap from its autodeleter, since we want to own it now
-    adb.detach();
-
     JavaPixelAllocator* allocator = (JavaPixelAllocator*) decoder->getAllocator();
-    jbyteArray buff = allocator->getStorageObjAndReset();
 
     int bitmapCreateFlags = 0;
     if (!requireUnpremultiplied) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
-    return GraphicsJNI::createBitmap(env, bitmap, buff, bitmapCreateFlags, NULL, NULL, -1);
+    return GraphicsJNI::createBitmap(env, allocator->getStorageObjAndReset(),
+            bitmapCreateFlags);
 }
 
 static jint nativeGetHeight(JNIEnv* env, jobject, jlong brdHandle) {
