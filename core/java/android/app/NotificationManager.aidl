@@ -17,4 +17,3 @@
 package android.app;
 
 parcelable NotificationManager.Policy;
-parcelable NotificationManager.Policy.Token;
