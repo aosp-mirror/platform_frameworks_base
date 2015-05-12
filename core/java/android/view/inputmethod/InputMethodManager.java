@@ -350,16 +350,6 @@ public final class InputMethodManager {
      */
     private CursorAnchorInfo mCursorAnchorInfo = null;
 
-    /**
-     * The buffer to retrieve the view location in screen coordinates in {@link #updateCursor}.
-     */
-    private final int[] mViewTopLeft = new int[2];
-
-    /**
-     * The matrix to convert the view location into screen coordinates in {@link #updateCursor}.
-     */
-    private final Matrix mViewToScreenMatrix = new Matrix();
-
     // -----------------------------------------------------------
 
     /**
