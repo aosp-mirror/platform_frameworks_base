@@ -702,7 +702,7 @@ public class DevicePolicyManager {
      * reported to the remote setup device over Bluetooth.
      *
      * <p>Broadcasts with this action must supply a
-     * {@linkplain DeviceInitializerStatus#isCustomStatus(int) custom} status code in the
+     * {@linkplain DeviceInitializerStatus#FLAG_STATUS_CUSTOM custom} status code in the
      * {@link EXTRA_DEVICE_INITIALIZER_STATUS_CODE} extra.
      *
      * <p>Broadcasts may optionally contain a description in the
@@ -718,7 +718,7 @@ public class DevicePolicyManager {
      * sent as part of a broadcast with an action of {@code ACTION_SEND_DEVICE_INITIALIZER_STATUS}.
      *
      * <p>The status code sent with this extra must be a custom status code as defined by
-     * {@link DeviceInitializerStatus#isCustomStatus(int)}.
+     * {@link DeviceInitializerStatus#FLAG_STATUS_CUSTOM}.
      * @hide
      */
     @SystemApi
@@ -4229,7 +4229,7 @@ public class DevicePolicyManager {
      * Called by device initializer to send a provisioning status update to the remote setup device.
      *
      * @param statusCode a custom status code value as defined by
-     *    {@link DeviceInitializerStatus#isCustomStatus(int)}.
+     *    {@link DeviceInitializerStatus#FLAG_STATUS_CUSTOM}.
      * @param description custom description of the status code sent
      */
     public void sendDeviceInitializerStatus(int statusCode, String description) {
