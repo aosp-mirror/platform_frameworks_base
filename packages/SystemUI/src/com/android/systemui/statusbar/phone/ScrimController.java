@@ -378,8 +378,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (previousAnimator != null) {
             if (animate || alpha == mCurrentHeadsUpAlpha) {
                 previousAnimator.cancel();
+            } else {
+                animEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim, TAG_HUN_END_ALPHA);
             }
-            animEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim, TAG_HUN_START_ALPHA);
         }
         if (alpha != mCurrentHeadsUpAlpha && alpha != animEndValue) {
             if (animate) {
