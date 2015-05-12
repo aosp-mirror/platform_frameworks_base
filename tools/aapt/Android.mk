@@ -132,28 +132,4 @@ LOCAL_STATIC_LIBRARIES += libaapt $(aaptHostStaticLibs)
 include $(BUILD_HOST_NATIVE_TEST)
 
 
-# ==========================================================
-# Build the device executable: aapt
-# ==========================================================
-ifneq ($(SDK_ONLY),true)
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := aapt
-LOCAL_CFLAGS += $(aaptCFlags)
-LOCAL_SRC_FILES := $(aaptSources) $(aaptMain)
-LOCAL_C_INCLUDES += $(aaptCIncludes)
-LOCAL_SHARED_LIBRARIES := \
-    libandroidfw \
-    libutils \
-    libcutils \
-    libpng \
-    liblog \
-    libz
-LOCAL_STATIC_LIBRARIES := \
-    libexpat_static
-
-include $(BUILD_EXECUTABLE)
-
-endif # Not SDK_ONLY
-
 endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK
