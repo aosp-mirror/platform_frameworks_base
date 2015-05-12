@@ -75,7 +75,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
     // Fields below are reset when engineDoFinal succeeds.
     private KeyStoreCryptoOperationChunkedStreamer mChunkedStreamer;
     private IBinder mOperationToken;
-    private Long mOperationHandle;
+    private long mOperationHandle;
 
     protected KeyStoreHmacSpi(int keymasterDigest) {
         mKeymasterDigest = keymasterDigest;
@@ -128,7 +128,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
             mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
-        mOperationHandle = null;
+        mOperationHandle = 0;
         mChunkedStreamer = null;
     }
 
@@ -138,7 +138,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
             mOperationToken = null;
             mKeyStore.abort(operationToken);
         }
-        mOperationHandle = null;
+        mOperationHandle = 0;
         mChunkedStreamer = null;
     }
 
@@ -186,6 +186,9 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
 
         if (mOperationToken == null) {
             throw new IllegalStateException("Keystore returned null operation token");
+        }
+        if (mOperationHandle == 0) {
+            throw new IllegalStateException("Keystore returned invalid operation handle");
         }
 
         mChunkedStreamer = new KeyStoreCryptoOperationChunkedStreamer(
@@ -249,7 +252,7 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
     }
 
     @Override
-    public Long getOperationHandle() {
+    public long getOperationHandle() {
         return mOperationHandle;
     }
 }
