@@ -159,9 +159,10 @@ parent.link=index.html
 
   <p>In Android 4.4 and later, you can use sample-based profiling to profile with less runtime
   performance impact. To enable sample profiling, call {@link
-  android.os.Debug#startMethodTracingSampling() startMethodTracingSampling()} with a specified
-  sampling interval. The system will then gather samples periodically until tracing is stopped
-  via {@link android.os.Debug#stopMethodTracing() stopMethodTracing()}.</p>
+  android.os.Debug#startMethodTracingSampling(java.lang.String, int, int)
+  startMethodTracingSampling()} with a specified sampling interval. The system will then gather
+  samples periodically until tracing is stopped via {@link android.os.Debug#stopMethodTracing()
+  stopMethodTracing()}.</p>
 
   <h2 id="copyingfiles">Copying Trace Files to a Host Machine</h2>
 
