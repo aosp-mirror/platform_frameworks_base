@@ -7,16 +7,17 @@
     <string name="title_activity_whitelist">LockWhitelistedActivity</string>
     <string name="title_activity_always">LockAtLaunchActivity</string>
     <string name="launch_default">android:lockTaskMode=\n
-            \"lockTaskModeDefault\"\n
+            \"default\"\n
             Pinnable from Overview.</string>
     <string name="launch_never">android:lockTaskMode=\n
-            \"lockTaskModeNever\"\n
+            \"never\"\n
             Not Lockable or Pinnable.</string>
-    <string name="launch_whitelist">android:lockTaskMode=\n\"lockTaskModeIfWhitelisted\"\n
+    <string name="launch_whitelist">android:lockTaskMode=\n
+            \"if_whitelisted\"\n
             Lockable if whitelisted, Pinnable.\n
             Use SampleDeviceOwner app to set whitelist.</string>
     <string name="launch_always">android:lockTaskMode=\n
-            \"lockTaskModeAlways\"\n
+            \"always\"\n
             Launches into lock mode.</string>
     <string name="launch_main">launch MainActivity (as activity)"</string>
     <string name="try_lock">Call startLockMode()</string>
