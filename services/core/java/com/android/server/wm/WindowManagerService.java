@@ -512,7 +512,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     int mLayoutSeq = 0;
 
+    // Last systemUiVisibility we received from status bar.
     int mLastStatusBarVisibility = 0;
+    // Last systemUiVisibility we dispatched to windows.
+    int mLastDispatchedSystemUiVisibility = 0;
 
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
@@ -10955,6 +10958,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // TOOD(multidisplay): StatusBar on multiple screens?
     void updateStatusBarVisibilityLocked(int visibility) {
+        if (mLastDispatchedSystemUiVisibility == visibility) {
+            return;
+        }
+        mLastDispatchedSystemUiVisibility = visibility;
         mInputManager.setSystemUiVisibility(visibility);
         final WindowList windows = getDefaultWindowListLocked();
         final int N = windows.size();
