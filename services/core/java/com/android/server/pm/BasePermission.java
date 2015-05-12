@@ -20,8 +20,6 @@ import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
 import android.os.UserHandle;
 
-import com.android.internal.util.ArrayUtils;
-
 final class BasePermission {
     final static int TYPE_NORMAL = 0;
 

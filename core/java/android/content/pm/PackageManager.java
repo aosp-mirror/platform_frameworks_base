@@ -1888,6 +1888,57 @@ public abstract class PackageManager {
     public static final String EXTRA_FAILURE_EXISTING_PERMISSION
             = "android.content.pm.extra.FAILURE_EXISTING_PERMISSION";
 
+   /**
+    * Permission flag: The permission is set in its current state
+    * by the user and apps can still request it at runtime.
+    *
+    * @hide
+    */
+    @SystemApi
+    public static final int FLAG_PERMISSION_USER_SET = 1 << 0;
+
+    /**
+     * Permission flag: The permission is set in its current state
+     * by the user and it is fixed, i.e. apps can no longer request
+     * this permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_USER_FIXED =  1 << 1;
+
+    /**
+     * Permission flag: The permission is set in its current state
+     * by device policy and neither apps nor the user can change
+     * its state.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_POLICY_FIXED =  1 << 2;
+
+    /**
+     * Permission flag: The permission is set in a granted state but
+     * access to resources it guards is restricted by other means to
+     * enable revoking a permission on legacy apps that do not support
+     * runtime permissions. If this permission is upgraded to runtime
+     * because the app was updated to support runtime permissions, the
+     * the permission will be revoked in the upgrade process.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE =  1 << 3;
+
+
+    /**
+     * Mask for all permission flags.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MASK_PERMISSION_FLAGS = 0xF;
+
     /**
      * Retrieve overall information about an application package that is
      * installed on the system.
@@ -2374,6 +2425,20 @@ public abstract class PackageManager {
      */
     public abstract void removePermission(String name);
 
+
+    /**
+     * Permission flags set when granting or revoking a permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @IntDef({FLAG_PERMISSION_USER_SET,
+            FLAG_PERMISSION_USER_FIXED,
+            FLAG_PERMISSION_POLICY_FIXED,
+            FLAG_PERMISSION_REVOKE_ON_UPGRADE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionFlags {}
+
     /**
      * Grant a runtime permission to an application which the application does not
      * already have. The permission must have been requested by the application.
@@ -2389,19 +2454,20 @@ public abstract class PackageManager {
      * @param permissionName The permission name to grant.
      * @param user The user for which to grant the permission.
      *
-     * @see #revokePermission(String, String, android.os.UserHandle)
+     * @see #revokeRuntimePermission(String, String, android.os.UserHandle)
+     * @see android.content.pm.PackageManager.PermissionFlags
      *
      * @hide
      */
     @SystemApi
-    public abstract void grantPermission(@NonNull String packageName,
+    public abstract void grantRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName, @NonNull UserHandle user);
 
     /**
      * Revoke a runtime permission that was previously granted by {@link
-     * #grantPermission(String, String, android.os.UserHandle)}. The permission
-     * must have been requested by and granted to the application. If the
-     * application is not allowed to hold the permission, a {@link
+     * #grantRuntimePermission(String, String, android.os.UserHandle)}. The
+     * permission must have been requested by and granted to the application.
+     * If the application is not allowed to hold the permission, a {@link
      * java.lang.SecurityException} is thrown.
      * <p>
      * <strong>Note: </strong>Using this API requires holding
@@ -2413,13 +2479,45 @@ public abstract class PackageManager {
      * @param permissionName The permission name to revoke.
      * @param user The user for which to revoke the permission.
      *
-     * @see #grantPermission(String, String, android.os.UserHandle)
+     * @see #grantRuntimePermission(String, String, android.os.UserHandle)
+     * @see android.content.pm.PackageManager.PermissionFlags
      *
      * @hide
      */
     @SystemApi
-    public abstract void revokePermission(@NonNull String packageName,
+    public abstract void revokeRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName, @NonNull UserHandle user);
+
+    /**
+     * Gets the state flags associated with a permission.
+     *
+     * @param permissionName The permission for which to get the flags.
+     * @param packageName The package name for which to get the flags.
+     * @param user The user for which to get permission flags.
+     * @return The permission flags.
+     *
+     * @hide
+     */
+    @SystemApi
+    public abstract @PermissionFlags int getPermissionFlags(String permissionName,
+            String packageName, @NonNull UserHandle user);
+
+    /**
+     * Updates the flags associated with a permission by replacing the flags in
+     * the specified mask with the provided flag values.
+     *
+     * @param permissionName The permission for which to update the flags.
+     * @param packageName The package name for which to update the flags.
+     * @param flagMask The flags which to replace.
+     * @param flagValues The flags with which to replace.
+     * @param user The user for which to update the permission flags.
+     *
+     * @hide
+     */
+    @SystemApi
+    public abstract void updatePermissionFlags(String permissionName,
+            String packageName, @PermissionFlags int flagMask, int flagValues,
+            @NonNull UserHandle user);
 
     /**
      * Returns an {@link android.content.Intent} suitable for passing to
