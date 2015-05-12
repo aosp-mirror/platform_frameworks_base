@@ -24,17 +24,31 @@ Android, so you should migrate to Android Studio to receive all the latest IDE u
 <p>To migrate existing Android projects, simply import them using Android Studio:</p>
 
 <ol>
-  <li>In Android Studio, close any projects currently open. You should see the
-  <strong>Welcome to Android Studio</strong> window.</li>
-  <li>Click <strong>Import Non-Android Studio project</strong>.</li>
-  <li>Locate the project you exported from Eclipse, expand it, select the
-  <strong>build.gradle</strong> file and click <strong>OK</strong>.</li>
-  <li>In the following dialog, leave <strong>Use gradle wrapper</strong> selected and click
-  <strong>OK</strong>. (You do not need to specify the Gradle home.)</li>
+  <li>In Android Studio, from the main menu or the <strong>Welcome to Android Studio</strong> page,
+  choose <strong>File &gt; Import Project</strong>.</li>
+  <li> Select the Eclipse root project directory</strong> and click <strong>OK</strong>.
+  <p class="note"><strong>Note:</strong> The Eclipse root directory must contain the
+  <code>AndroidManifest.xml</code> file. Also, the root directory must contain either the
+  <code>.project</code> and <strong>.classpath</strong> files from Eclipse or the
+  <code>res/</code> and <code>src/</code> directories.</p>
+  </li>
+  <li>Follow the steps in the import wizard. </li>
 </ol>
 
-<p>Android Studio properly updates the project structure and creates the appropriate
-Gradle build file.</p>
+<p>Android Studio imports the current dependencies, downloads libraries, and
+creates an Android Studio project with the imported Eclipse project as the main module. Android
+Studio also creates the required Gradle build files. </p>
+
+<p>The import process replaces any JAR files and libraries with Gradle dependencies, and replaces
+source libraries and binary libraries with Maven dependencies, so you no longer need to maintain
+these files manually.</p>
+
+ <p class="note"><strong>Note:</strong> If there are references to Eclipse workspace library files,
+ comment them out in the <code>project.properties</code> or <code>.classpath</code> files
+ that you imported from the Eclipse project. You can then add these files in the
+ <code>build.gradle</code> file. See
+ <a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>. </p>
+
 
 <p>For more help getting started with Android Studio and the IntelliJ user experience,
 <a href="{@docRoot}tools/studio/index.html">learn more about Android Studio</a> and
