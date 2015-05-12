@@ -56,6 +56,7 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
@@ -133,6 +134,8 @@ public class DirectoryFragment extends Fragment {
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<DirectoryResult> mCallbacks;
 
+    private static final boolean DEBUG_ENABLE_DND = false;
+
     private static final String EXTRA_TYPE = "type";
     private static final String EXTRA_ROOT = "root";
     private static final String EXTRA_DOC = "doc";
@@ -208,7 +211,6 @@ public class DirectoryFragment extends Fragment {
         mListView.setOnItemClickListener(mItemListener);
         mListView.setMultiChoiceModeListener(mMultiListener);
         mListView.setRecyclerListener(mRecycleListener);
-        setupDragAndDropOnDirectoryView(mListView);
 
         // Indent our list divider to align with text
         final Drawable divider = mListView.getDivider();
@@ -224,7 +226,11 @@ public class DirectoryFragment extends Fragment {
         mGridView.setOnItemClickListener(mItemListener);
         mGridView.setMultiChoiceModeListener(mMultiListener);
         mGridView.setRecyclerListener(mRecycleListener);
-        setupDragAndDropOnDirectoryView(mGridView);
+
+        if (DEBUG_ENABLE_DND) {
+            setupDragAndDropOnDirectoryView(mListView);
+            setupDragAndDropOnDirectoryView(mGridView);
+        }
 
         return view;
     }
@@ -1010,7 +1016,9 @@ public class DirectoryFragment extends Fragment {
             if (icon1 != null) icon1.setAlpha(iconAlpha);
             if (icon2 != null) icon2.setAlpha(iconAlpha);
 
-            setupDragAndDropOnDocumentView(convertView, cursor);
+            if (DEBUG_ENABLE_DND) {
+                setupDragAndDropOnDocumentView(convertView, cursor);
+            }
 
             return convertView;
         }
