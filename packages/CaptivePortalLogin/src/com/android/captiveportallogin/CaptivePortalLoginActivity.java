@@ -35,13 +35,13 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -221,6 +221,7 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private class MyWebViewClient extends WebViewClient {
+        private static final String INTERNAL_ASSETS = "file:///android_asset/";
         private boolean firstPageLoad = true;
 
         @Override
@@ -240,6 +241,12 @@ public class CaptivePortalLoginActivity extends Activity {
                 view.loadUrl(mURL.toString());
                 return;
             }
+            // For internally generated pages, leave URL bar listing prior URL as this is the URL
+            // the page refers to.
+            if (!url.startsWith(INTERNAL_ASSETS)) {
+                final TextView myUrlBar = (TextView) findViewById(R.id.url_bar);
+                myUrlBar.setText(url);
+            }
             testForCaptivePortal();
         }
 
@@ -252,17 +259,15 @@ public class CaptivePortalLoginActivity extends Activity {
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             Log.w(TAG, "SSL error; displaying broken lock icon.");
-            view.loadDataWithBaseURL("file:///android_asset/", SSL_ERROR_HTML, "text/HTML",
-                    "UTF-8", null);
+            view.loadDataWithBaseURL(INTERNAL_ASSETS, SSL_ERROR_HTML, "text/HTML", "UTF-8", null);
         }
     }
 
     private class MyWebChromeClient extends WebChromeClient {
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
-            ProgressBar myProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            final ProgressBar myProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
             myProgressBar.setProgress(newProgress);
-            myProgressBar.setVisibility(newProgress == 100 ? View.GONE : View.VISIBLE);
         }
     }
 }
