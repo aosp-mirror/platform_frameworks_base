@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "libRS_jni"
+#define LOG_TAG "RenderScript_jni"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -1857,7 +1857,7 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
                jintArray limits)
 {
     if (kLogApi) {
-        ALOGD("nScriptForEach, con(%p), s(%p), slot(%i)", (RsContext)con, (void *)script, slot);
+        ALOGD("nScriptForEach, con(%p), s(%p), slot(%i) ains(%p) aout(%lli)", (RsContext)con, (void *)script, slot, ains, aout);
     }
 
     jint   in_len = 0;

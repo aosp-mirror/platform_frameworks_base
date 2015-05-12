@@ -182,9 +182,9 @@ public class Script extends BaseObj {
         mRS.validateObject(ain);
         mRS.validateObject(aout);
 
-        if (ain == null && aout == null) {
+        if (ain == null && aout == null && sc == null) {
             throw new RSIllegalArgumentException(
-                "At least one of ain or aout is required to be non-null.");
+                "At least one of input allocation, output allocation, or LaunchOptions is required to be non-null.");
         }
 
         long[] in_ids = null;
