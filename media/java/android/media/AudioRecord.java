@@ -246,8 +246,8 @@ public class AudioRecord
      * Though some invalid parameters will result in an {@link IllegalArgumentException} exception,
      * other errors do not.  Thus you should call {@link #getState()} immediately after construction
      * to confirm that the object is usable.
-     * @param audioSource the recording source (also referred to as capture preset).
-     *    See {@link MediaRecorder.AudioSource} for the capture preset definitions.
+     * @param audioSource the recording source.
+     *   See {@link MediaRecorder.AudioSource} for the recording source definitions.
      * @param sampleRateInHz the sample rate expressed in Hertz. 44100Hz is currently the only
      *   rate that is guaranteed to work on all devices, but other rates such as 22050,
      *   16000, and 11025 may work on some devices.
@@ -285,8 +285,8 @@ public class AudioRecord
      * @hide
      * Class constructor with {@link AudioAttributes} and {@link AudioFormat}.
      * @param attributes a non-null {@link AudioAttributes} instance. Use
-     *     {@link AudioAttributes.Builder#setCapturePreset(int)} for configuring the capture
-     *     preset for this instance.
+     *     {@link AudioAttributes.Builder#setAudioSource(int)} for configuring the audio
+     *     source for this instance.
      * @param format a non-null {@link AudioFormat} instance describing the format of the data
      *     that will be recorded through this AudioRecord. See {@link AudioFormat.Builder} for
      *     configuring the audio format parameters such as encoding, channel mask and sample rate.
@@ -394,14 +394,14 @@ public class AudioRecord
     /**
      * Builder class for {@link AudioRecord} objects.
      * Use this class to configure and create an <code>AudioRecord</code> instance. By setting the
-     * recording preset (a.k.a. recording source) and audio format parameters, you indicate which of
-     *  those vary from the default behavior on the device.
+     * recording source and audio format parameters, you indicate which of
+     * those vary from the default behavior on the device.
      * <p> Here is an example where <code>Builder</code> is used to specify all {@link AudioFormat}
      * parameters, to be used by a new <code>AudioRecord</code> instance:
      *
      * <pre class="prettyprint">
      * AudioRecord recorder = new AudioRecord.Builder()
-     *         .setCapturePreset(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+     *         .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
      *         .setAudioFormat(new AudioFormat.Builder()
      *                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
      *                 .setSampleRate(32000)
@@ -411,7 +411,7 @@ public class AudioRecord
      *         .build();
      * </pre>
      * <p>
-     * If the capture preset is not set with {@link #setCapturePreset(int)},
+     * If the audio source is not set with {@link #setAudioSource(int)},
      * {@link MediaRecorder.AudioSource#DEFAULT} is used.
      * <br>If the audio format is not specified or is incomplete, its sample rate will be the
      * default output sample rate of the device (see
@@ -433,18 +433,18 @@ public class AudioRecord
         }
 
         /**
-         * @param preset the capture preset (also referred to as the recording source).
-         * See {@link MediaRecorder.AudioSource} for the supported capture preset definitions.
+         * @param source the audio source.
+         * See {@link MediaRecorder.AudioSource} for the supported audio source definitions.
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public Builder setCapturePreset(int preset) throws IllegalArgumentException {
-            if ( (preset < MediaRecorder.AudioSource.DEFAULT) ||
-                    (preset > MediaRecorder.getAudioSourceMax()) ) {
-                throw new IllegalArgumentException("Invalid audio source " + preset);
+        public Builder setAudioSource(int source) throws IllegalArgumentException {
+            if ( (source < MediaRecorder.AudioSource.DEFAULT) ||
+                    (source > MediaRecorder.getAudioSourceMax()) ) {
+                throw new IllegalArgumentException("Invalid audio source " + source);
             }
             mAttributes = new AudioAttributes.Builder()
-                    .setInternalCapturePreset(preset)
+                    .setInternalCapturePreset(source)
                     .build();
             return this;
         }
