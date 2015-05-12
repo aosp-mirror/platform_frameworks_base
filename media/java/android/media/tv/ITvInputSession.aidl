@@ -45,7 +45,7 @@ oneway interface ITvInputSession {
     void relayoutOverlayView(in Rect frame);
     void removeOverlayView();
 
-    void requestUnblockContent(in String unblockedRating);
+    void unblockContent(in String unblockedRating);
 
     void timeShiftPause();
     void timeShiftResume();

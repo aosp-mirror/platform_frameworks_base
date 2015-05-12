@@ -57,7 +57,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_CREATE_OVERLAY_VIEW = 10;
     private static final int DO_RELAYOUT_OVERLAY_VIEW = 11;
     private static final int DO_REMOVE_OVERLAY_VIEW = 12;
-    private static final int DO_REQUEST_UNBLOCK_CONTENT = 13;
+    private static final int DO_UNBLOCK_CONTENT = 13;
     private static final int DO_TIME_SHIFT_PAUSE = 14;
     private static final int DO_TIME_SHIFT_RESUME = 15;
     private static final int DO_TIME_SHIFT_SEEK_TO = 16;
@@ -155,7 +155,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.removeOverlayView(true);
                 break;
             }
-            case DO_REQUEST_UNBLOCK_CONTENT: {
+            case DO_UNBLOCK_CONTENT: {
                 mTvInputSessionImpl.unblockContent((String) msg.obj);
                 break;
             }
@@ -267,9 +267,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void requestUnblockContent(String unblockedRating) {
+    public void unblockContent(String unblockedRating) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(
-                DO_REQUEST_UNBLOCK_CONTENT, unblockedRating));
+                DO_UNBLOCK_CONTENT, unblockedRating));
     }
 
     @Override

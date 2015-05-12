@@ -1820,14 +1820,14 @@ public final class TvInputManager {
         /**
          * Requests to unblock content blocked by parental controls.
          */
-        void requestUnblockContent(@NonNull TvContentRating unblockedRating) {
+        void unblockContent(@NonNull TvContentRating unblockedRating) {
             Preconditions.checkNotNull(unblockedRating);
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.requestUnblockContent(mToken, unblockedRating.flattenToString(), mUserId);
+                mService.unblockContent(mToken, unblockedRating.flattenToString(), mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

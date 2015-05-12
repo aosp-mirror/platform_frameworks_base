@@ -72,7 +72,7 @@ interface ITvInputManager {
     void relayoutOverlayView(in IBinder sessionToken, in Rect frame, int userId);
     void removeOverlayView(in IBinder sessionToken, int userId);
 
-    void requestUnblockContent(in IBinder sessionToken, in String unblockedRating, int userId);
+    void unblockContent(in IBinder sessionToken, in String unblockedRating, int userId);
 
     void timeShiftPause(in IBinder sessionToken, int userId);
     void timeShiftResume(in IBinder sessionToken, int userId);

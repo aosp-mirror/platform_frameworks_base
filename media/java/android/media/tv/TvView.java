@@ -350,11 +350,27 @@ public class TvView extends ViewGroup {
      * @param unblockedRating A TvContentRating to unblock.
      * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
      * @hide
+     * @deprecated Use {@link #unblockContent} instead.
      */
+    @Deprecated
     @SystemApi
     public void requestUnblockContent(TvContentRating unblockedRating) {
+        unblockContent(unblockedRating);
+    }
+
+    /**
+     * Requests to unblock TV content according to the given rating.
+     *
+     * <p>This notifies TV input that blocked content is now OK to play.
+     *
+     * @param unblockedRating A TvContentRating to unblock.
+     * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
+     * @hide
+     */
+    @SystemApi
+    public void unblockContent(TvContentRating unblockedRating) {
         if (mSession != null) {
-            mSession.requestUnblockContent(unblockedRating);
+            mSession.unblockContent(unblockedRating);
         }
     }
 

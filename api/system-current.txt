@@ -19375,7 +19375,7 @@ package android.media.tv {
     method public java.util.List<android.media.tv.TvTrackInfo> getTracks(int);
     method protected void onLayout(boolean, int, int, int, int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
-    method public void requestUnblockContent(android.media.tv.TvContentRating);
+    method public deprecated void requestUnblockContent(android.media.tv.TvContentRating);
     method public void reset();
     method public void selectTrack(int, java.lang.String);
     method public void sendAppPrivateCommand(java.lang.String, android.os.Bundle);
@@ -19393,6 +19393,7 @@ package android.media.tv {
     method public void timeShiftSetPlaybackRate(float, int);
     method public void tune(java.lang.String, android.net.Uri);
     method public void tune(java.lang.String, android.net.Uri, android.os.Bundle);
+    method public void unblockContent(android.media.tv.TvContentRating);
   }
 
   public static abstract interface TvView.OnUnhandledInputEventListener {
