@@ -18,18 +18,31 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
-              android:layout_width="match_parent" android:layout_height="wrap_content"
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
               android:minWidth="80dp"
               android:gravity="center"
               android:paddingTop="8dp"
               android:paddingBottom="8dp"
-              android:background="?attr/activatedBackgroundIndicator">
+              android:background="?attr/selectableItemBackgroundBorderless">
 
-    <!-- Activity icon when presenting dialog -->
-    <ImageView android:id="@+id/icon"
-               android:layout_width="48dp"
-               android:layout_height="48dp"
-               android:scaleType="fitCenter" />
+    <FrameLayout android:layout_width="wrap_content"
+                 android:layout_height="wrap_content">
+        <ImageView android:id="@+id/icon"
+                   android:layout_width="48dp"
+                   android:layout_height="48dp"
+                   android:layout_marginLeft="3dp"
+                   android:layout_marginRight="3dp"
+                   android:layout_marginBottom="3dp"
+                   android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/target_badge"
+                   android:layout_width="16dp"
+                   android:layout_height="16dp"
+                   android:layout_gravity="end|bottom"
+                   android:visibility="gone"
+                   android:scaleType="fitCenter" />
+    </FrameLayout>
 
     <!-- Activity name -->
     <TextView android:id="@android:id/text1"
@@ -40,21 +53,23 @@
               android:layout_marginRight="4dp"
               android:textAppearance="?attr/textAppearanceSmall"
               android:textColor="?attr/textColorPrimary"
+              android:textSize="12sp"
               android:fontFamily="sans-serif-condensed"
-              android:gravity="center"
+              android:gravity="top|center_horizontal"
               android:minLines="2"
               android:maxLines="2"
               android:ellipsize="marquee" />
     <!-- Extended activity info to distinguish between duplicate activity names -->
     <TextView android:id="@android:id/text2"
               android:textAppearance="?android:attr/textAppearanceSmall"
+              android:textSize="12sp"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_marginLeft="4dp"
               android:layout_marginRight="4dp"
               android:minLines="2"
               android:maxLines="2"
-              android:gravity="center"
+              android:gravity="top|center_horizontal"
               android:ellipsize="marquee" />
 </LinearLayout>
 
