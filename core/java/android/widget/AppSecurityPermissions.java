@@ -244,7 +244,7 @@ public class AppSecurityPermissions {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     PackageManager pm = getContext().getPackageManager();
-                    pm.revokePermission(mPackageName, mPerm.name,
+                    pm.revokeRuntimePermission(mPackageName, mPerm.name,
                             new UserHandle(mContext.getUserId()));
                     PermissionItemView.this.setVisibility(View.GONE);
                 }

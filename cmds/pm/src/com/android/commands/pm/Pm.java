@@ -1609,9 +1609,9 @@ public final class Pm {
 
         try {
             if (grant) {
-                mPm.grantPermission(pkg, perm, userId);
+                mPm.grantRuntimePermission(pkg, perm, userId);
             } else {
-                mPm.revokePermission(pkg, perm, userId);
+                mPm.revokeRuntimePermission(pkg, perm, userId);
             }
             return 0;
         } catch (RemoteException e) {

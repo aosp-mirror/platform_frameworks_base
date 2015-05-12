@@ -6344,10 +6344,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = Binder.clearCallingIdentity();
             try {
+                PackageManager packageManager = mContext.getPackageManager();
                 if (granted) {
-                    mContext.getPackageManager().grantPermission(packageName, permission, user);
+                    packageManager.grantRuntimePermission(packageName, permission, user);
+                    packageManager.updatePermissionFlags(permission, packageName,
+                            PackageManager.FLAG_PERMISSION_POLICY_FIXED,
+                            PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
                 } else {
-                    mContext.getPackageManager().revokePermission(packageName, permission, user);
+                    packageManager.revokeRuntimePermission(packageName,
+                            permission, user);
+                    packageManager.updatePermissionFlags(permission, packageName,
+                            PackageManager.FLAG_PERMISSION_POLICY_FIXED,
+                            PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
                 }
                 return true;
             } catch (SecurityException se) {
