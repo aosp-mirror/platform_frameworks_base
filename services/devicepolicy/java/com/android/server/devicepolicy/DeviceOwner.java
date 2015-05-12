@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import android.app.AppGlobals;
+import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -78,7 +79,7 @@ class DeviceOwner {
     private final HashMap<Integer, OwnerInfo> mProfileOwners = new HashMap<Integer, OwnerInfo>();
 
     // Local system update policy controllable by device owner.
-    private PersistableBundle mSystemUpdatePolicy;
+    private SystemUpdatePolicy mSystemUpdatePolicy;
 
     // Private default constructor.
     private DeviceOwner() {
@@ -192,11 +193,11 @@ class DeviceOwner {
         return mProfileOwners.keySet();
     }
 
-    PersistableBundle getSystemUpdatePolicy() {
+    SystemUpdatePolicy getSystemUpdatePolicy() {
         return mSystemUpdatePolicy;
     }
 
-    void setSystemUpdatePolicy(PersistableBundle systemUpdatePolicy) {
+    void setSystemUpdatePolicy(SystemUpdatePolicy systemUpdatePolicy) {
         mSystemUpdatePolicy = systemUpdatePolicy;
     }
 
@@ -291,7 +292,7 @@ class DeviceOwner {
                     }
                     mProfileOwners.put(userId, profileOwnerInfo);
                 } else if (TAG_SYSTEM_UPDATE_POLICY.equals(tag)) {
-                    mSystemUpdatePolicy = PersistableBundle.restoreFromXml(parser);
+                    mSystemUpdatePolicy = SystemUpdatePolicy.restoreFromXml(parser);
                 } else {
                     throw new XmlPullParserException(
                             "Unexpected tag in device owner file: " + tag);
@@ -361,11 +362,7 @@ class DeviceOwner {
             // Write system update policy tag
             if (mSystemUpdatePolicy != null) {
                 out.startTag(null, TAG_SYSTEM_UPDATE_POLICY);
-                try {
-                    mSystemUpdatePolicy.saveToXml(out);
-                } catch (XmlPullParserException e) {
-                    Slog.e(TAG, "Failed to save system update policy", e);
-                }
+                mSystemUpdatePolicy.saveToXml(out);
                 out.endTag(null, TAG_SYSTEM_UPDATE_POLICY);
             }
             out.endDocument();

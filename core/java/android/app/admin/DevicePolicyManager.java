@@ -4253,11 +4253,7 @@ public class DevicePolicyManager {
     public void setSystemUpdatePolicy(ComponentName who, SystemUpdatePolicy policy) {
         if (mService != null) {
             try {
-                if (policy != null) {
-                    mService.setSystemUpdatePolicy(who, policy.getPolicyBundle());
-                } else {
-                    mService.setSystemUpdatePolicy(who, null);
-                }
+                mService.setSystemUpdatePolicy(who, policy);
             } catch (RemoteException re) {
                 Log.w(TAG, "Error calling setSystemUpdatePolicy", re);
             }
@@ -4272,12 +4268,7 @@ public class DevicePolicyManager {
     public SystemUpdatePolicy getSystemUpdatePolicy() {
         if (mService != null) {
             try {
-                PersistableBundle bundle = mService.getSystemUpdatePolicy();
-                if (bundle != null) {
-                    return new SystemUpdatePolicy(bundle);
-                } else {
-                    return null;
-                }
+                return mService.getSystemUpdatePolicy();
             } catch (RemoteException re) {
                 Log.w(TAG, "Error calling getSystemUpdatePolicy", re);
             }

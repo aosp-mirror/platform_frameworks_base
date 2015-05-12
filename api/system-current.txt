@@ -5976,21 +5976,19 @@ package android.app.admin {
     field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
   }
 
-  public class SystemUpdatePolicy {
-    ctor public SystemUpdatePolicy();
+  public class SystemUpdatePolicy implements android.os.Parcelable {
+    method public static android.app.admin.SystemUpdatePolicy createAutomaticInstallPolicy();
+    method public static android.app.admin.SystemUpdatePolicy createPostponeInstallPolicy();
+    method public static android.app.admin.SystemUpdatePolicy createWindowedInstallPolicy(int, int);
+    method public int describeContents();
     method public int getInstallWindowEnd();
     method public int getInstallWindowStart();
     method public int getPolicyType();
-    method public void setAutomaticInstallPolicy();
-    method public void setPostponeInstallPolicy();
-    method public void setWindowedInstallPolicy(int, int) throws android.app.admin.SystemUpdatePolicy.InvalidWindowException;
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.admin.SystemUpdatePolicy> CREATOR;
     field public static final int TYPE_INSTALL_AUTOMATIC = 1; // 0x1
     field public static final int TYPE_INSTALL_WINDOWED = 2; // 0x2
     field public static final int TYPE_POSTPONE = 3; // 0x3
-  }
-
-  public static class SystemUpdatePolicy.InvalidWindowException extends java.lang.Exception {
-    ctor public SystemUpdatePolicy.InvalidWindowException(java.lang.String);
   }
 
 }
