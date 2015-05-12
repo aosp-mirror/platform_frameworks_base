@@ -5877,16 +5877,9 @@
     </declare-styleable>
 
     <!-- @hide For internal use only. Use only as directed. -->
-    <declare-styleable name="EpicenterClipReveal">
-        <attr name="centerClipBounds" format="boolean" />
+    <declare-styleable name="EpicenterTranslateClipReveal">
         <attr name="interpolatorX" format="reference" />
         <attr name="interpolatorY" format="reference" />
-    </declare-styleable>
-
-    <!-- @hide For internal use only. Use only as directed. -->
-    <declare-styleable name="EpicenterTranslate">
-        <attr name="interpolatorX" />
-        <attr name="interpolatorY" />
         <attr name="interpolatorZ" format="reference" />
     </declare-styleable>
 
