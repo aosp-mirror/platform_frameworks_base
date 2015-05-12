@@ -15994,6 +15994,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         // By default broadcasts do not go to stopped apps.
         intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
 
+        // If we have not finished booting, don't allow this to launch new processes.
+        if (!mProcessesReady && (intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0) {
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        }
+
         if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
                 (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
                 + " ordered=" + ordered + " userid=" + userId);
@@ -16455,8 +16460,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // if the caller really truly claims to know what they're doing, go
             // ahead and allow the broadcast without launching any receivers
             if ((flags&Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT) != 0) {
-                intent = new Intent(intent);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                // This will be turned into a FLAG_RECEIVER_REGISTERED_ONLY later on if needed.
             } else if ((flags&Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
                 Slog.e(TAG, "Attempt to launch receivers of broadcast intent " + intent
                         + " before boot completion");
