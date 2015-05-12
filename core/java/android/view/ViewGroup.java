@@ -586,6 +586,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mGroupFlags |= FLAG_CLIP_CHILDREN;
         mGroupFlags |= FLAG_CLIP_TO_PADDING;
         mGroupFlags |= FLAG_ANIMATION_DONE;
+        mGroupFlags |= FLAG_ANIMATION_CACHE;
+        mGroupFlags |= FLAG_ALWAYS_DRAWN_WITH_CACHE;
 
         if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
             mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
