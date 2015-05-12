@@ -156,6 +156,14 @@ static void nativeSendPowerHint(JNIEnv *env, jclass clazz, jint hintId, jint dat
     }
 }
 
+static void nativeSetFeature(JNIEnv *env, jclass clazz, jint featureId, jint data) {
+    int data_param = data;
+
+    if (gPowerModule && gPowerModule->setFeature) {
+        gPowerModule->setFeature(gPowerModule, (feature_t)featureId, data_param);
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gPowerManagerServiceMethods[] = {
@@ -172,6 +180,8 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) nativeSetAutoSuspend },
     { "nativeSendPowerHint", "(II)V",
             (void*) nativeSendPowerHint },
+    { "nativeSetFeature", "(II)V",
+            (void*) nativeSetFeature },
 };
 
 #define FIND_CLASS(var, className) \
