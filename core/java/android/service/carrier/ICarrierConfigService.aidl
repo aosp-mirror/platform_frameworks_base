@@ -16,7 +16,7 @@
 
 package android.service.carrier;
 
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.service.carrier.CarrierIdentifier;
 
 /**
@@ -28,5 +28,5 @@ import android.service.carrier.CarrierIdentifier;
 interface ICarrierConfigService {
 
     /** @see android.service.carrier.CarrierConfigService#onLoadConfig */
-    Bundle getCarrierConfig(in CarrierIdentifier id);
+    PersistableBundle getCarrierConfig(in CarrierIdentifier id);
 }
