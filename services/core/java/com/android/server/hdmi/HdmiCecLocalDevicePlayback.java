@@ -23,6 +23,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.provider.Settings.Global;
 import android.util.Slog;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -47,8 +48,17 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     // Lazily initialized - should call getWakeLock() to get the instance.
     private ActiveWakeLock mWakeLock;
 
+    // If true, turn off TV upon standby. False by default.
+    private boolean mAutoTvOff;
+
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
+
+        mAutoTvOff = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, false);
+
+        // The option is false by default. Update settings db as well to have the right
+        // initial setting on UI.
+        mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, mAutoTvOff);
     }
 
     @Override
@@ -139,6 +149,35 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         if (!connected) {
             getWakeLock().release();
         }
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        assertRunOnServiceThread();
+        if (!mService.isControlEnabled() || initiatedByCec) {
+            return;
+        }
+        switch (standbyAction) {
+            case HdmiControlService.STANDBY_SCREEN_OFF:
+                if (mAutoTvOff) {
+                    mService.sendCecCommand(
+                            HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
+                }
+                break;
+            case HdmiControlService.STANDBY_SHUTDOWN:
+                // ACTION_SHUTDOWN is taken as a signal to power off all the devices.
+                mService.sendCecCommand(
+                        HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_BROADCAST));
+                break;
+        }
+    }
+
+    @Override
+    @ServiceThreadOnly
+    void setAutoDeviceOff(boolean enabled) {
+        assertRunOnServiceThread();
+        mAutoTvOff = enabled;
     }
 
     @ServiceThreadOnly
@@ -295,6 +334,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     protected void dump(final IndentingPrintWriter pw) {
         super.dump(pw);
         pw.println("mIsActiveSource: " + mIsActiveSource);
+        pw.println("mAutoTvOff:" + mAutoTvOff);
     }
 
     // Wrapper interface over PowerManager.WakeLock
