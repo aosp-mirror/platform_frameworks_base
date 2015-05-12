@@ -73,7 +73,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
     }
 
     private void setupPassword() {
-        assertTrue(mAndroidKeyStore.password("1111"));
+        assertTrue(mAndroidKeyStore.onUserPasswordChanged("1111"));
         assertTrue(mAndroidKeyStore.isUnlocked());
 
         String[] aliases = mAndroidKeyStore.saw("");
@@ -288,7 +288,7 @@ public class AndroidKeyPairGeneratorTest extends AndroidTestCase {
             } catch (IllegalStateException expected) {
             }
 
-            assertTrue(mAndroidKeyStore.password("1111"));
+            assertTrue(mAndroidKeyStore.onUserPasswordChanged("1111"));
             assertTrue(mAndroidKeyStore.isUnlocked());
 
             final KeyPair pair2 = mGenerator.generateKeyPair();
