@@ -28,6 +28,7 @@ import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -115,12 +116,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
     /**
      * Construct this controller object and register for updates.
      */
-    public NetworkControllerImpl(Context context) {
+    public NetworkControllerImpl(Context context, Looper bgLooper) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE),
                 SubscriptionManager.from(context), Config.readConfig(context),
-                new AccessPointControllerImpl(context), new MobileDataControllerImpl(context));
+                new AccessPointControllerImpl(context, bgLooper),
+                new MobileDataControllerImpl(context));
         registerListeners();
     }
 
