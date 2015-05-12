@@ -1,0 +1,269 @@
+page.title=RenderScript Time Functions and Types
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> The functions below can be used to tell the current clock time and the current
+system up time.  It is not recommended to call these functions inside of a kernel.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rs_time_t'>rs_time_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Seconds since January 1, 1970
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rs_tm'>rs_tm</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Date and time structure
+    </td>
+  </tr>
+</tbody></table>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsGetDt'>rsGetDt</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Elapsed time since last call
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsLocaltime'>rsLocaltime</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Convert to local time
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsTime'>rsTime</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Seconds since January 1, 1970
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsUptimeMillis'>rsUptimeMillis</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      System uptime in milliseconds
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_time.html#android_rs:rsUptimeNanos'>rsUptimeNanos</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      System uptime in nanoseconds
+    </td>
+  </tr>
+</tbody></table>
+<h2>Types</h2>
+<a name='android_rs:rs_time_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_time_t</span>
+    <span class='normal'>: Seconds since January 1, 1970</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 32 bits. 
+</p>
+<p>A typedef of: long&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    When compiling for 64 bits. 
+</p>
+<p> Calendar time interpreted as seconds elapsed since the Epoch (00:00:00 on
+January 1, 1970, Coordinated Universal Time (UTC)).
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_tm'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_tm</span>
+    <span class='normal'>: Date and time structure</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A structure with the following fields:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>int tm_sec</th><td>Seconds after the minute. This ranges from 0 to 59, but possibly up to 60 for leap seconds.</td></tr>
+    <tr><th>int tm_min</th><td>Minutes after the hour. This ranges from 0 to 59.</td></tr>
+    <tr><th>int tm_hour</th><td>Hours past midnight. This ranges from 0 to 23.</td></tr>
+    <tr><th>int tm_mday</th><td>Day of the month. This ranges from 1 to 31.</td></tr>
+    <tr><th>int tm_mon</th><td>Months since January. This ranges from 0 to 11.</td></tr>
+    <tr><th>int tm_year</th><td>Years since 1900.</td></tr>
+    <tr><th>int tm_wday</th><td>Days since Sunday. This ranges from 0 to 6.</td></tr>
+    <tr><th>int tm_yday</th><td>Days since January 1. This ranges from 0 to 365.</td></tr>
+    <tr><th>int tm_isdst</th><td>Flag to indicate whether daylight saving time is in effect. The value is positive if it is in effect, zero if it is not, and negative if the information is not available.</td></tr>
+  </tbody></table><br/>
+<p> Data structure for broken-down time components.
+</p>
+  </div>
+</div>
+
+<h2>Functions</h2>
+<a name='android_rs:rsGetDt'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsGetDt</span>
+    <span class='normal'>: Elapsed time since last call</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>float rsGetDt();
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Time in seconds.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the time in seconds since this function was last called in this script.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsLocaltime'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsLocaltime</span>
+    <span class='normal'>: Convert to local time</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_time.html#android_rs:rs_tm'>rs_tm</a>* rsLocaltime(<a href='rs_time.html#android_rs:rs_tm'>rs_tm</a>* local, const <a href='rs_time.html#android_rs:rs_time_t'>rs_time_t</a>* timer);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>local</th><td>Pointer to time structure where the local time will be stored.</td></tr>
+    <tr><th>timer</th><td>Input time as a number of seconds since January 1, 1970.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Pointer to the output local time, i.e. the same value as the parameter local.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Converts the time specified by timer into a <a href='rs_time.html#android_rs:rs_tm'>rs_tm</a> structure that provides year, month,
+hour, etc.  This value is stored at *local.
+</p>
+
+<p> This functions returns the same pointer that is passed as first argument.  If the
+local parameter is NULL, this function does nothing and returns NULL.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsTime'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsTime</span>
+    <span class='normal'>: Seconds since January 1, 1970</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_time.html#android_rs:rs_time_t'>rs_time_t</a> rsTime(<a href='rs_time.html#android_rs:rs_time_t'>rs_time_t</a>* timer);
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>timer</th><td>Location to also store the returned calendar time.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Seconds since the Epoch, -1 if there's an error.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the number of seconds since the Epoch (00:00:00 UTC, January 1, 1970).
+</p>
+
+<p> If timer is non-NULL, the result is also stored in the memory pointed to by
+this variable.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsUptimeMillis'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsUptimeMillis</span>
+    <span class='normal'>: System uptime in milliseconds</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int64_t'>int64_t</a> rsUptimeMillis();
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Uptime in milliseconds.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the current system clock (uptime) in milliseconds.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsUptimeNanos'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsUptimeNanos</span>
+    <span class='normal'>: System uptime in nanoseconds</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td><a href='rs_value_types.html#android_rs:int64_t'>int64_t</a> rsUptimeNanos();
+</td>
+        <td>        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Returns</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><td>Uptime in nanoseconds.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Returns the current system clock (uptime) in nanoseconds.
+</p>
+
+<p> The granularity of the values return by this call may be much larger than a nanosecond.
+</p>
+  </div>
+</div>
+
+</div>

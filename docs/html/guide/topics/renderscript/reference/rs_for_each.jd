@@ -1,0 +1,183 @@
+page.title=RenderScript Kernel Invocation Functions and Types
+
+@jd:body
+
+<div class='renderscript'>
+<h2>Overview</h2>
+<p> The <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>() function can be used to invoke the root kernel of a script.
+</p>
+<h2>Summary</h2>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Types</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rs_for_each_strategy_t'>rs_for_each_strategy_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Suggested cell processing order
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rs_script_call_t'>rs_script_call_t</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Cell iteration information
+    </td>
+  </tr>
+</tbody></table>
+<table class='jd-sumtable'><tbody>
+  <tr><th colspan='2'>Functions</th></tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Invoke the root kernel of a script
+    </td>
+  </tr>
+</tbody></table>
+<h2>Types</h2>
+<a name='android_rs:rs_for_each_strategy_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_for_each_strategy_t</span>
+    <span class='normal'>: Suggested cell processing order</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>An enum with the following values:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>RS_FOR_EACH_STRATEGY_SERIAL = 0</th><td>Prefer contiguous memory regions.</td></tr>
+    <tr><th>RS_FOR_EACH_STRATEGY_DONT_CARE = 1</th><td>No prefrences.</td></tr>
+    <tr><th>RS_FOR_EACH_STRATEGY_DST_LINEAR = 2</th><td>Prefer DST.</td></tr>
+    <tr><th>RS_FOR_EACH_STRATEGY_TILE_SMALL = 3</th><td>Prefer processing small rectangular regions.</td></tr>
+    <tr><th>RS_FOR_EACH_STRATEGY_TILE_MEDIUM = 4</th><td>Prefer processing medium rectangular regions.</td></tr>
+    <tr><th>RS_FOR_EACH_STRATEGY_TILE_LARGE = 5</th><td>Prefer processing large rectangular regions.</td></tr>
+  </tbody></table><br/>
+<p> This type is used to suggest how the invoked kernel should iterate over the cells of the
+allocations.  This is a hint only.  Implementations may not follow the suggestion.
+</p>
+
+<p> This specification can help the caching behavior of the running kernel, e.g. the cache
+locality when the processing is distributed over multiple cores.
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rs_script_call_t'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_script_call_t</span>
+    <span class='normal'>: Cell iteration information</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A structure with the following fields:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+  <table class='jd-tagtable'><tbody>
+    <tr><th>rs_for_each_strategy_t strategy</th><td>Currently ignored.  In the future, will be suggested cell iteration strategy.</td></tr>
+    <tr><th>uint32_t xStart</th><td>Starting index in the X dimension.</td></tr>
+    <tr><th>uint32_t xEnd</th><td>Ending index (exclusive) in the X dimension.</td></tr>
+    <tr><th>uint32_t yStart</th><td>Starting index in the Y dimension.</td></tr>
+    <tr><th>uint32_t yEnd</th><td>Ending index (exclusive) in the Y dimension.</td></tr>
+    <tr><th>uint32_t zStart</th><td>Starting index in the Z dimension.</td></tr>
+    <tr><th>uint32_t zEnd</th><td>Ending index (exclusive) in the Z dimension.</td></tr>
+    <tr><th>uint32_t arrayStart</th><td>Starting index in the Array0 dimension.</td></tr>
+    <tr><th>uint32_t arrayEnd</th><td>Ending index (exclusive) in the Array0 dimension.</td></tr>
+    <tr><th>uint32_t array1Start</th><td>Starting index in the Array1 dimension.</td></tr>
+    <tr><th>uint32_t array1End</th><td>Ending index (exclusive) in the Array1 dimension.</td></tr>
+    <tr><th>uint32_t array2Start</th><td>Starting index in the Array2 dimension.</td></tr>
+    <tr><th>uint32_t array2End</th><td>Ending index (exclusive) in the Array2 dimension.</td></tr>
+    <tr><th>uint32_t array3Start</th><td>Starting index in the Array3 dimension.</td></tr>
+    <tr><th>uint32_t array3End</th><td>Ending index (exclusive) in the Array3 dimension.</td></tr>
+  </tbody></table><br/>
+<p> This structure is used to provide iteration information to a rsForEach call.
+It is currently used to restrict processing to a subset of cells.  In future
+versions, it will also be used to provide hint on how to best iterate over
+the cells.
+</p>
+
+<p> The Start fields are inclusive and the End fields are exclusive.  E.g. to iterate
+over cells 4, 5, 6, and 7 in the X dimension, set xStart to 4 and xEnd to 8.
+</p>
+  </div>
+</div>
+
+<h2>Functions</h2>
+<a name='android_rs:rsForEach'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsForEach</span>
+    <span class='normal'>: Invoke the root kernel of a script</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsForEach(<a href='rs_object_types.html#android_rs:rs_script'>rs_script</a> script, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> input, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> output);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsForEach(<a href='rs_object_types.html#android_rs:rs_script'>rs_script</a> script, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> input, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> output, const void* usrData);
+</td>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsForEach(<a href='rs_object_types.html#android_rs:rs_script'>rs_script</a> script, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> input, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> output, const void* usrData, const <a href='rs_for_each.html#android_rs:rs_script_call_t'>rs_script_call_t</a>* sc);
+</td>
+        <td>    Removed from <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsForEach(<a href='rs_object_types.html#android_rs:rs_script'>rs_script</a> script, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> input, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> output, const void* usrData, <a href='rs_value_types.html#android_rs:size_t'>size_t</a> usrDataLen);
+</td>
+        <td>    <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 20</a>
+        </td>
+      </tr>
+      <tr>
+        <td>void rsForEach(<a href='rs_object_types.html#android_rs:rs_script'>rs_script</a> script, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> input, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> output, const void* usrData, <a href='rs_value_types.html#android_rs:size_t'>size_t</a> usrDataLen, const <a href='rs_for_each.html#android_rs:rs_script_call_t'>rs_script_call_t</a>* sc);
+</td>
+        <td>    <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 20</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>script</th><td>Script to call.</td></tr>
+    <tr><th>input</th><td>Allocation to source data from.</td></tr>
+    <tr><th>output</th><td>Allocation to write date into.</td></tr>
+    <tr><th>usrData</th><td>User defined data to pass to the script.  May be NULL.</td></tr>
+    <tr><th>sc</th><td>Extra control information used to select a sub-region of the allocation to be processed or suggest a walking strategy.  May be NULL.</td></tr>
+    <tr><th>usrDataLen</th><td>Size of the userData structure.  This will be used to perform a shallow copy of the data if necessary.</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Invoke the kernel named "root" of the specified script.  Like other kernels, this root()
+function will be invoked repeatedly over the cells of the specificed allocation, filling
+the output allocation with the results.
+</p>
+
+<p> When rsForEach is called, the root script is launched immediately.  rsForEach returns
+only when the script has completed and the output allocation is ready to use.
+</p>
+
+<p> The rs_script argument is typically initialized using a global variable set from Java.
+</p>
+
+<p> The kernel can be invoked with just an input allocation or just an output allocation.
+This can be done by defining an rs_allocation variable and not initializing it.  E.g.<code><br/>
+rs_script gCustomScript;<br/>
+void specializedProcessing(rs_allocation in) {<br/>
+&nbsp;&nbsp;rs_allocation ignoredOut;<br/>
+&nbsp;&nbsp;rsForEach(gCustomScript, in, ignoredOut);<br/>
+}<br/></code>
+</p>
+
+<p> If both input and output allocations are specified, they must have the same dimensions.
+</p>
+  </div>
+</div>
+
+</div>
