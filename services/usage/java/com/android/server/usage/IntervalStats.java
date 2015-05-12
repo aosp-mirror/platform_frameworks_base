@@ -48,6 +48,7 @@ class IntervalStats {
             usageStats.mPackageName = getCachedStringRef(packageName);
             usageStats.mBeginTimeStamp = beginTime;
             usageStats.mEndTimeStamp = endTime;
+            usageStats.mBeginIdleTime = endTime;
             packageStats.put(usageStats.mPackageName, usageStats);
         }
         return usageStats;
@@ -117,6 +118,17 @@ class IntervalStats {
         }
 
         endTime = timeStamp;
+    }
+
+    /**
+     * Updates the last active time for the package. The timestamp uses a timebase that
+     * tracks the device usage time.
+     * @param packageName
+     * @param timeStamp
+     */
+    void updateBeginIdleTime(String packageName, long timeStamp) {
+        UsageStats usageStats = getOrCreateUsageStats(packageName);
+        usageStats.mBeginIdleTime = timeStamp;
     }
 
     void updateConfigurationStats(Configuration config, long timeStamp) {

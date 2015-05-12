@@ -46,6 +46,13 @@ public final class UsageStats implements Parcelable {
     public long mLastTimeUsed;
 
     /**
+     * Last time the package was used and the beginning of the idle countdown.
+     * This uses a different timebase that is about how much the device has been in use in general.
+     * {@hide}
+     */
+    public long mBeginIdleTime;
+
+    /**
      * {@hide}
      */
     public long mTotalTimeInForeground;
@@ -74,6 +81,7 @@ public final class UsageStats implements Parcelable {
         mTotalTimeInForeground = stats.mTotalTimeInForeground;
         mLaunchCount = stats.mLaunchCount;
         mLastEvent = stats.mLastEvent;
+        mBeginIdleTime = stats.mBeginIdleTime;
     }
 
     public String getPackageName() {
@@ -110,6 +118,15 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
+     * @hide
+     * Get the last time this package was active, measured in milliseconds. This timestamp
+     * uses a timebase that represents how much the device was used and not wallclock time.
+     */
+    public long getBeginIdleTime() {
+        return mBeginIdleTime;
+    }
+
+    /**
      * Get the total time this package spent in the foreground, measured in milliseconds.
      */
     public long getTotalTimeInForeground() {
@@ -133,6 +150,7 @@ public final class UsageStats implements Parcelable {
             mLastEvent = right.mLastEvent;
             mEndTimeStamp = right.mEndTimeStamp;
             mLastTimeUsed = right.mLastTimeUsed;
+            mBeginIdleTime = right.mBeginIdleTime;
         }
         mBeginTimeStamp = Math.min(mBeginTimeStamp, right.mBeginTimeStamp);
         mTotalTimeInForeground += right.mTotalTimeInForeground;
@@ -153,6 +171,7 @@ public final class UsageStats implements Parcelable {
         dest.writeLong(mTotalTimeInForeground);
         dest.writeInt(mLaunchCount);
         dest.writeInt(mLastEvent);
+        dest.writeLong(mBeginIdleTime);
     }
 
     public static final Creator<UsageStats> CREATOR = new Creator<UsageStats>() {
@@ -166,6 +185,7 @@ public final class UsageStats implements Parcelable {
             stats.mTotalTimeInForeground = in.readLong();
             stats.mLaunchCount = in.readInt();
             stats.mLastEvent = in.readInt();
+            stats.mBeginIdleTime = in.readLong();
             return stats;
         }
 

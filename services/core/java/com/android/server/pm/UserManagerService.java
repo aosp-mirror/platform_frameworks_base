@@ -241,7 +241,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
         }
-        userForeground(UserHandle.USER_OWNER);
+        onUserForeground(UserHandle.USER_OWNER);
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         for (int i = 0; i < mUserIds.length; ++i) {
@@ -1784,7 +1784,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Make a note of the last started time of a user and do some cleanup.
      * @param userId the user that was just foregrounded
      */
-    public void userForeground(int userId) {
+    public void onUserForeground(int userId) {
         synchronized (mPackagesLock) {
             UserInfo user = mUsers.get(userId);
             long now = System.currentTimeMillis();
