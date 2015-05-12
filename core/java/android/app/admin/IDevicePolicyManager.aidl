@@ -17,6 +17,7 @@
 
 package android.app.admin;
 
+import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -221,8 +222,8 @@ interface IDevicePolicyManager {
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 
     void sendDeviceInitializerStatus(int statusCode, String description);
-    void setSystemUpdatePolicy(in ComponentName who, in PersistableBundle policy);
-    PersistableBundle getSystemUpdatePolicy();
+    void setSystemUpdatePolicy(in ComponentName who, in SystemUpdatePolicy policy);
+    SystemUpdatePolicy getSystemUpdatePolicy();
 
     boolean setKeyguardDisabled(in ComponentName admin, boolean disabled);
     boolean setStatusBarDisabled(in ComponentName who, boolean disabled);
