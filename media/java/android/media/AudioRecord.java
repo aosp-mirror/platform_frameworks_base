@@ -416,7 +416,8 @@ public class AudioRecord
      * <br>If the audio format is not specified or is incomplete, its sample rate will be the
      * default output sample rate of the device (see
      * {@link AudioManager#PROPERTY_OUTPUT_SAMPLE_RATE}), its channel configuration will be
-     * {@link AudioFormat#CHANNEL_IN_DEFAULT}.
+     * {@link AudioFormat#CHANNEL_IN_MONO}, and the encoding will be
+     * {@link AudioFormat#ENCODING_PCM_16BIT}.
      * <br>If the buffer size is not specified with {@link #setBufferSizeInBytes(int)},
      * the minimum buffer size for the source is used.
      */
@@ -533,7 +534,22 @@ public class AudioRecord
          */
         public AudioRecord build() throws UnsupportedOperationException {
             if (mFormat == null) {
-                mFormat = new AudioFormat.Builder().build();
+                mFormat = new AudioFormat.Builder()
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .build();
+            } else {
+                if (mFormat.getEncoding() == AudioFormat.ENCODING_INVALID) {
+                    mFormat = new AudioFormat.Builder(mFormat)
+                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                            .build();
+                }
+                if (mFormat.getChannelMask() == AudioFormat.CHANNEL_INVALID
+                        && mFormat.getChannelIndexMask() == AudioFormat.CHANNEL_INVALID) {
+                    mFormat = new AudioFormat.Builder(mFormat)
+                            .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                            .build();
+                }
             }
             if (mAttributes == null) {
                 mAttributes = new AudioAttributes.Builder()
