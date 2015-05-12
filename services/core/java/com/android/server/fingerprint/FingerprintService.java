@@ -16,10 +16,12 @@
 
 package com.android.server.fingerprint;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -38,6 +40,7 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -116,6 +119,7 @@ public class FingerprintService extends SystemService {
     static native int nativeCloseHal();
     static native void nativeInit(MessageQueue queue, FingerprintService service);
     static native long nativeGetAuthenticatorId();
+    static native int nativeSetActiveGroup(int gid, byte[] storePath);
 
     static final class FpHalMsg {
         int type; // Type of the message. One of the constants in fingerprint.h
@@ -628,6 +632,11 @@ public class FingerprintService extends SystemService {
     public void onStart() {
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
         mHalDeviceId = nativeOpenHal();
+        if (mHalDeviceId != 0) {
+            int userId = ActivityManager.getCurrentUser();
+            File path = Environment.getUserSystemDirectory(userId);
+            nativeSetActiveGroup(0, path.getAbsolutePath().getBytes());
+        }
         if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
     }
 
