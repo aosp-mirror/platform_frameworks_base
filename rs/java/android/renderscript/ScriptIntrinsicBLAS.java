@@ -1039,14 +1039,8 @@ public final class ScriptIntrinsicBLAS extends ScriptIntrinsic {
             if (cM != cN) {
                 throw new RSRuntimeException("Matrix C is not symmetric");
             }
-            if (TransA != NO_TRANSPOSE) {
-                if (aN != cM) {
-                    throw new RSRuntimeException("Called BLAS with invalid dimensions");
-                }
-            } else {
-                if (aM != cM) {
-                    throw new RSRuntimeException("Called BLAS with invalid dimensions");
-                }
+            if (aM != cM) {
+                throw new RSRuntimeException("Called BLAS with invalid dimensions");
             }
         } else if (A != null && B != null) {
             // A and B only
