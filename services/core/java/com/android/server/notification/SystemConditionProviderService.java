@@ -21,10 +21,12 @@ import android.content.Context;
 import android.net.Uri;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
+import android.util.TimeUtils;
 
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
+import java.util.Date;
 
 public abstract class SystemConditionProviderService extends ConditionProviderService {
 
@@ -33,4 +35,15 @@ public abstract class SystemConditionProviderService extends ConditionProviderSe
     abstract public IConditionProvider asInterface();
     abstract public ComponentName getComponent();
     abstract public boolean isValidConditionId(Uri id);
+    abstract public void onBootComplete();
+
+    protected static String ts(long time) {
+        return new Date(time) + " (" + time + ")";
+    }
+
+    protected static String formatDuration(long millis) {
+        final StringBuilder sb = new StringBuilder();
+        TimeUtils.formatDuration(millis, sb);
+        return sb.toString();
+    }
 }

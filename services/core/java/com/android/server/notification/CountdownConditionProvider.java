@@ -34,12 +34,11 @@ import android.util.Slog;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
-import java.util.Date;
 
 /** Built-in zen condition provider for simple time-based conditions */
 public class CountdownConditionProvider extends SystemConditionProviderService {
-    private static final String TAG = "ConditionProviders";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String TAG = "ConditionProviders.CCP";
+    private static final boolean DEBUG = Log.isLoggable("ConditionProviders", Log.DEBUG);
 
     public static final ComponentName COMPONENT =
             new ComponentName("android", CountdownConditionProvider.class.getName());
@@ -71,6 +70,11 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
     @Override
     public void attachBase(Context base) {
         attachBaseContext(base);
+    }
+
+    @Override
+    public void onBootComplete() {
+        // noop
     }
 
     @Override
@@ -168,10 +172,6 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
                 DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
         return String.format("Scheduled for %s, %s in the future (%s), now=%s",
                 ts(time), time - now, span, ts(now));
-    }
-
-    private static String ts(long time) {
-        return new Date(time) + " (" + time + ")";
     }
 
 }
