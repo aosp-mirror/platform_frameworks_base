@@ -49,14 +49,14 @@ import java.util.Set;
  */
 public final class PermissionsState {
 
+    /** The permission operation failed. */
+    public static final int PERMISSION_OPERATION_FAILURE = -1;
+
     /** The permission operation succeeded and no gids changed. */
-    public static final int PERMISSION_OPERATION_SUCCESS = 1;
+    public static final int PERMISSION_OPERATION_SUCCESS = 0;
 
     /** The permission operation succeeded and gids changed. */
-    public static final int PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED = 2;
-
-    /** The permission operation failed. */
-    public static final int PERMISSION_OPERATION_FAILURE = 3;
+    public static final int PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED = 1;
 
     private static final int[] NO_GIDS = {};
 
@@ -167,8 +167,6 @@ public final class PermissionsState {
      * @return The operation result which is either {@link #PERMISSION_OPERATION_SUCCESS},
      *     or {@link #PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED}, or {@link
      *     #PERMISSION_OPERATION_FAILURE}.
-     *
-     * @see android.content.pm.PackageManager.PermissionFlags
      */
     public int revokeRuntimePermission(BasePermission permission, int userId) {
         enforceValidUserId(userId);
