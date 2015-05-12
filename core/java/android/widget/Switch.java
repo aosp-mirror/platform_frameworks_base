@@ -214,7 +214,7 @@ public class Switch extends CompoundButton {
     public Switch(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mTextPaint = new TextPaint();
+        mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 
         final Resources res = getResources();
         mTextPaint.density = res.getDisplayMetrics().density;
