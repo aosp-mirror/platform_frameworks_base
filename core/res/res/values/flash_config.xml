@@ -26,6 +26,9 @@
     <string-array name="config_forceEnabledComponents" translatable="false">
     </string-array>
 
+    <!-- Default value for led color when battery is really fully charged -->
+    <integer name="config_notificationsBatteryReallyFullARGB">0xFF0000FF</integer>
+
     <!-- Does the notification LED support multiple colors -->
     <bool name="config_multiColorNotificationLed">false</bool>
 
