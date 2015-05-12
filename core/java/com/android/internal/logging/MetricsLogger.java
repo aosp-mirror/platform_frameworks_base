@@ -27,7 +27,6 @@ import android.view.View;
  */
 public class MetricsLogger implements MetricsConstants {
     // These constants are temporary, they should migrate to MetricsConstants.
-    // next value is 179;
 
     public static final int NOTIFICATION_ZEN_MODE_SCHEDULE_RULE = 144;
     public static final int NOTIFICATION_ZEN_MODE_EXTERNAL_RULE = 145;
@@ -64,6 +63,8 @@ public class MetricsLogger implements MetricsConstants {
     public static final int ACTION_ZEN_ENABLE_RULE = 176;
     public static final int ACTION_AIRPLANE_TOGGLE = 177;
     public static final int ACTION_CELL_DATA_TOGGLE = 178;
+    public static final int NOTIFICATION_ACCESS = 179;
+    public static final int NOTIFICATION_ZEN_MODE_ACCESS = 180;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
