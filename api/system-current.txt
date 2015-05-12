@@ -9544,6 +9544,7 @@ package android.content.pm {
     method public abstract void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public abstract void setInstallerPackageName(java.lang.String, java.lang.String);
     method public abstract void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);
+    method public abstract void verifyIntentFilter(int, int, java.util.List<java.lang.String>);
     method public abstract void verifyPendingInstall(int, int);
     field public static final java.lang.String ACTION_REQUEST_PERMISSIONS = "android.content.pm.action.REQUEST_PERMISSIONS";
     field public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0; // 0x0
@@ -34042,6 +34043,7 @@ package android.test.mock {
     method public boolean setDefaultBrowserPackageName(java.lang.String, int);
     method public void setInstallerPackageName(java.lang.String, java.lang.String);
     method public void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);
+    method public void verifyIntentFilter(int, int, java.util.List<java.lang.String>);
     method public void verifyPendingInstall(int, int);
   }
 
@@ -38255,7 +38257,6 @@ package android.view {
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
     method public boolean isScrollContainer();
-    method public boolean isScrollIndicatorEnabled(int);
     method public boolean isScrollbarFadingEnabled();
     method public boolean isSelected();
     method public boolean isShown();
