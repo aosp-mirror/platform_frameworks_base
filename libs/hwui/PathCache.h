@@ -186,10 +186,6 @@ public:
     void clear();
 
     /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
-    /**
      * Returns the maximum size of the cache in bytes.
      */
     uint32_t getMaxSize();
