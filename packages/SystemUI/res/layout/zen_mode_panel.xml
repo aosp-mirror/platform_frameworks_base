@@ -24,31 +24,29 @@
 
     <com.android.systemui.volume.SegmentedButtons
         android:id="@+id/zen_buttons"
+        android:background="@drawable/segmented_buttons_background"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp" />
-
-    <View
-        android:id="@+id/zen_embedded_divider"
-        android:layout_width="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
-        android:layout_height="1dp"
-        android:background="#4dffffff" />
+        android:layout_marginBottom="8dp" />
 
     <RelativeLayout
         android:id="@+id/zen_introduction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingEnd="4dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:background="@color/zen_introduction_message_background" >
+        android:background="@drawable/zen_introduction_message_background" >
 
         <ImageView
             android:id="@+id/zen_introduction_confirm"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
             android:layout_alignParentEnd="true"
             android:background="@drawable/btn_borderless_rect"
             android:clickable="true"
@@ -73,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="4dp"
+            android:layout_marginEnd="12dp"
             android:layout_below="@id/zen_introduction_message"
             android:clickable="true"
             android:focusable="true"
