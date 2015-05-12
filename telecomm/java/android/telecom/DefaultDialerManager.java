@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.provider.Settings;
 import android.text.TextUtils;
 
@@ -151,14 +152,14 @@ public class DefaultDialerManager {
 
         for (ResolveInfo resolveInfo : resolveInfoList) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
-            if (activityInfo == null) {
-                continue;
+            if (activityInfo != null && !packageNames.contains(activityInfo.packageName)) {
+                packageNames.add(activityInfo.packageName);
             }
-            packageNames.add(activityInfo.packageName);
         }
 
-        // TODO: Filter for apps that don't handle DIAL intent with tel scheme
-        return packageNames;
+        final Intent dialIntentWithTelScheme = new Intent(Intent.ACTION_DIAL);
+        dialIntentWithTelScheme.setData(Uri.fromParts(PhoneAccount.SCHEME_TEL, "", null));
+        return filterByIntent(context, packageNames, dialIntentWithTelScheme);
     }
 
     /**
@@ -181,6 +182,36 @@ public class DefaultDialerManager {
         return packageName.equals(tm.getDefaultDialerPackage())
                 || packageName.equals(tm.getSystemDialerPackage());
     }
+
+    /**
+     * Filter a given list of package names for those packages that contain an activity that has
+     * an intent filter for a given intent.
+     *
+     * @param context A valid context
+     * @param packageNames List of package names to filter.
+     * @return The filtered list.
+     */
+    private static List<String> filterByIntent(Context context, List<String> packageNames,
+            Intent intent) {
+        if (packageNames == null || packageNames.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        final List<String> result = new ArrayList<>();
+        final List<ResolveInfo> resolveInfoList =
+                context.getPackageManager().queryIntentActivities(intent, 0);
+        final int length = resolveInfoList.size();
+        for (int i = 0; i < length; i++) {
+            final ActivityInfo info = resolveInfoList.get(i).activityInfo;
+            if (info != null && packageNames.contains(info.packageName)
+                    && !result.contains(info.packageName)) {
+                result.add(info.packageName);
+            }
+        }
+
+        return result;
+    }
+
 
     private static TelecomManager getTelecomManager(Context context) {
         return (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
