@@ -184,7 +184,7 @@ public:
         }
 
         mBitmap->reconfigure(info, bitmap->rowBytes(), ctable);
-        bitmap->setPixelRef(mBitmap->pixelRef());
+        bitmap->setPixelRef(mBitmap->refPixelRef())->unref();
 
         // since we're already allocated, we lockPixels right away
         // HeapAllocator/JavaPixelAllocator behaves this way too
@@ -258,7 +258,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     unsigned int existingBufferSize = 0;
     if (javaBitmap != NULL) {
         reuseBitmap = GraphicsJNI::getBitmap(env, javaBitmap);
-        if (reuseBitmap->pixelRef()->isImmutable()) {
+        if (reuseBitmap->peekAtPixelRef()->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             javaBitmap = NULL;
             reuseBitmap = nullptr;
