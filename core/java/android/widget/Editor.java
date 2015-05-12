@@ -3903,10 +3903,6 @@ public class Editor {
         public void updatePosition(float x, float y) {
             final int trueOffset = mTextView.getOffsetForPosition(x, y);
             final int currLine = mTextView.getLineAtCoordinate(y);
-
-            // Don't select white space on different lines.
-            if (isWhitespaceLine(mPrevLine, currLine, trueOffset)) return;
-
             boolean positionCursor = false;
             int offset = trueOffset;
             int end = getWordEnd(offset, true);
@@ -4005,10 +4001,6 @@ public class Editor {
         public void updatePosition(float x, float y) {
             final int trueOffset = mTextView.getOffsetForPosition(x, y);
             final int currLine = mTextView.getLineAtCoordinate(y);
-
-            // Don't select white space on different lines.
-            if (isWhitespaceLine(mPrevLine, currLine, trueOffset)) return;
-
             int offset = trueOffset;
             boolean positionCursor = false;
 
@@ -4067,36 +4059,6 @@ public class Editor {
             }
             return superResult;
         }
-    }
-
-    /**
-     * Checks whether selection is happening on a different line than previous and
-     * if that line only contains whitespace up to the touch location.
-     *
-     * @param prevLine The previous line the selection was on.
-     * @param currLine The current line being selected.
-     * @param offset The offset in the text where the touch occurred.
-     * @return Whether or not it was just a white space line being selected.
-     */
-    private boolean isWhitespaceLine(int prevLine, int currLine, int offset) {
-        if (prevLine == currLine) {
-            // Same line; don't care.
-            return false;
-        }
-        CharSequence text = mTextView.getText();
-        if (offset == text.length()) {
-            // No character at the last position.
-            return false;
-        }
-        int lineEndOffset = mTextView.getLayout().getLineEnd(currLine);
-        for (int cp, i = offset; i < lineEndOffset; i += Character.charCount(cp)) {
-            cp = Character.codePointAt(text, i);
-            if (!Character.isSpaceChar(cp) && !Character.isWhitespace(cp)) {
-                // There are non white space chars on the line.
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -4178,8 +4140,6 @@ public class Editor {
         private int mStartOffset = -1;
         // Indicates whether the user is selecting text and using the drag accelerator.
         private boolean mDragAcceleratorActive;
-        // Indicates the line of text the drag accelerator is on.
-        private int mPrevLine = -1;
 
         SelectionModifierCursorController() {
             resetTouchOffsets();
@@ -4272,8 +4232,6 @@ public class Editor {
                         }
                     }
 
-                    // New selection, reset line.
-                    mPrevLine = mTextView.getLineAtCoordinate(y);
                     mDownPositionX = x;
                     mDownPositionY = y;
                     mGestureStayedInTapRegion = true;
@@ -4329,13 +4287,6 @@ public class Editor {
                             if (mx > fingerOffset) mx -= fingerOffset;
                             if (my > fingerOffset) my -= fingerOffset;
                             offset = mTextView.getOffsetForPosition(mx, my);
-
-                            int currLine = mTextView.getLineAtCoordinate(my);
-
-                            // Don't select white space on different lines.
-                            if (isWhitespaceLine(mPrevLine, currLine, offset)) return;
-
-                            mPrevLine = currLine;
 
                             // Perform the check for closeness at edge of view, if we're very close
                             // don't adjust the offset to be in front of the finger - otherwise the
