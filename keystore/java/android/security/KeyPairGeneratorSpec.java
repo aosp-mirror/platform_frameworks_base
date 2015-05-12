@@ -403,14 +403,14 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the duration of time (seconds) for which the private key can be used after the user
-     * is successfully authenticated.
+     * Gets the duration of time (seconds) for which this key can be used after the user is
+     * successfully authenticated. This has effect only if user authentication is required.
      *
      * <p>This restriction applies only to private key operations. Public key operations are not
      * restricted.
      *
-     * @return duration in seconds or {@code -1} if not restricted. {@code 0} means authentication
-     *         is required for every use of the key.
+     * @return duration in seconds or {@code -1} if authentication is required for every use of the
+     *         key.
      *
      * @see #isUserAuthenticationRequired()
      */
@@ -791,7 +791,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>This restriction applies only to private key operations. Public key operations are not
          * restricted.
          *
-         * @param seconds duration in seconds or {@code 0} if the user needs to authenticate for
+         * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
          *        every use of the key.
          *
          * @see #setUserAuthenticationRequired(boolean)
