@@ -350,7 +350,7 @@ private:
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        const SkBitmap* localBitmap = new (alloc()) SkBitmap(bitmap);
+        SkBitmap* localBitmap = new (alloc()) SkBitmap(bitmap);
         alloc().autoDestroy(localBitmap);
         mDisplayListData->bitmapResources.push_back(localBitmap);
         return localBitmap;
