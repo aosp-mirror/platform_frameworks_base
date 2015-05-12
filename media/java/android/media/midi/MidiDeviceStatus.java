@@ -89,10 +89,9 @@ public final class MidiDeviceStatus implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(mDeviceInfo.toString());
         int inputPortCount = mDeviceInfo.getInputPortCount();
         int outputPortCount = mDeviceInfo.getOutputPortCount();
-        builder.append(" mInputPortOpen=[");
+        StringBuilder builder = new StringBuilder("mInputPortOpen=[");
         for (int i = 0; i < inputPortCount; i++) {
             builder.append(mInputPortOpen[i]);
             if (i < inputPortCount -1) {
