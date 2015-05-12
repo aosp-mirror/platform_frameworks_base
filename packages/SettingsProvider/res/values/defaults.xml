@@ -207,4 +207,7 @@
     <!-- Default for Settings.Global.GUEST_USER_ENABLED -->
     <bool name="def_guest_user_enabled">true</bool>
 
+    <!-- Default state of tap to wake -->
+    <bool name="def_double_tap_to_wake">true</bool>
+
 </resources>
