@@ -178,12 +178,6 @@ public class AudioTrack
      */
     private static final int NATIVE_EVENT_NEW_POS = 4;
 
-    /**
-     * Event id denotes when the routing changes.
-     */
-    private final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
-
-
     private final static String TAG = "android.media.AudioTrack";
 
 
@@ -2057,11 +2051,14 @@ public class AudioTrack
         if (deviceInfo != null && !deviceInfo.isSink()) {
             return false;
         }
-
-        mPreferredDevice = deviceInfo;
-        int preferredDeviceId = mPreferredDevice != null ? deviceInfo.getId() : 0;
-
-        return native_setOutputDevice(preferredDeviceId);
+        int preferredDeviceId = deviceInfo != null ? deviceInfo.getId() : 0;
+        boolean status = native_setOutputDevice(preferredDeviceId);
+        if (status == true) {
+            synchronized (this) {
+                mPreferredDevice = deviceInfo;
+            }
+        }
+        return status;
     }
 
     /**
@@ -2069,7 +2066,9 @@ public class AudioTrack
      * is not guaranteed to correspond to the actual device being used for playback.
      */
     public AudioDeviceInfo getPreferredOutputDevice() {
-        return mPreferredDevice;
+        synchronized (this) {
+            return mPreferredDevice;
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -2079,6 +2078,17 @@ public class AudioTrack
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioTrack.
      */
     public AudioDeviceInfo getRoutedDevice() {
+        int deviceId = native_getRoutedDeviceId();
+        if (deviceId == 0) {
+            return null;
+        }
+        AudioDeviceInfo[] devices =
+                AudioDevicesManager.listDevicesStatic(AudioDevicesManager.LIST_DEVICES_OUTPUTS);
+        for (int i = 0; i < devices.length; i++) {
+            if (devices[i].getId() == deviceId) {
+                return devices[i];
+            }
+        }
         return null;
     }
 
@@ -2098,6 +2108,9 @@ public class AudioTrack
             android.os.Handler handler) {
         if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
             synchronized (mRoutingChangeListeners) {
+                if (mRoutingChangeListeners.size() == 0) {
+                    native_enableDeviceCallback();
+                }
                 mRoutingChangeListeners.put(
                     listener, new NativeRoutingEventHandlerDelegate(this, listener, handler));
             }
@@ -2113,6 +2126,9 @@ public class AudioTrack
             if (mRoutingChangeListeners.containsKey(listener)) {
                 mRoutingChangeListeners.remove(listener);
             }
+            if (mRoutingChangeListeners.size() == 0) {
+                native_disableDeviceCallback();
+            }
         }
     }
 
@@ -2124,10 +2140,11 @@ public class AudioTrack
         synchronized (mRoutingChangeListeners) {
             values = mRoutingChangeListeners.values();
         }
+        AudioManager.resetAudioPortGeneration();
         for(NativeRoutingEventHandlerDelegate delegate : values) {
             Handler handler = delegate.getHandler();
             if (handler != null) {
-                handler.sendEmptyMessage(NATIVE_EVENT_ROUTING_CHANGE);
+                handler.sendEmptyMessage(AudioSystem.NATIVE_EVENT_ROUTING_CHANGE);
             }
         }
     }
@@ -2240,7 +2257,7 @@ public class AudioTrack
                             return;
                         }
                         switch(msg.what) {
-                        case NATIVE_EVENT_ROUTING_CHANGE:
+                        case AudioSystem.NATIVE_EVENT_ROUTING_CHANGE:
                             if (listener != null) {
                                 listener.onAudioTrackRouting(track);
                             }
@@ -2273,6 +2290,10 @@ public class AudioTrack
             return;
         }
 
+        if (what == AudioSystem.NATIVE_EVENT_ROUTING_CHANGE) {
+            track.broadcastRoutingChange();
+            return;
+        }
         NativePositionEventHandlerDelegate delegate = track.mEventHandlerDelegate;
         if (delegate != null) {
             Handler handler = delegate.getHandler();
@@ -2281,7 +2302,6 @@ public class AudioTrack
                 handler.sendMessage(m);
             }
         }
-
     }
 
 
@@ -2362,6 +2382,9 @@ public class AudioTrack
     private native final int native_setAuxEffectSendLevel(float level);
 
     private native final boolean native_setOutputDevice(int deviceId);
+    private native final int native_getRoutedDeviceId();
+    private native final void native_enableDeviceCallback();
+    private native final void native_disableDeviceCallback();
 
     //---------------------------------------------------------
     // Utility methods
