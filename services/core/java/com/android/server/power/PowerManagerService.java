@@ -69,6 +69,7 @@ import android.view.WindowManagerPolicy;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import libcore.util.Objects;
 
@@ -423,6 +424,9 @@ public final class PowerManagerService extends SystemService
     // True if we are currently in device idle mode.
     private boolean mDeviceIdleMode;
 
+    // Set of app ids that we will always respect the wake locks for.
+    int[] mDeviceIdleWhitelist = new int[0];
+
     // True if theater mode is enabled
     private boolean mTheaterModeEnabled;
 
@@ -758,6 +762,7 @@ public final class PowerManagerService extends SystemService
                     throw new IllegalArgumentException("Wake lock is already dead.");
                 }
                 mWakeLocks.add(wakeLock);
+                setWakeLockDisabledStateLocked(wakeLock);
                 notifyAcquire = true;
             }
 
@@ -894,7 +899,7 @@ public final class PowerManagerService extends SystemService
     }
 
     private void notifyWakeLockAcquiredLocked(WakeLock wakeLock) {
-        if (mSystemReady) {
+        if (mSystemReady && !wakeLock.mDisabled) {
             wakeLock.mNotifiedAcquired = true;
             mNotifier.onWakeLockAcquired(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
                     wakeLock.mOwnerUid, wakeLock.mOwnerPid, wakeLock.mWorkSource,
@@ -1388,7 +1393,10 @@ public final class PowerManagerService extends SystemService
                 final WakeLock wakeLock = mWakeLocks.get(i);
                 switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
                     case PowerManager.PARTIAL_WAKE_LOCK:
-                        mWakeLockSummary |= WAKE_LOCK_CPU;
+                        if (!wakeLock.mDisabled) {
+                            // We only respect this if the wake lock is not disabled.
+                            mWakeLockSummary |= WAKE_LOCK_CPU;
+                        }
                         break;
                     case PowerManager.FULL_WAKE_LOCK:
                         mWakeLockSummary |= WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_BUTTON_BRIGHT;
@@ -2248,17 +2256,80 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private void setStayOnSettingInternal(int val) {
+    void setStayOnSettingInternal(int val) {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, val);
     }
 
-    private void setMaximumScreenOffTimeoutFromDeviceAdminInternal(int timeMs) {
+    void setMaximumScreenOffTimeoutFromDeviceAdminInternal(int timeMs) {
         synchronized (mLock) {
             mMaximumScreenOffTimeoutFromDeviceAdmin = timeMs;
             mDirty |= DIRTY_SETTINGS;
             updatePowerStateLocked();
         }
+    }
+
+    void setDeviceIdleModeInternal(boolean enabled) {
+        synchronized (mLock) {
+            if (mDeviceIdleMode != enabled) {
+                mDeviceIdleMode = enabled;
+                updateWakeLockDisabledStatesLocked();
+            }
+        }
+    }
+
+    void setDeviceIdleWhitelistInternal(int[] appids) {
+        synchronized (mLock) {
+            mDeviceIdleWhitelist = appids;
+            if (mDeviceIdleMode) {
+                updateWakeLockDisabledStatesLocked();
+            }
+        }
+    }
+
+    private void updateWakeLockDisabledStatesLocked() {
+        boolean changed = false;
+        final int numWakeLocks = mWakeLocks.size();
+        for (int i = 0; i < numWakeLocks; i++) {
+            final WakeLock wakeLock = mWakeLocks.get(i);
+            if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
+                    == PowerManager.PARTIAL_WAKE_LOCK) {
+                if (setWakeLockDisabledStateLocked(wakeLock)) {
+                    changed = true;
+                    if (wakeLock.mDisabled) {
+                        // This wake lock is no longer being respected.
+                        notifyWakeLockReleasedLocked(wakeLock);
+                    } else {
+                        notifyWakeLockAcquiredLocked(wakeLock);
+                    }
+                }
+            }
+        }
+        if (changed) {
+            mDirty |= DIRTY_WAKE_LOCKS;
+            updatePowerStateLocked();
+        }
+    }
+
+    private boolean setWakeLockDisabledStateLocked(WakeLock wakeLock) {
+        if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
+                == PowerManager.PARTIAL_WAKE_LOCK) {
+            boolean disabled = false;
+            if (mDeviceIdleMode) {
+                final int appid = UserHandle.getAppId(wakeLock.mOwnerUid);
+                // If we are in idle mode, we will ignore all partial wake locks that are
+                // for application uids that are not whitelisted.
+                if (appid >= Process.FIRST_APPLICATION_UID &&
+                        Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0) {
+                    disabled = true;
+                }
+            }
+            if (wakeLock.mDisabled != disabled) {
+                wakeLock.mDisabled = disabled;
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked() {
@@ -2459,6 +2530,8 @@ public final class PowerManagerService extends SystemService
             pw.println("  mSandmanSummoned=" + mSandmanSummoned);
             pw.println("  mLowPowerModeEnabled=" + mLowPowerModeEnabled);
             pw.println("  mBatteryLevelLow=" + mBatteryLevelLow);
+            pw.println("  mDeviceIdleMode=" + mDeviceIdleMode);
+            pw.println("  mDeviceIdleWhitelist=" + Arrays.toString(mDeviceIdleWhitelist));
             pw.println("  mLastWakeTime=" + TimeUtils.formatUptime(mLastWakeTime));
             pw.println("  mLastSleepTime=" + TimeUtils.formatUptime(mLastSleepTime));
             pw.println("  mLastUserActivityTime=" + TimeUtils.formatUptime(mLastUserActivityTime));
@@ -2671,6 +2744,7 @@ public final class PowerManagerService extends SystemService
         public final int mOwnerUid;
         public final int mOwnerPid;
         public boolean mNotifiedAcquired;
+        public boolean mDisabled;
 
         public WakeLock(IBinder lock, int flags, String tag, String packageName,
                 WorkSource workSource, String historyTag, int ownerUid, int ownerPid) {
@@ -2729,7 +2803,7 @@ public final class PowerManagerService extends SystemService
         @Override
         public String toString() {
             return getLockLevelString()
-                    + " '" + mTag + "'" + getLockFlagsString()
+                    + " '" + mTag + "'" + getLockFlagsString() + (mDisabled ? " DISABLED" : "")
                     + " (uid=" + mOwnerUid + ", pid=" + mOwnerPid + ", ws=" + mWorkSource + ")";
         }
 
@@ -3340,9 +3414,12 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public void setDeviceIdleMode(boolean enabled) {
-            synchronized (mLock) {
-                mDeviceIdleMode = enabled;
-            }
+            setDeviceIdleModeInternal(enabled);
+        }
+
+        @Override
+        public void setDeviceIdleWhitelist(int[] appids) {
+            setDeviceIdleWhitelistInternal(appids);
         }
     }
 }

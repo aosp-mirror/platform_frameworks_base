@@ -3851,7 +3851,9 @@ package android.app {
     method public void set(int, long, android.app.PendingIntent);
     method public void set(int, long, long, long, android.app.PendingIntent, android.os.WorkSource);
     method public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
+    method public void setAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);
+    method public void setExactAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
     method public void setRepeating(int, long, long, android.app.PendingIntent);
     method public void setTime(long);
