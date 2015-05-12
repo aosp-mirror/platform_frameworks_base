@@ -56,47 +56,39 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-        PointFormat.UNSPECIFIED,
-        PointFormat.UNCOMPRESSED,
-        PointFormat.COMPRESSED,
+        POINT_FORMAT_UNSPECIFIED,
+        POINT_FORMAT_UNCOMPRESSED,
+        POINT_FORMAT_COMPRESSED,
         })
     public @interface PointFormatEnum {}
 
+    /** Unspecified EC point format. */
+    public static final int POINT_FORMAT_UNSPECIFIED = -1;
+
     /**
-     * Wire format of the EC point.
+     * Uncompressed EC point format: both coordinates are stored separately.
+     *
+     * <p>The wire format is byte {@code 0x04} followed by binary representation of the {@code x}
+     * coordinate followed by binary representation of the {@code y} coordinate. See
+     * {@code ISO 18033-2} section {@code 5.4.3}.
      */
-    public static abstract class PointFormat {
+    public static final int POINT_FORMAT_UNCOMPRESSED = 0;
 
-        private PointFormat() {}
-
-        /** Unspecified point format. */
-        public static final int UNSPECIFIED = -1;
-
-        /**
-         * Uncompressed point format: both coordinates are stored separately.
-         *
-         * <p>The wire format is byte {@code 0x04} followed by binary representation of the
-         * {@code x} coordinate followed by binary representation of the {@code y} coordinate. See
-         * {@code ISO 18033-2} section {@code 5.4.3}.
-         */
-        public static final int UNCOMPRESSED = 0;
-
-        /**
-         * Compressed point format: only one coordinate is stored.
-         *
-         * <p>The wire format is byte {@code 0x02} or {@code 0x03} (depending on the value of the
-         * stored coordinate) followed by the binary representation of the {@code x} coordinate.
-         * See {@code ISO 18033-2} section {@code 5.4.3}.
-         */
-        public static final int COMPRESSED = 1;
-    }
+    /**
+     * Compressed EC point format: only one coordinate is stored.
+     *
+     * <p>The wire format is byte {@code 0x02} or {@code 0x03} (depending on the value of the stored
+     * coordinate) followed by the binary representation of the {@code x} coordinate. See
+     * {@code ISO 18033-2} section {@code 5.4.3}.
+     */
+    public static final int POINT_FORMAT_COMPRESSED = 1;
 
     /**
      * Default parameter spec: compressed point format, {@code HKDFwithSHA256}, DEM uses 128-bit AES
      * GCM.
      */
     public static final EcIesParameterSpec DEFAULT = new EcIesParameterSpec(
-            PointFormat.COMPRESSED,
+            POINT_FORMAT_COMPRESSED,
             "HKDFwithSHA256",
             "AES/GCM/NoPadding",
             128,
@@ -126,7 +118,7 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns KEM EC point wire format or {@link PointFormat#UNSPECIFIED} if not specified.
+     * Returns KEM EC point wire format or {@link #POINT_FORMAT_UNSPECIFIED} if not specified.
      */
     public @PointFormatEnum int getKemPointFormat() {
         return mKemPointFormat;
@@ -187,7 +179,7 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
      * Builder of {@link EcIesParameterSpec}.
      */
     public static class Builder {
-        private @PointFormatEnum int mKemPointFormat = PointFormat.UNSPECIFIED;
+        private @PointFormatEnum int mKemPointFormat = POINT_FORMAT_UNSPECIFIED;
         private String mKemKdfAlgorithm;
         private String mDemCipherTransformation;
         private int mDemCipherKeySize = 128;
