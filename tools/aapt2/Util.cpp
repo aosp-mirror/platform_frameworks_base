@@ -28,6 +28,9 @@
 namespace aapt {
 namespace util {
 
+constexpr const char16_t* kSchemaAuto = u"http://schemas.android.com/apk/res-auto";
+constexpr const char16_t* kSchemaPrefix = u"http://schemas.android.com/apk/res/";
+
 static std::vector<std::string> splitAndTransform(const StringPiece& str, char sep,
         const std::function<char(char)>& f) {
     std::vector<std::string> parts;
@@ -277,6 +280,18 @@ std::unique_ptr<uint8_t[]> copy(const BigBuffer& buffer) {
         p += block.size;
     }
     return data;
+}
+
+Maybe<std::u16string> extractPackageFromNamespace(const std::u16string& namespaceUri) {
+    if (stringStartsWith<char16_t>(namespaceUri, kSchemaPrefix)) {
+        StringPiece16 schemaPrefix = kSchemaPrefix;
+        StringPiece16 package = namespaceUri;
+        return package.substr(schemaPrefix.size(), package.size() - schemaPrefix.size())
+                .toString();
+    } else if (namespaceUri == kSchemaAuto) {
+        return std::u16string();
+    }
+    return {};
 }
 
 } // namespace util

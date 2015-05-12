@@ -130,6 +130,7 @@ struct ResourceId {
     uint8_t typeId() const;
     uint16_t entryId() const;
     bool operator<(const ResourceId& rhs) const;
+    bool operator==(const ResourceId& rhs) const;
 };
 
 //
@@ -176,6 +177,10 @@ inline uint16_t ResourceId::entryId() const {
 
 inline bool ResourceId::operator<(const ResourceId& rhs) const {
     return id < rhs.id;
+}
+
+inline bool ResourceId::operator==(const ResourceId& rhs) const {
+    return id == rhs.id;
 }
 
 inline ::std::ostream& operator<<(::std::ostream& out,

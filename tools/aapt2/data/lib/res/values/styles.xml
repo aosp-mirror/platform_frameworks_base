@@ -3,4 +3,6 @@
     <style name="Platform.AppCompat" parent="@android:style/Theme">
         <item name="android:windowNoTitle">true</item>
     </style>
+
+    <bool name="allow">true</bool>
 </resources>

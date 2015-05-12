@@ -76,6 +76,11 @@ const std::u16string& ScopedXmlPullParser::getNamespaceUri() const {
     return mParser->getNamespaceUri();
 }
 
+bool ScopedXmlPullParser::applyPackageAlias(std::u16string* package,
+                                            const std::u16string& defaultPackage) const {
+    return mParser->applyPackageAlias(package, defaultPackage);
+}
+
 const std::u16string& ScopedXmlPullParser::getElementNamespace() const {
     return mParser->getElementNamespace();
 }

@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 
+#include "Maybe.h"
 #include "SourceXmlPullParser.h"
 #include "Util.h"
 
@@ -66,7 +67,25 @@ SourceXmlPullParser::Event SourceXmlPullParser::next() {
         }
     }
 
-    return getEvent();
+    Event event = getEvent();
+
+    // Record namespace prefixes and package names so that we can do our own
+    // handling of references that use namespace aliases.
+    if (event == Event::kStartNamespace || event == Event::kEndNamespace) {
+        Maybe<std::u16string> result = util::extractPackageFromNamespace(getNamespaceUri());
+        if (event == Event::kStartNamespace) {
+            if (result) {
+                mPackageAliases.emplace_back(getNamespacePrefix(), result.value());
+            }
+        } else {
+            if (result) {
+                assert(mPackageAliases.back().second == result.value());
+                mPackageAliases.pop_back();
+            }
+        }
+    }
+
+    return event;
 }
 
 SourceXmlPullParser::Event SourceXmlPullParser::getEvent() const {
@@ -110,6 +129,22 @@ const std::u16string& SourceXmlPullParser::getNamespaceUri() const {
         return mEmpty;
     }
     return mEventQueue.front().data2;
+}
+
+bool SourceXmlPullParser::applyPackageAlias(std::u16string* package,
+                                            const std::u16string& defaultPackage) const {
+    const auto endIter = mPackageAliases.rend();
+    for (auto iter = mPackageAliases.rbegin(); iter != endIter; ++iter) {
+        if (iter->first == *package) {
+            if (iter->second.empty()) {
+                *package = defaultPackage;
+            } else {
+                *package = iter->second;
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 const std::u16string& SourceXmlPullParser::getElementNamespace() const {

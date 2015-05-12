@@ -252,6 +252,11 @@ const std::u16string& BindingXmlPullParser::getNamespaceUri() const {
     return mParser->getNamespaceUri();
 }
 
+bool BindingXmlPullParser::applyPackageAlias(std::u16string* package,
+                                             const std::u16string& defaultPackage) const {
+    return mParser->applyPackageAlias(package, defaultPackage);
+}
+
 const std::u16string& BindingXmlPullParser::getElementNamespace() const {
     return mParser->getElementNamespace();
 }

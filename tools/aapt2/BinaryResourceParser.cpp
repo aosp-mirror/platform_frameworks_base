@@ -39,7 +39,7 @@ using namespace android;
  * given a mapping from resource ID to resource name.
  */
 struct ReferenceIdToNameVisitor : ValueVisitor {
-    ReferenceIdToNameVisitor(const std::shared_ptr<Resolver>& resolver,
+    ReferenceIdToNameVisitor(const std::shared_ptr<IResolver>& resolver,
                              std::map<ResourceId, ResourceName>* cache) :
             mResolver(resolver), mCache(cache) {
     }
@@ -96,30 +96,25 @@ private:
             reference.name = cacheIter->second;
             reference.id = 0;
         } else {
-            const android::ResTable& table = mResolver->getResTable();
-            android::ResTable::resource_name resourceName;
-            if (table.getResourceName(reference.id.id, false, &resourceName)) {
-                const ResourceType* type = parseResourceType(StringPiece16(resourceName.type,
-                                                                           resourceName.typeLen));
-                assert(type);
-                reference.name.package.assign(resourceName.package, resourceName.packageLen);
-                reference.name.type = *type;
-                reference.name.entry.assign(resourceName.name, resourceName.nameLen);
-                reference.id = 0;
+            Maybe<ResourceName> result = mResolver->findName(reference.id);
+            if (result) {
+                reference.name = result.value();
 
                 // Add to cache.
                 mCache->insert({reference.id, reference.name});
+
+                reference.id = 0;
             }
         }
     }
 
-    std::shared_ptr<Resolver> mResolver;
+    std::shared_ptr<IResolver> mResolver;
     std::map<ResourceId, ResourceName>* mCache;
 };
 
 
 BinaryResourceParser::BinaryResourceParser(const std::shared_ptr<ResourceTable>& table,
-                                           const std::shared_ptr<Resolver>& resolver,
+                                           const std::shared_ptr<IResolver>& resolver,
                                            const Source& source,
                                            const void* data,
                                            size_t len) :

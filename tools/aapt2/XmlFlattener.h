@@ -23,6 +23,8 @@
 #include "Source.h"
 #include "XmlPullParser.h"
 
+#include <string>
+
 namespace aapt {
 
 /**
@@ -33,6 +35,12 @@ namespace aapt {
 class XmlFlattener {
 public:
     struct Options {
+        /**
+         * The package to use when a reference has no package specified
+         * (or a namespace URI equals "http://schemas.android.com/apk/res-auto").
+         */
+        std::u16string defaultPackage;
+
         /**
          * If set, tells the XmlFlattener to strip out
          * attributes that have been introduced after
@@ -46,7 +54,7 @@ public:
      * and attributes.
      */
     XmlFlattener(const std::shared_ptr<ResourceTable>& table,
-                 const std::shared_ptr<Resolver>& resolver);
+                 const std::shared_ptr<IResolver>& resolver);
 
     XmlFlattener(const XmlFlattener&) = delete; // Not copyable.
 
@@ -62,7 +70,7 @@ public:
 
 private:
     std::shared_ptr<ResourceTable> mTable;
-    std::shared_ptr<Resolver> mResolver;
+    std::shared_ptr<IResolver> mResolver;
 };
 
 } // namespace aapt
