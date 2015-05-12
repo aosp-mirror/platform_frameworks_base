@@ -392,7 +392,8 @@
      <dimen name="floating_toolbar_text_size">14sp</dimen>
      <dimen name="floating_toolbar_menu_button_minimum_width">48dp</dimen>
      <dimen name="floating_toolbar_preferred_width">328dp</dimen>
-     <dimen name="floating_toolbar_minimum_overflow_height">144dp</dimen>
+     <dimen name="floating_toolbar_minimum_overflow_height">96dp</dimen>
+     <dimen name="floating_toolbar_maximum_overflow_height">192dp</dimen>
      <dimen name="floating_toolbar_horizontal_margin">16dp</dimen>
      <dimen name="floating_toolbar_vertical_margin">8dp</dimen>
 
