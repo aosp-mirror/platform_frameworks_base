@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge.intensive;
 
 import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
@@ -364,13 +365,14 @@ public class Main {
                 }
 
                 @Override
-                public void fidelityWarning(String tag, String message, Throwable throwable,
-                        Object data) {
+                public void fidelityWarning(@Nullable String tag, String message,
+                        Throwable throwable, Object data) {
+
                     System.out.println("FidelityWarning " + tag + ": " + message);
                     if (throwable != null) {
                         throwable.printStackTrace();
                     }
-                    failWithMsg(message);
+                    failWithMsg(message == null ? "" : message);
                 }
 
                 @Override
@@ -396,11 +398,11 @@ public class Main {
         if (sLogger == null) {
             sLogger = new ILogger() {
                 @Override
-                public void error(Throwable t, String msgFormat, Object... args) {
+                public void error(Throwable t, @Nullable String msgFormat, Object... args) {
                     if (t != null) {
                         t.printStackTrace();
                     }
-                    failWithMsg(msgFormat, args);
+                    failWithMsg(msgFormat == null ? "" : msgFormat, args);
                 }
 
                 @Override
