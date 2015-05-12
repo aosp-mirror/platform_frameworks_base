@@ -65,6 +65,7 @@ import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
 import com.google.android.collect.Lists;
 
@@ -139,7 +140,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private BatteryStatus mBatteryStatus;
 
     // Password attempts
-    private int mFailedAttempts = 0;
+    private SparseIntArray mFailedAttempts = new SparseIntArray();
 
     private boolean mClockVisible;
 
@@ -1260,28 +1261,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return mDeviceProvisioned;
     }
 
-    public int getFailedUnlockAttempts() {
-        return mFailedAttempts;
+    public void clearFailedUnlockAttempts() {
+        mFailedAttempts.delete(sCurrentUser);
     }
 
-    public void clearFailedUnlockAttempts() {
-        mFailedAttempts = 0;
+    public int getFailedUnlockAttempts() {
+        return mFailedAttempts.get(sCurrentUser, 0);
+    }
+
+    public void reportFailedUnlockAttempt() {
+        mFailedAttempts.put(sCurrentUser, getFailedUnlockAttempts() + 1);
     }
 
     public void clearFingerprintRecognized() {
         mUserFingerprintAuthenticated.clear();
-    }
-
-    public void reportFailedUnlockAttempt() {
-        mFailedAttempts++;
-    }
-
-    public boolean isClockVisible() {
-        return mClockVisible;
-    }
-
-    public int getPhoneState() {
-        return mPhoneState;
     }
 
     public boolean isSimPinVoiceSecure() {
