@@ -918,9 +918,9 @@ final public class MediaCodec {
         }
 
         /**
-         * This indicates that no key has been set to perform the requested
-         * decrypt operation.  The operation can be retried after adding
-         * a decryption key.
+         * This indicates that the requested key was not found when trying to
+         * perform a decrypt operation.  The operation can be retried after adding
+         * the correct decryption key.
          */
         public static final int ERROR_NO_KEY = 1;
 
