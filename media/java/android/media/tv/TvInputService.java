@@ -281,8 +281,15 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Enables or disables the overlay view. By default, the overlay view is disabled. Must be
-         * called explicitly after the session is created to enable the overlay view.
+         * Enables or disables the overlay view.
+         *
+         * <p>By default, the overlay view is disabled. Must be called explicitly after the
+         * session is created to enable the overlay view.
+         *
+         * <p>The TV input service can disable its overlay view when the size of the overlay view is
+         * insufficient to display the whole information, such as when used in Picture-in-picture.
+         * Override {@link #onOverlayViewSizeChanged} to get the size of the overlay view, which
+         * then can be used to determine whether to enable/disable the overlay view.
          *
          * @param enable {@code true} if you want to enable the overlay view. {@code false}
          *            otherwise.
