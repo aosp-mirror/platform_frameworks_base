@@ -28,14 +28,11 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.app.ActivityThread;
-import android.os.SystemProperties;
-import android.provider.Settings;
-import android.os.Binder;
 import android.util.Log;
 import android.util.Pair;
 
@@ -1255,7 +1252,7 @@ public final class BluetoothAdapter {
      * @return true if chipset supports on-chip filtering
      */
     public boolean isOffloadedFilteringSupported() {
-        if (getState() != STATE_ON) return false;
+        if (!getLeAccess()) return false;
         try {
             return mService.isOffloadedFilteringSupported();
         } catch (RemoteException e) {
@@ -1270,7 +1267,7 @@ public final class BluetoothAdapter {
      * @return true if chipset supports on-chip scan batching
      */
     public boolean isOffloadedScanBatchingSupported() {
-        if (getState() != STATE_ON) return false;
+        if (!getLeAccess()) return false;
         try {
             return mService.isOffloadedScanBatchingSupported();
         } catch (RemoteException e) {
@@ -1286,7 +1283,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     public boolean isHardwareTrackingFiltersAvailable() {
-        if (getState() != STATE_ON) return false;
+        if (!getLeAccess()) return false;
         try {
             IBluetoothGatt iGatt = mManagerService.getBluetoothGatt();
             if (iGatt == null) {
