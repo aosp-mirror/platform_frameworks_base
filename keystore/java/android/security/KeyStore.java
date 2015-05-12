@@ -131,10 +131,10 @@ public class KeyStore {
         return mToken;
     }
 
-    static int getKeyTypeForAlgorithm(@KeyStoreKeyProperties.AlgorithmEnum String keyType) {
-        if (KeyStoreKeyProperties.Algorithm.RSA.equalsIgnoreCase(keyType)) {
+    static int getKeyTypeForAlgorithm(@KeyStoreKeyProperties.KeyAlgorithmEnum String keyType) {
+        if (KeyStoreKeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyType)) {
             return NativeConstants.EVP_PKEY_RSA;
-        } else if (KeyStoreKeyProperties.Algorithm.EC.equalsIgnoreCase(keyType)) {
+        } else if (KeyStoreKeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyType)) {
             return NativeConstants.EVP_PKEY_EC;
         } else {
             return -1;

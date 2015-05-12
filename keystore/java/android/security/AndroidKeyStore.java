@@ -129,10 +129,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
                 keymasterDigest = keymasterDigests.get(0);
             }
 
-            @KeyStoreKeyProperties.AlgorithmEnum String keyAlgorithmString;
+            @KeyStoreKeyProperties.KeyAlgorithmEnum String keyAlgorithmString;
             try {
                 keyAlgorithmString =
-                        KeyStoreKeyProperties.Algorithm.fromKeymasterSecretKeyAlgorithm(
+                        KeyStoreKeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
                                 keymasterAlgorithm, keymasterDigest);
             } catch (IllegalArgumentException e) {
                 throw (UnrecoverableKeyException)
@@ -453,10 +453,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
         int keymasterAlgorithm;
         int keymasterDigest;
         try {
-            keymasterAlgorithm = KeyStoreKeyProperties.Algorithm.toKeymasterSecretKeyAlgorithm(
+            keymasterAlgorithm = KeyStoreKeyProperties.KeyAlgorithm.toKeymasterSecretKeyAlgorithm(
                     keyAlgorithmString);
             keymasterDigest =
-                    KeyStoreKeyProperties.Algorithm.toKeymasterDigest(keyAlgorithmString);
+                    KeyStoreKeyProperties.KeyAlgorithm.toKeymasterDigest(keyAlgorithmString);
         } catch (IllegalArgumentException e) {
             throw new KeyStoreException("Unsupported secret key algorithm: " + keyAlgorithmString);
         }
@@ -497,7 +497,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
         @KeyStoreKeyProperties.PurposeEnum int purposes = params.getPurposes();
         int[] keymasterBlockModes =
                 KeyStoreKeyProperties.BlockMode.allToKeymaster(params.getBlockModes());
-        if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
+        if (((purposes & KeyStoreKeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (params.isRandomizedEncryptionRequired())) {
             for (int keymasterBlockMode : keymasterBlockModes) {
                 if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(keymasterBlockMode)) {
@@ -536,7 +536,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
         // TODO: Remove this once keymaster does not require us to specify the size of imported key.
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keyMaterial.length * 8);
 
-        if (((purposes & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
+        if (((purposes & KeyStoreKeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (!params.isRandomizedEncryptionRequired())) {
             // Permit caller-provided IV when encrypting with this key
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
