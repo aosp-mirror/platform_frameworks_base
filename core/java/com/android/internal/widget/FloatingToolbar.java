@@ -1247,9 +1247,13 @@ public final class FloatingToolbar {
     }
 
     private static int getAdjustedToolbarWidth(Context context, int width) {
-        if (width <= 0 || width > getScreenWidth(context)) {
-            width = context.getResources()
-                    .getDimensionPixelSize(R.dimen.floating_toolbar_default_width);
+        int maximumWidth = getScreenWidth(context) - 2 * context.getResources()
+                .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
+
+        if (width <= 0 || width > maximumWidth) {
+            int defaultWidth = context.getResources()
+                    .getDimensionPixelSize(R.dimen.floating_toolbar_preferred_width);
+            width = Math.min(defaultWidth, maximumWidth);
         }
         return width;
     }
