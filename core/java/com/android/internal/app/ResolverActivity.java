@@ -102,7 +102,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private int mLastSelected = AbsListView.INVALID_POSITION;
     private boolean mResolvingHome = false;
     private int mProfileSwitchMessageId = -1;
-    private Intent mIntent;
+    private final ArrayList<Intent> mIntents = new ArrayList<>();
 
     private UsageStatsManager mUsm;
     private Map<String, UsageStats> mStats;
@@ -229,7 +229,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         final ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         mIconDpi = am.getLauncherLargeIconDensity();
 
-        mIntent = new Intent(intent);
+        mIntents.add(0, new Intent(intent));
         mAdapter = createAdapter(this, initialIntents, rList, mLaunchedFromUid, alwaysUseOption);
 
         final int layoutId;
@@ -250,7 +250,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             return;
         }
 
-        int count = mAdapter.mList.size();
+        int count = mAdapter.mDisplayList.size();
         if (count > 1 || (count == 1 && mAdapter.getOtherProfile() != null)) {
             setContentView(layoutId);
             mAdapterView = (AbsListView) findViewById(R.id.resolver_list);
@@ -376,8 +376,16 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
     }
 
+    protected final void setAdditionalTargets(Intent[] intents) {
+        if (intents != null) {
+            for (Intent intent : intents) {
+                mIntents.add(intent);
+            }
+        }
+    }
+
     public Intent getTargetIntent() {
-        return mIntent;
+        return mIntents.isEmpty() ? null : mIntents.get(0);
     }
 
     private String getReferrerPackageName() {
@@ -630,8 +638,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         TargetInfo target = mAdapter.targetInfoForPosition(which, filtered);
-        onTargetSelected(target, always);
-        finish();
+        if (onTargetSelected(target, always)) {
+            finish();
+        }
     }
 
     /**
@@ -641,7 +650,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         return defIntent;
     }
 
-    protected void onTargetSelected(TargetInfo target, boolean alwaysCheck) {
+    protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
         final ResolveInfo ri = target.getResolveInfo();
         final Intent intent = target != null ? target.getResolvedIntent() : null;
 
@@ -728,7 +737,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 ComponentName[] set = new ComponentName[N];
                 int bestMatch = 0;
                 for (int i=0; i<N; i++) {
-                    ResolveInfo r = mAdapter.mOrigResolveList.get(i);
+                    ResolveInfo r = mAdapter.mOrigResolveList.get(i).getResolveInfoAt(0);
                     set[i] = new ComponentName(r.activityInfo.packageName,
                             r.activityInfo.name);
                     if (r.match > bestMatch) bestMatch = r.match;
@@ -774,6 +783,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         if (target != null) {
             safelyStartActivity(target);
         }
+        return true;
     }
 
     void safelyStartActivity(TargetInfo cti) {
@@ -837,21 +847,33 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         private Drawable mDisplayIcon;
         private final CharSequence mExtendedInfo;
         private final Intent mResolvedIntent;
+        private final List<Intent> mSourceIntents = new ArrayList<>();
 
-        DisplayResolveInfo(ResolveInfo pri, CharSequence pLabel,
+        DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, CharSequence pLabel,
                 CharSequence pInfo, Intent pOrigIntent) {
+            mSourceIntents.add(originalIntent);
             mResolveInfo = pri;
             mDisplayLabel = pLabel;
             mExtendedInfo = pInfo;
 
             final Intent intent = new Intent(pOrigIntent != null ? pOrigIntent :
-                    getReplacementIntent(pri.activityInfo, mIntent));
+                    getReplacementIntent(pri.activityInfo, getTargetIntent()));
             intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
                     | Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
             final ActivityInfo ai = mResolveInfo.activityInfo;
             intent.setComponent(new ComponentName(ai.applicationInfo.packageName, ai.name));
 
             mResolvedIntent = intent;
+        }
+
+        private DisplayResolveInfo(DisplayResolveInfo other, Intent fillInIntent, int flags) {
+            mSourceIntents.addAll(other.getAllSourceIntents());
+            mResolveInfo = other.mResolveInfo;
+            mDisplayLabel = other.mDisplayLabel;
+            mDisplayIcon = other.mDisplayIcon;
+            mExtendedInfo = other.mExtendedInfo;
+            mResolvedIntent = new Intent(other.mResolvedIntent);
+            mResolvedIntent.fillIn(fillInIntent, flags);
         }
 
         public ResolveInfo getResolveInfo() {
@@ -864,6 +886,20 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         public Drawable getDisplayIcon() {
             return mDisplayIcon;
+        }
+
+        @Override
+        public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
+            return new DisplayResolveInfo(this, fillInIntent, flags);
+        }
+
+        @Override
+        public List<Intent> getAllSourceIntents() {
+            return mSourceIntents;
+        }
+
+        public void addAlternateSourceIntent(Intent alt) {
+            mSourceIntents.add(alt);
         }
 
         public void setDisplayIcon(Drawable icon) {
@@ -986,6 +1022,16 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
          * @return The drawable that should be used to represent this target
          */
         public Drawable getDisplayIcon();
+
+        /**
+         * Clone this target with the given fill-in information.
+         */
+        public TargetInfo cloneFilledIn(Intent fillInIntent, int flags);
+
+        /**
+         * @return the list of supported source intents deduped against this single target
+         */
+        public List<Intent> getAllSourceIntents();
     }
 
     class ResolveListAdapter extends BaseAdapter {
@@ -998,8 +1044,8 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         protected final LayoutInflater mInflater;
 
-        List<DisplayResolveInfo> mList;
-        List<ResolveInfo> mOrigResolveList;
+        List<DisplayResolveInfo> mDisplayList;
+        List<ResolvedComponentInfo> mOrigResolveList;
 
         private int mLastChosenPosition = -1;
         private boolean mFilterLastUsed;
@@ -1010,7 +1056,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             mBaseResolveList = rList;
             mLaunchedFromUid = launchedFromUid;
             mInflater = LayoutInflater.from(context);
-            mList = new ArrayList<>();
+            mDisplayList = new ArrayList<>();
             mFilterLastUsed = filterLastUsed;
             rebuildList();
         }
@@ -1027,7 +1073,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         public DisplayResolveInfo getFilteredItem() {
             if (mFilterLastUsed && mLastChosenPosition >= 0) {
                 // Not using getItem since it offsets to dodge this position for the list
-                return mList.get(mLastChosenPosition);
+                return mDisplayList.get(mLastChosenPosition);
             }
             return null;
         }
@@ -1048,11 +1094,12 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         private void rebuildList() {
-            List<ResolveInfo> currentResolveList;
+            List<ResolvedComponentInfo> currentResolveList = null;
 
             try {
+                final Intent primaryIntent = getTargetIntent();
                 mLastChosen = AppGlobals.getPackageManager().getLastChosenActivity(
-                        mIntent, mIntent.resolveTypeIfNeeded(getContentResolver()),
+                        primaryIntent, primaryIntent.resolveTypeIfNeeded(getContentResolver()),
                         PackageManager.MATCH_DEFAULT_ONLY);
             } catch (RemoteException re) {
                 Log.d(TAG, "Error calling setLastChosenActivity\n" + re);
@@ -1060,15 +1107,27 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
             // Clear the value of mOtherProfile from previous call.
             mOtherProfile = null;
-            mList.clear();
+            mDisplayList.clear();
             if (mBaseResolveList != null) {
-                currentResolveList = mOrigResolveList = mBaseResolveList;
+                currentResolveList = mOrigResolveList = new ArrayList<>();
+                addResolveListDedupe(currentResolveList, getTargetIntent(), mBaseResolveList);
             } else {
-                currentResolveList = mOrigResolveList = mPm.queryIntentActivities(mIntent,
-                        PackageManager.MATCH_DEFAULT_ONLY
-                        | (shouldGetResolvedFilter() ? PackageManager.GET_RESOLVED_FILTER : 0)
-                        | (shouldGetActivityMetadata() ? PackageManager.GET_META_DATA : 0)
-                );
+                final boolean shouldGetResolvedFilter = shouldGetResolvedFilter();
+                final boolean shouldGetActivityMetadata = shouldGetActivityMetadata();
+                for (int i = 0, N = mIntents.size(); i < N; i++) {
+                    final Intent intent = mIntents.get(i);
+                    final List<ResolveInfo> infos = mPm.queryIntentActivities(intent,
+                            PackageManager.MATCH_DEFAULT_ONLY
+                            | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)
+                            | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0));
+                    if (infos != null) {
+                        if (currentResolveList == null) {
+                            currentResolveList = mOrigResolveList = new ArrayList<>();
+                        }
+                        addResolveListDedupe(currentResolveList, intent, infos);
+                    }
+                }
+
                 // Filter out any activities that the launched uid does not
                 // have permission for.  We don't do this when we have an explicit
                 // list of resolved activities, because that only happens when
@@ -1076,14 +1135,15 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 // they gave us.
                 if (currentResolveList != null) {
                     for (int i=currentResolveList.size()-1; i >= 0; i--) {
-                        ActivityInfo ai = currentResolveList.get(i).activityInfo;
+                        ActivityInfo ai = currentResolveList.get(i)
+                                .getResolveInfoAt(0).activityInfo;
                         int granted = ActivityManager.checkComponentPermission(
                                 ai.permission, mLaunchedFromUid,
                                 ai.applicationInfo.uid, ai.exported);
                         if (granted != PackageManager.PERMISSION_GRANTED) {
                             // Access not allowed!
                             if (mOrigResolveList == currentResolveList) {
-                                mOrigResolveList = new ArrayList<ResolveInfo>(mOrigResolveList);
+                                mOrigResolveList = new ArrayList<>(mOrigResolveList);
                             }
                             currentResolveList.remove(i);
                         }
@@ -1094,9 +1154,10 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             if ((currentResolveList != null) && ((N = currentResolveList.size()) > 0)) {
                 // Only display the first matches that are either of equal
                 // priority or have asked to be default options.
-                ResolveInfo r0 = currentResolveList.get(0);
+                ResolvedComponentInfo rci0 = currentResolveList.get(0);
+                ResolveInfo r0 = rci0.getResolveInfoAt(0);
                 for (int i=1; i<N; i++) {
-                    ResolveInfo ri = currentResolveList.get(i);
+                    ResolveInfo ri = currentResolveList.get(i).getResolveInfoAt(0);
                     if (DEBUG) Log.v(
                         TAG,
                         r0.activityInfo.name + "=" +
@@ -1107,7 +1168,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                         r0.isDefault != ri.isDefault) {
                         while (i < N) {
                             if (mOrigResolveList == currentResolveList) {
-                                mOrigResolveList = new ArrayList<ResolveInfo>(mOrigResolveList);
+                                mOrigResolveList = new ArrayList<>(mOrigResolveList);
                             }
                             currentResolveList.remove(i);
                             N--;
@@ -1115,9 +1176,8 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                     }
                 }
                 if (N > 1) {
-                    Comparator<ResolveInfo> rComparator =
-                            new ResolverComparator(ResolverActivity.this, mIntent);
-                    Collections.sort(currentResolveList, rComparator);
+                    Collections.sort(currentResolveList,
+                            new ResolverComparator(ResolverActivity.this, getTargetIntent()));
                 }
                 // First put the initial items at the top.
                 if (mInitialIntents != null) {
@@ -1146,14 +1206,15 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                             ri.nonLocalizedLabel = li.getNonLocalizedLabel();
                             ri.icon = li.getIconResource();
                         }
-                        addResolveInfo(new DisplayResolveInfo(ri,
+                        addResolveInfo(new DisplayResolveInfo(ii, ri,
                                 ri.loadLabel(getPackageManager()), null, ii));
                     }
                 }
 
                 // Check for applications with same name and use application name or
                 // package name if necessary
-                r0 = currentResolveList.get(0);
+                rci0 = currentResolveList.get(0);
+                r0 = rci0.getResolveInfoAt(0);
                 int start = 0;
                 CharSequence r0Label =  r0.loadLabel(mPm);
                 mHasExtendedInfo = false;
@@ -1161,7 +1222,8 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                     if (r0Label == null) {
                         r0Label = r0.activityInfo.packageName;
                     }
-                    ResolveInfo ri = currentResolveList.get(i);
+                    ResolvedComponentInfo rci = currentResolveList.get(i);
+                    ResolveInfo ri = rci.getResolveInfoAt(0);
                     CharSequence riLabel = ri.loadLabel(mPm);
                     if (riLabel == null) {
                         riLabel = ri.activityInfo.packageName;
@@ -1169,13 +1231,14 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                     if (riLabel.equals(r0Label)) {
                         continue;
                     }
-                    processGroup(currentResolveList, start, (i-1), r0, r0Label);
+                    processGroup(currentResolveList, start, (i-1), rci0, r0Label);
+                    rci0 = rci;
                     r0 = ri;
                     r0Label = riLabel;
                     start = i;
                 }
                 // Process last group
-                processGroup(currentResolveList, start, (N-1), r0, r0Label);
+                processGroup(currentResolveList, start, (N-1), rci0, r0Label);
             }
 
             // Layout doesn't handle both profile button and last chosen
@@ -1188,6 +1251,36 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             onListRebuilt();
         }
 
+        private void addResolveListDedupe(List<ResolvedComponentInfo> into, Intent intent,
+                List<ResolveInfo> from) {
+            final int fromCount = from.size();
+            final int intoCount = into.size();
+            for (int i = 0; i < fromCount; i++) {
+                final ResolveInfo newInfo = from.get(i);
+                boolean found = false;
+                // Only loop to the end of into as it was before we started; no dupes in from.
+                for (int j = 0; j < intoCount; j++) {
+                    final ResolvedComponentInfo rci = into.get(i);
+                    if (isSameResolvedComponent(newInfo, rci)) {
+                        found = true;
+                        rci.add(intent, newInfo);
+                        break;
+                    }
+                }
+                if (!found) {
+                    into.add(new ResolvedComponentInfo(new ComponentName(
+                            newInfo.activityInfo.packageName, newInfo.activityInfo.name),
+                            intent, newInfo));
+                }
+            }
+        }
+
+        private boolean isSameResolvedComponent(ResolveInfo a, ResolvedComponentInfo b) {
+            final ActivityInfo ai = a.activityInfo;
+            return ai.packageName.equals(b.name.getPackageName())
+                    && ai.name.equals(b.name.getClassName());
+        }
+
         public void onListRebuilt() {
             // This space for rent
         }
@@ -1196,18 +1289,18 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             return mFilterLastUsed;
         }
 
-        private void processGroup(List<ResolveInfo> rList, int start, int end, ResolveInfo ro,
-                CharSequence roLabel) {
+        private void processGroup(List<ResolvedComponentInfo> rList, int start, int end,
+                ResolvedComponentInfo ro, CharSequence roLabel) {
             // Process labels from start to i
             int num = end - start+1;
             if (num == 1) {
                 // No duplicate labels. Use label for entry at start
-                addResolveInfo(new DisplayResolveInfo(ro, roLabel, null, null));
-                updateLastChosenPosition(ro);
+                addResolveInfoWithAlternates(ro, null, roLabel);
             } else {
                 mHasExtendedInfo = true;
                 boolean usePkg = false;
-                CharSequence startApp = ro.activityInfo.applicationInfo.loadLabel(mPm);
+                CharSequence startApp = ro.getResolveInfoAt(0).activityInfo.applicationInfo
+                        .loadLabel(mPm);
                 if (startApp == null) {
                     usePkg = true;
                 }
@@ -1217,7 +1310,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                         new HashSet<CharSequence>();
                     duplicates.add(startApp);
                     for (int j = start+1; j <= end ; j++) {
-                        ResolveInfo jRi = rList.get(j);
+                        ResolveInfo jRi = rList.get(j).getResolveInfoAt(0);
                         CharSequence jApp = jRi.activityInfo.applicationInfo.loadLabel(mPm);
                         if ( (jApp == null) || (duplicates.contains(jApp))) {
                             usePkg = true;
@@ -1230,26 +1323,46 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                     duplicates.clear();
                 }
                 for (int k = start; k <= end; k++) {
-                    ResolveInfo add = rList.get(k);
+                    final ResolvedComponentInfo rci = rList.get(k);
+                    final ResolveInfo add = rci.getResolveInfoAt(0);
+                    final CharSequence extraInfo;
                     if (usePkg) {
-                        // Use application name for all entries from start to end-1
-                        addResolveInfo(new DisplayResolveInfo(add, roLabel,
-                                add.activityInfo.packageName, null));
-                    } else {
                         // Use package name for all entries from start to end-1
-                        addResolveInfo(new DisplayResolveInfo(add, roLabel,
-                                add.activityInfo.applicationInfo.loadLabel(mPm), null));
+                        extraInfo = add.activityInfo.packageName;
+                    } else {
+                        // Use application name for all entries from start to end-1
+                        extraInfo = add.activityInfo.applicationInfo.loadLabel(mPm);
                     }
-                    updateLastChosenPosition(add);
+                    addResolveInfoWithAlternates(rci, extraInfo, roLabel);
                 }
             }
+        }
+
+        private void addResolveInfoWithAlternates(ResolvedComponentInfo rci,
+                CharSequence extraInfo, CharSequence roLabel) {
+            final int count = rci.getCount();
+            final Intent intent = rci.getIntentAt(0);
+            final ResolveInfo add = rci.getResolveInfoAt(0);
+            final Intent replaceIntent = getReplacementIntent(add.activityInfo, intent);
+            final DisplayResolveInfo dri = new DisplayResolveInfo(intent, add, roLabel,
+                    extraInfo, replaceIntent);
+            addResolveInfo(dri);
+            if (replaceIntent == intent) {
+                // Only add alternates if we didn't get a specific replacement from
+                // the caller. If we have one it trumps potential alternates.
+                for (int i = 1, N = count; i < N; i++) {
+                    final Intent altIntent = rci.getIntentAt(i);
+                    dri.addAlternateSourceIntent(altIntent);
+                }
+            }
+            updateLastChosenPosition(add);
         }
 
         private void updateLastChosenPosition(ResolveInfo info) {
             if (mLastChosen != null
                     && mLastChosen.activityInfo.packageName.equals(info.activityInfo.packageName)
                     && mLastChosen.activityInfo.name.equals(info.activityInfo.name)) {
-                mLastChosenPosition = mList.size() - 1;
+                mLastChosenPosition = mDisplayList.size() - 1;
             }
         }
 
@@ -1259,20 +1372,21 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 // The first one we see gets special treatment.
                 mOtherProfile = dri;
             } else {
-                mList.add(dri);
+                mDisplayList.add(dri);
             }
         }
 
         public ResolveInfo resolveInfoForPosition(int position, boolean filtered) {
-            return (filtered ? getItem(position) : mList.get(position)).getResolveInfo();
+            return (filtered ? getItem(position) : mDisplayList.get(position))
+                    .getResolveInfo();
         }
 
         public TargetInfo targetInfoForPosition(int position, boolean filtered) {
-            return filtered ? getItem(position) : mList.get(position);
+            return filtered ? getItem(position) : mDisplayList.get(position);
         }
 
         public int getCount() {
-            int result = mList.size();
+            int result = mDisplayList.size();
             if (mFilterLastUsed && mLastChosenPosition >= 0) {
                 result--;
             }
@@ -1283,7 +1397,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             if (mFilterLastUsed && mLastChosenPosition >= 0 && position >= mLastChosenPosition) {
                 position++;
             }
-            return mList.get(position);
+            return mDisplayList.get(position);
         }
 
         public long getItemId(int position) {
@@ -1295,8 +1409,8 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         public boolean hasResolvedTarget(ResolveInfo info) {
-            for (int i = 0, N = mList.size(); i < N; i++) {
-                if (info.equals(mList.get(i).getResolveInfo())) {
+            for (int i = 0, N = mDisplayList.size(); i < N; i++) {
+                if (info.equals(mDisplayList.get(i).getResolveInfo())) {
                     return true;
                 }
             }
@@ -1304,11 +1418,12 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         protected int getDisplayResolveInfoCount() {
-            return mList.size();
+            return mDisplayList.size();
         }
 
         protected DisplayResolveInfo getDisplayResolveInfo(int index) {
-            return mList.get(index);
+            // Used to query services. We only query services for primary targets, not alternates.
+            return mDisplayList.get(index);
         }
 
         public final View getView(int position, View convertView, ViewGroup parent) {
@@ -1346,6 +1461,52 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 new LoadAdapterIconTask((DisplayResolveInfo) info).execute();
             }
             holder.icon.setImageDrawable(info.getDisplayIcon());
+        }
+    }
+
+    static final class ResolvedComponentInfo {
+        public final ComponentName name;
+        private final List<Intent> mIntents = new ArrayList<>();
+        private final List<ResolveInfo> mResolveInfos = new ArrayList<>();
+
+        public ResolvedComponentInfo(ComponentName name, Intent intent, ResolveInfo info) {
+            this.name = name;
+            add(intent, info);
+        }
+
+        public void add(Intent intent, ResolveInfo info) {
+            mIntents.add(intent);
+            mResolveInfos.add(info);
+        }
+
+        public int getCount() {
+            return mIntents.size();
+        }
+
+        public Intent getIntentAt(int index) {
+            return index >= 0 ? mIntents.get(index) : null;
+        }
+
+        public ResolveInfo getResolveInfoAt(int index) {
+            return index >= 0 ? mResolveInfos.get(index) : null;
+        }
+
+        public int findIntent(Intent intent) {
+            for (int i = 0, N = mIntents.size(); i < N; i++) {
+                if (intent.equals(mIntents.get(i))) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public int findResolveInfo(ResolveInfo info) {
+            for (int i = 0, N = mResolveInfos.size(); i < N; i++) {
+                if (info.equals(mResolveInfos.get(i))) {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 
@@ -1435,7 +1596,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 && match <= IntentFilter.MATCH_CATEGORY_PATH;
     }
 
-    class ResolverComparator implements Comparator<ResolveInfo> {
+    class ResolverComparator implements Comparator<ResolvedComponentInfo> {
         private final Collator mCollator;
         private final boolean mHttp;
 
@@ -1446,7 +1607,10 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         @Override
-        public int compare(ResolveInfo lhs, ResolveInfo rhs) {
+        public int compare(ResolvedComponentInfo lhsp, ResolvedComponentInfo rhsp) {
+            final ResolveInfo lhs = lhsp.getResolveInfoAt(0);
+            final ResolveInfo rhs = rhsp.getResolveInfoAt(0);
+
             // We want to put the one targeted to another user at the end of the dialog.
             if (lhs.targetUserId != UserHandle.USER_CURRENT) {
                 return 1;
@@ -1487,7 +1651,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 if (stats != null) {
                     return stats.getTotalTimeInForeground();
                 }
-
             }
             return 0;
         }

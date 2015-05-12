@@ -93,7 +93,7 @@ public class UsbResolverActivity extends ResolverActivity {
     }
 
     @Override
-    protected void onTargetSelected(TargetInfo target, boolean alwaysCheck) {
+    protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
         final ResolveInfo ri = target.getResolveInfo();
         try {
             IBinder b = ServiceManager.getService(USB_SERVICE);
@@ -129,5 +129,6 @@ public class UsbResolverActivity extends ResolverActivity {
         } catch (RemoteException e) {
             Log.e(TAG, "onIntentSelected failed", e);
         }
+        return true;
     }
 }
