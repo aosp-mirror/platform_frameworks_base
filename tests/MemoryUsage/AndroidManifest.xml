@@ -6,6 +6,8 @@
                      android:name="com.android.tests.memoryusage.MemoryUsageInstrumentation"
                      android:targetPackage="com.android.tests.memoryusage" />
 
+    <uses-permission android:name="android.permission.REAL_GET_TASKS" />
+
     <application android:label="Memory Usage Test">
         <uses-library android:name="android.test.runner" />
     </application>
