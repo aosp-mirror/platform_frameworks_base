@@ -28329,9 +28329,6 @@ package android.security {
     field public static final int UNSPECIFIED = -1; // 0xffffffff
   }
 
-  public static abstract class EcIesParameterSpec.PointFormatEnum implements java.lang.annotation.Annotation {
-  }
-
   public final class KeyChain {
     ctor public KeyChain();
     method public static void choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, java.lang.String[], java.security.Principal[], java.lang.String, int, java.lang.String);
@@ -28474,17 +28471,11 @@ package android.security {
     field public static final java.lang.String RSA = "RSA";
   }
 
-  public static abstract class KeyStoreKeyProperties.AlgorithmEnum implements java.lang.annotation.Annotation {
-  }
-
   public static abstract class KeyStoreKeyProperties.BlockMode {
     field public static final java.lang.String CBC = "CBC";
     field public static final java.lang.String CTR = "CTR";
     field public static final java.lang.String ECB = "ECB";
     field public static final java.lang.String GCM = "GCM";
-  }
-
-  public static abstract class KeyStoreKeyProperties.BlockModeEnum implements java.lang.annotation.Annotation {
   }
 
   public static abstract class KeyStoreKeyProperties.Digest {
@@ -28497,9 +28488,6 @@ package android.security {
     field public static final java.lang.String SHA512 = "SHA-512";
   }
 
-  public static abstract class KeyStoreKeyProperties.DigestEnum implements java.lang.annotation.Annotation {
-  }
-
   public static abstract class KeyStoreKeyProperties.EncryptionPadding {
     field public static final java.lang.String NONE = "NoPadding";
     field public static final java.lang.String PKCS7 = "PKCS7Padding";
@@ -28507,16 +28495,10 @@ package android.security {
     field public static final java.lang.String RSA_PKCS1 = "PKCS1Padding";
   }
 
-  public static abstract class KeyStoreKeyProperties.EncryptionPaddingEnum implements java.lang.annotation.Annotation {
-  }
-
   public static abstract class KeyStoreKeyProperties.Origin {
     field public static final int GENERATED = 1; // 0x1
     field public static final int IMPORTED = 2; // 0x2
     field public static final int UNKNOWN = 4; // 0x4
-  }
-
-  public static abstract class KeyStoreKeyProperties.OriginEnum implements java.lang.annotation.Annotation {
   }
 
   public static abstract class KeyStoreKeyProperties.Purpose {
@@ -28526,15 +28508,9 @@ package android.security {
     field public static final int VERIFY = 8; // 0x8
   }
 
-  public static abstract class KeyStoreKeyProperties.PurposeEnum implements java.lang.annotation.Annotation {
-  }
-
   public static abstract class KeyStoreKeyProperties.SignaturePadding {
     field public static final java.lang.String RSA_PKCS1 = "PKCS1";
     field public static final java.lang.String RSA_PSS = "PSS";
-  }
-
-  public static abstract class KeyStoreKeyProperties.SignaturePaddingEnum implements java.lang.annotation.Annotation {
   }
 
   public class KeyStoreKeySpec implements java.security.spec.KeySpec {
