@@ -313,6 +313,10 @@ public class DeviceIdleController extends SystemService {
             return getAppIdWhitelistInternal();
         }
 
+        @Override public boolean isPowerSaveWhitelistApp(String name) {
+            return isPowerSaveWhitelistAppInternal(name);
+        }
+
         @Override protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             DeviceIdleController.this.dump(fd, pw, args);
         }
@@ -449,6 +453,13 @@ public class DeviceIdleController extends SystemService {
                 cur++;
             }
             return apps;
+        }
+    }
+
+    public boolean isPowerSaveWhitelistAppInternal(String packageName) {
+        synchronized (this) {
+            return mPowerSaveWhitelistApps.containsKey(packageName)
+                    || mPowerSaveWhitelistUserApps.containsKey(packageName);
         }
     }
 
