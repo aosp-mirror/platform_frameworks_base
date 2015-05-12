@@ -94,11 +94,11 @@ public class CameraDeviceImpl extends CameraDevice {
     private final int mTotalPartialCount;
 
     /**
-     * A list tracking request and its expected last frame.
-     * Updated when calling ICameraDeviceUser methods.
+     * A list tracking request and its expected last regular frame number and last reprocess frame
+     * number. Updated when calling ICameraDeviceUser methods.
      */
-    private final List<SimpleEntry</*frameNumber*/Long, /*requestId*/Integer>>
-            mFrameNumberRequestPairs = new ArrayList<SimpleEntry<Long, Integer>>();
+    private final List<RequestLastFrameNumbersHolder> mRequestLastFrameNumbersList =
+            new ArrayList<>();
 
     /**
      * An object tracking received frame numbers.
@@ -653,8 +653,8 @@ public class CameraDeviceImpl extends CameraDevice {
      *
      * <p>If lastFrameNumber is NO_FRAMES_CAPTURED, it means that the request was never
      * sent to HAL. Then onCaptureSequenceAborted is immediately triggered.
-     * If lastFrameNumber is non-negative, then the requestId and lastFrameNumber pair
-     * is added to the list mFrameNumberRequestPairs.</p>
+     * If lastFrameNumber is non-negative, then the requestId and lastFrameNumber as the last
+     * regular frame number will be added to the list mRequestLastFrameNumbersList.</p>
      *
      * @param requestId the request ID of the current repeating request.
      *
@@ -693,10 +693,6 @@ public class CameraDeviceImpl extends CameraDevice {
                                         "early trigger sequence complete for request %d",
                                         requestId));
                             }
-                            if (lastFrameNumber < Integer.MIN_VALUE
-                                    || lastFrameNumber > Integer.MAX_VALUE) {
-                                throw new AssertionError(lastFrameNumber + " cannot be cast to int");
-                            }
                             holder.getCallback().onCaptureSequenceAborted(
                                     CameraDeviceImpl.this,
                                     requestId);
@@ -710,9 +706,11 @@ public class CameraDeviceImpl extends CameraDevice {
                         requestId));
             }
         } else {
-            mFrameNumberRequestPairs.add(
-                    new SimpleEntry<Long, Integer>(lastFrameNumber,
-                            requestId));
+            // This function is only called for regular request so lastFrameNumber is the last
+            // regular frame number.
+            mRequestLastFrameNumbersList.add(new RequestLastFrameNumbersHolder(requestId,
+                    lastFrameNumber));
+
             // It is possible that the last frame has already arrived, so we need to check
             // for sequence completion right away
             checkAndFireSequenceComplete();
@@ -779,8 +777,8 @@ public class CameraDeviceImpl extends CameraDevice {
                 }
                 mRepeatingRequestId = requestId;
             } else {
-                mFrameNumberRequestPairs.add(
-                        new SimpleEntry<Long, Integer>(lastFrameNumber, requestId));
+                mRequestLastFrameNumbersList.add(new RequestLastFrameNumbersHolder(requestList,
+                        requestId, lastFrameNumber));
             }
 
             if (mIdle) {
@@ -1146,7 +1144,101 @@ public class CameraDeviceImpl extends CameraDevice {
         public int getSessionId() {
             return mSessionId;
         }
+    }
 
+    /**
+     * This class holds a capture ID and its expected last regular frame number and last reprocess
+     * frame number.
+     */
+    static class RequestLastFrameNumbersHolder {
+        // request ID
+        private final int mRequestId;
+        // The last regular frame number for this request ID. It's
+        // CaptureCallback.NO_FRAMES_CAPTURED if the request ID has no regular request.
+        private final long mLastRegularFrameNumber;
+        // The last reprocess frame number for this request ID. It's
+        // CaptureCallback.NO_FRAMES_CAPTURED if the request ID has no reprocess request.
+        private final long mLastReprocessFrameNumber;
+
+        /**
+         * Create a request-last-frame-numbers holder with a list of requests, request ID, and
+         * the last frame number returned by camera service.
+         */
+        public RequestLastFrameNumbersHolder(List<CaptureRequest> requestList, int requestId,
+                long lastFrameNumber) {
+            long lastRegularFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
+            long lastReprocessFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
+            long frameNumber = lastFrameNumber;
+
+            if (lastFrameNumber < requestList.size() - 1) {
+                throw new IllegalArgumentException("lastFrameNumber: " + lastFrameNumber +
+                        " should be at least " + (requestList.size() - 1) + " for the number of " +
+                        " requests in the list: " + requestList.size());
+            }
+
+            // find the last regular frame number and the last reprocess frame number
+            for (int i = requestList.size() - 1; i >= 0; i--) {
+                CaptureRequest request = requestList.get(i);
+                if (request.isReprocess() && lastReprocessFrameNumber ==
+                        CaptureCallback.NO_FRAMES_CAPTURED) {
+                    lastReprocessFrameNumber = frameNumber;
+                } else if (!request.isReprocess() && lastRegularFrameNumber ==
+                        CaptureCallback.NO_FRAMES_CAPTURED) {
+                    lastRegularFrameNumber = frameNumber;
+                }
+
+                if (lastReprocessFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED &&
+                        lastRegularFrameNumber != CaptureCallback.NO_FRAMES_CAPTURED) {
+                    break;
+                }
+
+                frameNumber--;
+            }
+
+            mLastRegularFrameNumber = lastRegularFrameNumber;
+            mLastReprocessFrameNumber = lastReprocessFrameNumber;
+            mRequestId = requestId;
+        }
+
+        /**
+         * Create a request-last-frame-numbers holder with a request ID and last regular frame
+         * number.
+         */
+        public RequestLastFrameNumbersHolder(int requestId, long lastRegularFrameNumber) {
+            mLastRegularFrameNumber = lastRegularFrameNumber;
+            mLastReprocessFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
+            mRequestId = requestId;
+        }
+
+        /**
+         * Return the last regular frame number. Return CaptureCallback.NO_FRAMES_CAPTURED if
+         * it contains no regular request.
+         */
+        public long getLastRegularFrameNumber() {
+            return mLastRegularFrameNumber;
+        }
+
+        /**
+         * Return the last reprocess frame number. Return CaptureCallback.NO_FRAMES_CAPTURED if
+         * it contains no reprocess request.
+         */
+        public long getLastReprocessFrameNumber() {
+            return mLastReprocessFrameNumber;
+        }
+
+        /**
+         * Return the last frame number overall.
+         */
+        public long getLastFrameNumber() {
+            return Math.max(mLastRegularFrameNumber, mLastReprocessFrameNumber);
+        }
+
+        /**
+         * Return the request ID.
+         */
+        public int getRequestId() {
+            return mRequestId;
+        }
     }
 
     /**
@@ -1154,8 +1246,8 @@ public class CameraDeviceImpl extends CameraDevice {
      */
     public class FrameNumberTracker {
 
-        private long mCompletedFrameNumber = -1;
-        private long mCompletedReprocessFrameNumber = -1;
+        private long mCompletedFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
+        private long mCompletedReprocessFrameNumber = CaptureCallback.NO_FRAMES_CAPTURED;
         /** the skipped frame numbers that belong to regular results */
         private final LinkedList<Long> mSkippedRegularFrameNumbers = new LinkedList<Long>();
         /** the skipped frame numbers that belong to reprocess results */
@@ -1360,11 +1452,11 @@ public class CameraDeviceImpl extends CameraDevice {
         long completedFrameNumber = mFrameNumberTracker.getCompletedFrameNumber();
         long completedReprocessFrameNumber = mFrameNumberTracker.getCompletedReprocessFrameNumber();
         boolean isReprocess = false;
-        Iterator<SimpleEntry<Long, Integer> > iter = mFrameNumberRequestPairs.iterator();
+        Iterator<RequestLastFrameNumbersHolder> iter = mRequestLastFrameNumbersList.iterator();
         while (iter.hasNext()) {
-            final SimpleEntry<Long, Integer> frameNumberRequestPair = iter.next();
+            final RequestLastFrameNumbersHolder requestLastFrameNumbers = iter.next();
             boolean sequenceCompleted = false;
-            final int requestId = frameNumberRequestPair.getValue();
+            final int requestId = requestLastFrameNumbers.getRequestId();
             final CaptureCallbackHolder holder;
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) {
@@ -1376,19 +1468,22 @@ public class CameraDeviceImpl extends CameraDevice {
                 holder = (index >= 0) ?
                         mCaptureCallbackMap.valueAt(index) : null;
                 if (holder != null) {
-                    isReprocess = holder.getRequest().isReprocess();
+                    long lastRegularFrameNumber =
+                            requestLastFrameNumbers.getLastRegularFrameNumber();
+                    long lastReprocessFrameNumber =
+                            requestLastFrameNumbers.getLastReprocessFrameNumber();
+
                     // check if it's okay to remove request from mCaptureCallbackMap
-                    if ((isReprocess && frameNumberRequestPair.getKey() <=
-                            completedReprocessFrameNumber) || (!isReprocess &&
-                            frameNumberRequestPair.getKey() <= completedFrameNumber)) {
+                    if (lastRegularFrameNumber <= completedFrameNumber &&
+                            lastReprocessFrameNumber <= completedReprocessFrameNumber) {
                         sequenceCompleted = true;
                         mCaptureCallbackMap.removeAt(index);
                         if (DEBUG) {
                             Log.v(TAG, String.format(
-                                    "remove holder for requestId %d, "
-                                    + "because lastFrame %d is <= %d",
-                                    requestId, frameNumberRequestPair.getKey(),
-                                    completedFrameNumber));
+                                    "Remove holder for requestId %d, because lastRegularFrame %d " +
+                                    "is <= %d and lastReprocessFrame %d is <= %d", requestId,
+                                    lastRegularFrameNumber, completedFrameNumber,
+                                    lastReprocessFrameNumber, completedReprocessFrameNumber));
                         }
                     }
                 }
@@ -1412,16 +1507,10 @@ public class CameraDeviceImpl extends CameraDevice {
                                         requestId));
                             }
 
-                            long lastFrameNumber = frameNumberRequestPair.getKey();
-                            if (lastFrameNumber < Integer.MIN_VALUE
-                                    || lastFrameNumber > Integer.MAX_VALUE) {
-                                throw new AssertionError(lastFrameNumber
-                                        + " cannot be cast to int");
-                            }
                             holder.getCallback().onCaptureSequenceCompleted(
                                 CameraDeviceImpl.this,
                                 requestId,
-                                lastFrameNumber);
+                                requestLastFrameNumbers.getLastFrameNumber());
                         }
                     }
                 };
