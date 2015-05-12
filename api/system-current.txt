@@ -32188,7 +32188,7 @@ package android.telecom {
     method public final java.util.List<android.telecom.Connection> getConnections();
     method public final android.telecom.DisconnectCause getDisconnectCause();
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
-    method public final android.telecom.Connection getPrimaryConnection();
+    method public android.telecom.Connection getPrimaryConnection();
     method public final int getState();
     method public final android.telecom.StatusHints getStatusHints();
     method public android.telecom.Connection.VideoProvider getVideoProvider();
