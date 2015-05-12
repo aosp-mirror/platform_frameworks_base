@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -101,6 +102,12 @@ public class EmergencyButton extends Button {
                 takeEmergencyCallAction();
             }
         });
+        updateEmergencyCallButton();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         updateEmergencyCallButton();
     }
 
