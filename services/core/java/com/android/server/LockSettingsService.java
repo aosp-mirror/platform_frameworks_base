@@ -100,20 +100,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
+                // Notify keystore that a new user was added.
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                final int userSysUid = UserHandle.getUid(userHandle, Process.SYSTEM_UID);
                 final KeyStore ks = KeyStore.getInstance();
-
-                // Clear up keystore in case anything was left behind by previous users
-                ks.resetUid(userSysUid);
-
-                // If this user has a parent, sync with its keystore password
                 final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
                 final UserInfo parentInfo = um.getProfileParent(userHandle);
-                if (parentInfo != null) {
-                    final int parentSysUid = UserHandle.getUid(parentInfo.id, Process.SYSTEM_UID);
-                    ks.syncUid(parentSysUid, userSysUid);
-                }
+                final int parentHandle = parentInfo != null ? parentInfo.id : -1;
+                ks.onUserAdded(userHandle, parentHandle);
             } else if (Intent.ACTION_USER_STARTING.equals(intent.getAction())) {
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 mStorage.prefetchUser(userHandle);
@@ -392,8 +385,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.removeUser(userId);
 
         final KeyStore ks = KeyStore.getInstance();
-        final int userUid = UserHandle.getUid(userId, Process.SYSTEM_UID);
-        ks.resetUid(userUid);
+        ks.onUserRemoved(userId);
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
