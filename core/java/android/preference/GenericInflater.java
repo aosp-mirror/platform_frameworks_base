@@ -376,6 +376,7 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
                 Class clazz = mContext.getClassLoader().loadClass(
                         prefix != null ? (prefix + name) : name);
                 constructor = clazz.getConstructor(mConstructorSignature);
+                constructor.setAccessible(true);
                 sConstructorMap.put(name, constructor);
             }
 
