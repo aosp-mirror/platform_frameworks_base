@@ -637,17 +637,15 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Assigns a position of the {@link Surface} passed by {@link #onSetSurface}. The position
-         * is relative to an overlay view.
+         * Assigns a size and position to the surface passed in {@link #onSetSurface}. The position
+         * is relative to the overlay view that sits on top of this surface.
          *
          * @param left Left position in pixels, relative to the overlay view.
          * @param top Top position in pixels, relative to the overlay view.
          * @param right Right position in pixels, relative to the overlay view.
          * @param bottom Bottom position in pixels, relative to the overlay view.
          * @see #onOverlayViewSizeChanged
-         * @hide
          */
-        @SystemApi
         public void layoutSurface(final int left, final int top, final int right,
                 final int bottom) {
             if (left > right || top > bottom) {
@@ -701,41 +699,40 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sets the {@link Surface} for the current input session on which the TV input renders
-         * video.
+         * Called when the application sets the surface.
          *
-         * <p>When {@code setSurface(null)} is called, the implementation should stop using the
-         * Surface object previously given and release any references to it.
+         * <p>The TV input service should render video onto the given surface. When called with
+         * {@code null}, the input service should immediately release any references to the
+         * currently set surface and stop using it.
          *
-         * @param surface possibly {@code null} {@link Surface} the application passes to this TV
-         *            input session.
-         * @return {@code true} if the surface was set, {@code false} otherwise.
+         * @param surface The surface to be used for video rendering. Can be {@code null}.
+         * @return {@code true} if the surface was set successfully, {@code false} otherwise.
          */
         public abstract boolean onSetSurface(@Nullable Surface surface);
 
         /**
-         * Called after any structural changes (format or size) have been made to the
-         * {@link Surface} passed by {@link #onSetSurface}. This method is always called
-         * at least once, after {@link #onSetSurface} with non-null {@link Surface} is called.
+         * Called after any structural changes (format or size) have been made to the surface passed
+         * in {@link #onSetSurface}. This method is always called at least once, after
+         * {@link #onSetSurface} is called with non-null surface.
          *
-         * @param format The new PixelFormat of the {@link Surface}.
-         * @param width The new width of the {@link Surface}.
-         * @param height The new height of the {@link Surface}.
+         * @param format The new PixelFormat of the surface.
+         * @param width The new width of the surface.
+         * @param height The new height of the surface.
          */
         public void onSurfaceChanged(int format, int width, int height) {
         }
 
         /**
-         * Called when a size of an overlay view is changed by the application. Even when the
-         * overlay view is disabled by {@link #setOverlayViewEnabled}, this is called. The size is
-         * same as the size of {@link Surface} in general. Once {@link #layoutSurface} is called,
-         * the sizes of {@link Surface} and the overlay view can be different.
+         * Called when the size of the overlay view is changed by the application.
+         *
+         * <p>This is always called at least once when the session is created regardless of whether
+         * the overlay view is enabled or not. The overlay view size is the same as the containing
+         * {@link TvView}. Note that the size of the underlying surface can be different if the
+         * surface was changed by calling {@link #layoutSurface}.
          *
          * @param width The width of the overlay view.
          * @param height The height of the overlay view.
-         * @hide
          */
-        @SystemApi
         public void onOverlayViewSizeChanged(int width, int height) {
         }
 
