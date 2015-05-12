@@ -32,7 +32,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageVolume;
@@ -349,6 +348,11 @@ public class StorageMeasurement {
         final Message finished = mMeasurementHandler.obtainMessage(MeasurementHandler.MSG_COMPLETED,
                 details);
 
+        if (mVolume == null || !mVolume.isMountedReadable()) {
+            finished.sendToTarget();
+            return;
+        }
+
         if (mSharedVolume != null && mSharedVolume.isMountedReadable()) {
             final File basePath = mSharedVolume.getPathForUser(currentUser);
 
@@ -375,8 +379,10 @@ public class StorageMeasurement {
         }
 
         final File file = mVolume.getPath();
-        details.totalSize = file.getTotalSpace();
-        details.availSize = file.getFreeSpace();
+        if (file != null) {
+            details.totalSize = file.getTotalSpace();
+            details.availSize = file.getFreeSpace();
+        }
 
         // Measure all apps hosted on this volume for all users
         if (mVolume.getType() == VolumeInfo.TYPE_PRIVATE) {
