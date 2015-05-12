@@ -20,15 +20,6 @@ import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_SIDE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.Executor;
-
-import libcore.io.IoUtils;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -61,7 +52,18 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+
 import com.google.common.collect.Maps;
+
+import libcore.io.IoUtils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 abstract class BaseActivity extends Activity {
 
@@ -637,7 +639,6 @@ abstract class BaseActivity extends Activity {
         private SearchView mView;
 
         public void install(MenuItem menu) {
-            assert(mMenu == null);
             mMenu = menu;
             mView = (SearchView) menu.getActionView();
 
