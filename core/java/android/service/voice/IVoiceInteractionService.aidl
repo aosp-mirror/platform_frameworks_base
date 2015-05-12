@@ -23,4 +23,5 @@ oneway interface IVoiceInteractionService {
     void ready();
     void soundModelsChanged();
     void shutdown();
+    void launchVoiceAssistFromKeyguard();
 }

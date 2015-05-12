@@ -33,11 +33,11 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /**
- * Class to manage everything around the assist gesture.
+ * Class to manage everything related to assist in SystemUI.
  */
-public class AssistGestureManager {
+public class AssistManager {
 
-    private static final String TAG = "AssistGestureManager";
+    private static final String TAG = "AssistManager";
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
 
@@ -77,7 +77,7 @@ public class AssistGestureManager {
         }
     };
 
-    public AssistGestureManager(PhoneStatusBar bar, Context context) {
+    public AssistManager(PhoneStatusBar bar, Context context) {
         mContext = context;
         mBar = bar;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
@@ -194,6 +194,14 @@ public class AssistGestureManager {
         }
     }
 
+    public void launchVoiceAssistFromKeyguard() {
+        try {
+            mVoiceInteractionManagerService.launchVoiceAssistFromKeyguard();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to call launchVoiceAssistFromKeyguard", e);
+        }
+    }
+
     private boolean getVoiceInteractorSupportsAssistGesture() {
         try {
             return mVoiceInteractionManagerService.activeServiceSupportsAssist();
@@ -203,7 +211,16 @@ public class AssistGestureManager {
         }
     }
 
-    private ComponentName getVoiceInteractorComponentName() {
+    public boolean canVoiceAssistBeLaunchedFromKeyguard() {
+        try {
+            return mVoiceInteractionManagerService.activeServiceSupportsLaunchFromKeyguard();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to call activeServiceSupportsLaunchFromKeyguard", e);
+            return false;
+        }
+    }
+
+    public ComponentName getVoiceInteractorComponentName() {
         try {
             return mVoiceInteractionManagerService.getActiveServiceComponentName();
         } catch (RemoteException e) {

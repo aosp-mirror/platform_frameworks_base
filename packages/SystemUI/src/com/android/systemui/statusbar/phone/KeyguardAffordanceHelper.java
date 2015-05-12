@@ -131,6 +131,10 @@ public class KeyguardAffordanceHelper {
         mCenterIcon = mCallback.getCenterIcon();
         mRightIcon = mCallback.getRightIcon();
         mRightIcon.setIsLeft(false);
+        updatePreviews();
+    }
+
+    public void updatePreviews() {
         mLeftIcon.setPreviewView(mCallback.getLeftPreview());
         mRightIcon.setPreviewView(mCallback.getRightPreview());
     }
