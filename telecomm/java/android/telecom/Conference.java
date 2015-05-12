@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.telecom.Connection.VideoProvider;
 
 import java.util.ArrayList;
@@ -458,8 +459,10 @@ public abstract class Conference implements Conferenceable {
      * the connection from which the conference will retrieve its current state.
      *
      * @return The primary connection.
+     * @hide
      */
-    public Connection getPrimaryConnection() {
+    @SystemApi
+    public final Connection getPrimaryConnection() {
         if (mUnmodifiableChildConnections == null || mUnmodifiableChildConnections.isEmpty()) {
             return null;
         }
@@ -467,22 +470,42 @@ public abstract class Conference implements Conferenceable {
     }
 
     /**
-     * Sets the connect time of the {@code Conference}.
-     *
-     * @param connectTimeMillis The connection time, in milliseconds.
+     * @hide
+     * @deprecated Use {@link #setConnectionTime}.
      */
-    public void setConnectTimeMillis(long connectTimeMillis) {
-        mConnectTimeMillis = connectTimeMillis;
+    @Deprecated
+    @SystemApi
+    public final void setConnectTimeMillis(long connectTimeMillis) {
+        setConnectionTime(connectTimeMillis);
     }
 
     /**
-     * Retrieves the connect time of the {@code Conference}, if specified.  A value of
+     * Sets the connection start time of the {@code Conference}.
+     *
+     * @param connectionTimeMillis The connection time, in milliseconds.
+     */
+    public final void setConnectionTime(long connectionTimeMillis) {
+        mConnectTimeMillis = connectionTimeMillis;
+    }
+
+    /**
+     * @hide
+     * @deprecated Use {@link #getConnectionTime}.
+     */
+    @Deprecated
+    @SystemApi
+    public final long getConnectTimeMillis() {
+        return getConnectionTime();
+    }
+
+    /**
+     * Retrieves the connection start time of the {@code Conference}, if specified.  A value of
      * {@link #CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the start time
      * of the conference.
      *
-     * @return The time the {@code Conference} has been connected.
+     * @return The time at which the {@code Conference} was connected.
      */
-    public final long getConnectTimeMillis() {
+    public final long getConnectionTime() {
         return mConnectTimeMillis;
     }
 

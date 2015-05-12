@@ -32191,12 +32191,13 @@ package android.telecom {
     method public final void destroy();
     method public final android.telecom.AudioState getAudioState();
     method public final java.util.List<android.telecom.Connection> getConferenceableConnections();
-    method public final long getConnectTimeMillis();
+    method public final deprecated long getConnectTimeMillis();
     method public final int getConnectionCapabilities();
+    method public final long getConnectionTime();
     method public final java.util.List<android.telecom.Connection> getConnections();
     method public final android.telecom.DisconnectCause getDisconnectCause();
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
-    method public android.telecom.Connection getPrimaryConnection();
+    method public final android.telecom.Connection getPrimaryConnection();
     method public final int getState();
     method public final android.telecom.StatusHints getStatusHints();
     method public android.telecom.Connection.VideoProvider getVideoProvider();
@@ -32215,8 +32216,9 @@ package android.telecom {
     method public final void removeConnection(android.telecom.Connection);
     method public final void setActive();
     method public final void setConferenceableConnections(java.util.List<android.telecom.Connection>);
-    method public void setConnectTimeMillis(long);
+    method public final deprecated void setConnectTimeMillis(long);
     method public final void setConnectionCapabilities(int);
+    method public final void setConnectionTime(long);
     method public final void setDisconnected(android.telecom.DisconnectCause);
     method public final void setOnHold();
     method public final void setStatusHints(android.telecom.StatusHints);
