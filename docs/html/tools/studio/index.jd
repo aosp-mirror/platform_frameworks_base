@@ -173,7 +173,7 @@ To configure custom build settings in an Android Studio project, see
 <a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</p>
 
 
-<h3>Application ID for package identification </h3>
+<h3 id="app-id">Application ID for package identification </h3>
 <p>With the Android build system, the <em>applicationId</em> attribute is used to
 uniquely identify application packages for publishing. The application ID is set in the
 <em>android</em> section of the <code>build.gradle</code> file.
