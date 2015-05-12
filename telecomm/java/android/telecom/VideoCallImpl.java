@@ -98,7 +98,7 @@ public class VideoCallImpl extends VideoCall {
         }
 
         @Override
-        public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
+        public void changeCameraCapabilities(VideoProfile.CameraCapabilities cameraCapabilities) {
             mHandler.obtainMessage(MessageHandler.MSG_CHANGE_CAMERA_CAPABILITIES,
                     cameraCapabilities).sendToTarget();
         }
@@ -160,7 +160,7 @@ public class VideoCallImpl extends VideoCall {
                     break;
                 case MSG_CHANGE_CAMERA_CAPABILITIES:
                     mCallback.onCameraCapabilitiesChanged(
-                            (CameraCapabilities) msg.obj);
+                            (VideoProfile.CameraCapabilities) msg.obj);
                     break;
                 case MSG_CHANGE_VIDEO_QUALITY:
                     mVideoQuality = msg.arg1;
