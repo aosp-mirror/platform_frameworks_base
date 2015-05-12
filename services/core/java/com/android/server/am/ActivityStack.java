@@ -748,6 +748,14 @@ final class ActivityStack {
             return true;
         }
 
+        if (hasVisibleBehindActivity()) {
+            // Stop visible behind activity before going to sleep.
+            final ActivityRecord r = mActivityContainer.mActivityDisplay.mVisibleBehindActivity;
+            mStackSupervisor.mStoppingActivities.add(r);
+            if (DEBUG_STATES) Slog.v(TAG, "Sleep still waiting to stop visible behind " + r);
+            return true;
+        }
+
         return false;
     }
 
@@ -1007,7 +1015,7 @@ final class ActivityStack {
                     // the current instance before starting the new one.
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Destroying after pause: " + prev);
                     destroyActivityLocked(prev, true, "pause-config");
-                } else if (!hasVisibleBehindActivity()) {
+                } else if (!hasVisibleBehindActivity() || mService.isSleepingOrShuttingDown()) {
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
                     mStackSupervisor.mStoppingActivities.add(prev);
