@@ -36,13 +36,13 @@ cutting off grid items to communicate where the overflow is located.</p>
 <p>Avoid creating grid lists that scroll in two dimensions.</p>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/gridview_vertical.png">
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
 <h4>Vertical scrolling</h4>
 <p>Vertically scrolling grid list items are sorted in traditional western reading direction:
@@ -53,13 +53,13 @@ scheme when the user rotates the screen.</p>
   </div>
 </div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/gridview_horizontal.png">
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
 <h4>Horizontal scrolling</h4>
 <p>Horizontally scrolling lists fix the vertical axis of the item grid. Compared to vertically
@@ -80,13 +80,13 @@ navigation.</p>
 <p>Use labels to display additional contextual information for your grid list items.</p>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
     <img src="{@docRoot}design/media/gridview_style.png">
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
 <h4>Style</h4>
 <p>Use semi-transparent panels on top of the grid list items to display your labels. This allows you to

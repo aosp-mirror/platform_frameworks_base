@@ -24,8 +24,8 @@ page.metaDescription=With Google Play services, your app can take advantage of t
 </div>
 </div>
 
-  <div class="layout-content-row">
-  <div class="layout-content-col span-4">
+  <div class="cols">
+  <div class="col-4">
 
 <h4>Google Technology</h4>
 <p>Google Play services provides you with easy access to Google services and is
@@ -34,7 +34,7 @@ provided for each service that let you implement the functionality you want
 easier and faster.</p>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <h4>Standard Authorization</h4>
 <p>All products in Google Play services share a common authorization API
@@ -43,7 +43,7 @@ easier and faster.</p>
   to Google services.</p>
 
   </div>
-  <div class="layout-content-col span-4">
+  <div class="col-4">
 
 <h4>Automatic Updates</h4>
 <p>Devices running Android 2.3 or higher that have the Google Play Store
@@ -666,8 +666,8 @@ announcement <a href="http://android-developers.blogspot.com/2014/03/google-play
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
     <h4 id="apk">The Google Play services APK</h4>
     <p>
         The Google Play services APK contains the individual Google services and runs
@@ -687,7 +687,7 @@ announcement <a href="http://android-developers.blogspot.com/2014/03/google-play
     </p>
   </div>
 
-  <div class="layout-content-col span-6">
+  <div class="col-6">
     <img src="/images/play-services-diagram.png" />
     <p class="img-caption"><em>The Google Play services APK on user devices receives regular updates
     for new APIs, features, and bug fixes.</em></p>

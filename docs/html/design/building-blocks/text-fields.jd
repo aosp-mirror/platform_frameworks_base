@@ -24,8 +24,8 @@ typing, text fields allow for a variety of other activities, such as text select
 paste) and data lookup via auto-completion.</p>
 
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-12">
+<div class="cols">
+  <div class="col-12">
 
     <img src="{@docRoot}design/media/text_input_singlevsmultiline.png">
 
@@ -39,8 +39,8 @@ overflow text and scroll vertically when the cursor reaches the lower edge.</p>
 
 <img src="{@docRoot}design/media/text_input_typesandtypedown.png">
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-6">
+<div class="cols">
+  <div class="col-6">
 
 <h4>Text field types</h4>
 <p>Text fields can have different types, such as number, message, or email address. The type determines
@@ -48,7 +48,7 @@ what kind of characters are allowed inside the field, and may prompt the virtual
 optimize its layout for frequently used characters.</p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
 <h4>Auto-complete text fields</h4>
 <p>Use auto-complete text fields to present real-time completions or search results in popups, so users
@@ -63,13 +63,13 @@ can enter information more accurately and efficiently.</p>
 mode that facilitates extending the selection or choosing an action to perform on the selected text.
 Selection mode includes:</p>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-9">
+<div class="cols">
+  <div class="col-9">
 
     <img src="{@docRoot}design/media/text_input_textselection.png">
 
   </div>
-  <div class="layout-content-col span-4 with-callouts">
+  <div class="col-4 with-callouts">
 
 <ol>
 <li>

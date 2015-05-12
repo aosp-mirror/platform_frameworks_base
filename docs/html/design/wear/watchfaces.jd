@@ -55,42 +55,42 @@ format.</p>
 
 <p>These guidelines help your concepts align across devices:</p>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-6">
+<div class="cols" style="margin-top:20px">
+<div class="col-6">
   <h3>Create flexible concepts</h3>
   <p>Ideally, the visual functionality of the watch face works for both round and square
   formats. In this example, the visual functionality of the watch face is flexible enough
   to work well in either format without any adjustment. However, other design concepts require
   different executions for square and round screens.</p>
 </div>
-<div class="layout-content-col span-7">
+<div class="col-7">
   <img src="{@docRoot}design/media/wear/ScreenShapes_Invert.png" width="400"
        height="221" alt="" style="margin-top:-30px">
 </div>
 </div>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-6">
+<div class="cols" style="margin-top:20px">
+<div class="col-6">
   <h3>Use a common design language</h3>
   <p>Try using a common set of colors, line weights, shading, and other design elements
   to draw a visual connection between your square and round versions. By using similar color
   palettes and a few consistent visual elements, the overall appearance of square and round
   can be appropriately customized while still feeling like part of the same visual system.</p>
 </div>
-<div class="layout-content-col span-7">
+<div class="col-7">
   <img src="{@docRoot}design/media/wear/ScreenShapes_Pyramids.png" width="400"
        height="221" alt="" style="margin-top:-30px">
 </div>
 </div>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-6">
+<div class="cols" style="margin-top:20px">
+<div class="col-6">
   <h3>Adjust for analog concepts</h3>
   <p>Some of your concepts will naturally take the shape of an analog clock, like a center
   dial with hour and minute hands. In this case, consider the corner areas that are exposed
   when translating to a square format. Try extending and exploring this extra space.</p>
 </div>
-<div class="layout-content-col span-7">
+<div class="col-7">
   <img src="{@docRoot}design/media/wear/ScreenShapes_Rift.png" width="400"
        height="221" alt="" style="margin-top:-30px">
 </div>
@@ -137,8 +137,8 @@ You can configure your watch face to display different ambient designs depending
 of screen available on the device. Consider the best design for your watch faces on all
 screens.</p>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-9">
+<div class="cols" style="margin-top:20px">
+<div class="col-9">
   <h3>Reduced color space</h3>
   <p>Some displays use a reduced color space in ambient mode to save power.</p>
   <p>One reduced color space power saving method is to use a "low-bit" mode. In low-bit mode,
@@ -152,14 +152,14 @@ screens.</p>
   displays which do not use color in ambient mode, the background may be either black or
   white.</p>
 </div>
-<div class="layout-content-col span-4">
+<div class="col-4">
   <img src="{@docRoot}design/media/wear/Render_LowBit.png" width="200"
        height="" alt="" style="margin-top:45px;margin-left:13px">
 </div>
 </div>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-9">
+<div class="cols" style="margin-top:20px">
+<div class="col-9">
   <h3>Burn protection techniques</h3>
   <p>When designing for OLED screens, you should consider power efficiency and the screen
   burn-in effect. When these screens are in ambient mode, the system shifts the contents of
@@ -169,7 +169,7 @@ screens.</p>
   replace filled images with pixel patterns. For analog watch face designs, hollow out the center
   where the hands meet to avoid pixel burn-in in this mode.</p>
 </div>
-<div class="layout-content-col span-4">
+<div class="col-4">
   <img src="{@docRoot}design/media/wear/Render_1Bit.png" width="200"
        height="" alt="" style="margin-top:-10px;margin-left:13px">
 </div>
@@ -183,8 +183,8 @@ screens.</p>
 user the status of the wearable and show notifications from services on the user's phone. Try
 to keep critical elements in your watch face designs from being obscured by the UI elements.</p>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-9">
+<div class="cols" style="margin-top:20px">
+<div class="col-9">
   <h3>Cards</h3>
 <p>Cards are the notification system that bridges information between the wearable and a
 mobile device. Cards are also how most applications communicate with users. The user will be
@@ -202,14 +202,14 @@ the bottom half of the face should leverage the small peek card instead.</p>
 <p>The system notifies your watch face when the bounds of a peek card change, so you can
 rearrange the elements in your design if necessary.</p>
 </div>
-<div class="layout-content-col span-4">
+<div class="col-4">
   <img src="{@docRoot}design/media/wear/CardsRender_Build.png" width="200"
        height="" alt="" style="margin-top:20px;margin-left:13px">
 </div>
 </div>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-9">
+<div class="cols" style="margin-top:20px">
+<div class="col-9">
   <h3>Indicators</h3>
 <p>Indicators tell the user the status of the wearable, such as charging and airplane mode.
 When designing a watch face, consider how the indicator will fall over the watch face.</p>
@@ -219,14 +219,14 @@ position the status icons or the hotword on the bottom of the screen, the system
 peek cards. If the edge of the watch face contains strong visual elements, such as
 ticks or numbers, place the indicators on the center of the screen.</p>
 </div>
-<div class="layout-content-col span-4">
+<div class="col-4">
   <img src="{@docRoot}design/media/wear/Indicators_Cropped.png" width="200"
        height="" alt="" style="margin-top:0px;margin-left:13px">
 </div>
 </div>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-9">
+<div class="cols" style="margin-top:20px">
+<div class="col-9">
   <h3>The hotword</h3>
 <p>The hotword is the phrase "OK Google", which tells the user that they can interact with
 the watch using voice commands. When a user turns on the wearable, the hotword appears on
@@ -237,7 +237,7 @@ watch face. Finally, background protection for the hotword and the indicators sh
 turned on unless your design is tailored to have these elements appear on top of them, for example
 using dark solid colors with no patterns.</p>
 </div>
-<div class="layout-content-col span-4">
+<div class="col-4">
   <img src="{@docRoot}design/media/wear/Hotword_Cropped.png" width="200"
        height="" alt="" style="margin-top:0px;margin-left:13px">
 </div>
@@ -253,8 +253,8 @@ using dark solid colors with no patterns.</p>
 <p>Your watch face can show users contextually relevant data and react to it by changing styles
 and colors in your design.</p>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-9">
+<div class="cols" style="margin-top:20px">
+<div class="col-9">
   <h3>What do you want your user to know?</h3>
 <p>The first step in designing a data-integrated watch face is to define a conceptual user
 outcome based on available data. First, generate a strong concept or outcome you believe is
@@ -262,14 +262,14 @@ supported by real user needs. What do you want your users to know after they hav
 at your design? Once you have identified your outcome, you need to determine how to obtain
 the required data.</p>
 </div>
-<div class="layout-content-col span-4">
+<div class="col-4">
   <img src="{@docRoot}design/media/wear/Render_Saturn.png" width="200"
        height="" alt="" style="margin-top:-10px;margin-left:13px">
 </div>
 </div>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-9">
+<div class="cols" style="margin-top:20px">
+<div class="col-9">
   <h3>A watch dial is a timeline; add data to it</h3>
 <p>Your watch face concept may include use of data beyond time, such as weather, calendar
 and fitness data. Consider the inclusion of data integration creatively. Avoid simply
@@ -279,14 +279,14 @@ watch face as a clock with an indication of the current temperature in degrees o
 you might design a watch face that describes how the temperature will change over the
 course of the day.</p>
 </div>
-<div class="layout-content-col span-4">
+<div class="col-4">
   <img src="{@docRoot}design/media/wear/Render_Episode.png" width="200"
        height="" alt="" style="margin-top:-10px;margin-left:13px">
 </div>
 </div>
 
-<div class="layout-content-row" style="margin-top:20px">
-<div class="layout-content-col span-9">
+<div class="cols" style="margin-top:20px">
+<div class="col-9">
   <h3>Stick to one message</h3>
 <p>Once you have solidified your conceptual direction or desired outcome, you will need to
 begin visualizing your watch face. The strongest watch face designs are highly glanceable
@@ -296,7 +296,7 @@ an entire month of calendar events,  you might decide to display only the next
 upcoming event. By a process of reduction, you should arrive at a powerful singular
 expression of data to include in your design.</p>
 </div>
-<div class="layout-content-col span-4">
+<div class="col-4">
   <img src="{@docRoot}design/media/wear/Render_Albumem.png" width="200"
        height="" alt="" style="margin-top:-10px;margin-left:13px">
 </div>

@@ -3,7 +3,7 @@ page.viewport_width=970
 fullpage=true
 no_footer_links=true
 page.type=about
-page.image=/auto/images/hero.jpg
+page.image=/images/cards/android-auto_2x.png
 
 @jd:body
 
@@ -11,9 +11,6 @@ page.image=/auto/images/hero.jpg
 .fullpage>#footer,
 #jd-content>.content-footer.wrap {
   display:none;
-}
-#hero-height {
-  height:calc(100% - 100px);
 }
 .img-logo {
   margin:0 auto;
