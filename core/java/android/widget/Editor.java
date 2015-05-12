@@ -4475,7 +4475,7 @@ public class Editor {
 
     private class CorrectionHighlighter {
         private final Path mPath = new Path();
-        private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint mPaint = new Paint();
         private int mStart, mEnd;
         private long mFadingStartTime;
         private RectF mTempRectF;

@@ -501,7 +501,7 @@ public class ShapeDrawable extends Drawable {
             if (mShapeState.mPaint != null) {
                 mShapeState.mPaint = new Paint(mShapeState.mPaint);
             } else {
-                mShapeState.mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                mShapeState.mPaint = new Paint();
             }
             if (mShapeState.mPadding != null) {
                 mShapeState.mPadding = new Rect(mShapeState.mPadding);
@@ -555,7 +555,7 @@ public class ShapeDrawable extends Drawable {
                 mAlpha = orig.mAlpha;
                 mShaderFactory = orig.mShaderFactory;
             } else {
-                mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                mPaint = new Paint();
             }
         }
 
