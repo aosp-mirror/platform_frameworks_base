@@ -416,24 +416,27 @@ public abstract class CameraDevice implements AutoCloseable {
      * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING}) or OPAQUE
      * reprocessing
      * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING}), besides
-     * the capture session created via {@link #createCaptureSession}, the application can also
-     * create a reprocessible capture session to submit reprocess capture requests in addition to
-     * regular capture requests. A reprocess capture request takes the next available buffer from
-     * the session's input Surface, and sends it through the camera device's processing pipeline
-     * again, to produce buffers for the request's target output Surfaces. No new image data is
-     * captured for a reprocess request. However the input buffer provided by
+     * the capture session created via {@link #createCaptureSession createCaptureSession}, the
+     * application can also create a reprocessible capture session to submit reprocess capture
+     * requests in addition to regular capture requests. A reprocess capture request takes the next
+     * available buffer from the session's input Surface, and sends it through the camera device's
+     * processing pipeline again, to produce buffers for the request's target output Surfaces. No
+     * new image data is captured for a reprocess request. However the input buffer provided by
      * the application must be captured previously by the same camera device in the same session
      * directly (e.g. for Zero-Shutter-Lag use case) or indirectly (e.g. combining multiple output
      * images).</p>
      *
      * <p>The active reprocessible capture session determines an input {@link Surface} and the set
      * of potential output Surfaces for the camera devices for each capture request. The application
-     * can use {@link #createCaptureRequest} to create regular capture requests to capture new
-     * images from the camera device, and use {@link #createReprocessCaptureRequest} to create
-     * reprocess capture requests to process buffers from the input {@link Surface}. A request may
-     * use all or only some of the outputs. All the output Surfaces in one capture request will come
-     * from the same source, either from a new capture by the camera device, or from the input
-     * Surface depending on if the request is a reprocess capture request.</p>
+     * can use {@link #createCaptureRequest createCaptureRequest} to create regular capture requests
+     * to capture new images from the camera device, and use {@link #createReprocessCaptureRequest
+     * createReprocessCaptureRequest} to create reprocess capture requests to process buffers from
+     * the input {@link Surface}. Some combinations of output Surfaces in a session may not be used
+     * in a request simultaneously. The guaranteed combinations of output Surfaces that can be used
+     * in a request simultaneously are listed in the tables under {@link #createCaptureSession
+     * createCaptureSession}. All the output Surfaces in one capture request will come from the
+     * same source, either from a new capture by the camera device, or from the input Surface
+     * depending on if the request is a reprocess capture request.</p>
      *
      * <p>Input formats and sizes supported by the camera device can be queried via
      * {@link StreamConfigurationMap#getInputFormats} and
@@ -451,6 +454,88 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link android.graphics.ImageFormat#PRIVATE} format. Otherwise, creating a reprocessible
      * capture session will fail.</p>
      *
+     * <p>The guaranteed stream configurations listed in
+     * {@link #createCaptureSession createCaptureSession} are also guaranteed to work for
+     * {@link #createReprocessibleCaptureSession createReprocessibleCaptureSession}. In addition,
+     * the configurations in the tables below are also guaranteed for creating a reprocessible
+     * capture session if the camera device supports YUV reprocessing or OPAQUE reprocessing.
+     * However, not all output targets used to create a reprocessible session may be used in a
+     * {@link CaptureRequest} simultaneously. The guaranteed output targets that can be included
+     * in a {@link CaptureRequest} simultaneously are listed in the tables under
+     * {@link #createCaptureSession createCaptureSession}. For example, with a FULL-capability
+     * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL} {@code == }
+     * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}) device that supports OPAQUE
+     * reprocessing, an application can create a reprocessible capture session with 1 input,
+     * ({@code PRIV}, {@code MAXIMUM}), and 3 outputs, ({@code PRIV}, {@code MAXIMUM}),
+     * ({@code PRIV}, {@code PREVIEW}), and ({@code YUV}, {@code MAXIMUM}). However, it's not
+     * guaranteed that an application can submit a regular or reprocess capture with ({@code PRIV},
+     * {@code MAXIMUM}) and ({@code YUV}, {@code MAXIMUM}) outputs based on the table listed under
+     * {@link #createCaptureSession createCaptureSession}. In other words, use the tables below to
+     * determine the guaranteed stream configurations for creating a reprocessible capture session,
+     * and use the tables under {@link #createCaptureSession createCaptureSession} to determine the
+     * guaranteed output targets that can be submitted in a regular or reprocess
+     * {@link CaptureRequest} simultaneously.</p>
+     *
+     * <style scoped>
+     *  #rb { border-right-width: thick; }
+     * </style>
+     *
+     * <p>Limited-capability ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
+     * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}) devices
+     * support at least the following stream combinations for creating a reprocessible capture
+     * session in addition to those listed in {@link #createCaptureSession createCaptureSession} for
+     * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices:
+     *
+     * <table>
+     * <tr><th colspan="11">LIMITED-level additional guaranteed configurations for creating a reprocessible capture session<br>({@code PRIV} input is guaranteed only if OPAQUE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
+     * <tr><th colspan="2" id="rb">Input</th><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td></td><td id="rb"></td> <td>No-viewfinder still image reprocessing.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>ZSL(Zero-Shutter-Lag) still imaging.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>ZSL still and in-app processing imaging.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>ZSL in-app processing with still capture.</td> </tr>
+     * </table><br>
+     * </p>
+     *
+     * <p>FULL-capability ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
+     * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}) devices
+     * support at least the following stream combinations for creating a reprocessible capture
+     * session in addition to those for
+     * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices:
+     *
+     * <table>
+     * <tr><th colspan="11">FULL-capability additional guaranteed configurations for creating a reprocessible capture session<br>({@code PRIV} input is guaranteed only if OPAQUE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
+     * <tr><th colspan="2" id="rb">Input</th><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td></td><td id="rb"></td> <td></td><td id="rb"></td> <td>Maximum-resolution multi-frame image fusion in-app processing with regular preview.</td> </tr>
+     * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td></td><td id="rb"></td> <td></td><td id="rb"></td> <td>Maximum-resolution multi-frame image fusion two-input in-app processing.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code RECORD}</td> <td></td><td id="rb"></td> <td>High-resolution ZSL in-app video processing with regular preview.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>Maximum-resolution ZSL in-app processing with regular preview.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>Maximum-resolution two-input ZSL in-app processing.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code RECORD}</td> <td>{@code JPEG}</td><td id="rb">{@code RECORD}</td> <td>High-resolution ZSL in-app video processing and video snapshot with regular preview.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Maximum-resolution two-input ZSL in-app processing with regular preview.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>ZSL still capture and in-app processing.</td> </tr>
+     * </table><br>
+     * </p>
+     *
+     * <p>RAW-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}) devices additionally support
+     * at least the following stream combinations for creating a reprocessible capture session
+     * on both {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL} and
+     * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices
+     *
+     * <table>
+     * <tr><th colspan="11">RAW-capability additional guaranteed configurations for creating a reprocessible capture session<br>({@code PRIV} input is guaranteed only if OPAQUE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
+     * <tr><th colspan="2" id="rb">Input</th><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>Mutually exclusive ZSL in-app processing and DNG capture.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td>Mutually exclusive ZSL in-app processing and preview with DNG capture.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td>Mutually exclusive ZSL two-input in-app processing and DNG capture.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td>Mutually exclusive ZSL still capture and preview with DNG capture.</td> </tr>
+     * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td>Mutually exclusive ZSL in-app processing with still capture and DNG capture.</td> </tr>
+     * </table><br>
+     * </p>
+     *
      * @param inputConfig The configuration for the input {@link Surface}
      * @param outputs The new set of Surfaces that should be made available as
      *                targets for captured image data.
@@ -466,6 +551,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
      *
+     * @see #createCaptureSession
      * @see CameraCaptureSession
      * @see StreamConfigurationMap#getInputFormats
      * @see StreamConfigurationMap#getInputSizes
