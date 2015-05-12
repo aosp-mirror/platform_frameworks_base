@@ -30656,10 +30656,10 @@ package android.service.carrier {
 package android.service.chooser {
 
   public final class ChooserTarget implements android.os.Parcelable {
-    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.app.PendingIntent);
-    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.content.IntentSender);
+    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.drawable.Icon, float, android.app.PendingIntent);
+    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.drawable.Icon, float, android.content.IntentSender);
     method public int describeContents();
-    method public android.graphics.Bitmap getIcon();
+    method public android.graphics.drawable.Icon getIcon();
     method public android.content.IntentSender getIntentSender();
     method public float getScore();
     method public java.lang.CharSequence getTitle();
