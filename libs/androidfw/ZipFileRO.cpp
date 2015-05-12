@@ -68,6 +68,7 @@ ZipFileRO::~ZipFileRO() {
     const int32_t error = OpenArchive(zipFileName, &handle);
     if (error) {
         ALOGW("Error opening archive %s: %s", zipFileName, ErrorCodeString(error));
+        CloseArchive(handle);
         return NULL;
     }
 
