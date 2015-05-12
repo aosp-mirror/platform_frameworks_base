@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_MEDIA_PLAYBACK_SETTINGS_H_
-#define _ANDROID_MEDIA_PLAYBACK_SETTINGS_H_
+#ifndef _ANDROID_MEDIA_PLAYBACK_PARAMS_H_
+#define _ANDROID_MEDIA_PLAYBACK_PARAMS_H_
 
 #include <media/AudioResamplerPublic.h>
 
 namespace android {
 
 // This entire class is inline as it is used from both core and media
-struct PlaybackSettings {
+struct PlaybackParams {
     AudioPlaybackRate audioRate;
     bool speedSet;
     bool pitchSet;
@@ -44,7 +44,7 @@ struct PlaybackSettings {
         jint        set_audio_stretch_mode;
 
         void init(JNIEnv *env) {
-            jclass lclazz = env->FindClass("android/media/PlaybackSettings");
+            jclass lclazz = env->FindClass("android/media/PlaybackParams");
             if (lclazz == NULL) {
                 return;
             }
@@ -80,14 +80,14 @@ struct PlaybackSettings {
         }
     };
 
-    void fillFromJobject(JNIEnv *env, const fields_t& fields, jobject settings) {
-        audioRate.mSpeed = env->GetFloatField(settings, fields.speed);
-        audioRate.mPitch = env->GetFloatField(settings, fields.pitch);
+    void fillFromJobject(JNIEnv *env, const fields_t& fields, jobject params) {
+        audioRate.mSpeed = env->GetFloatField(params, fields.speed);
+        audioRate.mPitch = env->GetFloatField(params, fields.pitch);
         audioRate.mFallbackMode =
-            (AudioTimestretchFallbackMode)env->GetIntField(settings, fields.audio_fallback_mode);
+            (AudioTimestretchFallbackMode)env->GetIntField(params, fields.audio_fallback_mode);
         audioRate.mStretchMode =
-            (AudioTimestretchStretchMode)env->GetIntField(settings, fields.audio_stretch_mode);
-        int set = env->GetIntField(settings, fields.set);
+            (AudioTimestretchStretchMode)env->GetIntField(params, fields.audio_stretch_mode);
+        int set = env->GetIntField(params, fields.set);
 
         speedSet = set & fields.set_speed;
         pitchSet = set & fields.set_pitch;
@@ -96,25 +96,25 @@ struct PlaybackSettings {
     }
 
     jobject asJobject(JNIEnv *env, const fields_t& fields) {
-        jobject settings = env->NewObject(fields.clazz, fields.constructID);
-        if (settings == NULL) {
+        jobject params = env->NewObject(fields.clazz, fields.constructID);
+        if (params == NULL) {
             return NULL;
         }
-        env->SetFloatField(settings, fields.speed, (jfloat)audioRate.mSpeed);
-        env->SetFloatField(settings, fields.pitch, (jfloat)audioRate.mPitch);
-        env->SetIntField(settings, fields.audio_fallback_mode, (jint)audioRate.mFallbackMode);
-        env->SetIntField(settings, fields.audio_stretch_mode, (jint)audioRate.mStretchMode);
+        env->SetFloatField(params, fields.speed, (jfloat)audioRate.mSpeed);
+        env->SetFloatField(params, fields.pitch, (jfloat)audioRate.mPitch);
+        env->SetIntField(params, fields.audio_fallback_mode, (jint)audioRate.mFallbackMode);
+        env->SetIntField(params, fields.audio_stretch_mode, (jint)audioRate.mStretchMode);
         env->SetIntField(
-                settings, fields.set,
+                params, fields.set,
                 (speedSet ? fields.set_speed : 0)
                         | (pitchSet ? fields.set_pitch : 0)
                         | (audioFallbackModeSet ? fields.set_audio_fallback_mode : 0)
                         | (audioStretchModeSet  ? fields.set_audio_stretch_mode : 0));
 
-        return settings;
+        return params;
     }
 };
 
 }  // namespace android
 
-#endif  // _ANDROID_MEDIA_PLAYBACK_SETTINGS_H_
+#endif  // _ANDROID_MEDIA_PLAYBACK_PARAMS_H_
