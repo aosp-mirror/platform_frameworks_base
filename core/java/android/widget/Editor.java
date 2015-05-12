@@ -689,14 +689,12 @@ public class Editor {
         // FIXME - For this and similar methods we're not doing anything to check if there's
         // a LocaleSpan in the text, this may be something we should try handling or checking for.
         int retOffset = getWordIteratorWithText().prevBoundary(offset);
-        if (isPunctBoundaryBehind(retOffset, true /* isStart */)) {
-            // If we're on a punctuation boundary we should continue to get the
-            // previous offset until we're not longer on a punctuation boundary.
-            retOffset = getWordIteratorWithText().prevBoundary(retOffset);
-            while (!isPunctBoundaryBehind(retOffset, false /* isStart */)
-                    && retOffset != BreakIterator.DONE) {
-                retOffset = getWordIteratorWithText().prevBoundary(retOffset);
-            }
+        if (getWordIteratorWithText().isOnPunctuation(retOffset)) {
+            // On punctuation boundary or within group of punctuation, find punctuation start.
+            retOffset = getWordIteratorWithText().getPunctuationBeginning(offset);
+        } else {
+            // Not on a punctuation boundary, find the word start.
+            retOffset = getWordIteratorWithText().getBeginning(offset);
         }
         if (retOffset == BreakIterator.DONE) {
             return offset;
@@ -706,83 +704,17 @@ public class Editor {
 
     private int getWordEnd(int offset) {
         int retOffset = getWordIteratorWithText().nextBoundary(offset);
-        if (isPunctBoundaryForward(retOffset, true /* isStart */)) {
-            // If we're on a punctuation boundary we should continue to get the
-            // next offset until we're no longer on a punctuation boundary.
-            retOffset = getWordIteratorWithText().nextBoundary(retOffset);
-            while (!isPunctBoundaryForward(retOffset, false /* isStart */)
-                    && retOffset != BreakIterator.DONE) {
-                retOffset = getWordIteratorWithText().nextBoundary(retOffset);
-            }
+        if (getWordIteratorWithText().isAfterPunctuation(retOffset)) {
+            // On punctuation boundary or within group of punctuation, find punctuation end.
+            retOffset = getWordIteratorWithText().getPunctuationEnd(offset);
+        } else {
+            // Not on a punctuation boundary, find the word end.
+            retOffset = getWordIteratorWithText().getEnd(offset);
         }
         if (retOffset == BreakIterator.DONE) {
             return offset;
         }
         return retOffset;
-    }
-
-    /**
-     * Checks for punctuation boundaries for the provided offset and the
-     * previous character.
-     *
-     * @param offset The offset to check from.
-     * @param isStart Whether the boundary being checked for is at the start or
-     *            end of a punctuation sequence.
-     * @return Whether this is a punctuation boundary.
-     */
-    private boolean isPunctBoundaryBehind(int offset, boolean isStart) {
-        CharSequence text = mTextView.getText();
-        if (offset == BreakIterator.DONE || offset > text.length() || offset == 0) {
-            return false;
-        }
-        int cp = Character.codePointAt(text, offset);
-        int prevCp = Character.codePointBefore(text, offset);
-
-        if (isPunctuation(cp)) {
-            // If it's the start, the current cp and the prev cp are
-            // punctuation. If it's at the end of a punctuation sequence the
-            // current is punctuation and the prev is not.
-            return isStart ? isPunctuation(prevCp) : !isPunctuation(prevCp);
-        }
-        return false;
-    }
-
-    /**
-     * Checks for punctuation boundaries for the provided offset and the next
-     * character.
-     *
-     * @param offset The offset to check from.
-     * @param isStart Whether the boundary being checked for is at the start or
-     *            end of a punctuation sequence.
-     * @return Whether this is a punctuation boundary.
-     */
-    private boolean isPunctBoundaryForward(int offset, boolean isStart) {
-        CharSequence text = mTextView.getText();
-        if (offset == BreakIterator.DONE || offset > text.length() || offset == 0) {
-            return false;
-        }
-        int cp = Character.codePointBefore(text, offset);
-        int nextCpOffset = Math.min(offset + Character.charCount(cp), text.length() - 1);
-        int nextCp = Character.codePointBefore(text, nextCpOffset);
-
-        if (isPunctuation(cp)) {
-            // If it's the start, the current cp and the next cp are
-            // punctuation. If it's at the end of a punctuation sequence the
-            // current is punctuation and the next is not.
-            return isStart ? isPunctuation(nextCp) : !isPunctuation(nextCp);
-        }
-        return false;
-    }
-
-    private boolean isPunctuation(int cp) {
-        int type = Character.getType(cp);
-        return (type == Character.CONNECTOR_PUNCTUATION ||
-                type == Character.DASH_PUNCTUATION ||
-                type == Character.END_PUNCTUATION ||
-                type == Character.FINAL_QUOTE_PUNCTUATION ||
-                type == Character.INITIAL_QUOTE_PUNCTUATION ||
-                type == Character.OTHER_PUNCTUATION ||
-                type == Character.START_PUNCTUATION);
     }
 
     /**
