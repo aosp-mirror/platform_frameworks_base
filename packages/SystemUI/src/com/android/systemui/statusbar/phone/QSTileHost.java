@@ -67,11 +67,12 @@ public class QSTileHost implements QSTile.Host {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String TILES_SETTING = "sysui_qs_tiles";
+    protected static final String TILES_SETTING = "sysui_qs_tiles";
 
     private final Context mContext;
     private final PhoneStatusBar mStatusBar;
     private final LinkedHashMap<String, QSTile<?>> mTiles = new LinkedHashMap<>();
+    private final ArrayList<String> mTileSpecs = new ArrayList<>();
     private final Observer mObserver = new Observer();
     private final BluetoothController mBluetooth;
     private final LocationController mLocation;
@@ -81,7 +82,7 @@ public class QSTileHost implements QSTile.Host {
     private final HotspotController mHotspot;
     private final CastController mCast;
     private final Looper mLooper;
-    private final CurrentUserTracker mUserTracker;
+    protected final CurrentUserTracker mUserTracker;
     private final FlashlightController mFlashlight;
     private final UserSwitcherController mUserSwitcherController;
     private final KeyguardMonitor mKeyguard;
@@ -224,6 +225,7 @@ public class QSTileHost implements QSTile.Host {
     private void recreateTiles() {
         if (DEBUG) Log.d(TAG, "Recreating tiles");
         final List<String> tileSpecs = loadTileSpecs();
+        if (tileSpecs.equals(mTileSpecs)) return;
         for (Map.Entry<String, QSTile<?>> tile : mTiles.entrySet()) {
             if (!tileSpecs.contains(tile.getKey())) {
                 if (DEBUG) Log.d(TAG, "Destroying tile: " + tile.getKey());
@@ -243,7 +245,8 @@ public class QSTileHost implements QSTile.Host {
                 }
             }
         }
-        if (mTiles.equals(newTiles)) return;
+        mTileSpecs.clear();
+        mTileSpecs.addAll(tileSpecs);
         mTiles.clear();
         mTiles.putAll(newTiles);
         if (mCallback != null) {
@@ -251,7 +254,7 @@ public class QSTileHost implements QSTile.Host {
         }
     }
 
-    private QSTile<?> createTile(String tileSpec) {
+    protected QSTile<?> createTile(String tileSpec) {
         if (tileSpec.equals("wifi")) return new WifiTile(this);
         else if (tileSpec.equals("bt")) return new BluetoothTile(this);
         else if (tileSpec.equals("inversion")) return new ColorInversionTile(this);
@@ -267,7 +270,7 @@ public class QSTileHost implements QSTile.Host {
         else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
     }
 
-    private List<String> loadTileSpecs() {
+    protected List<String> loadTileSpecs() {
         final Resources res = mContext.getResources();
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
         String tileList = Secure.getStringForUser(mContext.getContentResolver(), TILES_SETTING,

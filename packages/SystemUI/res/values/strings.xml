@@ -1024,4 +1024,13 @@
 
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">SystemUI Tuner</string>
+
+    <!-- Name of quick settings -->
+    <string name="quick_settings">Quick Settings</string>
+
+    <!-- Description for adding  a quick settings tile -->
+    <string name="add_tile">Add tile</string>
+
+    <!-- Name of a quick settings tile controlled by broadcast -->
+    <string name="broadcast_tile">Broadcast Tile</string>
 </resources>
