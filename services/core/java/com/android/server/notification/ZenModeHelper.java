@@ -43,6 +43,7 @@ import android.provider.Settings.Global;
 import android.service.notification.IConditionListener;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.util.ArraySet;
@@ -91,6 +92,7 @@ public class ZenModeHelper {
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mDefaultConfig = readDefaultConfig(context.getResources());
         appendDefaultScheduleRules(mDefaultConfig);
+        appendDefaultEventRules(mDefaultConfig);
         mConfig = mDefaultConfig;
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
@@ -439,6 +441,20 @@ public class ZenModeHelper {
         config.automaticRules.put(config.newRuleId(), rule2);
     }
 
+    private void appendDefaultEventRules(ZenModeConfig config) {
+        if (config == null) return;
+
+        final EventInfo events = new EventInfo();
+        events.calendar = EventInfo.ANY_CALENDAR;
+        events.reply = EventInfo.REPLY_YES_OR_MAYBE;
+        final ZenRule rule = new ZenRule();
+        rule.enabled = false;
+        rule.name = mContext.getResources().getString(R.string.zen_mode_default_events_name);
+        rule.conditionId = ZenModeConfig.toEventConditionId(events);
+        rule.zenMode = Global.ZEN_MODE_ALARMS;
+        config.automaticRules.put(config.newRuleId(), rule);
+    }
+
     private static int zenSeverity(int zen) {
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS: return 1;
@@ -481,6 +497,7 @@ public class ZenModeHelper {
                 Log.i(TAG, "No existing V1 downtime found, generating default schedules");
                 appendDefaultScheduleRules(rt);
             }
+            appendDefaultEventRules(rt);
             return rt;
         }
     };
