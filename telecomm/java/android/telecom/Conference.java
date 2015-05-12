@@ -116,7 +116,7 @@ public abstract class Conference implements Conferenceable {
     }
 
     /**
-     * Returns the capabilities of a conference. See {@code CAPABILITY_*} constants in class
+     * Returns the capabilities of the conference. See {@code CAPABILITY_*} constants in class
      * {@link Connection} for valid values.
      *
      * @return A bitmask of the capabilities of the conference call.
