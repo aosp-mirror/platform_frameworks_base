@@ -15925,6 +15925,12 @@ package android.media {
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
+  public abstract class AudioDeviceCallback {
+    ctor public AudioDeviceCallback();
+    method public void onAudioDevicesAdded(android.media.AudioDeviceInfo[]);
+    method public void onAudioDevicesRemoved(android.media.AudioDeviceInfo[]);
+  }
+
   public final class AudioDeviceInfo {
     method public int[] getChannelCounts();
     method public int[] getChannelMasks();
@@ -16040,7 +16046,6 @@ package android.media {
   public class AudioManager {
     method public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener);
     method public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
-    method public void addOnAudioDeviceConnectionListener(android.media.OnAudioDeviceConnectionListener, android.os.Handler);
     method public void adjustStreamVolume(int, int, int);
     method public void adjustSuggestedStreamVolume(int, int, int);
     method public void adjustVolume(int, int);
@@ -16068,12 +16073,12 @@ package android.media {
     method public void loadSoundEffects();
     method public void playSoundEffect(int);
     method public void playSoundEffect(int, float);
+    method public void registerAudioDeviceCallback(android.media.AudioDeviceCallback, android.os.Handler);
     method public int registerAudioPolicy(android.media.audiopolicy.AudioPolicy);
     method public deprecated void registerMediaButtonEventReceiver(android.content.ComponentName);
     method public deprecated void registerMediaButtonEventReceiver(android.app.PendingIntent);
     method public deprecated void registerRemoteControlClient(android.media.RemoteControlClient);
     method public deprecated boolean registerRemoteController(android.media.RemoteController);
-    method public void removeOnAudioDeviceConnectionListener(android.media.OnAudioDeviceConnectionListener);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int);
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
@@ -16094,6 +16099,7 @@ package android.media {
     method public void startBluetoothSco();
     method public void stopBluetoothSco();
     method public void unloadSoundEffects();
+    method public void unregisterAudioDeviceCallback(android.media.AudioDeviceCallback);
     method public void unregisterAudioPolicyAsync(android.media.audiopolicy.AudioPolicy);
     method public deprecated void unregisterMediaButtonEventReceiver(android.content.ComponentName);
     method public deprecated void unregisterMediaButtonEventReceiver(android.app.PendingIntent);
@@ -17724,10 +17730,6 @@ package android.media {
 
   public final class NotProvisionedException extends android.media.MediaDrmException {
     ctor public NotProvisionedException(java.lang.String);
-  }
-
-  public abstract interface OnAudioDeviceConnectionListener {
-    method public abstract void onAudioDeviceConnection();
   }
 
   public final class PlaybackParams {
