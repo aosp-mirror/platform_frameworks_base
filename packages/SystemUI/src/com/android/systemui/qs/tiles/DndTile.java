@@ -102,7 +102,9 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int zen = arg instanceof Integer ? (Integer) arg : mController.getZen();
-        state.value = zen != Global.ZEN_MODE_OFF;
+        final boolean newValue = zen != Global.ZEN_MODE_OFF;
+        final boolean valueChanged = state.value != newValue;
+        state.value = newValue;
         state.visible = isVisible(mContext);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
@@ -132,6 +134,9 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         }
         if (mShowingDetail && !state.value) {
             showDetail(false);
+        }
+        if (valueChanged) {
+            fireToggleStateChanged(state.value);
         }
     }
 
