@@ -1070,29 +1070,29 @@
              is launched that task will or will not start depending on whether the package of this
              activity has been whitelisted.
              <p>Tasks rooted at this activity can only exit lockTask mode using stopLockTask(). -->
-        <enum name="lockTaskModeDefault" value="0"/>
+        <enum name="normal" value="0"/>
         <!-- Tasks will not launch into lockTask mode and cannot be placed there using
              {@link android.app.Activity#startLockTask} or be pinned from the Overview screen.
              If the system is already in lockTask mode when a new task rooted at this activity is
              launched that task will not be started.
              <p>Note: This mode is only available to system and privileged applications.
-             Non-privileged apps with this value will be treated as lockTaskModeDefault.
+             Non-privileged apps with this value will be treated as normal.
              -->
-        <enum name="lockTaskModeNever" value="1"/>
+        <enum name="never" value="1"/>
         <!-- Tasks rooted at this activity will always launch into lockTask mode. If the system is
              already in lockTask mode when this task is launched then the new task will be launched
              on top of the current task. Tasks launched in this mode are capable of exiting
              lockTask mode using finish(), whereas tasks entering lockTask mode using
              startLockTask() must use stopLockTask() to exit.
              <p>Note: This mode is only available to system and privileged applications.
-             Non-privileged apps with this value will be treated as lockTaskModeDefault.
+             Non-privileged apps with this value will be treated as normal.
              -->
-        <enum name="lockTaskModeAlways" value="2"/>
+        <enum name="always" value="2"/>
         <!-- If the DevicePolicyManager (DPM) authorizes this package ({@link
              android.app.admin.DevicePolicyManager#setLockTaskPackages}) then this mode is
-             identical to lockTaskModeAlways. If the DPM does not authorize this package then this
-             mode is identical to lockTaskModeDefault. -->
-        <enum name="lockTaskModeIfWhitelisted" value="3"/>
+             identical to always. If the DPM does not authorize this package then this
+             mode is identical to normal. -->
+        <enum name="if_whitelisted" value="3"/>
     </attr>
     <!-- When set installer will extract native libraries. If set to false
          libraries in the apk must be stored and page-aligned.  -->
