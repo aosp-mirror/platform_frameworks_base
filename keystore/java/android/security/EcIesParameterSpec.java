@@ -1,6 +1,8 @@
 package android.security;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -127,6 +129,7 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
      * Returns KEM KDF algorithm (e.g., {@code HKDFwithSHA256} or {@code KDF1withSHA1}) or
      * {@code null} if not specified.
      */
+    @Nullable
     public String getKemKdfAlgorithm() {
         return mKemKdfAlgorithm;
     }
@@ -138,6 +141,7 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
      * @see Cipher#getInstance(String)
      * @see #getDemCipherKeySize()
      */
+    @Nullable
     public String getDemCipherTransformation() {
         return mDemCipherTransformation;
     }
@@ -158,6 +162,7 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
      * @see Mac#getInstance(String)
      * @see #getDemMacKeySize()
      */
+    @Nullable
     public String getDemMacAlgorithm() {
         return mDemMacAlgorithm;
     }
@@ -194,7 +199,8 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
          * Sets KEM KDF algorithm. For example, {@code HKDFwithSHA256}, {@code KDF2withSHA256}, or
          * {@code KDF1withSHA1}.
          */
-        public Builder setKemKdfAlgorithm(String algorithm) {
+        @NonNull
+        public Builder setKemKdfAlgorithm(@Nullable String algorithm) {
             mKemKdfAlgorithm = algorithm;
             return this;
         }
@@ -205,7 +211,8 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
          *
          * @see Cipher#getInstance(String)
          */
-        public Builder setDemCipherTransformation(String transformation) {
+        @NonNull
+        public Builder setDemCipherTransformation(@Nullable String transformation) {
             mDemCipherTransformation = transformation;
             return this;
         }
@@ -217,6 +224,7 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
          *
          * @see #setDemCipherTransformation(String)
          */
+        @NonNull
         public Builder setDemCipherKeySize(int sizeBits) {
             mDemCipherKeySize = sizeBits;
             return this;
@@ -227,7 +235,8 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
          *
          * @see Mac#getInstance(String)
          */
-        public Builder setDemMacAlgorithm(String algorithm) {
+        @NonNull
+        public Builder setDemMacAlgorithm(@Nullable String algorithm) {
             mDemMacAlgorithm = algorithm;
             return this;
         }
@@ -239,6 +248,7 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
          *
          * @see #setDemCipherKeySize(int)
          */
+        @NonNull
         public Builder setDemMacKeySize(int sizeBits) {
             mDemMacKeySize = sizeBits;
             return this;
@@ -247,6 +257,7 @@ public class EcIesParameterSpec implements AlgorithmParameterSpec {
         /**
          * Returns a new {@link EcIesParameterSpec} based on the current state of this builder.
          */
+        @NonNull
         public EcIesParameterSpec build() {
             int demMacKeySize = (mDemMacKeySize != -1) ? mDemMacKeySize : mDemCipherKeySize;
             return new EcIesParameterSpec(

@@ -17,6 +17,8 @@
 package android.security;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.security.keymaster.KeymasterDefs;
 
@@ -111,6 +113,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
+        @NonNull
         public static int[] allToKeymaster(@PurposeEnum int purposes) {
             int[] result = getSetFlags(purposes);
             for (int i = 0; i < result.length; i++) {
@@ -122,7 +125,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        public static @PurposeEnum int allFromKeymaster(Collection<Integer> purposes) {
+        public static @PurposeEnum int allFromKeymaster(@NonNull Collection<Integer> purposes) {
             @PurposeEnum int result = 0;
             for (int keymasterPurpose : purposes) {
                 result |= fromKeymaster(keymasterPurpose);
@@ -182,7 +185,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int toKeymasterSecretKeyAlgorithm(@AlgorithmEnum String algorithm) {
+        static int toKeymasterSecretKeyAlgorithm(@NonNull @AlgorithmEnum String algorithm) {
             if (AES.equalsIgnoreCase(algorithm)) {
                 return KeymasterDefs.KM_ALGORITHM_AES;
             } else if (algorithm.toUpperCase(Locale.US).startsWith("HMAC")) {
@@ -196,6 +199,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
+        @NonNull
         static @AlgorithmEnum String fromKeymasterSecretKeyAlgorithm(
                 int keymasterAlgorithm, int keymasterDigest) {
             switch (keymasterAlgorithm) {
@@ -232,7 +236,7 @@ public abstract class KeyStoreKeyProperties {
          *
          * @return keymaster digest or {@code -1} if the algorithm does not involve a digest.
          */
-        static int toKeymasterDigest(@AlgorithmEnum String algorithm) {
+        static int toKeymasterDigest(@NonNull @AlgorithmEnum String algorithm) {
             String algorithmUpper = algorithm.toUpperCase(Locale.US);
             if (algorithmUpper.startsWith("HMAC")) {
                 String digestUpper = algorithmUpper.substring("HMAC".length());
@@ -287,7 +291,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int toKeymaster(@BlockModeEnum String blockMode) {
+        static int toKeymaster(@NonNull @BlockModeEnum String blockMode) {
             if (ECB.equalsIgnoreCase(blockMode)) {
                 return KeymasterDefs.KM_MODE_ECB;
             } else if (CBC.equalsIgnoreCase(blockMode)) {
@@ -304,6 +308,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
+        @NonNull
         static @BlockModeEnum String fromKeymaster(int blockMode) {
             switch (blockMode) {
                 case KeymasterDefs.KM_MODE_ECB:
@@ -322,7 +327,8 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static @BlockModeEnum String[] allFromKeymaster(Collection<Integer> blockModes) {
+        @NonNull
+        static @BlockModeEnum String[] allFromKeymaster(@NonNull Collection<Integer> blockModes) {
             if ((blockModes == null) || (blockModes.isEmpty())) {
                 return EmptyArray.STRING;
             }
@@ -338,7 +344,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int[] allToKeymaster(@BlockModeEnum String[] blockModes) {
+        static int[] allToKeymaster(@Nullable @BlockModeEnum String[] blockModes) {
             if ((blockModes == null) || (blockModes.length == 0)) {
                 return EmptyArray.INT;
             }
@@ -388,7 +394,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int toKeymaster(@EncryptionPaddingEnum String padding) {
+        static int toKeymaster(@NonNull @EncryptionPaddingEnum String padding) {
             if (NONE.equalsIgnoreCase(padding)) {
                 return KeymasterDefs.KM_PAD_NONE;
             } else if (PKCS7.equalsIgnoreCase(padding)) {
@@ -406,6 +412,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
+        @NonNull
         static @EncryptionPaddingEnum String fromKeymaster(int padding) {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_NONE:
@@ -425,7 +432,8 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int[] allToKeymaster(@EncryptionPaddingEnum String[] paddings) {
+        @NonNull
+        static int[] allToKeymaster(@Nullable @EncryptionPaddingEnum String[] paddings) {
             if ((paddings == null) || (paddings.length == 0)) {
                 return EmptyArray.INT;
             }
@@ -463,7 +471,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int toKeymaster(@SignaturePaddingEnum String padding) {
+        static int toKeymaster(@NonNull @SignaturePaddingEnum String padding) {
             switch (padding.toUpperCase(Locale.US)) {
                 case RSA_PKCS1:
                     return KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN;
@@ -478,6 +486,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
+        @NonNull
         static @SignaturePaddingEnum String fromKeymaster(int padding) {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN:
@@ -492,7 +501,8 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int[] allToKeymaster(@SignaturePaddingEnum String[] paddings) {
+        @NonNull
+        static int[] allToKeymaster(@Nullable @SignaturePaddingEnum String[] paddings) {
             if ((paddings == null) || (paddings.length == 0)) {
                 return EmptyArray.INT;
             }
@@ -561,7 +571,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int toKeymaster(@DigestEnum String digest) {
+        static int toKeymaster(@NonNull @DigestEnum String digest) {
             switch (digest.toUpperCase(Locale.US)) {
                 case SHA1:
                     return KeymasterDefs.KM_DIGEST_SHA1;
@@ -585,6 +595,7 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
+        @NonNull
         static @DigestEnum String fromKeymaster(int digest) {
             switch (digest) {
                 case KeymasterDefs.KM_DIGEST_NONE:
@@ -609,7 +620,8 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static @DigestEnum String[] allFromKeymaster(Collection<Integer> digests) {
+        @NonNull
+        static @DigestEnum String[] allFromKeymaster(@NonNull Collection<Integer> digests) {
             if (digests.isEmpty()) {
                 return EmptyArray.STRING;
             }
@@ -625,7 +637,8 @@ public abstract class KeyStoreKeyProperties {
         /**
          * @hide
          */
-        static int[] allToKeymaster(@DigestEnum String[] digests) {
+        @NonNull
+        static int[] allToKeymaster(@Nullable @DigestEnum String[] digests) {
             if ((digests == null) || (digests.length == 0)) {
                 return EmptyArray.INT;
             }

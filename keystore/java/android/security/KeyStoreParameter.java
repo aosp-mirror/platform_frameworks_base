@@ -16,6 +16,9 @@
 
 package android.security;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
 
@@ -182,6 +185,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityStart() {
         return mKeyValidityStart;
     }
@@ -191,6 +195,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityForConsumptionEnd() {
         return mKeyValidityForConsumptionEnd;
     }
@@ -200,6 +205,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * @return instant or {@code null} if not restricted.
      */
+    @Nullable
     public Date getKeyValidityForOriginationEnd() {
         return mKeyValidityForOriginationEnd;
     }
@@ -214,6 +220,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
     /**
      * Gets the set of padding schemes with which the key can be used when encrypting/decrypting.
      */
+    @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
@@ -222,6 +229,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      * Gets the set of padding schemes with which the key can be used when signing or verifying
      * signatures.
      */
+    @NonNull
     public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
         return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
     }
@@ -233,6 +241,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * @see #isDigestsSpecified()
      */
+    @NonNull
     public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
         if (mDigests == null) {
             throw new IllegalStateException("Digests not specified");
@@ -246,6 +255,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *
      * @see #getDigests()
      */
+    @NonNull
     public boolean isDigestsSpecified() {
         return mDigests != null;
     }
@@ -253,6 +263,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
     /**
      * Gets the set of block modes with which the key can be used.
      */
+    @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
@@ -330,7 +341,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * some UI to ask the user to unlock or initialize the Android KeyStore
          * facility.
          */
-        public Builder(Context context) {
+        public Builder(@NonNull Context context) {
             if (context == null) {
                 throw new NullPointerException("context == null");
             }
@@ -350,6 +361,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * @see KeyguardManager#isDeviceSecure()
          */
+        @NonNull
         public Builder setEncryptionRequired(boolean required) {
             if (required) {
                 mFlags |= KeyStore.FLAG_ENCRYPTED;
@@ -368,6 +380,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * @see #setKeyValidityEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityStart(Date startDate) {
             mKeyValidityStart = startDate;
             return this;
@@ -384,6 +397,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * @see #setKeyValidityForConsumptionEnd(Date)
          * @see #setKeyValidityForOriginationEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityEnd(Date endDate) {
             setKeyValidityForOriginationEnd(endDate);
             setKeyValidityForConsumptionEnd(endDate);
@@ -399,6 +413,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityForOriginationEnd(Date endDate) {
             mKeyValidityForOriginationEnd = endDate;
             return this;
@@ -414,6 +429,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
+        @NonNull
         public Builder setKeyValidityForConsumptionEnd(Date endDate) {
             mKeyValidityForConsumptionEnd = endDate;
             return this;
@@ -426,6 +442,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
          */
+        @NonNull
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
             mPurposes = purposes;
             return this;
@@ -440,6 +457,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
          */
+        @NonNull
         public Builder setEncryptionPaddings(
                 @KeyStoreKeyProperties.EncryptionPaddingEnum String... paddings) {
             mEncryptionPaddings = ArrayUtils.cloneIfNotEmpty(paddings);
@@ -455,6 +473,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
          */
+        @NonNull
         public Builder setSignaturePaddings(
                 @KeyStoreKeyProperties.SignaturePaddingEnum String... paddings) {
             mSignaturePaddings = ArrayUtils.cloneIfNotEmpty(paddings);
@@ -471,6 +490,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
          */
+        @NonNull
         public Builder setDigests(@KeyStoreKeyProperties.DigestEnum String... digests) {
             mDigests = ArrayUtils.cloneIfNotEmpty(digests);
             return this;
@@ -484,6 +504,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
          */
+        @NonNull
         public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
             mBlockModes = ArrayUtils.cloneIfNotEmpty(blockModes);
             return this;
@@ -525,6 +546,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * <p><b>NOTE: This has currently no effect on asymmetric key pairs.
          */
+        @NonNull
         public Builder setRandomizedEncryptionRequired(boolean required) {
             mRandomizedEncryptionRequired = required;
             return this;
@@ -547,6 +569,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
+        @NonNull
         public Builder setUserAuthenticationRequired(boolean required) {
             mUserAuthenticationRequired = required;
             return this;
@@ -565,7 +588,9 @@ public final class KeyStoreParameter implements ProtectionParameter {
          *
          * @see #setUserAuthenticationRequired(boolean)
          */
-        public Builder setUserAuthenticationValidityDurationSeconds(int seconds) {
+        @NonNull
+        public Builder setUserAuthenticationValidityDurationSeconds(
+                @IntRange(from = -1) int seconds) {
             mUserAuthenticationValidityDurationSeconds = seconds;
             return this;
         }
@@ -576,6 +601,7 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * @throws IllegalArgumentException if a required field is missing
          * @return built instance of {@code KeyStoreParameter}
          */
+        @NonNull
         public KeyStoreParameter build() {
             return new KeyStoreParameter(
                     mContext,

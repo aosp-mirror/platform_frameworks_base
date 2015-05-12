@@ -15,6 +15,8 @@
  */
 package android.security;
 
+import android.annotation.Nullable;
+
 /**
  * The KeyChainAliasCallback is the callback for {@link
  * KeyChain#choosePrivateKeyAlias}.
@@ -25,5 +27,5 @@ public interface KeyChainAliasCallback {
      * Called with the alias of the certificate chosen by the user, or
      * null if no value was chosen.
      */
-    public void alias(String alias);
+    public void alias(@Nullable String alias);
 }
