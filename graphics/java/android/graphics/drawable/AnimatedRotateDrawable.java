@@ -127,7 +127,9 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Animatabl
             throws XmlPullParserException, IOException {
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.AnimatedRotateDrawable);
         super.inflateWithAttributes(r, parser, a, R.styleable.AnimatedRotateDrawable_visible);
+
         updateStateFromTypedArray(a);
+        inflateChildDrawable(r, parser, attrs, theme);
         verifyRequiredAttributes(a);
         a.recycle();
 
