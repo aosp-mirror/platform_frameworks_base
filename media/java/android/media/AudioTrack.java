@@ -2046,7 +2046,7 @@ public class AudioTrack
      * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
      * does not correspond to a valid audio output device.
      */
-    public boolean setPreferredOutputDevice(AudioDeviceInfo deviceInfo) {
+    public boolean setPreferredDevice(AudioDeviceInfo deviceInfo) {
         // Do some validation....
         if (deviceInfo != null && !deviceInfo.isSink()) {
             return false;
@@ -2062,10 +2062,10 @@ public class AudioTrack
     }
 
     /**
-     * Returns the selected output specified by {@link #setPreferredOutputDevice}. Note that this
+     * Returns the selected output specified by {@link #setPreferredDevice}. Note that this
      * is not guaranteed to correspond to the actual device being used for playback.
      */
-    public AudioDeviceInfo getPreferredOutputDevice() {
+    public AudioDeviceInfo getPreferredDevice() {
         synchronized (this) {
             return mPreferredDevice;
         }
@@ -2074,6 +2074,14 @@ public class AudioTrack
     //--------------------------------------------------------------------------
     // (Re)Routing Info
     //--------------------
+    public interface OnRoutingChangedListener {
+        /**
+         * Called when the routing of an AudioTrack changes from either and explicit or
+         * policy rerouting.
+         */
+        public void onRoutingChanged(AudioTrack audioTrack);
+    }
+
     /**
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioTrack.
      */
@@ -2083,7 +2091,7 @@ public class AudioTrack
             return null;
         }
         AudioDeviceInfo[] devices =
-                AudioDevicesManager.listDevicesStatic(AudioDevicesManager.LIST_DEVICES_OUTPUTS);
+                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
         for (int i = 0; i < devices.length; i++) {
             if (devices[i].getId() == deviceId) {
                 return devices[i];
@@ -2094,17 +2102,17 @@ public class AudioTrack
 
     /**
      * The message sent to apps when the routing of this AudioTrack changes if they provide
-     * a {#link Handler} object to addOnAudioTrackRoutingListener().
+     * a {#link Handler} object to addOnRoutingChangedListener().
      */
-    private ArrayMap<OnAudioTrackRoutingListener, NativeRoutingEventHandlerDelegate>
+    private ArrayMap<OnRoutingChangedListener, NativeRoutingEventHandlerDelegate>
         mRoutingChangeListeners =
-            new ArrayMap<OnAudioTrackRoutingListener, NativeRoutingEventHandlerDelegate>();
+            new ArrayMap<OnRoutingChangedListener, NativeRoutingEventHandlerDelegate>();
 
     /**
-     * Adds an {@link OnAudioTrackRoutingListener} to receive notifications of routing changes
+     * Adds an {@link OnRoutingChangedListener} to receive notifications of routing changes
      * on this AudioTrack.
      */
-    public void addOnAudioTrackRoutingListener(OnAudioTrackRoutingListener listener,
+    public void addOnRoutingChangedListener(OnRoutingChangedListener listener,
             android.os.Handler handler) {
         if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
             synchronized (mRoutingChangeListeners) {
@@ -2118,10 +2126,10 @@ public class AudioTrack
     }
 
     /**
-     * Removes an {@link OnAudioTrackRoutingListener} which has been previously added
+     * Removes an {@link OnRoutingChangedListener} which has been previously added
      * to receive notifications of changes to the set of connected audio devices.
      */
-    public void removeOnAudioTrackRoutingListener(OnAudioTrackRoutingListener listener) {
+    public void removeOnRoutingChangedListener(OnRoutingChangedListener listener) {
         synchronized (mRoutingChangeListeners) {
             if (mRoutingChangeListeners.containsKey(listener)) {
                 mRoutingChangeListeners.remove(listener);
@@ -2236,7 +2244,7 @@ public class AudioTrack
         private final Handler mHandler;
 
         NativeRoutingEventHandlerDelegate(final AudioTrack track,
-                                   final OnAudioTrackRoutingListener listener,
+                                   final OnRoutingChangedListener listener,
                                    Handler handler) {
             // find the looper for our new event handler
             Looper looper;
@@ -2259,7 +2267,7 @@ public class AudioTrack
                         switch(msg.what) {
                         case AudioSystem.NATIVE_EVENT_ROUTING_CHANGE:
                             if (listener != null) {
-                                listener.onAudioTrackRouting(track);
+                                listener.onRoutingChanged(track);
                             }
                             break;
                         default:

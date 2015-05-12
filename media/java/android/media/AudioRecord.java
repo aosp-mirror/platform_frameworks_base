@@ -1202,6 +1202,14 @@ public class AudioRecord
     //--------------------------------------------------------------------------
     // (Re)Routing Info
     //--------------------
+    public interface OnRoutingChangedListener {
+        /**
+         * Called when the routing of an AudioRecord changes from either and explicit or
+         * policy rerouting.
+         */
+        public void onRoutingChanged(AudioRecord audioRecord);
+    }
+
     /**
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioRecord.
      */
@@ -1211,7 +1219,7 @@ public class AudioRecord
             return null;
         }
         AudioDeviceInfo[] devices =
-                AudioDevicesManager.listDevicesStatic(AudioDevicesManager.LIST_DEVICES_INPUTS);
+                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_INPUTS);
         for (int i = 0; i < devices.length; i++) {
             if (devices[i].getId() == deviceId) {
                 return devices[i];
@@ -1222,17 +1230,17 @@ public class AudioRecord
 
     /**
      * The message sent to apps when the routing of this AudioRecord changes if they provide
-     * a {#link Handler} object to addOnAudioRecordRoutingListener().
+     * a {#link Handler} object to addOnRoutingChangeListener().
      */
-    private ArrayMap<OnAudioRecordRoutingListener, NativeRoutingEventHandlerDelegate>
+    private ArrayMap<OnRoutingChangedListener, NativeRoutingEventHandlerDelegate>
         mRoutingChangeListeners =
-            new ArrayMap<OnAudioRecordRoutingListener, NativeRoutingEventHandlerDelegate>();
+            new ArrayMap<OnRoutingChangedListener, NativeRoutingEventHandlerDelegate>();
 
     /**
-     * Adds an {@link OnAudioRecordRoutingListener} to receive notifications of routing changes
+     * Adds an {@link OnRoutingChangedListener} to receive notifications of routing changes
      * on this AudioRecord.
      */
-    public void addOnAudioRecordRoutingListener(OnAudioRecordRoutingListener listener,
+    public void addOnRoutingChangedListener(OnRoutingChangedListener listener,
             android.os.Handler handler) {
         if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
             synchronized (mRoutingChangeListeners) {
@@ -1246,10 +1254,10 @@ public class AudioRecord
     }
 
     /**
-     * Removes an {@link OnAudioRecordRoutingListener} which has been previously added
+     * Removes an {@link OnRoutingChangedListener} which has been previously added
      * to receive notifications of changes to the set of connected audio devices.
      */
-    public void removeOnAudioRecordRoutingListener(OnAudioRecordRoutingListener listener) {
+    public void removeOnRoutingChangedListener(OnRoutingChangedListener listener) {
         synchronized (mRoutingChangeListeners) {
             if (mRoutingChangeListeners.containsKey(listener)) {
                 mRoutingChangeListeners.remove(listener);
@@ -1268,7 +1276,7 @@ public class AudioRecord
         private final Handler mHandler;
 
         NativeRoutingEventHandlerDelegate(final AudioRecord record,
-                                   final OnAudioRecordRoutingListener listener,
+                                   final OnRoutingChangedListener listener,
                                    Handler handler) {
             // find the looper for our new event handler
             Looper looper;
@@ -1291,7 +1299,7 @@ public class AudioRecord
                         switch(msg.what) {
                         case AudioSystem.NATIVE_EVENT_ROUTING_CHANGE:
                             if (listener != null) {
-                                listener.onAudioRecordRouting(record);
+                                listener.onRoutingChanged(record);
                             }
                             break;
                         default:
@@ -1354,7 +1362,7 @@ public class AudioRecord
      * @return true if successful, false if the specified {@link AudioDeviceInfo} is non-null and
      * does not correspond to a valid audio input device.
      */
-    public boolean setPreferredInputDevice(AudioDeviceInfo deviceInfo) {
+    public boolean setPreferredDevice(AudioDeviceInfo deviceInfo) {
         // Do some validation....
         if (deviceInfo != null && !deviceInfo.isSource()) {
             return false;
@@ -1371,10 +1379,10 @@ public class AudioRecord
     }
 
     /**
-     * Returns the selected input specified by {@link #setPreferredInputDevice}. Note that this
+     * Returns the selected input specified by {@link #setPreferredDevice}. Note that this
      * is not guarenteed to correspond to the actual device being used for recording.
      */
-    public AudioDeviceInfo getPreferredInputDevice() {
+    public AudioDeviceInfo getPreferredDevice() {
         synchronized (this) {
             return mPreferredDevice;
         }

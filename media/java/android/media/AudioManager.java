@@ -42,10 +42,13 @@ import android.os.SystemProperties;
 import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -628,6 +631,9 @@ public class AudioManager {
         mUseFixedVolume = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
         sAudioPortEventHandler.init();
+
+        mPortListener = new OnAmPortUpdateListener();
+        registerAudioPortUpdateListener(mPortListener);
     }
 
     private Context getContext() {
@@ -3697,4 +3703,210 @@ public class AudioManager {
                                                  portCfg.format(),
                                                  gainCfg);
     }
+
+    private OnAmPortUpdateListener mPortListener = null;
+
+    /**
+     * The message sent to apps when the contents of the device list changes if they provide
+     * a {#link Handler} object to addOnAudioDeviceConnectionListener().
+     */
+    private final static int MSG_DEVICES_LIST_CHANGE = 0;
+
+    private ArrayMap<OnAudioDeviceConnectionListener, NativeEventHandlerDelegate>
+        mDeviceConnectionListeners =
+            new ArrayMap<OnAudioDeviceConnectionListener, NativeEventHandlerDelegate>();
+
+    /**
+     * Specifies to the {@link AudioManager#getDevices(int)} method to include
+     * source (i.e. input) audio devices.
+     */
+    public static final int GET_DEVICES_INPUTS    = 0x0001;
+
+    /**
+     * Specifies to the {@link AudioManager#getDevices(int)} method to include
+     * sink (i.e. output) audio devices.
+     */
+    public static final int GET_DEVICES_OUTPUTS   = 0x0002;
+
+    /**
+     * Specifies to the {@link AudioManager#getDevices(int)} method to include both
+     * source and sink devices.
+     */
+    public static final int GET_DEVICES_ALL = GET_DEVICES_OUTPUTS | GET_DEVICES_INPUTS;
+
+    /**
+     * Determines if a given AudioDevicePort meets the specified filter criteria.
+     * @param port  The port to test.
+     * @param flags A set of bitflags specifying the criteria to test.
+     * @see {@link GET_DEVICES_OUTPUTS} and {@link GET_DEVICES_INPUTS}
+     **/
+    private static boolean checkFlags(AudioDevicePort port, int flags) {
+        return port.role() == AudioPort.ROLE_SINK && (flags & GET_DEVICES_OUTPUTS) != 0 ||
+               port.role() == AudioPort.ROLE_SOURCE && (flags & GET_DEVICES_INPUTS) != 0;
+    }
+
+    /**
+     * Generates a list of AudioDeviceInfo objects corresponding to the audio devices currently
+     * connected to the system and meeting the criteria specified in the <code>flags</code>
+     * parameter.
+     * @param flags A set of bitflags specifying the criteria to test.
+     * @see {@link GET_DEVICES_OUTPUTS}, {@link GET_DEVICES_INPUTS} and {@lGET_DEVICES_CES_ALL}.
+     * @return A (possibly zero-length) array of AudioDeviceInfo objects.
+     */
+    public AudioDeviceInfo[] getDevices(int flags) {
+        return getDevicesStatic(flags);
+    }
+
+    /**
+     * Generates a list of AudioDeviceInfo objects corresponding to the audio devices currently
+     * connected to the system and meeting the criteria specified in the <code>flags</code>
+     * parameter.
+     * @param flags A set of bitflags specifying the criteria to test.
+     * @see {@link GET_DEVICES_OUTPUTS}, {@link GET_DEVICES_INPUTS} and {@link GET_DEVICES_ALL}.
+     * @return A (possibly zero-length) array of AudioDeviceInfo objects.
+     * @hide
+     */
+    public static AudioDeviceInfo[] getDevicesStatic(int flags) {
+        ArrayList<AudioDevicePort> ports = new ArrayList<AudioDevicePort>();
+        int status = AudioManager.listAudioDevicePorts(ports);
+        if (status != AudioManager.SUCCESS) {
+            // fail and bail!
+            return new AudioDeviceInfo[0];
+        }
+
+        // figure out how many AudioDeviceInfo we need space for
+        int numRecs = 0;
+        for (AudioDevicePort port : ports) {
+            if (checkFlags(port, flags)) {
+                numRecs++;
+            }
+        }
+
+        // Now load them up
+        AudioDeviceInfo[] deviceList = new AudioDeviceInfo[numRecs];
+        int slot = 0;
+        for (AudioDevicePort port : ports) {
+            if (checkFlags(port, flags)) {
+                deviceList[slot++] = new AudioDeviceInfo(port);
+            }
+        }
+
+        return deviceList;
+    }
+
+    /**
+     * Adds an {@link OnAudioDeviceConnectionListener} to receive notifications of changes
+     * to the set of connected audio devices.
+     */
+    public void addOnAudioDeviceConnectionListener(OnAudioDeviceConnectionListener listener,
+            android.os.Handler handler) {
+        if (listener != null && !mDeviceConnectionListeners.containsKey(listener)) {
+            synchronized (mDeviceConnectionListeners) {
+                mDeviceConnectionListeners.put(
+                    listener, new NativeEventHandlerDelegate(listener, handler));
+            }
+        }
+    }
+
+    /**
+     * Removes an {@link OnAudioDeviceConnectionListener} which has been previously registered
+     * to receive notifications of changes to the set of connected audio devices.
+     */
+    public void removeOnAudioDeviceConnectionListener(OnAudioDeviceConnectionListener listener) {
+        synchronized (mDeviceConnectionListeners) {
+            if (mDeviceConnectionListeners.containsKey(listener)) {
+                mDeviceConnectionListeners.remove(listener);
+            }
+        }
+    }
+
+    /**
+     * Sends device list change notification to all listeners.
+     */
+    private void broadcastDeviceListChange() {
+        Collection<NativeEventHandlerDelegate> values;
+        synchronized (mDeviceConnectionListeners) {
+            values = mDeviceConnectionListeners.values();
+        }
+        for (NativeEventHandlerDelegate delegate : values) {
+            Handler handler = delegate.getHandler();
+            if (handler != null) {
+                handler.sendEmptyMessage(MSG_DEVICES_LIST_CHANGE);
+            }
+        }
+    }
+
+    /**
+     * Handles Port list update notifications from the AudioManager
+     */
+    private class OnAmPortUpdateListener implements AudioManager.OnAudioPortUpdateListener {
+        static final String TAG = "OnAmPortUpdateListener";
+        public void onAudioPortListUpdate(AudioPort[] portList) {
+            broadcastDeviceListChange();
+        }
+
+        /**
+         * Callback method called upon audio patch list update.
+         * @param patchList the updated list of audio patches
+         */
+        public void onAudioPatchListUpdate(AudioPatch[] patchList) {}
+
+        /**
+         * Callback method called when the mediaserver dies
+         */
+        public void onServiceDied() {
+            broadcastDeviceListChange();
+        }
+    }
+
+    //---------------------------------------------------------
+    // Inner classes
+    //--------------------
+    /**
+     * Helper class to handle the forwarding of native events to the appropriate listener
+     * (potentially) handled in a different thread.
+     */
+    private class NativeEventHandlerDelegate {
+        private final Handler mHandler;
+
+        NativeEventHandlerDelegate(final OnAudioDeviceConnectionListener listener,
+                                   Handler handler) {
+            // find the looper for our new event handler
+            Looper looper;
+            if (handler != null) {
+                looper = handler.getLooper();
+            } else {
+                // no given handler, use the looper the addListener call was called in
+                looper = Looper.getMainLooper();
+            }
+
+            // construct the event handler with this looper
+            if (looper != null) {
+                // implement the event handler delegate
+                mHandler = new Handler(looper) {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        switch(msg.what) {
+                        case MSG_DEVICES_LIST_CHANGE:
+                            // call the OnAudioDeviceConnectionListener
+                            if (listener != null) {
+                                listener.onAudioDeviceConnection();
+                            }
+                            break;
+                        default:
+                            Log.e(TAG, "Unknown native event type: " + msg.what);
+                            break;
+                        }
+                    }
+                };
+            } else {
+                mHandler = null;
+            }
+        }
+
+        Handler getHandler() {
+            return mHandler;
+        }
+    }
+
 }

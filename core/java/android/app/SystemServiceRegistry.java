@@ -55,7 +55,6 @@ import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;
 import android.location.LocationManager;
-import android.media.AudioDevicesManager;
 import android.media.AudioManager;
 import android.media.MediaRouter;
 import android.media.midi.IMidiManager;
@@ -701,13 +700,6 @@ final class SystemServiceRegistry {
             public RadioManager createService(ContextImpl ctx) {
                 return new RadioManager(ctx);
             }});
-
-        registerService(Context.AUDIO_DEVICES_SERVICE, AudioDevicesManager.class,
-                new CachedServiceFetcher<AudioDevicesManager>() {
-            @Override
-            public AudioDevicesManager createService(ContextImpl ctx) {
-                return new AudioDevicesManager(ctx);
-            }});
     }
 
     /**
@@ -726,7 +718,7 @@ final class SystemServiceRegistry {
     }
 
     /**
-     * Gets the name of the system-level service that is represented by the specified class. 
+     * Gets the name of the system-level service that is represented by the specified class.
      */
     public static String getSystemServiceName(Class<?> serviceClass) {
         return SYSTEM_SERVICE_NAMES.get(serviceClass);
