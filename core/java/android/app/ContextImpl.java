@@ -237,8 +237,11 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public void setTheme(int resid) {
-        mThemeResource = resid;
+    public void setTheme(int resId) {
+        if (mThemeResource != resId) {
+            mThemeResource = resId;
+            initializeTheme();
+        }
     }
 
     @Override
@@ -248,13 +251,22 @@ class ContextImpl extends Context {
 
     @Override
     public Resources.Theme getTheme() {
-        if (mTheme == null) {
-            mThemeResource = Resources.selectDefaultTheme(mThemeResource,
-                    getOuterContext().getApplicationInfo().targetSdkVersion);
-            mTheme = mResources.newTheme();
-            mTheme.applyStyle(mThemeResource, true);
+        if (mTheme != null) {
+            return mTheme;
         }
+
+        mThemeResource = Resources.selectDefaultTheme(mThemeResource,
+                getOuterContext().getApplicationInfo().targetSdkVersion);
+        initializeTheme();
+
         return mTheme;
+    }
+
+    private void initializeTheme() {
+        if (mTheme == null) {
+            mTheme = mResources.newTheme();
+        }
+        mTheme.applyStyle(mThemeResource, true);
     }
 
     @Override
