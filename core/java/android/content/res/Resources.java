@@ -1804,8 +1804,8 @@ public class Resources {
             final int N = mKey.mCount;
             final String[] themes = new String[N * 2];
             for (int i = 0, j = N - 1; i < themes.length; i += 2, --j) {
-                final int resId = mKey.mResId[i];
-                final boolean forced = mKey.mForce[i];
+                final int resId = mKey.mResId[j];
+                final boolean forced = mKey.mForce[j];
                 try {
                     themes[i] = getResourceName(resId);
                 } catch (NotFoundException e) {
@@ -1819,8 +1819,7 @@ public class Resources {
         /** @hide */
         public void encode(@NonNull ViewHierarchyEncoder encoder) {
             encoder.beginObject(this);
-            // TODO: revert after getTheme() is fixed
-            String[] properties = new String[0]; // getTheme();
+            final String[] properties = getTheme();
             for (int i = 0; i < properties.length; i += 2) {
                 encoder.addProperty(properties[i], properties[i+1]);
             }
