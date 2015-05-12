@@ -204,7 +204,8 @@ public class AssistManager {
 
     private boolean getVoiceInteractorSupportsAssistGesture() {
         try {
-            return mVoiceInteractionManagerService.activeServiceSupportsAssist();
+            return mVoiceInteractionManagerService != null
+                    && mVoiceInteractionManagerService.activeServiceSupportsAssist();
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call activeServiceSupportsAssistGesture", e);
             return false;
@@ -213,7 +214,8 @@ public class AssistManager {
 
     public boolean canVoiceAssistBeLaunchedFromKeyguard() {
         try {
-            return mVoiceInteractionManagerService.activeServiceSupportsLaunchFromKeyguard();
+            return mVoiceInteractionManagerService != null
+                    && mVoiceInteractionManagerService.activeServiceSupportsLaunchFromKeyguard();
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call activeServiceSupportsLaunchFromKeyguard", e);
             return false;
@@ -231,7 +233,8 @@ public class AssistManager {
 
     private boolean isVoiceSessionRunning() {
         try {
-            return mVoiceInteractionManagerService.isSessionRunning();
+            return mVoiceInteractionManagerService != null
+                    && mVoiceInteractionManagerService.isSessionRunning();
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to call isSessionRunning", e);
             return false;
