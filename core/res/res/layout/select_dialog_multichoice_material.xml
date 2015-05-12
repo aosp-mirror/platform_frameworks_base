@@ -25,6 +25,6 @@
     android:gravity="center_vertical"
     android:paddingStart="@dimen/select_dialog_padding_start_material"
     android:paddingEnd="?attr/dialogPreferredPadding"
-    android:checkMark="?attr/listChoiceIndicatorMultiple"
-    android:checkMarkGravity="start"
+    android:drawableStart="?attr/listChoiceIndicatorMultiple"
+    android:drawablePadding="20dp"
     android:ellipsize="marquee" />
