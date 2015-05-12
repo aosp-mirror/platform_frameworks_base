@@ -51,6 +51,7 @@ excludeFromSuggestions=true
        data-maxResults="3"></div>
 </div></section>
 
+
 <section class="dac-section dac-light"><div class="wrap">
   <h1 class="dac-section-title">Android performance patterns</h1>
   <div class="dac-section-subtitle">
@@ -68,39 +69,47 @@ excludeFromSuggestions=true
   </ul>
 </div></section>
 
-<section class="dac-section dac-dark dac-invert"><div class="wrap">
-  <h1 class="dac-section-title">Build with Google</h1>
-  <div class="dac-section-subtitle">Services on billions of Android devices worldwide to help you build better apps.</div>
+<section class="dac-section dac-section-light"><div class="wrap">
+  <h1 class="dac-section-title">Tools for building apps</h1>
+  <div class="dac-section-subtitle">
+    Insights into Android's tools and libraries to speed your development.
+  </div>
   <div class="resource-widget resource-flow-layout col-16"
-       data-query="collection:develop/landing/buildwithgoogle"
+       data-query="collection:develop/landing/tools"
        data-cardSizes="6x6"
        data-maxResults="3"></div>
   <ul class="dac-section-links">
-    <li class="dac-section-link"><a href="https://developers.google.com/">
-      <span class="dac-sprite dac-auto-chevron"></span>
-      Get started with Google << NEEDS LINK
-    </a></li>
   </ul>
 </div></section>
 
 <section class="dac-section dac-light"><div class="wrap">
-  <h1 class="dac-section-title">DevBytes</h1>
-  <div class="dac-section-subtitle">Learn Android in short, focused tutorials.</div>
+  <h1 class="dac-section-title">Ubiquitous computing</h1>
+  <div class="dac-section-subtitle">
+    Opening up new stuff.
+  </div>
   <div class="resource-widget resource-flow-layout col-16"
-       data-query="collection:develop/landing/devbytes"
+       data-query="collection:develop/landing/ubicomp"
        data-cardSizes="6x6"
-       data-maxResults="6"></div>
+       data-maxResults="3"></div>
   <ul class="dac-section-links">
-    <li class="dac-section-link"><a href="https://www.youtube.com/watch?v=wlFVIIstKmA&list=PLOU2XLYxmsIJJHY5OrsREtKewtBhc0Uy2">
+    <li class="dac-section-link"><a href="/wear/index.html">
       <span class="dac-sprite dac-auto-chevron"></span>
-      DevBytes 2014 playlist
+      Wear
+    </a></li>
+    <li class="dac-section-link"><a href="/tv/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      TV
+    </a></li>
+    <li class="dac-section-link"><a href="/auto/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Auto
     </a></li>
   </ul>
 </div></section>
 
 <section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Courses</h1>
-  <div class="dac-section-subtitle">Take free online courses from Android experts that bring you step-by-step to building your own apps.</div>
+  <div class="dac-section-subtitle">Free online courses from Android experts that bring you step-by-step to building your own apps.</div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/courses"
        data-cardSizes="6x6"
