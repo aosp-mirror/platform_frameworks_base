@@ -157,7 +157,8 @@ public class CommandQueue extends IStatusBar.Stub {
 
     public void setSystemUiVisibility(int vis, int mask) {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_SYSTEMUI_VISIBILITY);
+            // Don't coalesce these, since it might have one time flags set such as
+            // STATUS_BAR_UNHIDE which might get lost.
             mHandler.obtainMessage(MSG_SET_SYSTEMUI_VISIBILITY, vis, mask, null).sendToTarget();
         }
     }
