@@ -1498,7 +1498,11 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private void forgetAll() {
+    @Override
+    public void forgetAllVolumes() {
+        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        waitForReady();
+
         synchronized (mLock) {
             for (int i = 0; i < mRecords.size(); i++) {
                 final String fsUuid = mRecords.keyAt(i);
@@ -2978,12 +2982,6 @@ class MountService extends IMountService.Stub
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
-
-        for (String arg : args) {
-            if ("--forget-all".equals(arg)) {
-                forgetAll();
-            }
-        }
 
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ", 160);
         synchronized (mLock) {
