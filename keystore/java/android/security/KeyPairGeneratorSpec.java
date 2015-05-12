@@ -69,16 +69,16 @@ import javax.security.auth.x500.X500Principal;
  * digest and only if the user has been authenticated within the last five minutes.
  * <pre> {@code
  * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
- *         KeyStoreKeyProperties.Algorithm.EC,
+ *         KeyStoreKeyProperties.KEY_ALGORITHM_EC,
  *         "AndroidKeyStore");
  * keyPairGenerator.initialize(
  *         new KeyGeneratorSpec.Builder(context)
  *                 .setAlias("key2")
- *                 .setPurposes(KeyStoreKeyProperties.Purpose.SIGN
- *                         | KeyStoreKeyProperties.Purpose.VERIFY)
- *                 .setDigests(KeyStoreKeyProperties.Digest.SHA256
- *                         | KeyStoreKeyProperties.Digest.SHA384
- *                         | KeyStoreKeyProperties.Digest.SHA512)
+ *                 .setPurposes(KeyStoreKeyProperties.PURPOSE_SIGN
+ *                         | KeyStoreKeyProperties.PURPOSE_VERIFY)
+ *                 .setDigests(KeyStoreKeyProperties.DIGEST_SHA256
+ *                         | KeyStoreKeyProperties.DIGEST_SHA384
+ *                         | KeyStoreKeyProperties.DIGEST_SHA512)
  *                 // Only permit this key to be used if the user authenticated
  *                 // within the last five minutes.
  *                 .setUserAuthenticationRequired(true)
@@ -287,10 +287,11 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns the key type (e.g., "EC", "RSA") specified by this parameter.
+     * Returns the type of key pair (e.g., {@code EC}, {@code RSA}) to be generated. See
+     * {@link KeyStoreKeyProperties}.{@code KEY_ALGORITHM} constants.
      */
     @Nullable
-    public @KeyStoreKeyProperties.AlgorithmEnum String getKeyType() {
+    public @KeyStoreKeyProperties.KeyAlgorithmEnum String getKeyType() {
         return mKeyType;
     }
 
@@ -395,10 +396,10 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which the
-     * key can be used.
+     * Gets the set of purposes (e.g., encrypt, decrypt, sign) for which the key can be used.
+     * Attempts to use the key for any other purpose will be rejected.
      *
-     * @see KeyStoreKeyProperties.Purpose
+     * <p>See {@link KeyStoreKeyProperties}.{@code PURPOSE} flags.
      */
     public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
@@ -416,10 +417,11 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of padding schemes (e.g., {@code PKCS1Padding}, {@code NoPadding}) with which
-     * the key can be used when encrypting/decrypting.
+     * Gets the set of padding schemes (e.g., {@code OEAPPadding}, {@code PKCS1Padding},
+     * {@code NoPadding}) with which the key can be used when encrypting/decrypting. Attempts to use
+     * the key with any other padding scheme will be rejected.
      *
-     * @see KeyStoreKeyProperties.EncryptionPadding
+     * <p>See {@link KeyStoreKeyProperties}.{@code ENCRYPTION_PADDING} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
@@ -427,10 +429,11 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of padding schemes (e.g., {@code PSS}) with which the key can be used when
-     * signing/verifying.
+     * Gets the set of padding schemes (e.g., {@code PSS}, {@code PKCS#1}) with which the key
+     * can be used when signing/verifying. Attempts to use the key with any other padding scheme
+     * will be rejected.
      *
-     * @see KeyStoreKeyProperties.SignaturePadding
+     * <p>See {@link KeyStoreKeyProperties}.{@code SIGNATURE_PADDING} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
@@ -438,9 +441,11 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used.
+     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used
+     * when encrypting/decrypting. Attempts to use the key with any other block modes will be
+     * rejected.
      *
-     * @see KeyStoreKeyProperties.BlockMode
+     * <p>See {@link KeyStoreKeyProperties}.{@code BLOCK_MODE} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
@@ -580,10 +585,12 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the key type (e.g., EC, RSA) of the keypair to be created.
+         * Sets the type of key pair (e.g., {@code EC}, {@code RSA}) of the key pair to be
+         * generated. See {@link KeyStoreKeyProperties}.{@code KEY_ALGORITHM} constants.
+         *
          */
         @NonNull
-        public Builder setKeyType(@NonNull @KeyStoreKeyProperties.AlgorithmEnum String keyType)
+        public Builder setKeyType(@NonNull @KeyStoreKeyProperties.KeyAlgorithmEnum String keyType)
                 throws NoSuchAlgorithmException {
             if (keyType == null) {
                 throw new NullPointerException("keyType == null");
@@ -713,7 +720,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
          * @see #setKeyValidityEnd(Date)
          */
@@ -728,7 +735,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
          * @see #setKeyValidityStart(Date)
          * @see #setKeyValidityForConsumptionEnd(Date)
@@ -746,7 +753,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
          * @see #setKeyValidityForConsumptionEnd(Date)
          */
@@ -762,7 +769,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>By default, the key is valid at any instant.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
          * @see #setKeyValidityForOriginationEnd(Date)
          */
@@ -773,20 +780,20 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which
-         * the key can be used.
+         * Sets the set of purposes (e.g., encrypt, decrypt, sign) for which the key can be used.
+         * Attempts to use the key for any other purpose will be rejected.
          *
          * <p>This must be specified for all keys. There is no default.
          *
          * <p>If the set of purposes for which the key can be used does not contain
-         * {@link KeyStoreKeyProperties.Purpose#SIGN}, the self-signed certificate generated by
+         * {@link KeyStoreKeyProperties#PURPOSE_SIGN}, the self-signed certificate generated by
          * {@link KeyPairGenerator} of {@code AndroidKeyStore} provider will contain an invalid
          * signature. This is OK if the certificate is only used for obtaining the public key from
          * Android KeyStore.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
-         * @see KeyStoreKeyProperties.Purpose
+         * <p>See {@link KeyStoreKeyProperties}.{@code PURPOSE} flags.
          */
         @NonNull
         public Builder setPurposes(@KeyStoreKeyProperties.PurposeEnum int purposes) {
@@ -801,7 +808,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          *
          * <p>This must be specified for keys which are used for signing/verification.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
          * @see KeyStoreKeyProperties.Digest
          */
@@ -812,15 +819,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of padding schemes (e.g., {@code PKCS1Padding}, {@code NoPadding}) with
-         * which the key can be used when encrypting/decrypting. Attempts to use the key with any
-         * other padding scheme will be rejected.
+         * Sets the set of padding schemes (e.g., {@code OAEPPadding}, {@code PKCS1Padding},
+         * {@code NoPadding}) with which the key can be used when encrypting/decrypting. Attempts to
+         * use the key with any other padding scheme will be rejected.
          *
          * <p>This must be specified for keys which are used for encryption/decryption.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
-         * @see KeyStoreKeyProperties.EncryptionPadding
+         * <p>See {@link KeyStoreKeyProperties}.{@code ENCRYPTION_PADDING} constants.
          */
         @NonNull
         public Builder setEncryptionPaddings(
@@ -830,15 +837,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of padding schemes (e.g., {@code PSS}) with which the key can be used when
-         * signing/verifying. Attempts to use the key with any other padding scheme will be
-         * rejected.
+         * Sets the set of padding schemes (e.g., {@code PSS}, {@code PKCS#1}) with which the key
+         * can be used when signing/verifying. Attempts to use the key with any other padding scheme
+         * will be rejected.
          *
          * <p>This must be specified for RSA keys which are used for signing/verification.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
-         * @see KeyStoreKeyProperties.SignaturePadding
+         * <p>See {@link KeyStoreKeyProperties}.{@code SIGNATURE_PADDING} constants.
          */
         @NonNull
         public Builder setSignaturePaddings(
@@ -848,15 +855,15 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be
-         * used when encrypting/decrypting. Attempts to use the key with any other block modes will
-         * be rejected.
+         * Sets the set of block modes (e.g., {@code ECB}, {@code CBC}, {@code CTR}) with which the
+         * key can be used when encrypting/decrypting. Attempts to use the key with any other block
+         * modes will be rejected.
          *
          * <p>This must be specified for encryption/decryption keys.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
-         * @see KeyStoreKeyProperties.BlockMode
+         * <p>See {@link KeyStoreKeyProperties}.{@code BLOCK_MODE} constants.
          */
         @NonNull
         public Builder setBlockModes(@KeyStoreKeyProperties.BlockModeEnum String... blockModes) {
@@ -884,7 +891,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * schemes which offer {@code IND-CPA}, such as PKCS#1 or OAEP.</li>
          * </ul>
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          */
         @NonNull
         public Builder setRandomizedEncryptionRequired(boolean required) {
@@ -908,7 +915,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>This restriction applies only to private key operations. Public key operations are not
          * restricted.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
          * @see #setUserAuthenticationValidityDurationSeconds(int)
          */
@@ -927,7 +934,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * <p>This restriction applies only to private key operations. Public key operations are not
          * restricted.
          *
-         * <p><b>NOTE: This has currently no effect.
+         * <p><b>NOTE: This has currently no effect.</b>
          *
          * @param seconds duration in seconds or {@code -1} if the user needs to authenticate for
          *        every use of the key.

@@ -135,7 +135,7 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the origin of the key.
+     * Gets the origin of the key. See {@link KeyStoreKeyProperties}.{@code ORIGIN} constants.
      */
     public @KeyStoreKeyProperties.OriginEnum int getOrigin() {
         return mOrigin;
@@ -179,19 +179,21 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which the
-     * key can be used.
+     * Gets the set of purposes (e.g., encrypt, decrypt, sign) for which the key can be used.
+     * Attempts to use the key for any other purpose will be rejected.
      *
-     * @see KeyStoreKeyProperties.Purpose
+     * <p>See {@link KeyStoreKeyProperties}.{@code PURPOSE} flags.
      */
     public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
     /**
-     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used.
+     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used
+     * when encrypting/decrypting. Attempts to use the key with any other block modes will be
+     * rejected.
      *
-     * @see KeyStoreKeyProperties.BlockMode
+     * <p>See {@link KeyStoreKeyProperties}.{@code BLOCK_MODE} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
@@ -199,10 +201,11 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the set of padding schemes (e.g., {@code PKCS7Padding}, {@code NoPadding}) with which
-     * the key can be used when encrypting/decrypting.
+     * Gets the set of padding schemes (e.g., {@code PKCS7Padding}, {@code PKCS1Padding},
+     * {@code NoPadding}) with which the key can be used when encrypting/decrypting. Attempts to use
+     * the key with any other padding scheme will be rejected.
      *
-     * @see KeyStoreKeyProperties.EncryptionPadding
+     * <p>See {@link KeyStoreKeyProperties}.{@code ENCRYPTION_PADDING} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
@@ -210,10 +213,11 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the set of padding schemes (e.g., {@code PSS}) with which the key can be used when
-     * signing/verifying.
+     * Gets the set of padding schemes (e.g., {@code PSS}, {@code PKCS#1}) with which the key
+     * can be used when signing/verifying. Attempts to use the key with any other padding scheme
+     * will be rejected.
      *
-     * @see KeyStoreKeyProperties.SignaturePadding
+     * <p>See {@link KeyStoreKeyProperties}.{@code SIGNATURE_PADDING} constants.
      */
     @NonNull
     public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {

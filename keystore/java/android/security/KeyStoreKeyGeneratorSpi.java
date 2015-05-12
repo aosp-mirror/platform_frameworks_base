@@ -174,7 +174,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                         spec.getEncryptionPaddings());
                 mKeymasterBlockModes =
                         KeyStoreKeyProperties.BlockMode.allToKeymaster(spec.getBlockModes());
-                if (((spec.getPurposes() & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
+                if (((spec.getPurposes() & KeyStoreKeyProperties.PURPOSE_ENCRYPT) != 0)
                         && (spec.isRandomizedEncryptionRequired())) {
                     for (int keymasterBlockMode : mKeymasterBlockModes) {
                         if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(
@@ -247,7 +247,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 (spec.getKeyValidityForConsumptionEnd() != null)
                 ? spec.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
 
-        if (((spec.getPurposes() & KeyStoreKeyProperties.Purpose.ENCRYPT) != 0)
+        if (((spec.getPurposes() & KeyStoreKeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (!spec.isRandomizedEncryptionRequired())) {
             // Permit caller-provided IV when encrypting with this key
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
@@ -265,9 +265,9 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             throw new ProviderException(
                     "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
         }
-        String keyAlgorithmJCA;
+        @KeyStoreKeyProperties.KeyAlgorithmEnum String keyAlgorithmJCA;
         try {
-            keyAlgorithmJCA = KeyStoreKeyProperties.Algorithm.fromKeymasterSecretKeyAlgorithm(
+            keyAlgorithmJCA = KeyStoreKeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
                     mKeymasterAlgorithm, mKeymasterDigest);
         } catch (IllegalArgumentException e) {
             throw new ProviderException("Failed to obtain JCA secret key algorithm name", e);

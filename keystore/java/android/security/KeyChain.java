@@ -266,7 +266,7 @@ public final class KeyChain {
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
-            @KeyStoreKeyProperties.AlgorithmEnum String[] keyTypes, Principal[] issuers,
+            @KeyStoreKeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
             @Nullable String host, int port, @Nullable String alias) {
         choosePrivateKeyAlias(activity, response, keyTypes, issuers, host, port, null, alias);
     }
@@ -312,7 +312,7 @@ public final class KeyChain {
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
-            @KeyStoreKeyProperties.AlgorithmEnum String[] keyTypes, Principal[] issuers,
+            @KeyStoreKeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
             @Nullable String host, int port, @Nullable String url, @Nullable String alias) {
         /*
          * TODO currently keyTypes, issuers are unused. They are meant
@@ -439,10 +439,10 @@ public final class KeyChain {
      * "RSA").
      */
     public static boolean isKeyAlgorithmSupported(
-            @NonNull @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
+            @NonNull @KeyStoreKeyProperties.KeyAlgorithmEnum String algorithm) {
         final String algUpper = algorithm.toUpperCase(Locale.US);
-        return KeyStoreKeyProperties.Algorithm.EC.equals(algUpper)
-                || KeyStoreKeyProperties.Algorithm.RSA.equals(algUpper);
+        return KeyStoreKeyProperties.KEY_ALGORITHM_EC.equals(algUpper)
+                || KeyStoreKeyProperties.KEY_ALGORITHM_RSA.equals(algUpper);
     }
 
     /**
@@ -453,7 +453,7 @@ public final class KeyChain {
      * that makes it non-exportable.
      */
     public static boolean isBoundKeyAlgorithm(
-            @NonNull @KeyStoreKeyProperties.AlgorithmEnum String algorithm) {
+            @NonNull @KeyStoreKeyProperties.KeyAlgorithmEnum String algorithm) {
         if (!isKeyAlgorithmSupported(algorithm)) {
             return false;
         }

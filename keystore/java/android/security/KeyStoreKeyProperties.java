@@ -26,16 +26,8 @@ import libcore.util.EmptyArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPairGenerator;
 import java.util.Collection;
 import java.util.Locale;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.Mac;
-import javax.crypto.SecretKeyFactory;
 
 /**
  * Properties of {@code AndroidKeyStore} keys.
@@ -48,76 +40,69 @@ public abstract class KeyStoreKeyProperties {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
-            value = {Purpose.ENCRYPT, Purpose.DECRYPT, Purpose.SIGN, Purpose.VERIFY})
+            value = {
+                PURPOSE_ENCRYPT,
+                PURPOSE_DECRYPT,
+                PURPOSE_SIGN,
+                PURPOSE_VERIFY,
+                })
     public @interface PurposeEnum {}
 
     /**
-     * Purposes of key.
+     * Purpose of key: encryption.
      */
-    public static abstract class Purpose {
+    public static final int PURPOSE_ENCRYPT = 1 << 0;
+
+    /**
+     * Purpose of key: decryption.
+     */
+    public static final int PURPOSE_DECRYPT = 1 << 1;
+
+    /**
+     * Purpose of key: signing or generating a Message Authentication Code (MAC).
+     */
+    public static final int PURPOSE_SIGN = 1 << 2;
+
+    /**
+     * Purpose of key: signature or Message Authentication Code (MAC) verification.
+     */
+    public static final int PURPOSE_VERIFY = 1 << 3;
+
+    static abstract class Purpose {
         private Purpose() {}
 
-        /**
-         * Purpose: encryption.
-         */
-        public static final int ENCRYPT = 1 << 0;
-
-        /**
-         * Purpose: decryption.
-         */
-        public static final int DECRYPT = 1 << 1;
-
-        /**
-         * Purpose: signing.
-         */
-        public static final int SIGN = 1 << 2;
-
-        /**
-         * Purpose: signature verification.
-         */
-        public static final int VERIFY = 1 << 3;
-
-        /**
-         * @hide
-         */
-        public static int toKeymaster(@PurposeEnum int purpose) {
+        static int toKeymaster(@PurposeEnum int purpose) {
             switch (purpose) {
-                case ENCRYPT:
+                case PURPOSE_ENCRYPT:
                     return KeymasterDefs.KM_PURPOSE_ENCRYPT;
-                case DECRYPT:
+                case PURPOSE_DECRYPT:
                     return KeymasterDefs.KM_PURPOSE_DECRYPT;
-                case SIGN:
+                case PURPOSE_SIGN:
                     return KeymasterDefs.KM_PURPOSE_SIGN;
-                case VERIFY:
+                case PURPOSE_VERIFY:
                     return KeymasterDefs.KM_PURPOSE_VERIFY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
         }
 
-        /**
-         * @hide
-         */
-        public static @PurposeEnum int fromKeymaster(int purpose) {
+        static @PurposeEnum int fromKeymaster(int purpose) {
             switch (purpose) {
                 case KeymasterDefs.KM_PURPOSE_ENCRYPT:
-                    return ENCRYPT;
+                    return PURPOSE_ENCRYPT;
                 case KeymasterDefs.KM_PURPOSE_DECRYPT:
-                    return DECRYPT;
+                    return PURPOSE_DECRYPT;
                 case KeymasterDefs.KM_PURPOSE_SIGN:
-                    return SIGN;
+                    return PURPOSE_SIGN;
                 case KeymasterDefs.KM_PURPOSE_VERIFY:
-                    return VERIFY;
+                    return PURPOSE_VERIFY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
-        public static int[] allToKeymaster(@PurposeEnum int purposes) {
+        static int[] allToKeymaster(@PurposeEnum int purposes) {
             int[] result = getSetFlags(purposes);
             for (int i = 0; i < result.length; i++) {
                 result[i] = toKeymaster(result[i]);
@@ -125,10 +110,7 @@ public abstract class KeyStoreKeyProperties {
             return result;
         }
 
-        /**
-         * @hide
-         */
-        public static @PurposeEnum int allFromKeymaster(@NonNull Collection<Integer> purposes) {
+        static @PurposeEnum int allFromKeymaster(@NonNull Collection<Integer> purposes) {
             @PurposeEnum int result = 0;
             for (int keymasterPurpose : purposes) {
                 result |= fromKeymaster(keymasterPurpose);
@@ -142,57 +124,46 @@ public abstract class KeyStoreKeyProperties {
      */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        Algorithm.RSA,
-        Algorithm.EC,
-        Algorithm.AES,
-        Algorithm.HMAC_SHA1,
-        Algorithm.HMAC_SHA224,
-        Algorithm.HMAC_SHA256,
-        Algorithm.HMAC_SHA384,
-        Algorithm.HMAC_SHA512,
+        KEY_ALGORITHM_RSA,
+        KEY_ALGORITHM_EC,
+        KEY_ALGORITHM_AES,
+        KEY_ALGORITHM_HMAC_SHA1,
+        KEY_ALGORITHM_HMAC_SHA224,
+        KEY_ALGORITHM_HMAC_SHA256,
+        KEY_ALGORITHM_HMAC_SHA384,
+        KEY_ALGORITHM_HMAC_SHA512,
         })
-    public @interface AlgorithmEnum {}
+    public @interface KeyAlgorithmEnum {}
 
-    /**
-     * Key algorithms.
-     *
-     * <p>These are standard names which can be used to obtain instances of {@link KeyGenerator},
-     * {@link KeyPairGenerator}, {@link Cipher} (as part of the transformation string), {@link Mac},
-     * {@link KeyFactory}, {@link SecretKeyFactory}. These are also the names used by
-     * {@link Key#getAlgorithm()}.
-     */
-    public static abstract class Algorithm {
-        private Algorithm() {}
+    /** Rivest Shamir Adleman (RSA) key. */
+    public static final String KEY_ALGORITHM_RSA = "RSA";
 
-        /** Rivest Shamir Adleman (RSA) key. */
-        public static final String RSA = "RSA";
+    /** Elliptic Curve (EC) Cryptography key. */
+    public static final String KEY_ALGORITHM_EC = "EC";
 
-        /** Elliptic Curve (EC) key. */
-        public static final String EC = "EC";
+    /** Advanced Encryption Standard (AES) key. */
+    public static final String KEY_ALGORITHM_AES = "AES";
 
-        /** Advanced Encryption Standard (AES) key. */
-        public static final String AES = "AES";
+    /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-1 as the hash. */
+    public static final String KEY_ALGORITHM_HMAC_SHA1 = "HmacSHA1";
 
-        /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-1 as the hash. */
-        public static final String HMAC_SHA1 = "HmacSHA1";
+    /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-224 as the hash. */
+    public static final String KEY_ALGORITHM_HMAC_SHA224 = "HmacSHA224";
 
-        /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-224 as the hash. */
-        public static final String HMAC_SHA224 = "HmacSHA224";
+    /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-256 as the hash. */
+    public static final String KEY_ALGORITHM_HMAC_SHA256 = "HmacSHA256";
 
-        /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-256 as the hash. */
-        public static final String HMAC_SHA256 = "HmacSHA256";
+    /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-384 as the hash. */
+    public static final String KEY_ALGORITHM_HMAC_SHA384 = "HmacSHA384";
 
-        /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-384 as the hash. */
-        public static final String HMAC_SHA384 = "HmacSHA384";
+    /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-512 as the hash. */
+    public static final String KEY_ALGORITHM_HMAC_SHA512 = "HmacSHA512";
 
-        /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-512 as the hash. */
-        public static final String HMAC_SHA512 = "HmacSHA512";
+    static abstract class KeyAlgorithm {
+        private KeyAlgorithm() {}
 
-        /**
-         * @hide
-         */
-        static int toKeymasterSecretKeyAlgorithm(@NonNull @AlgorithmEnum String algorithm) {
-            if (AES.equalsIgnoreCase(algorithm)) {
+        static int toKeymasterSecretKeyAlgorithm(@NonNull @KeyAlgorithmEnum String algorithm) {
+            if (KEY_ALGORITHM_AES.equalsIgnoreCase(algorithm)) {
                 return KeymasterDefs.KM_ALGORITHM_AES;
             } else if (algorithm.toUpperCase(Locale.US).startsWith("HMAC")) {
                 return KeymasterDefs.KM_ALGORITHM_HMAC;
@@ -202,11 +173,8 @@ public abstract class KeyStoreKeyProperties {
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
-        static @AlgorithmEnum String fromKeymasterSecretKeyAlgorithm(
+        static @KeyAlgorithmEnum String fromKeymasterSecretKeyAlgorithm(
                 int keymasterAlgorithm, int keymasterDigest) {
             switch (keymasterAlgorithm) {
                 case KeymasterDefs.KM_ALGORITHM_AES:
@@ -214,26 +182,26 @@ public abstract class KeyStoreKeyProperties {
                         throw new IllegalArgumentException("Digest not supported for AES key: "
                                 + Digest.fromKeymaster(keymasterDigest));
                     }
-                    return AES;
+                    return KEY_ALGORITHM_AES;
                 case KeymasterDefs.KM_ALGORITHM_HMAC:
                     switch (keymasterDigest) {
                         case KeymasterDefs.KM_DIGEST_SHA1:
-                            return HMAC_SHA1;
+                            return KEY_ALGORITHM_HMAC_SHA1;
                         case KeymasterDefs.KM_DIGEST_SHA_2_224:
-                            return HMAC_SHA224;
+                            return KEY_ALGORITHM_HMAC_SHA224;
                         case KeymasterDefs.KM_DIGEST_SHA_2_256:
-                            return HMAC_SHA256;
+                            return KEY_ALGORITHM_HMAC_SHA256;
                         case KeymasterDefs.KM_DIGEST_SHA_2_384:
-                            return HMAC_SHA384;
+                            return KEY_ALGORITHM_HMAC_SHA384;
                         case KeymasterDefs.KM_DIGEST_SHA_2_512:
-                            return HMAC_SHA512;
+                            return KEY_ALGORITHM_HMAC_SHA512;
                         default:
                             throw new IllegalArgumentException("Unsupported HMAC digest: "
                                     + Digest.fromKeymaster(keymasterDigest));
                     }
                 default:
                     throw new IllegalArgumentException(
-                            "Unsupported algorithm: " + keymasterAlgorithm);
+                            "Unsupported key algorithm: " + keymasterAlgorithm);
             }
         }
 
@@ -242,7 +210,7 @@ public abstract class KeyStoreKeyProperties {
          *
          * @return keymaster digest or {@code -1} if the algorithm does not involve a digest.
          */
-        static int toKeymasterDigest(@NonNull @AlgorithmEnum String algorithm) {
+        static int toKeymasterDigest(@NonNull @KeyAlgorithmEnum String algorithm) {
             String algorithmUpper = algorithm.toUpperCase(Locale.US);
             if (algorithmUpper.startsWith("HMAC")) {
                 String digestUpper = algorithmUpper.substring("HMAC".length());
@@ -272,70 +240,58 @@ public abstract class KeyStoreKeyProperties {
      */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        BlockMode.ECB,
-        BlockMode.CBC,
-        BlockMode.CTR,
-        BlockMode.GCM,
+        BLOCK_MODE_ECB,
+        BLOCK_MODE_CBC,
+        BLOCK_MODE_CTR,
+        BLOCK_MODE_GCM,
         })
     public @interface BlockModeEnum {}
 
-    /**
-     * Block modes that can be used when encrypting/decrypting using a key.
-     */
-    public static abstract class BlockMode {
+    /** Electronic Codebook (ECB) block mode. */
+    public static final String BLOCK_MODE_ECB = "ECB";
+
+    /** Cipher Block Chaining (CBC) block mode. */
+    public static final String BLOCK_MODE_CBC = "CBC";
+
+    /** Counter (CTR) block mode. */
+    public static final String BLOCK_MODE_CTR = "CTR";
+
+    /** Galois/Counter Mode (GCM) block mode. */
+    public static final String BLOCK_MODE_GCM = "GCM";
+
+    static abstract class BlockMode {
         private BlockMode() {}
 
-        /** Electronic Codebook (ECB) block mode. */
-        public static final String ECB = "ECB";
-
-        /** Cipher Block Chaining (CBC) block mode. */
-        public static final String CBC = "CBC";
-
-        /** Counter (CTR) block mode. */
-        public static final String CTR = "CTR";
-
-        /** Galois/Counter Mode (GCM) block mode. */
-        public static final String GCM = "GCM";
-
-        /**
-         * @hide
-         */
         static int toKeymaster(@NonNull @BlockModeEnum String blockMode) {
-            if (ECB.equalsIgnoreCase(blockMode)) {
+            if (BLOCK_MODE_ECB.equalsIgnoreCase(blockMode)) {
                 return KeymasterDefs.KM_MODE_ECB;
-            } else if (CBC.equalsIgnoreCase(blockMode)) {
+            } else if (BLOCK_MODE_CBC.equalsIgnoreCase(blockMode)) {
                 return KeymasterDefs.KM_MODE_CBC;
-            } else if (CTR.equalsIgnoreCase(blockMode)) {
+            } else if (BLOCK_MODE_CTR.equalsIgnoreCase(blockMode)) {
                 return KeymasterDefs.KM_MODE_CTR;
-            } else if (GCM.equalsIgnoreCase(blockMode)) {
+            } else if (BLOCK_MODE_GCM.equalsIgnoreCase(blockMode)) {
                 return KeymasterDefs.KM_MODE_GCM;
             } else {
                 throw new IllegalArgumentException("Unsupported block mode: " + blockMode);
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static @BlockModeEnum String fromKeymaster(int blockMode) {
             switch (blockMode) {
                 case KeymasterDefs.KM_MODE_ECB:
-                    return ECB;
+                    return BLOCK_MODE_ECB;
                 case KeymasterDefs.KM_MODE_CBC:
-                    return CBC;
+                    return BLOCK_MODE_CBC;
                 case KeymasterDefs.KM_MODE_CTR:
-                    return CTR;
+                    return BLOCK_MODE_CTR;
                 case KeymasterDefs.KM_MODE_GCM:
-                    return GCM;
+                    return BLOCK_MODE_GCM;
                 default:
                     throw new IllegalArgumentException("Unsupported block mode: " + blockMode);
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static @BlockModeEnum String[] allFromKeymaster(@NonNull Collection<Integer> blockModes) {
             if ((blockModes == null) || (blockModes.isEmpty())) {
@@ -350,9 +306,6 @@ public abstract class KeyStoreKeyProperties {
             return result;
         }
 
-        /**
-         * @hide
-         */
         static int[] allToKeymaster(@Nullable @BlockModeEnum String[] blockModes) {
             if ((blockModes == null) || (blockModes.length == 0)) {
                 return EmptyArray.INT;
@@ -370,50 +323,44 @@ public abstract class KeyStoreKeyProperties {
      */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        EncryptionPadding.NONE,
-        EncryptionPadding.PKCS7,
-        EncryptionPadding.RSA_PKCS1,
-        EncryptionPadding.RSA_OAEP,
+        ENCRYPTION_PADDING_NONE,
+        ENCRYPTION_PADDING_PKCS7,
+        ENCRYPTION_PADDING_RSA_PKCS1,
+        ENCRYPTION_PADDING_RSA_OAEP,
         })
     public @interface EncryptionPaddingEnum {}
 
     /**
-     * Padding schemes for encryption/decryption.
+     * No encryption padding.
      */
-    public static abstract class EncryptionPadding {
+    public static final String ENCRYPTION_PADDING_NONE = "NoPadding";
+
+    /**
+     * PKCS#7 encryption padding scheme.
+     */
+    public static final String ENCRYPTION_PADDING_PKCS7 = "PKCS7Padding";
+
+    /**
+     * RSA PKCS#1 v1.5 padding scheme for encryption.
+     */
+    public static final String ENCRYPTION_PADDING_RSA_PKCS1 = "PKCS1Padding";
+
+    /**
+     * RSA Optimal Asymmetric Encryption Padding (OAEP) scheme.
+     */
+    public static final String ENCRYPTION_PADDING_RSA_OAEP = "OAEPPadding";
+
+    static abstract class EncryptionPadding {
         private EncryptionPadding() {}
 
-        /**
-         * No padding.
-         */
-        public static final String NONE = "NoPadding";
-
-        /**
-         * PKCS#7 padding.
-         */
-        public static final String PKCS7 = "PKCS7Padding";
-
-        /**
-         * RSA PKCS#1 v1.5 padding for encryption/decryption.
-         */
-        public static final String RSA_PKCS1 = "PKCS1Padding";
-
-        /**
-         * RSA Optimal Asymmetric Encryption Padding (OAEP).
-         */
-        public static final String RSA_OAEP = "OAEPPadding";
-
-        /**
-         * @hide
-         */
         static int toKeymaster(@NonNull @EncryptionPaddingEnum String padding) {
-            if (NONE.equalsIgnoreCase(padding)) {
+            if (ENCRYPTION_PADDING_NONE.equalsIgnoreCase(padding)) {
                 return KeymasterDefs.KM_PAD_NONE;
-            } else if (PKCS7.equalsIgnoreCase(padding)) {
+            } else if (ENCRYPTION_PADDING_PKCS7.equalsIgnoreCase(padding)) {
                 return KeymasterDefs.KM_PAD_PKCS7;
-            } else if (RSA_PKCS1.equalsIgnoreCase(padding)) {
+            } else if (ENCRYPTION_PADDING_RSA_PKCS1.equalsIgnoreCase(padding)) {
                 return KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT;
-            } else if (RSA_OAEP.equalsIgnoreCase(padding)) {
+            } else if (ENCRYPTION_PADDING_RSA_OAEP.equalsIgnoreCase(padding)) {
                 return KeymasterDefs.KM_PAD_RSA_OAEP;
             } else {
                 throw new IllegalArgumentException(
@@ -421,29 +368,23 @@ public abstract class KeyStoreKeyProperties {
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static @EncryptionPaddingEnum String fromKeymaster(int padding) {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_NONE:
-                    return NONE;
+                    return ENCRYPTION_PADDING_NONE;
                 case KeymasterDefs.KM_PAD_PKCS7:
-                    return PKCS7;
+                    return ENCRYPTION_PADDING_PKCS7;
                 case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT:
-                    return RSA_PKCS1;
+                    return ENCRYPTION_PADDING_RSA_PKCS1;
                 case KeymasterDefs.KM_PAD_RSA_OAEP:
-                    return RSA_OAEP;
+                    return ENCRYPTION_PADDING_RSA_OAEP;
                 default:
                     throw new IllegalArgumentException(
                             "Unsupported encryption padding: " + padding);
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static int[] allToKeymaster(@Nullable @EncryptionPaddingEnum String[] paddings) {
             if ((paddings == null) || (paddings.length == 0)) {
@@ -462,35 +403,29 @@ public abstract class KeyStoreKeyProperties {
      */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        SignaturePadding.RSA_PKCS1,
-        SignaturePadding.RSA_PSS,
+        SIGNATURE_PADDING_RSA_PKCS1,
+        SIGNATURE_PADDING_RSA_PSS,
         })
     public @interface SignaturePaddingEnum {}
 
     /**
-     * Padding schemes for signing/verification.
+     * RSA PKCS#1 v1.5 padding for signatures.
      */
-    public static abstract class SignaturePadding {
+    public static final String SIGNATURE_PADDING_RSA_PKCS1 = "PKCS1";
+
+    /**
+     * RSA PKCS#1 v2.1 Probabilistic Signature Scheme (PSS) padding.
+     */
+    public static final String SIGNATURE_PADDING_RSA_PSS = "PSS";
+
+    static abstract class SignaturePadding {
         private SignaturePadding() {}
 
-        /**
-         * RSA PKCS#1 v1.5 padding for signatures.
-         */
-        public static final String RSA_PKCS1 = "PKCS1";
-
-        /**
-         * RSA PKCS#1 v2.1 Probabilistic Signature Scheme (PSS) padding.
-         */
-        public static final String RSA_PSS = "PSS";
-
-        /**
-         * @hide
-         */
         static int toKeymaster(@NonNull @SignaturePaddingEnum String padding) {
             switch (padding.toUpperCase(Locale.US)) {
-                case RSA_PKCS1:
+                case SIGNATURE_PADDING_RSA_PKCS1:
                     return KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN;
-                case RSA_PSS:
+                case SIGNATURE_PADDING_RSA_PSS:
                     return KeymasterDefs.KM_PAD_RSA_PSS;
                 default:
                     throw new IllegalArgumentException(
@@ -498,24 +433,18 @@ public abstract class KeyStoreKeyProperties {
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static @SignaturePaddingEnum String fromKeymaster(int padding) {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN:
-                    return RSA_PKCS1;
+                    return SIGNATURE_PADDING_RSA_PKCS1;
                 case KeymasterDefs.KM_PAD_RSA_PSS:
-                    return RSA_PSS;
+                    return SIGNATURE_PADDING_RSA_PSS;
                 default:
                     throw new IllegalArgumentException("Unsupported signature padding: " + padding);
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static int[] allToKeymaster(@Nullable @SignaturePaddingEnum String[] paddings) {
             if ((paddings == null) || (paddings.length == 0)) {
@@ -534,110 +463,97 @@ public abstract class KeyStoreKeyProperties {
      */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        Digest.NONE,
-        Digest.MD5,
-        Digest.SHA1,
-        Digest.SHA224,
-        Digest.SHA256,
-        Digest.SHA384,
-        Digest.SHA512,
+        DIGEST_NONE,
+        DIGEST_MD5,
+        DIGEST_SHA1,
+        DIGEST_SHA224,
+        DIGEST_SHA256,
+        DIGEST_SHA384,
+        DIGEST_SHA512,
         })
     public @interface DigestEnum {}
 
     /**
-     * Digests that can be used with a key when signing or generating Message Authentication
-     * Codes (MACs).
+     * No digest: sign/authenticate the raw message.
      */
-    public static abstract class Digest {
+    public static final String DIGEST_NONE = "NONE";
+
+    /**
+     * MD5 digest.
+     */
+    public static final String DIGEST_MD5 = "MD5";
+
+    /**
+     * SHA-1 digest.
+     */
+    public static final String DIGEST_SHA1 = "SHA-1";
+
+    /**
+     * SHA-2 224 (aka SHA-224) digest.
+     */
+    public static final String DIGEST_SHA224 = "SHA-224";
+
+    /**
+     * SHA-2 256 (aka SHA-256) digest.
+     */
+    public static final String DIGEST_SHA256 = "SHA-256";
+
+    /**
+     * SHA-2 384 (aka SHA-384) digest.
+     */
+    public static final String DIGEST_SHA384 = "SHA-384";
+
+    /**
+     * SHA-2 512 (aka SHA-512) digest.
+     */
+    public static final String DIGEST_SHA512 = "SHA-512";
+
+    static abstract class Digest {
         private Digest() {}
 
-        /**
-         * No digest: sign/authenticate the raw message.
-         */
-        public static final String NONE = "NONE";
-
-        /**
-         * MD5 digest.
-         */
-        public static final String MD5 = "MD5";
-
-        /**
-         * SHA-1 digest.
-         */
-        public static final String SHA1 = "SHA-1";
-
-        /**
-         * SHA-2 224 (aka SHA-224) digest.
-         */
-        public static final String SHA224 = "SHA-224";
-
-        /**
-         * SHA-2 256 (aka SHA-256) digest.
-         */
-        public static final String SHA256 = "SHA-256";
-
-        /**
-         * SHA-2 384 (aka SHA-384) digest.
-         */
-        public static final String SHA384 = "SHA-384";
-
-        /**
-         * SHA-2 512 (aka SHA-512) digest.
-         */
-        public static final String SHA512 = "SHA-512";
-
-        /**
-         * @hide
-         */
         static int toKeymaster(@NonNull @DigestEnum String digest) {
             switch (digest.toUpperCase(Locale.US)) {
-                case SHA1:
+                case DIGEST_SHA1:
                     return KeymasterDefs.KM_DIGEST_SHA1;
-                case SHA224:
+                case DIGEST_SHA224:
                     return KeymasterDefs.KM_DIGEST_SHA_2_224;
-                case SHA256:
+                case DIGEST_SHA256:
                     return KeymasterDefs.KM_DIGEST_SHA_2_256;
-                case SHA384:
+                case DIGEST_SHA384:
                     return KeymasterDefs.KM_DIGEST_SHA_2_384;
-                case SHA512:
+                case DIGEST_SHA512:
                     return KeymasterDefs.KM_DIGEST_SHA_2_512;
-                case NONE:
+                case DIGEST_NONE:
                     return KeymasterDefs.KM_DIGEST_NONE;
-                case MD5:
+                case DIGEST_MD5:
                     return KeymasterDefs.KM_DIGEST_MD5;
                 default:
                     throw new IllegalArgumentException("Unsupported digest algorithm: " + digest);
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static @DigestEnum String fromKeymaster(int digest) {
             switch (digest) {
                 case KeymasterDefs.KM_DIGEST_NONE:
-                    return NONE;
+                    return DIGEST_NONE;
                 case KeymasterDefs.KM_DIGEST_MD5:
-                    return MD5;
+                    return DIGEST_MD5;
                 case KeymasterDefs.KM_DIGEST_SHA1:
-                    return SHA1;
+                    return DIGEST_SHA1;
                 case KeymasterDefs.KM_DIGEST_SHA_2_224:
-                    return SHA224;
+                    return DIGEST_SHA224;
                 case KeymasterDefs.KM_DIGEST_SHA_2_256:
-                    return SHA256;
+                    return DIGEST_SHA256;
                 case KeymasterDefs.KM_DIGEST_SHA_2_384:
-                    return SHA384;
+                    return DIGEST_SHA384;
                 case KeymasterDefs.KM_DIGEST_SHA_2_512:
-                    return SHA512;
+                    return DIGEST_SHA512;
                 default:
                     throw new IllegalArgumentException("Unsupported digest algorithm: " + digest);
             }
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static @DigestEnum String[] allFromKeymaster(@NonNull Collection<Integer> digests) {
             if (digests.isEmpty()) {
@@ -652,9 +568,6 @@ public abstract class KeyStoreKeyProperties {
             return result;
         }
 
-        /**
-         * @hide
-         */
         @NonNull
         static int[] allToKeymaster(@Nullable @DigestEnum String[] digests) {
             if ((digests == null) || (digests.length == 0)) {
@@ -674,38 +587,36 @@ public abstract class KeyStoreKeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Origin.GENERATED, Origin.IMPORTED, Origin.UNKNOWN})
+    @IntDef({
+        ORIGIN_GENERATED,
+        ORIGIN_IMPORTED,
+        ORIGIN_UNKNOWN,
+        })
     public @interface OriginEnum {}
 
+    /** Key was generated inside AndroidKeyStore. */
+    public static final int ORIGIN_GENERATED = 1 << 0;
+
+    /** Key was imported into AndroidKeyStore. */
+    public static final int ORIGIN_IMPORTED = 1 << 1;
+
     /**
-     * Origin of the key.
+     * Origin of the key is unknown. This can occur only for keys backed by an old TEE-backed
+     * implementation which does not record origin information.
      */
-    public static abstract class Origin {
+    public static final int ORIGIN_UNKNOWN = 1 << 2;
+
+    static abstract class Origin {
         private Origin() {}
 
-        /** Key was generated inside AndroidKeyStore. */
-        public static final int GENERATED = 1 << 0;
-
-        /** Key was imported into AndroidKeyStore. */
-        public static final int IMPORTED = 1 << 1;
-
-        /**
-         * Origin of the key is unknown. This can occur only for keys backed by an old TEE-backed
-         * implementation which does not record origin information.
-         */
-        public static final int UNKNOWN = 1 << 2;
-
-        /**
-         * @hide
-         */
-        public static @OriginEnum int fromKeymaster(int origin) {
+        static @OriginEnum int fromKeymaster(int origin) {
             switch (origin) {
                 case KeymasterDefs.KM_ORIGIN_GENERATED:
-                    return GENERATED;
+                    return ORIGIN_GENERATED;
                 case KeymasterDefs.KM_ORIGIN_IMPORTED:
-                    return IMPORTED;
+                    return ORIGIN_IMPORTED;
                 case KeymasterDefs.KM_ORIGIN_UNKNOWN:
-                    return UNKNOWN;
+                    return ORIGIN_UNKNOWN;
                 default:
                     throw new IllegalArgumentException("Unknown origin: " + origin);
             }
