@@ -27736,7 +27736,7 @@ package android.renderscript {
     method public final android.content.Context getApplicationContext();
     method public android.renderscript.RenderScript.RSErrorHandler getErrorHandler();
     method public android.renderscript.RenderScript.RSMessageHandler getMessageHandler();
-    method public static long getMinorID();
+    method public static long getMinorVersion();
     method public static void releaseAllContexts();
     method public void sendMessage(int, int[]);
     method public void setErrorHandler(android.renderscript.RenderScript.RSErrorHandler);
