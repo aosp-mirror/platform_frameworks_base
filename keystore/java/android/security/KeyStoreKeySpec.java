@@ -179,14 +179,19 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the set of purposes for which the key can be used.
+     * Gets the set of purposes (e.g., {@code ENCRYPT}, {@code DECRYPT}, {@code SIGN}) for which the
+     * key can be used.
+     *
+     * @see KeyStoreKeyProperties.Purpose
      */
     public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
     /**
-     * Gets the set of block modes with which the key can be used.
+     * Gets the set of block modes (e.g., {@code CBC}, {@code CTR}) with which the key can be used.
+     *
+     * @see KeyStoreKeyProperties.BlockMode
      */
     @NonNull
     public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
@@ -194,7 +199,10 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the set of padding modes with which the key can be used when encrypting/decrypting.
+     * Gets the set of padding schemes (e.g., {@code PKCS7Padding}, {@code NoPadding}) with which
+     * the key can be used when encrypting/decrypting.
+     *
+     * @see KeyStoreKeyProperties.EncryptionPadding
      */
     @NonNull
     public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
@@ -202,7 +210,10 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the set of padding modes with which the key can be used when signing/verifying.
+     * Gets the set of padding schemes (e.g., {@code PSS}) with which the key can be used when
+     * signing/verifying.
+     *
+     * @see KeyStoreKeyProperties.SignaturePadding
      */
     @NonNull
     public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
@@ -210,7 +221,10 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the set of digest algorithms with which the key can be used.
+     * Gets the set of digest algorithms (e.g., {@code SHA-256}, {@code SHA-384}) with which the key
+     * can be used.
+     *
+     * @see KeyStoreKeyProperties.Digest
      */
     @NonNull
     public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
