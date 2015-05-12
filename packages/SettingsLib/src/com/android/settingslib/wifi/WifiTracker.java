@@ -189,6 +189,8 @@ public class WifiTracker {
      */
     public void stopTracking() {
         if (mRegistered) {
+            mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
+            mWorkHandler.removeMessages(WorkHandler.MSG_UPDATE_NETWORK_INFO);
             mContext.unregisterReceiver(mReceiver);
             mRegistered = false;
         }
