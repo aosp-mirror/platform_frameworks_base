@@ -106,6 +106,12 @@ public final class HdmiControlService extends SystemService {
     static final int INITIATED_BY_WAKE_UP_MESSAGE = 3;
     static final int INITIATED_BY_HOTPLUG = 4;
 
+    // The reason code representing the intent action that drives the standby
+    // procedure. The procedure starts either by Intent.ACTION_SCREEN_OFF or
+    // Intent.ACTION_SHUTDOWN.
+    static final int STANDBY_SCREEN_OFF = 0;
+    static final int STANDBY_SHUTDOWN = 1;
+
     /**
      * Interface to report send result.
      */
@@ -143,7 +149,7 @@ public final class HdmiControlService extends SystemService {
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
                     if (isPowerOnOrTransient()) {
-                        onStandby();
+                        onStandby(STANDBY_SCREEN_OFF);
                     }
                     break;
                 case Intent.ACTION_SCREEN_ON:
@@ -155,6 +161,11 @@ public final class HdmiControlService extends SystemService {
                     String language = getMenuLanguage();
                     if (!mLanguage.equals(language)) {
                         onLanguageChanged(language);
+                    }
+                    break;
+                case Intent.ACTION_SHUTDOWN:
+                    if (isPowerOnOrTransient()) {
+                        onStandby(STANDBY_SHUTDOWN);
                     }
                     break;
             }
@@ -510,8 +521,9 @@ public final class HdmiControlService extends SystemService {
                     setCecOption(OPTION_CEC_AUTO_WAKEUP, toInt(enabled));
                     break;
                 case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
-                    if (isTvDeviceEnabled()) {
-                        tv().setAutoDeviceOff(enabled);
+                    for (int type : mLocalDevices) {
+                        HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
+                        localDevice.setAutoDeviceOff(enabled);
                     }
                     // No need to propagate to HAL.
                     break;
@@ -1994,7 +2006,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void onStandby() {
+    private void onStandby(final int standbyAction) {
         assertRunOnServiceThread();
         if (!canGoToStandby()) return;
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
@@ -2008,7 +2020,7 @@ public final class HdmiControlService extends SystemService {
                 Slog.v(TAG, "On standby-action cleared:" + device.mDeviceType);
                 devices.remove(device);
                 if (devices.isEmpty()) {
-                    onStandbyCompleted();
+                    onStandbyCompleted(standbyAction);
                     // We will not clear local devices here, since some OEM/SOC will keep passing
                     // the received packets until the application processor enters to the sleep
                     // actually.
@@ -2062,7 +2074,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void onStandbyCompleted() {
+    private void onStandbyCompleted(int standbyAction) {
         assertRunOnServiceThread();
         Slog.v(TAG, "onStandbyCompleted");
 
@@ -2071,7 +2083,7 @@ public final class HdmiControlService extends SystemService {
         }
         mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
         for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
-            device.onStandby(mStandbyMessageReceived);
+            device.onStandby(mStandbyMessageReceived, standbyAction);
         }
         mStandbyMessageReceived = false;
         mAddressAllocated = false;
