@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -800,6 +801,7 @@ public class ViewDebug {
 
     /**
      * Dumps the view hierarchy starting from the given view.
+     * @deprecated See {@link #dumpv2(View, ByteArrayOutputStream)} below.
      * @hide
      */
     public static void dump(View root, boolean skipChildren, boolean includeProperties,
@@ -822,6 +824,28 @@ public class ViewDebug {
                 out.close();
             }
         }
+    }
+
+    /**
+     * Dumps the view hierarchy starting from the given view.
+     * Rather than using reflection, it uses View's encode method to obtain all the properties.
+     * @hide
+     */
+    public static void dumpv2(@NonNull final View view, @NonNull ByteArrayOutputStream out)
+            throws InterruptedException {
+        final ViewHierarchyEncoder encoder = new ViewHierarchyEncoder(out);
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                view.encode(encoder);
+                latch.countDown();
+            }
+        });
+
+        latch.await(2, TimeUnit.SECONDS);
+        encoder.endStream();
     }
 
     /**
