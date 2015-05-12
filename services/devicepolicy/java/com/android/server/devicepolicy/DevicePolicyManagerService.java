@@ -39,6 +39,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
+import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -6238,7 +6239,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setSystemUpdatePolicy(ComponentName who, PersistableBundle policy) {
+    public void setSystemUpdatePolicy(ComponentName who, SystemUpdatePolicy policy) {
+        if (policy != null && !policy.isValid()) {
+            throw new IllegalArgumentException("Invalid system update policy.");
+        }
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             if (policy == null) {
@@ -6254,9 +6258,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public PersistableBundle getSystemUpdatePolicy() {
+    public SystemUpdatePolicy getSystemUpdatePolicy() {
         synchronized (this) {
-            return mDeviceOwner.getSystemUpdatePolicy();
+            SystemUpdatePolicy policy =  mDeviceOwner.getSystemUpdatePolicy();
+            if (policy != null && !policy.isValid()) {
+                Slog.w(LOG_TAG, "Stored system update policy is invalid, return null instead.");
+                return null;
+            }
+            return policy;
         }
     }
 
