@@ -329,6 +329,14 @@ public class SSLSocketFactory implements LayeredSocketFactory {
 
         sslsock.setSoTimeout(soTimeout);
         try {
+            // BEGIN android-added
+            /*
+             * Make sure we have started the handshake before verifying.
+             * Otherwise when we go to the hostname verifier, it directly calls
+             * SSLSocket#getSession() which swallows SSL handshake errors.
+             */
+            sslsock.startHandshake();
+            // END android-added
             hostnameVerifier.verify(host, sslsock);
             // verifyHostName() didn't blowup - good!
         } catch (IOException iox) {
