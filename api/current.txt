@@ -28310,6 +28310,9 @@ package android.security {
     method public java.lang.String getKemKdfAlgorithm();
     method public int getKemPointFormat();
     field public static final android.security.EcIesParameterSpec DEFAULT;
+    field public static final int POINT_FORMAT_COMPRESSED = 1; // 0x1
+    field public static final int POINT_FORMAT_UNCOMPRESSED = 0; // 0x0
+    field public static final int POINT_FORMAT_UNSPECIFIED = -1; // 0xffffffff
   }
 
   public static class EcIesParameterSpec.Builder {
@@ -28321,12 +28324,6 @@ package android.security {
     method public android.security.EcIesParameterSpec.Builder setDemMacKeySize(int);
     method public android.security.EcIesParameterSpec.Builder setKemKdfAlgorithm(java.lang.String);
     method public android.security.EcIesParameterSpec.Builder setKemPointFormat(int);
-  }
-
-  public static abstract class EcIesParameterSpec.PointFormat {
-    field public static final int COMPRESSED = 1; // 0x1
-    field public static final int UNCOMPRESSED = 0; // 0x0
-    field public static final int UNSPECIFIED = -1; // 0xffffffff
   }
 
   public final class KeyChain {
