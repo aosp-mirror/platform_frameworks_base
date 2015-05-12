@@ -668,29 +668,37 @@ public class ResolverActivity extends Activity {
                     if (r.match > bestMatch) bestMatch = r.match;
                 }
                 if (alwaysCheck) {
-                    PackageManager pm = getPackageManager();
+                    final int userId = getUserId();
+                    final PackageManager pm = getPackageManager();
 
                     // Set the preferred Activity
                     pm.addPreferredActivity(filter, bestMatch, set, intent.getComponent());
 
-                    // Update Domain Verification status
-                    int userId = getUserId();
-                    ComponentName cn = intent.getComponent();
-                    String packageName = cn.getPackageName();
-                    String dataScheme = (data != null) ? data.getScheme() : null;
+                    if (ri.handleAllWebDataURI) {
+                        // Set default Browser if needed
+                        final String packageName = pm.getDefaultBrowserPackageName(userId);
+                        if (TextUtils.isEmpty(packageName)) {
+                            pm.setDefaultBrowserPackageName(ri.activityInfo.packageName, userId);
+                        }
+                    } else {
+                        // Update Domain Verification status
+                        ComponentName cn = intent.getComponent();
+                        String packageName = cn.getPackageName();
+                        String dataScheme = (data != null) ? data.getScheme() : null;
 
-                    boolean isHttpOrHttps = (dataScheme != null) &&
-                            (dataScheme.equals(IntentFilter.SCHEME_HTTP) ||
-                            dataScheme.equals(IntentFilter.SCHEME_HTTPS));
+                        boolean isHttpOrHttps = (dataScheme != null) &&
+                                (dataScheme.equals(IntentFilter.SCHEME_HTTP) ||
+                                        dataScheme.equals(IntentFilter.SCHEME_HTTPS));
 
-                    boolean isViewAction = (action != null) && action.equals(Intent.ACTION_VIEW);
-                    boolean hasCategoryBrowsable = (categories != null) &&
-                            categories.contains(Intent.CATEGORY_BROWSABLE);
+                        boolean isViewAction = (action != null) && action.equals(Intent.ACTION_VIEW);
+                        boolean hasCategoryBrowsable = (categories != null) &&
+                                categories.contains(Intent.CATEGORY_BROWSABLE);
 
-                    if (isHttpOrHttps && isViewAction && hasCategoryBrowsable) {
-                        pm.updateIntentVerificationStatus(packageName,
-                                PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
-                                userId);
+                        if (isHttpOrHttps && isViewAction && hasCategoryBrowsable) {
+                            pm.updateIntentVerificationStatus(packageName,
+                                    PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
+                                    userId);
+                        }
                     }
                 } else {
                     try {

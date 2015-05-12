@@ -9217,7 +9217,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             result = mSettings.updateIntentFilterVerificationStatusLPw(packageName, status, userId);
         }
-        scheduleWritePackageRestrictionsLocked(userId);
+        if (result) {
+            scheduleWritePackageRestrictionsLocked(userId);
+        }
         return result;
     }
 
@@ -9254,9 +9256,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     public boolean setDefaultBrowserPackageName(String packageName, int userId) {
         synchronized (mPackages) {
             boolean result = mSettings.setDefaultBrowserPackageNameLPr(packageName, userId);
-            result |= updateIntentVerificationStatus(packageName,
-                    PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
-                    UserHandle.myUserId());
+            if (packageName != null) {
+                result |= updateIntentVerificationStatus(packageName,
+                        PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
+                        UserHandle.myUserId());
+            }
             return result;
         }
     }
@@ -11970,6 +11974,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (deletedPs != null) {
                 if ((flags&PackageManager.DELETE_KEEP_DATA) == 0) {
                     clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
+                    clearDefaultBrowserIfNeeded(packageName);
                     if (outInfo != null) {
                         mSettings.mKeySetManagerService.removeAppKeySetDataLPw(packageName);
                         outInfo.removedAppId = mSettings.removePackageLPw(packageName);
@@ -12504,7 +12509,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     succeded = deleteApplicationCacheFilesLI(packageName, userId);
                 }
                 clearExternalStorageDataSync(packageName, userId, false);
-                if(observer != null) {
+                if (observer != null) {
                     try {
                         observer.onRemoveCompleted(packageName, succeded);
                     } catch (RemoteException e) {
@@ -12869,6 +12874,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             if (mSettings.removeIntentFilterVerificationLPw(packageName, userId)) {
                 scheduleWritePackageRestrictionsLocked(userId);
+            }
+        }
+    }
+
+
+    void clearDefaultBrowserIfNeeded(String packageName) {
+        for (int oneUserId : sUserManager.getUserIds()) {
+            String defaultBrowserPackageName = getDefaultBrowserPackageName(oneUserId);
+            if (TextUtils.isEmpty(defaultBrowserPackageName)) continue;
+            if (packageName.equals(defaultBrowserPackageName)) {
+                setDefaultBrowserPackageName(null, oneUserId);
             }
         }
     }
