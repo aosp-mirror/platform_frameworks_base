@@ -29,6 +29,7 @@
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
 #include <SkBitmap.h>
+#include <SkRect.h>
 #include <utils/Functor.h>
 #include <utils/Vector.h>
 
@@ -117,7 +118,7 @@ private:
     friend class android::uirenderer::RenderState;
 
     void setSurface(ANativeWindow* window);
-    void swapBuffers();
+    void swapBuffers(const SkRect& dirty, EGLint width, EGLint height);
     void requireSurface();
 
     void requireGlContext();

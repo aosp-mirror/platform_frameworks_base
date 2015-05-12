@@ -16,35 +16,24 @@
 
 #include "CanvasContext.h"
 
+#include "AnimationContext.h"
+#include "Caches.h"
+#include "DeferredLayerUpdater.h"
 #include "EglManager.h"
+#include "LayerRenderer.h"
+#include "OpenGLRenderer.h"
+#include "Properties.h"
 #include "RenderThread.h"
-#include "../AnimationContext.h"
-#include "../Caches.h"
-#include "../DeferredLayerUpdater.h"
-#include "../renderstate/RenderState.h"
-#include "../renderstate/Stencil.h"
-#include "../LayerRenderer.h"
-#include "../OpenGLRenderer.h"
+#include "renderstate/RenderState.h"
+#include "renderstate/Stencil.h"
 
 #include <algorithm>
+#include <strings.h>
 #include <cutils/properties.h>
 #include <private/hwui/DrawGlInfo.h>
-#include <strings.h>
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
-
-#define PROPERTY_SKIP_EMPTY_DAMAGE "debug.hwui.skip_empty_damage"
-
-static bool sInitialized = false;
-static bool sSkipEmptyDamage = true;
-
-static void initGlobals() {
-    if (sInitialized) return;
-    sInitialized = true;
-    sSkipEmptyDamage = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE,
-            sSkipEmptyDamage);
-}
 
 namespace android {
 namespace uirenderer {
@@ -58,9 +47,6 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mRootRenderNode(rootRenderNode)
         , mJankTracker(thread.timeLord().frameIntervalNanos()) {
-    // Done lazily at first draw instead of at library load to avoid
-    // running pre-zygote fork
-    initGlobals();
     mRenderThread.renderState().registerCanvasContext(this);
     mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
 }
@@ -106,8 +92,8 @@ void CanvasContext::setSurface(ANativeWindow* window) {
     }
 }
 
-void CanvasContext::swapBuffers() {
-    if (CC_UNLIKELY(!mEglManager.swapBuffers(mEglSurface))) {
+void CanvasContext::swapBuffers(const SkRect& dirty, EGLint width, EGLint height) {
+    if (CC_UNLIKELY(!mEglManager.swapBuffers(mEglSurface, dirty, width, height))) {
         setSurface(nullptr);
     }
     mHaveNewSurface = false;
@@ -222,7 +208,7 @@ void CanvasContext::draw() {
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
-    if (dirty.isEmpty() && sSkipEmptyDamage) {
+    if (dirty.isEmpty() && Properties::skipEmptyFrames) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::kSkippedFrame);
         return;
     }
@@ -267,7 +253,7 @@ void CanvasContext::draw() {
     mCurrentFrameInfo->markSwapBuffers();
 
     if (drew) {
-        swapBuffers();
+        swapBuffers(dirty, width, height);
     } else {
         mEglManager.cancelFrame();
     }
