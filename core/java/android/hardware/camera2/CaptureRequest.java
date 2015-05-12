@@ -158,9 +158,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     private final HashSet<Surface> mSurfaceSet;
     private final CameraMetadataNative mSettings;
     private boolean mIsReprocess;
-    // Each reprocess request must be tied to a reprocessible session ID.
+    // Each reprocess request must be tied to a reprocessable session ID.
     // Valid only for reprocess requests (mIsReprocess == true).
-    private int mReprocessibleSessionId;
+    private int mReprocessableSessionId;
 
     private Object mUserTag;
 
@@ -173,7 +173,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         mSettings = new CameraMetadataNative();
         mSurfaceSet = new HashSet<Surface>();
         mIsReprocess = false;
-        mReprocessibleSessionId = CameraCaptureSession.SESSION_ID_NONE;
+        mReprocessableSessionId = CameraCaptureSession.SESSION_ID_NONE;
     }
 
     /**
@@ -186,7 +186,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         mSettings = new CameraMetadataNative(source.mSettings);
         mSurfaceSet = (HashSet<Surface>) source.mSurfaceSet.clone();
         mIsReprocess = source.mIsReprocess;
-        mReprocessibleSessionId = source.mReprocessibleSessionId;
+        mReprocessableSessionId = source.mReprocessableSessionId;
         mUserTag = source.mUserTag;
     }
 
@@ -199,30 +199,30 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @param isReprocess Indicates whether to create a reprocess capture request. {@code true}
      *                    to create a reprocess capture request. {@code false} to create a regular
      *                    capture request.
-     * @param reprocessibleSessionId The ID of the camera capture session this capture is created
+     * @param reprocessableSessionId The ID of the camera capture session this capture is created
      *                               for. This is used to validate if the application submits a
      *                               reprocess capture request to the same session where
      *                               the {@link TotalCaptureResult}, used to create the reprocess
      *                               capture, came from.
      *
      * @throws IllegalArgumentException If creating a reprocess capture request with an invalid
-     *                                  reprocessibleSessionId.
+     *                                  reprocessableSessionId.
      *
      * @see CameraDevice#createReprocessCaptureRequest
      */
     private CaptureRequest(CameraMetadataNative settings, boolean isReprocess,
-            int reprocessibleSessionId) {
+            int reprocessableSessionId) {
         mSettings = CameraMetadataNative.move(settings);
         mSurfaceSet = new HashSet<Surface>();
         mIsReprocess = isReprocess;
         if (isReprocess) {
-            if (reprocessibleSessionId == CameraCaptureSession.SESSION_ID_NONE) {
+            if (reprocessableSessionId == CameraCaptureSession.SESSION_ID_NONE) {
                 throw new IllegalArgumentException("Create a reprocess capture request with an " +
-                        "invalid session ID: " + reprocessibleSessionId);
+                        "invalid session ID: " + reprocessableSessionId);
             }
-            mReprocessibleSessionId = reprocessibleSessionId;
+            mReprocessableSessionId = reprocessableSessionId;
         } else {
-            mReprocessibleSessionId = CameraCaptureSession.SESSION_ID_NONE;
+            mReprocessableSessionId = CameraCaptureSession.SESSION_ID_NONE;
         }
     }
 
@@ -307,20 +307,20 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     }
 
     /**
-     * Get the reprocessible session ID this reprocess capture request is associated with.
+     * Get the reprocessable session ID this reprocess capture request is associated with.
      *
-     * @return the reprocessible session ID this reprocess capture request is associated with
+     * @return the reprocessable session ID this reprocess capture request is associated with
      *
      * @throws IllegalStateException if this capture request is not a reprocess capture request.
      * @hide
      */
-    public int getReprocessibleSessionId() {
+    public int getReprocessableSessionId() {
         if (mIsReprocess == false ||
-                mReprocessibleSessionId == CameraCaptureSession.SESSION_ID_NONE) {
-            throw new IllegalStateException("Getting the reprocessible session ID for a "+
+                mReprocessableSessionId == CameraCaptureSession.SESSION_ID_NONE) {
+            throw new IllegalStateException("Getting the reprocessable session ID for a "+
                     "non-reprocess capture request is illegal.");
         }
-        return mReprocessibleSessionId;
+        return mReprocessableSessionId;
     }
 
     /**
@@ -346,7 +346,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
                 && mSurfaceSet.equals(other.mSurfaceSet)
                 && mSettings.equals(other.mSettings)
                 && mIsReprocess == other.mIsReprocess
-                && mReprocessibleSessionId == other.mReprocessibleSessionId;
+                && mReprocessableSessionId == other.mReprocessableSessionId;
     }
 
     @Override
@@ -395,7 +395,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         }
 
         mIsReprocess = (in.readInt() == 0) ? false : true;
-        mReprocessibleSessionId = CameraCaptureSession.SESSION_ID_NONE;
+        mReprocessableSessionId = CameraCaptureSession.SESSION_ID_NONE;
     }
 
     @Override
@@ -450,19 +450,19 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * @param reprocess Indicates whether to create a reprocess capture request. {@code true}
          *                  to create a reprocess capture request. {@code false} to create a regular
          *                  capture request.
-         * @param reprocessibleSessionId The ID of the camera capture session this capture is
+         * @param reprocessableSessionId The ID of the camera capture session this capture is
          *                               created for. This is used to validate if the application
          *                               submits a reprocess capture request to the same session
          *                               where the {@link TotalCaptureResult}, used to create the
          *                               reprocess capture, came from.
          *
          * @throws IllegalArgumentException If creating a reprocess capture request with an invalid
-         *                                  reprocessibleSessionId.
+         *                                  reprocessableSessionId.
          * @hide
          */
         public Builder(CameraMetadataNative template, boolean reprocess,
-                int reprocessibleSessionId) {
-            mRequest = new CaptureRequest(template, reprocess, reprocessibleSessionId);
+                int reprocessableSessionId) {
+            mRequest = new CaptureRequest(template, reprocess, reprocessableSessionId);
         }
 
         /**
@@ -1275,7 +1275,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This control (except for MANUAL) is only effective if
      * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
      * <p>ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
-     * contains OPAQUE_REPROCESSING or YUV_REPROCESSING. MANUAL will be supported if
+     * contains PRIVATE_REPROCESSING or YUV_REPROCESSING. MANUAL will be supported if
      * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR. Other intent values are
      * always supported.</p>
      * <p><b>Possible values:</b>

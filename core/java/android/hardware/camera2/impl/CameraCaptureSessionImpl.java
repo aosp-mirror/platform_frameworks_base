@@ -153,10 +153,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             Handler handler) throws CameraAccessException {
         if (request == null) {
             throw new IllegalArgumentException("request must not be null");
-        } else if (request.isReprocess() && !isReprocessible()) {
+        } else if (request.isReprocess() && !isReprocessable()) {
             throw new IllegalArgumentException("this capture session cannot handle reprocess " +
                     "requests");
-        } else if (request.isReprocess() && request.getReprocessibleSessionId() != mId) {
+        } else if (request.isReprocess() && request.getReprocessableSessionId() != mId) {
             throw new IllegalArgumentException("capture request was created for another session");
         }
 
@@ -184,10 +184,10 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
 
         for (CaptureRequest request : requests) {
             if (request.isReprocess()) {
-                if (!isReprocessible()) {
+                if (!isReprocessable()) {
                     throw new IllegalArgumentException("This capture session cannot handle " +
                             "reprocess requests");
-                } else if (request.getReprocessibleSessionId() != mId) {
+                } else if (request.getReprocessableSessionId() != mId) {
                     throw new IllegalArgumentException("Capture request was created for another " +
                             "session");
                 }
@@ -293,7 +293,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     }
 
     @Override
-    public boolean isReprocessible() {
+    public boolean isReprocessable() {
         return mInput != null;
     }
 
