@@ -75,4 +75,6 @@ interface IKeystoreService {
     int abort(IBinder handle);
     boolean isOperationAuthorized(IBinder token);
     int addAuthToken(in byte[] authToken);
+    int onUserAdded(int userId, int parentId);
+    int onUserRemoved(int userId);
 }
