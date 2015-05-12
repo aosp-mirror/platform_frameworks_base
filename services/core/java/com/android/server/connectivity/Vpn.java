@@ -217,14 +217,21 @@ public class Vpn {
      * @return true if the operation is succeeded.
      */
     public synchronized boolean prepare(String oldPackage, String newPackage) {
-        if (oldPackage != null && getAppUid(oldPackage, mUserHandle) != mOwnerUID) {
-            // The package doesn't match. We return false (to obtain user consent) unless the user
-            // has already consented to that VPN package.
-            if (!oldPackage.equals(VpnConfig.LEGACY_VPN) && isVpnUserPreConsented(oldPackage)) {
-                prepareInternal(oldPackage);
-                return true;
+        if (oldPackage != null) {
+            if (getAppUid(oldPackage, mUserHandle) != mOwnerUID) {
+                // The package doesn't match. We return false (to obtain user consent) unless the
+                // user has already consented to that VPN package.
+                if (!oldPackage.equals(VpnConfig.LEGACY_VPN) && isVpnUserPreConsented(oldPackage)) {
+                    prepareInternal(oldPackage);
+                    return true;
+                }
+                return false;
+            } else if (!oldPackage.equals(VpnConfig.LEGACY_VPN)
+                    && !isVpnUserPreConsented(oldPackage)) {
+                // Currently prepared VPN is revoked, so unprepare it and return false.
+                prepareInternal(VpnConfig.LEGACY_VPN);
+                return false;
             }
-            return false;
         }
 
         // Return true if we do not need to revoke.
@@ -479,6 +486,10 @@ public class Vpn {
         // Check if the caller is already prepared.
         UserManager mgr = UserManager.get(mContext);
         if (Binder.getCallingUid() != mOwnerUID) {
+            return null;
+        }
+        // Check to ensure consent hasn't been revoked since we were prepared.
+        if (!isVpnUserPreConsented(mPackage)) {
             return null;
         }
         // Check if the service is properly declared.
