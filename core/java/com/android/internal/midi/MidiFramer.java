@@ -54,10 +54,10 @@ public class MidiFramer extends MidiReceiver {
     }
 
     /*
-     * @see android.midi.MidiReceiver#onReceive(byte[], int, int, long)
+     * @see android.midi.MidiReceiver#onSend(byte[], int, int, long)
      */
     @Override
-    public void onReceive(byte[] data, int offset, int count, long timestamp)
+    public void onSend(byte[] data, int offset, int count, long timestamp)
             throws IOException {
         // Log.i(TAG, formatMidiData(data, offset, count));
         int sysExStartOffset = (mInSysEx ? offset : -1);
@@ -77,7 +77,7 @@ public class MidiFramer extends MidiReceiver {
                     } else if (b == 0xF7 /* SysEx End */) {
                         // Log.i(TAG, "SysEx End");
                         if (mInSysEx) {
-                            mReceiver.sendWithTimestamp(data, sysExStartOffset,
+                            mReceiver.send(data, sysExStartOffset,
                                 offset - sysExStartOffset + 1, timestamp);
                             mInSysEx = false;
                             sysExStartOffset = -1;
@@ -91,11 +91,11 @@ public class MidiFramer extends MidiReceiver {
                 } else { // real-time?
                     // Single byte message interleaved with other data.
                     if (mInSysEx) {
-                        mReceiver.sendWithTimestamp(data, sysExStartOffset,
+                        mReceiver.send(data, sysExStartOffset,
                                 offset - sysExStartOffset, timestamp);
                         sysExStartOffset = offset + 1;
                     }
-                    mReceiver.sendWithTimestamp(data, offset, 1, timestamp);
+                    mReceiver.send(data, offset, 1, timestamp);
                 }
             } else { // data byte
                 // Save SysEx data for SysEx End marker or end of buffer.
@@ -105,7 +105,7 @@ public class MidiFramer extends MidiReceiver {
                         if (mRunningStatus != 0) {
                             mBuffer[0] = (byte) mRunningStatus;
                         }
-                        mReceiver.sendWithTimestamp(mBuffer, 0, mCount, timestamp);
+                        mReceiver.send(mBuffer, 0, mCount, timestamp);
                         mNeeded = MidiConstants.getBytesPerMessage(mBuffer[0]) - 1;
                         mCount = 1;
                     }
@@ -116,7 +116,7 @@ public class MidiFramer extends MidiReceiver {
 
         // send any accumulatedSysEx data
         if (sysExStartOffset >= 0 && sysExStartOffset < offset) {
-            mReceiver.sendWithTimestamp(data, sysExStartOffset,
+            mReceiver.send(data, sysExStartOffset,
                     offset - sysExStartOffset, timestamp);
         }
     }

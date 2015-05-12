@@ -70,7 +70,7 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
                             long timestamp = MidiPortImpl.getPacketTimestamp(buffer, count);
 
                             // dispatch to all our receivers
-                            mDispatcher.sendWithTimestamp(buffer, offset, size, timestamp);
+                            mDispatcher.send(buffer, offset, size, timestamp);
                             break;
                         }
                         case MidiPortImpl.PACKET_TYPE_FLUSH:
@@ -114,12 +114,12 @@ public final class MidiOutputPort extends MidiSender implements Closeable {
     }
 
     @Override
-    public void connect(MidiReceiver receiver) {
+    public void onConnect(MidiReceiver receiver) {
         mDispatcher.getSender().connect(receiver);
     }
 
     @Override
-    public void disconnect(MidiReceiver receiver) {
+    public void onDisconnect(MidiReceiver receiver) {
         mDispatcher.getSender().disconnect(receiver);
     }
 
