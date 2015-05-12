@@ -64,7 +64,7 @@ LOCAL_SRC_FILES:= $(deviceSources)
 LOCAL_C_INCLUDES := \
     external/zlib \
     system/core/include
-LOCAL_STATIC_LIBRARIES := libziparchive
+LOCAL_STATIC_LIBRARIES := libziparchive libbase
 LOCAL_SHARED_LIBRARIES := \
     libbinder \
     liblog \

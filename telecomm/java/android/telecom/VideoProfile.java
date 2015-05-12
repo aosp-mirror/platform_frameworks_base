@@ -144,6 +144,17 @@ public class VideoProfile implements Parcelable {
         dest.writeInt(mQuality);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[VideoProfile videoState = ");
+        sb.append(VideoState.videoStateToString(mVideoState));
+        sb.append(" videoQuality = ");
+        sb.append(mQuality);
+        sb.append("]");
+        return sb.toString();
+    }
+
     /**
     * The video state of the call, stored as a bit-field describing whether video transmission and
     * receipt it enabled, as well as whether the video is currently muted.
@@ -240,6 +251,31 @@ public class VideoProfile implements Parcelable {
          */
         private static boolean hasState(int videoState, int state) {
             return (videoState & state) == state;
+        }
+
+        /**
+         * Generates a string representation of a {@link VideoState}.
+         *
+         * @param videoState The video state.
+         * @return String representation of the {@link VideoState}.
+         */
+        public static String videoStateToString(int videoState) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Audio");
+
+            if (VideoProfile.VideoState.isTransmissionEnabled(videoState)) {
+                sb.append(" Tx");
+            }
+
+            if (VideoProfile.VideoState.isReceptionEnabled(videoState)) {
+                sb.append(" Rx");
+            }
+
+            if (VideoProfile.VideoState.isPaused(videoState)) {
+                sb.append(" Pause");
+            }
+
+            return sb.toString();
         }
     }
 }

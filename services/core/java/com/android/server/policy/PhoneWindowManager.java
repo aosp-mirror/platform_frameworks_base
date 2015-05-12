@@ -2673,6 +2673,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
             return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_N && event.isMetaPressed()) {
+            if (down) {
+                IStatusBarService service = getStatusBarService();
+                if (service != null) {
+                    try {
+                        service.expandNotificationsPanel();
+                    } catch (RemoteException e) {
+                        // do nothing.
+                    }
+                }
+            }
         } else if (keyCode == KeyEvent.KEYCODE_ASSIST) {
             if (down) {
                 if (repeatCount == 0) {

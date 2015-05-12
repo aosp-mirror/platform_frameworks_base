@@ -3500,6 +3500,30 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(R.id.accessibilityActionScrollToPosition, null);
 
         /**
+         * Action to scroll the node content up.
+         */
+        public static final AccessibilityAction ACTION_SCROLL_UP =
+                new AccessibilityAction(R.id.accessibilityActionScrollUp, null);
+
+        /**
+         * Action to scroll the node content left.
+         */
+        public static final AccessibilityAction ACTION_SCROLL_LEFT =
+                new AccessibilityAction(R.id.accessibilityActionScrollLeft, null);
+
+        /**
+         * Action to scroll the node content down.
+         */
+        public static final AccessibilityAction ACTION_SCROLL_DOWN =
+                new AccessibilityAction(R.id.accessibilityActionScrollDown, null);
+
+        /**
+         * Action to scroll the node content right.
+         */
+         public static final AccessibilityAction ACTION_SCROLL_RIGHT =
+                new AccessibilityAction(R.id.accessibilityActionScrollRight, null);
+
+        /**
          * Action that stylus button presses the node.
          */
         public static final AccessibilityAction ACTION_STYLUS_BUTTON_PRESS =
@@ -3531,6 +3555,10 @@ public class AccessibilityNodeInfo implements Parcelable {
             sStandardActions.add(ACTION_SET_TEXT);
             sStandardActions.add(ACTION_SHOW_ON_SCREEN);
             sStandardActions.add(ACTION_SCROLL_TO_POSITION);
+            sStandardActions.add(ACTION_SCROLL_UP);
+            sStandardActions.add(ACTION_SCROLL_LEFT);
+            sStandardActions.add(ACTION_SCROLL_DOWN);
+            sStandardActions.add(ACTION_SCROLL_RIGHT);
             sStandardActions.add(ACTION_STYLUS_BUTTON_PRESS);
         }
 
