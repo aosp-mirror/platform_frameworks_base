@@ -55,7 +55,6 @@ sdk.win_installer_checksum=e764ea93aa72766737f9be3b9fb3e42d879ab599
 
 <style type="text/css">
   .offline {display:none;}
-  a.download-bundle-button {display:block;}
   h2.feature {
     padding-top:30px;
     margin-top:0;
@@ -64,19 +63,6 @@ sdk.win_installer_checksum=e764ea93aa72766737f9be3b9fb3e42d879ab599
   .feature-blurb {
   margin:0px; font-size:16px; font-weight:300;
   padding-top:40px;
-  }
-
-  .landing-button.green {
-    font-size:16px;
-    background-color:#90c653;
-    padding:8px 10px 10px;
-    margin:0;
-    width:206px;
-    text-align:center;
-  }
-
-  .landing-button.green:hover {
-    background-color:#85b84f;
   }
 
   .landing-button .small {
@@ -284,7 +270,7 @@ This is the Android Software Development Kit License Agreement
 
 <img src="{@docRoot}images/tools/studio-hero.png"
 srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x"
-width="760" height="400" alt="" style="margin-bottom:100px" />
+width="760" height="400" alt="" />
 
 <div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
 
@@ -301,7 +287,7 @@ width: 400px;text-align: center;">The official Android IDE</p>
 </ul>
 
 
-<a class="online landing-button green download-bundle-button" style="margin-top:30px;"
+<a class="online landing-button green download-bundle-button"
 href="#Other" >Download Android Studio</a>
 
 <!-- this appears when viewing the offline docs -->
@@ -309,8 +295,9 @@ href="#Other" >Download Android Studio</a>
 To get Android Studio or stand-alone SDK tools, visit <a
 href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
 </p>
+</div>
 
-<ul style="margin-top:50px;color:#444">
+<ul>
   <li><a href="#Requirements">System Requirements</a></li>
   <li><a href="#Other">Other Download Options</a></li>
   <li><a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a></li>
@@ -318,7 +305,6 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
 target="_blank">Take a Survey</a></li>
 </ul>
 
-</div>
 
 
 
@@ -404,8 +390,7 @@ srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/to
   <p>Build APKs from Android Studio or the command line.</p>
 </div>
 
-
-
+</div>
 
 <h2 class="feature norule">More about Android Studio</h2>
 <div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">

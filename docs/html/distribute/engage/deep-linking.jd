@@ -26,27 +26,26 @@ page.image=images/cards/google-search_2x.png
   before accessing the resource.
 </p>
 
-<div style="padding:2em, auto;width:550px;">
-  <div style="float:right; width:260px; padding-left:1em;">
-    <img src="{@docRoot}images/gp-engage-5.jpg" class="border-img">
-    <p class="img-caption">
+
+<div style="inline-block">
+
+<div class="col-5">
+    <img src="{@docRoot}images/gp-engage-5.jpg">
+    <p class="figure-caption">
       G+ Post with Deep Link to Buy
     </p>
-  </div>
+</div>
 
-  <div style="width:260px;float:left;">
-    <img src="{@docRoot}images/gp-engage-6.jpg" class="border-img">
-    <p class="img-caption">
+<div class="col-5">
+    <img src="{@docRoot}images/gp-engage-6.jpg">
+    <p class="figure-caption">
       Purchase page within app
     </p>
-  </div>
 </div>
 
-
-<div class="headerLine">
-<h2>Deep Linking from Google Search &mdash; App Indexing</h2>
 </div>
 
+<h2 style="clear:both">Deep Linking from Google Search &mdash; App Indexing</h2>
 
 <div style="float:right;">
   <img src="/images/gp-listing-4.jpg" style="padding-top:1em;padding-left:2em;">
@@ -65,15 +64,15 @@ page.image=images/cards/google-search_2x.png
   content</a>.
 </p>
 
-<div class="clearfloat" style="margin-top:2em;"></div>
 
-<div style="float:right;width:340px;padding-left:2em;">
-  <img src="/images/gp-ads-linking2.jpg" style="padding-top:1em;">
+
+<h2 style="clear:both" style="padding-top:2em">Deep Linking from Google Ads</h2>
+
+
+<div class="col-5" style="float:right">
+  <img src="{@docRoot}images/gp-ads-linking2.jpg" >
 </div>
 
-<div class="headerLine ">
-<h2>Deep Linking from Google Ads</h2>
-</div>
 <p>
   Ads can remind users about the apps they already have.
 </p>
