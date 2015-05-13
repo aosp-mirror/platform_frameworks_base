@@ -908,8 +908,8 @@ public class AudioTrack
     }
 
     /**
-     * Returns the current playback params.
-     * See {@link #setPlaybackParams(PlaybackParams)} to set playback params
+     * Returns the current playback parameters.
+     * See {@link #setPlaybackParams(PlaybackParams)} to set playback parameters
      * @return current {@link PlaybackParams}.
      * @throws IllegalStateException if track is not initialized.
      */
@@ -1311,8 +1311,8 @@ public class AudioTrack
 
 
     /**
-     * Sets the playback params.
-     * This method returns failure if it cannot apply the playback params.
+     * Sets the playback parameters.
+     * This method returns failure if it cannot apply the playback parameters.
      * One possible cause is that the parameters for speed or pitch are out of range.
      * Another possible cause is that the <code>AudioTrack</code> is streaming
      * (see {@link #MODE_STREAM}) and the
@@ -1321,7 +1321,7 @@ public class AudioTrack
      * {@link #getMinBufferSize(int, int, int)}) to allow proper playback.
      * @param params see {@link PlaybackParams}. In particular,
      * speed, pitch, and audio mode should be set.
-     * @throws IllegalArgumentException if the params are invalid or not accepted.
+     * @throws IllegalArgumentException if the parameters are invalid or not accepted.
      * @throws IllegalStateException if track is not initialized.
      */
     public void setPlaybackParams(@NonNull PlaybackParams params) {
