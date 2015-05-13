@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"ব্যক্তিগত অ্যাপ্লিকেশানগুলি"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"কর্মক্ষেত্র্র"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"পরিচিতি"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"আপনার পরিচিতি অ্যাক্সেস এবং সংশোধন করুন"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"আপনার পরিচিতিগুলিতে অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"অবস্থান"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"আপনার অবস্থান অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"আপনার সামাজিক তথ্য"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"আপনার পরিচিতিগুলি এবং সামাজিক পরিচিতিগুলি সম্পর্কিত তথ্যে সরাসরি অ্যাক্সেস৷"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ক্যালেন্ডার"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"আপনার ক্যালেন্ডার অ্যাক্সেস এবং সংশোধন করুন"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"আপনার ক্যালেন্ডারে অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS অ্যাক্সেস এবং সংশোধন করুন"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS বার্তাগুলি দেখুন এবং পরিচালনা করুন"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"ব্যবহারকারীর অভিধান"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"ব্যবহারকারীর অভিধানে শব্দগুলিকে পড়ুন এবং লিখুন৷"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"বুকমার্কগুলি এবং ইতিহাস"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"বুকমার্কগুলি এবং ব্রাউজারের ইতিহাসে সরাসরি অ্যাক্সেস৷"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"মাইক্রোফোন"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"ডিভাইসের মাইক্রোফোন ব্যবহার করুন"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"অডিও রেকর্ড করুন"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ক্যামেরা"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"ডিভাইসের ক্যামেরা ব্যবহার করুন"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ছবি তুলুন এবং ভিডিও রেকর্ড করুন"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ফোন"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"ডিভাইসের টেলিফোনি ব্যবহার করুন"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ফোন কলগুলি করুন এবং পরিচালনা করুন"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"সেন্সরগুলি"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"সেন্সর এবং হালকা ও ছোট ডিভাইসগুলি অ্যাক্সেস করুন"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"সেন্সর এবং পরে থাকা যায় এমন ডিভাইসগুলি থেকে ডেটা অ্যাক্সেস করুন"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"উইন্ডোর সামগ্রী পুনরুদ্ধার করে"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"আপনি ইন্টারঅ্যাক্ট করছেন এমন একটি উইন্ডোর সামগ্রীকে সযত্নে নিরীক্ষণ করে৷"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পর্শের মাধ্যমে অন্বেষণ করা চালু করুন"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"সঙ্কুচিত করুন"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"বিরক্ত করবেন না"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ডাউনটাইম"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"সপ্তাহান্তের রাত্রি"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"সপ্তাহান্ত"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ইভেন্ট"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> দ্বারা নিঃশব্দ করা হয়েছে"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>

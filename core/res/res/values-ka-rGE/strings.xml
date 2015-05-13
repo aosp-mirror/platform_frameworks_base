@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"პერსონალური აპები"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"სამსახური"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"კონტაქტები"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"თქვენს კონტაქტებზე წვდომა და შეცვლა"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"თქვენს კონტაქტებზე წვდომა"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"მდებარეობა"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"თქვენს მდებარეობაზე წვდომა"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"თქვენი სოციალური ინფორმაცია"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"თქვენს კონტაქტებისა და სოციალურ კავშირების შესახებ ინფორმაციაზე პირდაპირი წვდომა."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"კალენდარი"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"თქვენს კალენდარზე წვდომა და შეცვლა"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"თქვენს კალენდარზე წვდომა"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS-ებზე წვდომა და შეცვლა"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS შეტყობინებების ნახვა და მართვა"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"მომხმარებლის ლექსიკონი"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"მომხმარებლის ლექსიკონში სიტყვების წაკითხვა ან ჩაწერა."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"სანიშნეები და ისტორია"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"პირდაპირი წვდომა სანიშნეებსა და ბრაუზერის ისტორიაზე"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"მიკროფონი"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"მოწყობილობის მიკროფონის გამოყენება"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"აუდიოს ჩწერა"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"კამერა"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"მოწყობილობის კამერის გამოყენება"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ფოტოებისა და ვიდეოების გადაღება"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ტელეფონი"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"მოწყობილობის ტელეფონიის გამოყენება"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"სატელეფონო ზარების განხორციელება და მართვა"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"სენსორები"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"სენსორებსა და ტარებად მოწყობილობებზე წვდომა"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"სენსორებიდან და ტარებადი მოწყობილობებიდან მონაცემებზე წვდომა"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ფანჯრის კონტენტის მოძიება"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"შეამოწმეთ იმ ფანჯრის კონტექტი, რომელშიც მუშაობთ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"„შეხებით აღმოჩენის“ ჩართვა"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"აკეცვა"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"არ შემაწუხოთ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ავარიული პაუზა"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"სამუშაო კვირის ღამე"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"შაბათ-კვირა"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"მოვლენა"</string>
     <string name="muted_by" msgid="6147073845094180001">"დადუმებულია <xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ის მიერ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ფიქსირდება თქვენი მოწყობილობის შიდა პრობლემა. დეტალებისათვის, მიმართეთ თქვენს მწარმოებელს."</string>

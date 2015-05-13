@@ -222,27 +222,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"אפליקציות אישיות"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"עבודה"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"אנשי קשר"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"גישה אל אנשי הקשר ושינוי שלהם"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"גישה אל אנשי הקשר"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"מיקום"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"גישה אל המיקום שלך"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"מידע על הקשרים החברתיים שלך"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"גישה ישירה למידע על אנשי קשר וקשרים חברתיים שלך."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"יומן"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"גישה אל היומן וביצוע שינויים בו"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"גישה אל היומן"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"‏גישה אל הודעות SMS ושינוי שלהן"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"‏הצגה וניהול של הודעות SMS"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"מילון משתמש"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"קריאה או כתיבה של מילים במילון המשתמש."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"סימניות והיסטוריה"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"גישה ישירה אל סימניות והיסטוריית דפדפן."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"מיקרופון"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"שימוש במיקרופון המכשיר"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"הקלטת אודיו"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"מצלמה"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"שימוש במצלמת המכשיר"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"צילום תמונות והקלטת וידאו"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"טלפון"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"שימוש ביכולות הטלפוניה של המכשיר"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"התקשרות וניהול של שיחות טלפון"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"חיישנים"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"גישה אל חיישנים וגאדג\'טים לבישים"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"גישה לנתונים מחיישנים וממכשירים לבישים"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"אחזר תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעל את \'גילוי באמצעות מגע\'"</string>

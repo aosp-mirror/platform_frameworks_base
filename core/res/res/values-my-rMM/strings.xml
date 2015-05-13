@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"ကိုယ်ပိုင် appများ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"အလုပ်"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"အဆက်အသွယ်များ"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"သင့် အဆက်အသွယ်များအား ဝင်ရောက်သုံးရန်နှင့် ပြင်ဆင်ရန်"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"သင့် အဆက်အသွယ်များအား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"တည်နေရာ"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"သင်၏ တည်နေရာအား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"သင်၏ ဆိုရှယ် သတင်းအချက်အလက်"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"သင်၏ အဆက်အသွယ်များနှင့် ဆိုရှယ်လ် အဆက်အသွယ်များအား၏ သတင်းအချက်အလက်များအား တိုက်ရိုက်အသုံးပြုခွင့် ရယူရန်"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ပြက္ခဒိန်"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"သင်၏ ပြက္ခဒိန်သို့ ဝင်ရောက်သုံးရန်နှင့် ပြင်ဆင်ရန်"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"စာတိုစနစ်"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS အား ဝင်ရောက်သုံးရန်နှင့် ပြင်ဆင်ရန်"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS စာတိုများအား ကြည့်ပြီး စီမံရန်"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"သုံးစွဲသူ အဘိဓာန်"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"သုံးစွဲသူ အဘိဓာန်တွင် စာလုံးများ ဖတ်ရန် သို့မဟုတ် ရေးရန်"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"မှတ်တမ်း နှင့် အမှတ်အသား နေရာများ"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ဘရောင်ဇာ မှတ်တမ်း နှင့် အမှတ်နေရာများအား တိုက်ရိုက် ရယူရန်"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"မိုက်ခရိုဖုန်း"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"စက်ကိရိယာ၏ မိုက်ကရိုဖုန်းအား သုံးရန်"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"အသံဖမ်းခြင်း"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ကင်မရာ"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"စက်ကိရိယာ၏ ကင်မရာအား သုံးရန်"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ဖုန်း"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"စက်ကိရိယာ၏ ဖုန်းခေါ်မှုဆိုင်ရာများအား သုံးရန်"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"အာရုံခံကိရိယာများ"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"အာရုံခံကိရိယာများနှင့် wearable  များအား ဝင်ရောက်သုံးရန်"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"အာရုံခံများနှင့် ဝတ်ဆင်ထားနိုင်သည့် ကိရိယာများမှ ဒေတာအား ဝင်ရောက်သုံးရန်"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ဝင်းဒိုးမှာပါရှိသည်များကို ထုတ်ယူခြင်း"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"သင် အပြန်အလှန်လုပ်နေသော ဝင်းဒိုးမှာပါရှိသည်များကို သေချာစွာ ကြည့်ရှုစစ်ဆေးပါ"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ထိတို့ခြင်းဖြင့် ရှာဖွေပေးနိုင်တာကို ဖွင့်လိုက်ပါ"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ခေါက်ရန်"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"မနှောက်ယှက်ပါနှင့်"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ကျချိန်"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ကြားရက်ည"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"စနေ၊တနင်္ဂနွေ"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ဖြစ်ရပ်"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> အသံပိတ်သည်"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေ၏။ အသေးစိတ်သိရန်အတွက် ပစ္စည်းထုတ်လုပ်သူအား ဆက်သွယ်ပါ။"</string>

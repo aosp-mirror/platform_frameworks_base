@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"വ്യക്തിഗത അപ്ലിക്കേഷനുകൾ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"കോൺടാക്റ്റുകൾ"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്‌ത് പരിഷ്‌ക്കരിക്കുക"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ലൊക്കേഷൻ"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"നിങ്ങളുടെ ലൊക്കേഷൻ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"നിങ്ങളുടെ സോഷ്യൽ വിവരം"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"നിങ്ങളുടെ കോൺടാക്റ്റുകളേയും സോഷ്യൽ കണക്ഷനുകളേയും സംബന്ധിച്ച വിവരങ്ങളിലേക്കുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"കലണ്ടർ"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്‌ത് പരിഷ്‌ക്കരിക്കുക"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS ആക്‌സസ്സുചെയ്‌ത് പരിഷ്‌ക്കരിക്കുക"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS സന്ദേശങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"ഉപയോക്തൃ നിഘണ്ടു"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"ഉപയോക്തൃ നിഘണ്ടുവിലെ പദങ്ങൾ വായിക്കുകയോ എഴുതുകയോ ചെയ്യുക."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ബുക്ക്‌മാർക്കുകളും ചരിത്രവും"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ബുക്ക്‌മാർക്കുകളിലേക്കും ബ്രൗസർ ചരിത്രത്തിലേക്കുമുള്ള നേരിട്ടുള്ള ആക്‌സസ്സ്."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"മൈക്രോഫോണ്‍"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"ഉപകരണ മൈക്രോഫോൺ ഉപയോഗിക്കുക"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ക്യാമറ"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"ഉപകരണ ക്യാമറ ഉപയോഗിക്കുക"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ചിത്രങ്ങളെടുത്ത് വീഡിയോ റെക്കോർഡുചെയ്യുക"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"ഉപകരണ ടെലിഫോണി ഉപയോഗിക്കുക"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"സെൻസറുകൾ"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"സെൻസറുകളും ധരിക്കാനാകുന്നവയും ആക്‌സസ്സ് ചെയ്യുക"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"സെൻസറുകളിൽ നിന്നും ധരിക്കാനാവുന്ന ഉപകരണങ്ങളിൽ നിന്നും വിവരം ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക ഓൺ ചെയ്യുക"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ചുരുക്കുക"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"പ്രവർത്തനരഹിതമായ സമയം"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"പ്രവൃത്തിദിനരാവ്"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"വാരാന്ത്യം"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ഇവന്റ്"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>, മ്യൂട്ടുചെയ്‌തു"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്, ഫാക്‌ടറി വിവര പുനഃസജ്ജീകരണം ചെയ്യുന്നതുവരെ ഇതു അസ്ഥിരമായിരിക്കാനിടയുണ്ട്."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്. വിശദാംശങ്ങൾക്കായി നിർമ്മാതാവിനെ ബന്ധപ്പെടുക."</string>
