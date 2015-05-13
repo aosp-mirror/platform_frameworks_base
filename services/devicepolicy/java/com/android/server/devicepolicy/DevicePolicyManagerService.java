@@ -246,6 +246,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.STAY_ON_WHILE_PLUGGED_IN);
     }
 
+    // Keyguard features that when set of a profile will affect the profiles
+    // parent user.
+    private static final int PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER =
+            DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS
+            | DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
+
+    // Keyguard features that are allowed to be set on a managed profile
+    private static final int PROFILE_KEYGUARD_FEATURES =
+            PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER
+            | DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+
     final Context mContext;
     final UserManager mUserManager;
     final PowerManager.WakeLock mWakeLock;
@@ -3957,7 +3968,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
-        enforceNotManagedProfile(userHandle, "disable keyguard features");
+        if (isManagedProfile(userHandle)) {
+            which = which & PROFILE_KEYGUARD_FEATURES;
+        }
         synchronized (this) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
@@ -3978,21 +3991,50 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return 0;
         }
         enforceCrossUserPermission(userHandle);
-        synchronized (this) {
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
-                return (admin != null) ? admin.disabledKeyguardFeatures : 0;
-            }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                if (who != null) {
+                    ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+                    return (admin != null) ? admin.disabledKeyguardFeatures : 0;
+                }
 
-            // Determine which keyguard features are disabled for any active admins.
-            DevicePolicyData policy = getUserData(userHandle);
-            final int N = policy.mAdminList.size();
-            int which = 0;
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = policy.mAdminList.get(i);
-                which |= admin.disabledKeyguardFeatures;
+                UserInfo user = mUserManager.getUserInfo(userHandle);
+                final List<UserInfo> profiles;
+                if (user.isManagedProfile()) {
+                    // If we are being asked about a managed profile just return
+                    // keyguard features disabled by admins in the profile.
+                    profiles = new ArrayList<UserInfo>(1);
+                    profiles.add(user);
+                } else {
+                    // Otherwise return those set by admins in the user
+                    // and its profiles.
+                    profiles = mUserManager.getProfiles(userHandle);
+                }
+
+                // Determine which keyguard features are disabled by any active admin.
+                int which = 0;
+                for (UserInfo userInfo : profiles) {
+                    DevicePolicyData policy = getUserData(userInfo.id);
+                    final int N = policy.mAdminList.size();
+                    for (int i = 0; i < N; i++) {
+                        ActiveAdmin admin = policy.mAdminList.get(i);
+                        if (userInfo.id == userHandle || !userInfo.isManagedProfile()) {
+                            // If we are being asked explictly about this user
+                            // return all disabled features even if its a managed profile.
+                            which |= admin.disabledKeyguardFeatures;
+                        } else {
+                            // Otherwise a managed profile is only allowed to disable
+                            // some features on the parent user.
+                            which |= (admin.disabledKeyguardFeatures
+                                    & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER);
+                        }
+                    }
+                }
+                return which;
             }
-            return which;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
