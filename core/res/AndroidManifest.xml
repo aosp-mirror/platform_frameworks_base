@@ -1319,13 +1319,23 @@
         android:description="@string/permdesc_bind_incall_service"
         android:label="@string/permlab_bind_incall_service" />
 
-    <!-- @SystemApi Allows an application to bind to ConnectionService implementations.
+    <!-- Must be required by a {@link android.telecom.ConnectionService},
+         to ensure that only the system can bind to it.
+         @deprecated {@link android.telecom.ConnectionService}s should require
+                 android.permission.BIND_TELECOM_CONNECTION_SERVICE instead.
+         @SystemApi
          @hide -->
     <permission android:name="android.permission.BIND_CONNECTION_SERVICE"
                 android:permissionGroup="android.permission-group.PHONE_CALLS"
                 android:protectionLevel="system|signature"
                 android:description="@string/permdesc_bind_connection_service"
                 android:label="@string/permlab_bind_connection_service" />
+
+    <!-- Must be required by a {@link android.telecom.ConnectionService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
+        android:protectionLevel="system|signature" />
+
 
     <!-- @SystemApi Allows an application to control the in-call experience.
          @hide -->
