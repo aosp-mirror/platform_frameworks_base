@@ -104,7 +104,7 @@ class UserUsageStatsService {
 
             // By calling loadActiveStats, we will
             // generate new stats for each bucket.
-            loadActiveStats(currentTimeMillis, false);
+            loadActiveStats(currentTimeMillis,/*force=*/ false, /*resetBeginIdleTime=*/ false);
         } else {
             // Set up the expiry date to be one day from the latest daily stat.
             // This may actually be today and we will rollover on the first event
@@ -167,10 +167,10 @@ class UserUsageStatsService {
         persistActiveStats();
     }
 
-    void onTimeChanged(long oldTime, long newTime) {
+    void onTimeChanged(long oldTime, long newTime, boolean resetBeginIdleTime) {
         persistActiveStats();
         mDatabase.onTimeChanged(newTime - oldTime);
-        loadActiveStats(newTime, true);
+        loadActiveStats(newTime, /* force= */ true, resetBeginIdleTime);
     }
 
     void reportEvent(UsageEvents.Event event, long deviceUsageTime) {
@@ -431,7 +431,7 @@ class UserUsageStatsService {
 
         persistActiveStats();
         mDatabase.prune(currentTimeMillis);
-        loadActiveStats(currentTimeMillis, false);
+        loadActiveStats(currentTimeMillis, /*force=*/ false, /*resetBeginIdleTime=*/ false);
 
         final int continueCount = continuePreviousDay.size();
         for (int i = 0; i < continueCount; i++) {
@@ -460,7 +460,8 @@ class UserUsageStatsService {
     /**
      * @param force To force all in-memory stats to be reloaded.
      */
-    private void loadActiveStats(final long currentTimeMillis, boolean force) {
+    private void loadActiveStats(final long currentTimeMillis, boolean force,
+            boolean resetBeginIdleTime) {
         final UnixCalendar tempCal = mDailyExpiryDate;
         for (int intervalType = 0; intervalType < mCurrentStats.length; intervalType++) {
             tempCal.setTimeInMillis(currentTimeMillis);
@@ -495,6 +496,12 @@ class UserUsageStatsService {
                 mCurrentStats[intervalType] = new IntervalStats();
                 mCurrentStats[intervalType].beginTime = tempCal.getTimeInMillis();
                 mCurrentStats[intervalType].endTime = currentTimeMillis;
+            }
+
+            if (resetBeginIdleTime) {
+                for (UsageStats usageStats : mCurrentStats[intervalType].packageStats.values()) {
+                    usageStats.mBeginIdleTime = 0;
+                }
             }
         }
         mStatsChanged = false;

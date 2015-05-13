@@ -49,6 +49,7 @@ import android.os.Handler;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -58,6 +59,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -87,13 +89,21 @@ public class UsageStatsService extends SystemService implements
 
     static final String TAG = "UsageStatsService";
 
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long TEN_SECONDS = 10 * 1000;
+    private static final long ONE_MINUTE = 60 * 1000;
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
     private static final long FLUSH_INTERVAL = DEBUG ? TEN_SECONDS : TWENTY_MINUTES;
     private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
-    static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = 2L * 24 * 60 * 60 * 1000; // 1 day
-    static final long DEFAULT_CHECK_IDLE_INTERVAL = 8 * 3600 * 1000; // 8 hours
+
+    static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = DEBUG ? ONE_MINUTE * 4 
+            : 1L * 24 * 60 * 60 * 1000; // 1 day
+    static final long DEFAULT_CHECK_IDLE_INTERVAL = DEBUG ? ONE_MINUTE
+            : 8 * 3600 * 1000; // 8 hours
+    static final long DEFAULT_PAROLE_INTERVAL = DEBUG ? ONE_MINUTE * 10
+            : 24 * 60 * 60 * 1000L; // 24 hours between paroles
+    static final long DEFAULT_PAROLE_DURATION = DEBUG ? ONE_MINUTE * 2
+            : 10 * 60 * 1000L; // 10 minutes
 
     // Handler message types.
     static final int MSG_REPORT_EVENT = 0;
@@ -102,6 +112,8 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_INFORM_LISTENERS = 3;
     static final int MSG_FORCE_IDLE_STATE = 4;
     static final int MSG_CHECK_IDLE_STATES = 5;
+    static final int MSG_CHECK_PAROLE_TIMEOUT = 6;
+    static final int MSG_PAROLE_END_TIMEOUT = 7;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -110,14 +122,16 @@ public class UsageStatsService extends SystemService implements
     AppWidgetManager mAppWidgetManager;
     IDeviceIdleController mDeviceIdleController;
     private DisplayManager mDisplayManager;
+    private PowerManager mPowerManager;
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
     private File mUsageStatsDir;
     long mRealTimeSnapshot;
     long mSystemTimeSnapshot;
+
     boolean mAppIdleParoled;
     private boolean mScreenOn;
-
+    private long mLastAppIdleParoledTime;
     long mAppIdleDurationMillis;
     long mCheckIdleIntervalMillis = DEFAULT_CHECK_IDLE_INTERVAL;
     long mScreenOnTime;
@@ -152,6 +166,7 @@ public class UsageStatsService extends SystemService implements
 
         IntentFilter deviceStates = new IntentFilter(BatteryManager.ACTION_CHARGING);
         deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
+        deviceStates.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
         getContext().registerReceiver(new DeviceStateReceiver(), deviceStates);
         synchronized (mLock) {
             cleanUpRemovedUsersLocked();
@@ -179,6 +194,8 @@ public class UsageStatsService extends SystemService implements
                     ServiceManager.getService(DeviceIdleController.SERVICE_NAME));
             mDisplayManager = (DisplayManager) getContext().getSystemService(
                     Context.DISPLAY_SERVICE);
+            mPowerManager = getContext().getSystemService(PowerManager.class);
+
             mScreenOnSystemTimeSnapshot = System.currentTimeMillis();
             synchronized (this) {
                 mScreenOnTime = readScreenOnTimeLocked();
@@ -216,6 +233,8 @@ public class UsageStatsService extends SystemService implements
             if (BatteryManager.ACTION_CHARGING.equals(action)
                     || BatteryManager.ACTION_DISCHARGING.equals(action)) {
                 setAppIdleParoled(BatteryManager.ACTION_CHARGING.equals(action));
+            } else if (PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)) {
+                onDeviceIdleModeChanged();
             }
         }
     }
@@ -270,13 +289,39 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    /** Paroled here means temporary pardon from being inactive */
     void setAppIdleParoled(boolean paroled) {
         synchronized (mLock) {
             if (mAppIdleParoled != paroled) {
                 mAppIdleParoled = paroled;
+                if (DEBUG) Slog.d(TAG, "Changing paroled to " + mAppIdleParoled);
+                if (paroled) {
+                    mLastAppIdleParoledTime = checkAndGetTimeLocked();
+                    postNextParoleTimeout();
+                }
                 postCheckIdleStates();
             }
         }
+    }
+
+    private void postNextParoleTimeout() {
+        if (DEBUG) Slog.d(TAG, "Posting MSG_CHECK_PAROLE_TIMEOUT");
+        mHandler.removeMessages(MSG_CHECK_PAROLE_TIMEOUT);
+        // Compute when the next parole needs to happen. We check more frequently than necessary
+        // since the message handler delays are based on elapsedRealTime and not wallclock time.
+        // The comparison is done in wallclock time.
+        long timeLeft = (mLastAppIdleParoledTime + DEFAULT_PAROLE_INTERVAL)
+                - checkAndGetTimeLocked();
+        if (timeLeft < 0) {
+            timeLeft = 0;
+        }
+        mHandler.sendEmptyMessageDelayed(MSG_CHECK_PAROLE_TIMEOUT, timeLeft / 10);
+    }
+
+    private void postParoleEndTimeout() {
+        if (DEBUG) Slog.d(TAG, "Posting MSG_PAROLE_END_TIMEOUT");
+        mHandler.removeMessages(MSG_PAROLE_END_TIMEOUT);
+        mHandler.sendEmptyMessageDelayed(MSG_PAROLE_END_TIMEOUT, DEFAULT_PAROLE_DURATION);
     }
 
     void postCheckIdleStates() {
@@ -311,6 +356,24 @@ public class UsageStatsService extends SystemService implements
             }
         }
         mHandler.sendEmptyMessageDelayed(MSG_CHECK_IDLE_STATES, mCheckIdleIntervalMillis);
+    }
+
+    /** Check if it's been a while since last parole and let idle apps do some work */
+    void checkParoleTimeout() {
+        synchronized (mLock) {
+            if (!mAppIdleParoled) {
+                final long timeSinceLastParole = checkAndGetTimeLocked() - mLastAppIdleParoledTime;
+                if (timeSinceLastParole > DEFAULT_PAROLE_INTERVAL) {
+                    if (DEBUG) Slog.d(TAG, "Crossed default parole interval");
+                    setAppIdleParoled(true);
+                    // Make sure it ends at some point
+                    postParoleEndTimeout();
+                } else {
+                    if (DEBUG) Slog.d(TAG, "Not long enough to go to parole");
+                    postNextParoleTimeout();
+                }
+            }
+        }
     }
 
     void updateDisplayLocked() {
@@ -368,6 +431,23 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    void onDeviceIdleModeChanged() {
+        final boolean deviceIdle = mPowerManager.isDeviceIdleMode();
+        if (DEBUG) Slog.i(TAG, "DeviceIdleMode changed to " + deviceIdle);
+        synchronized (mLock) {
+            final long timeSinceLastParole = checkAndGetTimeLocked() - mLastAppIdleParoledTime;
+            if (!deviceIdle
+                    && timeSinceLastParole >= DEFAULT_PAROLE_INTERVAL) {
+                if (DEBUG) Slog.i(TAG, "Bringing idle apps out of inactive state due to deviceIdleMode=false");
+                postNextParoleTimeout();
+                setAppIdleParoled(true);
+            } else if (deviceIdle) {
+                if (DEBUG) Slog.i(TAG, "Device idle, back to prison");
+                setAppIdleParoled(false);
+            }
+        }
+    }
+
     private static void deleteRecursively(File f) {
         File[] files = f.listFiles();
         if (files != null) {
@@ -400,12 +480,20 @@ public class UsageStatsService extends SystemService implements
         final long actualSystemTime = System.currentTimeMillis();
         final long actualRealtime = SystemClock.elapsedRealtime();
         final long expectedSystemTime = (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
+        boolean resetBeginIdleTime = false;
         if (Math.abs(actualSystemTime - expectedSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS) {
             // The time has changed.
+
+            // Check if it's severe enough a change to reset screenOnTime
+            if (Math.abs(actualSystemTime - expectedSystemTime) > mAppIdleDurationMillis) {
+                mScreenOnSystemTimeSnapshot = actualSystemTime;
+                mScreenOnTime = 0;
+                resetBeginIdleTime = true;
+            }
             final int userCount = mUserState.size();
             for (int i = 0; i < userCount; i++) {
                 final UserUsageStatsService service = mUserState.valueAt(i);
-                service.onTimeChanged(expectedSystemTime, actualSystemTime);
+                service.onTimeChanged(expectedSystemTime, actualSystemTime, resetBeginIdleTime);
             }
             mRealTimeSnapshot = actualRealtime;
             mSystemTimeSnapshot = actualSystemTime;
@@ -718,6 +806,16 @@ public class UsageStatsService extends SystemService implements
                 case MSG_CHECK_IDLE_STATES:
                     checkIdleStates();
                     break;
+
+                case MSG_CHECK_PAROLE_TIMEOUT:
+                    checkParoleTimeout();
+                    break;
+
+                case MSG_PAROLE_END_TIMEOUT:
+                    if (DEBUG) Slog.d(TAG, "Ending parole");
+                    setAppIdleParoled(false);
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
