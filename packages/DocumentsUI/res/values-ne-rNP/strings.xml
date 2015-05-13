@@ -73,8 +73,8 @@
     <string name="retry" msgid="7564024179122207376">"पुनःप्रयास गर्नुहोस्"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"यी फाइलहरू प्रतिलिपि गरिएको थिएनः <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
-      <item quantity="other"> क्लिपबोर्डमा <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू प्रतिलिपि बनाईए।</item>
-      <item quantity="one"> क्लिपबोर्डमा <xliff:g id="COUNT_0">%1$d</xliff:g> फाइलहरू प्रतिलिपि बनाईए।</item>
+      <item quantity="other"> क्लिपबोर्डमा <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू प्रतिलिपि बनाइए।</item>
+      <item quantity="one"> क्लिपबोर्डमा <xliff:g id="COUNT_0">%1$d</xliff:g> फाइलहरूका प्रतिलिपि बनाइए।</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"यस स्थान मा चयन गरिएका फाइलहरू हाल्न सकिएन।"</string>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"यस स्थान मा चयन गरिएका फाइलहरू टाँस्न सकिएन।"</string>
 </resources>

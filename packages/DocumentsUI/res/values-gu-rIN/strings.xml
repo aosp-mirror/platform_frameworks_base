@@ -72,7 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"વિગતો જોવા માટે ટચ કરો"</string>
     <string name="retry" msgid="7564024179122207376">"ફરી પ્રયાસ કરો"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"આ ફાઇલો કૉપિ કરી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for clipboard_files_clipped (855459017537058539) -->
-    <!-- no translation found for clipboard_files_cannot_paste (4696369437408683222) -->
-    <skip />
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="one">ક્લિપબોર્ડ પર <xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી.</item>
+      <item quantity="other">ક્લિપબોર્ડ પર <xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"આ સ્થાનમાં પસંદ કરેલ ફાઇલો પેસ્ટ કરી શકાતી નથી."</string>
 </resources>

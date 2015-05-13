@@ -72,7 +72,9 @@
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Prek për të parë detajet"</string>
     <string name="retry" msgid="7564024179122207376">"Provo përsëri"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Këta skedarë nuk u kopjuan: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for clipboard_files_clipped (855459017537058539) -->
-    <!-- no translation found for clipboard_files_cannot_paste (4696369437408683222) -->
-    <skip />
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="other">U kopjuan <xliff:g id="COUNT_1">%1$d</xliff:g> skedarë në kujtesën e fragmenteve.</item>
+      <item quantity="one">U kopjua <xliff:g id="COUNT_0">%1$d</xliff:g> skedar në kujtesën e fragmenteve.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Nuk mund të ngjiten skedarët e zgjedhur në këtë vendndodhje"</string>
 </resources>

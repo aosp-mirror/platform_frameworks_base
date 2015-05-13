@@ -76,5 +76,5 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> filer blev kopieret til udklipsholder.</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> filer blev kopieret til udklipsholder.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"De valgte filer på denne placering kan ikke indsættes."</string>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"De valgte filer kan ikke indsættes på denne placering."</string>
 </resources>
