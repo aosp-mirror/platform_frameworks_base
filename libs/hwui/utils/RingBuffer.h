@@ -31,7 +31,7 @@ public:
     RingBuffer() {}
     ~RingBuffer() {}
 
-    size_t capacity() { return SIZE; }
+    constexpr size_t capacity() { return SIZE; }
     size_t size() { return mCount; }
 
     T& next() {
