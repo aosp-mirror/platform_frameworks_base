@@ -26,6 +26,8 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.media.PlaybackParams;
+import android.media.tv.TvInputService.HardwareSession;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -586,7 +588,7 @@ public abstract class TvInputService extends Service {
          * set playback rate and audio mode. The implementation should override
          * {@link #onTimeShiftPause}, {@link #onTimeShiftResume}, {@link #onTimeShiftSeekTo},
          * {@link #onTimeShiftGetStartPosition}, {@link #onTimeShiftGetCurrentPosition} and
-         * {@link #onTimeShiftSetPlaybackRate}.
+         * {@link #onTimeShiftSetPlaybackParams}.
          *
          * @param status The current time shift status. Should be one of the followings.
          * <ul>
@@ -853,7 +855,7 @@ public abstract class TvInputService extends Service {
          *
          * @see #onTimeShiftResume
          * @see #onTimeShiftSeekTo
-         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftSetPlaybackParams
          * @see #onTimeShiftGetStartPosition
          * @see #onTimeShiftGetCurrentPosition
          */
@@ -865,7 +867,7 @@ public abstract class TvInputService extends Service {
          *
          * @see #onTimeShiftPause
          * @see #onTimeShiftSeekTo
-         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftSetPlaybackParams
          * @see #onTimeShiftGetStartPosition
          * @see #onTimeShiftGetCurrentPosition
          */
@@ -881,7 +883,7 @@ public abstract class TvInputService extends Service {
          * @param timeMs The time position to seek to, in milliseconds since the epoch.
          * @see #onTimeShiftResume
          * @see #onTimeShiftPause
-         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftSetPlaybackParams
          * @see #onTimeShiftGetStartPosition
          * @see #onTimeShiftGetCurrentPosition
          */
@@ -889,25 +891,20 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Called when the application sets playback rate and audio mode.
+         * Called when the application sets playback parameters containing the speed and audio mode.
          *
-         * <p>Once a playback rate is set, the implementation should honor the value until a new
-         * tune request. Pause/resume/seek request does not reset the playback rate previously set.
+         * <p>Once the playback parameters are set, the implementation should honor the current
+         * settings until the next tune request. Pause/resume/seek request does not reset the
+         * parameters previously set.
          *
-         * @param rate The ratio between desired playback rate and normal one.
-         * @param audioMode Audio playback mode. Must be one of the supported audio modes:
-         * <ul>
-         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_DEFAULT}
-         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_STRETCH}
-         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
-         * </ul>
+         * @param params The playback params.
          * @see #onTimeShiftResume
          * @see #onTimeShiftPause
          * @see #onTimeShiftSeekTo
          * @see #onTimeShiftGetStartPosition
          * @see #onTimeShiftGetCurrentPosition
          */
-        public void onTimeShiftSetPlaybackRate(float rate, int audioMode) {
+        public void onTimeShiftSetPlaybackParams(PlaybackParams params) {
         }
 
         /**
@@ -924,7 +921,7 @@ public abstract class TvInputService extends Service {
          * @see #onTimeShiftResume
          * @see #onTimeShiftPause
          * @see #onTimeShiftSeekTo
-         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftSetPlaybackParams
          * @see #onTimeShiftGetCurrentPosition
          */
         public long onTimeShiftGetStartPosition() {
@@ -939,7 +936,7 @@ public abstract class TvInputService extends Service {
          * @see #onTimeShiftResume
          * @see #onTimeShiftPause
          * @see #onTimeShiftSeekTo
-         * @see #onTimeShiftSetPlaybackRate
+         * @see #onTimeShiftSetPlaybackParams
          * @see #onTimeShiftGetStartPosition
          */
         public long onTimeShiftGetCurrentPosition() {
@@ -1273,10 +1270,10 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onTimeShiftSetPlaybackRate}.
+         * Calls {@link #onTimeShiftSetPlaybackParams}.
          */
-        void timeShiftSetPlaybackRate(float rate, int audioMode) {
-            onTimeShiftSetPlaybackRate(rate, audioMode);
+        void timeShiftSetPlaybackParams(PlaybackParams params) {
+            onTimeShiftSetPlaybackParams(params);
         }
 
         /**
