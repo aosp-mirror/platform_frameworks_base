@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Isiklikud rakendused"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Töö"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktid"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"kontaktidele juurdepääsemine ja nende muutmine"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"juurdepääs kontaktidele"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Asukoht"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"asukohale juurdepääsemine"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Teie sotsiaalne teave"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Otsene juurdepääs teie kontaktide teabele ja sotsiaalsetele sidemetele."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"kalendrile juurdepääsemine ja selle muutmine"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"juurdepääs kalendrile"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS-idele juurdepääsemine ja nende muutmine"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS-sõnumite vaatamine ja haldamine"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Kasutaja sõnaraamat"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Kasutaja sõnaraamatus sõnade lugemine ja nende sinna kirjutamine."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Järjehoidjad ja ajalugu"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Otsene juurdepääs järjehoidjatele ja brauseri ajaloole."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"seadme mikrofoni kasutamine"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"heli salvestamine"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kaamera"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"seadme kaamera kasutamine"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"pildistamine ja video salvestamine"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"seadme telefoni kasutamine"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"helistamine ja telefonikõnede haldamine"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Andurid"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"anduritele ja kaasaskantavatele seadmetele juurdepääsemine"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"juurdepääs andmetele andurite ja aksessuaaride kaudu"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Akna sisu toomine"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tutvuge kasutatava akna sisuga."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Puudutusega sirvimise sisselülitamine"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Ahendamine"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Mitte segada"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Puhkeaeg"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Argiõhtu"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Nädalavahetus"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Sündmus"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vaigistas"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Seadmes ilmnes sisemine probleem ja seade võib olla ebastabiilne seni, kuni lähtestate seadme tehase andmetele."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Seadmes ilmnes sisemine probleem. Üksikasjaliku teabe saamiseks võtke ühendust tootjaga."</string>

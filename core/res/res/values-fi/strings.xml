@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Omat sovellukset"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Työ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktit"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"käytä ja muokkaa kontakteja"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"käyttää yhteystietoja"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Sijainti"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"käytä sijaintiasi"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Sosiaaliset tietosi"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Kontaktiesi ja internet-kontaktiesi tietojen käyttöoikeus."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenteri"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"käytä ja muokkaa kalenteria"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"käyttää kalenteria"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Tekstiviestit"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"käytä ja muokkaa tekstiviestejä"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"tarkastella ja hallinnoida tekstiviestejä"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Käyttäjän sanakirja"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Lue tai kirjoita sanoja käyttäjän sanakirjaan."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Kirjanmerkit ja historia"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Kirjanmerkkien ja selaimen historian käyttöoikeus."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"käytä laitteen mikrofonia"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"tallentaa ääntä"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"käytä laitteen kameraa"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ottaa kuvia ja videoita"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Puhelin"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"käytä laitteen puhelinta"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"soittaa ja hallinnoida puheluita"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Anturit"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"käytä antureita ja puettavia laitteita"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"käyttää antureiden ja puettavien laitteiden tietoja"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Nouda ikkunan sisältöä"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tarkista käyttämäsi ikkunan sisältö."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ota kosketuksella tutkiminen käyttöön"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Kutista"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Älä häiritse"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Vapaalla"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Arki-iltaisin"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Viikonloppuna"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Tapahtuma"</string>
     <string name="muted_by" msgid="6147073845094180001">"Mykistänyt <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Laitteellasi on sisäinen ongelma, joka aiheuttaa epävakautta. Voit korjata tilanteen palauttamalla tehdasasetukset."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Laitteesi yhdistäminen ei onnistu sisäisen virheen takia. Saat lisätietoja valmistajalta."</string>

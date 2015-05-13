@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"개인 앱"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"직장"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"주소록"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"내 주소록 액세스 및 수정"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"주소록 액세스"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"위치"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"내 위치 액세스"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"소셜 정보"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"내 연락처 및 소셜 친구의 개인 정보에 직접 액세스합니다."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"내 캘린더 액세스 및 수정"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"캘린더 액세스"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS 액세스 및 수정"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS 메시지 보기 및 관리"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"사용자 사전"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"사용자 사전의 단어를 읽거나 씁니다."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"북마크 및 기록"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"북마크 및 브라우저 기록에 직접 액세스합니다."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"마이크"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"기기 마이크 사용"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"오디오 녹음"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"카메라"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"기기 카메라 사용"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"사진 찍기 및 동영상 녹화"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"기기 전화 기능 사용"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"전화 걸기 및 관리"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"센서"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"센서 및 웨어러블 액세스"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"센서 및 웨어러블 기기의 데이터 액세스"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"터치하여 탐색 사용"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"알림 일시중지"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"다운타임"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"평일 밤"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"주말"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"일정"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>에서 알림음 음소거"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"사용 중인 기기 내부에 문제가 발생했습니다. 자세한 내용은 제조업체에 문의하세요."</string>

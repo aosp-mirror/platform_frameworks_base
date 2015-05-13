@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Жеке қолданбалар"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Жұмыс"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контактілер"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"Контактілеріңізге кіру және өзгерту"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"контактілерге кіру"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Орын"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"орныңызға кіру"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Сіздің әлеуметтік ақпаратыңыз"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Байланыстарыңыз бен әлеуметтік контактілеріңіз туралы ақпаратқа тікелей қол жетімділік."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнтізбе"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"Күнтізбеңізге кіру және өзгерту"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"күнтізбеге кіру"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS кіру және өзгерту"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS хабарларды қарау және басқару"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Пайдаланушы сөздігі"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Пайдаланушы сөздігінде сөздерді оқыңыз не жазыңыз."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Бетбелгілер және Тарих"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Бетбелгілер мен браузерге тікелей қол жетімділік."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"құрылғы микрофонын пайдалану"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"аудио жазу"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"құрылғы камерасын пайдалану"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"суретке түсіріп, бейне жазу"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"құрылғы телефониясын пайдалану"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"қоңырау шалу және телефон қоңырауларын басқару"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Сенсорлар"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"сенсорлы және киілетін құрылғыларға кіру"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"датчиктер мен киілетін құрылғылардан деректерге кіру"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терез мазмұнына қол жеткізу"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Сіз қатынасып отырған терезе мазмұнын тексеру."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Шарлауды Түрту арқылы қосыңыз"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Тасалау"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Мазаламауыңызды сұраймын"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Бос тұру уақыты"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Апта түндері"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Апта соңы"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Оқиға"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> үнін өшірген"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"There\'s an internal problem with your device. Contact your manufacturer for details."</string>

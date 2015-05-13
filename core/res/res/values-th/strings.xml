@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"แอปส่วนตัว"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ที่ทำงาน"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"รายชื่อติดต่อ"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"เข้าถึงและปรับเปลี่ยนรายชื่อติดต่อของคุณ"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"เข้าถึงรายชื่อติดต่อ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ตำแหน่ง"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"เข้าถึงตำแหน่งของคุณ"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ข้อมูลทางสังคมของคุณ"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"เข้าถึงข้อมูลเกี่ยวกับผู้ติดต่อและเครือข่ายสังคมของคุณโดยตรง"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ปฏิทิน"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"เข้าถึงและปรับเปลี่ยนปฏิทินของคุณ"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"เข้าถึงปฏิทิน"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"เข้าถึงและปรับเปลี่ยน SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"ดูและจัดการข้อความ SMS"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"พจนานุกรมผู้ใช้"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"อ่านหรือเขียนคำในพจนานุกรมผู้ใช้"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"บุ๊กมาร์กและประวัติ"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"เข้าถึงบุ๊กมาร์กและประวัติของเบราว์เซอร์โดยตรง"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ไมโครโฟน"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"ใช้ไมโครโฟนของอุปกรณ์"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"บันทึกเสียง"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"กล้องถ่ายรูป"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"ใช้กล้องของอุปกรณ์"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ถ่ายภาพและบันทึกวิดีโอ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"โทรศัพท์"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"ใช้โทรศัพท์ของอุปกรณ์"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"โทรและจัดการการโทร"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"เซ็นเซอร์"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"เข้าถึงเซ็นเซอร์และอุปกรณ์ที่สวมใส่ได้"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"เข้าถึงข้อมูลจากเซ็นเซอร์และอุปกรณ์ที่สวมใส่ได้"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"เรียกข้อมูลเนื้อหาของหน้าต่าง"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ตรวจสอบเนื้อหาของหน้าต่างที่คุณกำลังโต้ตอบอยู่"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"เปิด \"แตะเพื่อสำรวจ\""</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ยุบ"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ห้ามรบกวน"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ช่วงเวลาเครื่องไม่ทำงาน"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"คืนวันธรรมดา"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"สุดสัปดาห์"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"กิจกรรม"</string>
     <string name="muted_by" msgid="6147073845094180001">"ปิดเสียงโดย <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง อุปกรณ์อาจทำงานไม่เสถียรจนกว่าคุณจะรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง โปรดติดต่อผู้ผลิตเพื่อขอรายละเอียดเพิ่มเติม"</string>

@@ -222,27 +222,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Asmeninės programos"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Darbo"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktai"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"pasiekti ir keisti kontaktus"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"pasiekti kontaktus"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vietovė"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"pasiekti vietovę"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Socialinė informacija"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Tiesioginė prieiga prie kontaktų ir socialinių ryšių informacijos."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendorius"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"pasiekti ir keisti kalendorių"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pasiekti kalendorių"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"pasiekti ir keisti SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"žiūrėti ir tvarkyti SMS pranešimus"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Naudotojo žodynas"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Skaityti arba rašyti žodžius naudotojo žodyne."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Žymės ir istorija"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Tiesioginė prieiga prie žymių ir naršyklės istorijos."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonas"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"naudoti įrenginio mikrofoną"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"įrašyti garso įrašą"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparatas"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"naudoti įrenginio fotoaparatą"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografuoti ir filmuoti"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonas"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"naudoti įrenginio telefonijos funkcijas"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"skambinti ir tvarkyti telefonų skambučius"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Jutikliai"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"pasiekti jutiklius ir nešiojamuosius"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"pasiekti duomenis iš jutiklių ir nešiojamųjų įrenginių"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Gauti lango turinį"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tikrinti lango, su kuriuo sąveikaujate, turinį."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Įjungti „Naršyti paliečiant“"</string>
@@ -1510,12 +1510,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sutraukti"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Netrukdyti"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Prastova"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Savaitgalio vakarą"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Savaitgalį"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Įvykis"</string>
     <string name="muted_by" msgid="6147073845094180001">"Nutildė <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Iškilo vidinė su jūsų įrenginiu susijusi problema, todėl įrenginys gali veikti nestabiliai, kol neatkursite gamyklinių duomenų."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Iškilo vidinė su jūsų įrenginiu susijusi problema. Jei reikia išsamios informacijos, susisiekite su gamintoju."</string>
