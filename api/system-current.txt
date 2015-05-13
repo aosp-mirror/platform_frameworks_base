@@ -9633,6 +9633,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
     field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
     field public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
+    field public static final int FLAG_PERMISSION_SYSTEM_FIXED = 16; // 0x10
     field public static final int FLAG_PERMISSION_USER_FIXED = 2; // 0x2
     field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
     field public static final int GET_ACTIVITIES = 1; // 0x1
@@ -9687,7 +9688,7 @@ package android.content.pm {
     field public static final int INSTALL_PARSE_FAILED_NO_CERTIFICATES = -103; // 0xffffff99
     field public static final int INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION = -102; // 0xffffff9a
     field public static final int INSTALL_SUCCEEDED = 1; // 0x1
-    field public static final int MASK_PERMISSION_FLAGS = 15; // 0xf
+    field public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ALL = 131072; // 0x20000
     field public static final int MATCH_DEFAULT_ONLY = 65536; // 0x10000
     field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 3600000L; // 0x36ee80L
