@@ -76,5 +76,5 @@
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> материалыг түр санах ой руу хуулсан.</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> материалыг түр санах ой руу хуулсан.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Сонгосон файлыг энэ байршил дээр paste хийж болохгүй байна."</string>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Сонгосон файлыг энэ байршилд тавих боломжгүй байна."</string>
 </resources>

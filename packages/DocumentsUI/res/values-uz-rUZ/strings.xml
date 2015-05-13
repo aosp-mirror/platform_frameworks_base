@@ -73,8 +73,8 @@
     <string name="retry" msgid="7564024179122207376">"Qayta urinish"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Ushbu fayllardan nusxa olinmadi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta fayldan vaqtinchalik xotiraga nusxa olindi</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta fayldan vaqtinchalik xotiraga nusxa olindi</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta fayldan vaqtinchalik xotiraga nusxa olindi.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta fayldan vaqtinchalik xotiraga nusxa olindi.</item>
     </plurals>
-    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Tanlangan fayllarni ushbu joylashuvga o‘tkazib bo‘lmadi."</string>
+    <string name="clipboard_files_cannot_paste" msgid="4696369437408683222">"Tanlangan fayllarni bu yerga o‘tkazib bo‘lmadi."</string>
 </resources>
