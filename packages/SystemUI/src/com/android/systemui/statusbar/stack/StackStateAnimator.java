@@ -163,7 +163,7 @@ public class StackStateAnimator {
             // This is a heads up animation
             return false;
         }
-        if (mHostLayout.isPinnedHeadsUp(child)) {
+        if (NotificationStackScrollLayout.isPinnedHeadsUp(child)) {
             // This is another headsUp which might move. Let's animate!
             return false;
         }
