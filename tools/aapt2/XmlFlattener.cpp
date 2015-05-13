@@ -300,6 +300,7 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                 elem->attributeCount = sortedAttributes.size();
 
                 // Flatten the sorted attributes.
+                uint16_t attributeIndex = 1;
                 for (auto entry : sortedAttributes) {
                     android::ResXMLTree_attribute* attr =
                             out.nextBlock<android::ResXMLTree_attribute>();
@@ -310,44 +311,64 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                         attr->ns.index = -1;
                     }
 
-                    stringRefs.emplace_back(entry.nameRef, &attr->name);
-                    attr->rawValue.index = -1;
-
                     StringPool::Ref rawValueRef = pool.makeRef(entry.xmlAttr->value, lowPriority);
 
-                    if (entry.attr) {
-                        std::unique_ptr<Item> value = ResourceParser::parseItemForAttribute(
-                                entry.xmlAttr->value, *entry.attr);
-                        if (value) {
-                            AttributeValueFlattener flattener(
-                                    mResolver,
-                                    &logger,
-                                    &attr->typedValue,
-                                    parser,
-                                    &error,
-                                    rawValueRef,
-                                    &options.defaultPackage,
-                                    &stringRefs);
-                            value->accept(flattener, {});
-                        } else if (!(entry.attr->typeMask & android::ResTable_map::TYPE_STRING)) {
-                            logger.error(parser->getLineNumber())
-                                    << "'"
-                                    << *rawValueRef
-                                    << "' is not compatible with attribute "
-                                    << *entry.attr
-                                    << "."
-                                    << std::endl;
-                            error = true;
-                        } else {
-                            attr->typedValue.dataType = android::Res_value::TYPE_STRING;
-                            stringRefs.emplace_back(rawValueRef, &attr->rawValue);
-                            stringRefs.emplace_back(rawValueRef,
-                                    reinterpret_cast<android::ResStringPool_ref*>(
-                                            &attr->typedValue.data));
+                    stringRefs.emplace_back(entry.nameRef, &attr->name);
+
+                    if (options.keepRawValues) {
+                        stringRefs.emplace_back(rawValueRef, &attr->rawValue);
+                    } else {
+                        attr->rawValue.index = -1;
+                    }
+
+                    // Assign the indices for specific attributes.
+                    if (entry.xmlAttr->namespaceUri == kSchemaAndroid &&
+                            entry.xmlAttr->name == u"id") {
+                        elem->idIndex = attributeIndex;
+                    } else if (entry.xmlAttr->namespaceUri.empty()) {
+                        if (entry.xmlAttr->name == u"class") {
+                            elem->classIndex = attributeIndex;
+                        } else if (entry.xmlAttr->name == u"style") {
+                            elem->styleIndex = attributeIndex;
                         }
+                    }
+
+                    std::unique_ptr<Item> value;
+                    if (entry.attr) {
+                        value = ResourceParser::parseItemForAttribute(entry.xmlAttr->value,
+                                                                      *entry.attr);
+                    } else {
+                        bool create = false;
+                        value = ResourceParser::tryParseReference(entry.xmlAttr->value, &create);
+                    }
+
+                    if (mResolver && value) {
+                        AttributeValueFlattener flattener(
+                                mResolver,
+                                &logger,
+                                &attr->typedValue,
+                                parser,
+                                &error,
+                                rawValueRef,
+                                &options.defaultPackage,
+                                &stringRefs);
+                        value->accept(flattener, {});
+                    } else if (!value && entry.attr &&
+                            !(entry.attr->typeMask & android::ResTable_map::TYPE_STRING)) {
+                        logger.error(parser->getLineNumber())
+                                << "'"
+                                << *rawValueRef
+                                << "' is not compatible with attribute "
+                                << *entry.attr
+                                << "."
+                                << std::endl;
+                        error = true;
                     } else {
                         attr->typedValue.dataType = android::Res_value::TYPE_STRING;
-                        stringRefs.emplace_back(rawValueRef, &attr->rawValue);
+                        if (!options.keepRawValues) {
+                            // Don't set the string twice.
+                            stringRefs.emplace_back(rawValueRef, &attr->rawValue);
+                        }
                         stringRefs.emplace_back(rawValueRef,
                                 reinterpret_cast<android::ResStringPool_ref*>(
                                         &attr->typedValue.data));
@@ -440,6 +461,9 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
     header->header.type = android::RES_XML_TYPE;
     header->header.headerSize = sizeof(*header);
 
+    // Flatten the StringPool.
+    StringPool::flattenUtf16(outBuffer, pool);
+
     // Write the array of resource IDs, indexed by StringPool order.
     const size_t beforeResIdMapIndex = outBuffer->size();
     android::ResChunk_header* resIdMapChunk = outBuffer->nextBlock<android::ResChunk_header>();
@@ -458,10 +482,7 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
     }
     resIdMapChunk->size = outBuffer->size() - beforeResIdMapIndex;
 
-    // Flatten the StringPool.
-    StringPool::flattenUtf16(outBuffer, pool);
-
-    // Move the temporary BigBuffer into outBuffer->
+    // Move the temporary BigBuffer into outBuffer.
     outBuffer->appendBuffer(std::move(out));
 
     header->header.size = outBuffer->size() - beforeXmlTreeIndex;

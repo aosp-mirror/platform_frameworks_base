@@ -50,13 +50,24 @@ namespace aapt {
  */
 class Linker : ValueVisitor {
 public:
+    struct Options {
+        /**
+         * Assign resource Ids to references when linking.
+         * When building a static library, set this to false.
+         */
+        bool linkResourceIds = true;
+    };
+
     /**
      * Create a Linker for the given resource table with the sources available in
      * IResolver. IResolver should contain the ResourceTable as a source too.
      */
-    Linker(std::shared_ptr<ResourceTable> table, std::shared_ptr<IResolver> resolver);
+    Linker(const std::shared_ptr<ResourceTable>& table,
+           const std::shared_ptr<IResolver>& resolver, const Options& options);
 
     Linker(const Linker&) = delete;
+
+    virtual ~Linker() = default;
 
     /**
      * Entry point to the linker. Assigns resource IDs, follows references,
@@ -72,6 +83,12 @@ public:
      */
     using ResourceNameToSourceMap = std::map<ResourceName, std::vector<SourceLine>>;
     const ResourceNameToSourceMap& getUnresolvedReferences() const;
+
+protected:
+    virtual void doResolveReference(Reference& reference, const SourceLine& source);
+    virtual const Attribute* doResolveAttribute(Reference& attribute, const SourceLine& source);
+
+    std::shared_ptr<IResolver> mResolver;
 
 private:
     struct Args : public ValueVisitorArgs {
@@ -92,33 +109,13 @@ private:
     void visit(Plural& plural, ValueVisitorArgs& args) override;
 
     void processAttributeValue(const ResourceNameRef& name, const SourceLine& source,
-            const Attribute& attr, std::unique_ptr<Item>& value);
+                               const Attribute& attr, std::unique_ptr<Item>& value);
 
     void addUnresolvedSymbol(const ResourceNameRef& name, const SourceLine& source);
 
-    /**
-     * Node of the resource table graph.
-     */
-    struct Node {
-        // We use ResourceNameRef and StringPiece, which are safe so long as the ResourceTable
-        // that defines the data isn't modified.
-        ResourceNameRef name;
-        StringPiece source;
-        size_t line;
-
-        // The reference object that points to name.
-        Reference* reference;
-
-        bool operator<(const Node& rhs) const;
-        bool operator==(const Node& rhs) const;
-        bool operator!=(const Node& rhs) const;
-    };
-    friend ::std::ostream& operator<<(::std::ostream&, const Node&);
-
     std::shared_ptr<ResourceTable> mTable;
-    std::shared_ptr<IResolver> mResolver;
-    std::map<ResourceNameRef, std::vector<Node>> mGraph;
     std::map<ResourceName, std::vector<SourceLine>> mUnresolvedSymbols;
+    Options mOptions;
     bool mError;
 };
 

@@ -31,13 +31,15 @@ namespace aapt {
 
 ResourceTableResolver::ResourceTableResolver(
         std::shared_ptr<const ResourceTable> table,
-        std::shared_ptr<const android::AssetManager> sources) :
+        const std::vector<std::shared_ptr<const android::AssetManager>>& sources) :
         mTable(table), mSources(sources) {
-    const android::ResTable& resTable = mSources->getResources(false);
-    const size_t packageCount = resTable.getBasePackageCount();
-    for (size_t i = 0; i < packageCount; i++) {
-        std::u16string packageName = resTable.getBasePackageName(i).string();
-        mIncludedPackages.insert(std::move(packageName));
+    for (const auto& assetManager : mSources) {
+        const android::ResTable& resTable = assetManager->getResources(false);
+        const size_t packageCount = resTable.getBasePackageCount();
+        for (size_t i = 0; i < packageCount; i++) {
+            std::u16string packageName = resTable.getBasePackageName(i).string();
+            mIncludedPackages.insert(std::move(packageName));
+        }
     }
 }
 
@@ -99,20 +101,23 @@ Maybe<IResolver::Entry> ResourceTableResolver::findAttribute(const ResourceName&
 }
 
 Maybe<ResourceName> ResourceTableResolver::findName(ResourceId resId) {
-    const android::ResTable& table = mSources->getResources(false);
+    for (const auto& assetManager : mSources) {
+        const android::ResTable& table = assetManager->getResources(false);
 
-    android::ResTable::resource_name resourceName;
-    if (!table.getResourceName(resId.id, false, &resourceName)) {
-        return {};
+        android::ResTable::resource_name resourceName;
+        if (!table.getResourceName(resId.id, false, &resourceName)) {
+            continue;
+        }
+
+        const ResourceType* type = parseResourceType(StringPiece16(resourceName.type,
+                                                                   resourceName.typeLen));
+        assert(type);
+        return ResourceName{
+                { resourceName.package, resourceName.packageLen },
+                *type,
+                { resourceName.name, resourceName.nameLen } };
     }
-
-    const ResourceType* type = parseResourceType(StringPiece16(resourceName.type,
-                                                               resourceName.typeLen));
-    assert(type);
-    return ResourceName{
-            { resourceName.package, resourceName.packageLen },
-            *type,
-            { resourceName.name, resourceName.nameLen } };
+    return {};
 }
 
 /**
@@ -122,73 +127,76 @@ Maybe<ResourceName> ResourceTableResolver::findName(ResourceId resId) {
  */
 const ResourceTableResolver::CacheEntry* ResourceTableResolver::buildCacheEntry(
         const ResourceName& name) {
-    const android::ResTable& table = mSources->getResources(false);
+    for (const auto& assetManager : mSources) {
+        const android::ResTable& table = assetManager->getResources(false);
 
-    const StringPiece16 type16 = toString(name.type);
-    ResourceId resId {
-        table.identifierForName(
-                name.entry.data(), name.entry.size(),
-                type16.data(), type16.size(),
-                name.package.data(), name.package.size())
-    };
+        const StringPiece16 type16 = toString(name.type);
+        ResourceId resId {
+            table.identifierForName(
+                    name.entry.data(), name.entry.size(),
+                    type16.data(), type16.size(),
+                    name.package.data(), name.package.size())
+        };
 
-    if (!resId.isValid()) {
-        return nullptr;
-    }
+        if (!resId.isValid()) {
+            continue;
+        }
 
-    CacheEntry& entry = mCache[name];
-    entry.id = resId;
+        CacheEntry& entry = mCache[name];
+        entry.id = resId;
 
-    //
-    // Now check to see if this resource is an Attribute.
-    //
+        //
+        // Now check to see if this resource is an Attribute.
+        //
 
-    const android::ResTable::bag_entry* bagBegin;
-    ssize_t bags = table.lockBag(resId.id, &bagBegin);
-    if (bags < 1) {
+        const android::ResTable::bag_entry* bagBegin;
+        ssize_t bags = table.lockBag(resId.id, &bagBegin);
+        if (bags < 1) {
+            table.unlockBag(bagBegin);
+            return &entry;
+        }
+
+        // Look for the ATTR_TYPE key in the bag and check the types it supports.
+        uint32_t attrTypeMask = 0;
+        for (ssize_t i = 0; i < bags; i++) {
+            if (bagBegin[i].map.name.ident == android::ResTable_map::ATTR_TYPE) {
+                attrTypeMask = bagBegin[i].map.value.data;
+            }
+        }
+
+        entry.attr = util::make_unique<Attribute>(false);
+
+        if (attrTypeMask & android::ResTable_map::TYPE_ENUM ||
+                attrTypeMask & android::ResTable_map::TYPE_FLAGS) {
+            for (ssize_t i = 0; i < bags; i++) {
+                if (Res_INTERNALID(bagBegin[i].map.name.ident)) {
+                    // Internal IDs are special keys, which are not enum/flag symbols, so skip.
+                    continue;
+                }
+
+                android::ResTable::resource_name symbolName;
+                bool result = table.getResourceName(bagBegin[i].map.name.ident, false,
+                        &symbolName);
+                assert(result);
+                const ResourceType* type = parseResourceType(
+                        StringPiece16(symbolName.type, symbolName.typeLen));
+                assert(type);
+
+                entry.attr->symbols.push_back(Attribute::Symbol{
+                        Reference(ResourceNameRef(
+                                    StringPiece16(symbolName.package, symbolName.packageLen),
+                                    *type,
+                                    StringPiece16(symbolName.name, symbolName.nameLen))),
+                                bagBegin[i].map.value.data
+                });
+            }
+        }
+
+        entry.attr->typeMask |= attrTypeMask;
         table.unlockBag(bagBegin);
         return &entry;
     }
-
-    // Look for the ATTR_TYPE key in the bag and check the types it supports.
-    uint32_t attrTypeMask = 0;
-    for (ssize_t i = 0; i < bags; i++) {
-        if (bagBegin[i].map.name.ident == android::ResTable_map::ATTR_TYPE) {
-            attrTypeMask = bagBegin[i].map.value.data;
-        }
-    }
-
-    entry.attr = util::make_unique<Attribute>(false);
-
-    if (attrTypeMask & android::ResTable_map::TYPE_ENUM ||
-            attrTypeMask & android::ResTable_map::TYPE_FLAGS) {
-        for (ssize_t i = 0; i < bags; i++) {
-            if (Res_INTERNALID(bagBegin[i].map.name.ident)) {
-                // Internal IDs are special keys, which are not enum/flag symbols, so skip.
-                continue;
-            }
-
-            android::ResTable::resource_name symbolName;
-            bool result = table.getResourceName(bagBegin[i].map.name.ident, false,
-                    &symbolName);
-            assert(result);
-            const ResourceType* type = parseResourceType(
-                    StringPiece16(symbolName.type, symbolName.typeLen));
-            assert(type);
-
-            entry.attr->symbols.push_back(Attribute::Symbol{
-                    Reference(ResourceNameRef(
-                                StringPiece16(symbolName.package, symbolName.packageLen),
-                                *type,
-                                StringPiece16(symbolName.name, symbolName.nameLen))),
-                            bagBegin[i].map.value.data
-            });
-        }
-    }
-
-    entry.attr->typeMask |= attrTypeMask;
-    table.unlockBag(bagBegin);
-    return &entry;
+    return nullptr;
 }
 
 } // namespace aapt
