@@ -1835,8 +1835,9 @@ public class WebView extends AbsoluteLayout
     /**
      * Creates a message channel to communicate with JS and returns the message
      * ports that represent the endpoints of this message channel. The HTML5 message
-     * channel functionality is described here:
-     * https://html.spec.whatwg.org/multipage/comms.html#messagechannel
+     * channel functionality is described
+     * <a href="https://html.spec.whatwg.org/multipage/comms.html#messagechannel">here
+     * </a>
      *
      * The returned message channels are entangled and already in started state.
      *
@@ -1850,11 +1851,14 @@ public class WebView extends AbsoluteLayout
     /**
      * Post a message to main frame. The embedded application can restrict the
      * messages to a certain target origin. See
-     *    https://html.spec.whatwg.org/multipage/comms.html#posting-messages
-     * for how target origin can be used.
+     * <a href="https://html.spec.whatwg.org/multipage/comms.html#posting-messages">
+     * HTML5 spec</a> for how target origin can be used.
      *
      * @param message the WebMessage
-     * @param targetOrigin the target origin.
+     * @param targetOrigin the target origin. This is the origin of the page
+     *          that is intended to receive the message. For best security
+     *          practices, the user should not specify a wildcard (*) when
+     *          specifying the origin.
      */
     public void postMessageToMainFrame(WebMessage message, Uri targetOrigin) {
         checkThread();

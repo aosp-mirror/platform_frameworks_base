@@ -38794,7 +38794,6 @@ package android.webkit {
   }
 
   public abstract class WebMessagePort {
-    ctor public WebMessagePort();
     method public abstract void close();
     method public abstract void postMessage(android.webkit.WebMessage);
     method public abstract void setWebMessageCallback(android.webkit.WebMessagePort.WebMessageCallback);
