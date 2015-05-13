@@ -629,7 +629,7 @@ public class AlarmManager
         }
 
         /**
-         * Returns an intent intent that can be used to show or edit details of the alarm clock in
+         * Returns an intent that can be used to show or edit details of the alarm clock in
          * the application that scheduled it.
          *
          * <p class="note">Beware that any application can retrieve and send this intent, 
