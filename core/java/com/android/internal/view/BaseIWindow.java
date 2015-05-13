@@ -100,7 +100,11 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void doneAnimating() {
+    public void onAnimationStarted(int remainingFrameCount) {
+    }
+
+    @Override
+    public void onAnimationStopped() {
     }
 
     @Override
