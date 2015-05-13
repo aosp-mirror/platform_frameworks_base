@@ -102,8 +102,8 @@ public:
             canvas->translate(bounds.fLeft, bounds.fTop);
             canvas->scale(scale, scale);
 
-            bounds.fRight = SkScalarDiv(bounds.fRight-bounds.fLeft, scale);
-            bounds.fBottom = SkScalarDiv(bounds.fBottom-bounds.fTop, scale);
+            bounds.fRight = (bounds.fRight-bounds.fLeft) / scale;
+            bounds.fBottom = (bounds.fBottom-bounds.fTop) / scale;
             bounds.fLeft = bounds.fTop = 0;
 
             ALOGV("Drawing scaled 9-patch: (%g,%g)-(%g,%g) srcDensity=%d destDensity=%d",
