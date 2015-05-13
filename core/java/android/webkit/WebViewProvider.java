@@ -32,7 +32,6 @@ import android.print.PrintDocumentAdapter;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewStructure;
 import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -299,7 +298,7 @@ public interface WebViewProvider {
     interface ViewDelegate {
         public boolean shouldDelayChildPressedState();
 
-        public void onProvideVirtualAssistStructure(ViewStructure structure);
+        public void onProvideVirtualAssistStructure(android.view.ViewAssistStructure structure);
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
 
