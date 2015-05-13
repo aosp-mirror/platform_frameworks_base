@@ -1481,23 +1481,22 @@ public class MediaPlayer implements SubtitleController.Listener
     public native void seekTo(int msec) throws IllegalStateException;
 
     /**
-     * Get current playback position.
+     * Get current playback position as a {@link MediaTimestamp}.
      * <p>
      * The MediaTimestamp represents how the media time correlates to the system time in
-     * a linear fashion. It contains the media time and system timestamp of an anchor frame
-     * ({@link MediaTimestamp#mediaTimeUs} and {@link MediaTimestamp#nanoTime})
-     * and the speed of the media clock ({@link MediaTimestamp#clockRate}).
+     * a linear fashion using an anchor and a clock rate. During regular playback, the media
+     * time moves fairly constantly (though the anchor frame may be rebased to a current
+     * system time, the linear correlation stays steady). Therefore, this method does not
+     * need to be called often.
      * <p>
-     * During regular playback, the media time moves fairly constantly (though the
-     * anchor frame may be rebased to a current system time, the linear correlation stays
-     * steady). Therefore, this method does not need to be called often.
-     * <p>
-     * To help users to get current playback position, this method always returns the timestamp of
-     * just-rendered frame, i.e., {@link System#nanoTime} and its corresponding media time. They
-     * can be used as current playback position.
+     * To help users get current playback position, this method always anchors the timestamp
+     * to the current {@link System#nanoTime system time}, so
+     * {@link MediaTimestamp#getAnchorMediaTimeUs} can be used as current playback position.
      *
      * @return a MediaTimestamp object if a timestamp is available, or {@code null} if no timestamp
      *         is available, e.g. because the media player has not been initialized.
+     *
+     * @see MediaTimestamp
      */
     @Nullable
     public MediaTimestamp getTimestamp()
