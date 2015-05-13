@@ -216,9 +216,9 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
 
         mWakeLock.acquire();
 
-        Log.i(TAG, "MSG_NEW_DEVICE_STATE ");
+        Log.i(TAG, "MSG_NEW_DEVICE_STATE");
         Message msg = mHandler.obtainMessage(MSG_NEW_DEVICE_STATE, headsetState,
-                mHeadsetState, newName);
+                mHeadsetState, "");
         mHandler.sendMessage(msg);
 
         mHeadsetState = headsetState;
