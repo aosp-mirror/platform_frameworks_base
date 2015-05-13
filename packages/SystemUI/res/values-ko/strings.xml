@@ -83,13 +83,11 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"검색"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"카메라"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"전화"</string>
-    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
-    <skip />
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"음성 지원"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"잠금 해제"</string>
     <string name="unlock_label" msgid="8779712358041029439">"잠금 해제"</string>
     <string name="phone_label" msgid="2320074140205331708">"휴대전화 열기"</string>
-    <!-- no translation found for voice_assist_label (3956854378310019854) -->
-    <skip />
+    <string name="voice_assist_label" msgid="3956854378310019854">"음성 지원 열기"</string>
     <string name="camera_label" msgid="7261107956054836961">"카메라 열기"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"새 작업 레이아웃 선택"</string>
     <string name="cancel" msgid="6442560571259935130">"취소"</string>
@@ -316,12 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"다시 터치하여 열기"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"위로 스와이프하여 잠금 해제"</string>
-    <!-- no translation found for phone_hint (4872890986869209950) -->
-    <skip />
-    <!-- no translation found for voice_hint (8939888732119726665) -->
-    <skip />
-    <!-- no translation found for camera_hint (7939688436797157483) -->
-    <skip />
+    <string name="phone_hint" msgid="4872890986869209950">"전화 기능을 사용하려면 아이콘에서 스와이프하세요."</string>
+    <string name="voice_hint" msgid="8939888732119726665">"음성 지원을 사용하려면 아이콘에서 스와이프하세요."</string>
+    <string name="camera_hint" msgid="7939688436797157483">"카메라를 사용하려면 아이콘에서 스와이프하세요."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"모두 차단"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"중요 알림만"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"알람만 수신"</string>
@@ -385,10 +380,8 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"모두 숨기기"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"지금 종료"</string>
-    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
-    <skip />
-    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
-    <skip />
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"펼치기"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"접기"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"화면 고정됨"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"고정 해제하기 전까지 계속 표시됩니다. 고정 해제하려면 뒤로와 최근 사용을 동시에 길게 터치합니다."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"고정 해제하기 전까지 계속 표시됩니다. 고정 해제하려면 최근 사용을 길게 터치합니다."</string>
@@ -403,4 +396,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"현재 직장 프로필에 있음"</string>
+    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
+    <skip />
 </resources>

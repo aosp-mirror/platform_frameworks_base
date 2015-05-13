@@ -84,13 +84,11 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Căutați"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Cameră foto"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
-    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
-    <skip />
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Asistent vocal"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Deblocați"</string>
     <string name="unlock_label" msgid="8779712358041029439">"deblocați"</string>
     <string name="phone_label" msgid="2320074140205331708">"deschideți telefonul"</string>
-    <!-- no translation found for voice_assist_label (3956854378310019854) -->
-    <skip />
+    <string name="voice_assist_label" msgid="3956854378310019854">"deschideți asistentul vocal"</string>
     <string name="camera_label" msgid="7261107956054836961">"deschideți camera foto"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Selectați noul aspect pentru activitate"</string>
     <string name="cancel" msgid="6442560571259935130">"Anulați"</string>
@@ -317,12 +315,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificările mai puțin urgente mai jos"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Atingeți din nou pentru a deschide"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Glisați în sus pentru a debloca"</string>
-    <!-- no translation found for phone_hint (4872890986869209950) -->
-    <skip />
-    <!-- no translation found for voice_hint (8939888732119726665) -->
-    <skip />
-    <!-- no translation found for camera_hint (7939688436797157483) -->
-    <skip />
+    <string name="phone_hint" msgid="4872890986869209950">"Glisați dinspre pictogramă pentru telefon"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Glisați dinspre pictogramă pentru asistentul vocal"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Glisați dinspre pictogramă pentru camera foto"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Niciun sunet"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Numai cu prioritate"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Numai alarme"</string>
@@ -386,10 +381,8 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Ascundeți toate"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Opriți acum"</string>
-    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
-    <skip />
-    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
-    <skip />
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Extindeți"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Restrângeți"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ecranul este fixat"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"Ecranul este afișat până anulați fixarea. Apăsați lung pe Înapoi și pe Vizualizare generală simultan pentru a anula fixarea."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Ecranul este afișat până anulați fixarea. Apăsați lung pe Vizualizare generală pentru a anula fixarea."</string>
@@ -404,4 +397,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> afișează caseta de dialog pentru volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Atingeți pentru a reveni la setarea inițială."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Vă aflați în profilul de serviciu"</string>
+    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
+    <skip />
 </resources>

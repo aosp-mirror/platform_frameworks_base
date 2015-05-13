@@ -148,7 +148,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth bog‘landi."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth modem"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Parvoz rejimi"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobil tarmoqni o‘zgartirish"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
@@ -288,11 +288,11 @@
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Qolayotgan ma\'lumot"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limitdan oshgan"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> foydalanilgan"</string>
-    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> chegarasi"</string>
+    <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Cheklov: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Ogohlantirish: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Siz yaqinda ishlatgan ilova ekranlari bu yerda ko‘rinadi"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Ilova haqida ma’lumot"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ekranni qadab qo‘yish"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"o‘zgarmas ekran"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"qidirish"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"“<xliff:g id="APP">%s</xliff:g>” ilovasini ishga tushirib bo‘lmadi."</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Barcha ilovalarni olib tashlash"</string>
@@ -396,4 +396,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ovoz balandligini boshqaradi"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Aslini tiklash uchun bosing."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Siz Android for Work profiliga kirgansiz"</string>
+    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
+    <skip />
 </resources>
