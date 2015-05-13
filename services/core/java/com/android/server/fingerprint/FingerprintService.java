@@ -17,13 +17,16 @@
 package com.android.server.fingerprint;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
+import android.app.IUserSwitchObserver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.RemoteException;
@@ -63,6 +66,7 @@ public class FingerprintService extends SystemService {
     private final AppOpsManager mAppOps;
 
     private static final int MSG_NOTIFY = 10;
+    private static final int MSG_USER_SWITCHING = 11;
 
     private static final int ENROLLMENT_TIMEOUT_MS = 60 * 1000; // 1 minute
 
@@ -83,6 +87,10 @@ public class FingerprintService extends SystemService {
                 case MSG_NOTIFY:
                     FpHalMsg m = (FpHalMsg) msg.obj;
                     handleNotify(m.type, m.arg1, m.arg2, m.arg3);
+                    break;
+
+                case MSG_USER_SWITCHING:
+                    handleUserSwitching(msg.arg1);
                     break;
 
                 default:
@@ -144,7 +152,7 @@ public class FingerprintService extends SystemService {
 
     void handleNotify(int type, int arg1, int arg2, int arg3) {
         Slog.v(TAG, "handleNotify(type=" + type + ", arg1=" + arg1 + ", arg2=" + arg2 + ")"
-                    + ", mAuthClients = " + mAuthClient + ", mEnrollClient = " + mEnrollClient);
+                + ", mAuthClients = " + mAuthClient + ", mEnrollClient = " + mEnrollClient);
         if (mEnrollClient != null) {
             final IBinder token = mEnrollClient.token;
             if (dispatchNotify(mEnrollClient, type, arg1, arg2, arg3)) {
@@ -164,6 +172,10 @@ public class FingerprintService extends SystemService {
                 removeClient(mRemoveClient);
             }
         }
+    }
+
+    void handleUserSwitching(int userId) {
+        updateActiveGroup(userId);
     }
 
     /*
@@ -633,11 +645,37 @@ public class FingerprintService extends SystemService {
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
         mHalDeviceId = nativeOpenHal();
         if (mHalDeviceId != 0) {
-            int userId = ActivityManager.getCurrentUser();
-            File path = Environment.getUserSystemDirectory(userId);
-            nativeSetActiveGroup(0, path.getAbsolutePath().getBytes());
+            updateActiveGroup(ActivityManager.getCurrentUser());
         }
         if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
+        listenForUserSwitches();
     }
 
+    private void updateActiveGroup(int userId) {
+        File path = Environment.getUserSystemDirectory(userId);
+        nativeSetActiveGroup(userId, path.getAbsolutePath().getBytes());
+    }
+
+    private void listenForUserSwitches() {
+        try {
+            ActivityManagerNative.getDefault().registerUserSwitchObserver(
+                    new IUserSwitchObserver.Stub() {
+                        @Override
+                        public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                            mHandler.obtainMessage(MSG_USER_SWITCHING, newUserId, 0 /* unused */)
+                                    .sendToTarget();
+                        }
+                        @Override
+                        public void onUserSwitchComplete(int newUserId) throws RemoteException {
+                            // Ignore.
+                        }
+                        @Override
+                        public void onForegroundProfileSwitch(int newProfileId) {
+                            // Ignore.
+                        }
+                    });
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to listen for user switching event" ,e);
+        }
+    }
 }
