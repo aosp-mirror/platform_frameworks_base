@@ -17,6 +17,7 @@
 package android.security;
 
 import android.security.keymaster.KeymasterDefs;
+import android.security.keystore.UserNotAuthenticatedException;
 
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;

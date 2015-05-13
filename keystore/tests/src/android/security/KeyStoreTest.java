@@ -21,7 +21,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.ServiceManager;
-import android.security.KeyStore;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
