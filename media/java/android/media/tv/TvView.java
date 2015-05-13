@@ -24,9 +24,11 @@ import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
+import android.media.tv.TvView.TimeShiftPositionCallback;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -468,19 +470,13 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets playback rate and audio mode.
+     * Sets playback rate using {@link android.media#PlaybackParams}.
      *
-     * @param rate The ratio between desired playback rate and normal one.
-     * @param audioMode Audio playback mode. Must be one of the supported audio modes:
-     * <ul>
-     * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_DEFAULT}
-     * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_STRETCH}
-     * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
-     * </ul>
+     * @param params The playback params.
      */
-    public void timeShiftSetPlaybackRate(float rate, int audioMode) {
+    public void timeShiftSetPlaybackParams(@NonNull PlaybackParams params) {
         if (mSession != null) {
-            mSession.timeShiftSetPlaybackRate(rate, audioMode);
+            mSession.timeShiftSetPlaybackRate(params.getSpeed(), params.getAudioFallbackMode());
         }
     }
 
@@ -820,6 +816,9 @@ public class TvView extends ViewGroup {
          * limitation on storage space). The application should not allow the user to seek to a
          * position earlier than the start position.
          *
+         * <p>Note that {@code timeMs} is not relative time in the program but wall-clock time,
+         * which is intended to avoid calling this method unnecessarily around program boundaries.
+         *
          * @param inputId The ID of the TV input bound to this view.
          * @param timeMs The start playback position of the time shifted program, in milliseconds
          *            since the epoch.
@@ -829,6 +828,9 @@ public class TvView extends ViewGroup {
 
         /**
          * This is called when the current playback position is changed.
+         *
+         * <p>Note that {@code timeMs} is not relative time in the program but wall-clock time,
+         * which is intended to avoid calling this method unnecessarily around program boundaries.
          *
          * @param inputId The ID of the TV input bound to this view.
          * @param timeMs The current playback position of the time shifted program, in milliseconds
