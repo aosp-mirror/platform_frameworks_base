@@ -859,7 +859,7 @@
     <permission android:name="android.permission.INTERNET"
         android:description="@string/permdesc_createNetworkSockets"
         android:label="@string/permlab_createNetworkSockets"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- Allows applications to access information about networks -->
     <permission android:name="android.permission.ACCESS_NETWORK_STATE"
@@ -952,7 +952,7 @@
     <permission android:name="android.permission.NFC"
         android:description="@string/permdesc_nfc"
         android:label="@string/permlab_nfc"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- @SystemApi Allows an internal user to use privileged ConnectivityManager APIs.
          @hide -->
@@ -1272,7 +1272,7 @@
     <permission android:name="android.permission.DISABLE_KEYGUARD"
         android:description="@string/permdesc_disableKeyguard"
         android:label="@string/permlab_disableKeyguard"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <!-- ================================== -->
     <!-- Permissions to access other installed applications  -->
