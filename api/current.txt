@@ -36033,7 +36033,6 @@ package android.view {
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
     method public boolean isScrollContainer();
-    method public boolean isScrollIndicatorEnabled(int);
     method public boolean isScrollbarFadingEnabled();
     method public boolean isSelected();
     method public boolean isShown();
