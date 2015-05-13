@@ -1340,11 +1340,13 @@ public abstract class WebSettings {
      * offscreen but attached to a window. Turning this on can avoid
      * rendering artifacts when animating an offscreen WebView on-screen.
      * Offscreen WebViews in this mode use more memory. The default value is
-     * false.
+     * false.<br>
      * Please follow these guidelines to limit memory usage:
-     * - WebView size should be not be larger than the device screen size.
-     * - Limit use of this mode to a small number of WebViews. Use it for
+     * <ul>
+     * <li> WebView size should be not be larger than the device screen size.
+     * <li> Limit use of this mode to a small number of WebViews. Use it for
      *   visible WebViews and WebViews about to be animated to visible.
+     * </ul>
      */
     public abstract void setOffscreenPreRaster(boolean enabled);
 
