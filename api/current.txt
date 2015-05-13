@@ -16092,7 +16092,7 @@ package android.media {
     method public void setOnInfoListener(android.media.MediaPlayer.OnInfoListener);
     method public void setOnPreparedListener(android.media.MediaPlayer.OnPreparedListener);
     method public void setOnSeekCompleteListener(android.media.MediaPlayer.OnSeekCompleteListener);
-    method public void setOnTimedMetaDataListener(android.media.MediaPlayer.OnTimedMetaDataListener);
+    method public void setOnTimedMetaDataAvailableListener(android.media.MediaPlayer.OnTimedMetaDataAvailableListener);
     method public void setOnTimedTextListener(android.media.MediaPlayer.OnTimedTextListener);
     method public void setOnVideoSizeChangedListener(android.media.MediaPlayer.OnVideoSizeChangedListener);
     method public void setPlaybackParams(android.media.PlaybackParams);
@@ -16154,8 +16154,8 @@ package android.media {
     method public abstract void onSeekComplete(android.media.MediaPlayer);
   }
 
-  public static abstract interface MediaPlayer.OnTimedMetaDataListener {
-    method public abstract void onTimedMetaData(android.media.MediaPlayer, android.media.TimedMetaData);
+  public static abstract interface MediaPlayer.OnTimedMetaDataAvailableListener {
+    method public abstract void onTimedMetaDataAvailable(android.media.MediaPlayer, android.media.TimedMetaData);
   }
 
   public static abstract interface MediaPlayer.OnTimedTextListener {
@@ -16692,9 +16692,9 @@ package android.media {
     field public static final int OPTIONS_RECYCLE_INPUT = 2; // 0x2
   }
 
-  public class TimedMetaData {
-    method public byte[] getRawData();
-    method public long getTimeUs();
+  public final class TimedMetaData {
+    method public byte[] getMetaData();
+    method public long getTimestamp();
   }
 
   public final class TimedText {

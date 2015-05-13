@@ -19,21 +19,20 @@ package android.media;
 import android.os.Parcel;
 
 /**
- * Class that embodies a piece of timed metadata, including
+ * Class that embodies one timed metadata access unit, including
  *
  * <ul>
  * <li> a time stamp, and </li>
  * <li> raw uninterpreted byte-array extracted directly from the container. </li>
  * </ul>
  *
- * @see MediaPlayer#setOnTimedMetaDataListener(android.media.MediaPlayer.OnTimedMetaDataListener)
+ * @see MediaPlayer#setOnTimedMetaDataAvailableListener(android.media.MediaPlayer.OnTimedMetaDataListener)
  */
-
-public class TimedMetaData {
+public final class TimedMetaData {
     private static final String TAG = "TimedMetaData";
 
-    private long mTimeUs;
-    private byte[] mRawData;
+    private long mTimestampUs;
+    private byte[] mMetaData;
 
     /**
      * @hide
@@ -48,12 +47,20 @@ public class TimedMetaData {
         }
     }
 
-    public long getTimeUs() {
-        return mTimeUs;
+    /**
+     * @return the timestamp associated with this metadata access unit in microseconds;
+     * 0 denotes playback start.
+     */
+    public long getTimestamp() {
+        return mTimestampUs;
     }
 
-    public byte[] getRawData() {
-        return mRawData;
+    /**
+     * @return raw, uninterpreted content of this metadata access unit; for ID3 tags this includes
+     * everything starting from the 3 byte signature "ID3".
+     */
+    public byte[] getMetaData() {
+        return mMetaData;
     }
 
     private boolean parseParcel(Parcel parcel) {
@@ -62,9 +69,9 @@ public class TimedMetaData {
             return false;
         }
 
-        mTimeUs = parcel.readLong();
-        mRawData = new byte[parcel.readInt()];
-        parcel.readByteArray(mRawData);
+        mTimestampUs = parcel.readLong();
+        mMetaData = new byte[parcel.readInt()];
+        parcel.readByteArray(mMetaData);
 
         return true;
     }
