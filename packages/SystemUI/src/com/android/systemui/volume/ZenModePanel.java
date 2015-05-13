@@ -438,7 +438,8 @@ public class ZenModePanel extends LinearLayout {
         final long span = time - now;
         if (span <= 0 || span > MAX_BUCKET_MINUTES * MINUTES_MS) return null;
         return ZenModeConfig.toTimeCondition(context,
-                time, Math.round(span / (float) MINUTES_MS), now, ActivityManager.getCurrentUser());
+                time, Math.round(span / (float) MINUTES_MS), now, ActivityManager.getCurrentUser(),
+                false /*shortVersion*/);
     }
 
     private void handleUpdateConditions(Condition[] conditions) {
@@ -717,7 +718,8 @@ public class ZenModePanel extends LinearLayout {
                 if (up && bucketTime > time || !up && bucketTime < time) {
                     mBucketIndex = j;
                     newCondition = ZenModeConfig.toTimeCondition(mContext,
-                            bucketTime, bucketMinutes, now, ActivityManager.getCurrentUser());
+                            bucketTime, bucketMinutes, now, ActivityManager.getCurrentUser(),
+                            false /*shortVersion*/);
                     break;
                 }
             }
