@@ -5403,7 +5403,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     } else if (UserManager.DISALLOW_USB_FILE_TRANSFER.equals(key)) {
                         UsbManager manager =
                                 (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
-                        manager.setCurrentFunction("none", false);
+                        manager.setCurrentFunction("none");
                     } else if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                                 Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF,

@@ -228,6 +228,23 @@ public class UsbManager {
      */
     public static final String EXTRA_PERMISSION_GRANTED = "permission";
 
+    /**
+     * The persistent property which stores whether adb is enabled or not. Other values are ignored.
+     * Previously this value stored non-adb settings, but not anymore.
+     * TODO: rename this to something adb specific, rather than using usb.
+     *
+     * {@hide}
+     */
+    public static final String ADB_PERSISTENT_PROPERTY = "persist.sys.usb.config";
+
+    /**
+     * The non-persistent property which stores the current USB settings.
+     *
+     * {@hide}
+     */
+    public static final String USB_SETTINGS_PROPERTY = "sys.usb.config";
+
+
     private final Context mContext;
     private final IUsbManager mService;
 
@@ -410,21 +427,26 @@ public class UsbManager {
         }
     }
 
+    private static boolean propertyContainsFunction(String property, String function) {
+        String functions = SystemProperties.get(property, "");
+        int index = functions.indexOf(function);
+        if (index < 0) return false;
+        if (index > 0 && functions.charAt(index - 1) != ',') return false;
+        int charAfter = index + function.length();
+        if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
+        return true;
+    }
+
     /**
-     * Returns the current default USB function.
+     * Returns true if the specified USB function is currently enabled.
      *
-     * @return name of the default function.
+     * @param function name of the USB function
+     * @return true if the USB function is enabled.
      *
      * {@hide}
      */
-    public String getDefaultFunction() {
-        String functions = SystemProperties.get("persist.sys.usb.config", "");
-        int commaIndex = functions.indexOf(',');
-        if (commaIndex > 0) {
-            return functions.substring(0, commaIndex);
-        } else {
-            return functions;
-        }
+    public boolean isFunctionEnabled(String function) {
+        return propertyContainsFunction(USB_SETTINGS_PROPERTY, function);
     }
 
     /**
@@ -432,13 +454,12 @@ public class UsbManager {
      * If function is null, then the current function is set to the default function.
      *
      * @param function name of the USB function, or null to restore the default function
-     * @param makeDefault true if the function should be set as the new default function
      *
      * {@hide}
      */
-    public void setCurrentFunction(String function, boolean makeDefault) {
+    public void setCurrentFunction(String function) {
         try {
-            mService.setCurrentFunction(function, makeDefault);
+            mService.setCurrentFunction(function);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in setCurrentFunction", e);
         }
