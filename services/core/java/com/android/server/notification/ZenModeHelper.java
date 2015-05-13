@@ -264,7 +264,7 @@ public class ZenModeHelper {
             Log.w(TAG, "Invalid config in setConfig; " + config);
             return false;
         }
-        mConditions.evaluateConfig(config);  // may modify config
+        mConditions.evaluateConfig(config, false /*processSubscriptions*/);  // may modify config
         if (config.equals(mConfig)) return true;
         if (DEBUG) Log.d(TAG, "setConfig reason=" + reason, new Throwable());
         ZenLog.traceConfig(reason, config);
@@ -280,6 +280,7 @@ public class ZenModeHelper {
         if (!evaluateZenMode(reason, setRingerMode)) {
             applyRestrictions();  // evaluateZenMode will also apply restrictions if changed
         }
+        mConditions.evaluateConfig(config, true /*processSubscriptions*/);
         return true;
     }
 
