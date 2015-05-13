@@ -69,9 +69,6 @@
     <!-- Show rotation lock toggle in System UI-->
     <bool name="config_showRotationLock">true</bool>
 
-    <!-- Amount of time to hold off before showing the search panel when the user presses home -->
-    <integer name="config_show_search_delay">200</integer>
-
     <!-- Vibration duration for GlowPadView used in SearchPanelView -->
     <integer translatable="false" name="config_vibration_duration">0</integer>
 
