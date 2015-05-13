@@ -908,11 +908,6 @@ public class NotificationManagerService extends SystemService {
             void onPolicyChanged() {
                 sendRegisteredOnlyBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
             }
-
-            private void sendRegisteredOnlyBroadcast(String action) {
-                getContext().sendBroadcast(new Intent(action)
-                        .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
-            }
         });
         final File systemDir = new File(Environment.getDataDirectory(), "system");
         mPolicyFile = new AtomicFile(new File(systemDir, "notification_policy.xml"));
@@ -995,6 +990,11 @@ public class NotificationManagerService extends SystemService {
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
 
+    private void sendRegisteredOnlyBroadcast(String action) {
+        getContext().sendBroadcastAsUser(new Intent(action)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL, null);
+    }
+
     /**
      * Read the old XML-based app block database and import those blockages into the AppOps system.
      */
@@ -1061,8 +1061,7 @@ public class NotificationManagerService extends SystemService {
         ZenLog.traceEffectsSuppressorChanged(mEffectsSuppressor, suppressor);
         mEffectsSuppressor = suppressor;
         mZenModeHelper.setEffectsSuppressed(suppressor != null);
-        getContext().sendBroadcast(new Intent(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED)
-                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+        sendRegisteredOnlyBroadcast(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
     }
 
     private void updateInterruptionFilterLocked() {
