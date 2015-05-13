@@ -43,7 +43,7 @@ import java.io.IOException;
  * @attr ref android.R.styleable#ColorDrawable_color
  */
 public class ColorDrawable extends Drawable {
-    private final Paint mPaint = new Paint();
+    private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "state_")
     private ColorState mColorState;
