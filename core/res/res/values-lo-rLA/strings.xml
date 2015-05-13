@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"​ແອັບຯ​ສ່ວນ​ໂຕ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ລາຍຊື່"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"ເຂົ້າ​ຫາ ແລະ​ແກ້​ໄຂ​ລາຍ​ຊື່​ຂອງ​ທ່ານ"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ເຂົ້າ​ຫາ​ລາຍ​ຊື່​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ສະ​ຖານ​ທີ່"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"ເຂົ້າ​ຫາ​ທີ່​ຕັ້ງ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ຂໍ້ມູນສັງຄົມຂອງທ່ານ"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ເຂົ້າເຖິງຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ່ຕິດຕໍ່ ແລະການເຊື່ອມຕໍ່ທາງສັງຄົມຂອງທ່ານໂດຍກົງ."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ປະຕິທິນ"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"ເຂົ້າ​ຫາ ແລະ​ແກ້​ໄຂ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"ເຂົ້າ​ຫາ ແລະ​ແກ້​ໄຂ SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"ເບິ່ງ ແລະ​ຈັດ​ການ​ຂໍ້​ຄວາມ SMS"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"ວັດ​ຈະນາ​ນຸກົມ​ຜູ່ໃຊ້"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"ອ່ານ ຫຼື​ຂຽນຄຳສັບໃນວັດຈະນານຸກົມຜູ້ໃຊ້."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ບຸກມາກ ແລະປະຫວັດເວັບໄຊ"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ເຂົ້ານຳໃຊ້ບຸກແລະປະຫວັດການທ່ອງເວັບໂດຍກົງ."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ໄມໂຄຣໂຟນ"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"ໃຊ້​ໄມ​ໂຄ​ຣ​ໂຟນ​ຂອງ​ອຸ​ປະ​ກອນ"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ບັນທຶກສຽງ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ກ້ອງ"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"ໃຊ້​ກ້ອງ​ຖ່າຍ​ຮູບ​ຂອງ​ອຸ​ປະ​ກອນ"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ຖ່າຍ​ຮູບ ແລະ​ບັນ​ທຶກວິ​ດີ​ໂອ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ໂທລະສັບ"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"ໃຊ້​ລະ​ບົບ​ໂທ​ລະ​ສັບ​ຂອງ​ອຸ​ປະ​ກອນ"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ໂທ ແລະ​ຈັດ​ການ​ການ​ໂທ​ລະ​ສັບ"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"ເຊັນເຊີ"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"ເຂົ້າ​ຫາ​ເຊັນ​ເຊີ ແລະ​ສິ່ງ​ທີ່​ສາ​ມາດ​ສວມ​ໃສ່​ໄດ້"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"ເຂົ້າ​ຫາ​ຂໍ້​ມູນ​ຈາກ​ເຊັນ​ເຊີ ແລະ​ອຸ​ປະ​ກອນ​ສວມ​ໃສ່​ໄດ້"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ດຶງຂໍ້ມູນເນື້ອຫາໃນໜ້າຈໍ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳພັດ\""</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ຫຍໍ້"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ຫ້າມ​ລົບ​ກວນ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"​ເວ​ລາ​ປິດ​ເຮັດ​ວຽກ"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ຄ່ຳ​ຄືນ​ໃນ​ອາ​ທິດ"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ທ້າຍອາທິດ"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ການນັດໝາຍ"</string>
     <string name="muted_by" msgid="6147073845094180001">"ຖືກ​ປິດ​ສຽງ​ໂດຍ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ມັນ​ອາດ​ຈະ​ບໍ່​ສະ​ຖຽນ​ຈົນ​ກວ່າ​ທ່ານ​ຕັ້ງ​ເປັນ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ແລ້ວ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ. ຕິດ​ຕໍ່ຜູ້​ຜະ​ລິດ​ຂອງ​ທ່ານ​ສຳ​ລັບ​ລາຍ​ລະ​ອຽດ​ຕ່າງໆ."</string>

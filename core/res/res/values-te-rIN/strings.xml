@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"వ్యక్తిగత అనువర్తనాలు"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"కార్యాలయం"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"పరిచయాలు"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"మీ పరిచయాలను ప్రాప్యత చేస్తుంది మరియు సవరిస్తుంది"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"మీ పరిచయాలను ప్రాప్యత చేస్తుంది"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"స్థానం"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"మీ స్థానాన్ని ప్రాప్యత చేస్తుంది"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"మీ సామాజిక సమాచారం"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"మీ పరిచయాలు మరియు సామాజిక బాంధవ్యాలకు సంబంధించిన సమాచారానికి ప్రత్యక్ష ప్రాప్యత."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"క్యాలెండర్"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"మీ క్యాలెండర్‌ను ప్రాప్యత చేస్తుంది మరియు సవరిస్తుంది"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"మీ క్యాలెండర్‌ను ప్రాప్యత చేస్తుంది"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMSను ప్రాప్యత చేస్తుంది మరియు సవరిస్తుంది"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS సందేశాలను వీక్షిస్తుంది మరియు నిర్వహిస్తుంది"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"వినియోగదారు నిఘంటువు"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"వినియోగదారు నిఘంటువులో పదాలు చదువుతుంది లేదా వ్రాస్తుంది."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"బుక్‌మార్క్‌లు మరియు చరిత్ర"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"బుక్‌మార్క్‌లు మరియు బ్రౌజర్ చరిత్రకు ప్రత్యక్ష ప్రాప్యత."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"మైక్రోఫోన్"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"పరికర మైక్రోఫోన్‌ను ఉపయోగిస్తుంది"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ఆడియోను రికార్డ్ చేస్తుంది"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"కెమెరా"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"పరికర కెమెరాను ఉపయోగిస్తుంది"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"చిత్రాలను తీస్తుంది మరియు వీడియోను రికార్డ్ చేస్తుంది"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ఫోన్"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"పరికర టెలిఫోనీ సాంకేతికతను ఉపయోగిస్తుంది"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లను చేస్తుంది మరియు నిర్వహిస్తుంది"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"సెన్సార్‌లు"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"సెన్సార్‌లను మరియు ధరింపదగిన వాటిని ప్రాప్యత చేస్తుంది"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"సెన్సార్‌లు మరియు వేరబుల్ పరికరాల డేటాను ప్రాప్యత చేస్తుంది"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను మరలా పొందండి"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలించండి."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"తాకడం ద్వారా విశ్లేషణను ప్రారంభించండి"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"అంతరాయం కలిగించవద్దు"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ముఖ్యమైన పనిలో ఉన్నప్పుడు"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"వారపు రోజుల్లో రాత్రి"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"వారాంతం"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ఈవెంట్"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ద్వారా మ్యూట్ చేయబడింది"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>

@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"App personali"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Lavoro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatti"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"accesso e modifica ai contatti"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accesso ai contatti"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posizione"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"accesso alla posizione"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Le tue informazioni social"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Accesso diretto alle informazioni sui tuoi contatti e sulle tue connessioni social."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"accesso e modifica al calendario"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accesso al calendario"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"accesso e modifica agli SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"lettura e gestione di messaggi SMS"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Dizionario utente"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Lettura o scrittura delle parole contenute nel dizionario utente."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Segnalibri e cronologia"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Accesso diretto ai segnalibri e alla cronologia del browser."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfono"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"utilizzo del microfono del dispositivo"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrazione audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"utilizzo della fotocamera del dispositivo"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"acquisizione di foto e registrazione di video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefono"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"utilizzo del servizio di telefonia del dispositivo"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"esecuzione e gestione delle telefonate"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensori"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"accesso ai sensori e ai dispositivi indossabili"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"accesso ai dati da sensori e dispositivi indossabili"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Comprimi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Non disturbare"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tempo di inattività"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Notte di un giorno feriale"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fine settimana"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
     <string name="muted_by" msgid="6147073845094180001">"Audio disattivato da <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Si è verificato un problema interno con il dispositivo, che potrebbe essere instabile fino al ripristino dei dati di fabbrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Si è verificato un problema interno con il dispositivo. Per informazioni dettagliate, contatta il produttore."</string>

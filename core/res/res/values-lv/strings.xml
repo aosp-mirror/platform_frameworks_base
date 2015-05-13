@@ -221,27 +221,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Personīgās lietotnes"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Darba"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktpersonas"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"piekļūt jūsu kontaktpersonām un tās mainīt"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"piekļūt jūsu kontaktpersonu datiem"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Atrašanās vieta"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"piekļūt jūsu atrašanās vietas informācijai"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Jūsu sociālo tīklu informācija"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Tieša piekļuve informācijai par jūsu kontaktpersonām un sociālajiem savienojumiem."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendārs"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"piekļūt jūsu kalendāram un to mainīt"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"piekļūt jūsu kalendāram"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Īsziņas"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"piekļūt īsziņām un tās mainīt"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"skatīt un pārvaldīt īsziņas"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Lietotāja vārdnīca"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Lasīt vai rakstīt vārdus lietotāja vārdnīcā."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Grāmatzīmes un vēsture"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Tieša piekļuve grāmatzīmēm un pārlūkprogrammas vēsturei."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofons"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"izmantot ierīces mikrofonu"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ierakstīt audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"izmantot ierīces kameru"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"uzņemt attēlus un ierakstīt videoklipus"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Tālrunis"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"izmantot ierīces tālruņa funkcijas"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"veikt un pārvaldīt tālruņa zvanus"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensori"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"piekļūt sensoriem un valkājamām ierīcēm"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"piekļūt sensoru un valkājamo ierīču datiem"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Izgūt loga saturu."</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Skatīt tā loga saturu, ar kuru mijiedarbojaties."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivizēt funkciju “Pārlūkot pieskaroties”."</string>
@@ -1497,12 +1497,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sakļaut"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Netraucēt"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Dīkstāve"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Darbadienas vakarā"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Nedēļas nogalē"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Pasākums"</string>
     <string name="muted_by" msgid="6147073845094180001">"Skaņu izslēdza <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Jūsu ierīcē ir radusies iekšēja problēma, un ierīce var darboties nestabili. Lai to labotu, veiciet rūpnīcas datu atiestatīšanu."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Jūsu ierīcē ir radusies iekšēja problēma. Lai iegūtu plašāku informāciju, lūdzu, sazinieties ar ražotāju."</string>

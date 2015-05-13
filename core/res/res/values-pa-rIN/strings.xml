@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"ਨਿੱਜੀ ਐਪਸ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ਕੰਮ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ਸੰਪਰਕ"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚੋ ਅਤੇ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਨੂੰ ਐਕਸੈਸ ਕਰੋ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ਨਿਰਧਾਰਿਤ ਸਥਾਨ"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"ਆਪਣੇ ਸਥਾਨ ਤੱਕ ਪਹੁੰਚੋ"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ਤੁਹਾਡੀ ਸਮਾਜਿਕ ਜਾਣਕਾਰੀ"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਅਤੇ ਸਮਾਜਿਕ ਕਨੈਕਸ਼ਨਾਂ ਬਾਰੇ ਜਾਣਕਾਰੀ ਤੱਕ ਸਿੱਧੀ ਪਹੁੰਚ।"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ਕੈਲੰਡਰ"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"ਆਪਣੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚੋ ਅਤੇ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ਆਪਣੇ ਕੈਲੰਡਰ ਦੀ ਐਕਸੈਸ ਕਰੋ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS ਤੱਕ ਪਹੁੰਚੋ ਅਤੇ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS ਸੁਨੇਹੇ ਵੇਖੋ ਅਤੇ ਉਹਨਾਂ ਨੂੰ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"ਉਪਭੋਗਤਾ ਸ਼ਬਦਕੋਸ਼"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"ਉਪਭੋਗਤਾ ਸ਼ਬਦਕੋਸ਼ ਵਿੱਚ ਸ਼ਬਦ ਪੜ੍ਹੋ ਜਾਂ ਲਿਖੋ।"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ਬੁੱਕਮਾਰਕਸ ਅਤੇ ਇਤਿਹਾਸ"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ਬੁੁੱਕਮਾਰਕਾਂ ਅਤੇ ਬ੍ਰਾਊਜ਼ਰ ਇਤਿਹਾਸ ਤੱਕ ਸਿੱਧੀ ਪਹੁੰਚ।"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ਮਾਈਕ੍ਰੋਫੋਨ"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"ਡਿਵਾਈਸ ਮਾਈਕ੍ਰੋਫੋਨ ਵਰਤੋ"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ਕੈਮਰਾ"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"ਡਿਵਾਈਸ ਕੈਮਰਾ ਵਰਤੋ"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ਤਸਵੀਰਾਂ ਖਿੱਚੋ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ਫੋਨ"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"ਡਿਵਾਈਸ ਟੈਲੀਫੋਨੀ ਵਰਤੋ"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰੋ ਅਤੇ ਉਹਨਾਂ ਨੂੰ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"ਸੰੰਵੇਦਕ"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"ਸੰਵੇਦਕ ਅਤੇ ਪਹਿਨਣਯੋਗ ਤੱਕ ਪਹੁੰਚੋ"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"ਸੈਂਸਰ ਅਤੇ ਪਾਉਣਯੋਗ ਡਿਵਾਈਸਾਂ ਤੋਂ ਡੇਟਾ ਨੂੰ ਐਕਸੈਸ ਕਰੋ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਇੱਕ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਇੰਟਰੈਕਟ ਕਰ ਰਹੇ ਹੋ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ਐਕਸਪਲੋਰ ਬਾਇ ਟਚ ਚਾਲੂ ਕਰੋ"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ਨਸ਼ਟ ਕਰੋ"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ਡਾਊਨਟਾਈਮ"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ਵੀਕਨਾਈਟ"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ਹਫ਼ਤੇ ਦਾ ਅੰਤਲਾ ਦਿਨ"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ਇਵੈਂਟ"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ਵੱਲੋਂ ਮਿਊਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਹੈ ਅਤੇ ਇਹ ਅਸਥਿਰ ਹੋ ਸਕਦੀ ਹੈ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈਟ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਸੀ। ਵੇਰਵਿਆਂ ਲਈ ਆਪਣੇ ਨਿਰਮਾਤਾ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
