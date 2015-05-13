@@ -20,7 +20,7 @@ import com.android.internal.telephony.ICarrierConfigLoader;
 
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
@@ -232,10 +232,10 @@ public class CarrierConfigManager {
     private final static String TAG = "CarrierConfigManager";
 
     /** The default value for every variable. */
-    private final static Bundle sDefaults;
+    private final static PersistableBundle sDefaults;
 
     static {
-        sDefaults = new Bundle();
+        sDefaults = new PersistableBundle();
         sDefaults.putBoolean(BOOL_ADDITIONAL_CALL_SETTING, true);
         sDefaults.putBoolean(BOOL_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG, false);
         sDefaults.putBoolean(BOOL_ALLOW_LOCAL_DTMF_TONES, true);
@@ -276,10 +276,10 @@ public class CarrierConfigManager {
      * values.
      *
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
-     * @return A {@link Bundle} containing the config for the given subId, or default values for an
-     *         invalid subId.
+     * @return A {@link PersistableBundle} containing the config for the given subId, or default
+     *         values for an invalid subId.
      */
-    public Bundle getConfigForSubId(int subId) {
+    public PersistableBundle getConfigForSubId(int subId) {
         try {
             return getICarrierConfigLoader().getConfigForSubId(subId);
         } catch (RemoteException ex) {
@@ -297,7 +297,7 @@ public class CarrierConfigManager {
      *
      * @see #getConfigForSubId
      */
-    public Bundle getConfig() {
+    public PersistableBundle getConfig() {
         return getConfigForSubId(SubscriptionManager.getDefaultSubId());
     }
 
@@ -349,8 +349,8 @@ public class CarrierConfigManager {
      * @hide
      */
     @SystemApi
-    public static Bundle getDefaultConfig() {
-        return new Bundle(sDefaults);
+    public static PersistableBundle getDefaultConfig() {
+        return new PersistableBundle(sDefaults);
     }
 
     /** @hide */
