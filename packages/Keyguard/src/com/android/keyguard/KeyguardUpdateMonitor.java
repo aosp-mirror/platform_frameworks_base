@@ -24,7 +24,6 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -56,7 +55,6 @@ import com.android.internal.telephony.TelephonyIntents;
 
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
-import android.hardware.fingerprint.FingerprintUtils;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -367,14 +365,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 Log.d(TAG, "Fingerprint disabled by DPM for userId: " + userId);
                 return;
             }
-            final ContentResolver res = mContext.getContentResolver();
-            final int ids[] = FingerprintUtils.getFingerprintIdsForUser(res, userId);
-            for (int i = 0; i < ids.length; i++) {
-                // TODO: fix once HAL supports storing group id
-                final boolean isCorrectUser = true || (groupId == userId);
-                if (ids[i] == fingerId && isCorrectUser) {
-                    onFingerprintAuthenticated(userId);
-                }
+            if (groupId == userId) {
+                onFingerprintAuthenticated(groupId);
             }
         } finally {
             setFingerprintRunningDetectionRunning(false);
