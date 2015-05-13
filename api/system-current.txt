@@ -3975,6 +3975,7 @@ package android.app {
     field public static final java.lang.String OPSTR_COARSE_LOCATION = "android:coarse_location";
     field public static final java.lang.String OPSTR_FINE_LOCATION = "android:fine_location";
     field public static final java.lang.String OPSTR_GET_USAGE_STATS = "android:get_usage_stats";
+    field public static final java.lang.String OPSTR_MOCK_LOCATION = "android:mock_location";
     field public static final java.lang.String OPSTR_MONITOR_HIGH_POWER_LOCATION = "android:monitor_location_high_power";
     field public static final java.lang.String OPSTR_MONITOR_LOCATION = "android:monitor_location";
   }
@@ -28627,7 +28628,7 @@ package android.provider {
     field public static final java.lang.String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
     field public static final deprecated java.lang.String ADB_ENABLED = "adb_enabled";
     field public static final java.lang.String ALLOWED_GEOLOCATION_ORIGINS = "allowed_geolocation_origins";
-    field public static final java.lang.String ALLOW_MOCK_LOCATION = "mock_location";
+    field public static final deprecated java.lang.String ALLOW_MOCK_LOCATION = "mock_location";
     field public static final java.lang.String ANDROID_ID = "android_id";
     field public static final deprecated java.lang.String BACKGROUND_DATA = "background_data";
     field public static final deprecated java.lang.String BLUETOOTH_ON = "bluetooth_on";
