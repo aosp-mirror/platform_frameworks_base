@@ -396,4 +396,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ხმოვან დიალოგშია"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ორიგინალის აღდგენისათვის, შეეხეთ."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"თქვენ სამუშაო პროფილში ხართ"</string>
+    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
+    <skip />
 </resources>
