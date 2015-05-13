@@ -34,7 +34,7 @@ struct MockResolver : public IResolver {
     MockResolver(const std::shared_ptr<ResourceTable>& table,
                  const std::map<ResourceName, ResourceId>& items) :
             mResolver(std::make_shared<ResourceTableResolver>(
-                        table, std::make_shared<const android::AssetManager>())),
+                    table, std::vector<std::shared_ptr<const android::AssetManager>>())),
             mAttr(false, android::ResTable_map::TYPE_ANY), mItems(items) {
     }
 

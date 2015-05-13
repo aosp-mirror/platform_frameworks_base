@@ -24,7 +24,6 @@
 #include "ResourceValues.h"
 
 #include <androidfw/AssetManager.h>
-#include <androidfw/ResourceTypes.h>
 #include <memory>
 #include <vector>
 #include <unordered_set>
@@ -40,8 +39,9 @@ public:
      * Creates a resolver with a local ResourceTable and an AssetManager
      * loaded with library packages.
      */
-    ResourceTableResolver(std::shared_ptr<const ResourceTable> table,
-                          std::shared_ptr<const android::AssetManager> sources);
+    ResourceTableResolver(
+            std::shared_ptr<const ResourceTable> table,
+            const std::vector<std::shared_ptr<const android::AssetManager>>& sources);
 
     ResourceTableResolver(const ResourceTableResolver&) = delete; // Not copyable.
 
@@ -50,8 +50,6 @@ public:
     virtual Maybe<Entry> findAttribute(const ResourceName& name) override;
 
     virtual Maybe<ResourceName> findName(ResourceId resId) override;
-
-    const android::ResTable& getResTable() const;
 
 private:
     struct CacheEntry {
@@ -62,14 +60,10 @@ private:
     const CacheEntry* buildCacheEntry(const ResourceName& name);
 
     std::shared_ptr<const ResourceTable> mTable;
-    std::shared_ptr<const android::AssetManager> mSources;
+    std::vector<std::shared_ptr<const android::AssetManager>> mSources;
     std::map<ResourceName, CacheEntry> mCache;
     std::unordered_set<std::u16string> mIncludedPackages;
 };
-
-inline const android::ResTable& ResourceTableResolver::getResTable() const {
-    return mSources->getResources(false);
-}
 
 } // namespace aapt
 

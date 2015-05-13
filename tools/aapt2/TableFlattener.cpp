@@ -79,10 +79,28 @@ public:
 
         // Write the key.
         if (!Res_INTERNALID(key.id.id) && !key.id.isValid()) {
+            assert(key.name.isValid());
             mSymbols->push_back(std::make_pair(ResourceNameRef(key.name),
                     mOut->size() - sizeof(*outMapEntry)));
         }
         outMapEntry->name.ident = key.id.id;
+
+        // Write the value.
+        value.flatten(outMapEntry->value);
+
+        if (outMapEntry->value.data == 0x0) {
+            visitFunc<Reference>(value, [&](const Reference& reference) {
+                mSymbols->push_back(std::make_pair(ResourceNameRef(reference.name),
+                        mOut->size() - sizeof(outMapEntry->value.data)));
+            });
+        }
+        outMapEntry->value.size = sizeof(outMapEntry->value);
+    }
+
+    void flattenValueOnly(const Item& value) {
+        mMap->count++;
+
+        android::ResTable_map* outMapEntry = mOut->nextBlock<android::ResTable_map>();
 
         // Write the value.
         value.flatten(outMapEntry->value);
@@ -139,7 +157,7 @@ public:
 
     void visit(const Array& array, ValueVisitorArgs&) override {
         for (const auto& item : array.items) {
-            flattenEntry({}, *item);
+            flattenValueOnly(*item);
         }
     }
 
@@ -333,6 +351,10 @@ bool TableFlattener::flatten(BigBuffer* out, const ResourceTable& table) {
         spec->header.size = spec->header.headerSize + (type->entries.size() * sizeof(uint32_t));
         spec->id = type->typeId;
         spec->entryCount = type->entries.size();
+
+        if (type->entries.empty()) {
+            continue;
+        }
 
         // Reserve space for the masks of each resource in this type. These
         // show for which configuration axis the resource changes.
