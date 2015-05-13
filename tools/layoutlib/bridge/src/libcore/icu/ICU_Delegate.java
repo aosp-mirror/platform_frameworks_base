@@ -21,6 +21,7 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import android.icu.text.DateTimePatternGenerator;
 import android.icu.util.Currency;
 import android.icu.util.ULocale;
+import android.icu.util.VersionInfo;
 
 import java.util.Locale;
 
@@ -54,18 +55,19 @@ public class ICU_Delegate {
     }
 
     @LayoutlibDelegate
+    @SuppressWarnings("deprecation")
     /*package*/ static String getCldrVersion() {
-        return "22.1.1";      // TODO: check what the right value should be.
+        return VersionInfo.ICU_DATA_VERSION.toString();
     }
 
     @LayoutlibDelegate
     /*package*/ static String getIcuVersion() {
-        return "unknown_layoutlib";
+        return VersionInfo.ICU_VERSION.toString();
     }
 
     @LayoutlibDelegate
     /*package*/ static String getUnicodeVersion() {
-        return "5.2";
+        return VersionInfo.UNICODE_7_0.toString();
     }
 
     @LayoutlibDelegate
@@ -182,8 +184,8 @@ public class ICU_Delegate {
     /*package*/ static boolean initLocaleDataNative(String locale, LocaleData result) {
 
         // Used by Calendar.
-        result.firstDayOfWeek = Integer.valueOf(1);
-        result.minimalDaysInFirstWeek = Integer.valueOf(1);
+        result.firstDayOfWeek = 1;
+        result.minimalDaysInFirstWeek = 1;
 
         // Used by DateFormatSymbols.
         result.amPm = new String[] { "AM", "PM" };

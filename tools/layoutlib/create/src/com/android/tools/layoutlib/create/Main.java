@@ -123,6 +123,7 @@ public class Main {
                     excludeClasses,
                     new String[] {
                         "com/android/i18n/phonenumbers/data/*",
+                        "android/icu/impl/data/**"
                     });
             aa.analyze();
             agen.generate();
