@@ -29,12 +29,4 @@
         friend inline int compare_type(const Type& lhs, const Type& rhs) { return lhs.compare(rhs); } \
         friend inline hash_t hash_type(const Type& entry) { return entry.hash(); }
 
-#define HWUI_ENUM(name, ...) \
-    namespace name { \
-        enum _##name { \
-            __VA_ARGS__ \
-        }; \
-    } \
-    typedef enum name::_##name name##Enum
-
 #endif /* MACROS_H */
