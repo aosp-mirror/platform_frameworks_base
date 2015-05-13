@@ -28356,15 +28356,67 @@ package android.security {
     ctor public KeyChainException(java.lang.Throwable);
   }
 
+  public final deprecated class KeyPairGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
+    method public java.security.spec.AlgorithmParameterSpec getAlgorithmParameterSpec();
+    method public android.content.Context getContext();
+    method public java.util.Date getEndDate();
+    method public int getKeySize();
+    method public java.lang.String getKeyType();
+    method public java.lang.String getKeystoreAlias();
+    method public java.math.BigInteger getSerialNumber();
+    method public java.util.Date getStartDate();
+    method public javax.security.auth.x500.X500Principal getSubjectDN();
+    method public boolean isEncryptionRequired();
+  }
+
+  public static final deprecated class KeyPairGeneratorSpec.Builder {
+    ctor public KeyPairGeneratorSpec.Builder(android.content.Context);
+    method public android.security.KeyPairGeneratorSpec build();
+    method public android.security.KeyPairGeneratorSpec.Builder setAlgorithmParameterSpec(java.security.spec.AlgorithmParameterSpec);
+    method public android.security.KeyPairGeneratorSpec.Builder setAlias(java.lang.String);
+    method public android.security.KeyPairGeneratorSpec.Builder setEncryptionRequired();
+    method public android.security.KeyPairGeneratorSpec.Builder setEndDate(java.util.Date);
+    method public android.security.KeyPairGeneratorSpec.Builder setKeySize(int);
+    method public android.security.KeyPairGeneratorSpec.Builder setKeyType(java.lang.String) throws java.security.NoSuchAlgorithmException;
+    method public android.security.KeyPairGeneratorSpec.Builder setSerialNumber(java.math.BigInteger);
+    method public android.security.KeyPairGeneratorSpec.Builder setStartDate(java.util.Date);
+    method public android.security.KeyPairGeneratorSpec.Builder setSubject(javax.security.auth.x500.X500Principal);
+  }
+
+  public final deprecated class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
+    method public android.content.Context getContext();
+    method public boolean isEncryptionRequired();
+  }
+
+  public static final deprecated class KeyStoreParameter.Builder {
+    ctor public KeyStoreParameter.Builder(android.content.Context);
+    method public android.security.KeyStoreParameter build();
+    method public android.security.KeyStoreParameter.Builder setEncryptionRequired(boolean);
+  }
+
+  public class NetworkSecurityPolicy {
+    method public static android.security.NetworkSecurityPolicy getInstance();
+    method public boolean isCleartextTrafficPermitted();
+  }
+
+}
+
+package android.security.keystore {
+
   public class KeyExpiredException extends java.security.InvalidKeyException {
     ctor public KeyExpiredException();
     ctor public KeyExpiredException(java.lang.String);
     ctor public KeyExpiredException(java.lang.String, java.lang.Throwable);
   }
 
-  public class KeyGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
+  public final class KeyGenParameterSpec implements java.security.spec.AlgorithmParameterSpec {
+    method public java.security.spec.AlgorithmParameterSpec getAlgorithmParameterSpec();
     method public java.lang.String[] getBlockModes();
-    method public android.content.Context getContext();
+    method public java.util.Date getCertificateNotAfter();
+    method public java.util.Date getCertificateNotBefore();
+    method public java.math.BigInteger getCertificateSerialNumber();
+    method public javax.security.auth.x500.X500Principal getCertificateSubject();
+    method public java.lang.String[] getDigests();
     method public java.lang.String[] getEncryptionPaddings();
     method public int getKeySize();
     method public java.util.Date getKeyValidityForConsumptionEnd();
@@ -28372,28 +28424,53 @@ package android.security {
     method public java.util.Date getKeyValidityStart();
     method public java.lang.String getKeystoreAlias();
     method public int getPurposes();
+    method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
-    method public boolean isEncryptionRequired();
+    method public boolean isDigestsSpecified();
+    method public boolean isEncryptionAtRestRequired();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUserAuthenticationRequired();
   }
 
-  public static class KeyGeneratorSpec.Builder {
-    ctor public KeyGeneratorSpec.Builder(android.content.Context);
-    method public android.security.KeyGeneratorSpec build();
-    method public android.security.KeyGeneratorSpec.Builder setAlias(java.lang.String);
-    method public android.security.KeyGeneratorSpec.Builder setBlockModes(java.lang.String...);
-    method public android.security.KeyGeneratorSpec.Builder setEncryptionPaddings(java.lang.String...);
-    method public android.security.KeyGeneratorSpec.Builder setEncryptionRequired();
-    method public android.security.KeyGeneratorSpec.Builder setKeySize(int);
-    method public android.security.KeyGeneratorSpec.Builder setKeyValidityEnd(java.util.Date);
-    method public android.security.KeyGeneratorSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
-    method public android.security.KeyGeneratorSpec.Builder setKeyValidityForOriginationEnd(java.util.Date);
-    method public android.security.KeyGeneratorSpec.Builder setKeyValidityStart(java.util.Date);
-    method public android.security.KeyGeneratorSpec.Builder setPurposes(int);
-    method public android.security.KeyGeneratorSpec.Builder setRandomizedEncryptionRequired(boolean);
-    method public android.security.KeyGeneratorSpec.Builder setUserAuthenticationRequired(boolean);
-    method public android.security.KeyGeneratorSpec.Builder setUserAuthenticationValidityDurationSeconds(int);
+  public static final class KeyGenParameterSpec.Builder {
+    ctor public KeyGenParameterSpec.Builder(java.lang.String, int);
+    method public android.security.keystore.KeyGenParameterSpec build();
+    method public android.security.keystore.KeyGenParameterSpec.Builder setAlgorithmParameterSpec(java.security.spec.AlgorithmParameterSpec);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setBlockModes(java.lang.String...);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateNotAfter(java.util.Date);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateNotBefore(java.util.Date);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateSerialNumber(java.math.BigInteger);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateSubject(javax.security.auth.x500.X500Principal);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setDigests(java.lang.String...);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setEncryptionAtRestRequired(boolean);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setEncryptionPaddings(java.lang.String...);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setKeySize(int);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityEnd(java.util.Date);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForOriginationEnd(java.util.Date);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityStart(java.util.Date);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setRandomizedEncryptionRequired(boolean);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setSignaturePaddings(java.lang.String...);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setUserAuthenticationRequired(boolean);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setUserAuthenticationValidityDurationSeconds(int);
+  }
+
+  public class KeyInfo implements java.security.spec.KeySpec {
+    method public java.lang.String[] getBlockModes();
+    method public java.lang.String[] getDigests();
+    method public java.lang.String[] getEncryptionPaddings();
+    method public int getKeySize();
+    method public java.util.Date getKeyValidityForConsumptionEnd();
+    method public java.util.Date getKeyValidityForOriginationEnd();
+    method public java.util.Date getKeyValidityStart();
+    method public java.lang.String getKeystoreAlias();
+    method public int getOrigin();
+    method public int getPurposes();
+    method public java.lang.String[] getSignaturePaddings();
+    method public int getUserAuthenticationValidityDurationSeconds();
+    method public boolean isInsideSecureHardware();
+    method public boolean isUserAuthenticationRequired();
+    method public boolean isUserAuthenticationRequirementEnforcedBySecureHardware();
   }
 
   public class KeyNotYetValidException extends java.security.InvalidKeyException {
@@ -28402,63 +28479,13 @@ package android.security {
     ctor public KeyNotYetValidException(java.lang.String, java.lang.Throwable);
   }
 
-  public final class KeyPairGeneratorSpec implements java.security.spec.AlgorithmParameterSpec {
-    method public java.security.spec.AlgorithmParameterSpec getAlgorithmParameterSpec();
-    method public java.lang.String[] getBlockModes();
-    method public android.content.Context getContext();
-    method public java.lang.String[] getDigests();
-    method public java.lang.String[] getEncryptionPaddings();
-    method public java.util.Date getEndDate();
-    method public int getKeySize();
-    method public java.lang.String getKeyType();
-    method public java.util.Date getKeyValidityForConsumptionEnd();
-    method public java.util.Date getKeyValidityForOriginationEnd();
-    method public java.util.Date getKeyValidityStart();
-    method public java.lang.String getKeystoreAlias();
-    method public int getPurposes();
-    method public java.math.BigInteger getSerialNumber();
-    method public java.lang.String[] getSignaturePaddings();
-    method public java.util.Date getStartDate();
-    method public javax.security.auth.x500.X500Principal getSubjectDN();
-    method public int getUserAuthenticationValidityDurationSeconds();
-    method public boolean isEncryptionRequired();
-    method public boolean isRandomizedEncryptionRequired();
-    method public boolean isUserAuthenticationRequired();
-  }
-
-  public static final class KeyPairGeneratorSpec.Builder {
-    ctor public KeyPairGeneratorSpec.Builder(android.content.Context);
-    method public android.security.KeyPairGeneratorSpec build();
-    method public android.security.KeyPairGeneratorSpec.Builder setAlgorithmParameterSpec(java.security.spec.AlgorithmParameterSpec);
-    method public android.security.KeyPairGeneratorSpec.Builder setAlias(java.lang.String);
-    method public android.security.KeyPairGeneratorSpec.Builder setBlockModes(java.lang.String...);
-    method public android.security.KeyPairGeneratorSpec.Builder setDigests(java.lang.String...);
-    method public android.security.KeyPairGeneratorSpec.Builder setEncryptionPaddings(java.lang.String...);
-    method public android.security.KeyPairGeneratorSpec.Builder setEncryptionRequired();
-    method public android.security.KeyPairGeneratorSpec.Builder setEndDate(java.util.Date);
-    method public android.security.KeyPairGeneratorSpec.Builder setKeySize(int);
-    method public android.security.KeyPairGeneratorSpec.Builder setKeyType(java.lang.String) throws java.security.NoSuchAlgorithmException;
-    method public android.security.KeyPairGeneratorSpec.Builder setKeyValidityEnd(java.util.Date);
-    method public android.security.KeyPairGeneratorSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
-    method public android.security.KeyPairGeneratorSpec.Builder setKeyValidityForOriginationEnd(java.util.Date);
-    method public android.security.KeyPairGeneratorSpec.Builder setKeyValidityStart(java.util.Date);
-    method public android.security.KeyPairGeneratorSpec.Builder setPurposes(int);
-    method public android.security.KeyPairGeneratorSpec.Builder setRandomizedEncryptionRequired(boolean);
-    method public android.security.KeyPairGeneratorSpec.Builder setSerialNumber(java.math.BigInteger);
-    method public android.security.KeyPairGeneratorSpec.Builder setSignaturePaddings(java.lang.String...);
-    method public android.security.KeyPairGeneratorSpec.Builder setStartDate(java.util.Date);
-    method public android.security.KeyPairGeneratorSpec.Builder setSubject(javax.security.auth.x500.X500Principal);
-    method public android.security.KeyPairGeneratorSpec.Builder setUserAuthenticationRequired(boolean);
-    method public android.security.KeyPairGeneratorSpec.Builder setUserAuthenticationValidityDurationSeconds(int);
-  }
-
   public class KeyPermanentlyInvalidatedException extends java.security.InvalidKeyException {
     ctor public KeyPermanentlyInvalidatedException();
     ctor public KeyPermanentlyInvalidatedException(java.lang.String);
     ctor public KeyPermanentlyInvalidatedException(java.lang.String, java.lang.Throwable);
   }
 
-  public abstract class KeyStoreKeyProperties {
+  public abstract class KeyProperties {
     field public static final java.lang.String BLOCK_MODE_CBC = "CBC";
     field public static final java.lang.String BLOCK_MODE_CTR = "CTR";
     field public static final java.lang.String BLOCK_MODE_ECB = "ECB";
@@ -28493,27 +28520,8 @@ package android.security {
     field public static final java.lang.String SIGNATURE_PADDING_RSA_PSS = "PSS";
   }
 
-  public class KeyStoreKeySpec implements java.security.spec.KeySpec {
+  public final class KeyProtection implements java.security.KeyStore.ProtectionParameter {
     method public java.lang.String[] getBlockModes();
-    method public java.lang.String[] getDigests();
-    method public java.lang.String[] getEncryptionPaddings();
-    method public int getKeySize();
-    method public java.util.Date getKeyValidityForConsumptionEnd();
-    method public java.util.Date getKeyValidityForOriginationEnd();
-    method public java.util.Date getKeyValidityStart();
-    method public java.lang.String getKeystoreAlias();
-    method public int getOrigin();
-    method public int getPurposes();
-    method public java.lang.String[] getSignaturePaddings();
-    method public int getUserAuthenticationValidityDurationSeconds();
-    method public boolean isInsideSecureHardware();
-    method public boolean isUserAuthenticationRequired();
-    method public boolean isUserAuthenticationRequirementEnforcedBySecureHardware();
-  }
-
-  public final class KeyStoreParameter implements java.security.KeyStore.ProtectionParameter {
-    method public java.lang.String[] getBlockModes();
-    method public android.content.Context getContext();
     method public java.lang.String[] getDigests();
     method public java.lang.String[] getEncryptionPaddings();
     method public java.util.Date getKeyValidityForConsumptionEnd();
@@ -28523,32 +28531,26 @@ package android.security {
     method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
     method public boolean isDigestsSpecified();
-    method public boolean isEncryptionRequired();
+    method public boolean isEncryptionAtRestRequired();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUserAuthenticationRequired();
   }
 
-  public static final class KeyStoreParameter.Builder {
-    ctor public KeyStoreParameter.Builder(android.content.Context);
-    method public android.security.KeyStoreParameter build();
-    method public android.security.KeyStoreParameter.Builder setBlockModes(java.lang.String...);
-    method public android.security.KeyStoreParameter.Builder setDigests(java.lang.String...);
-    method public android.security.KeyStoreParameter.Builder setEncryptionPaddings(java.lang.String...);
-    method public android.security.KeyStoreParameter.Builder setEncryptionRequired(boolean);
-    method public android.security.KeyStoreParameter.Builder setKeyValidityEnd(java.util.Date);
-    method public android.security.KeyStoreParameter.Builder setKeyValidityForConsumptionEnd(java.util.Date);
-    method public android.security.KeyStoreParameter.Builder setKeyValidityForOriginationEnd(java.util.Date);
-    method public android.security.KeyStoreParameter.Builder setKeyValidityStart(java.util.Date);
-    method public android.security.KeyStoreParameter.Builder setPurposes(int);
-    method public android.security.KeyStoreParameter.Builder setRandomizedEncryptionRequired(boolean);
-    method public android.security.KeyStoreParameter.Builder setSignaturePaddings(java.lang.String...);
-    method public android.security.KeyStoreParameter.Builder setUserAuthenticationRequired(boolean);
-    method public android.security.KeyStoreParameter.Builder setUserAuthenticationValidityDurationSeconds(int);
-  }
-
-  public class NetworkSecurityPolicy {
-    method public static android.security.NetworkSecurityPolicy getInstance();
-    method public boolean isCleartextTrafficPermitted();
+  public static final class KeyProtection.Builder {
+    ctor public KeyProtection.Builder(int);
+    method public android.security.keystore.KeyProtection build();
+    method public android.security.keystore.KeyProtection.Builder setBlockModes(java.lang.String...);
+    method public android.security.keystore.KeyProtection.Builder setDigests(java.lang.String...);
+    method public android.security.keystore.KeyProtection.Builder setEncryptionAtRestRequired(boolean);
+    method public android.security.keystore.KeyProtection.Builder setEncryptionPaddings(java.lang.String...);
+    method public android.security.keystore.KeyProtection.Builder setKeyValidityEnd(java.util.Date);
+    method public android.security.keystore.KeyProtection.Builder setKeyValidityForConsumptionEnd(java.util.Date);
+    method public android.security.keystore.KeyProtection.Builder setKeyValidityForOriginationEnd(java.util.Date);
+    method public android.security.keystore.KeyProtection.Builder setKeyValidityStart(java.util.Date);
+    method public android.security.keystore.KeyProtection.Builder setRandomizedEncryptionRequired(boolean);
+    method public android.security.keystore.KeyProtection.Builder setSignaturePaddings(java.lang.String...);
+    method public android.security.keystore.KeyProtection.Builder setUserAuthenticationRequired(boolean);
+    method public android.security.keystore.KeyProtection.Builder setUserAuthenticationValidityDurationSeconds(int);
   }
 
   public class UserNotAuthenticatedException extends java.security.InvalidKeyException {

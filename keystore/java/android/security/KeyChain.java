@@ -28,6 +28,8 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.security.keystore.KeyProperties;
+
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.security.InvalidKeyException;
@@ -266,7 +268,7 @@ public final class KeyChain {
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
-            @KeyStoreKeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
+            @KeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
             @Nullable String host, int port, @Nullable String alias) {
         choosePrivateKeyAlias(activity, response, keyTypes, issuers, host, port, null, alias);
     }
@@ -312,7 +314,7 @@ public final class KeyChain {
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
-            @KeyStoreKeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
+            @KeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
             @Nullable String host, int port, @Nullable String url, @Nullable String alias) {
         /*
          * TODO currently keyTypes, issuers are unused. They are meant
@@ -439,10 +441,10 @@ public final class KeyChain {
      * "RSA").
      */
     public static boolean isKeyAlgorithmSupported(
-            @NonNull @KeyStoreKeyProperties.KeyAlgorithmEnum String algorithm) {
+            @NonNull @KeyProperties.KeyAlgorithmEnum String algorithm) {
         final String algUpper = algorithm.toUpperCase(Locale.US);
-        return KeyStoreKeyProperties.KEY_ALGORITHM_EC.equals(algUpper)
-                || KeyStoreKeyProperties.KEY_ALGORITHM_RSA.equals(algUpper);
+        return KeyProperties.KEY_ALGORITHM_EC.equals(algUpper)
+                || KeyProperties.KEY_ALGORITHM_RSA.equals(algUpper);
     }
 
     /**
@@ -453,7 +455,7 @@ public final class KeyChain {
      * that makes it non-exportable.
      */
     public static boolean isBoundKeyAlgorithm(
-            @NonNull @KeyStoreKeyProperties.KeyAlgorithmEnum String algorithm) {
+            @NonNull @KeyProperties.KeyAlgorithmEnum String algorithm) {
         if (!isKeyAlgorithmSupported(algorithm)) {
             return false;
         }

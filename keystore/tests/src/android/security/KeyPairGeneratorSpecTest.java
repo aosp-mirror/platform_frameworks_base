@@ -24,11 +24,6 @@ import java.util.Date;
 import javax.security.auth.x500.X500Principal;
 
 public class KeyPairGeneratorSpecTest extends AndroidTestCase {
-    private static final X500Principal DEFAULT_CERT_SUBJECT = new X500Principal("CN=fake");
-    private static final BigInteger DEFAULT_CERT_SERIAL_NUMBER = new BigInteger("1");
-    private static final Date DEFAULT_CERT_NOT_BEFORE = new Date(0L); // Jan 1 1980
-    private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
-
     private static final String TEST_ALIAS_1 = "test1";
 
     private static final X500Principal TEST_DN_1 = new X500Principal("CN=test1");
@@ -110,37 +105,46 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
         }
     }
 
-    public void testConstructor_NullSubjectDN_Success() throws Exception {
-        KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec(
-                getContext(), TEST_ALIAS_1, "RSA", 1024, null, null, SERIAL_1, NOW,
-                NOW_PLUS_10_YEARS, 0);
-        assertEquals(DEFAULT_CERT_SUBJECT, spec.getSubjectDN());
+    public void testConstructor_NullSubjectDN_Failure() throws Exception {
+        try {
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, null, SERIAL_1, NOW,
+                    NOW_PLUS_10_YEARS, 0);
+            fail("Should throw IllegalArgumentException when subjectDN is null");
+        } catch (IllegalArgumentException success) {
+        }
     }
 
-    public void testConstructor_NullSerial_Success() throws Exception {
-        KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec(
-                getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, null, NOW,
-                NOW_PLUS_10_YEARS, 0);
-        assertEquals(DEFAULT_CERT_SERIAL_NUMBER, spec.getSerialNumber());
+    public void testConstructor_NullSerial_Failure() throws Exception {
+        try {
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, null, NOW,
+                    NOW_PLUS_10_YEARS, 0);
+            fail("Should throw IllegalArgumentException when startDate is null");
+        } catch (IllegalArgumentException success) {
+        }
     }
 
-    public void testConstructor_NullStartDate_Success() throws Exception {
-        KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec(
-                getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1, null,
-                NOW_PLUS_10_YEARS, 0);
-        assertEquals(DEFAULT_CERT_NOT_BEFORE, spec.getStartDate());
+    public void testConstructor_NullStartDate_Failure() throws Exception {
+        try {
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1,
+                    null, NOW_PLUS_10_YEARS, 0);
+            fail("Should throw IllegalArgumentException when startDate is null");
+        } catch (IllegalArgumentException success) {
+        }
     }
 
-    public void testConstructor_NullEndDate_Success() throws Exception {
-        KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec(
-                getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1, NOW, null, 0);
-        assertEquals(DEFAULT_CERT_NOT_AFTER, spec.getEndDate());
+    public void testConstructor_NullEndDate_Failure() throws Exception {
+        try {
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1,
+                    NOW, null, 0);
+            fail("Should throw IllegalArgumentException when keystoreAlias is null");
+        } catch (IllegalArgumentException success) {
+        }
     }
 
     public void testConstructor_EndBeforeStart_Failure() throws Exception {
         try {
-            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1,
-                    SERIAL_1, NOW_PLUS_10_YEARS, NOW, 0);
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1,
+                    NOW_PLUS_10_YEARS, NOW, 0);
             fail("Should throw IllegalArgumentException when end is before start");
         } catch (IllegalArgumentException success) {
         }

@@ -16,6 +16,10 @@
 
 package android.security;
 
+import android.annotation.NonNull;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
 import com.android.org.conscrypt.NativeConstants;
 import com.android.org.conscrypt.OpenSSLEngine;
@@ -36,6 +40,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Locale;
 
 /**
  * Provides a way to create instances of a KeyPair which will be placed in the
@@ -54,13 +59,13 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
 
     public static class RSA extends AndroidKeyPairGenerator {
         public RSA() {
-            super(KeyStoreKeyProperties.KEY_ALGORITHM_RSA);
+            super(KeyProperties.KEY_ALGORITHM_RSA);
         }
     }
 
     public static class EC extends AndroidKeyPairGenerator {
         public EC() {
-            super(KeyStoreKeyProperties.KEY_ALGORITHM_EC);
+            super(KeyProperties.KEY_ALGORITHM_EC);
         }
     }
 
@@ -80,18 +85,18 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
 
     private final String mAlgorithm;
 
-    private android.security.KeyStore mKeyStore;
+    private KeyStore mKeyStore;
 
-    private KeyPairGeneratorSpec mSpec;
-    private @KeyStoreKeyProperties.KeyAlgorithmEnum String mKeyAlgorithm;
+    private KeyGenParameterSpec mSpec;
+    private @KeyProperties.KeyAlgorithmEnum String mKeyAlgorithm;
     private int mKeyType;
     private int mKeySize;
 
-    protected AndroidKeyPairGenerator(@KeyStoreKeyProperties.KeyAlgorithmEnum String algorithm) {
+    protected AndroidKeyPairGenerator(@KeyProperties.KeyAlgorithmEnum String algorithm) {
         mAlgorithm = algorithm;
     }
 
-    @KeyStoreKeyProperties.KeyAlgorithmEnum String getAlgorithm() {
+    @KeyProperties.KeyAlgorithmEnum String getAlgorithm() {
         return mAlgorithm;
     }
 
@@ -113,15 +118,16 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
     @Override
     public KeyPair generateKeyPair() {
         if (mKeyStore == null || mSpec == null) {
-            throw new IllegalStateException(
-                    "Must call initialize with an android.security.KeyPairGeneratorSpec first");
+            throw new IllegalStateException("Not initialized");
+
         }
 
-        if (((mSpec.getFlags() & KeyStore.FLAG_ENCRYPTED) != 0)
+        final int flags = mSpec.getFlags();
+        if (((flags & KeyStore.FLAG_ENCRYPTED) != 0)
                 && (mKeyStore.state() != KeyStore.State.UNLOCKED)) {
             throw new IllegalStateException(
-                    "Android keystore must be in initialized and unlocked state "
-                            + "if encryption is required");
+                    "Encryption at rest using secure lock screen credential requested for key pair"
+                    + ", but the user has not yet entered the credential");
         }
 
         final String alias = mSpec.getKeystoreAlias();
@@ -131,8 +137,9 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
         byte[][] args = getArgsForKeyType(mKeyType, mSpec.getAlgorithmParameterSpec());
 
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
+
         if (!mKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF, mKeyType, mKeySize,
-                mSpec.getFlags(), args)) {
+                flags, args)) {
             throw new IllegalStateException("could not generate key in keystore");
         }
 
@@ -175,7 +182,7 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
         }
 
         if (!mKeyStore.put(Credentials.USER_CERTIFICATE + alias, certBytes, KeyStore.UID_SELF,
-                mSpec.getFlags())) {
+                flags)) {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new IllegalStateException("Can't store certificate in AndroidKeyStore");
         }
@@ -188,17 +195,17 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
             throws Exception {
         final X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
         certGen.setPublicKey(publicKey);
-        certGen.setSerialNumber(mSpec.getSerialNumber());
-        certGen.setSubjectDN(mSpec.getSubjectDN());
-        certGen.setIssuerDN(mSpec.getSubjectDN());
-        certGen.setNotBefore(mSpec.getStartDate());
-        certGen.setNotAfter(mSpec.getEndDate());
+        certGen.setSerialNumber(mSpec.getCertificateSerialNumber());
+        certGen.setSubjectDN(mSpec.getCertificateSubject());
+        certGen.setIssuerDN(mSpec.getCertificateSubject());
+        certGen.setNotBefore(mSpec.getCertificateNotBefore());
+        certGen.setNotAfter(mSpec.getCertificateNotAfter());
         certGen.setSignatureAlgorithm(getDefaultSignatureAlgorithmForKeyAlgorithm(mKeyAlgorithm));
         return certGen.generate(privateKey);
     }
 
-    private @KeyStoreKeyProperties.KeyAlgorithmEnum String getKeyAlgorithm(
-            KeyPairGeneratorSpec spec) {
+    @NonNull
+    private @KeyProperties.KeyAlgorithmEnum String getKeyAlgorithm(KeyPairGeneratorSpec spec) {
         String result = spec.getKeyType();
         if (result != null) {
             return result;
@@ -250,10 +257,10 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
     }
 
     private static String getDefaultSignatureAlgorithmForKeyAlgorithm(
-            @KeyStoreKeyProperties.KeyAlgorithmEnum String algorithm) {
-        if (KeyStoreKeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(algorithm)) {
+            @KeyProperties.KeyAlgorithmEnum String algorithm) {
+        if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(algorithm)) {
             return "sha256WithRSA";
-        } else if (KeyStoreKeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(algorithm)) {
+        } else if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(algorithm)) {
             return "sha256WithECDSA";
         } else {
             throw new IllegalArgumentException("Unsupported key type " + algorithm);
@@ -282,14 +289,86 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
             throws InvalidAlgorithmParameterException {
         if (params == null) {
             throw new InvalidAlgorithmParameterException(
-                    "must supply params of type android.security.KeyPairGeneratorSpec");
-        } else if (!(params instanceof KeyPairGeneratorSpec)) {
-            throw new InvalidAlgorithmParameterException(
-                    "params must be of type android.security.KeyPairGeneratorSpec");
+                    "Must supply params of type " + KeyGenParameterSpec.class.getName()
+                    + " or " + KeyPairGeneratorSpec.class.getName());
         }
 
-        KeyPairGeneratorSpec spec = (KeyPairGeneratorSpec) params;
-        @KeyStoreKeyProperties.KeyAlgorithmEnum String keyAlgorithm = getKeyAlgorithm(spec);
+        String keyAlgorithm;
+        KeyGenParameterSpec spec;
+        if (params instanceof KeyPairGeneratorSpec) {
+            KeyPairGeneratorSpec legacySpec = (KeyPairGeneratorSpec) params;
+            try {
+                KeyGenParameterSpec.Builder specBuilder;
+                keyAlgorithm = getKeyAlgorithm(legacySpec).toUpperCase(Locale.US);
+                if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyAlgorithm)) {
+                    specBuilder = new KeyGenParameterSpec.Builder(
+                            legacySpec.getKeystoreAlias(),
+                            KeyProperties.PURPOSE_SIGN
+                            | KeyProperties.PURPOSE_VERIFY);
+                    specBuilder.setDigests(
+                            KeyProperties.DIGEST_NONE,
+                            KeyProperties.DIGEST_MD5,
+                            KeyProperties.DIGEST_SHA1,
+                            KeyProperties.DIGEST_SHA224,
+                            KeyProperties.DIGEST_SHA256,
+                            KeyProperties.DIGEST_SHA384,
+                            KeyProperties.DIGEST_SHA512);
+                } else if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyAlgorithm)) {
+                    specBuilder = new KeyGenParameterSpec.Builder(
+                            legacySpec.getKeystoreAlias(),
+                            KeyProperties.PURPOSE_ENCRYPT
+                            | KeyProperties.PURPOSE_DECRYPT
+                            | KeyProperties.PURPOSE_SIGN
+                            | KeyProperties.PURPOSE_VERIFY);
+                    specBuilder.setDigests(
+                            KeyProperties.DIGEST_NONE,
+                            KeyProperties.DIGEST_MD5,
+                            KeyProperties.DIGEST_SHA1,
+                            KeyProperties.DIGEST_SHA224,
+                            KeyProperties.DIGEST_SHA256,
+                            KeyProperties.DIGEST_SHA384,
+                            KeyProperties.DIGEST_SHA512);
+                    specBuilder.setSignaturePaddings(
+                            KeyProperties.SIGNATURE_PADDING_RSA_PKCS1);
+                    specBuilder.setBlockModes(KeyProperties.BLOCK_MODE_ECB);
+                    specBuilder.setEncryptionPaddings(
+                            KeyProperties.ENCRYPTION_PADDING_NONE,
+                            KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1);
+                    // Disable randomized encryption requirement to support encryption padding NONE
+                    // above.
+                    specBuilder.setRandomizedEncryptionRequired(false);
+                } else {
+                    throw new InvalidAlgorithmParameterException(
+                            "Unsupported key algorithm: " + keyAlgorithm);
+                }
+
+                if (legacySpec.getKeySize() != -1) {
+                    specBuilder.setKeySize(legacySpec.getKeySize());
+                }
+                if (legacySpec.getAlgorithmParameterSpec() != null) {
+                    specBuilder.setAlgorithmParameterSpec(legacySpec.getAlgorithmParameterSpec());
+                }
+                specBuilder.setCertificateSubject(legacySpec.getSubjectDN());
+                specBuilder.setCertificateSerialNumber(legacySpec.getSerialNumber());
+                specBuilder.setCertificateNotBefore(legacySpec.getStartDate());
+                specBuilder.setCertificateNotAfter(legacySpec.getEndDate());
+                specBuilder.setEncryptionAtRestRequired(legacySpec.isEncryptionRequired());
+                specBuilder.setUserAuthenticationRequired(false);
+
+                spec = specBuilder.build();
+            } catch (NullPointerException | IllegalArgumentException e) {
+                throw new InvalidAlgorithmParameterException(e);
+            }
+        } else if (params instanceof KeyGenParameterSpec) {
+            spec = (KeyGenParameterSpec) params;
+            keyAlgorithm = getAlgorithm();
+        } else {
+            throw new InvalidAlgorithmParameterException(
+                    "Unsupported params class: " + params.getClass().getName()
+                    + ". Supported: " + KeyGenParameterSpec.class.getName()
+                    + ", " + KeyPairGeneratorSpec.class);
+        }
+
         int keyType = KeyStore.getKeyTypeForAlgorithm(keyAlgorithm);
         if (keyType == -1) {
             throw new InvalidAlgorithmParameterException(
@@ -300,7 +379,7 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
             keySize = getDefaultKeySize(keyType);
             if (keySize == -1) {
                 throw new InvalidAlgorithmParameterException(
-                    "Unsupported key algorithm: " + keyAlgorithm);
+                        "Unsupported key algorithm: " + keyAlgorithm);
             }
         }
         checkCorrectParametersSpec(keyType, keySize, spec.getAlgorithmParameterSpec());
@@ -310,6 +389,6 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
         mKeyType = keyType;
         mKeySize = keySize;
         mSpec = spec;
-        mKeyStore = android.security.KeyStore.getInstance();
+        mKeyStore = KeyStore.getInstance();
     }
 }

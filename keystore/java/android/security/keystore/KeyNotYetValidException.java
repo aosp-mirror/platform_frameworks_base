@@ -14,34 +14,35 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import java.security.InvalidKeyException;
 
 /**
- * Indicates that a cryptographic operation failed because the employed key's validity end date
- * is in the past.
+ * Indicates that a cryptographic operation failed because the employed key's validity start date
+ * is in the future.
  */
-public class KeyExpiredException extends InvalidKeyException {
+public class KeyNotYetValidException extends InvalidKeyException {
 
     /**
-     * Constructs a new {@code KeyExpiredException} without detail message and cause.
+     * Constructs a new {@code KeyNotYetValidException} without detail message and cause.
      */
-    public KeyExpiredException() {
-        super("Key expired");
+    public KeyNotYetValidException() {
+        super("Key not yet valid");
     }
 
     /**
-     * Constructs a new {@code KeyExpiredException} with the provided detail message and no cause.
+     * Constructs a new {@code KeyNotYetValidException} with the provided detail message and no
+     * cause.
      */
-    public KeyExpiredException(String message) {
+    public KeyNotYetValidException(String message) {
         super(message);
     }
 
     /**
-     * Constructs a new {@code KeyExpiredException} with the provided detail message and cause.
+     * Constructs a new {@code KeyNotYetValidException} with the provided detail message and cause.
      */
-    public KeyExpiredException(String message, Throwable cause) {
+    public KeyNotYetValidException(String message, Throwable cause) {
         super(message, cause);
     }
 }

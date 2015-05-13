@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
+import android.security.keystore.KeyProperties;
 
 import java.security.AlgorithmParameters;
 import java.security.GeneralSecurityException;
@@ -496,7 +497,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
         if ((mIv != null) && (mIv.length > 0)) {
             try {
                 AlgorithmParameters params =
-                        AlgorithmParameters.getInstance(KeyStoreKeyProperties.KEY_ALGORITHM_AES);
+                        AlgorithmParameters.getInstance(KeyProperties.KEY_ALGORITHM_AES);
                 params.init(new IvParameterSpec(mIv));
                 return params;
             } catch (NoSuchAlgorithmException e) {
