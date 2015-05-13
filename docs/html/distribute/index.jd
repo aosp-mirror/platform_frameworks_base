@@ -10,7 +10,13 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
 <div class="dac-hero-carousel" data-carousel-query="collection:distribute/landing/carousel">
 </div>
 
-<section class="dac-section dac-gray dac-small dac-invert"><div class="wrap">
+<div class="wrap dac-offset-parent">
+  <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
+    <i class="dac-sprite dac-arrow-down-gray"></i>
+  </a>
+</div>
+
+<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
       data-query="type:youtube+tag:googleplay+tag:developerstory+tag:featured, type:blog+tag:googleplay+tag:distribute+tag:featured"

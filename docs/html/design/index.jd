@@ -41,8 +41,12 @@ footer.hide=1
     </div>
   </div>
 </section>
-
-<section class="dac-section dac-gray dac-small dac-invert"><div class="wrap">
+<div class="wrap dac-offset-parent">
+  <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
+    <i class="dac-sprite dac-arrow-down-gray"></i>
+  </a>
+</div>
+<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:design/landing/latest"
