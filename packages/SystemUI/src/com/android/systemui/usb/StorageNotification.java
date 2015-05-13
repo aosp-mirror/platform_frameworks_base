@@ -176,7 +176,7 @@ public class StorageNotification extends SystemUI {
                 final CharSequence text = mContext.getString(R.string.ext_media_missing_message);
 
                 final Notification notif = new Notification.Builder(mContext)
-                        .setSmallIcon(R.drawable.stat_notify_sdcard)
+                        .setSmallIcon(R.drawable.ic_sd_card_48dp)
                         .setColor(mContext.getColor(R.color.system_notification_accent_color))
                         .setContentTitle(title)
                         .setContentText(text)
@@ -313,9 +313,10 @@ public class StorageNotification extends SystemUI {
 
             final PendingIntent initIntent = buildInitPendingIntent(vol);
             return buildNotificationBuilder(vol, title, text)
-                    .addAction(new Action(0, mContext.getString(R.string.ext_media_init_action),
-                            initIntent))
-                    .addAction(new Action(0, mContext.getString(R.string.ext_media_unmount_action),
+                    .addAction(new Action(R.drawable.ic_settings_24dp,
+                            mContext.getString(R.string.ext_media_init_action), initIntent))
+                    .addAction(new Action(R.drawable.ic_eject_24dp,
+                            mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
                     .setContentIntent(initIntent)
                     .setDeleteIntent(buildSnoozeIntent(vol))
@@ -329,9 +330,11 @@ public class StorageNotification extends SystemUI {
 
             final PendingIntent browseIntent = buildBrowsePendingIntent(vol);
             return buildNotificationBuilder(vol, title, text)
-                    .addAction(new Action(0, mContext.getString(R.string.ext_media_browse_action),
+                    .addAction(new Action(R.drawable.ic_folder_24dp,
+                            mContext.getString(R.string.ext_media_browse_action),
                             browseIntent))
-                    .addAction(new Action(0, mContext.getString(R.string.ext_media_unmount_action),
+                    .addAction(new Action(R.drawable.ic_eject_24dp,
+                            mContext.getString(R.string.ext_media_unmount_action),
                             buildUnmountPendingIntent(vol)))
                     .setContentIntent(browseIntent)
                     .setDeleteIntent(buildSnoozeIntent(vol))
@@ -430,7 +433,7 @@ public class StorageNotification extends SystemUI {
         }
 
         final Notification notif = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.stat_notify_sdcard)
+                .setSmallIcon(R.drawable.ic_sd_card_48dp)
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentText(text)
@@ -477,7 +480,7 @@ public class StorageNotification extends SystemUI {
         }
 
         final Notification notif = new Notification.Builder(mContext)
-                .setSmallIcon(R.drawable.stat_notify_sdcard)
+                .setSmallIcon(R.drawable.ic_sd_card_48dp)
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentText(text)
@@ -498,14 +501,14 @@ public class StorageNotification extends SystemUI {
             switch (state) {
                 case VolumeInfo.STATE_CHECKING:
                 case VolumeInfo.STATE_EJECTING:
-                    return R.drawable.stat_notify_sdcard_prepare;
+                    return R.drawable.ic_sd_card_48dp;
                 default:
-                    return R.drawable.stat_notify_sdcard;
+                    return R.drawable.ic_sd_card_48dp;
             }
         } else if (disk.isUsb()) {
-            return R.drawable.stat_sys_data_usb;
+            return R.drawable.ic_usb_48dp;
         } else {
-            return R.drawable.stat_notify_sdcard;
+            return R.drawable.ic_sd_card_48dp;
         }
     }
 
