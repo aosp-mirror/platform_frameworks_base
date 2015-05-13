@@ -63,7 +63,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         mConditionProviders.requestConditions(callback, relevance);
     }
 
-    public void evaluateConfig(ZenModeConfig config) {
+    public void evaluateConfig(ZenModeConfig config, boolean processSubscriptione) {
         if (config == null) return;
         if (config.manualRule != null && config.manualRule.condition != null
                 && !config.manualRule.isTrueOrUnknown()) {
@@ -71,18 +71,20 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             config.manualRule = null;
         }
         final ArraySet<Uri> current = new ArraySet<>();
-        evaluateRule(config.manualRule, current);
+        evaluateRule(config.manualRule, current, processSubscriptione);
         for (ZenRule automaticRule : config.automaticRules.values()) {
-            evaluateRule(automaticRule, current);
+            evaluateRule(automaticRule, current, processSubscriptione);
             updateSnoozing(automaticRule);
         }
         final int N = mSubscriptions.size();
         for (int i = N - 1; i >= 0; i--) {
             final Uri id = mSubscriptions.keyAt(i);
             final ComponentName component = mSubscriptions.valueAt(i);
-            if (!current.contains(id)) {
-                mConditionProviders.unsubscribeIfNecessary(component, id);
-                mSubscriptions.removeAt(i);
+            if (processSubscriptione) {
+                if (!current.contains(id)) {
+                    mConditionProviders.unsubscribeIfNecessary(component, id);
+                    mSubscriptions.removeAt(i);
+                }
             }
         }
         mFirstEvaluation = false;
@@ -122,7 +124,7 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         }
     }
 
-    private void evaluateRule(ZenRule rule, ArraySet<Uri> current) {
+    private void evaluateRule(ZenRule rule, ArraySet<Uri> current, boolean processSubscriptions) {
         if (rule == null || rule.conditionId == null) return;
         final Uri id = rule.conditionId;
         boolean isSystemCondition = false;
@@ -148,10 +150,12 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         if (current != null) {
             current.add(id);
         }
-        if (mConditionProviders.subscribeIfNecessary(rule.component, rule.conditionId)) {
-            mSubscriptions.put(rule.conditionId, rule.component);
-        } else {
-            if (DEBUG) Log.d(TAG, "zmc failed to subscribe");
+        if (processSubscriptions) {
+            if (mConditionProviders.subscribeIfNecessary(rule.component, rule.conditionId)) {
+                mSubscriptions.put(rule.conditionId, rule.component);
+            } else {
+                if (DEBUG) Log.d(TAG, "zmc failed to subscribe");
+            }
         }
     }
 
