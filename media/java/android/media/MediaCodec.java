@@ -660,7 +660,7 @@ final public class MediaCodec {
      *            surface in the current state.
      *  @throws IllegalArgumentException if the new surface is not of a suitable type for the codec.
      */
-    public void setSurface(@NonNull Surface surface) {
+    public void setOutputSurface(@NonNull Surface surface) {
         if (!mHasSurface) {
             throw new IllegalStateException("codec was not configured for an output surface");
         }
