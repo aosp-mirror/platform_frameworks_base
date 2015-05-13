@@ -1408,9 +1408,9 @@
     <string name="permdesc_bindCarrierMessagingService">Allows the holder to bind to the top-level interface of a carrier messaging service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_bindCarrierConfigService">bind to a carrier config service</string>
+    <string name="permlab_bindCarrierServices">bind to carrier services</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindCarrierConfigService">Allows the holder to bind to a carrier config service. Should never be needed for normal apps.</string>
+    <string name="permdesc_bindCarrierServices">Allows the holder to bind to carrier services. Should never be needed for normal apps.</string>
 
     <!-- Policy administration -->
 
