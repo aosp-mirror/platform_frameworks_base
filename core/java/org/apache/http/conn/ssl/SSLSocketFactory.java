@@ -397,6 +397,14 @@ public class SSLSocketFactory implements LayeredSocketFactory {
               port,
               autoClose
         );
+        // BEGIN android-added
+        /*
+         * Make sure we have started the handshake before verifying.
+         * Otherwise when we go to the hostname verifier, it directly calls
+         * SSLSocket#getSession() which swallows SSL handshake errors.
+         */
+        sslSocket.startHandshake();
+        // END android-added
         hostnameVerifier.verify(host, sslSocket);
         // verifyHostName() didn't blowup - good!
         return sslSocket;
