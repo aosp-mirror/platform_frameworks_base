@@ -16,12 +16,13 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.os.Handler;
 
 /**
- * The Java representation of the HTML5 Message Port. See
- * https://html.spec.whatwg.org/multipage/comms.html#messageport
- * for definition of MessagePort in HTML5.
+ * The Java representation of the
+ * <a href="https://html.spec.whatwg.org/multipage/comms.html#messageport">
+ * HTML5 message ports.</a>
  *
  * A Message port represents one endpoint of a Message Channel. In Android
  * webview, there is no separate Message Channel object. When a message channel
@@ -32,6 +33,19 @@ import android.os.Handler;
  * When a message port is first created or received via transfer, it does not
  * have a WebMessageCallback to receive web messages. The messages are queued until
  * a WebMessageCallback is set.
+ *
+ * A message port should be closed when it is not used by the embedder application
+ * anymore. A closed port cannot be transferred or cannot be reopened to send
+ * messages. Close can be called multiple times.
+ *
+ * When a port is transferred to JS, it cannot be used to send or receive messages
+ * at the Java side anymore. Different from HTML5 Spec, a port cannot be transferred
+ * if one of these has ever happened: i. a message callback was set, ii. a message was
+ * posted on it. A transferred port cannot be closed by the application, since
+ * the ownership is also transferred.
+ *
+ * It is possible to transfer both ports of a channel to JS, for example for
+ * communication between subframes.
  */
 public abstract class WebMessagePort {
 
@@ -53,6 +67,13 @@ public abstract class WebMessagePort {
          */
         public void onMessage(WebMessagePort port, WebMessage message) { }
     }
+
+    /**
+     * Constructor.
+     * @hide
+     */
+    @SystemApi
+    public WebMessagePort() { }
 
     /**
      * Post a WebMessage to the entangled port.
