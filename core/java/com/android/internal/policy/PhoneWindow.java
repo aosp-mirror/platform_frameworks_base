@@ -3376,9 +3376,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mFloatingActionMode.finish();
             }
             cleanupFloatingActionModeViews();
-            mFloatingToolbar = new FloatingToolbar(mContext, PhoneWindow.this);
-            final FloatingActionMode mode = new FloatingActionMode(
-                    mContext, callback, originatingView, mFloatingToolbar);
+            final FloatingActionMode mode =
+                    new FloatingActionMode(mContext, callback, originatingView);
             mFloatingActionModeOriginatingView = originatingView;
             mFloatingToolbarPreDrawListener =
                 new OnPreDrawListener() {
@@ -3393,6 +3392,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private void setHandledFloatingActionMode(ActionMode mode) {
             mFloatingActionMode = mode;
+            mFloatingToolbar = new FloatingToolbar(mContext, PhoneWindow.this);
+            ((FloatingActionMode) mFloatingActionMode).setFloatingToolbar(mFloatingToolbar);
             mFloatingActionMode.invalidate();
             mFloatingToolbar.show();
             mFloatingActionModeOriginatingView.getViewTreeObserver()
