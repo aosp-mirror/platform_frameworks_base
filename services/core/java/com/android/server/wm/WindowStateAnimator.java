@@ -276,9 +276,6 @@ class WindowStateAnimator {
     // This must be called while inside a transaction.  Returns true if
     // there is more animation to run.
     boolean stepAnimationLocked(long currentTime) {
-        // Save the animation state as it was before this step so WindowManagerService can tell if
-        // we just started or just stopped animating by comparing mWasAnimating with isAnimating().
-        mWasAnimating = mAnimating;
         final DisplayContent displayContent = mWin.getDisplayContent();
         if (displayContent != null && mService.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
