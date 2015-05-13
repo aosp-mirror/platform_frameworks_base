@@ -159,6 +159,12 @@
     <!-- Option to always allow USB debugging from the attached computer -->
     <string name="usb_debugging_always">Always allow from this computer</string>
 
+    <!-- Title of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
+    <string name="usb_debugging_secondary_user_title">USB debugging not allowed</string>
+
+    <!-- Message of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
+    <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user \u201C<xliff:g id="name" example="John Doe">%s</xliff:g>\u201D.</string>
+
     <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
          on a phone).  [CHAR LIMIT=25] -->
     <string name="compat_mode_on">Zoom to fill screen</string>
