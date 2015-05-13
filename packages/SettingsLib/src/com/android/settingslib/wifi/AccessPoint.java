@@ -826,6 +826,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     static String removeDoubleQuotes(String string) {
+        if (TextUtils.isEmpty(string)) {
+            return "";
+        }
         int length = string.length();
         if ((length > 1) && (string.charAt(0) == '"')
                 && (string.charAt(length - 1) == '"')) {
