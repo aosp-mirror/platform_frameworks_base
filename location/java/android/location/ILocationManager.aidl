@@ -77,14 +77,15 @@ interface ILocationManager
     ProviderProperties getProviderProperties(String provider);
     boolean isProviderEnabled(String provider);
 
-    void addTestProvider(String name, in ProviderProperties properties);
-    void removeTestProvider(String provider);
-    void setTestProviderLocation(String provider, in Location loc);
-    void clearTestProviderLocation(String provider);
-    void setTestProviderEnabled(String provider, boolean enabled);
-    void clearTestProviderEnabled(String provider);
-    void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime);
-    void clearTestProviderStatus(String provider);
+    void addTestProvider(String name, in ProviderProperties properties, String opPackageName);
+    void removeTestProvider(String provider, String opPackageName);
+    void setTestProviderLocation(String provider, in Location loc, String opPackageName);
+    void clearTestProviderLocation(String provider, String opPackageName);
+    void setTestProviderEnabled(String provider, boolean enabled, String opPackageName);
+    void clearTestProviderEnabled(String provider, String opPackageName);
+    void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime,
+            String opPackageName);
+    void clearTestProviderStatus(String provider, String opPackageName);
 
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 
