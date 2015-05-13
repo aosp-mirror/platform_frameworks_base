@@ -697,8 +697,7 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
 
         // This is not an unresolved symbol, so it must be the magic @null reference.
         Res_value nullType = {};
-        nullType.dataType = Res_value::TYPE_NULL;
-        nullType.data = Res_value::DATA_NULL_UNDEFINED;
+        nullType.dataType = Res_value::TYPE_REFERENCE;
         return util::make_unique<BinaryPrimitive>(nullType);
     }
 
