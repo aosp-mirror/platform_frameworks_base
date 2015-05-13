@@ -83,7 +83,7 @@ interface IUsbManager
     void clearDefaults(String packageName, int userId);
 
     /* Sets the current USB function. */
-    void setCurrentFunction(String function, boolean makeDefault);
+    void setCurrentFunction(String function);
 
     /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
      * the public key to list of host keys that the user has approved.

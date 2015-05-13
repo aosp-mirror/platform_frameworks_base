@@ -2916,18 +2916,20 @@
     <!-- USB_STORAGE_ERROR dialog  ok button-->
     <string name="dlg_ok">OK</string>
 
+    <!-- USB_PREFERENCES: Notification for when the user connected to the charger only.  This is the title -->
+    <string name="usb_charging_notification_title">USB for charging</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MTP mode.  This is the title -->
-    <string name="usb_mtp_notification_title">Connected as a media device</string>
+    <string name="usb_mtp_notification_title">USB for file transfer</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in PTP mode.  This is the title -->
-    <string name="usb_ptp_notification_title">Connected as a camera</string>
+    <string name="usb_ptp_notification_title">USB for photo transfer</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MIDI mode.  This is the title -->
-    <string name="usb_midi_notification_title">Connected as a MIDI device</string>
+    <string name="usb_midi_notification_title">USB for MIDI</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in mass storage mode (for installer CD image).  This is the title -->
     <string name="usb_cd_installer_notification_title">Connected as an installer</string>
     <!-- USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title -->
     <string name="usb_accessory_notification_title">Connected to a USB accessory</string>
     <!-- See USB_PREFERENCES. This is the message. -->
-    <string name="usb_notification_message">Touch for other USB options.</string>
+    <string name="usb_notification_message">Touch for more options.</string>
 
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
