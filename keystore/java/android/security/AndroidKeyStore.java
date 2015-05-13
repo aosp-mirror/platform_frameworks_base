@@ -476,6 +476,21 @@ public class AndroidKeyStore extends KeyStoreSpi {
                             + ". Key: " + keyAlgorithmString
                             + ", parameter spec: " + Arrays.asList(params.getDigests()));
                 }
+                // When the key is read back from keystore we reconstruct the JCA key algorithm
+                // name from the KM_TAG_ALGORITHM and the first KM_TAG_DIGEST. Thus we need to
+                // ensure that the digest reflected in the JCA key algorithm name is the first
+                // KM_TAG_DIGEST tag.
+                if (keymasterDigests[0] != keymasterDigest) {
+                    // The first digest is not the one implied by the JCA key algorithm name.
+                    // Swap the implied digest with the first one.
+                    for (int i = 0; i < keymasterDigests.length; i++) {
+                        if (keymasterDigests[i] == keymasterDigest) {
+                            keymasterDigests[i] = keymasterDigests[0];
+                            keymasterDigests[0] = keymasterDigest;
+                            break;
+                        }
+                    }
+                }
             }
         } else {
             // No digest specified in parameters
