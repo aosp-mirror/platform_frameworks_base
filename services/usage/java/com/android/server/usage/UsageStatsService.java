@@ -64,6 +64,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.DeviceIdleController;
@@ -90,20 +91,21 @@ public class UsageStatsService extends SystemService implements
     static final String TAG = "UsageStatsService";
 
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
     private static final long TEN_SECONDS = 10 * 1000;
     private static final long ONE_MINUTE = 60 * 1000;
     private static final long TWENTY_MINUTES = 20 * 60 * 1000;
     private static final long FLUSH_INTERVAL = DEBUG ? TEN_SECONDS : TWENTY_MINUTES;
     private static final long TIME_CHANGE_THRESHOLD_MILLIS = 2 * 1000; // Two seconds.
 
-    static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = DEBUG ? ONE_MINUTE * 4 
-            : 1L * 24 * 60 * 60 * 1000; // 1 day
-    static final long DEFAULT_CHECK_IDLE_INTERVAL = DEBUG ? ONE_MINUTE
-            : 8 * 3600 * 1000; // 8 hours
+    static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = DEBUG ? ONE_MINUTE * 4
+            : 1L * 24 * 60 * ONE_MINUTE; // 1 day
+    static final long DEFAULT_CHECK_IDLE_INTERVAL = DEBUG ? ONE_MINUTE / 4
+            : 8 * 60 * ONE_MINUTE; // 8 hours
     static final long DEFAULT_PAROLE_INTERVAL = DEBUG ? ONE_MINUTE * 10
-            : 24 * 60 * 60 * 1000L; // 24 hours between paroles
-    static final long DEFAULT_PAROLE_DURATION = DEBUG ? ONE_MINUTE * 2
-            : 10 * 60 * 1000L; // 10 minutes
+            : 24 * 60 * ONE_MINUTE; // 24 hours between paroles
+    static final long DEFAULT_PAROLE_DURATION = DEBUG ? ONE_MINUTE
+            : 10 * ONE_MINUTE; // 10 minutes
 
     // Handler message types.
     static final int MSG_REPORT_EVENT = 0;
@@ -136,6 +138,9 @@ public class UsageStatsService extends SystemService implements
     long mCheckIdleIntervalMillis = DEFAULT_CHECK_IDLE_INTERVAL;
     long mScreenOnTime;
     long mScreenOnSystemTimeSnapshot;
+
+    @GuardedBy("mLock")
+    private AppIdleHistory mAppIdleHistory = new AppIdleHistory();
 
     private ArrayList<UsageStatsManagerInternal.AppIdleStateChangeListener>
             mPackageAccessListeners = new ArrayList<>();
@@ -346,12 +351,14 @@ public class UsageStatsService extends SystemService implements
                                 | PackageManager.GET_UNINSTALLED_PACKAGES,
                             userId);
             synchronized (mLock) {
+                final long timeNow = checkAndGetTimeLocked();
                 final int packageCount = packages.size();
                 for (int p = 0; p < packageCount; p++) {
                     final String packageName = packages.get(p).packageName;
                     final boolean isIdle = isAppIdleFiltered(packageName, userId);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
                             userId, isIdle ? 1 : 0, packageName));
+                    mAppIdleHistory.addEntry(packageName, userId, isIdle, timeNow);
                 }
             }
         }
@@ -541,6 +548,7 @@ public class UsageStatsService extends SystemService implements
                     // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
                             /* idle = */ 0, event.mPackage));
+                    mAppIdleHistory.addEntry(event.mPackage, userId, false, timeNow);
                 }
             }
         }
@@ -567,6 +575,7 @@ public class UsageStatsService extends SystemService implements
                 // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
                         /* idle = */ idle ? 1 : 0, packageName));
+                mAppIdleHistory.addEntry(packageName, userId, idle, timeNow);
             }
         }
     }
@@ -768,10 +777,14 @@ public class UsageStatsService extends SystemService implements
                     mUserState.valueAt(i).checkin(idpw, screenOnTime);
                 } else {
                     mUserState.valueAt(i).dump(idpw, screenOnTime);
+                    idpw.println();
+                    if (args.length > 0 && "history".equals(args[0])) {
+                        mAppIdleHistory.dump(idpw, mUserState.keyAt(i));
+                    }
                 }
                 idpw.decreaseIndent();
             }
-            pw.write("Screen On Timestamp:" + mScreenOnTime + "\n");
+            pw.write("Screen On Timebase:" + mScreenOnTime + "\n");
         }
     }
 
