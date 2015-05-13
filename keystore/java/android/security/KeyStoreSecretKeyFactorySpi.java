@@ -18,6 +18,8 @@ package android.security;
 
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterDefs;
+import android.security.keystore.KeyInfo;
+import android.security.keystore.KeyProperties;
 
 import libcore.util.EmptyArray;
 
@@ -55,7 +57,7 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             throw new InvalidKeySpecException(
                     "Key material export of Android KeyStore keys is not supported");
         }
-        if (!KeyStoreKeySpec.class.equals(keySpecClass)) {
+        if (!KeyInfo.class.equals(keySpecClass)) {
             throw new InvalidKeySpecException("Unsupported key spec: " + keySpecClass.getName());
         }
         String keyAliasInKeystore = ((KeyStoreSecretKey) key).getAlias();
@@ -75,22 +77,22 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         }
 
         boolean insideSecureHardware;
-        @KeyStoreKeyProperties.OriginEnum int origin;
+        @KeyProperties.OriginEnum int origin;
         int keySize;
-        @KeyStoreKeyProperties.PurposeEnum int purposes;
+        @KeyProperties.PurposeEnum int purposes;
         String[] encryptionPaddings;
-        @KeyStoreKeyProperties.DigestEnum String[] digests;
-        @KeyStoreKeyProperties.BlockModeEnum String[] blockModes;
+        @KeyProperties.DigestEnum String[] digests;
+        @KeyProperties.BlockModeEnum String[] blockModes;
         int keymasterSwEnforcedUserAuthenticators;
         int keymasterHwEnforcedUserAuthenticators;
         try {
             if (keyCharacteristics.hwEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
                 insideSecureHardware = true;
-                origin = KeyStoreKeyProperties.Origin.fromKeymaster(
+                origin = KeyProperties.Origin.fromKeymaster(
                         keyCharacteristics.hwEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else if (keyCharacteristics.swEnforced.containsTag(KeymasterDefs.KM_TAG_ORIGIN)) {
                 insideSecureHardware = false;
-                origin = KeyStoreKeyProperties.Origin.fromKeymaster(
+                origin = KeyProperties.Origin.fromKeymaster(
                         keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_ORIGIN, -1));
             } else {
                 throw new InvalidKeySpecException("Key origin not available");
@@ -100,15 +102,14 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 throw new InvalidKeySpecException("Key size not available");
             }
             keySize = keySizeInteger;
-            purposes = KeyStoreKeyProperties.Purpose.allFromKeymaster(
+            purposes = KeyProperties.Purpose.allFromKeymaster(
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PURPOSE));
 
             List<String> encryptionPaddingsList = new ArrayList<String>();
             for (int keymasterPadding : keyCharacteristics.getInts(KeymasterDefs.KM_TAG_PADDING)) {
-                @KeyStoreKeyProperties.EncryptionPaddingEnum String jcaPadding;
+                @KeyProperties.EncryptionPaddingEnum String jcaPadding;
                 try {
-                    jcaPadding =
-                            KeyStoreKeyProperties.EncryptionPadding.fromKeymaster(keymasterPadding);
+                    jcaPadding = KeyProperties.EncryptionPadding.fromKeymaster(keymasterPadding);
                 } catch (IllegalArgumentException e) {
                     throw new InvalidKeySpecException(
                             "Unsupported encryption padding: " + keymasterPadding);
@@ -118,9 +119,9 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
             encryptionPaddings =
                     encryptionPaddingsList.toArray(new String[encryptionPaddingsList.size()]);
 
-            digests = KeyStoreKeyProperties.Digest.allFromKeymaster(
+            digests = KeyProperties.Digest.allFromKeymaster(
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_DIGEST));
-            blockModes = KeyStoreKeyProperties.BlockMode.allFromKeymaster(
+            blockModes = KeyProperties.BlockMode.allFromKeymaster(
                     keyCharacteristics.getInts(KeymasterDefs.KM_TAG_BLOCK_MODE));
             keymasterSwEnforcedUserAuthenticators =
                     keyCharacteristics.swEnforced.getInt(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 0);
@@ -154,7 +155,7 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 && (keymasterHwEnforcedUserAuthenticators != 0)
                 && (keymasterSwEnforcedUserAuthenticators == 0);
 
-        return new KeyStoreKeySpec(entryAlias,
+        return new KeyInfo(entryAlias,
                 insideSecureHardware,
                 origin,
                 keySize,
