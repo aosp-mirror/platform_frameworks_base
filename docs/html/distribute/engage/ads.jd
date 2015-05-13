@@ -1,0 +1,58 @@
+page.title=Drive engagement with AdWords Ads
+page.metaDescription=Keep users coming back. AdWords offers re-engagement tools to help your app stay top of mind with users.
+page.tags="engagement, adwords"
+page.image=images/cards/adwords_2x.jpg
+@jd:body
+
+<p>Successful apps keep users coming back again and again. AdWords offers app
+re-engagement tools to help your app stay top of  mind with users who’ve
+already installed it on their phone. AdWords can remind them of key features
+and encourage them to try your app again, or help them complete an activity
+they didn't know your app could handle.</p>
+
+<p>
+  <a href="https://support.google.com/adwords/answer/6032073">Get started with AdWords mobile
+  app engagement campaigns</a>.
+</p>
+
+<div>
+ <div class="figure-left" style="width:46%;">
+   <h3>From search</h3>
+   <img src="/images/distribute/promote_ads.png">
+    <p class="figure-caption">Add deep links to your app, then bring users straight
+    to relevant app content when they’re searching.</p>
+  </div>
+  <div class="figure-right" style="width:46%;">
+    <h3>From apps</h3>
+    <img src="/images/distribute/promote_ads_inapp.png">
+    <p class="figure-caption">Use remarketing and deep links to bring users to just the right
+    place in your app to re-engage and convert, from other apps and games they love.</p>
+  </div>
+</div>
+
+<h3 id="tips">Tips</h2>
+
+<ul>
+  <li> Track what users do in your app after they click an ad, by installing the
+    AdWords <a href="https://developers.google.com/app-conversion-tracking/">conversion tracking
+    SDK</a>.
+  <li> Advertise a compelling reason for users to re-engage with your app, such as a
+    reminder or a special offer.
+  <li> <a href="https://developers.google.com/app-indexing/webmasters/app">Add deep links</a> to
+    your app and bring users directly to the most relevant and interesting
+    parts of your app, where they can easily take action.
+  <li> Re-engage with your app users across the Display Network with remarketing lists
+and search with keywords.
+  <li> Use remarketing lists to target high value users so that you can drive more
+conversions in your app.
+</ul>
+
+<h2 id="related_resources">Related resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/engage/reengage"
+  data-sortorder="-timestamp"
+  data-cardsizes="9x3"
+  data-maxresults="6">
+</div>
+
