@@ -127,7 +127,7 @@ public class ZenFooter extends LinearLayout {
         Util.setText(mSummaryLine1, line1);
 
         final String line2 = ZenModeConfig.getConditionSummary(mContext, mConfig,
-                mController.getCurrentUser());
+                mController.getCurrentUser(), true /*shortVersion*/);
         Util.setText(mSummaryLine2, line2);
     }
 

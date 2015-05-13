@@ -2060,6 +2060,10 @@
   <java-symbol type="plurals" name="zen_mode_duration_hours" />
   <java-symbol type="plurals" name="zen_mode_duration_minutes_summary" />
   <java-symbol type="plurals" name="zen_mode_duration_hours_summary" />
+  <java-symbol type="plurals" name="zen_mode_duration_minutes_short" />
+  <java-symbol type="plurals" name="zen_mode_duration_hours_short" />
+  <java-symbol type="plurals" name="zen_mode_duration_minutes_summary_short" />
+  <java-symbol type="plurals" name="zen_mode_duration_hours_summary_short" />
   <java-symbol type="string" name="zen_mode_until" />
   <java-symbol type="string" name="zen_mode_feature_name" />
   <java-symbol type="string" name="zen_mode_downtime_feature_name" />
