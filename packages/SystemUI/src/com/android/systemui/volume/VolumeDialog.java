@@ -533,8 +533,7 @@ public class VolumeDialog {
             }
             Util.setVisOrInvis(row.settingsButton, false);
             row.header.setAlpha(mExpanded && isActive ? 1 : 0.5f);
-            row.slider.setProgressTintList(isActive ? mActiveSliderTint : mInactiveSliderTint);
-            row.slider.setThumbTintList(isActive ? mActiveSliderTint : mInactiveSliderTint);
+            updateVolumeRowSliderTintH(row, isActive);
         }
     }
 
@@ -666,8 +665,18 @@ public class VolumeDialog {
         updateVolumeRowSliderH(row, zenMuted);
     }
 
+    private void updateVolumeRowSliderTintH(VolumeRow row, boolean isActive) {
+        final ColorStateList tint = isActive && row.slider.isEnabled() ? mActiveSliderTint
+                : mInactiveSliderTint;
+        if (tint == row.cachedSliderTint) return;
+        row.cachedSliderTint = tint;
+        row.slider.setProgressTintList(tint);
+        row.slider.setThumbTintList(tint);
+    }
+
     private void updateVolumeRowSliderH(VolumeRow row, boolean zenMuted) {
         row.slider.setEnabled(!zenMuted);
+        updateVolumeRowSliderTintH(row, row.stream == mActiveStream);
         if (row.tracking) {
             return;  // don't update if user is sliding
         }
@@ -1027,6 +1036,7 @@ public class VolumeDialog {
         private int iconMuteRes;
         private boolean important;
         private int cachedIconRes;
+        private ColorStateList cachedSliderTint;
         private int iconState;  // from Events
         private boolean cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
         private int cachedExpandButtonRes;
