@@ -252,7 +252,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase2<MediaFra
             if (persistentSurface != null) {
                 Log.v(TAG, "using persistent surface");
                 surface = persistentSurface;
-                recorder.usePersistentSurface(surface);
+                recorder.setInputSurface(surface);
             }
             recorder.prepare();
             if (persistentSurface == null) {

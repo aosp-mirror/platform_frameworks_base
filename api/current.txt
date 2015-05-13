@@ -15340,6 +15340,7 @@ package android.media {
     method public final void reset();
     method public void setCallback(android.media.MediaCodec.Callback, android.os.Handler);
     method public void setCallback(android.media.MediaCodec.Callback);
+    method public void setInputSurface(android.view.Surface);
     method public void setOnFrameRenderedListener(android.media.MediaCodec.OnFrameRenderedListener, android.os.Handler);
     method public final void setParameters(android.os.Bundle);
     method public void setSurface(android.view.Surface);
@@ -15347,7 +15348,6 @@ package android.media {
     method public final void signalEndOfInputStream();
     method public final void start();
     method public final void stop();
-    method public void usePersistentInputSurface(android.view.Surface);
     field public static final int BUFFER_FLAG_CODEC_CONFIG = 2; // 0x2
     field public static final int BUFFER_FLAG_END_OF_STREAM = 4; // 0x4
     field public static final int BUFFER_FLAG_KEY_FRAME = 1; // 0x1
@@ -16196,6 +16196,7 @@ package android.media {
     method public void setAudioSource(int) throws java.lang.IllegalStateException;
     method public deprecated void setCamera(android.hardware.Camera);
     method public void setCaptureRate(double);
+    method public void setInputSurface(android.view.Surface);
     method public void setLocation(float, float);
     method public void setMaxDuration(int) throws java.lang.IllegalArgumentException;
     method public void setMaxFileSize(long) throws java.lang.IllegalArgumentException;
@@ -16214,7 +16215,6 @@ package android.media {
     method public void setVideoSource(int) throws java.lang.IllegalStateException;
     method public void start() throws java.lang.IllegalStateException;
     method public void stop() throws java.lang.IllegalStateException;
-    method public void usePersistentSurface(android.view.Surface);
     field public static final int MEDIA_ERROR_SERVER_DIED = 100; // 0x64
     field public static final int MEDIA_RECORDER_ERROR_UNKNOWN = 1; // 0x1
     field public static final int MEDIA_RECORDER_INFO_MAX_DURATION_REACHED = 800; // 0x320
