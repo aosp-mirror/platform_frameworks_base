@@ -95,13 +95,15 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
 
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
-                if (Math.abs(h) > mTouchSlop && Math.abs(h) > Math.abs(x - mInitialTouchX)) {
+                if (mTouchingHeadsUpView && Math.abs(h) > mTouchSlop
+                        && Math.abs(h) > Math.abs(x - mInitialTouchX)) {
                     setTrackingHeadsUp(true);
                     mCollapseSnoozes = h < 0;
                     mInitialTouchX = x;
                     mInitialTouchY = y;
                     int expandedHeight = mPickedChild.getActualHeight();
                     mPanel.startExpandMotion(x, y, true /* startTracking */, expandedHeight);
+                    mHeadsUpManager.unpinAll();
                     return true;
                 }
                 break;
