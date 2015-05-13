@@ -32751,7 +32751,7 @@ package android.telephony {
     field public static final java.lang.String BOOL_OPERATOR_SELECTION_EXPAND = "bool_operator_selection_expand";
     field public static final java.lang.String BOOL_PREFER_2G = "bool_prefer_2g";
     field public static final java.lang.String BOOL_SHOW_APN_SETTING_CDMA = "bool_show_apn_setting_cdma";
-    field public static final java.lang.String BOOL_SHOW_CDMA = "bool_show_cdma";
+    field public static final java.lang.String BOOL_SHOW_CDMA_CHOICES = "bool_show_cdma_choices";
     field public static final java.lang.String BOOL_SHOW_ONSCREEN_DIAL_BUTTON = "bool_show_onscreen_dial_button";
     field public static final java.lang.String BOOL_SIM_NETWORK_UNLOCK_ALLOW_DISMISS = "bool_sim_network_unlock_allow_dismiss";
     field public static final java.lang.String BOOL_SUPPORT_PAUSE_IMS_VIDEO_CALLS = "bool_support_pause_ims_video_calls";
