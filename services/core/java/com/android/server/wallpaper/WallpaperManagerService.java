@@ -589,12 +589,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     void switchUser(int userId, IRemoteCallback reply) {
         synchronized (mLock) {
             mCurrentUserId = userId;
-            WallpaperData wallpaper = mWallpaperMap.get(userId);
-            if (wallpaper == null) {
-                wallpaper = new WallpaperData(userId);
-                mWallpaperMap.put(userId, wallpaper);
-                loadSettingsLocked(userId);
-            }
+            WallpaperData wallpaper = getWallpaperSafeLocked(userId);
             // Not started watching yet, in case wallpaper data was loaded for other reasons.
             if (wallpaper.wallpaperObserver == null) {
                 wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
@@ -717,10 +712,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
         synchronized (mLock) {
             int userId = UserHandle.getCallingUserId();
-            WallpaperData wallpaper = mWallpaperMap.get(userId);
-            if (wallpaper == null) {
-                throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
-            }
+            WallpaperData wallpaper = getWallpaperSafeLocked(userId);
             if (width <= 0 || height <= 0) {
                 throw new IllegalArgumentException("width and height must be > 0");
             }
@@ -782,10 +774,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
         synchronized (mLock) {
             int userId = UserHandle.getCallingUserId();
-            WallpaperData wallpaper = mWallpaperMap.get(userId);
-            if (wallpaper == null) {
-                throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
-            }
+            WallpaperData wallpaper = getWallpaperSafeLocked(userId);
             if (padding.left < 0 || padding.top < 0 || padding.right < 0 || padding.bottom < 0) {
                 throw new IllegalArgumentException("padding must be positive: " + padding);
             }
@@ -866,10 +855,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         synchronized (mLock) {
             if (DEBUG) Slog.v(TAG, "setWallpaper");
             int userId = UserHandle.getCallingUserId();
-            WallpaperData wallpaper = mWallpaperMap.get(userId);
-            if (wallpaper == null) {
-                throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
-            }
+            WallpaperData wallpaper = getWallpaperSafeLocked(userId);
             final long ident = Binder.clearCallingIdentity();
             try {
                 ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name, wallpaper);
@@ -1227,6 +1213,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             return defValue;
         }
         return Integer.parseInt(value);
+    }
+
+    /**
+     * Sometimes it is expected the wallpaper map may not have a user's data.  E.g. This could
+     * happen during user switch.  The async user switch observer may not have received
+     * the event yet.  We use this safe method when we don't care about this ordering and just
+     * want to update the data.  The data is going to be applied when the user switch observer
+     * is eventually executed.
+     */
+    private WallpaperData getWallpaperSafeLocked(int userId) {
+        WallpaperData wallpaper = mWallpaperMap.get(userId);
+        if (wallpaper == null) {
+            loadSettingsLocked(userId);
+            wallpaper = mWallpaperMap.get(userId);
+        }
+        return wallpaper;
     }
 
     private void loadSettingsLocked(int userId) {
