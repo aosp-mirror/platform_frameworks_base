@@ -392,6 +392,13 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
         }
         LOG_ALWAYS_FATAL_IF(!isLayer && properties().getHasOverlappingRendering());
         renderer.scaleAlpha(properties().getAlpha());
+
+        if (CC_UNLIKELY(ATRACE_ENABLED() && properties().promotedToLayer())) {
+            // pretend to cause savelayer to warn about performance problem affecting old versions
+            ATRACE_FORMAT("%s alpha caused saveLayer %dx%d", getName(),
+                    static_cast<int>(getWidth()),
+                    static_cast<int>(getHeight()));
+        }
     }
     if (clipFlags) {
         Rect clipRect;
