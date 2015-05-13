@@ -131,8 +131,8 @@ public class CarrierConfigManager {
     /** Used in Cellular Network Settings for preferred network type. */
     public static final String BOOL_PREFER_2G = "bool_prefer_2g";
 
-    /** Show cdma auto network mode in (glabal) roaming */
-    public static final String BOOL_SHOW_CDMA = "bool_show_cdma";
+    /** Show cdma network mode choices 1x, 3G, global etc. */
+    public static final String BOOL_SHOW_CDMA_CHOICES = "bool_show_cdma_choices";
 
     /** CDMA activation goes through HFA */
     public static final String BOOL_USE_HFA_FOR_PROVISIONING = "bool_use_hfa_for_provisioning";
@@ -254,7 +254,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(BOOL_OPERATOR_SELECTION_EXPAND, true);
         sDefaults.putBoolean(BOOL_PREFER_2G, true);
         sDefaults.putBoolean(BOOL_SHOW_APN_SETTING_CDMA, false);
-        sDefaults.putBoolean(BOOL_SHOW_CDMA, false);
+        sDefaults.putBoolean(BOOL_SHOW_CDMA_CHOICES, false);
         sDefaults.putBoolean(BOOL_SHOW_ONSCREEN_DIAL_BUTTON, true);
         sDefaults.putBoolean(BOOL_SIM_NETWORK_UNLOCK_ALLOW_DISMISS, true);
         sDefaults.putBoolean(BOOL_SUPPORT_PAUSE_IMS_VIDEO_CALLS, true);
