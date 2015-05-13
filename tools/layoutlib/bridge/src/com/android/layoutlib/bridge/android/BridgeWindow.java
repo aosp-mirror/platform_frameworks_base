@@ -91,11 +91,11 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
-    public void windowBeginAnimating(int remainingFrameCount) {
+    public void onAnimationStarted(int remainingFrameCount) {
     }
 
     @Override
-    public void windowEndAnimating() {
+    public void onAnimationStopped() {
     }
 
     @Override
