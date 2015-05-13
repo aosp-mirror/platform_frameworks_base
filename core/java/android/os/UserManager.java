@@ -886,6 +886,22 @@ public class UserManager {
     }
 
     /**
+     * Checks whether it's possible to add more managed profiles. Caller must hold the MANAGE_USERS
+     * permission.
+     *
+     * @return true if more managed profiles can be added, false if limit has been reached.
+     * @hide
+     */
+    public boolean canAddMoreManagedProfiles() {
+        try {
+            return mService.canAddMoreManagedProfiles();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not check if we can add more managed profiles", re);
+            return false;
+        }
+    }
+
+    /**
      * Returns list of the profiles of userHandle including
      * userHandle itself.
      * Note that this returns both enabled and not enabled profiles. See
