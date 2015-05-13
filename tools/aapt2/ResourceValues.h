@@ -222,6 +222,7 @@ struct Attribute : public BaseValue<Attribute> {
 
     bool isWeak() const override;
     virtual Attribute* clone(StringPool* newPool) const override;
+    void printMask(std::ostream& out) const;
     virtual void print(std::ostream& out) const override;
 };
 
@@ -278,6 +279,10 @@ struct Styleable : public BaseValue<Styleable> {
 inline ::std::ostream& operator<<(::std::ostream& out, const Value& value) {
     value.print(out);
     return out;
+}
+
+inline ::std::ostream& operator<<(::std::ostream& out, const Attribute::Symbol& s) {
+    return out << s.symbol.name.entry << "=" << s.value;
 }
 
 /**

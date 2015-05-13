@@ -32,7 +32,8 @@ struct LinkerTest : public ::testing::Test {
         mTable->setPackage(u"android");
         mTable->setPackageId(0x01);
         mLinker = std::make_shared<Linker>(mTable, std::make_shared<ResourceTableResolver>(
-                mTable, std::make_shared<android::AssetManager>()));
+                mTable, std::vector<std::shared_ptr<const android::AssetManager>>()),
+                Linker::Options{});
 
         // Create a few attributes for use in the tests.
 

@@ -475,8 +475,15 @@ bool BinaryResourceParser::parsePublic(const ResChunk_header* chunk) {
             source.line = entry->sourceLine;
         }
 
-        if (!mTable->markPublic(name, resId, source)) {
+        if (!mTable->markPublicAllowMangled(name, resId, source)) {
             return false;
+        }
+
+        // Add this resource name->id mapping to the index so
+        // that we can resolve all ID references to name references.
+        auto cacheIter = mIdIndex.find(resId);
+        if (cacheIter == mIdIndex.end()) {
+            mIdIndex.insert({ resId, name });
         }
 
         entry++;
@@ -611,12 +618,12 @@ bool BinaryResourceParser::parseType(const ResChunk_header* chunk) {
             source.line = sourceBlock->line;
         }
 
-        if (!mTable->addResource(name, config, source, std::move(resourceValue))) {
+        if (!mTable->addResourceAllowMangled(name, config, source, std::move(resourceValue))) {
             return false;
         }
 
         if ((entry->flags & ResTable_entry::FLAG_PUBLIC) != 0) {
-            if (!mTable->markPublic(name, resId, mSource.line(0))) {
+            if (!mTable->markPublicAllowMangled(name, resId, mSource.line(0))) {
                 return false;
             }
         }
@@ -635,6 +642,10 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
                                                        const ConfigDescription& config,
                                                        const Res_value* value,
                                                        uint16_t flags) {
+    if (name.type == ResourceType::kId) {
+        return util::make_unique<Id>();
+    }
+
     if (value->dataType == Res_value::TYPE_STRING) {
         StringPiece16 str = util::getString(mValuePool, value->data);
 
@@ -695,13 +706,6 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
         return util::make_unique<RawString>(
                 mTable->getValueStringPool().makeRef(util::getString(mValuePool, value->data),
                                                     StringPool::Context{ 1, config }));
-    }
-
-    if (name.type == ResourceType::kId ||
-            (value->dataType == Res_value::TYPE_NULL &&
-            value->data == Res_value::DATA_NULL_UNDEFINED &&
-            (flags & ResTable_entry::FLAG_WEAK) != 0)) {
-        return util::make_unique<Id>();
     }
 
     // Treat this as a raw binary primitive.
@@ -789,10 +793,21 @@ std::unique_ptr<Attribute> BinaryResourceParser::parseAttr(const ResourceNameRef
                 continue;
             }
 
-            attr->symbols.push_back(Attribute::Symbol{
-                    Reference(mapEntry.name.ident),
-                    mapEntry.value.data
-            });
+            Attribute::Symbol symbol;
+            symbol.value = mapEntry.value.data;
+            if (mapEntry.name.ident == 0) {
+                // The map entry's key (id) is not set. This must be
+                // a symbol reference, so resolve it.
+                ResourceNameRef symbolName;
+                bool result = getSymbol(&mapEntry.name.ident, &symbolName);
+                assert(result);
+                symbol.symbol.name = symbolName.toResourceName();
+            } else {
+                // The map entry's key (id) is a regular reference.
+                symbol.symbol.id = mapEntry.name.ident;
+            }
+
+            attr->symbols.push_back(std::move(symbol));
         }
     }
 
