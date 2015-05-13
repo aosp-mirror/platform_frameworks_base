@@ -1137,7 +1137,7 @@ public class Paint_Delegate {
     }
 
     private void reset() {
-        mFlags = Paint.DEFAULT_PAINT_FLAGS | Paint.HIDDEN_DEFAULT_PAINT_FLAGS;
+        mFlags = Paint.HIDDEN_DEFAULT_PAINT_FLAGS;
         mColor = 0xFF000000;
         mStyle = Paint.Style.FILL.nativeInt;
         mCap = Paint.Cap.BUTT.nativeInt;
