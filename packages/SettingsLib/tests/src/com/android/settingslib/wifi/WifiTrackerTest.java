@@ -23,9 +23,12 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiSsid;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 
 import com.android.settingslib.BaseTest;
+import com.android.settingslib.wifi.WifiTracker.Scanner;
 import com.android.settingslib.wifi.WifiTracker.WifiListener;
 
 import org.mockito.ArgumentCaptor;
@@ -54,13 +57,25 @@ public class WifiTrackerTest extends BaseTest {
 
     private WifiTracker mWifiTracker;
 
+    private HandlerThread mWorkerThread;
+    private Looper mLooper;
+    private HandlerThread mMainThread;
+    private Looper mMainLooper;
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
         mWifiManager = Mockito.mock(WifiManager.class);
         mWifiListener = Mockito.mock(WifiListener.class);
-        mWifiTracker = new WifiTracker(mContext, mWifiListener, true, true, mWifiManager);
+        mWorkerThread = new HandlerThread("TestHandlerThread");
+        mWorkerThread.start();
+        mLooper = mWorkerThread.getLooper();
+        mMainThread = new HandlerThread("TestHandlerThread");
+        mMainThread.start();
+        mMainLooper = mMainThread.getLooper();
+        mWifiTracker = new WifiTracker(mContext, mWifiListener, mLooper, true, true, true,
+                mWifiManager, mMainLooper);
         mWifiTracker.mScanner = mWifiTracker.new Scanner();
         Mockito.when(mWifiManager.isWifiEnabled()).thenReturn(true);
     }
@@ -76,13 +91,14 @@ public class WifiTrackerTest extends BaseTest {
     }
 
     public void testAccessPointsCallback() {
-        sendScanResultsAvailable();
+        sendScanResultsAndProcess(false);
 
         Mockito.verify(mWifiListener, Mockito.atLeastOnce()).onAccessPointsChanged();
     }
 
     public void testConnectedCallback() {
         sendConnected();
+        waitForThreads();
 
         Mockito.verify(mWifiListener, Mockito.atLeastOnce()).onConnectedChanged();
         assertEquals(true, mWifiTracker.isConnected());
@@ -94,6 +110,7 @@ public class WifiTrackerTest extends BaseTest {
         Intent i = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
         i.putExtra(WifiManager.EXTRA_WIFI_STATE, TEST_WIFI_STATE);
         mWifiTracker.mReceiver.onReceive(mContext, i);
+        waitForThreads();
 
         ArgumentCaptor<Integer> wifiState = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(mWifiListener, Mockito.atLeastOnce())
@@ -106,7 +123,7 @@ public class WifiTrackerTest extends BaseTest {
         // Make scans be successful.
         Mockito.when(mWifiManager.startScan()).thenReturn(true);
 
-        mWifiTracker.mScanner.handleMessage(null);
+        mWifiTracker.mScanner.handleMessage(mWifiTracker.mScanner.obtainMessage(Scanner.MSG_SCAN));
         Mockito.verify(mWifiManager, Mockito.atLeastOnce()).startScan();
     }
 
@@ -121,7 +138,7 @@ public class WifiTrackerTest extends BaseTest {
         // Send all of the configs and scan results to the tracker.
         Mockito.when(mWifiManager.getConfiguredNetworks()).thenReturn(wifiConfigs);
         Mockito.when(mWifiManager.getScanResults()).thenReturn(scanResults);
-        sendScanResultsAvailable();
+        sendScanResultsAndProcess(false);
 
         List<AccessPoint> accessPoints = mWifiTracker.getAccessPoints();
         assertEquals("Expected number of results", NUM_NETWORKS, accessPoints.size());
@@ -131,7 +148,8 @@ public class WifiTrackerTest extends BaseTest {
     }
 
     public void testSavedOnly() {
-        mWifiTracker = new WifiTracker(mContext, mWifiListener, true, false, mWifiManager);
+        mWifiTracker = new WifiTracker(mContext, mWifiListener, mLooper, true, false, true,
+                mWifiManager, mMainLooper);
         mWifiTracker.mScanner = mWifiTracker.new Scanner();
 
         List<WifiConfiguration> wifiConfigs = new ArrayList<WifiConfiguration>();
@@ -144,7 +162,7 @@ public class WifiTrackerTest extends BaseTest {
         // Send all of the configs and scan results to the tracker.
         Mockito.when(mWifiManager.getConfiguredNetworks()).thenReturn(wifiConfigs);
         Mockito.when(mWifiManager.getScanResults()).thenReturn(scanResults);
-        sendScanResultsAvailable();
+        sendScanResultsAndProcess(false);
 
         List<AccessPoint> accessPoints = mWifiTracker.getAccessPoints();
         // Only expect the first two to come back in the results.
@@ -154,7 +172,8 @@ public class WifiTrackerTest extends BaseTest {
     }
 
     public void testAvailableOnly() {
-        mWifiTracker = new WifiTracker(mContext, mWifiListener, false, true, mWifiManager);
+        mWifiTracker = new WifiTracker(mContext, mWifiListener, mLooper, false, true, true,
+                mWifiManager, mMainLooper);
         mWifiTracker.mScanner = mWifiTracker.new Scanner();
 
         List<WifiConfiguration> wifiConfigs = new ArrayList<WifiConfiguration>();
@@ -167,7 +186,7 @@ public class WifiTrackerTest extends BaseTest {
         // Send all of the configs and scan results to the tracker.
         Mockito.when(mWifiManager.getConfiguredNetworks()).thenReturn(wifiConfigs);
         Mockito.when(mWifiManager.getScanResults()).thenReturn(scanResults);
-        sendScanResultsAvailable();
+        sendScanResultsAndProcess(false);
 
         // Expect the last one (sorted order) to be left off since its only saved.
         List<AccessPoint> accessPoints = mWifiTracker.getAccessPoints();
@@ -178,12 +197,13 @@ public class WifiTrackerTest extends BaseTest {
     }
 
     public void testNonEphemeralConnected() {
-        mWifiTracker = new WifiTracker(mContext, mWifiListener, false, true, mWifiManager);
+        mWifiTracker = new WifiTracker(mContext, mWifiListener, mLooper, false, true, true,
+                mWifiManager, mMainLooper);
         mWifiTracker.mScanner = mWifiTracker.new Scanner();
 
         List<WifiConfiguration> wifiConfigs = new ArrayList<WifiConfiguration>();
         List<ScanResult> scanResults = new ArrayList<ScanResult>();
-        String[] expectedSsids = generateTestNetworks(wifiConfigs, scanResults, false);
+        generateTestNetworks(wifiConfigs, scanResults, false);
 
         // Tell WifiTracker we are connected now.
         sendConnected();
@@ -191,9 +211,8 @@ public class WifiTrackerTest extends BaseTest {
         // Send all of the configs and scan results to the tracker.
         Mockito.when(mWifiManager.getConfiguredNetworks()).thenReturn(wifiConfigs);
         Mockito.when(mWifiManager.getScanResults()).thenReturn(scanResults);
-        sendScanResultsAvailable();
         // Do this twice to catch a bug that was happening in the caching, making things ephemeral.
-        sendScanResultsAvailable();
+        sendScanResultsAndProcess(true);
 
         List<AccessPoint> accessPoints = mWifiTracker.getAccessPoints();
         assertEquals("Expected number of results", NUM_NETWORKS - 1, accessPoints.size());
@@ -299,9 +318,28 @@ public class WifiTrackerTest extends BaseTest {
         mWifiTracker.mReceiver.onReceive(mContext, intent);
     }
 
-    private void sendScanResultsAvailable() {
+    private void sendScanResultsAndProcess(boolean sendTwice) {
         Intent i = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         mWifiTracker.mReceiver.onReceive(mContext, i);
+        if (sendTwice) {
+            mWifiTracker.mReceiver.onReceive(mContext, i);
+        }
+        waitForThreads();
+    }
+
+    private void waitForThreads() {
+        // Run all processing.
+        mWorkerThread.quitSafely();
+        try {
+            mWorkerThread.join();
+        } catch (InterruptedException e) {
+        }
+        // Send all callbacks.
+        mMainThread.quitSafely();
+        try {
+            mMainThread.join();
+        } catch (InterruptedException e) {
+        }
     }
 
 }

@@ -95,20 +95,20 @@ public class WifiTracker {
     public WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
             boolean includeSaved, boolean includeScans, boolean includePasspoints) {
         this(context, wifiListener, workerLooper, includeSaved, includeScans, includePasspoints,
-                (WifiManager) context.getSystemService(Context.WIFI_SERVICE));
+                (WifiManager) context.getSystemService(Context.WIFI_SERVICE), Looper.myLooper());
     }
 
     @VisibleForTesting
     WifiTracker(Context context, WifiListener wifiListener, Looper workerLooper,
             boolean includeSaved, boolean includeScans, boolean includePasspoints,
-            WifiManager wifiManager) {
+            WifiManager wifiManager, Looper currentLooper) {
         if (!includeSaved && !includeScans) {
             throw new IllegalArgumentException("Must include either saved or scans");
         }
         mContext = context;
-        mMainHandler = new MainHandler();
+        mMainHandler = new MainHandler(currentLooper);
         mWorkHandler = new WorkHandler(
-                workerLooper != null ? workerLooper : Looper.myLooper());
+                workerLooper != null ? workerLooper : currentLooper);
         mWifiManager = wifiManager;
         mIncludeSaved = includeSaved;
         mIncludeScans = includeScans;
@@ -439,6 +439,10 @@ public class WifiTracker {
         private static final int MSG_WIFI_STATE_CHANGED = 1;
         private static final int MSG_ACCESS_POINT_CHANGED = 2;
 
+        public MainHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (mListener == null) {
@@ -481,7 +485,7 @@ public class WifiTracker {
 
     @VisibleForTesting
     class Scanner extends Handler {
-        private static final int MSG_SCAN = 0;
+        static final int MSG_SCAN = 0;
 
         private int mRetry = 0;
 
