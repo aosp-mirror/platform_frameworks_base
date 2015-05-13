@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
+import android.security.Credentials;
+import android.security.KeyStore;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterDefs;
-import android.security.keystore.KeyInfo;
-import android.security.keystore.KeyProperties;
 
 import libcore.util.EmptyArray;
 
@@ -39,7 +39,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @hide
  */
-public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
+public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
 
     private final KeyStore mKeyStore = KeyStore.getInstance();
 
@@ -49,7 +49,7 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         if (keySpecClass == null) {
             throw new InvalidKeySpecException("keySpecClass == null");
         }
-        if (!(key instanceof KeyStoreSecretKey)) {
+        if (!(key instanceof AndroidKeyStoreSecretKey)) {
             throw new InvalidKeySpecException("Only Android KeyStore secret keys supported: " +
                     ((key != null) ? key.getClass().getName() : "null"));
         }
@@ -60,7 +60,7 @@ public class KeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         if (!KeyInfo.class.equals(keySpecClass)) {
             throw new InvalidKeySpecException("Unsupported key spec: " + keySpecClass.getName());
         }
-        String keyAliasInKeystore = ((KeyStoreSecretKey) key).getAlias();
+        String keyAliasInKeystore = ((AndroidKeyStoreSecretKey) key).getAlias();
         String entryAlias;
         if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)) {
             entryAlias = keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());

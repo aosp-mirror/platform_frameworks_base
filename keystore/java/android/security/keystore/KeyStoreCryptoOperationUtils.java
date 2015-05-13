@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
+import android.security.KeyStore;
 import android.security.keymaster.KeymasterDefs;
-import android.security.keystore.UserNotAuthenticatedException;
 
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -41,7 +41,7 @@ abstract class KeyStoreCryptoOperationUtils {
      * the {@code init} method should succeed.
      */
     static InvalidKeyException getInvalidKeyExceptionForInit(
-            KeyStore keyStore, KeyStoreKey key, int beginOpResultCode) {
+            KeyStore keyStore, AndroidKeyStoreKey key, int beginOpResultCode) {
         if (beginOpResultCode == KeyStore.NO_ERROR) {
             return null;
         }
@@ -69,8 +69,8 @@ abstract class KeyStoreCryptoOperationUtils {
      * in response to {@code KeyStore.begin} operation or {@code null} if the {@code init} method
      * should succeed.
      */
-    static GeneralSecurityException getExceptionForCipherInit(
-            KeyStore keyStore, KeyStoreKey key, int beginOpResultCode) {
+    public static GeneralSecurityException getExceptionForCipherInit(
+            KeyStore keyStore, AndroidKeyStoreKey key, int beginOpResultCode) {
         if (beginOpResultCode == KeyStore.NO_ERROR) {
             return null;
         }

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import android.annotation.NonNull;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
+import android.security.Credentials;
+import android.security.KeyPairGeneratorSpec;
+import android.security.KeyStore;
 
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
 import com.android.org.conscrypt.NativeConstants;
@@ -55,15 +56,15 @@ import java.util.Locale;
  *
  * {@hide}
  */
-public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
+public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
 
-    public static class RSA extends AndroidKeyPairGenerator {
+    public static class RSA extends AndroidKeyPairGeneratorSpi {
         public RSA() {
             super(KeyProperties.KEY_ALGORITHM_RSA);
         }
     }
 
-    public static class EC extends AndroidKeyPairGenerator {
+    public static class EC extends AndroidKeyPairGeneratorSpi {
         public EC() {
             super(KeyProperties.KEY_ALGORITHM_EC);
         }
@@ -92,7 +93,7 @@ public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
     private int mKeyType;
     private int mKeySize;
 
-    protected AndroidKeyPairGenerator(@KeyProperties.KeyAlgorithmEnum String algorithm) {
+    protected AndroidKeyPairGeneratorSpi(@KeyProperties.KeyAlgorithmEnum String algorithm) {
         mAlgorithm = algorithm;
     }
 

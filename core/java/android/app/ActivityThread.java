@@ -96,7 +96,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScriptCacheDir;
-import android.security.AndroidKeyStoreProvider;
+import android.security.keystore.AndroidKeyStoreProvider;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
