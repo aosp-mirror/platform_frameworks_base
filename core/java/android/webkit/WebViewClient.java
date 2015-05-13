@@ -233,8 +233,17 @@ public class WebViewClient {
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         if (request.isForMainFrame()) {
             onReceivedError(view,
-                    error.getErrorCode(), error.getDescription(), request.getUrl().toString());
+                    error.getErrorCode(), error.getDescription().toString(),
+                    request.getUrl().toString());
         }
+    }
+
+    /**
+     * This method will be deleted after updated WebView.apk will be submitted
+     * into the Android tree.
+     */
+    public void onReceivedHttpError(
+            WebView view, WebResourceRequest request, WebResourceResponseBase errorResponse) {
     }
 
     /**
@@ -248,7 +257,7 @@ public class WebViewClient {
      * @param errorResponse Information about the error occured.
      */
     public void onReceivedHttpError(
-            WebView view, WebResourceRequest request, WebResourceResponseBase errorResponse) {
+            WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
     }
 
     /**
