@@ -1,0 +1,39 @@
+page.title=Drive On-Device Discovery through Android Intents
+page.metaDescription=Make your app available to users as they perform tasks in other apps through Intents. 
+page.tags="engagement"
+@jd:body
+
+<p>Let the user choose <em>your app</em> to handle specific tasks from another app,
+such as sharing a picture, sending a message, or playing music. You can do this though
+Android's open Intents system. By adding Intent filters for the tasks your app can handle,
+you make it easy for the user to access your app’s features from other apps and from voice
+commands in Google Now.</p>
+
+<img src="{@docRoot}images/distribute/engage-intents.png">
+
+<p>By declaring Intent Filters in your app, it informs the Android OS about the
+actions it can perform for other apps. And in addition to making it easy for
+your users to make full use of your app’s features, it can help them discover
+features they didn’t know it supported.</p>
+
+<p>To learn about all the ways you can use Intents, check out <a
+href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.</p>
+
+<h2 id=tips>Tips</h2>
+
+<ul>
+  <li> Identify and package any features your app can offer to other apps.
+  <li> Use the "view" intent to give users the option to open any links to your
+website within your app instead.
+  <li> Familiarize yourself with actions commonly accomplished with intents, such as
+sharing, so that you can focus on your app's core functionality and outsource
+common actions.
+</ul>
+
+<h2 style="clear:both" id="related-resources">Related Resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/engage/intents"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
