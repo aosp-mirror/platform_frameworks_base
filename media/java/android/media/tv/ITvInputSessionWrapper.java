@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -172,7 +173,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_TIME_SHIFT_SET_PLAYBACK_RATE: {
-                mTvInputSessionImpl.timeShiftSetPlaybackRate((Float) msg.obj, msg.arg1);
+                PlaybackParams params = new PlaybackParams()
+                        .setSpeed((Float) msg.obj)
+                        .setAudioFallbackMode(msg.arg1);
+                mTvInputSessionImpl.timeShiftSetPlaybackParams(params);
                 break;
             }
             case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
