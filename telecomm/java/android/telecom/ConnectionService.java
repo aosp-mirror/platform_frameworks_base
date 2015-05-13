@@ -50,7 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <pre>
  * &lt;service android:name="com.example.package.MyConnectionService"
  *    android:label="@string/some_label_for_my_connection_service"
- *    android:permission="android.permission.BIND_CONNECTION_SERVICE"&gt;
+ *    android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"&gt;
  *  &lt;intent-filter&gt;
  *   &lt;action android:name="android.telecom.ConnectionService" /&gt;
  *  &lt;/intent-filter&gt;

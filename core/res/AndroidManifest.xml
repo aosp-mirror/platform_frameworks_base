@@ -1186,9 +1186,19 @@
         android:protectionLevel="system|signature" />
 
     <!-- Must be required by a {@link android.telecom.ConnectionService},
-         to ensure that only the system can bind to it. -->
+         to ensure that only the system can bind to it.
+         @deprecated {@link android.telecom.ConnectionService}s should require
+                 android.permission.BIND_TELECOM_CONNECTION_SERVICE instead.
+         @SystemApi
+         @hide -->
     <permission android:name="android.permission.BIND_CONNECTION_SERVICE"
         android:protectionLevel="system|signature" />
+
+    <!-- Must be required by a {@link android.telecom.ConnectionService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
+        android:protectionLevel="system|signature" />
+
 
     <!-- @SystemApi Allows an application to control the in-call experience.
          @hide -->
