@@ -265,6 +265,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
     private static final String TAG_LOCKSCREEN = TAG + POSTFIX_LOCKSCREEN;
+    private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_LRU = TAG + POSTFIX_LRU;
     private static final String TAG_MU = TAG + POSTFIX_MU;
     private static final String TAG_OOM_ADJ = TAG + POSTFIX_OOM_ADJ;
@@ -8762,6 +8763,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             throw new SecurityException("updateLockTaskPackage called from non-system process");
         }
         synchronized (this) {
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" + packages);
             mLockTaskPackages.put(userId, packages);
             mStackSupervisor.onLockTaskPackagesUpdatedLocked();
         }
@@ -8769,6 +8771,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
 
     void startLockTaskModeLocked(TaskRecord task) {
+        if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "startLockTaskModeLocked: " + task);
         if (task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {
             return;
         }
@@ -8785,6 +8788,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 task.mLockTaskUid = callingUid;
                 if (task.mLockTaskAuth == LOCK_TASK_AUTH_PINNABLE) {
                     // startLockTask() called by app and task mode is lockTaskModeDefault.
+                    if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Mode default, asking user");
                     StatusBarManagerInternal statusBarManager =
                             LocalServices.getService(StatusBarManagerInternal.class);
                     if (statusBarManager != null) {
@@ -8797,6 +8801,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new IllegalArgumentException("Invalid task, not in foreground");
                 }
             }
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, isSystemInitiated ? "Locking pinned" :
+                    "Locking fully");
             mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated ?
                     ActivityManager.LOCK_TASK_MODE_PINNED :
                     ActivityManager.LOCK_TASK_MODE_LOCKED,
