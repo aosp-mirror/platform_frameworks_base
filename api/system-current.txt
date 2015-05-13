@@ -30132,18 +30132,6 @@ package android.renderscript {
     field public static final int UPPER = 121; // 0x79
   }
 
-  public static abstract class ScriptIntrinsicBLAS.Diag implements java.lang.annotation.Annotation {
-  }
-
-  public static abstract class ScriptIntrinsicBLAS.Side implements java.lang.annotation.Annotation {
-  }
-
-  public static abstract class ScriptIntrinsicBLAS.Transpose implements java.lang.annotation.Annotation {
-  }
-
-  public static abstract class ScriptIntrinsicBLAS.Uplo implements java.lang.annotation.Annotation {
-  }
-
   public class ScriptIntrinsicBlend extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicBlend create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEachAdd(android.renderscript.Allocation, android.renderscript.Allocation);
