@@ -191,6 +191,32 @@ TEST_F(ResourceParserTest, ParseEscapedString) {
     EXPECT_EQ(std::u16string(u"?123"), *str->value);
 }
 
+TEST_F(ResourceParserTest, ParseNull) {
+    std::string input = "<integer name=\"foo\">@null</integer>";
+    ASSERT_TRUE(testParse(input));
+
+    // The Android runtime treats a value of android::Res_value::TYPE_NULL as
+    // a non-existing value, and this causes problems in styles when trying to resolve
+    // an attribute. Null values must be encoded as android::Res_value::TYPE_REFERENCE
+    // with a data value of 0.
+    const BinaryPrimitive* integer = findResource<BinaryPrimitive>(ResourceName{
+            u"android", ResourceType::kInteger, u"foo" });
+    ASSERT_NE(nullptr, integer);
+    EXPECT_EQ(uint16_t(android::Res_value::TYPE_REFERENCE), integer->value.dataType);
+    EXPECT_EQ(0u, integer->value.data);
+}
+
+TEST_F(ResourceParserTest, ParseEmpty) {
+    std::string input = "<integer name=\"foo\">@empty</integer>";
+    ASSERT_TRUE(testParse(input));
+
+    const BinaryPrimitive* integer = findResource<BinaryPrimitive>(ResourceName{
+            u"android", ResourceType::kInteger, u"foo" });
+    ASSERT_NE(nullptr, integer);
+    EXPECT_EQ(uint16_t(android::Res_value::TYPE_NULL), integer->value.dataType);
+    EXPECT_EQ(uint32_t(android::Res_value::DATA_NULL_EMPTY), integer->value.data);
+}
+
 TEST_F(ResourceParserTest, ParseAttr) {
     std::string input = "<attr name=\"foo\" format=\"string\"/>\n"
                         "<attr name=\"bar\"/>";
