@@ -85,13 +85,11 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"Iskanje"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Fotoaparat"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefon"</string>
-    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
-    <skip />
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Glasovni pomočnik"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Odkleni"</string>
     <string name="unlock_label" msgid="8779712358041029439">"odkleni"</string>
     <string name="phone_label" msgid="2320074140205331708">"odpri telefon"</string>
-    <!-- no translation found for voice_assist_label (3956854378310019854) -->
-    <skip />
+    <string name="voice_assist_label" msgid="3956854378310019854">"odpri glasovnega pomočnika"</string>
     <string name="camera_label" msgid="7261107956054836961">"odpri fotoaparat"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Izberite novo postavitev opravil"</string>
     <string name="cancel" msgid="6442560571259935130">"Prekliči"</string>
@@ -318,12 +316,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Manj nujna obvestila spodaj"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Dotaknite se znova, če želite odpreti"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Povlecite, da odklenete"</string>
-    <!-- no translation found for phone_hint (4872890986869209950) -->
-    <skip />
-    <!-- no translation found for voice_hint (8939888732119726665) -->
-    <skip />
-    <!-- no translation found for camera_hint (7939688436797157483) -->
-    <skip />
+    <string name="phone_hint" msgid="4872890986869209950">"Povlecite z ikone za telefon"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"Povlecite z ikone za glasovnega pomočnika"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"Povlecite z ikone za fotoaparat"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Popolna tišina"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Samo prednostno"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Samo alarmi"</string>
@@ -371,13 +366,13 @@
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Napravo upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, podatke, povezane z napravo, in podatke o lokaciji naprave. Če želite več informacij, se obrnite na skrbnika."</string>
     <string name="monitoring_description_vpn" msgid="996222259035614736">"Aplikaciji ste dovolili vzpostavitev povezave z omrežjem VPN.\n\nTa aplikacija lahko nadzira napravo in omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Napravo upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, podatke, povezane z napravo, in podatke o lokaciji naprave.\n\nPovezani ste z omrežjem VPN, ki lahko nadzira vašo omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Delovni profil upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika.\n\nPovezani ste tudi z omrežjem VPN, ki lahko nadzira omrežno dejavnost."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Delovni profil upravlja organizacija <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika.\n\nPovezani ste tudi z omrežjem VPN, ki lahko nadzira omrežno dejavnost."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6947928635272782570">"Povezani ste z aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
     <string name="monitoring_description_app_personal" msgid="8506133233655324426">"Povezani ste z aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>, ki lahko nadzira vašo osebno omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
-    <string name="monitoring_description_app_work" msgid="808687576155832307">"Delovni profil upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Povezan je z aplikacijo <xliff:g id="APPLICATION">%2$s</xliff:g>, ki lahko nadzira vašo delovno omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika."</string>
-    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Delovni profil upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Povezan je z aplikacijo <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ki lahko nadzira vašo delovno omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nPovezani ste tudi z aplikacijo <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ki lahko nadzira vašo osebno omrežno dejavnost."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Napravo upravlja: <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, podatke, povezane z napravo, in podatke o lokaciji naprave.\n\nPovezani ste z aplikacijo <xliff:g id="APPLICATION">%2$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika."</string>
+    <string name="monitoring_description_app_work" msgid="808687576155832307">"Delovni profil upravlja organizacija <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Povezan je z aplikacijo <xliff:g id="APPLICATION">%2$s</xliff:g>, ki lahko nadzira vašo delovno omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika."</string>
+    <string name="monitoring_description_app_personal_work" msgid="7711690793960304868">"Delovni profil upravlja organizacija <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Povezan je z aplikacijo <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ki lahko nadzira vašo delovno omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nPovezani ste tudi z aplikacijo <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ki lahko nadzira vašo osebno omrežno dejavnost."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Napravo upravlja organizcija <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nSkrbnik lahko nadzira in upravlja nastavitve, dostop za podjetje, aplikacije, podatke, povezane z napravo, in podatke o lokaciji naprave.\n\nPovezani ste z aplikacijo <xliff:g id="APPLICATION">%2$s</xliff:g>, ki lahko nadzira omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nČe želite več informacij, se obrnite na skrbnika."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Naprava bo ostala zaklenjena, dokler je ročno ne odklenete."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Hitrejše prejemanje obvestil"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Oglejte si jih pred odklepanjem"</string>
@@ -387,10 +382,8 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"Skrij vse"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Končaj zdaj"</string>
-    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
-    <skip />
-    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
-    <skip />
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"Razširi"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Strni"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Zaslon je pripet"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"S tem ostane zaslon v pogledu, dokler ga ne odpnete. Hkrati pridržite tipko za nazaj in tipko za pregled, če ga želite odpeti."</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"S tem ostane zaslon v pogledu, dokler ga ne odpnete. Pridržite tipko za pregled, če ga želite odpeti."</string>
@@ -405,4 +398,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> je pogovorno okno glede prostornine"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Dotaknite se, če želite obnoviti izvirnik."</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"Ste v profilu za Android Work"</string>
+    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
+    <skip />
 </resources>
