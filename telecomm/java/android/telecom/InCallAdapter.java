@@ -119,7 +119,7 @@ public final class InCallAdapter {
     }
 
     /**
-     * Sets the audio route (speaker, bluetooth, etc...). See {@link AudioState}.
+     * Sets the audio route (speaker, bluetooth, etc...). See {@link CallAudioState}.
      *
      * @param route The audio route to use.
      */
