@@ -20,6 +20,7 @@ import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -775,11 +776,24 @@ public final class RemoteConnection {
      * Set the audio state of this {@code RemoteConnection}.
      *
      * @param state The audio state of this {@code RemoteConnection}.
+     * @hide
+     * @deprecated Use {@link #setCallAudioState(CallAudioState) instead.
      */
+    @SystemApi
+    @Deprecated
     public void setAudioState(AudioState state) {
+        setCallAudioState(new CallAudioState(state));
+    }
+
+    /**
+     * Set the audio state of this {@code RemoteConnection}.
+     *
+     * @param state The audio state of this {@code RemoteConnection}.
+     */
+    public void setCallAudioState(CallAudioState state) {
         try {
             if (mConnected) {
-                mConnectionService.onAudioStateChanged(mConnectionId, state);
+                mConnectionService.onCallAudioStateChanged(mConnectionId, state);
             }
         } catch (RemoteException ignored) {
         }

@@ -28317,23 +28317,6 @@ package android.system {
 
 package android.telecom {
 
-  public final class AudioState implements android.os.Parcelable {
-    ctor public AudioState(boolean, int, int);
-    ctor public AudioState(android.telecom.AudioState);
-    method public static java.lang.String audioRouteToString(int);
-    method public int describeContents();
-    method public int getRoute();
-    method public int getSupportedRouteMask();
-    method public boolean isMuted();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telecom.AudioState> CREATOR;
-    field public static final int ROUTE_BLUETOOTH = 2; // 0x2
-    field public static final int ROUTE_EARPIECE = 1; // 0x1
-    field public static final int ROUTE_SPEAKER = 8; // 0x8
-    field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
-    field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
-  }
-
   public final class Call {
     method public void answer(int);
     method public void conference(android.telecom.Call);
@@ -28427,6 +28410,22 @@ package android.telecom {
     field public static final int PROPERTY_WIFI = 8; // 0x8
   }
 
+  public final class CallAudioState implements android.os.Parcelable {
+    ctor public CallAudioState(boolean, int, int);
+    method public static java.lang.String audioRouteToString(int);
+    method public int describeContents();
+    method public int getRoute();
+    method public int getSupportedRouteMask();
+    method public boolean isMuted();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.CallAudioState> CREATOR;
+    field public static final int ROUTE_BLUETOOTH = 2; // 0x2
+    field public static final int ROUTE_EARPIECE = 1; // 0x1
+    field public static final int ROUTE_SPEAKER = 8; // 0x8
+    field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
+    field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
+  }
+
   public final class CameraCapabilities implements android.os.Parcelable {
     ctor public CameraCapabilities(int, int);
     method public int describeContents();
@@ -28440,7 +28439,7 @@ package android.telecom {
     ctor public Conference(android.telecom.PhoneAccountHandle);
     method public final boolean addConnection(android.telecom.Connection);
     method public final void destroy();
-    method public final android.telecom.AudioState getAudioState();
+    method public final android.telecom.CallAudioState getCallAudioState();
     method public final java.util.List<android.telecom.Connection> getConferenceableConnections();
     method public final long getConnectTimeMillis();
     method public final int getConnectionCapabilities();
@@ -28452,7 +28451,7 @@ package android.telecom {
     method public final android.telecom.StatusHints getStatusHints();
     method public android.telecom.Connection.VideoProvider getVideoProvider();
     method public int getVideoState();
-    method public void onAudioStateChanged(android.telecom.AudioState);
+    method public void onCallAudioStateChanged(android.telecom.CallAudioState);
     method public void onConnectionAdded(android.telecom.Connection);
     method public void onDisconnect();
     method public void onHold();
@@ -28485,7 +28484,7 @@ package android.telecom {
     method public final android.net.Uri getAddress();
     method public final int getAddressPresentation();
     method public final boolean getAudioModeIsVoip();
-    method public final android.telecom.AudioState getAudioState();
+    method public final android.telecom.CallAudioState getCallAudioState();
     method public final java.lang.String getCallerDisplayName();
     method public final int getCallerDisplayNamePresentation();
     method public final android.telecom.Conference getConference();
@@ -28499,7 +28498,7 @@ package android.telecom {
     method public void onAbort();
     method public void onAnswer(int);
     method public void onAnswer();
-    method public void onAudioStateChanged(android.telecom.AudioState);
+    method public void onCallAudioStateChanged(android.telecom.CallAudioState);
     method public void onDisconnect();
     method public void onHold();
     method public void onPlayDtmfTone(char);
@@ -28659,12 +28658,12 @@ package android.telecom {
   public abstract class InCallService extends android.app.Service {
     ctor public InCallService();
     method public final boolean canAddCall();
-    method public final android.telecom.AudioState getAudioState();
+    method public final android.telecom.CallAudioState getCallAudioState();
     method public final java.util.List<android.telecom.Call> getCalls();
-    method public void onAudioStateChanged(android.telecom.AudioState);
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onBringToForeground(boolean);
     method public void onCallAdded(android.telecom.Call);
+    method public void onCallAudioStateChanged(android.telecom.CallAudioState);
     method public void onCallRemoved(android.telecom.Call);
     method public void onCanAddCallChanged(boolean);
     method public final void setAudioRoute(int);
@@ -28776,7 +28775,7 @@ package android.telecom {
     method public final void registerCallback(android.telecom.RemoteConference.Callback);
     method public final void registerCallback(android.telecom.RemoteConference.Callback, android.os.Handler);
     method public void separate(android.telecom.RemoteConnection);
-    method public void setAudioState(android.telecom.AudioState);
+    method public void setCallAudioState(android.telecom.CallAudioState);
     method public void stopDtmfTone();
     method public void swap();
     method public void unhold();
@@ -28816,7 +28815,7 @@ package android.telecom {
     method public void registerCallback(android.telecom.RemoteConnection.Callback);
     method public void registerCallback(android.telecom.RemoteConnection.Callback, android.os.Handler);
     method public void reject();
-    method public void setAudioState(android.telecom.AudioState);
+    method public void setCallAudioState(android.telecom.CallAudioState);
     method public void stopDtmfTone();
     method public void unhold();
     method public void unregisterCallback(android.telecom.RemoteConnection.Callback);

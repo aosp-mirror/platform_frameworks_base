@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,12 +24,8 @@ import java.util.Locale;
 /**
  *  Encapsulates the telecom audio state, including the current audio routing, supported audio
  *  routing and mute.
- *  @deprecated - use {@link CallAudioState} instead.
- *  @hide
  */
-@Deprecated
-@SystemApi
-public class AudioState implements Parcelable {
+public final class CallAudioState implements Parcelable {
     /** Direct the audio stream through the device's earpiece. */
     public static final int ROUTE_EARPIECE      = 0x00000001;
 
@@ -57,19 +52,39 @@ public class AudioState implements Parcelable {
     private final int route;
     private final int supportedRouteMask;
 
-    public AudioState(boolean muted, int route, int supportedRouteMask) {
+    /**
+     * Constructor for a {@link CallAudioState} object.
+     *
+     * @param muted {@code true} if the call is muted, {@code false} otherwise.
+     * @param route The current audio route being used.
+     * Allowed values:
+     * {@link #ROUTE_EARPIECE}
+     * {@link #ROUTE_BLUETOOTH}
+     * {@link #ROUTE_WIRED_HEADSET}
+     * {@link #ROUTE_SPEAKER}
+     * @param supportedRouteMask Bit mask of all routes supported by this call. This should be a
+     * bitwise combination of the following values:
+     * {@link #ROUTE_EARPIECE}
+     * {@link #ROUTE_BLUETOOTH}
+     * {@link #ROUTE_WIRED_HEADSET}
+     * {@link #ROUTE_SPEAKER}
+     */
+    public CallAudioState(boolean muted, int route, int supportedRouteMask) {
         this.isMuted = muted;
         this.route = route;
         this.supportedRouteMask = supportedRouteMask;
     }
 
-    public AudioState(AudioState state) {
+    /** @hide */
+    public CallAudioState(CallAudioState state) {
         isMuted = state.isMuted();
         route = state.getRoute();
         supportedRouteMask = state.getSupportedRouteMask();
     }
 
-    public AudioState(CallAudioState state) {
+    /** @hide */
+    @SuppressWarnings("deprecation")
+    public CallAudioState(AudioState state) {
         isMuted = state.isMuted();
         route = state.getRoute();
         supportedRouteMask = state.getSupportedRouteMask();
@@ -80,10 +95,10 @@ public class AudioState implements Parcelable {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof AudioState)) {
+        if (!(obj instanceof CallAudioState)) {
             return false;
         }
-        AudioState state = (AudioState) obj;
+        CallAudioState state = (CallAudioState) obj;
         return isMuted() == state.isMuted() && getRoute() == state.getRoute() &&
                 getSupportedRouteMask() == state.getSupportedRouteMask();
     }
@@ -97,6 +112,34 @@ public class AudioState implements Parcelable {
                 audioRouteToString(supportedRouteMask));
     }
 
+    /**
+     * @return {@code true} if the call is muted, {@code false} otherwise.
+     */
+    public boolean isMuted() {
+        return isMuted;
+    }
+
+    /**
+     * @return The current audio route being used.
+     */
+    public int getRoute() {
+        return route;
+    }
+
+    /**
+     * @return Bit mask of all routes supported by this call.
+     */
+    public int getSupportedRouteMask() {
+        return supportedRouteMask;
+    }
+
+    /**
+     * Converts the provided audio route into a human readable string representation.
+     *
+     * @param route to convert into a string.
+     *
+     * @return String representation of the provided audio route.
+     */
     public static String audioRouteToString(int route) {
         if (route == 0 || (route & ~ROUTE_ALL) != 0x0) {
             return "UNKNOWN";
@@ -119,30 +162,23 @@ public class AudioState implements Parcelable {
         return buffer.toString();
     }
 
-    private static void listAppend(StringBuffer buffer, String str) {
-        if (buffer.length() > 0) {
-            buffer.append(", ");
-        }
-        buffer.append(str);
-    }
-
     /**
      * Responsible for creating AudioState objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<AudioState> CREATOR =
-            new Parcelable.Creator<AudioState> () {
+    public static final Parcelable.Creator<CallAudioState> CREATOR =
+            new Parcelable.Creator<CallAudioState> () {
 
         @Override
-        public AudioState createFromParcel(Parcel source) {
+        public CallAudioState createFromParcel(Parcel source) {
             boolean isMuted = source.readByte() == 0 ? false : true;
             int route = source.readInt();
             int supportedRouteMask = source.readInt();
-            return new AudioState(isMuted, route, supportedRouteMask);
+            return new CallAudioState(isMuted, route, supportedRouteMask);
         }
 
         @Override
-        public AudioState[] newArray(int size) {
-            return new AudioState[size];
+        public CallAudioState[] newArray(int size) {
+            return new CallAudioState[size];
         }
     };
 
@@ -164,24 +200,10 @@ public class AudioState implements Parcelable {
         destination.writeInt(supportedRouteMask);
     }
 
-    /**
-     * @return {@code true} if the call is muted, false otherwise.
-     */
-    public boolean isMuted() {
-        return isMuted;
-    }
-
-    /**
-     * @return The current audio route being used.
-     */
-    public int getRoute() {
-        return route;
-    }
-
-    /**
-     * @return Bit mask of all routes supported by this call.
-     */
-    public int getSupportedRouteMask() {
-        return supportedRouteMask;
+    private static void listAppend(StringBuffer buffer, String str) {
+        if (buffer.length() > 0) {
+            buffer.append(", ");
+        }
+        buffer.append(str);
     }
 }

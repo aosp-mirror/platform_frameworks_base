@@ -20,6 +20,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -800,7 +801,7 @@ public abstract class Connection implements IConferenceable {
             Collections.unmodifiableList(mConferenceables);
 
     private int mState = STATE_NEW;
-    private AudioState mAudioState;
+    private CallAudioState mCallAudioState;
     private Uri mAddress;
     private int mAddressPresentation;
     private String mCallerDisplayName;
@@ -875,9 +876,22 @@ public abstract class Connection implements IConferenceable {
      * @return The audio state of the connection, describing how its audio is currently
      *         being routed by the system. This is {@code null} if this Connection
      *         does not directly know about its audio state.
+     * @deprecated Use {@link #getCallAudioState()} instead.
+     * @hide
      */
+    @SystemApi
+    @Deprecated
     public final AudioState getAudioState() {
-        return mAudioState;
+        return new AudioState(mCallAudioState);
+    }
+
+    /**
+     * @return The audio state of the connection, describing how its audio is currently
+     *         being routed by the system. This is {@code null} if this Connection
+     *         does not directly know about its audio state.
+     */
+    public final CallAudioState getCallAudioState() {
+        return mCallAudioState;
     }
 
     /**
@@ -951,11 +965,12 @@ public abstract class Connection implements IConferenceable {
      * @param state The new audio state.
      * @hide
      */
-    final void setAudioState(AudioState state) {
+    final void setCallAudioState(CallAudioState state) {
         checkImmutable();
         Log.d(this, "setAudioState %s", state);
-        mAudioState = state;
-        onAudioStateChanged(state);
+        mCallAudioState = state;
+        onAudioStateChanged(getAudioState());
+        onCallAudioStateChanged(state);
     }
 
     /**
@@ -1345,8 +1360,19 @@ public abstract class Connection implements IConferenceable {
      * Notifies this Connection that the {@link #getAudioState()} property has a new value.
      *
      * @param state The new connection audio state.
+     * @deprecated Use {@link #onCallAudioStateChanged(CallAudioState)} instead.
+     * @hide
      */
+    @SystemApi
+    @Deprecated
     public void onAudioStateChanged(AudioState state) {}
+
+    /**
+     * Notifies this Connection that the {@link #getCallAudioState()} property has a new value.
+     *
+     * @param state The new connection audio state.
+     */
+    public void onCallAudioStateChanged(CallAudioState state) {}
 
     /**
      * Notifies this Connection of an internal state change. This method is called after the

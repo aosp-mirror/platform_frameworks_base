@@ -18,6 +18,7 @@ package android.telecom;
 
 import com.android.internal.telecom.IConnectionService;
 
+import android.annotation.SystemApi;
 import android.os.Handler;
 import android.os.RemoteException;
 
@@ -279,13 +280,36 @@ public final class RemoteConference {
         }
     }
 
+    /**
+     * Request to change the conference's audio routing to the specified state. The specified state
+     * can include audio routing (Bluetooth, Speaker, etc) and muting state.
+     *
+     * @see android.telecom.AudioState
+     * @deprecated Use {@link #setCallAudioState(CallAudioState)} instead.
+     * @hide
+     */
+    @SystemApi
+    @Deprecated
     public void setAudioState(AudioState state) {
+        setCallAudioState(new CallAudioState(state));
+    }
+
+    /**
+     * Request to change the conference's audio routing to the specified state. The specified state
+     * can include audio routing (Bluetooth, Speaker, etc) and muting state.
+     */
+    public void setCallAudioState(CallAudioState state) {
         try {
-            mConnectionService.onAudioStateChanged(mId, state);
+            mConnectionService.onCallAudioStateChanged(mId, state);
         } catch (RemoteException e) {
         }
     }
 
+    /**
+     * Returns a list of independent connections that can me merged with this conference.
+     *
+     * @return A list of conferenceable connections.
+     */
     public List<RemoteConnection> getConferenceableConnections() {
         return mUnmodifiableConferenceableConnections;
     }
