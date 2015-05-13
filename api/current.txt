@@ -30452,13 +30452,11 @@ package android.telecom {
   }
 
   public final class StatusHints implements android.os.Parcelable {
-    ctor public StatusHints(android.content.ComponentName, java.lang.CharSequence, int, android.os.Bundle);
+    ctor public StatusHints(java.lang.CharSequence, android.graphics.drawable.Icon, android.os.Bundle);
     method public int describeContents();
     method public android.os.Bundle getExtras();
-    method public android.graphics.drawable.Drawable getIcon(android.content.Context);
-    method public int getIconResId();
+    method public android.graphics.drawable.Icon getIcon();
     method public java.lang.CharSequence getLabel();
-    method public android.content.ComponentName getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telecom.StatusHints> CREATOR;
   }
