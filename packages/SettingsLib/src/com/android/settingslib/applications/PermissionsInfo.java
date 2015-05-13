@@ -82,6 +82,7 @@ public class PermissionsInfo {
                     // TODO: Add default permission icon.
                     group.icon = info.icon != 0 ? info.loadIcon(mPm) : new ShapeDrawable();
                     group.name = info.name;
+                    group.packageName = info.packageName;
                     group.label = info.loadLabel(mPm).toString();
                     mGroups.add(group);
                     mGroupLookup.put(permission, group);
@@ -105,6 +106,7 @@ public class PermissionsInfo {
                 // TODO: Add default permission icon.
                 group.icon = groupInfo.icon != 0 ? groupInfo.loadIcon(mPm) : new ShapeDrawable();
                 group.name = groupInfo.name;
+                group.packageName = groupInfo.packageName;
                 group.label = groupInfo.loadLabel(mPm).toString();
                 synchronized (mGroups) {
                     mGroups.add(group);
@@ -172,6 +174,7 @@ public class PermissionsInfo {
         public final List<String> possibleApps = new ArrayList<>();
         public final List<String> grantedApps = new ArrayList<>();
         public String name;
+        public String packageName;
         public String label;
         public Drawable icon;
 
