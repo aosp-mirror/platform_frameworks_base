@@ -39086,7 +39086,6 @@ package android.webkit {
     method public void goBack();
     method public void goBackOrForward(int);
     method public void goForward();
-    method public void insertVisualStateCallback(long, android.webkit.WebView.VisualStateCallback);
     method public void invokeZoomPicker();
     method public boolean isPrivateBrowsingEnabled();
     method public void loadData(java.lang.String, java.lang.String, java.lang.String);
@@ -39105,6 +39104,7 @@ package android.webkit {
     method public void pauseTimers();
     method public void postMessageToMainFrame(android.webkit.WebMessage, android.net.Uri);
     method public void postUrl(java.lang.String, byte[]);
+    method public void postVisualStateCallback(long, android.webkit.WebView.VisualStateCallback);
     method public void reload();
     method public void removeJavascriptInterface(java.lang.String);
     method public void requestFocusNodeHref(android.os.Message);
