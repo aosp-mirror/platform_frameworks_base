@@ -193,18 +193,18 @@ std::unique_ptr<Reference> ResourceParser::tryParseReference(const StringPiece16
 
 std::unique_ptr<BinaryPrimitive> ResourceParser::tryParseNullOrEmpty(const StringPiece16& str) {
     StringPiece16 trimmedStr(util::trimWhitespace(str));
-    uint32_t data = 0;
+    android::Res_value value = {};
     if (trimmedStr == u"@null") {
-        data = android::Res_value::DATA_NULL_UNDEFINED;
+        // TYPE_NULL with data set to 0 is interpreted by the runtime as an error.
+        // Instead we set the data type to TYPE_REFERENCE with a value of 0.
+        value.dataType = android::Res_value::TYPE_REFERENCE;
     } else if (trimmedStr == u"@empty") {
-        data = android::Res_value::DATA_NULL_EMPTY;
+        // TYPE_NULL with value of DATA_NULL_EMPTY is handled fine by the runtime.
+        value.dataType = android::Res_value::TYPE_NULL;
+        value.data = android::Res_value::DATA_NULL_EMPTY;
     } else {
         return {};
     }
-
-    android::Res_value value = {};
-    value.dataType = android::Res_value::TYPE_NULL;
-    value.data = data;
     return util::make_unique<BinaryPrimitive>(value);
 }
 
