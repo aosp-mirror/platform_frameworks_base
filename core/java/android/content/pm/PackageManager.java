@@ -3739,6 +3739,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public abstract void verifyIntentFilter(int verificationId, int verificationCode,
             List<String> outFailedDomains);
 
