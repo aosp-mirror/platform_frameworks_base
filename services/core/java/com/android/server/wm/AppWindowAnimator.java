@@ -16,6 +16,11 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
+import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
+
 import android.graphics.Matrix;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -77,7 +82,11 @@ public class AppWindowAnimator {
     boolean deferFinalFrameCleanup;
 
     /** WindowStateAnimator from mAppAnimator.allAppWindows as of last performLayout */
-    ArrayList<WindowStateAnimator> mAllAppWinAnimators = new ArrayList<WindowStateAnimator>();
+    ArrayList<WindowStateAnimator> mAllAppWinAnimators = new ArrayList<>();
+
+    /** True if the current animation was transferred from another AppWindowAnimator.
+     *  See {@link #transferCurrentAnimation}*/
+    boolean usingTransferredAnimation = false;
 
     static final Animation sDummyAnimation = new DummyAnimation();
 
@@ -101,9 +110,9 @@ public class AppWindowAnimator {
         int zorder = anim.getZAdjustment();
         int adj = 0;
         if (zorder == Animation.ZORDER_TOP) {
-            adj = WindowManagerService.TYPE_LAYER_OFFSET;
+            adj = TYPE_LAYER_OFFSET;
         } else if (zorder == Animation.ZORDER_BOTTOM) {
-            adj = -WindowManagerService.TYPE_LAYER_OFFSET;
+            adj = -TYPE_LAYER_OFFSET;
         }
 
         if (animLayerAdjustment != adj) {
@@ -139,6 +148,7 @@ public class AppWindowAnimator {
             mAppToken.allDrawn = false;
             mAppToken.deferClearAllDrawn = false;
         }
+        usingTransferredAnimation = false;
     }
 
     public boolean isAnimating() {
@@ -153,19 +163,38 @@ public class AppWindowAnimator {
         deferThumbnailDestruction = false;
     }
 
+    void transferCurrentAnimation(
+            AppWindowAnimator toAppAnimator, WindowStateAnimator transferWinAnimator) {
+
+        if (animation != null) {
+            toAppAnimator.animation = animation;
+            animation = null;
+            toAppAnimator.animating = animating;
+            toAppAnimator.animLayerAdjustment = animLayerAdjustment;
+            animLayerAdjustment = 0;
+            toAppAnimator.updateLayers();
+            updateLayers();
+            toAppAnimator.usingTransferredAnimation = true;
+        }
+        if (transferWinAnimator != null) {
+            mAllAppWinAnimators.remove(transferWinAnimator);
+            toAppAnimator.mAllAppWinAnimators.add(transferWinAnimator);
+            transferWinAnimator.mAppAnimator = toAppAnimator;
+        }
+    }
+
     void updateLayers() {
-        final int N = mAppToken.allAppWindows.size();
+        final int windowCount = mAppToken.allAppWindows.size();
         final int adj = animLayerAdjustment;
         thumbnailLayer = -1;
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < windowCount; i++) {
             final WindowState w = mAppToken.allAppWindows.get(i);
             final WindowStateAnimator winAnimator = w.mWinAnimator;
             winAnimator.mAnimLayer = w.mLayer + adj;
             if (winAnimator.mAnimLayer > thumbnailLayer) {
                 thumbnailLayer = winAnimator.mAnimLayer;
             }
-            if (WindowManagerService.DEBUG_LAYERS) Slog.v(TAG, "Updating layer " + w + ": "
-                    + winAnimator.mAnimLayer);
+            if (DEBUG_LAYERS) Slog.v(TAG, "Updating layer " + w + ": " + winAnimator.mAnimLayer);
             if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
                 mService.setInputMethodAnimLayerAdjustment(adj);
             }
@@ -190,11 +219,11 @@ public class AppWindowAnimator {
         // cache often used attributes locally
         final float tmpFloats[] = mService.mTmpFloats;
         thumbnailTransformation.getMatrix().getValues(tmpFloats);
-        if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
+        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "POS " + tmpFloats[Matrix.MTRANS_X]
                 + ", " + tmpFloats[Matrix.MTRANS_Y], null);
         thumbnail.setPosition(tmpFloats[Matrix.MTRANS_X], tmpFloats[Matrix.MTRANS_Y]);
-        if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
+        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "alpha=" + thumbnailTransformation.getAlpha()
                 + " layer=" + thumbnailLayer
                 + " matrix=[" + tmpFloats[Matrix.MSCALE_X]
@@ -227,14 +256,14 @@ public class AppWindowAnimator {
                 deferFinalFrameCleanup = true;
                 hasMoreFrames = true;
             } else {
-                if (false && WindowManagerService.DEBUG_ANIM) Slog.v(
-                        TAG, "Stepped animation in " + mAppToken + ": more=" + hasMoreFrames +
-                                ", xform=" + transformation);
+                if (false && DEBUG_ANIM) Slog.v(TAG,
+                        "Stepped animation in " + mAppToken + ": more=" + hasMoreFrames +
+                        ", xform=" + transformation);
                 deferFinalFrameCleanup = false;
                 animation = null;
                 clearThumbnail();
-                if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                        TAG, "Finished animation in " + mAppToken + " @ " + currentTime);
+                if (DEBUG_ANIM) Slog.v(TAG,
+                        "Finished animation in " + mAppToken + " @ " + currentTime);
             }
         }
         hasTransformation = hasMoreFrames;
@@ -257,8 +286,8 @@ public class AppWindowAnimator {
             if ((mAppToken.allDrawn || animating || mAppToken.startingDisplayed)
                     && animation != null) {
                 if (!animating) {
-                    if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                        TAG, "Starting animation in " + mAppToken +
+                    if (DEBUG_ANIM) Slog.v(TAG,
+                        "Starting animation in " + mAppToken +
                         " @ " + currentTime + " scale="
                         + mService.getTransitionAnimationScaleLocked()
                         + " allDrawn=" + mAppToken.allDrawn + " animating=" + animating);
@@ -305,8 +334,8 @@ public class AppWindowAnimator {
             mService.moveInputMethodWindowsIfNeededLocked(true);
         }
 
-        if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                TAG, "Animation done in " + mAppToken
+        if (DEBUG_ANIM) Slog.v(TAG,
+                "Animation done in " + mAppToken
                 + ": reportedVisible=" + mAppToken.reportedVisible);
 
         transformation.clear();
