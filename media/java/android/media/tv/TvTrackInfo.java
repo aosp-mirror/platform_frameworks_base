@@ -45,7 +45,7 @@ public final class TvTrackInfo implements Parcelable {
     private final int mType;
     private final String mId;
     private final String mLanguage;
-    private final String mDescription;
+    private final CharSequence mDescription;
     private final int mAudioChannelCount;
     private final int mAudioSampleRate;
     private final int mVideoWidth;
@@ -54,7 +54,7 @@ public final class TvTrackInfo implements Parcelable {
     private final float mVideoPixelAspectRatio;
     private final Bundle mExtra;
 
-    private TvTrackInfo(int type, String id, String language, String description,
+    private TvTrackInfo(int type, String id, String language, CharSequence description,
             int audioChannelCount, int audioSampleRate, int videoWidth, int videoHeight,
             float videoFrameRate, float videoPixelAspectRatio, Bundle extra) {
         mType = type;
@@ -110,7 +110,7 @@ public final class TvTrackInfo implements Parcelable {
     /**
      * Returns a user readable description for the current track.
      */
-    public final String getDescription() {
+    public final CharSequence getDescription() {
         return mDescription;
     }
 
@@ -201,7 +201,7 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeInt(mType);
         dest.writeString(mId);
         dest.writeString(mLanguage);
-        dest.writeString(mDescription);
+        dest.writeString(mDescription != null ? mDescription.toString() : null);
         dest.writeInt(mAudioChannelCount);
         dest.writeInt(mAudioSampleRate);
         dest.writeInt(mVideoWidth);
@@ -231,7 +231,7 @@ public final class TvTrackInfo implements Parcelable {
         private final String mId;
         private final int mType;
         private String mLanguage;
-        private String mDescription;
+        private CharSequence mDescription;
         private int mAudioChannelCount;
         private int mAudioSampleRate;
         private int mVideoWidth;
@@ -274,7 +274,7 @@ public final class TvTrackInfo implements Parcelable {
          *
          * @param description The user readable description.
          */
-        public final Builder setDescription(String description) {
+        public final Builder setDescription(CharSequence description) {
             mDescription = description;
             return this;
         }

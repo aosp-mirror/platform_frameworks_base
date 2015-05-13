@@ -17854,7 +17854,7 @@ package android.media.tv {
     method public void onTimeShiftPause();
     method public void onTimeShiftResume();
     method public void onTimeShiftSeekTo(long);
-    method public void onTimeShiftSetPlaybackRate(float, int);
+    method public void onTimeShiftSetPlaybackParams(android.media.PlaybackParams);
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
     method public abstract boolean onTune(android.net.Uri);
@@ -17866,7 +17866,7 @@ package android.media.tv {
     method public int describeContents();
     method public final int getAudioChannelCount();
     method public final int getAudioSampleRate();
-    method public final java.lang.String getDescription();
+    method public final java.lang.CharSequence getDescription();
     method public final android.os.Bundle getExtra();
     method public final java.lang.String getId();
     method public final java.lang.String getLanguage();
@@ -17887,7 +17887,7 @@ package android.media.tv {
     method public android.media.tv.TvTrackInfo build();
     method public final android.media.tv.TvTrackInfo.Builder setAudioChannelCount(int);
     method public final android.media.tv.TvTrackInfo.Builder setAudioSampleRate(int);
-    method public final android.media.tv.TvTrackInfo.Builder setDescription(java.lang.String);
+    method public final android.media.tv.TvTrackInfo.Builder setDescription(java.lang.CharSequence);
     method public final android.media.tv.TvTrackInfo.Builder setExtra(android.os.Bundle);
     method public final android.media.tv.TvTrackInfo.Builder setLanguage(java.lang.String);
     method public final android.media.tv.TvTrackInfo.Builder setVideoFrameRate(float);
@@ -17915,7 +17915,7 @@ package android.media.tv {
     method public void timeShiftPause();
     method public void timeShiftResume();
     method public void timeShiftSeekTo(long);
-    method public void timeShiftSetPlaybackRate(float, int);
+    method public void timeShiftSetPlaybackParams(android.media.PlaybackParams);
     method public void tune(java.lang.String, android.net.Uri);
   }
 
