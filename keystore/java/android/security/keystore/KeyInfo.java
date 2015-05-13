@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.security.ArrayUtils;
 
 import java.security.PrivateKey;
 import java.security.spec.KeySpec;
@@ -27,55 +28,55 @@ import javax.crypto.SecretKey;
 
 /**
  * Information about a key from the <a href="{@docRoot}training/articles/keystore.html">Android
- * KeyStore</a>. This class describes whether the key material is available in
+ * Keystore system</a>. This class describes whether the key material is available in
  * plaintext outside of secure hardware, whether user authentication is required for using the key
  * and whether this requirement is enforced by secure hardware, the key's origin, what uses the key
  * is authorized for (e.g., only in {@code CBC} mode, or signing only), whether the key should be
  * encrypted at rest, the key's and validity start and end dates.
  *
  * <p><h3>Example: Symmetric Key</h3>
- * The following example illustrates how to obtain a {@link KeyStoreKeySpec} describing the provided
- * Android KeyStore {@link SecretKey}.
+ * The following example illustrates how to obtain a {@code KeyInfo} describing the provided Android
+ * Keystore {@link SecretKey}.
  * <pre> {@code
- * SecretKey key = ...; // Android KeyStore key
+ * SecretKey key = ...; // Android Keystore key
  *
  * SecretKeyFactory factory = SecretKeyFactory.getInstance(key.getAlgorithm(), "AndroidKeyStore");
- * KeyStoreKeySpec spec;
+ * KeyInfo keyInfo;
  * try &#123;
- *     spec = (KeyStoreKeySpec) factory.getKeySpec(key, KeyStoreKeySpec.class);
+ *     keyInfo = (KeyInfo) factory.getKeySpec(key, KeyInfo.class);
  * &#125; catch (InvalidKeySpecException e) &#123;
  *     // Not an Android KeyStore key.
  * &#125;
  * }</pre>
  *
  * <p><h3>Example: Private Key</h3>
- * The following example illustrates how to obtain a {@link KeyStoreKeySpec} describing the provided
+ * The following example illustrates how to obtain a {@code KeyInfo} describing the provided
  * Android KeyStore {@link PrivateKey}.
  * <pre> {@code
  * PrivateKey key = ...; // Android KeyStore key
  *
  * KeyFactory factory = KeyFactory.getInstance(key.getAlgorithm(), "AndroidKeyStore");
- * KeyStoreKeySpec spec;
+ * KeyInfo keyInfo;
  * try &#123;
- *     spec = factory.getKeySpec(key, KeyStoreKeySpec.class);
+ *     keyInfo = factory.getKeySpec(key, KeyInfo.class);
  * &#125; catch (InvalidKeySpecException e) &#123;
  *     // Not an Android KeyStore key.
  * &#125;
  * }</pre>
  */
-public class KeyStoreKeySpec implements KeySpec {
+public class KeyInfo implements KeySpec {
     private final String mKeystoreAlias;
     private final int mKeySize;
     private final boolean mInsideSecureHardware;
-    private final @KeyStoreKeyProperties.OriginEnum int mOrigin;
+    private final @KeyProperties.OriginEnum int mOrigin;
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
-    private final @KeyStoreKeyProperties.PurposeEnum int mPurposes;
-    private final @KeyStoreKeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
-    private final @KeyStoreKeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
-    private final @KeyStoreKeyProperties.DigestEnum String[] mDigests;
-    private final @KeyStoreKeyProperties.BlockModeEnum String[] mBlockModes;
+    private final @KeyProperties.PurposeEnum int mPurposes;
+    private final @KeyProperties.EncryptionPaddingEnum String[] mEncryptionPaddings;
+    private final @KeyProperties.SignaturePaddingEnum String[] mSignaturePaddings;
+    private final @KeyProperties.DigestEnum String[] mDigests;
+    private final @KeyProperties.BlockModeEnum String[] mBlockModes;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
     private final boolean mUserAuthenticationRequirementEnforcedBySecureHardware;
@@ -83,18 +84,18 @@ public class KeyStoreKeySpec implements KeySpec {
     /**
      * @hide
      */
-    KeyStoreKeySpec(String keystoreKeyAlias,
+    public KeyInfo(String keystoreKeyAlias,
             boolean insideSecureHardware,
-            @KeyStoreKeyProperties.OriginEnum int origin,
+            @KeyProperties.OriginEnum int origin,
             int keySize,
             Date keyValidityStart,
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
-            @KeyStoreKeyProperties.PurposeEnum int purposes,
-            @KeyStoreKeyProperties.EncryptionPaddingEnum String[] encryptionPaddings,
-            @KeyStoreKeyProperties.SignaturePaddingEnum String[] signaturePaddings,
-            @KeyStoreKeyProperties.DigestEnum String[] digests,
-            @KeyStoreKeyProperties.BlockModeEnum String[] blockModes,
+            @KeyProperties.PurposeEnum int purposes,
+            @KeyProperties.EncryptionPaddingEnum String[] encryptionPaddings,
+            @KeyProperties.SignaturePaddingEnum String[] signaturePaddings,
+            @KeyProperties.DigestEnum String[] digests,
+            @KeyProperties.BlockModeEnum String[] blockModes,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
             boolean userAuthenticationRequirementEnforcedBySecureHardware) {
@@ -135,9 +136,9 @@ public class KeyStoreKeySpec implements KeySpec {
     }
 
     /**
-     * Gets the origin of the key. See {@link KeyStoreKeyProperties}.{@code ORIGIN} constants.
+     * Gets the origin of the key. See {@link KeyProperties}.{@code ORIGIN} constants.
      */
-    public @KeyStoreKeyProperties.OriginEnum int getOrigin() {
+    public @KeyProperties.OriginEnum int getOrigin() {
         return mOrigin;
     }
 
@@ -182,9 +183,9 @@ public class KeyStoreKeySpec implements KeySpec {
      * Gets the set of purposes (e.g., encrypt, decrypt, sign) for which the key can be used.
      * Attempts to use the key for any other purpose will be rejected.
      *
-     * <p>See {@link KeyStoreKeyProperties}.{@code PURPOSE} flags.
+     * <p>See {@link KeyProperties}.{@code PURPOSE} flags.
      */
-    public @KeyStoreKeyProperties.PurposeEnum int getPurposes() {
+    public @KeyProperties.PurposeEnum int getPurposes() {
         return mPurposes;
     }
 
@@ -193,10 +194,10 @@ public class KeyStoreKeySpec implements KeySpec {
      * when encrypting/decrypting. Attempts to use the key with any other block modes will be
      * rejected.
      *
-     * <p>See {@link KeyStoreKeyProperties}.{@code BLOCK_MODE} constants.
+     * <p>See {@link KeyProperties}.{@code BLOCK_MODE} constants.
      */
     @NonNull
-    public @KeyStoreKeyProperties.BlockModeEnum String[] getBlockModes() {
+    public @KeyProperties.BlockModeEnum String[] getBlockModes() {
         return ArrayUtils.cloneIfNotEmpty(mBlockModes);
     }
 
@@ -205,10 +206,10 @@ public class KeyStoreKeySpec implements KeySpec {
      * {@code NoPadding}) with which the key can be used when encrypting/decrypting. Attempts to use
      * the key with any other padding scheme will be rejected.
      *
-     * <p>See {@link KeyStoreKeyProperties}.{@code ENCRYPTION_PADDING} constants.
+     * <p>See {@link KeyProperties}.{@code ENCRYPTION_PADDING} constants.
      */
     @NonNull
-    public @KeyStoreKeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
+    public @KeyProperties.EncryptionPaddingEnum String[] getEncryptionPaddings() {
         return ArrayUtils.cloneIfNotEmpty(mEncryptionPaddings);
     }
 
@@ -217,10 +218,10 @@ public class KeyStoreKeySpec implements KeySpec {
      * can be used when signing/verifying. Attempts to use the key with any other padding scheme
      * will be rejected.
      *
-     * <p>See {@link KeyStoreKeyProperties}.{@code SIGNATURE_PADDING} constants.
+     * <p>See {@link KeyProperties}.{@code SIGNATURE_PADDING} constants.
      */
     @NonNull
-    public @KeyStoreKeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
+    public @KeyProperties.SignaturePaddingEnum String[] getSignaturePaddings() {
         return ArrayUtils.cloneIfNotEmpty(mSignaturePaddings);
     }
 
@@ -228,10 +229,10 @@ public class KeyStoreKeySpec implements KeySpec {
      * Gets the set of digest algorithms (e.g., {@code SHA-256}, {@code SHA-384}) with which the key
      * can be used.
      *
-     * @see KeyStoreKeyProperties.Digest
+     * <p>See {@link KeyProperties}.{@code DIGEST} constants.
      */
     @NonNull
-    public @KeyStoreKeyProperties.DigestEnum String[] getDigests() {
+    public @KeyProperties.DigestEnum String[] getDigests() {
         return ArrayUtils.cloneIfNotEmpty(mDigests);
     }
 

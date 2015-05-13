@@ -5,7 +5,7 @@ import libcore.util.EmptyArray;
 /**
  * @hide
  */
-abstract class ArrayUtils {
+public abstract class ArrayUtils {
     private ArrayUtils() {}
 
     public static String[] nullToEmpty(String[] array) {

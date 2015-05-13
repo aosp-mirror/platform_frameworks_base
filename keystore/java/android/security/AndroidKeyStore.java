@@ -24,6 +24,8 @@ import libcore.util.EmptyArray;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
+import android.security.keystore.KeyProperties;
+import android.security.keystore.KeyProtection;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -129,11 +131,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
                 keymasterDigest = keymasterDigests.get(0);
             }
 
-            @KeyStoreKeyProperties.KeyAlgorithmEnum String keyAlgorithmString;
+            @KeyProperties.KeyAlgorithmEnum String keyAlgorithmString;
             try {
-                keyAlgorithmString =
-                        KeyStoreKeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
-                                keymasterAlgorithm, keymasterDigest);
+                keyAlgorithmString = KeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
+                        keymasterAlgorithm, keymasterDigest);
             } catch (IllegalArgumentException e) {
                 throw (UnrecoverableKeyException)
                         new UnrecoverableKeyException("Unsupported secret key type").initCause(e);
@@ -270,7 +271,70 @@ public class AndroidKeyStore extends KeyStoreSpi {
     }
 
     private void setPrivateKeyEntry(String alias, PrivateKey key, Certificate[] chain,
-            KeyStoreParameter params) throws KeyStoreException {
+            java.security.KeyStore.ProtectionParameter param) throws KeyStoreException {
+        KeyProtection spec;
+        if (param instanceof KeyStoreParameter) {
+            KeyStoreParameter legacySpec = (KeyStoreParameter) param;
+            try {
+                String keyAlgorithm = key.getAlgorithm();
+                KeyProtection.Builder specBuilder;
+                if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyAlgorithm)) {
+                    specBuilder =
+                            new KeyProtection.Builder(
+                                    KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY);
+                    specBuilder.setDigests(
+                            KeyProperties.DIGEST_NONE,
+                            KeyProperties.DIGEST_MD5,
+                            KeyProperties.DIGEST_SHA1,
+                            KeyProperties.DIGEST_SHA224,
+                            KeyProperties.DIGEST_SHA256,
+                            KeyProperties.DIGEST_SHA384,
+                            KeyProperties.DIGEST_SHA512);
+                } else if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyAlgorithm)) {
+                    specBuilder =
+                            new KeyProtection.Builder(
+                                    KeyProperties.PURPOSE_ENCRYPT
+                                    | KeyProperties.PURPOSE_DECRYPT
+                                    | KeyProperties.PURPOSE_SIGN
+                                    | KeyProperties.PURPOSE_VERIFY);
+                    specBuilder.setDigests(
+                            KeyProperties.DIGEST_NONE,
+                            KeyProperties.DIGEST_MD5,
+                            KeyProperties.DIGEST_SHA1,
+                            KeyProperties.DIGEST_SHA224,
+                            KeyProperties.DIGEST_SHA256,
+                            KeyProperties.DIGEST_SHA384,
+                            KeyProperties.DIGEST_SHA512);
+                    specBuilder.setSignaturePaddings(
+                            KeyProperties.SIGNATURE_PADDING_RSA_PKCS1);
+                    specBuilder.setBlockModes(KeyProperties.BLOCK_MODE_ECB);
+                    specBuilder.setEncryptionPaddings(
+                            KeyProperties.ENCRYPTION_PADDING_NONE,
+                            KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1);
+                    // Disable randomized encryption requirement to support encryption padding NONE
+                    // above.
+                    specBuilder.setRandomizedEncryptionRequired(false);
+                } else {
+                    throw new KeyStoreException("Unsupported key algorithm: " + keyAlgorithm);
+                }
+                specBuilder.setEncryptionAtRestRequired(legacySpec.isEncryptionRequired());
+                specBuilder.setUserAuthenticationRequired(false);
+
+                spec = specBuilder.build();
+            } catch (NullPointerException | IllegalArgumentException e) {
+                throw new KeyStoreException("Unsupported protection parameter", e);
+            }
+        } else if (param instanceof KeyProtection) {
+            spec = (KeyProtection) param;
+        } else if (param != null) {
+            throw new KeyStoreException(
+                    "Unsupported protection parameter class:" + param.getClass().getName()
+                    + ". Supported: " + KeyStoreParameter.class.getName() + ", "
+                    + KeyProtection.class.getName());
+        } else {
+            spec = null;
+        }
+
         byte[] keyBytes = null;
 
         final String pkeyAlias;
@@ -383,7 +447,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
             Credentials.deleteSecretKeyTypeForAlias(mKeyStore, alias);
         }
 
-        final int flags = (params == null) ? 0 : params.getFlags();
+        final int flags = (spec == null) ? 0 : spec.getFlags();
 
         if (shouldReplacePrivateKey
                 && !mKeyStore.importKey(Credentials.USER_PRIVATE_KEY + alias, keyBytes,
@@ -402,8 +466,16 @@ public class AndroidKeyStore extends KeyStoreSpi {
         }
     }
 
-    private void setSecretKeyEntry(String entryAlias, SecretKey key, KeyStoreParameter params)
+    private void setSecretKeyEntry(String entryAlias, SecretKey key,
+            java.security.KeyStore.ProtectionParameter param)
             throws KeyStoreException {
+        if ((param != null) && (!(param instanceof KeyProtection))) {
+            throw new KeyStoreException(
+                    "Unsupported protection parameter class: " + param.getClass().getName()
+                    + ". Supported: " + KeyProtection.class.getName());
+        }
+        KeyProtection params = (KeyProtection) param;
+
         if (key instanceof KeyStoreSecretKey) {
             // KeyStore-backed secret key. It cannot be duplicated into another entry and cannot
             // overwrite its own entry.
@@ -453,10 +525,9 @@ public class AndroidKeyStore extends KeyStoreSpi {
         int keymasterAlgorithm;
         int keymasterDigest;
         try {
-            keymasterAlgorithm = KeyStoreKeyProperties.KeyAlgorithm.toKeymasterSecretKeyAlgorithm(
-                    keyAlgorithmString);
-            keymasterDigest =
-                    KeyStoreKeyProperties.KeyAlgorithm.toKeymasterDigest(keyAlgorithmString);
+            keymasterAlgorithm =
+                    KeyProperties.KeyAlgorithm.toKeymasterSecretKeyAlgorithm(keyAlgorithmString);
+            keymasterDigest = KeyProperties.KeyAlgorithm.toKeymasterDigest(keyAlgorithmString);
         } catch (IllegalArgumentException e) {
             throw new KeyStoreException("Unsupported secret key algorithm: " + keyAlgorithmString);
         }
@@ -467,7 +538,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
         int[] keymasterDigests;
         if (params.isDigestsSpecified()) {
             // Digest(s) specified in parameters
-            keymasterDigests = KeyStoreKeyProperties.Digest.allToKeymaster(params.getDigests());
+            keymasterDigests = KeyProperties.Digest.allToKeymaster(params.getDigests());
             if (keymasterDigest != -1) {
                 // Digest also specified in the JCA key algorithm name.
                 if (!com.android.internal.util.ArrayUtils.contains(
@@ -509,33 +580,32 @@ public class AndroidKeyStore extends KeyStoreSpi {
             }
         }
 
-        @KeyStoreKeyProperties.PurposeEnum int purposes = params.getPurposes();
+        @KeyProperties.PurposeEnum int purposes = params.getPurposes();
         int[] keymasterBlockModes =
-                KeyStoreKeyProperties.BlockMode.allToKeymaster(params.getBlockModes());
-        if (((purposes & KeyStoreKeyProperties.PURPOSE_ENCRYPT) != 0)
+                KeyProperties.BlockMode.allToKeymaster(params.getBlockModes());
+        if (((purposes & KeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (params.isRandomizedEncryptionRequired())) {
             for (int keymasterBlockMode : keymasterBlockModes) {
                 if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(keymasterBlockMode)) {
                     throw new KeyStoreException(
                             "Randomized encryption (IND-CPA) required but may be violated by block"
                             + " mode: "
-                            + KeyStoreKeyProperties.BlockMode.fromKeymaster(keymasterBlockMode)
-                            + ". See KeyStoreParameter documentation.");
+                            + KeyProperties.BlockMode.fromKeymaster(keymasterBlockMode)
+                            + ". See KeyProtection documentation.");
                 }
             }
         }
-        for (int keymasterPurpose : KeyStoreKeyProperties.Purpose.allToKeymaster(purposes)) {
+        for (int keymasterPurpose : KeyProperties.Purpose.allToKeymaster(purposes)) {
             args.addInt(KeymasterDefs.KM_TAG_PURPOSE, keymasterPurpose);
         }
         args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, keymasterBlockModes);
         if (params.getSignaturePaddings().length > 0) {
             throw new KeyStoreException("Signature paddings not supported for symmetric keys");
         }
-        int[] keymasterPaddings = KeyStoreKeyProperties.EncryptionPadding.allToKeymaster(
+        int[] keymasterPaddings = KeyProperties.EncryptionPadding.allToKeymaster(
                 params.getEncryptionPaddings());
         args.addInts(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
         KeymasterUtils.addUserAuthArgs(args,
-                params.getContext(),
                 params.isUserAuthenticationRequired(),
                 params.getUserAuthenticationValidityDurationSeconds());
         args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
@@ -551,7 +621,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
         // TODO: Remove this once keymaster does not require us to specify the size of imported key.
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, keyMaterial.length * 8);
 
-        if (((purposes & KeyStoreKeyProperties.PURPOSE_ENCRYPT) != 0)
+        if (((purposes & KeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (!params.isRandomizedEncryptionRequired())) {
             // Permit caller-provided IV when encrypting with this key
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
@@ -789,19 +859,12 @@ public class AndroidKeyStore extends KeyStoreSpi {
             return;
         }
 
-        if (param != null && !(param instanceof KeyStoreParameter)) {
-            throw new KeyStoreException(
-                    "protParam should be android.security.KeyStoreParameter; was: "
-                    + param.getClass().getName());
-        }
-
         if (entry instanceof PrivateKeyEntry) {
             PrivateKeyEntry prE = (PrivateKeyEntry) entry;
-            setPrivateKeyEntry(alias, prE.getPrivateKey(), prE.getCertificateChain(),
-                    (KeyStoreParameter) param);
+            setPrivateKeyEntry(alias, prE.getPrivateKey(), prE.getCertificateChain(), param);
         } else if (entry instanceof SecretKeyEntry) {
             SecretKeyEntry secE = (SecretKeyEntry) entry;
-            setSecretKeyEntry(alias, secE.getSecretKey(), (KeyStoreParameter) param);
+            setSecretKeyEntry(alias, secE.getSecretKey(), param);
         } else {
             throw new KeyStoreException(
                     "Entry must be a PrivateKeyEntry, SecretKeyEntry or TrustedCertificateEntry"
