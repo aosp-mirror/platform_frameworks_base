@@ -16,6 +16,7 @@
 
 package com.android.internal.telecom;
 
+import android.net.Uri;
 import android.view.Surface;
 import android.telecom.VideoProfile;
 
@@ -47,5 +48,5 @@ oneway interface IVideoProvider {
 
     void requestCallDataUsage();
 
-    void setPauseImage(String uri);
+    void setPauseImage(in Uri uri);
 }
