@@ -342,16 +342,10 @@ void Attribute::print(std::ostream& out) const {
     }
 }
 
-Style::Style(bool weak) : weak(weak) {
-}
-
-bool Style::isWeak() const {
-    return weak;
-}
-
 Style* Style::clone(StringPool* newPool) const {
-    Style* style = new Style(weak);
+    Style* style = new Style();
     style->parent = parent;
+    style->parentInferred = parentInferred;
     for (auto& entry : entries) {
         style->entries.push_back(Entry{
                 entry.key,

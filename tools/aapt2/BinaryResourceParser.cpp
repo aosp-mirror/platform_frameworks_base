@@ -735,8 +735,7 @@ std::unique_ptr<Value> BinaryResourceParser::parseMapEntry(const ResourceNameRef
 std::unique_ptr<Style> BinaryResourceParser::parseStyle(const ResourceNameRef& name,
                                                         const ConfigDescription& config,
                                                         const ResTable_map_entry* map) {
-    const bool isWeak = (map->flags & ResTable_entry::FLAG_WEAK) != 0;
-    std::unique_ptr<Style> style = util::make_unique<Style>(isWeak);
+    std::unique_ptr<Style> style = util::make_unique<Style>();
     if (map->parent.ident == 0) {
         // The parent is either not set or it is an unresolved symbol.
         // Check to see if it is a symbol.

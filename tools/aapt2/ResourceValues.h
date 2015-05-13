@@ -232,12 +232,16 @@ struct Style : public BaseValue<Style> {
         std::unique_ptr<Item> value;
     };
 
-    bool weak;
     Reference parent;
+
+    /**
+     * If set to true, the parent was auto inferred from the
+     * style's name.
+     */
+    bool parentInferred = false;
+
     std::vector<Entry> entries;
 
-    Style(bool weak);
-    bool isWeak() const override;
     Style* clone(StringPool* newPool) const override;
     void print(std::ostream& out) const override;
 };
