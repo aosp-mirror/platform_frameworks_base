@@ -12713,10 +12713,11 @@ package android.graphics.drawable {
     method public static android.graphics.drawable.Icon createWithData(byte[], int, int);
     method public static android.graphics.drawable.Icon createWithFilePath(java.lang.String);
     method public static android.graphics.drawable.Icon createWithResource(android.content.res.Resources, int);
+    method public static android.graphics.drawable.Icon createWithResource(java.lang.String, int);
     method public int describeContents();
     method public android.graphics.drawable.Drawable loadDrawable(android.content.Context);
     method public void loadDrawableAsync(android.content.Context, android.os.Message);
-    method public void loadDrawableAsync(android.content.Context, android.os.Handler, android.graphics.drawable.Icon.OnDrawableLoadedListener);
+    method public void loadDrawableAsync(android.content.Context, android.graphics.drawable.Icon.OnDrawableLoadedListener, android.os.Handler);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.graphics.drawable.Icon> CREATOR;
   }

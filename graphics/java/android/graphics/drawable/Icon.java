@@ -29,9 +29,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -177,14 +177,13 @@ public final class Icon implements Parcelable {
      * Invokes {@link #loadDrawable(Context)} on a background thread
      * and then runs <code>andThen</code> on the UI thread when finished.
      *
-     * @param context {@link android.content.Context Context} in which to load the drawable; see
+     * @param context {@link Context Context} in which to load the drawable; see
      *                {@link #loadDrawable(Context)}
-     * @param handler {@link android.os.Handler} on which to run <code>andThen</code>.
      * @param listener a callback to run on the provided
-     *                 Handler once the drawable is available.
+     * @param handler {@link Handler} on which to run <code>andThen</code>.
      */
-    public void loadDrawableAsync(Context context, Handler handler,
-            final OnDrawableLoadedListener listener) {
+    public void loadDrawableAsync(Context context, final OnDrawableLoadedListener listener,
+            Handler handler) {
         new LoadDrawableTask(context, handler, listener).runAsync();
     }
 
@@ -211,14 +210,21 @@ public final class Icon implements Parcelable {
                         try {
                             mObj1 = pm.getResourcesForApplication(getResPackage());
                         } catch (PackageManager.NameNotFoundException e) {
-                            Log.e(TAG,
-                                    String.format("Unable to find package '%s'", getResPackage()),
+                            Log.e(TAG, String.format("Unable to find pkg=%s",
+                                            getResPackage()),
                                     e);
                             break;
                         }
                     }
                 }
-                return getResources().getDrawable(getResId(), context.getTheme());
+                try {
+                    return getResources().getDrawable(getResId(), context.getTheme());
+                } catch (RuntimeException e) {
+                    Log.e(TAG, String.format("Unable to load resource 0x%08x from pkg=%s",
+                                    getResId(),
+                                    getResPackage()),
+                            e);
+                }
             case TYPE_DATA:
                 return new BitmapDrawable(context.getResources(),
                     BitmapFactory.decodeByteArray(getDataBytes(), getDataOffset(), getDataLength())
@@ -250,25 +256,62 @@ public final class Icon implements Parcelable {
         return null;
     }
 
+    /**
+     * Load the requested resources under the given userId, if the system allows it,
+     * before actually loading the drawable.
+     *
+     * @hide
+     */
+    public Drawable loadDrawableAsUser(Context context, int userId) {
+        if (mType == TYPE_RESOURCE) {
+            if (getResources() == null
+                    && getResPackage() != null
+                    && !(getResPackage().equals("android"))) {
+                final PackageManager pm = context.getPackageManager();
+                try {
+                    mObj1 = pm.getResourcesForApplicationAsUser(getResPackage(), userId);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.e(TAG, String.format("Unable to find pkg=%s user=%d",
+                                    getResPackage(),
+                                    userId),
+                            e);
+                }
+            }
+        }
+        return loadDrawable(context);
+    }
+
     private Icon(int mType) {
         this.mType = mType;
     }
 
     /**
-     * Create a Icon pointing to a drawable resource.
+     * Create an Icon pointing to a drawable resource.
      * @param res Resources for a package containing the resource in question
-     * @param resid ID of the drawable resource
+     * @param resId ID of the drawable resource
      */
-    public static Icon createWithResource(Resources res, @DrawableRes int resid) {
+    public static Icon createWithResource(Resources res, @DrawableRes int resId) {
         final Icon rep = new Icon(TYPE_RESOURCE);
         rep.mObj1 = res;
-        rep.mInt1 = resid;
-        rep.mString1 = res.getResourcePackageName(resid);
+        rep.mInt1 = resId;
+        rep.mString1 = res.getResourcePackageName(resId);
         return rep;
     }
 
     /**
-     * Create a Icon pointing to a bitmap in memory.
+     * Create an Icon pointing to a drawable resource.
+     * @param resPackage Name of the package containing the resource in question
+     * @param resId ID of the drawable resource
+     */
+    public static Icon createWithResource(String resPackage, @DrawableRes int resId) {
+        final Icon rep = new Icon(TYPE_RESOURCE);
+        rep.mInt1 = resId;
+        rep.mString1 = resPackage;
+        return rep;
+    }
+
+    /**
+     * Create an Icon pointing to a bitmap in memory.
      * @param bits A valid {@link android.graphics.Bitmap} object
      */
     public static Icon createWithBitmap(Bitmap bits) {
@@ -278,7 +321,7 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * Create a Icon pointing to a compressed bitmap stored in a byte array.
+     * Create an Icon pointing to a compressed bitmap stored in a byte array.
      * @param data Byte array storing compressed bitmap data of a type that
      *             {@link android.graphics.BitmapFactory}
      *             can decode (see {@link android.graphics.Bitmap.CompressFormat}).
@@ -294,7 +337,7 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * Create a Icon pointing to a content specified by URI.
+     * Create an Icon pointing to an image file specified by URI.
      *
      * @param uri A uri referring to local content:// or file:// image data.
      */
@@ -305,7 +348,7 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * Create a Icon pointing to a content specified by URI.
+     * Create an Icon pointing to an image file specified by URI.
      *
      * @param uri A uri referring to local content:// or file:// image data.
      */
@@ -316,7 +359,7 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * Create a Icon pointing to
+     * Create an Icon pointing to an image file specified by path.
      *
      * @param path A path to a file that contains compressed bitmap data of
      *           a type that {@link android.graphics.BitmapFactory} can decode.
@@ -437,8 +480,8 @@ public final class Icon implements Parcelable {
     };
 
     /**
-     * Implement this interface to receive notification when
-     * {@link #loadDrawableAsync(Context, Handler, OnDrawableLoadedListener) loadDrawableAsync}
+     * Implement this interface to receive a callback when
+     * {@link #loadDrawableAsync(Context, OnDrawableLoadedListener, Handler) loadDrawableAsync}
      * is finished and your Drawable is ready.
      */
     public interface OnDrawableLoadedListener {

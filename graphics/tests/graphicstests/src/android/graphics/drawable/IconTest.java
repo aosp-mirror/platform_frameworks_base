@@ -27,14 +27,10 @@ import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.Override;
 import java.util.Arrays;
 import java.util.ArrayList;
-
-import junit.framework.TestCase;
 
 import com.android.frameworks.graphicstests.R;
 
@@ -173,7 +169,7 @@ public class IconTest extends AndroidTestCase {
         thd.start();
         final Handler h = new Handler(thd.getLooper());
         L(TAG, "asyncTest: dispatching load to thread: " + thd);
-        im1.loadDrawableAsync(mContext, h, new Icon.OnDrawableLoadedListener() {
+        im1.loadDrawableAsync(mContext, new Icon.OnDrawableLoadedListener() {
             @Override
             public void onDrawableLoaded(Drawable draw1) {
                 L(TAG, "asyncTest: thread: loading drawable");
@@ -195,7 +191,7 @@ public class IconTest extends AndroidTestCase {
                     fail("testAsync: file1 differs, check " + dir);
                 }
             }
-        });
+        }, h);
         L(TAG, "asyncTest: awaiting result");
         Thread.sleep(500); // ;_;
         assertTrue("async-test.png does not exist!", new File(dir, "async-test.png").exists());
