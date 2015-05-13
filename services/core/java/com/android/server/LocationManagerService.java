@@ -60,6 +60,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.IGpsGeofenceHardware;
 import android.location.IGpsMeasurementsListener;
 import android.location.IGpsNavigationMessageListener;
 import android.location.IGpsStatusListener;
@@ -162,6 +163,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private LocationBlacklist mBlacklist;
     private GpsMeasurementsProvider mGpsMeasurementsProvider;
     private GpsNavigationMessageProvider mGpsNavigationMessageProvider;
+    private IGpsGeofenceHardware mGpsGeofenceProxy;
 
     // --- fields below are protected by mLock ---
     // Set of providers that are explicitly enabled
@@ -401,18 +403,19 @@ public class LocationManagerService extends ILocationManager.Stub {
         addProviderLocked(passiveProvider);
         mEnabledProviders.add(passiveProvider.getName());
         mPassiveProvider = passiveProvider;
-        // Create a gps location provider
-        GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this,
-                mLocationHandler.getLooper());
 
         if (GpsLocationProvider.isSupported()) {
+            // Create a gps location provider
+            GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this,
+                    mLocationHandler.getLooper());
             mGpsStatusProvider = gpsProvider.getGpsStatusProvider();
             mNetInitiatedListener = gpsProvider.getNetInitiatedListener();
             addProviderLocked(gpsProvider);
             mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
+            mGpsMeasurementsProvider = gpsProvider.getGpsMeasurementsProvider();
+            mGpsNavigationMessageProvider = gpsProvider.getGpsNavigationMessageProvider();
+            mGpsGeofenceProxy = gpsProvider.getGpsGeofenceProxy();
         }
-        mGpsMeasurementsProvider = gpsProvider.getGpsMeasurementsProvider();
-        mGpsNavigationMessageProvider = gpsProvider.getGpsNavigationMessageProvider();
 
         /*
         Load package name(s) containing location provider support.
@@ -508,7 +511,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 com.android.internal.R.string.config_geofenceProviderPackageName,
                 com.android.internal.R.array.config_locationProviderPackageNames,
                 mLocationHandler,
-                gpsProvider.getGpsGeofenceProxy(),
+                mGpsGeofenceProxy,
                 flpHardwareProvider != null ? flpHardwareProvider.getGeofenceHardware() : null);
         if (provider == null) {
             Slog.e(TAG,  "Unable to bind FLP Geofence proxy.");
@@ -1851,7 +1854,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (!hasLocationAccess) {
+        if (!hasLocationAccess || mGpsMeasurementsProvider == null) {
             return false;
         }
         return mGpsMeasurementsProvider.addListener(listener);
@@ -1859,7 +1862,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void removeGpsMeasurementsListener(IGpsMeasurementsListener listener) {
-        mGpsMeasurementsProvider.removeListener(listener);
+        if (mGpsMeasurementsProvider != null) {
+            mGpsMeasurementsProvider.removeListener(listener);
+        }
     }
 
     @Override
@@ -1880,7 +1885,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (!hasLocationAccess) {
+        if (!hasLocationAccess || mGpsNavigationMessageProvider == null) {
             return false;
         }
         return mGpsNavigationMessageProvider.addListener(listener);
@@ -1888,7 +1893,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void removeGpsNavigationMessageListener(IGpsNavigationMessageListener listener) {
-        mGpsNavigationMessageProvider.removeListener(listener);
+        if (mGpsNavigationMessageProvider != null) {
+            mGpsNavigationMessageProvider.removeListener(listener);
+        }
     }
 
     @Override

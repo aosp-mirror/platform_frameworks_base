@@ -446,12 +446,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
                 int networkState;
                 if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false) ||
-                    !info.isConnected()) {
+                        !info.isConnected()) {
                     networkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
                 } else {
                     networkState = LocationProvider.AVAILABLE;
                 }
-
 
                 updateNetworkState(networkState, info);
             } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)
