@@ -16,7 +16,6 @@
 
 package android.security;
 
-import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
@@ -73,7 +72,6 @@ public abstract class KeymasterUtils {
      *        use of the key needs authorization.
      */
     public static void addUserAuthArgs(KeymasterArguments args,
-            Context context,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds) {
         if (!userAuthenticationRequired) {
@@ -85,7 +83,7 @@ public abstract class KeymasterUtils {
             // Every use of this key needs to be authorized by the user. This currently means
             // fingerprint-only auth.
             FingerprintManager fingerprintManager =
-                    context.getSystemService(FingerprintManager.class);
+                    KeyStore.getApplicationContext().getSystemService(FingerprintManager.class);
             if ((fingerprintManager == null) || (!fingerprintManager.isHardwareDetected())) {
                 throw new IllegalStateException(
                         "This device does not support keys which require authentication for every"
