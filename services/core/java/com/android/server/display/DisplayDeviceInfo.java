@@ -104,6 +104,16 @@ final class DisplayDeviceInfo {
     public static final int TOUCH_EXTERNAL = 2;
 
     /**
+     * Diff result: The {@link #state} fields differ.
+     */
+    public static final int DIFF_STATE = 1 << 0;
+
+    /**
+     * Diff result: Other fields differ.
+     */
+    public static final int DIFF_OTHER = 1 << 1;
+
+    /**
      * Gets the name of the display device, which may be derived from EDID or
      * other sources. The name may be localized and displayed to the user.
      */
@@ -238,26 +248,39 @@ final class DisplayDeviceInfo {
     }
 
     public boolean equals(DisplayDeviceInfo other) {
-        return other != null
-                && Objects.equal(name, other.name)
-                && Objects.equal(uniqueId, other.uniqueId)
-                && width == other.width
-                && height == other.height
-                && refreshRate == other.refreshRate
-                && Arrays.equals(supportedRefreshRates, other.supportedRefreshRates)
-                && densityDpi == other.densityDpi
-                && xDpi == other.xDpi
-                && yDpi == other.yDpi
-                && appVsyncOffsetNanos == other.appVsyncOffsetNanos
-                && presentationDeadlineNanos == other.presentationDeadlineNanos
-                && flags == other.flags
-                && touch == other.touch
-                && rotation == other.rotation
-                && type == other.type
-                && Objects.equal(address, other.address)
-                && state == other.state
-                && ownerUid == other.ownerUid
-                && Objects.equal(ownerPackageName, other.ownerPackageName);
+        return other != null && diff(other) == 0;
+    }
+
+    /**
+     * Computes the difference between display device infos.
+     * Assumes other is not null.
+     */
+    public int diff(DisplayDeviceInfo other) {
+        int diff = 0;
+        if (state != other.state) {
+            diff |= DIFF_STATE;
+        }
+        if (!Objects.equal(name, other.name)
+                || !Objects.equal(uniqueId, other.uniqueId)
+                || width != other.width
+                || height != other.height
+                || refreshRate != other.refreshRate
+                || !Arrays.equals(supportedRefreshRates, other.supportedRefreshRates)
+                || densityDpi != other.densityDpi
+                || xDpi != other.xDpi
+                || yDpi != other.yDpi
+                || appVsyncOffsetNanos != other.appVsyncOffsetNanos
+                || presentationDeadlineNanos != other.presentationDeadlineNanos
+                || flags != other.flags
+                || touch != other.touch
+                || rotation != other.rotation
+                || type != other.type
+                || !Objects.equal(address, other.address)
+                || ownerUid != other.ownerUid
+                || !Objects.equal(ownerPackageName, other.ownerPackageName)) {
+            diff |= DIFF_OTHER;
+        }
+        return diff;
     }
 
     @Override
