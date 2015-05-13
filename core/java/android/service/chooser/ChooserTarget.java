@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,6 +35,16 @@ import android.util.Log;
 /**
  * A ChooserTarget represents a deep-link into an application as returned by a
  * {@link android.service.chooser.ChooserTargetService}.
+ *
+ * <p>A chooser target represents a specific deep link target into an application exposed
+ * for selection by the user. This might be a frequently emailed contact, a recently active
+ * group messaging conversation, a folder in a cloud storage app, a collection of related
+ * items published on a social media service or any other contextually relevant grouping
+ * of target app + relevant metadata.</p>
+ *
+ * <p>Creators of chooser targets should consult the relevant design guidelines for the type
+ * of target they are presenting. For example, targets involving people should be presented
+ * with a circular icon.</p>
  */
 public final class ChooserTarget implements Parcelable {
     private static final String TAG = "ChooserTarget";
@@ -48,7 +59,7 @@ public final class ChooserTarget implements Parcelable {
      * The icon that will be shown to the user to represent this target.
      * The system may resize this icon as appropriate.
      */
-    private Bitmap mIcon;
+    private Icon mIcon;
 
     /**
      * The IntentSender that will be used to deliver the intent to the target.
@@ -93,7 +104,7 @@ public final class ChooserTarget implements Parcelable {
      * @param score ranking score for this target between 0.0f and 1.0f, inclusive
      * @param pendingIntent PendingIntent to fill in and send if the user chooses this target
      */
-    public ChooserTarget(CharSequence title, Bitmap icon, float score,
+    public ChooserTarget(CharSequence title, Icon icon, float score,
             PendingIntent pendingIntent) {
         this(title, icon, score, pendingIntent.getIntentSender());
     }
@@ -129,7 +140,7 @@ public final class ChooserTarget implements Parcelable {
      * @param score ranking score for this target between 0.0f and 1.0f, inclusive
      * @param intentSender IntentSender to fill in and send if the user chooses this target
      */
-    public ChooserTarget(CharSequence title, Bitmap icon, float score, IntentSender intentSender) {
+    public ChooserTarget(CharSequence title, Icon icon, float score, IntentSender intentSender) {
         mTitle = title;
         mIcon = icon;
         if (score > 1.f || score < 0.f) {
@@ -143,7 +154,7 @@ public final class ChooserTarget implements Parcelable {
     ChooserTarget(Parcel in) {
         mTitle = in.readCharSequence();
         if (in.readInt() != 0) {
-            mIcon = Bitmap.CREATOR.createFromParcel(in);
+            mIcon = Icon.CREATOR.createFromParcel(in);
         } else {
             mIcon = null;
         }
@@ -167,7 +178,7 @@ public final class ChooserTarget implements Parcelable {
      *
      * @return the icon representing this target, intended to be shown to a user
      */
-    public Bitmap getIcon() {
+    public Icon getIcon() {
         return mIcon;
     }
 
