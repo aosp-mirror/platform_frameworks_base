@@ -306,6 +306,13 @@ public class VoicemailContract {
             contentValues.put(Voicemails.SOURCE_PACKAGE, voicemail.getSourcePackage());
             contentValues.put(Voicemails.SOURCE_DATA, voicemail.getSourceData());
             contentValues.put(Voicemails.IS_READ, voicemail.isRead() ? 1 : 0);
+
+            PhoneAccountHandle phoneAccount = voicemail.getPhoneAccount();
+            if (voicemail.getPhoneAccount() != null) {
+                contentValues.put(Voicemails.PHONE_ACCOUNT_COMPONENT_NAME,
+                        phoneAccount.getComponentName().flattenToString());
+                contentValues.put(Voicemails.PHONE_ACCOUNT_ID, phoneAccount.getId());
+            }
             return contentValues;
         }
     }
