@@ -17,6 +17,7 @@
 #ifndef AAPT_DEBUG_H
 #define AAPT_DEBUG_H
 
+#include "Resource.h"
 #include "ResourceTable.h"
 
 #include <memory>
@@ -25,7 +26,8 @@ namespace aapt {
 
 struct Debug {
     static void printTable(const std::shared_ptr<ResourceTable>& table);
-    static void printStyleGraph(const std::shared_ptr<ResourceTable>& table);
+    static void printStyleGraph(const std::shared_ptr<ResourceTable>& table,
+                                const ResourceName& targetStyle);
 };
 
 } // namespace aapt
