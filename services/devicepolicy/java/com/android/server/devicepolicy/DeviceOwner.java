@@ -116,9 +116,9 @@ class DeviceOwner {
     /**
      * Creates an instance of the device owner object with the device initializer set.
      */
-    static DeviceOwner createWithDeviceInitializer(ComponentName admin, String ownerName) {
+    static DeviceOwner createWithDeviceInitializer(ComponentName admin) {
         DeviceOwner owner = new DeviceOwner();
-        owner.mDeviceInitializer = new OwnerInfo(ownerName, admin);
+        owner.mDeviceInitializer = new OwnerInfo(null, admin);
         return owner;
     }
 
@@ -155,12 +155,8 @@ class DeviceOwner {
         return mDeviceInitializer != null ? mDeviceInitializer.packageName : null;
     }
 
-    String getDeviceInitializerName() {
-        return mDeviceInitializer != null ? mDeviceInitializer.name : null;
-    }
-
-    void setDeviceInitializer(ComponentName admin, String ownerName) {
-        mDeviceInitializer = new OwnerInfo(ownerName, admin);
+    void setDeviceInitializer(ComponentName admin) {
+        mDeviceInitializer = new OwnerInfo(null, admin);
     }
 
     void clearDeviceInitializer() {
@@ -255,16 +251,15 @@ class DeviceOwner {
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     mDeviceOwner = new OwnerInfo(name, packageName);
                 } else if (tag.equals(TAG_DEVICE_INITIALIZER)) {
-                    String name = parser.getAttributeValue(null, ATTR_NAME);
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     String initializerComponentStr =
                             parser.getAttributeValue(null, ATTR_COMPONENT_NAME);
                     ComponentName admin =
                             ComponentName.unflattenFromString(initializerComponentStr);
                     if (admin != null) {
-                        mDeviceInitializer = new OwnerInfo(name, admin);
+                        mDeviceInitializer = new OwnerInfo(null, admin);
                     } else {
-                        mDeviceInitializer = new OwnerInfo(name, packageName);
+                        mDeviceInitializer = new OwnerInfo(null, packageName);
                         Slog.e(TAG, "Error parsing device-owner file. Bad component name " +
                                 initializerComponentStr);
                     }
@@ -334,9 +329,6 @@ class DeviceOwner {
             if (mDeviceInitializer != null) {
                 out.startTag(null, TAG_DEVICE_INITIALIZER);
                 out.attribute(null, ATTR_PACKAGE, mDeviceInitializer.packageName);
-                if (mDeviceInitializer.name != null) {
-                    out.attribute(null, ATTR_NAME, mDeviceInitializer.name);
-                }
                 if (mDeviceInitializer.admin != null) {
                     out.attribute(
                             null, ATTR_COMPONENT_NAME, mDeviceInitializer.admin.flattenToString());

@@ -5751,7 +5751,7 @@ package android.app.admin {
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setCertInstallerPackage(android.content.ComponentName, java.lang.String) throws java.lang.SecurityException;
     method public void setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean);
-    method public boolean setDeviceInitializer(android.content.ComponentName, android.content.ComponentName, java.lang.String) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
+    method public boolean setDeviceInitializer(android.content.ComponentName, android.content.ComponentName) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public boolean setKeyguardDisabled(android.content.ComponentName, boolean);
     method public void setKeyguardDisabledFeatures(android.content.ComponentName, int);
