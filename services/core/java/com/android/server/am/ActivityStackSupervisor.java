@@ -2868,6 +2868,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             task.stack.removeTask(task, "moveTaskToStack", false /* notMoving */);
         }
         stack.addTask(task, toTop, true);
+        // The task might have already been running and its visibility needs to be synchronized with
+        // the visibility of the stack / windows.
+        stack.ensureActivitiesVisibleLocked(null, 0);
         resumeTopActivitiesLocked();
     }
 
