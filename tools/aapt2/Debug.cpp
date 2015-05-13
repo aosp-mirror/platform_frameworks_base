@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <queue>
 #include <set>
 #include <vector>
 
@@ -135,43 +136,53 @@ static size_t getNodeIndex(const std::vector<ResourceName>& names, const Resourc
     return std::distance(names.begin(), iter);
 }
 
-void Debug::printStyleGraph(const std::shared_ptr<ResourceTable>& table) {
-    std::vector<ResourceName> names;
+void Debug::printStyleGraph(const std::shared_ptr<ResourceTable>& table,
+                            const ResourceName& targetStyle) {
     std::map<ResourceName, std::set<ResourceName>> graph;
 
-    for (const auto& type : *table) {
-        for (const auto& entry : type->entries) {
-            ResourceName name = { table->getPackage(), type->type, entry->name };
+    std::queue<ResourceName> stylesToVisit;
+    stylesToVisit.push(targetStyle);
+    for (; !stylesToVisit.empty(); stylesToVisit.pop()) {
+        const ResourceName& styleName = stylesToVisit.front();
+        std::set<ResourceName>& parents = graph[styleName];
+        if (!parents.empty()) {
+            // We've already visited this style.
+            continue;
+        }
+
+        const ResourceTableType* type;
+        const ResourceEntry* entry;
+        std::tie(type, entry) = table->findResource(styleName);
+        if (entry) {
             for (const auto& value : entry->values) {
                 visitFunc<Style>(*value.value, [&](const Style& style) {
                     if (style.parent.name.isValid()) {
-                        names.push_back(style.parent.name);
-                        names.push_back(name);
-                        graph[style.parent.name].insert(name);
+                        parents.insert(style.parent.name);
+                        stylesToVisit.push(style.parent.name);
                     }
                 });
             }
         }
     }
 
-    std::sort(names.begin(), names.end());
-    auto it1 = std::unique(names.begin(), names.end());
-    names.resize(std::distance(names.begin(), it1));
+    std::vector<ResourceName> names;
+    for (const auto& entry : graph) {
+        names.push_back(entry.first);
+    }
 
     std::cout << "digraph styles {\n";
-
     for (const auto& name : names) {
         std::cout << "  node_" << getNodeIndex(names, name)
-                  << " [label=\"" << name.entry << "\"];\n";
+                  << " [label=\"" << name << "\"];\n";
     }
 
     for (const auto& entry : graph) {
-        const ResourceName& parent = entry.first;
-        size_t parentNodeIndex = getNodeIndex(names, parent);
+        const ResourceName& styleName = entry.first;
+        size_t styleNodeIndex = getNodeIndex(names, styleName);
 
-        for (const auto& childName : entry.second) {
-            std::cout << "node_" << getNodeIndex(names, childName) << " -> "
-                      << "node_" << parentNodeIndex << ";\n";
+        for (const auto& parentName : entry.second) {
+            std::cout << "  node_" << styleNodeIndex << " -> "
+                      << "node_" << getNodeIndex(names, parentName) << ";\n";
         }
     }
 
