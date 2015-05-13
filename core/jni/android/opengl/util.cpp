@@ -153,7 +153,105 @@ static void doThrowIAE(JNIEnv* env, const char* msg) {
     jniThrowException(env, "java/lang/IllegalArgumentException", msg);
 }
 
-template<class JArray, class T>
+class ByteArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jbyteArray array, jboolean* is_copy) {
+        return _env->GetByteArrayElements(array, is_copy);
+    }
+};
+class BooleanArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jbooleanArray array, jboolean* is_copy) {
+        return _env->GetBooleanArrayElements(array, is_copy);
+    }
+};
+class CharArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jcharArray array, jboolean* is_copy) {
+        return _env->GetCharArrayElements(array, is_copy);
+    }
+};
+class ShortArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jshortArray array, jboolean* is_copy) {
+        return _env->GetShortArrayElements(array, is_copy);
+    }
+};
+class IntArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jintArray array, jboolean* is_copy) {
+        return _env->GetIntArrayElements(array, is_copy);
+    }
+};
+class LongArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jlongArray array, jboolean* is_copy) {
+        return _env->GetLongArrayElements(array, is_copy);
+    }
+};
+class FloatArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jfloatArray array, jboolean* is_copy) {
+        return _env->GetFloatArrayElements(array, is_copy);
+    }
+};
+class DoubleArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jdoubleArray array, jboolean* is_copy) {
+        return _env->GetDoubleArrayElements(array, is_copy);
+    }
+};
+
+class ByteArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jbyteArray array, jbyte* data, jint mode) {
+        _env->ReleaseByteArrayElements(array, data, mode);
+    }
+};
+class BooleanArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jbooleanArray array, jboolean* data, jint mode) {
+        _env->ReleaseBooleanArrayElements(array, data, mode);
+    }
+};
+class CharArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jcharArray array, jchar* data, jint mode) {
+        _env->ReleaseCharArrayElements(array, data, mode);
+    }
+};
+class ShortArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jshortArray array, jshort* data, jint mode) {
+        _env->ReleaseShortArrayElements(array, data, mode);
+    }
+};
+class IntArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jintArray array, jint* data, jint mode) {
+        _env->ReleaseIntArrayElements(array, data, mode);
+    }
+};
+class LongArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jlongArray array, jlong* data, jint mode) {
+        _env->ReleaseLongArrayElements(array, data, mode);
+    }
+};
+class FloatArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jfloatArray array, jfloat* data, jint mode) {
+        _env->ReleaseFloatArrayElements(array, data, mode);
+    }
+};
+class DoubleArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jdoubleArray array, jdouble* data, jint mode) {
+        _env->ReleaseDoubleArrayElements(array, data, mode);
+    }
+};
+
+template<class JArray, class T, class ArrayGetter, class ArrayReleaser>
 class ArrayHelper {
 public:
     ArrayHelper(JNIEnv* env, JArray ref, jint offset, jint minSize) {
@@ -167,7 +265,7 @@ public:
 
     ~ArrayHelper() {
         if (mBase) {
-            mEnv->ReleasePrimitiveArrayCritical(mRef, mBase, mReleaseParam);
+            ArrayReleaser::Release(mEnv, mRef, mBase, mReleaseParam);
         }
     }
 
@@ -198,7 +296,7 @@ public:
     // Bind the array.
 
     void bind() {
-        mBase = (T*) mEnv->GetPrimitiveArrayCritical(mRef, (jboolean *) 0);
+        mBase = (T*) ArrayGetter::Get(mEnv, mRef, (jboolean *) 0);
         mData = mBase + mOffset;
     }
 
@@ -218,10 +316,10 @@ private:
     int mReleaseParam;
 };
 
-typedef ArrayHelper<jfloatArray, float> FloatArrayHelper;
-typedef ArrayHelper<jcharArray, unsigned short> UnsignedShortArrayHelper;
-typedef ArrayHelper<jintArray, int> IntArrayHelper;
-typedef ArrayHelper<jbyteArray, unsigned char> ByteArrayHelper;
+typedef ArrayHelper<jfloatArray, float, FloatArrayGetter, FloatArrayReleaser> FloatArrayHelper;
+typedef ArrayHelper<jcharArray, unsigned short, CharArrayGetter, CharArrayReleaser> UnsignedShortArrayHelper;
+typedef ArrayHelper<jintArray, int, IntArrayGetter, IntArrayReleaser> IntArrayHelper;
+typedef ArrayHelper<jbyteArray, unsigned char, ByteArrayGetter, ByteArrayReleaser> ByteArrayHelper;
 
 inline float distance2(float x, float y, float z) {
     return x * x + y * y + z * z;
