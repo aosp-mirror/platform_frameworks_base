@@ -13,6 +13,9 @@ namespace flag {
 void requiredFlag(const StringPiece& name, const StringPiece& description,
                   std::function<void(const StringPiece&)> action);
 
+void requiredFlag(const StringPiece& name, const StringPiece& description,
+                  std::function<bool(const StringPiece&, std::string*)> action);
+
 void optionalFlag(const StringPiece& name, const StringPiece& description,
                   std::function<void(const StringPiece&)> action);
 
