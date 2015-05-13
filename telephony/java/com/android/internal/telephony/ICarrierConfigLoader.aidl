@@ -16,14 +16,14 @@
 
 package com.android.internal.telephony;
 
-import android.os.Bundle;
+import android.os.PersistableBundle;
 
 /**
  * Interface used to interact with the CarrierConfigLoader
  */
 interface ICarrierConfigLoader {
 
-    Bundle getConfigForSubId(int subId);
+    PersistableBundle getConfigForSubId(int subId);
 
     void reloadCarrierConfigForSubId(int subId);
 
