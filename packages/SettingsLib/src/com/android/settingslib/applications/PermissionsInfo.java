@@ -22,7 +22,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.UserHandle;
@@ -80,7 +79,8 @@ public class PermissionsInfo {
                 if (info.protectionLevel == PermissionInfo.PROTECTION_DANGEROUS) {
                     group = new PermissionGroup();
                     // TODO: Add default permission icon.
-                    group.icon = info.icon != 0 ? info.loadIcon(mPm) : new ShapeDrawable();
+                    group.icon = info.icon != 0 ? info.loadIcon(mPm) : mContext.getDrawable(
+                            com.android.internal.R.drawable.ic_perm_device_info);
                     group.name = info.name;
                     group.packageName = info.packageName;
                     group.label = info.loadLabel(mPm).toString();
@@ -104,7 +104,8 @@ public class PermissionsInfo {
             for (PermissionGroupInfo groupInfo : groups) {
                 PermissionGroup group = new PermissionGroup();
                 // TODO: Add default permission icon.
-                group.icon = groupInfo.icon != 0 ? groupInfo.loadIcon(mPm) : new ShapeDrawable();
+                group.icon = groupInfo.icon != 0 ? groupInfo.loadIcon(mPm) : mContext.getDrawable(
+                        com.android.internal.R.drawable.ic_perm_device_info);
                 group.name = groupInfo.name;
                 group.packageName = groupInfo.packageName;
                 group.label = groupInfo.loadLabel(mPm).toString();
