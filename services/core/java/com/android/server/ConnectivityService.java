@@ -1661,6 +1661,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private static final String DEFAULT_TCP_BUFFER_SIZES = "4096,87380,110208,4096,16384,110208";
+    private static final String DEFAULT_TCP_RWND_KEY = "net.tcp.default_init_rwnd";
+
+    // Overridden for testing purposes to avoid writing to SystemProperties.
+    protected int getDefaultTcpRwnd() {
+        return SystemProperties.getInt(DEFAULT_TCP_RWND_KEY, 0);
+    }
 
     private void updateTcpBufferSizes(NetworkAgentInfo nai) {
         if (isDefaultNetwork(nai) == false) {
@@ -1696,10 +1702,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             loge("Can't set TCP buffer sizes:" + e);
         }
 
-        final String defaultRwndKey = "net.tcp.default_init_rwnd";
-        int defaultRwndValue = SystemProperties.getInt(defaultRwndKey, 0);
         Integer rwndValue = Settings.Global.getInt(mContext.getContentResolver(),
-            Settings.Global.TCP_DEFAULT_INIT_RWND, defaultRwndValue);
+            Settings.Global.TCP_DEFAULT_INIT_RWND, getDefaultTcpRwnd());
         final String sysctlKey = "sys.sysctl.tcp_def_init_rwnd";
         if (rwndValue != 0) {
             SystemProperties.set(sysctlKey, rwndValue.toString());
