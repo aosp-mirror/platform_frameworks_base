@@ -1,42 +1,125 @@
 page.title=Promote Your App with Ads
-page.metaDescription=Promote your app through AdMob, AdWords, and YouTube to find new users at the right moment.
+page.metaDescription=Promote your app with AdWords to find new users at the right moment.
 page.image=images/cards/adwords_2x.jpg
-page.tags="users, ads, analytics"
-
+page.tags="users, ads, adwords"
 @jd:body
 
-<p>
-  AdMob is Google's advertising platform for mobile apps. You can use it to
-  monetize your app and promote your apps, and you can link your Google
-  Analytics account to AdMob so you can analyze your apps &mdash; all in one
-  place.
-</p>
+<p>Users have a huge amount of choice when it comes to which apps they install and
+use, so it’s important to actively find new ways to promote your app and drive
+ongoing engagement. AdWords is a powerful and effective way to do both.</p>
 
-<p>
-  <a href="http://www.google.com/ads/admob/">AdMob</a> is the largest mobile ad
-  app network. But you get more than just massive scale: AdMob will soon help
-  you find the right users in related apps. If your app is for bicycling, AdMob
-  can promote your app on other fitness and cycling-related apps worldwide.
-  <a href=
-  "https://apps.admob.com/admob/signup?subid=us-en-et-dac&_adc=ww-ww-et-admob2&hl=en">
-  Sign up for AdMob</a>.
-</p>
 
-<p>
-  AdMob also offers new solutions to help you achieve app-related goals such as
-  downloads, re-engagement and in-app purchases using Google search and the
-  Google Display Network. These solutions include streamlined campaign creation
-  flows and tools to track performance across the entire app lifecycle.
-  <a href="https://support.google.com/adwords/answer/2549053?hl=en">Learn
-  More</a>.
-</p>
-<div style="margin-top:2em;">
-  <img src="{@docRoot}images/gp-ads-console.jpg">
+<h2 id=drive_installs>Drive installs</h2>
+
+<p><a href="http://adwords.google.com">AdWords</a> promotes your app to interested users where they spend time on phones and
+tablets – with app install ads on Google Search, YouTube, Gmail, and within
+apps and across the web on  the Google Display Network. AdWords is a powerful
+way to scale app promotion across Google networks and find customers that are
+most likely to install your app. </p>
+
+<p><a href="https://support.google.com/adwords/answer/6032059">Get started with AdWords app install ads</a>.</p>
+
+<div style="display:inline-block">
+ <div class="figure-left" style="width:40%;">
+   <h3>From Google Play</h3>
+   <img src="/images/distribute/promote_ads_play.png">
+    <p class="figure-caption">Search ads on Google Play are still undergoing testing and not yet available to
+buy. <a href="http://android-developers.blogspot.com/2015/02/a-new-way-to-promote-your-app-on-google.html">Find out more</a>.</p>
+  </div>
+  <div class="figure-right" style="width:40%;">
+    <h3>From apps</h3>
+    <img src="/images/distribute/promote_ads_search.png">
+    <p class="figure-caption">Connect with users as they search for content and services provided by your
+app.</p>
+  </div>
 </div>
 
-<div class="headerLine">
+<div style="display:inline-block">
+ <div class="figure-left" style="width:40%;">
+   <h3>From YouTube</h3>
+   <img src="/images/distribute/promote_ads_youtube.png">
+    <p class="figure-caption">Promote your app when users are watching related videos.</p>
+  </div>
+  <div class="figure-right" style="width:40%;">
+    <h3>From apps</h3>
+    <img src="/images/distribute/promote_ads_apps.png">
+    <p class="figure-caption">Reach users while they’re engaged with apps and games across the AdMob network.</p>
+  </div>
+</div>
+
+<div style="display:inline-block">
+ <div class="figure-left" style="width:40%;">
+   <h3>From the web</h3>
+   <img src="/images/distribute/promote_ads_web.png">
+    <p class="figure-caption">Reach users while they’re engaged with websites across the Google Display Network.</p>
+  </div>
+  <div class="figure-right" style="width:40%;">
+    <h3>From Gmail</h3>
+    <img src="/images/distribute/promote_ads_gmail.png">
+    <p class="figure-caption">Promote your app while users communicate and get things done in Gmail.</p>
+  </div>
+</div>
+
+<h3>Tips</h3>
+
+<ul>
+  <li> Estimate how much an app user is worth to your business, so that you can work
+out an appropriate cost-per-install that you’re willing to pay.
+  <li> Ensure that your ads and Play Store listing are compelling and clearly describe
+your app’s value.
+  <li> Check that you’re accurately tracking and attributing installs by installing
+the AdWords <a href="https://developers.google.com/app-conversion-tracking/">conversion tracking SDK</a>.
+  <li> Promote your app broadly across display, search, and video to reach even more
+potential users and drive a higher volume of installs.
+  <li> Start with broader targeting and then fine tune your bidding once you’ve
+assessed your campaign results.
+  <li> Use Conversion Optimizer to automate your bidding so that your ads target users
+who are most likely to install your app. 
+  <li> Use Conversion Optimizer for in-app buyers to automate your bidding so that
+your ads target high value users who are most likely to make purchases in your
+app.
+</ul>
+
+
+<h2 id=engage_with_users>Engage with users</h2>
+
+<p>Getting a user to install an app is one thing, but you'll also want them to
+open it regularly. AdWords offers app re-engagement tools to help your app stay
+in mind with users who’ve already installed it on their phone. AdWords can
+remind them of key features and encourage them to try your app again, or help
+them complete an activity they didn't know your app could handle.</p>
+
+<div>
+ <div class="figure-left" style="width:46%;">
+   <h3>From search</h3>
+   <img src="/images/distribute/promote_ads.png">
+    <p class="figure-caption">Add deep links to your app, then bring users straight
+    to relevant app content when they’re searching.</p>
+  </div>
+  <div class="figure-right" style="width:46%;">
+    <h3>From apps</h3>
+    <img src="/images/distribute/promote_ads_inapp.png">
+    <p class="figure-caption">Use remarketing and deep links to bring users to just the right
+    place in your app to re-engage and convert, from other apps and games they love.</p>
+  </div>
+</div>
+
+<h3>Tips</h3>
+
+<ul>
+  <li> Track what users do in your app after they’ve clicked an ad, by installing the
+AdWords <a href="https://developers.google.com/app-conversion-tracking/">conversion tracking SDK</a>.
+  <li> Advertise a compelling reason for users to re-engage with your app (such as a
+reminder or a special offer).
+  <li> <a href="https://developers.google.com/app-indexing/webmasters/app">Add deep links</a> to your app that’ll take users  directly to the parts of your app that will be
+most relevant and interesting to them, where they can easily take action.
+  <li> Re-engage your app users across the display network with remarketing lists and
+search with keywords.
+  <li> Use remarketing lists to target high value users so that you can drive more
+conversions in your app.
+</ul>
+
 <h2 id="related-resources">Related Resources</h2>
-</div>
 
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/users/promotewithads"
