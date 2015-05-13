@@ -581,6 +581,44 @@ public class KeyStore {
         }
     }
 
+    /**
+     * Notify keystore that a user was added.
+     *
+     * @param userId the new user.
+     * @param parentId the parent of the new user, or -1 if the user has no parent. If parentId is
+     * specified then the new user's keystore will be intialized with the same secure lockscreen
+     * password as the parent.
+     */
+    public void onUserAdded(int userId, int parentId) {
+        try {
+            mBinder.onUserAdded(userId, parentId);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+        }
+    }
+
+    /**
+     * Notify keystore that a user was added.
+     *
+     * @param userId the new user.
+     */
+    public void onUserAdded(int userId) {
+        onUserAdded(userId, -1);
+    }
+
+    /**
+     * Notify keystore that a user was removed.
+     *
+     * @param userId the removed user.
+     */
+    public void onUserRemoved(int userId) {
+        try {
+            mBinder.onUserRemoved(userId);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+        }
+    }
+
     public boolean onUserPasswordChanged(String newPassword) {
         return onUserPasswordChanged(UserHandle.getUserId(Process.myUid()), newPassword);
     }
