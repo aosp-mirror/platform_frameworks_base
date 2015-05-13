@@ -576,15 +576,15 @@ public:
                 && getOutline().getAlpha() != 0.0f;
     }
 
-    LayerType effectiveLayerType() const {
-        LayerType type = mLayerProperties.mType;
-        if (type == LayerType::None
+    bool promotedToLayer() const {
+        return mLayerProperties.mType == LayerType::None
                 && !MathUtils::isZero(mPrimitiveFields.mAlpha)
                 && mPrimitiveFields.mAlpha < 1
-                && mPrimitiveFields.mHasOverlappingRendering) {
-            return LayerType::RenderLayer;
-        }
-        return type;
+                && mPrimitiveFields.mHasOverlappingRendering;
+    }
+
+    LayerType effectiveLayerType() const {
+        return promotedToLayer() ? LayerType::RenderLayer : mLayerProperties.mType;
     }
 
 private:
