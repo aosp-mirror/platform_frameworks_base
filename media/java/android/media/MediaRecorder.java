@@ -156,14 +156,14 @@ public class MediaRecorder
      * @see MediaCodec#createPersistentInputSurface
      * @see MediaRecorder.VideoSource
      */
-    public void usePersistentSurface(@NonNull Surface surface) {
+    public void setInputSurface(@NonNull Surface surface) {
         if (!(surface instanceof MediaCodec.PersistentSurface)) {
             throw new IllegalArgumentException("not a PersistentSurface");
         }
-        native_usePersistentSurface(surface);
+        native_setInputSurface(surface);
     }
 
-    private native final void native_usePersistentSurface(@NonNull Surface surface);
+    private native final void native_setInputSurface(@NonNull Surface surface);
 
     /**
      * Sets a Surface to show a preview of recorded media (video). Calls this

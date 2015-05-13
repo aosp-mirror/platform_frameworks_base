@@ -677,7 +677,7 @@ final public class MediaCodec {
      * <p>
      * The application is responsible for calling release() on the Surface when done.
      *
-     * @return an input surface that can be used with {@link #usePersistentInputSurface}.
+     * @return an input surface that can be used with {@link #setInputSurface}.
      */
     @NonNull
     public static Surface createPersistentInputSurface() {
@@ -707,17 +707,17 @@ final public class MediaCodec {
      * @throws IllegalArgumentException if the surface was not created by
      *           {@link #createPersistentInputSurface}.
      */
-    public void usePersistentInputSurface(@NonNull Surface surface) {
+    public void setInputSurface(@NonNull Surface surface) {
         if (!(surface instanceof PersistentSurface)) {
             throw new IllegalArgumentException("not a PersistentSurface");
         }
-        native_usePersistentInputSurface(surface);
+        native_setInputSurface(surface);
     }
 
     @NonNull
     private static native final PersistentSurface native_createPersistentInputSurface();
     private static native final void native_releasePersistentInputSurface(@NonNull Surface surface);
-    private native final void native_usePersistentInputSurface(@NonNull Surface surface);
+    private native final void native_setInputSurface(@NonNull Surface surface);
 
     private native final void native_setCallback(@Nullable Callback cb);
 

@@ -272,9 +272,9 @@ status_t JMediaCodec::createInputSurface(
     return mCodec->createInputSurface(bufferProducer);
 }
 
-status_t JMediaCodec::usePersistentInputSurface(
+status_t JMediaCodec::setInputSurface(
         const sp<PersistentSurface> &surface) {
-    return mCodec->usePersistentInputSurface(surface);
+    return mCodec->setInputSurface(surface);
 }
 
 status_t JMediaCodec::start() {
@@ -1024,9 +1024,9 @@ static void android_media_MediaCodec_releasePersistentInputSurface(
     // no need to release surface as it will be released by Surface's jni
 }
 
-static void android_media_MediaCodec_usePersistentInputSurface(
+static void android_media_MediaCodec_setInputSurface(
         JNIEnv* env, jobject thiz, jobject object) {
-    ALOGV("android_media_MediaCodec_usePersistentInputSurface");
+    ALOGV("android_media_MediaCodec_setInputSurface");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
     if (codec == NULL) {
@@ -1037,7 +1037,7 @@ static void android_media_MediaCodec_usePersistentInputSurface(
     sp<PersistentSurface> persistentSurface =
         android_media_MediaCodec_getPersistentInputSurface(env, object);
 
-    status_t err = codec->usePersistentInputSurface(persistentSurface);
+    status_t err = codec->setInputSurface(persistentSurface);
     if (err != NO_ERROR) {
         throwExceptionAsNecessary(env, err);
     }
@@ -1726,8 +1726,8 @@ static JNINativeMethod gMethods[] = {
       "()Landroid/media/MediaCodec$PersistentSurface;",
       (void *)android_media_MediaCodec_createPersistentInputSurface },
 
-    { "native_usePersistentInputSurface", "(Landroid/view/Surface;)V",
-      (void *)android_media_MediaCodec_usePersistentInputSurface },
+    { "native_setInputSurface", "(Landroid/view/Surface;)V",
+      (void *)android_media_MediaCodec_setInputSurface },
 
     { "native_setCallback",
       "(Landroid/media/MediaCodec$Callback;)V",
