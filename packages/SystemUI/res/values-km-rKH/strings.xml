@@ -83,13 +83,11 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"ស្វែងរក"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ម៉ាស៊ីន​ថត"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ទូរស័ព្ទ"</string>
-    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
-    <skip />
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ជំនួយសំឡេង"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ដោះ​​សោ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ដោះ​សោ"</string>
     <string name="phone_label" msgid="2320074140205331708">"បើក​ទូរស័ព្ទ"</string>
-    <!-- no translation found for voice_assist_label (3956854378310019854) -->
-    <skip />
+    <string name="voice_assist_label" msgid="3956854378310019854">"បើកជំនួយសំឡេង"</string>
     <string name="camera_label" msgid="7261107956054836961">"បើក​ម៉ាស៊ីន​ថត"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"ជ្រើសប្លង់ភារកិច្ចថ្មី"</string>
     <string name="cancel" msgid="6442560571259935130">"បោះ​បង់​"</string>
@@ -316,12 +314,9 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ការ​ជូន​ដំណឹង​​មិន​សូវ​បន្ទាន់​ខាង​ក្រោម"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"ប៉ះ​ម្ដង​ទៀត​ដើម្បី​បើក"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"អូស​ឡើង​លើ ដើម្បី​ដោះ​សោ"</string>
-    <!-- no translation found for phone_hint (4872890986869209950) -->
-    <skip />
-    <!-- no translation found for voice_hint (8939888732119726665) -->
-    <skip />
-    <!-- no translation found for camera_hint (7939688436797157483) -->
-    <skip />
+    <string name="phone_hint" msgid="4872890986869209950">"អូសចេញពីរូបតំណាងដើម្បីប្រើទូរស័ព្ទ"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"អូសចេញពីរូបតំណាងដើម្បីប្រើជំនួយសំឡេង"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"អូសចេញពីរូបតំណាងដើម្បីប្រើកាមេរ៉ា"</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"ស្ងៀមស្ងាត់ទាំងស្រុង"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"អាទិភាពប៉ុណ្ណោះ"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"សំឡេងរោទ៍ប៉ុណ្ណោះ"</string>
@@ -385,10 +380,8 @@
     <string name="notification_collapse_button_text" msgid="6883253262134328057">"លាក់ទាំងអស់"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"បញ្ចប់ឥឡូវនេះ"</string>
-    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
-    <skip />
-    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
-    <skip />
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"ពង្រីក"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"បង្រួម"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"អេក្រង់​ត្រូវ​បាន​ភ្ជាប់"</string>
     <string name="screen_pinning_description" msgid="1346522416878235405">"រក្សាទុក​វា​ក្នុង​ទិដ្ឋភាព​រហូត​ដល់​អ្នក​ផ្ដាច់។ ប៉ះ ហើយ​សង្កត់​ថយក្រោយ និង​ទិដ្ឋភាព​នៅ​ពេល​តែ​មួយ​ដើម្បី​ផ្ដាច់។"</string>
     <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"វា​រក្សាទុក​ក្នុង​ទិដ្ឋភាព​រហូត​ដល់​អ្នក​ផ្ដាច់។ ប៉ះ និង​សង្កត់​ទិដ្ឋភាព​ដើម្បី​ផ្ដាច់។"</string>
@@ -403,4 +396,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> គឺជាប្រអប់សម្លេង"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ប៉ះដើម្បីស្តារច្បាប់ដើម។"</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"អ្នកកំពុងនៅក្នុងប្រវត្តិរូបការងារ"</string>
+    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
+    <skip />
 </resources>

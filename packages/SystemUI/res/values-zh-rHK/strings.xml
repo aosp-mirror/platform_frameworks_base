@@ -398,4 +398,6 @@
     <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」為音量對話框"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸即可復原。"</string>
     <string name="managed_profile_foreground_toast" msgid="3199278359979281097">"您正在「工作設定檔」頁面"</string>
+    <!-- no translation found for system_ui_tuner (8982911407690974001) -->
+    <skip />
 </resources>
