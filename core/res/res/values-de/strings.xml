@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Private Apps"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Geschäftlich"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"Auf Kontakte zugreifen und diese ändern"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"Auf Kontakte zuzugreifen"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"Auf Standort zugreifen"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Ihre sozialen Informationen"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkter Zugriff auf Informationen über Ihre Kontakte und sozialen Verbindungen"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"Auf Kalender zugreifen und diesen ändern"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"Auf Kalender zuzugreifen"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"Auf SMS zugreifen und diese ändern"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS abzurufen und zu verwalten"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Mein Wörterbuch"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Wörter in Mein Wörterbuch lesen oder schreiben"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Lesezeichen und Verlauf"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direkter Zugriff auf Lesezeichen und Browserverlauf"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"Gerätemikrofon verwenden"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"Audio aufzunehmen"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"Gerätekamera verwenden"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"Bilder und Videos aufzunehmen"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"Gerätetelefonie verwenden"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"Telefonanrufe zu tätigen und zu verwalten"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensoren"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"Auf Sensoren und Wearables zugreifen"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"Auf Daten von Sensoren und Wearables zuzugreifen"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters mit dem Sie interagieren werden abgerufen."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Tippen &amp; Entdecken\" aktivieren"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minimieren"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nicht stören"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Ruhezeit"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Abends unter der Woche"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Wochenende"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Termin"</string>
     <string name="muted_by" msgid="6147073845094180001">"Stummgeschaltet durch <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Es liegt ein internes Problem mit Ihrem Gerät vor. Möglicherweise verhält es sich instabil, bis Sie es auf die Werkseinstellungen zurücksetzen."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Es liegt ein internes Problem mit Ihrem Gerät vor. Bitte wenden Sie sich diesbezüglich an den Hersteller."</string>

@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"ವೈಯಕ್ತಿಕ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"ಕಚೇರಿ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಿ ಮತ್ತು ಮಾರ್ಪಡಿಸಿ"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ಸ್ಥಳ"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ನಿಮ್ಮ ಸಾಮಾಜಿಕ ಮಾಹಿತಿ"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳು ಮತ್ತು ಸಾಮಾಜಿಕ ಸಂಪರ್ಕಗಳ ಕುರಿತ ಮಾಹಿತಿಗೆ ನೇರ ಪ್ರವೇಶ."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ಕ್ಯಾಲೆಂಡರ್"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಿ ಮತ್ತು ಮಾರ್ಪಡಿಸಿ"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS ಪ್ರವೇಶಿಸಿ ಮತ್ತು ಮಾರ್ಪಡಿಸಿ"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS ಸಂದೇಶಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"ಬಳಕೆದಾರರ ನಿಘಂಟು"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"ಬಳಕೆದಾರರ ನಿಘಂಟಿನಲ್ಲಿನ ಪದಗಳನ್ನು ಓದಿ ಮತ್ತು ಬರೆಯಿರಿ."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"ಬುಕ್‍ಮಾರ್ಕ್‌ಗಳು ಮತ್ತು ಇತಿಹಾಸ"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"ಬುಕ್‍ಮಾರ್ಕ್‌ಗಳು ಮತ್ತು ಬ್ರೌಸರ್ ಇತಿಹಾಸಕ್ಕೆ ನೇರ ಪ್ರವೇಶ."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ಮೈಕ್ರೋಫೋನ್‌"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"ಸಾಧನ ಮೈಕ್ರೊಫೋನ್ ಬಳಸಿ"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ಕ್ಯಾಮರಾ"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"ಸಾಧನ ಕ್ಯಾಮರಾ ಬಳಸಿ"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ಚಿತ್ರಗಳನ್ನು ತೆಗೆಯಿರಿ ಹಾಗೂ ವೀಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ಫೋನ್"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"ಸಾಧನ ದೂರವಾಣಿ ಬಳಸಿ"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"ಸಂವೇದಕಗಳು"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"ಸಂವೇದಕಗಳು ಮತ್ತು ವೇರಬಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"ಸೆನ್ಸಾರ್‌ಗಳು ಹಾಗೂ ಧರಿಸುವಂತಹ ಸಾಧನಗಳಿಂದ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆದುಕೊಳ್ಳಿ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಸಂವಹನ ನಡೆಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯವನ್ನು ಪರೀಕ್ಷಿಸಿ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶಿಸುವ ಮೂಲಕ ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡಿ"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ಸಂಕುಚಿಸು"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ಸ್ಥಗಿತಕಾಲ"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ವಾರದ ರಾತ್ರಿ"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ವಾರಾಂತ್ಯ"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ಈವೆಂಟ್"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಅವರಿಂದ ಮ್ಯೂಟ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ಮರುಹೊಂದಿಸುವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ. ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ತಯಾರಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>

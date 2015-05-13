@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"个人应用"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"工作"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通讯录"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"存取和修改您的通讯录"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"使用您的通讯录"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"存取您的位置信息"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"您的社交信息"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"直接访问与您的联系人和社交人脉相关的信息。"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"存取和修改您的日历"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"访问您的日历"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"短信"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"存取和修改短信"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"查看和管理短信"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"用户字典"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"读取用户字典中的字词或写入新字词。"</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"书签和历史记录"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"直接访问书签和浏览器历史记录。"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麦克风"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"使用设备的麦克风"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"录制音频"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相机"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"使用设备的摄像头"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍摄照片和录制视频"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"电话"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"使用设备的电话服务"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"拨打电话和管理通话"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"传感器"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"存取传感器和穿戴式设备的数据"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"访问传感器和穿戴式设备的数据"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"检查您正与其进行互动的窗口的内容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"启用触摸浏览"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收起"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"勿扰"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"休息时间"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"周一至周五夜间"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"周末"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"活动"</string>
     <string name="muted_by" msgid="6147073845094180001">"已被<xliff:g id="THIRD_PARTY">%1$s</xliff:g>设为静音"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"您的设备内部出现了问题。如果不将设备恢复出厂设置，设备运行可能会不稳定。"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"您的设备内部出现了问题。请联系您的设备制造商了解详情。"</string>

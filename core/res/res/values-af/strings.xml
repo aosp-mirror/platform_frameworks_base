@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Persoonlike programme"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Werk"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"toegang tot jou kontakte verkry en hulle wysig"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"gaan by jou kontakte in"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ligging"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"toegang tot jou ligging verkry"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Jou sosiale inligting"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte toegang tot inligting oor jou kontakte en sosiale verbindings."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"toegang tot jou kalender verkry en dit wysig"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"gaan by jou kalender in"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"toegang tot SMS verkry en dit wysig"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"bekyk en bestuur SMS-boodskappe"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Gebruikerwoordeboek"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Lees of skryf woorde in gebruikerswoordeboek."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Boekmerke en geskiedenis"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direkte toegang tot boekmerke en blaaiergeskiedenis."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoon"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"toestelmikrofoon gebruik"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"neem oudio op"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"toestelkamera gebruik"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"neem foto\'s en neem video op"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Foon"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"toesteltelefonie gebruik"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"maak en bestuur foonoproepe"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensors"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"toegang tot sensors en drabare toestelle verkry"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"gaan in by data vanaf sensors en drabare toestelle"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Haal venster-inhoud op"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ondersoek die inhoud van \'n venster waarmee jy interaksie het."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Skakel Verken deur raak aan"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Vou in"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Moenie steur nie"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Staantyd"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Weeksaand"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Naweek"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Geleentheid"</string>
     <string name="muted_by" msgid="6147073845094180001">"Gedemp deur <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Daar is \'n interne probleem met jou toestel en dit sal dalk onstabiel wees totdat jy \'n fabriekterugstelling doen."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Daar is \'n interne probleem met jou toestel. Kontak jou vervaardiger vir besonderhede."</string>

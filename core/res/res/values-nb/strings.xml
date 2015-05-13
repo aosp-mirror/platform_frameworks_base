@@ -220,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"Personlige apper"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Jobb"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"få tilgang til og endre kontakene dine"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"få tilgang til kontaktene dine"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posisjon"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"få tilgang til posisjonen din"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Den sosiale informasjonen din"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Direkte tilgang til informasjon om kontaktene og de sosiale forbindelsene dine."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenderen"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"få tilgang til og endre kalenderen din"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"få tilgang til kalenderen din"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"få tilgang til og endre SMS"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"se og administrer SMS-meldinger"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"Brukerordlisten"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"Les eller skriv inn ord i brukerordlisten."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Bokmerkene og loggen"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Direkte tilgang til bokmerker og nettleserloggen."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonen"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"bruke mikrofonen på enheten"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spill inn lyd"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kameraet"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"bruke kameraet på enheten"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ta bilder og ta opp video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"bruke enhetstelefoni"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ring og administrer anrop"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"Sensorer"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"få tilgang til sensorer og hapå-teknologi"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"få tilgang til data fra sensorer og enheter du har på deg"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hent innholdet i vinduet"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspiser innholdet i et vindu du samhandler med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Slå på for Berøringsutforsking"</string>
@@ -1484,12 +1484,9 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"«Ikke forstyrr»"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Nedetid"</string>
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Hverdagskveld"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Helg"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Aktivitet"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> har kuttet lyden"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Det har oppstått et internt problem på enheten din, og den kan være ustabil til du tilbakestiller den til fabrikkdata."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Det har oppstått et internt problem på enheten din. Ta kontakt med produsenten for mer informasjon."</string>
