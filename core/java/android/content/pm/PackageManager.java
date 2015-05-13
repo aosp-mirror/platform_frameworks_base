@@ -2601,7 +2601,7 @@ public abstract class PackageManager {
 
     /**
      * Retrieve the official name associated with a user id.  This name is
-     * guaranteed to never change, though it is possibly for the underlying
+     * guaranteed to never change, though it is possible for the underlying
      * user id to be changed.  That is, if you are storing information about
      * user ids in persistent storage, you should use the string returned
      * by this function instead of the raw user-id.
