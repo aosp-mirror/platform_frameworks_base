@@ -55,6 +55,7 @@ import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
 import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageParser.isApkFile;
+import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static android.system.OsConstants.O_CREAT;
@@ -3142,14 +3143,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static void enforceOnlySystemUpdatesPermissionPolicyFlags(int flagMask, int flagValues) {
-        if (((flagMask & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0
-                || (flagValues & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0)
-                && getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Only the system can modify policy flags");
-        }
-    }
-
     @Override
     public void grantRuntimePermission(String packageName, String name, int userId) {
         if (!sUserManager.exists(userId)) {
@@ -3302,7 +3295,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "updatePermissionFlags");
 
-        enforceOnlySystemUpdatesPermissionPolicyFlags(flagMask, flagValues);
+        // Only the system can change policy flags.
+        if (getCallingUid() != Process.SYSTEM_UID) {
+            flagMask &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+            flagValues &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+        }
+
+        // Only the package manager can change system flags.
+        flagMask &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+        flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
@@ -3321,6 +3322,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             PermissionsState permissionsState = sb.getPermissionsState();
+
+            // Only the package manager can change flags for system component permissions.
+            final int flags = permissionsState.getPermissionFlags(bp.name, userId);
+            if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
+                return;
+            }
 
             if (permissionsState.updatePermissionFlags(bp, userId, flagMask, flagValues)) {
                 // Install and runtime permissions are stored in different places,
@@ -7757,9 +7764,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     changedRuntimePermissionUserIds = ArrayUtils.appendInt(
                                             changedRuntimePermissionUserIds, userId);
                                 } else {
+                                    // System components not only get the permissions but
+                                    // they are also fixed, so nothing can change that.
+                                    final int newFlags = !isSystemComponentOrPersistentPrivApp(pkg)
+                                            ? flags
+                                            : flags | PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
                                     // Propagate the permission flags.
                                     permissionsState.updatePermissionFlags(bp, userId,
-                                            flags, flags);
+                                            newFlags, newFlags);
                                 }
                             }
                         }
@@ -7782,9 +7794,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                             for (int userId : upgradeUserIds) {
                                 if (permissionsState.grantRuntimePermission(bp, userId) !=
                                         PermissionsState.PERMISSION_OPERATION_FAILURE) {
+                                    // System components not only get the permissions but
+                                    // they are also fixed so nothing can change that.
+                                    final int newFlags = !isSystemComponentOrPersistentPrivApp(pkg)
+                                            ? flags
+                                            : flags | PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
                                     // Transfer the permission flags.
                                     permissionsState.updatePermissionFlags(bp, userId,
-                                            flags, flags);
+                                            newFlags, newFlags);
                                     // If we granted the permission, we have to write.
                                     changedRuntimePermissionUserIds = ArrayUtils.appendInt(
                                             changedRuntimePermissionUserIds, userId);
@@ -11664,6 +11681,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Nothing to do
                 return false;
         }
+    }
+
+    private boolean isSystemComponentOrPersistentPrivApp(PackageParser.Package pkg) {
+        return UserHandle.getAppId(pkg.applicationInfo.uid) < FIRST_APPLICATION_UID
+                || ((pkg.applicationInfo.privateFlags
+                        & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0
+                && (pkg.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0);
     }
 
     private static boolean isMultiArch(PackageSetting ps) {
