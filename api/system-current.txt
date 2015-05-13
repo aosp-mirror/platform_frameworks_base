@@ -3660,7 +3660,6 @@ package android.app {
     method public int getMemoryClass();
     method public void getMemoryInfo(android.app.ActivityManager.MemoryInfo);
     method public static void getMyMemoryState(android.app.ActivityManager.RunningAppProcessInfo);
-    method public int getPackageImportance(java.lang.String);
     method public android.os.Debug.MemoryInfo[] getProcessMemoryInfo(int[]);
     method public java.util.List<android.app.ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
     method public deprecated java.util.List<android.app.ActivityManager.RecentTaskInfo> getRecentTasks(int, int) throws java.lang.SecurityException;
