@@ -16,7 +16,8 @@
 
 package android.view;
 
-import android.annotation.IntDef;
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -26,18 +27,16 @@ import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.TimeUtils;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 
-import com.android.internal.R;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -75,14 +74,6 @@ public class ThreadedRenderer extends HardwareRenderer {
         PROFILE_PROPERTY_VISUALIZE_BARS,
     };
 
-    private static final int FLAG_DUMP_FRAMESTATS   = 1 << 0;
-    private static final int FLAG_DUMP_RESET        = 1 << 1;
-
-    @IntDef(flag = true, value = {
-            FLAG_DUMP_FRAMESTATS, FLAG_DUMP_RESET })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DumpFlags {}
-
     // Size of the rendered content.
     private int mWidth, mHeight;
 
@@ -102,12 +93,12 @@ public class ThreadedRenderer extends HardwareRenderer {
     private final float mLightRadius;
     private final int mAmbientShadowAlpha;
     private final int mSpotShadowAlpha;
-    private final float mDensity;
 
     private long mNativeProxy;
     private boolean mInitialized = false;
     private RenderNode mRootNode;
     private Choreographer mChoreographer;
+    private boolean mProfilingEnabled;
     private boolean mRootNodeNeedsUpdate;
 
     ThreadedRenderer(Context context, boolean translucent) {
@@ -119,7 +110,6 @@ public class ThreadedRenderer extends HardwareRenderer {
                 (int) (255 * a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0) + 0.5f);
         mSpotShadowAlpha = (int) (255 * a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0) + 0.5f);
         a.recycle();
-        mDensity = context.getResources().getDisplayMetrics().density;
 
         long rootNodePtr = nCreateRootRenderNode();
         mRootNode = RenderNode.adopt(rootNodePtr);
@@ -224,7 +214,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
         nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight,
                 lightX, mLightY, mLightZ, mLightRadius,
-                mAmbientShadowAlpha, mSpotShadowAlpha, mDensity);
+                mAmbientShadowAlpha, mSpotShadowAlpha);
     }
 
     @Override
@@ -243,25 +233,32 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args) {
+    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd) {
         pw.flush();
-        int flags = 0;
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "framestats":
-                    flags |= FLAG_DUMP_FRAMESTATS;
-                    break;
-                case "reset":
-                    flags |= FLAG_DUMP_RESET;
-                    break;
-            }
+        nDumpProfileInfo(mNativeProxy, fd);
+    }
+
+    private static int search(String[] values, String value) {
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(value)) return i;
         }
-        nDumpProfileInfo(mNativeProxy, fd, flags);
+        return -1;
+    }
+
+    private static boolean checkIfProfilingRequested() {
+        String profiling = SystemProperties.get(HardwareRenderer.PROFILE_PROPERTY);
+        int graphType = search(VISUALIZERS, profiling);
+        return (graphType >= 0) || Boolean.parseBoolean(profiling);
     }
 
     @Override
     boolean loadSystemProperties() {
         boolean changed = nLoadSystemProperties(mNativeProxy);
+        boolean wantProfiling = checkIfProfilingRequested();
+        if (wantProfiling != mProfilingEnabled) {
+            mProfilingEnabled = wantProfiling;
+            changed = true;
+        }
         if (changed) {
             invalidateRoot();
         }
@@ -310,11 +307,19 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks) {
         attachInfo.mIgnoreDirtyState = true;
+        long frameTimeNanos = mChoreographer.getFrameTimeNanos();
+        attachInfo.mDrawingTime = frameTimeNanos / TimeUtils.NANOS_PER_MS;
 
-        final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;
-        choreographer.mFrameInfo.markDrawStart();
+        long recordDuration = 0;
+        if (mProfilingEnabled) {
+            recordDuration = System.nanoTime();
+        }
 
         updateRootDisplayList(view, callbacks);
+
+        if (mProfilingEnabled) {
+            recordDuration = System.nanoTime() - recordDuration;
+        }
 
         attachInfo.mIgnoreDirtyState = false;
 
@@ -332,8 +337,8 @@ public class ThreadedRenderer extends HardwareRenderer {
             attachInfo.mPendingAnimatingRenderNodes = null;
         }
 
-        final long[] frameInfo = choreographer.mFrameInfo.mFrameInfo;
-        int syncResult = nSyncAndDrawFrame(mNativeProxy, frameInfo, frameInfo.length);
+        int syncResult = nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
+                recordDuration, view.getResources().getDisplayMetrics().density);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             setEnabled(false);
             attachInfo.mViewRootImpl.mSurface.release();
@@ -495,9 +500,10 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native boolean nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height,
             float lightX, float lightY, float lightZ, float lightRadius,
-            int ambientShadowAlpha, int spotShadowAlpha, float density);
+            int ambientShadowAlpha, int spotShadowAlpha);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
-    private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
+    private static native int nSyncAndDrawFrame(long nativeProxy,
+            long frameTimeNanos, long recordDuration, float density);
     private static native void nDestroy(long nativeProxy);
     private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);
 
@@ -517,6 +523,5 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nStopDrawing(long nativeProxy);
     private static native void nNotifyFramePending(long nativeProxy);
 
-    private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
-            @DumpFlags int dumpFlags);
+    private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd);
 }
