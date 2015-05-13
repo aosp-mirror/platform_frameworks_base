@@ -18,8 +18,10 @@ package com.android.commands.sm;
 
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.storage.DiskInfo;
 import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.Log;
 
@@ -65,6 +67,8 @@ public final class Sm {
             runListDisks();
         } else if ("list-volumes".equals(op)) {
             runListVolumes();
+        } else if ("has-adoptable".equals(op)) {
+            runHasAdoptable();
         } else if ("get-primary-storage-uuid".equals(op)) {
             runGetPrimaryStorageUuid();
         } else if ("partition".equals(op)) {
@@ -111,7 +115,12 @@ public final class Sm {
         }
     }
 
-    public void runGetPrimaryStorageUuid() throws RemoteException{
+    public void runHasAdoptable() {
+        System.out.println(SystemProperties.getBoolean(StorageManager.PROP_HAS_ADOPTABLE, false)
+                || SystemProperties.getBoolean(StorageManager.PROP_FORCE_ADOPTABLE, false));
+    }
+
+    public void runGetPrimaryStorageUuid() throws RemoteException {
         System.out.println(mSm.getPrimaryStorageUuid());
     }
 
@@ -166,6 +175,7 @@ public final class Sm {
     private static int showUsage() {
         System.err.println("usage: sm list-disks");
         System.err.println("       sm list-volumes [public|private|emulated|all]");
+        System.err.println("       sm has-adoptable");
         System.err.println("       sm get-primary-storage-uuid");
         System.err.println("");
         System.err.println("       sm partition DISK [public|private|mixed] [ratio]");
