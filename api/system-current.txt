@@ -111,6 +111,7 @@ package android {
     field public static final java.lang.String INVOKE_CARRIER_SETUP = "android.permission.INVOKE_CARRIER_SETUP";
     field public static final java.lang.String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
     field public static final java.lang.String KILL_UID = "android.permission.KILL_UID";
+    field public static final java.lang.String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";
     field public static final java.lang.String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final java.lang.String LOOP_RADIO = "android.permission.LOOP_RADIO";
     field public static final java.lang.String MANAGE_ACCOUNTS = "android.permission.MANAGE_ACCOUNTS";

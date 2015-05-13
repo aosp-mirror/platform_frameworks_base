@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
@@ -909,14 +910,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mCallbacks.finishBroadcast();
         }
     }
+
     public String getAddress() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
-                                                "Need BLUETOOTH permission");
+                "Need BLUETOOTH permission");
 
         if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
-            (!checkIfCallerIsForegroundUser())) {
+                (!checkIfCallerIsForegroundUser())) {
             Log.w(TAG,"getAddress(): not allowed for non-active and non system user");
             return null;
+        }
+
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.LOCAL_MAC_ADDRESS)
+                != PackageManager.PERMISSION_GRANTED) {
+            return BluetoothAdapter.DEFAULT_MAC_ADDRESS;
         }
 
         synchronized(mConnection) {

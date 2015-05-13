@@ -96,6 +96,14 @@ public final class BluetoothAdapter {
     private static final boolean VDBG = false;
 
     /**
+     * Default MAC address reported to a client that does not have the
+     * android.permission.LOCAL_MAC_ADDRESS permission.
+     *
+     * @hide
+     */
+    public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
+
+    /**
      * Sentinel error value for this class. Guaranteed to not equal any other
      * integer constant in this class. Provided as a convenience for functions
      * that require a sentinel error value, for example:
