@@ -1624,53 +1624,61 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private boolean needsToShowImeSwitchOngoingNotification() {
+    private boolean shouldShowImeSwitcherLocked() {
         if (!mShowOngoingImeSwitcherForPhones) return false;
         if (mSwitchingDialog != null) return false;
         if (isScreenLocked()) return false;
-        synchronized (mMethodMap) {
-            List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
-            final int N = imis.size();
-            if (N > 2) return true;
-            if (N < 1) return false;
-            int nonAuxCount = 0;
-            int auxCount = 0;
-            InputMethodSubtype nonAuxSubtype = null;
-            InputMethodSubtype auxSubtype = null;
-            for(int i = 0; i < N; ++i) {
-                final InputMethodInfo imi = imis.get(i);
-                final List<InputMethodSubtype> subtypes =
-                        mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
-                final int subtypeCount = subtypes.size();
-                if (subtypeCount == 0) {
-                    ++nonAuxCount;
-                } else {
-                    for (int j = 0; j < subtypeCount; ++j) {
-                        final InputMethodSubtype subtype = subtypes.get(j);
-                        if (!subtype.isAuxiliary()) {
-                            ++nonAuxCount;
-                            nonAuxSubtype = subtype;
-                        } else {
-                            ++auxCount;
-                            auxSubtype = subtype;
-                        }
+        if ((mImeWindowVis & InputMethodService.IME_ACTIVE) == 0) return false;
+        if (mWindowManagerService.isHardKeyboardAvailable()) {
+            // When physical keyboard is attached, we show the ime switcher (or notification if
+            // NavBar is not available) because SHOW_IME_WITH_HARD_KEYBOARD settings currently
+            // exists in the IME switcher dialog.  Might be OK to remove this condition once
+            // SHOW_IME_WITH_HARD_KEYBOARD settings finds a good place to live.
+            return true;
+        }
+        if ((mImeWindowVis & InputMethodService.IME_VISIBLE) == 0) return false;
+
+        List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
+        final int N = imis.size();
+        if (N > 2) return true;
+        if (N < 1) return false;
+        int nonAuxCount = 0;
+        int auxCount = 0;
+        InputMethodSubtype nonAuxSubtype = null;
+        InputMethodSubtype auxSubtype = null;
+        for(int i = 0; i < N; ++i) {
+            final InputMethodInfo imi = imis.get(i);
+            final List<InputMethodSubtype> subtypes =
+                    mSettings.getEnabledInputMethodSubtypeListLocked(mContext, imi, true);
+            final int subtypeCount = subtypes.size();
+            if (subtypeCount == 0) {
+                ++nonAuxCount;
+            } else {
+                for (int j = 0; j < subtypeCount; ++j) {
+                    final InputMethodSubtype subtype = subtypes.get(j);
+                    if (!subtype.isAuxiliary()) {
+                        ++nonAuxCount;
+                        nonAuxSubtype = subtype;
+                    } else {
+                        ++auxCount;
+                        auxSubtype = subtype;
                     }
                 }
             }
-            if (nonAuxCount > 1 || auxCount > 1) {
-                return true;
-            } else if (nonAuxCount == 1 && auxCount == 1) {
-                if (nonAuxSubtype != null && auxSubtype != null
-                        && (nonAuxSubtype.getLocale().equals(auxSubtype.getLocale())
-                                || auxSubtype.overridesImplicitlyEnabledSubtype()
-                                || nonAuxSubtype.overridesImplicitlyEnabledSubtype())
-                        && nonAuxSubtype.containsExtraValueKey(TAG_TRY_SUPPRESSING_IME_SWITCHER)) {
-                    return false;
-                }
-                return true;
-            }
-            return false;
         }
+        if (nonAuxCount > 1 || auxCount > 1) {
+            return true;
+        } else if (nonAuxCount == 1 && auxCount == 1) {
+            if (nonAuxSubtype != null && auxSubtype != null
+                    && (nonAuxSubtype.getLocale().equals(auxSubtype.getLocale())
+                            || auxSubtype.overridesImplicitlyEnabledSubtype()
+                            || nonAuxSubtype.overridesImplicitlyEnabledSubtype())
+                    && nonAuxSubtype.containsExtraValueKey(TAG_TRY_SUPPRESSING_IME_SWITCHER)) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     private boolean isKeyguardLocked() {
@@ -1697,11 +1705,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mImeWindowVis = vis;
                 mInputShown = ((mImeWindowVis & InputMethodService.IME_VISIBLE) != 0);
                 mBackDisposition = backDisposition;
-                final boolean iconVisibility = ((vis & (InputMethodService.IME_ACTIVE)) != 0)
-                        && (mWindowManagerService.isHardKeyboardAvailable()
-                                || (vis & (InputMethodService.IME_VISIBLE)) != 0);
-                final boolean needsToShowImeSwitcher = iconVisibility
-                        && needsToShowImeSwitchOngoingNotification();
+                // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
+                final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked();
                 if (mStatusBar != null) {
                     mStatusBar.setImeWindowStatus(token, vis, backDisposition,
                             needsToShowImeSwitcher);
