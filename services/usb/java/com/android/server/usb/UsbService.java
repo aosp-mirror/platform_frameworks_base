@@ -252,19 +252,19 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
-    public void setCurrentFunction(String function, boolean makeDefault) {
+    public void setCurrentFunction(String function) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
 
         // If attempt to change USB function while file transfer is restricted, ensure that
         // the current function is set to "none", and return.
         UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
-            if (mDeviceManager != null) mDeviceManager.setCurrentFunctions("none", false);
+            if (mDeviceManager != null) mDeviceManager.setCurrentFunctions("none");
             return;
         }
 
         if (mDeviceManager != null) {
-            mDeviceManager.setCurrentFunctions(function, makeDefault);
+            mDeviceManager.setCurrentFunctions(function);
         } else {
             throw new IllegalStateException("USB device mode not supported");
         }

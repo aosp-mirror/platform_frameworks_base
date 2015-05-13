@@ -608,12 +608,12 @@ public class Tethering extends BaseNetworkObserver {
                     tetherUsb(true);
                 } else {
                     mUsbTetherRequested = true;
-                    usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
+                    usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS);
                 }
             } else {
                 tetherUsb(false);
                 if (mRndisEnabled) {
-                    usbManager.setCurrentFunction(null, false);
+                    usbManager.setCurrentFunction(null);
                 }
                 mUsbTetherRequested = false;
             }
