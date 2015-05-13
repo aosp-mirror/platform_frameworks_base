@@ -2,29 +2,25 @@ ndk=true
 page.template=sdk
 
 
-ndk.mac64_download=android-ndk-r10d-darwin-x86_64.bin
-ndk.mac64_bytes=442691567
-ndk.mac64_checksum=cb101e1e62d56ea75b215f6bc6c27fae
+ndk.mac64_download=android-ndk-r10e-darwin-x86_64.bin
+ndk.mac64_bytes=388937326
+ndk.mac64_checksum=2cb8893a5701603519d38a7e04c50e81
 
-ndk.mac32_download=android-ndk-r10d-darwin-x86.bin
-ndk.mac32_bytes=441545213
-ndk.mac32_checksum=0aeb3dc062dc457a4cd01e72eadb2379
+ndk.linux64_download=android-ndk-r10e-linux-x86_64.bin
+ndk.linux64_bytes=401522849
+ndk.linux64_checksum=19af543b068bdb7f27787c2bc69aba7f
 
-ndk.linux64_download=android-ndk-r10d-linux-x86_64.bin
-ndk.linux64_bytes=459151600
-ndk.linux64_checksum=263b83071e6bca15f67898548d8d236e
+ndk.linux32_download=android-ndk-r10e-linux-x86.bin
+ndk.linux32_bytes=394281908
+ndk.linux32_checksum=c3edd3273029da1cbd2f62c48249e978
 
-ndk.linux32_download=android-ndk-r10d-linux-x86.bin
-ndk.linux32_bytes=449997190
-ndk.linux32_checksum=70ed6d8c34e7e620c145b791e8eeef89
+ndk.win64_download=android-ndk-r10e-windows-x86_64.exe
+ndk.win64_bytes=419616132
+ndk.win64_checksum=8412bb4991a95e08fda50b5a44d95df7
 
-ndk.win64_download=android-ndk-r10d-windows-x86_64.exe
-ndk.win64_bytes=472613732
-ndk.win64_checksum=9a33f96da58a7e0b70e47d27b4a880b4
-
-ndk.win32_download=android-ndk-r10d-windows-x86.exe
-ndk.win32_bytes=455427281
-ndk.win32_checksum=c0930abfae0c990c4d191cc4ebd46b68
+ndk.win32_download=android-ndk-r10e-windows-x86.exe
+ndk.win32_bytes=396563176
+ndk.win32_checksum=1a82445baaf62aec3a46386ab1e5772c
 
 
 
@@ -382,11 +378,174 @@ $('#Downloads').after($('#download-table'));
 
 <p>The following sections provide information about releases of the NDK.</p>
 
-
 <div class="toggle-content opened">
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
      src="/assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+   >Android NDK, Revision 10e</a> <em>(May 2015)</em>
+ </p>
+ <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Important changes:</dt>
+      <dd>
+      <ul>
+        <li>Integrated the workaround for Cortex-A53 Erratum 843419 into the
+        {@code aarch64-linux-android-4.9} linker. For more information on this workaround, see
+        <a href="https://sourceware.org/ml/binutils/2015-03/msg00446.html">Workaround for cortex-a53
+        erratum 843419.</a></li>
+
+         <li>Added Clang 3.6; {@code NDK_TOOLCHAIN_VERSION=clang} now picks that version
+         of Clang by default.</li>
+
+         <li>Removed Clang 3.4.</li>
+
+         <li>Removed GCC 4.6.</li>
+
+         <li>Implemented multithreading support in {@code ld.gold} for all architectures. It can
+         now link with or without support for multithreading; the default is to do it without.
+            <ul>
+            <li>To compile with multithreading, use the {@code --threads} option.</li>
+            <li>To compile without multithreading, use the {@code --no-threads} option.</li>
+            </ul>
+            </li>
+
+         <li>Upgraded GDB/gdbserver to 7.7 for all architectures.</li>
+
+         <li>Removed the NDK package for 32-bit Darwin.</li>
+      </ul>
+      </dd>
+   <dl>
+
+
+     <dt>Important bug fixes:</dt>
+     <dd>
+     <ul>
+        <li>Fixed a crash that occurred when there were OpenMP loops outside of the main thread.</li>
+
+        <li>Fixed a GCC 4.9 internal compiler error (<i>ICE</i>) that occured when the user declared
+        {@code #pragma GCC optimize ("O0")}, but had a different level of optimization specified
+        on the command line. The {@code pragma} takes precedence.</li>
+
+        <li>Fixed an error that used to produce a crash with the following error message:
+<pre>
+in add_stores, at var-tracking.c:6000
+</pre>
+        </li>
+
+        <li>Implemented a workaround for a Clang 3.5 issue in which LLVM auto-vectorization
+        generates {@code llvm.cttz.v2i64()}, an instruction with no counterpart in the ARM
+        instruction set.</li>
+     </ul>
+     </dd>
+
+     <dt>Other bug fixes:</dt>
+     <dd>
+     <ul>
+        <li>Made the following header and library fixes:</li>
+           <ul>
+           <li>Fixed {@code PROPERTY_*} in {@code media/NdkMediaDrm.h}.</li>
+           <li>Fixed {@code sys/ucontext.h} for {@code mips64}.</li>
+           <li>Dropped the Clang version check for {@code __builtin_isnan} and
+           {@code __builtin_isinf}.</li>
+           <li>Added {@code android-21/arch-mips/usr/include/asm/reg.h}
+           and {@code android-21/arch-mips64/usr/include/asm/reg.h}.</li>
+           </ul>
+           </li>
+
+        <li>Fixed a spurious array-bounds warning that GCC 4.9 produced for x86, and reenabled the
+        array bounds warning that GCC 4.9 had produced for ARM. The warning for ARM had
+        previously been unconditionally disabled.</li>
+
+        <li>Fixed Clang 3.5 for {@code mips} and {@code mips64} to create a writable
+            {@code .gcc_except_table} section, thus matching GCC behavior. This change allows you
+            to avoid the following linker warning:
+
+<pre>
+.../ld: warning: creating a DT_TEXTREL in a shared object
+</pre>
+            </li>
+
+        <li>Backported a fix for {@code compiler-rt} issues that were causing crashes when Clang
+        compiled for {@code mips64}. For more information, see LLVM Issue
+        <a href="http://llvm.org/bugs/show_bug.cgi?id=20098">20098</a>.</li>
+
+        <li>Fixed Clang 3.5 crashes that occurred on non-ASCII comments. (Issue
+        <a href="https://code.google.com/p/android/issues/detail?id=81440">81440</a>)</li>
+
+        <li>Fixed {@code stlport collate::compare} to return {@code -1} and {@code 1}. Previously,
+        it had returned arbitrary signed numbers.</li>
+
+        <li>Fixed {@code ndk-gdb} for 64-bit ABIs. (Issue
+        <a href="https://code.google.com/p/android/issues/detail?id=118300">118300</a>)</li>
+
+        <li>Fixed the crash that the HelloComputeNDK sample for RenderScript was producing on
+        Android 4.4 (Android API level 19). For more information, see
+        <a href="http://stackoverflow.com/questions/28057049/targeting-pre-lollipop-devices-using-renderscript-from-ndk-c">this page</a>.</li>
+
+        <li>Fixed {@code libc++ __wrap_iter} for GCC. For more information, see LLVM Issue
+        <a href="http://llvm.org/bugs/show_bug.cgi?id=22355">22355</a>.</li>
+
+        <li>Fixed {@code .asm} support for ABI {@code x86_64}.</li>
+
+        <li>Implemented a workaround for the GCC 4.8 {@code stlport} issue. (Issue
+        <a href="https://android-review.googlesource.com/#/c/127773">127773</a>)</li>
+
+        <li>Removed the trailing directory separator {@code \\} from the project path in Windows.
+        (Issue <a href="https://code.google.com/p/android/issues/detail?id=160584">160584</a>)
+        </li>
+
+        <li>Fixed a {@code no rule to make target} error that occurred when compiling a single
+        {@code .c} file by executing the {@code ndk-build.cmd} command from {@code gradle}. (Issue
+        <a href="https://code.google.com/p/android/issues/detail?id=66937">66937</a>)</li>
+
+        <li>Added the {@code libatomic.a} and {@code libgomp.a} libraries that had been missing from
+        the following host toolchains:
+        <ul>
+           <li>{@code aarch64-linux-android-4.9}</li>
+           <li>{@code mips64el-linux-android-4.9}</li>
+           <li>{@code mipsel-linux-android-4.9}</li>
+           <li>{@code x86_64-4.9}</li>
+        </ul>
+     </ul>
+     </dd>
+
+     <dt>Other changes:</dt>
+     <dd>
+       <ul>
+       <li>Added {@code ld.gold} for {@code aarch64}. The default linker remains {@code ld.bfd}.
+       To explicitly enable {@code ld.gold}, add {@code -fuse-ld=gold} to the
+       {@code LOCAL_LDFLAGS} or {@code APP_LDFLAGS} variable.</li>
+
+       <li>Built the MIPS and MIPS64 toolchains with {@code binutils-2.25}, which provides improved
+       R6 support.</li>
+
+       <li>Made {@code -fstandalone-debug} (full debug info) a default option for Clang.</li>
+
+       <li>Replaced {@code -fstack-protector} with {@code -fstack-protector-strong} for
+       the ARM, AArch64, X86, and X86_64 toolchains for GCC 4.9, Clang 3.5, and
+       Clang 3.6.</li>
+
+       <li>Added the {@code --package} command-line switch to {@code ndk-gdb} to allow the build
+       system to override the package name. (Issue
+       <a href="https://code.google.com/p/android/issues/detail?id=56189">56189</a>)</li>
+
+       <li> Deprecated {@code -mno-ldc1-stc1} for MIPS.  This option may not work with the new
+       {@code -fpxx} and {@code -mno-odd-spreg} options, or with the FPXX ABI.</li>
+
+       <li>Added MIPS MSA and R6 detection to {@code cpu-features}.</li>
+
+     </ul>
+     </dd>
+
+   </dl>
+ </div>
+</div>
+
+
+<div class="toggle-content closed">
+ <p>
+   <a href="#" onclick="return toggleContent(this)"> <img
+     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10d</a> <em>(December 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
