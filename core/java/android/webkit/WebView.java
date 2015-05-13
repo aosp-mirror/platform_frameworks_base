@@ -366,15 +366,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Callback interface supplied to {@link #insertVisualStateCallback} for receiving
+     * Callback interface supplied to {@link #postVisualStateCallback} for receiving
      * notifications about the visual state.
      */
     public static abstract class VisualStateCallback {
         /**
          * Invoked when the visual state is ready to be drawn in the next {@link #onDraw}.
          *
-         * @param requestId the id supplied to the corresponding {@link #insertVisualStateCallback}
-         * request
+         * @param requestId The identifier passed to {@link #postVisualStateCallback} when this
+         *                  callback was posted.
          */
         public abstract void onComplete(long requestId);
     }
@@ -1125,15 +1125,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Inserts a {@link VisualStateCallback}.
+     * Posts a {@link VisualStateCallback}, which will be called when
+     * the current state of the WebView is ready to be drawn.
      *
-     * <p>Updates to the the DOM are reflected asynchronously such that when the DOM is updated the
-     * subsequent {@link WebView#onDraw} invocation might not reflect those updates. The
+     * <p>Because updates to the the DOM are processed asynchronously, updates to the DOM may not
+     * immediately be reflected visually by subsequent {@link WebView#onDraw} invocations. The
      * {@link VisualStateCallback} provides a mechanism to notify the caller when the contents of
-     * the DOM at the current time are ready to be drawn the next time the {@link WebView} draws.
-     * By current time we mean the time at which this API was called. The next draw after the
-     * callback completes is guaranteed to reflect all the updates to the DOM applied before the
-     * current time, but it may also contain updates applied after the current time.</p>
+     * the DOM at the current time are ready to be drawn the next time the {@link WebView}
+     * draws.</p>
+     *
+     * <p>The next draw after the callback completes is guaranteed to reflect all the updates to the
+     * DOM up to the the point at which the {@link VisualStateCallback} was posted, but it may also
+     * contain updates applied after the callback was posted.</p>
      *
      * <p>The state of the DOM covered by this API includes the following:
      * <ul>
@@ -1164,15 +1167,15 @@ public class WebView extends AbsoluteLayout
      * {@link VisualStateCallback#onComplete} method.</li>
      * </ul></p>
      *
-     * <p>When using this API it is also recommended to enable pre-rasterization if the
-     * {@link WebView} is offscreen to avoid flickering. See WebSettings#setOffscreenPreRaster for
+     * <p>When using this API it is also recommended to enable pre-rasterization if the {@link
+     * WebView} is offscreen to avoid flickering. See {@link WebSettings#setOffscreenPreRaster} for
      * more details and do consider its caveats.</p>
      *
-     * @param requestId an id that will be returned in the callback to allow callers to match
-     * requests with callbacks.
-     * @param callback the callback to be invoked.
+     * @param requestId An id that will be returned in the callback to allow callers to match
+     *                  requests with callbacks.
+     * @param callback  The callback to be invoked.
      */
-    public void insertVisualStateCallback(long requestId, VisualStateCallback callback) {
+    public void postVisualStateCallback(long requestId, VisualStateCallback callback) {
         checkThread();
         mProvider.insertVisualStateCallback(requestId, callback);
     }
