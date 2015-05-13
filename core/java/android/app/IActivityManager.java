@@ -403,6 +403,9 @@ public interface IActivityManager extends IInterface {
 
     public void keyguardWaitingForActivityDrawn() throws RemoteException;
 
+    public void keyguardGoingAway(boolean disableWindowAnimations,
+            boolean keyguardGoingToNotificationShade) throws RemoteException;
+
     public boolean shouldUpRecreateTask(IBinder token, String destAffinity)
             throws RemoteException;
 
@@ -842,4 +845,5 @@ public interface IActivityManager extends IInterface {
     int SHOW_LOCK_TASK_ESCAPE_MESSAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+294;
     int UPDATE_DEVICE_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+295;
     int UPDATE_PREFERRED_SETUP_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+296;
+    int KEYGUARD_GOING_AWAY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+297;
 }

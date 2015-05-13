@@ -69,12 +69,6 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_SURFACE_CHANGED = 0x4;
 
     /**
-     * The window manager is currently animating.  It will call
-     * IWindow.doneAnimating() when done.
-     */
-    public static final int RELAYOUT_RES_ANIMATING = 0x8;
-
-    /**
      * Flag for relayout: the client will be later giving
      * internal insets; as a result, the window will not impact other window
      * layouts until the insets are given.
