@@ -208,6 +208,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         public void onPatternStart() {
             mLockPatternView.removeCallbacks(mCancelPatternRunnable);
+            mSecurityMessageDisplay.setMessage("", false);
         }
 
         public void onPatternCleared() {

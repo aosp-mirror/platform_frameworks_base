@@ -148,7 +148,14 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                mCallback.userActivity();
+                onUserInput();
+            }
+        });
+
+        mPasswordEntry.setUserActivityListener(new PasswordTextView.UserActivityListener() {
+            @Override
+            public void onUserActivity() {
+                onUserInput();
             }
         });
 
