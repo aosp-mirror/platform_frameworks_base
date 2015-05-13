@@ -2573,7 +2573,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mFocusedActivity.userId != mLastFocusedUserId) {
                 mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
                 mHandler.sendMessage(mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG,
-                                mFocusedActivity.userId, 0));
+                        mFocusedActivity.userId, 0));
                 mLastFocusedUserId = mFocusedActivity.userId;
             }
         }
@@ -5962,7 +5962,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void postFinishBooting(boolean finishBooting, boolean enableScreen) {
         mHandler.sendMessage(mHandler.obtainMessage(FINISH_BOOTING_MSG,
-                finishBooting? 1 : 0, enableScreen ? 1 : 0));
+                finishBooting ? 1 : 0, enableScreen ? 1 : 0));
     }
 
     void enableScreenAfterBoot() {
@@ -5994,6 +5994,26 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mWindowManager.keyguardWaitingForActivityDrawn();
                 if (mLockScreenShown == LOCK_SCREEN_SHOWN) {
                     mLockScreenShown = LOCK_SCREEN_LEAVING;
+                    updateSleepIfNeededLocked();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void keyguardGoingAway(boolean disableWindowAnimations,
+            boolean keyguardGoingToNotificationShade) {
+        enforceNotIsolatedCaller("keyguardGoingAway");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                if (DEBUG_LOCKSCREEN) logLockScreen("");
+                mWindowManager.keyguardGoingAway(disableWindowAnimations,
+                        keyguardGoingToNotificationShade);
+                if (mLockScreenShown == LOCK_SCREEN_SHOWN) {
+                    mLockScreenShown = LOCK_SCREEN_HIDDEN;
                     updateSleepIfNeededLocked();
                 }
             }
