@@ -41731,7 +41731,7 @@ package android.webkit {
     method public abstract boolean onKeyUp(int, android.view.KeyEvent);
     method public abstract void onMeasure(int, int);
     method public abstract void onOverScrolled(int, int, boolean, boolean);
-    method public abstract void onProvideVirtualAssistStructure(android.view.ViewStructure);
+    method public abstract void onProvideVirtualAssistStructure(android.view.ViewAssistStructure);
     method public abstract void onScrollChanged(int, int, int, int);
     method public abstract void onSizeChanged(int, int, int, int);
     method public abstract void onStartTemporaryDetach();
