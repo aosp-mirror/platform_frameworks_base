@@ -186,7 +186,7 @@ public abstract class Connection implements Conferenceable {
 
     /**
      * For video calls, indicates whether the outgoing video for the call can be paused using
-     * the {@link android.telecom.VideoProfile.VideoState#PAUSED} VideoState.
+     * the {@link android.telecom.VideoProfile#STATE_PAUSED} VideoState.
      */
     public static final int CAPABILITY_CAN_PAUSE_VIDEO = 0x00100000;
 
@@ -484,7 +484,7 @@ public abstract class Connection implements Conferenceable {
                         onRequestConnectionDataUsage();
                         break;
                     case MSG_SET_PAUSE_IMAGE:
-                        onSetPauseImage((String) msg.obj);
+                        onSetPauseImage((Uri) msg.obj);
                         break;
                     default:
                         break;
@@ -547,7 +547,7 @@ public abstract class Connection implements Conferenceable {
                 mMessageHandler.obtainMessage(MSG_REQUEST_CONNECTION_DATA_USAGE).sendToTarget();
             }
 
-            public void setPauseImage(String uri) {
+            public void setPauseImage(Uri uri) {
                 mMessageHandler.obtainMessage(MSG_SET_PAUSE_IMAGE, uri).sendToTarget();
             }
         }
@@ -642,7 +642,7 @@ public abstract class Connection implements Conferenceable {
          *
          * @param uri URI of image to display.
          */
-        public abstract void onSetPauseImage(String uri);
+        public abstract void onSetPauseImage(Uri uri);
 
         /**
          * Invokes callback method defined in listening {@link InCallService} implementations.
@@ -726,7 +726,7 @@ public abstract class Connection implements Conferenceable {
          *
          * @param dataUsage The updated data usage.
          */
-        public void changeCallDataUsage(long dataUsage) {
+        public void setCallDataUsage(long dataUsage) {
             if (mVideoCallbacks != null) {
                 try {
                     for (IVideoCallback callback : mVideoCallbacks.values()) {
@@ -735,6 +735,17 @@ public abstract class Connection implements Conferenceable {
                 } catch (RemoteException ignored) {
                 }
             }
+        }
+
+        /**
+         * Invokes callback method defined in listening {@link InCallService} implementations.
+         *
+         * @param dataUsage The updated data usage.
+         * @deprecated - Use {@link #setCallDataUsage(long)} instead.
+         * @hide
+         */
+        public void changeCallDataUsage(long dataUsage) {
+            setCallDataUsage(dataUsage);
         }
 
         /**
@@ -755,6 +766,12 @@ public abstract class Connection implements Conferenceable {
 
         /**
          * Invokes callback method defined in listening {@link InCallService} implementations.
+         *
+         * Allowed values:
+         * {@link VideoProfile#QUALITY_HIGH},
+         * {@link VideoProfile#QUALITY_MEDIUM},
+         * {@link VideoProfile#QUALITY_LOW},
+         * {@link VideoProfile#QUALITY_DEFAULT}.
          *
          * @param videoQuality The updated video quality.
          */
@@ -859,10 +876,10 @@ public abstract class Connection implements Conferenceable {
 
     /**
      * Returns the video state of the connection.
-     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoProfile.VideoState#TX_ENABLED},
-     * {@link VideoProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED}.
      *
      * @return The video state of the connection.
      * @hide
@@ -1027,10 +1044,10 @@ public abstract class Connection implements Conferenceable {
 
     /**
      * Set the video state for the connection.
-     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoProfile.VideoState#TX_ENABLED},
-     * {@link VideoProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED}.
      *
      * @param videoState The new video state.
      */
