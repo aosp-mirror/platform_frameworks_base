@@ -40,11 +40,11 @@ LOCAL_SRC_FILES := \
     DisplayList.cpp \
     DisplayListCanvas.cpp \
     Dither.cpp \
-    DrawProfiler.cpp \
     Extensions.cpp \
     FboCache.cpp \
     FontRenderer.cpp \
     FrameInfo.cpp \
+    FrameInfoVisualizer.cpp \
     GammaFontRenderer.cpp \
     GlopBuilder.cpp \
     GradientCache.cpp \

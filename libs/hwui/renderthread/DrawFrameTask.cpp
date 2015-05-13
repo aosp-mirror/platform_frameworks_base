@@ -83,8 +83,6 @@ void DrawFrameTask::postAndWait() {
 void DrawFrameTask::run() {
     ATRACE_NAME("DrawFrame");
 
-    mContext->profiler().startFrame();
-
     bool canUnblockUiThread;
     bool canDrawThisFrame;
     {
