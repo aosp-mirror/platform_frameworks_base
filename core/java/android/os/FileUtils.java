@@ -528,7 +528,7 @@ public class FileUtils {
      * {@code /after/foo/bar.txt}.
      */
     public static File rewriteAfterRename(File beforeDir, File afterDir, File file) {
-        if (file == null) return null;
+        if (file == null || beforeDir == null || afterDir == null) return null;
         if (contains(beforeDir, file)) {
             final String splice = file.getAbsolutePath().substring(
                     beforeDir.getAbsolutePath().length());
