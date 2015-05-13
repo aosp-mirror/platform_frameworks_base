@@ -1,21 +1,33 @@
-page.title=Automatic App Data Backup
+page.title=Auto Backup for Apps
 page.tags=backup
 
 @jd:body
 
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+      <ol>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#configuring">Configuring Data Backup</a></li>
+        <li><a href="#testing">Testing Backup Configuration</a></li>
+        <li><a href="#issues">Known Issues</a></li>
+      </ol>
+  </div>
+</div>
+
 <p>
-  Users often invest significant time and effort collecting data and setting preferences within
+  Users often invest significant time and effort creating data and setting preferences within
   apps. Preserving that data for users if they replace a broken device or upgrade to a new one is
-  an important part of ensuring a great user experience. The Android M Preview system helps ensure
-  a good experience for users in this circumstances by automatically backing up app data to the
-  cloud.
+  an important part of ensuring a great user experience. Devices running the Android M Preview
+  system help ensure a good experience for users in these circumstances by automatically backing up
+  app data to Google Drive. The app data is automatically restored if a user changes or upgrades a
+  device.
 </p>
 
 <p>
-  This behavior is enabled by default for all apps installed on devices running Android M or
-  higher. No additional app code is required. The system provides users with the ability opt out of
-  automatic data backups for individual apps. You can also choose to limit what data from your app
-  is backed up.
+  Automatic backups are enabled for all apps installed on devices running the Android M Preview. No
+  additional app code is required. The system provides users with the ability opt out of automatic
+  data backups. You can also choose to limit what data from your app is backed up.
 </p>
 
 <p>
@@ -23,25 +35,31 @@ page.tags=backup
   your app.
 </p>
 
-<h2>Overview</h2>
+<h2 id="overview">Overview</h2>
 
 <p>
-  The automatic backup feature preserves the data your app creates on a user device by uploading to
-  the user’s Google Drive account and encrypting it. There is no charge to you or the user for data
-  storage and the saved data does not count towards the user's personal Drive quota. During the M
-  Preview period, users can store up to 25MB per Android app.
+  The automatic backup feature preserves the data your app creates on a user device by uploading it
+  to the user’s Google Drive account and encrypting it. There is no charge to you or the user for
+  data storage and the saved data does not count towards the user's personal Drive quota. During
+  the M Preview period, users can store up to 25MB per Android app.
 </p>
 
 <p>
   Automatic backups occur every 24 hours, when the device is idle, charging, and connected to a
   Wi-Fi network. When these conditions are met, the Backup Manager service uploads all available
   backup data to the cloud. When the user transitions to a new device, or uninstalls and reinstalls
-  the backed up application, a restore operation will take place, copying the backed up data into
-  the newly installed application’s data directory.
+  the backed up app, a restore operation copies the backed up data into the newly installed
+  app’s data directory.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> If your app uses the legacy
+  <a href="{@docRoot}google/backup/index.html">Android Backup service</a>, this new behavior
+  does not apply and the existing backup behavior works as usual.
 </p>
 
 
-<h3>Automatically Excluded Data Files</h3>
+<h3 id="auto-exclude">Automatically Excluded Data Files</h3>
 
 <p>
   Not all app data should be backed up, such as temporary files and caches, so the automatic backup
@@ -49,37 +67,33 @@ page.tags=backup
 </p>
 
 <ul>
-  <li>Files in the directories referred to by the <code><a href=
-  "{@docRoot}reference/android/content/Context.html#getCacheDir()">getCacheDir()</a></code> and
-  <code><a href=
-  "{@docRoot}reference/android/content/ContextWrapper.html#getCodeCacheDir()">getCodeCacheDir()</a></code>
-  methods.
+  <li>Files in the directories referred to by the {@link android.content.Context#getCacheDir
+    getCacheDir()} and {@link android.content.ContextWrapper#getCodeCacheDir getCodeCacheDir()}
+    methods.
   </li>
 
   <li>Files located on external storage, unless they reside in the directory referred to by the
-  <code><a href=
-  "{@docRoot}reference/android/content/Context.html#getExternalFilesDir(java.lang.String)">getExternalFilesDir()</a></code>
+    {@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
   method.
   </li>
 
-  <li>Files located in the directory referred to by the <code><a href=
-  "{@docRoot}reference/android/content/Context.html#getNoBackupFilesDir()">getNoBackupFilesDir()</a></code>
-  method.
+  <li>Files located in the directory referred to by the
+    {@link android.content.Context#getNoBackupFilesDir getNoBackupFilesDir()} method.
   </li>
 </ul>
 
-<h2>Configuring Data Backup</h2>
+<h2 id="configuring">Configuring Data Backup</h2>
 
 <p>
-  The data created by any app installed on an M device is backed up, except for the automatically
-  excluded files listed in the previous section. You can further limit and configure what data gets
-  backed up from your app using settings in your app manifest.
+  The data created by any app installed on an M Preview device is backed up, except for the
+  automatically excluded files listed in the previous section. You can further limit and configure
+  what data gets backed up from your app using settings in your app manifest.
 </p>
 
-<h3>Including or Excluding Data</h3>
+<h3 id="include-exclude">Including or Excluding Data</h3>
 
 <p>
-  Depending on what data your application needs and how you save it, you may need to set specific
+  Depending on what data your app needs and how you save it, you may need to set specific
   rules for including or excluding certain files or directories. The automatic backup service
   supports setting these backup rules through use of an XML configuration file and the app
   manifest. In the app manifest, you can specify a backup scheme configuration file as shown in the
@@ -93,31 +107,31 @@ page.tags=backup
         package="com.my.appexample"&gt;
     &lt;uses-sdk android:minSdkVersion="9"/&gt;
     &lt;uses-sdk android:targetSdkVersion="android-MNC"/&gt;
-    &lt;application ...
+    &lt;app ...
 <strong>        android:fullBackupContent="&#64;xml/mybackupscheme"&gt;</strong>
-    &lt;/application&gt;
+    &lt;/app&gt;
     ...
 &lt;/manifest&gt;
 </pre>
 
 <p>
-  In this example code, the android:fullBackupContent attribute specifies an XML file, located in
-  the <code>res/xml/</code> directory of your app development project, named
-  <code>mybackupscheme.xml</code>. This configuration file can include rules for what files are
-  backed up. The following example code shows a configuration file that excludes a specific file
-  from backups:
+  In this example code, the <code>android:fullBackupContent</code> attribute specifies an XML file,
+  located in the <code>res/xml/</code> directory of your app development project, named
+  <code>mybackupscheme.xml</code>. This configuration file includes rules for what files are backed
+  up. The following example code shows a configuration file that excludes a specific file from
+  backups:
 </p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
-	&lt;full-backup-content&gt;
+&lt;full-backup-content&gt;
     &lt;exclude domain="database" path="device_info.db"/&gt;
 &lt;/full-backup-content&gt;
 </pre>
 
 <p>
-  This backup configuration only excludes a specific database file from being backed up. All other
-  files are backed up.
+  This example backup configuration only excludes a specific database file from being backed up.
+  All other files are backed up.
 </p>
 
 <h4>Backup Configuration Syntax</h4>
@@ -141,72 +155,66 @@ page.tags=backup
 
 <ul>
   <li>
-	<code>&lt;include&gt;</code>. Use this element if you want to specify a set of resources to
-	back up, instead of having the system back up all data in your app by default. When you specify
-	an <code>&lt;include&gt;</code> tag, the system backs up only the resources specified with this
-	element.
+  <code>&lt;include&gt;</code>. Use this element if you want to specify a set of resources to
+  back up, instead of having the system back up all data in your app by default. When you specify
+  an <code>&lt;include&gt;</code> tag, the system backs up <em>only the resources specified</em>
+  with this element.
   </li>
 
   <li>
-	<code>&lt;exclude&gt;</code>. Use this element to specify a set of resources to exclude from
-	backup. The system backs up all data in your app, except for resources specified with this
-	element.
+  <code>&lt;exclude&gt;</code>. Use this element to specify a set of resources to exclude from
+  backup. The system backs up all data in your app, except for resources specified with this
+  element.
   </li>
 
   <li>
-	<code>domain.</code> The type of resource you want to include or exclude from backup. The valid
-	values you can specify for this attribute include:
+  <code>domain.</code> The type of resource you want to include or exclude from backup. The valid
+  values you can specify for this attribute include:
   </li>
 
   <li style="list-style: none">
-	<ul>
-	  <li>
-		<code>root</code>. Specifies that the resource is in the app’s root directory.
-	  </li>
+  <ul>
+    <li>
+    <code>root</code>. Specifies that the resource is in the app’s root directory.
+    </li>
 
-	  <li>
-		<code>file</code>. Corresponds to a resource in the directory returned by the
-		<code><a href="{@docRoot}reference/android/content/Context.html#getFilesDir()">getFilesDir()</a></code>
-		method.
-	  </li>
+    <li>
+    <code>file</code>. Corresponds to a resource in the directory returned by the
+    {@link android.content.Context#getFilesDir getFilesDir()} method.
+    </li>
 
-	  <li>
-		<code>database</code>. Corresponds to a database returned by the <code><a href=
-		"{@docRoot}reference/android/content/Context.html#getDatabasePath(java.lang.String)">getDatabasePath()</a></code>
-		method or by using the <code><a href=
-		"{@docRoot}reference/android/database/sqlite/SQLiteOpenHelper.html">SQLiteOpenHelper</a></code>
-		class.
-	  </li>
+    <li>
+    <code>database</code>. Corresponds to a database returned by the
+    {@link android.content.Context#getDatabasePath getDatabasePath()} method or by using the
+    {@link android.database.sqlite.SQLiteOpenHelper} class.
+    </li>
 
-	  <li>
-		<code>sharedpref</code>. Corresponds to a <code><a href=
-		"{@docRoot}reference/android/content/SharedPreferences.html">SharedPreferences</a></code>
-		object returned by the <code><a href=
-		"{@docRoot}reference/android/content/Context.html#getSharedPreferences(java.lang.String,%20int)">
-		getSharedPreferences()</a></code> method.
-	  </li>
+    <li>
+    <code>sharedpref</code>. Corresponds to a {@link android.content.SharedPreferences} object
+    returned by the {@link android.content.Context#getSharedPreferences getSharedPreferences()}
+    method.
+    </li>
 
-	  <li>
-		<code>external</code>. Specifies that the resource is in external storage, and corresponds
-		to a file in the directory returned by the <code><a href=
-		"{@docRoot}reference/android/content/Context.html#getExternalFilesDir(java.lang.String)">getExternalFilesDir()</a></code>
-		method.
-	  </li>
+    <li>
+    <code>external</code>. Specifies that the resource is in external storage, and corresponds
+    to a file in the directory returned by the
+    {@link android.content.Context#getExternalFilesDir getExternalFilesDir()} method.
+    </li>
 
-	  <li>
-		<code>path</code>. The file path to a resource that you want to include or exclude from
-		backup.
-	  </li>
-	</ul>
+    <li>
+    <code>path</code>. The file path to a resource that you want to include or exclude from
+    backup.
+    </li>
+  </ul>
   </li>
 </ul>
 
 
-<h3>Prohibiting Data Backups</h3>
+<h3 id="prohibit">Prohibiting Data Backups</h3>
 
 <p>
   You can choose to prevent automatic backups of any of your app data by setting the
-  <code>android:allowBackup</code> attribute to <code>false</code> in the application element of
+  <code>android:allowBackup</code> attribute to <code>false</code> in the app element of
   your manifest. This setting is illustrated in the following example code:
 </p>
 
@@ -217,15 +225,15 @@ page.tags=backup
         package="com.my.appexample"&gt;
     &lt;uses-sdk android:minSdkVersion="9"/&gt;
     &lt;uses-sdk android:targetSdkVersion="android-MNC"/&gt;
-    &lt;application ...
+    &lt;app ...
 <strong>        android:allowBackup="false"&gt;</strong>
-    &lt;/application&gt;
+    &lt;/app&gt;
     ...
 &lt;/manifest&gt;
 </pre>
 
 
-<h2>Testing Backup Configuration</h2>
+<h2 id="testing">Testing Backup Configuration</h2>
 
 <p>
   Once you have created a backup configuration, you should test it to make sure your app saves data
@@ -240,24 +248,39 @@ page.tags=backup
   performing a test backup:
 </p>
 
-<pre>$ adb shell setprop log.tag.BackupXmlParserLogging VERBOSE</pre>
+<pre class="noprettyprint">
+$ adb shell setprop log.tag.BackupXmlParserLogging VERBOSE
+</pre>
 
 <h4>Testing Backup</h4>
 
-<p>
-  To manually enable a backup, call the following command, specifying the package name for your app
-  as the <code>&lt;PACKAGE&gt;</code> parameter:
+<p>To manually run a backup, first you must initialize the Backup Manager by calling the following
+  command:
 </p>
 
-<pre>$ adb shell bmgr fullbackup &lt;PACKAGE&gt;</pre>
+<pre class="noprettyprint">
+$ adb shell bmgr run
+</pre>
+
+<p>
+  Next, you manually backup your application using the following command, specifying the package
+  name for your app as the <code>&lt;PACKAGE&gt;</code> parameter:
+</p>
+
+<pre class="noprettyprint">
+$ adb shell bmgr fullbackup &lt;PACKAGE&gt;</pre>
+
 
 <h4>Testing Restore</h4>
+
 <p>
-  To manually initiate a restore after your app data is backed-up, call the following command,
+  To manually initiate a restore after your app data is backed up, call the following command,
   specifying the package name for your app as the <code>&lt;PACKAGE&gt;</code> parameter:
 </p>
 
-<pre>$ adb shell bmgr restore &lt;PACKAGE&gt;</pre>
+<pre class="noprettyprint">
+$ adb shell bmgr restore &lt;PACKAGE&gt;
+</pre>
 
 <p class="warning">
   <b>Warning:</b> This action stops your app and wipes its data before performing the restore
@@ -273,7 +296,9 @@ page.tags=backup
 <h4>Troubleshooting Backups</h4>
 
 <p>
-  If you run into issues, clear the backup data and associated metadata by calling this command.
+  If you run into issues, you can clear the backup data and associated metadata by turning backup
+  off and on in the <strong>Settings &gt; Backup</strong>, factory resetting the device, or by
+  calling this command:
 </p>
 
 <pre>$ adb shell bmgr wipe &lt;TRANSPORT&gt; &lt;PACKAGE&gt;</pre>
@@ -285,16 +310,17 @@ page.tags=backup
 
 <pre>$ adb shell bmgr list transports</pre>
 
-<h2>Known Issues</h2>
+<h2 id="issues">Known Issues</h2>
 
 <p>The following are known issues with the automatic backup service:</p>
 
 <ul>
-  <li>For apps that use Google Cloud Messaging for push notifications, there is a known issue where
-  backing up the registration id returned by Google Cloud Messaging registration can break push
-  notifications for the restored application. It is important to query the API for a new
-  registration id after being installed on a new device - which will not be the case if the old
-  registration id was backed up. To avoid this, exclude the registration id from the set of backed
+  <li><strong>Google Cloud Messaging</strong> -
+  For apps that use Google Cloud Messaging for push notifications, there is a known issue where
+  backing up the registration ID returned by Google Cloud Messaging registration can break push
+  notifications for the restored app. It is important to query the API for a new
+  registration ID after being installed on a new device, which is not be the case if the old
+  registration ID was backed up. To avoid this, exclude the registration id from the set of backed
   up files.
   </li>
 </ul>
