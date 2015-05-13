@@ -1163,7 +1163,7 @@ bool ResourceParser::parseUntypedItem(XmlPullParser* parser, Style& style) {
 
 bool ResourceParser::parseStyle(XmlPullParser* parser, const ResourceNameRef& resourceName) {
     const SourceLine source = mSource.line(parser->getLineNumber());
-    std::unique_ptr<Style> style = util::make_unique<Style>(false);
+    std::unique_ptr<Style> style = util::make_unique<Style>();
 
     const auto endAttrIter = parser->endAttributes();
     const auto parentAttrIter = parser->findAttribute(u"", u"parent");
@@ -1180,6 +1180,16 @@ bool ResourceParser::parseStyle(XmlPullParser* parser, const ResourceNameRef& re
         } else {
             // If no package is specified, this can not be an alias and is the local package.
             style->parent.name.package = mTable->getPackage();
+        }
+    } else {
+        // No parent was specified, so try inferring it from the style name.
+        std::u16string styleName = resourceName.entry.toString();
+        size_t pos = styleName.find_last_of(u'.');
+        if (pos != std::string::npos) {
+            style->parentInferred = true;
+            style->parent.name.package = mTable->getPackage();
+            style->parent.name.type = ResourceType::kStyle;
+            style->parent.name.entry = styleName.substr(0, pos);
         }
     }
 

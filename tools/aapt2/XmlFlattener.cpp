@@ -332,6 +332,7 @@ Maybe<size_t> XmlFlattener::flatten(const Source& source,
                             elem->styleIndex = attributeIndex;
                         }
                     }
+                    attributeIndex++;
 
                     std::unique_ptr<Item> value;
                     if (entry.attr) {

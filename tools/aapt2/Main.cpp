@@ -158,7 +158,6 @@ void versionStylesForCompat(const std::shared_ptr<ResourceTable>& table) {
                         };
 
                         Style& newStyle = static_cast<Style&>(*value.value);
-                        newStyle.weak = true;
 
                         // Move the recorded stripped attributes into this new style.
                         std::move(stripped.begin(), stripped.end(),
