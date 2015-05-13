@@ -40,8 +40,9 @@ namespace aapt {
 Linker::Args::Args(const ResourceNameRef& r, const SourceLine& s) : referrer(r), source(s) {
 }
 
-Linker::Linker(std::shared_ptr<ResourceTable> table, std::shared_ptr<IResolver> resolver) :
-        mTable(table), mResolver(resolver), mError(false) {
+Linker::Linker(const std::shared_ptr<ResourceTable>& table,
+               const std::shared_ptr<IResolver>& resolver, const Options& options) :
+        mResolver(resolver), mTable(table), mOptions(options), mError(false) {
 }
 
 bool Linker::linkAndValidate() {
@@ -49,7 +50,7 @@ bool Linker::linkAndValidate() {
     std::array<std::set<uint16_t>, 256> usedIds;
     usedTypeIds.set(0);
 
-    // First build the graph of references.
+    // Collect which resource IDs are already taken.
     for (auto& type : *mTable) {
         if (type->typeId != ResourceTableType::kUnsetTypeId) {
             // The ID for this type has already been set. We
@@ -66,29 +67,10 @@ bool Linker::linkAndValidate() {
                 // later.
                 usedIds[type->typeId].insert(entry->entryId);
             }
-
-            if (entry->publicStatus.isPublic && entry->values.empty()) {
-                // A public resource has no values. It will not be encoded
-                // properly without a symbol table. This is a unresolved symbol.
-                addUnresolvedSymbol(ResourceNameRef{
-                        mTable->getPackage(), type->type, entry->name },
-                        entry->publicStatus.source);
-            } else {
-                for (auto& valueConfig : entry->values) {
-                    // Dispatch to the right method of this linker
-                    // based on the value's type.
-                    valueConfig.value->accept(*this, Args{
-                            ResourceNameRef{ mTable->getPackage(), type->type, entry->name },
-                            valueConfig.source
-                    });
-                }
-            }
         }
     }
 
-    /*
-     * Assign resource IDs that are available.
-     */
+    // Assign resource IDs that are available.
     size_t nextTypeIndex = 0;
     for (auto& type : *mTable) {
         if (type->typeId == ResourceTableType::kUnsetTypeId) {
@@ -109,29 +91,32 @@ bool Linker::linkAndValidate() {
                     ++nextEntryIter;
                 }
                 entry->entryId = nextIndex++;
-
-                std::u16string unmangledPackage = mTable->getPackage();
-                std::u16string unmangledName = entry->name;
-                NameMangler::unmangle(&unmangledName, &unmangledPackage);
-
-                // Update callers of this resource with the right ID.
-                auto callersIter = mGraph.find(ResourceNameRef{
-                        unmangledPackage,
-                        type->type,
-                        unmangledName
-                });
-
-                if (callersIter != std::end(mGraph)) {
-                    for (Node& caller : callersIter->second) {
-                        caller.reference->id = ResourceId(mTable->getPackageId(),
-                                                          type->typeId,
-                                                          entry->entryId);
-                    }
-                }
             }
         }
     }
 
+    // Now do reference linking.
+    for (auto& type : *mTable) {
+        for (auto& entry : type->entries) {
+            if (entry->publicStatus.isPublic && entry->values.empty()) {
+                // A public resource has no values. It will not be encoded
+                // properly without a symbol table. This is a unresolved symbol.
+                addUnresolvedSymbol(ResourceNameRef{
+                        mTable->getPackage(), type->type, entry->name },
+                        entry->publicStatus.source);
+                continue;
+            }
+
+            for (auto& valueConfig : entry->values) {
+                // Dispatch to the right method of this linker
+                // based on the value's type.
+                valueConfig.value->accept(*this, Args{
+                        ResourceNameRef{ mTable->getPackage(), type->type, entry->name },
+                        valueConfig.source
+                });
+            }
+        }
+    }
     return !mError;
 }
 
@@ -139,12 +124,48 @@ const Linker::ResourceNameToSourceMap& Linker::getUnresolvedReferences() const {
     return mUnresolvedSymbols;
 }
 
+void Linker::doResolveReference(Reference& reference, const SourceLine& source) {
+    Maybe<ResourceId> result = mResolver->findId(reference.name);
+    if (!result) {
+        addUnresolvedSymbol(reference.name, source);
+        return;
+    }
+    assert(result.value().isValid());
+
+    if (mOptions.linkResourceIds) {
+        reference.id = result.value();
+    } else {
+        reference.id = 0;
+    }
+}
+
+const Attribute* Linker::doResolveAttribute(Reference& attribute, const SourceLine& source) {
+    Maybe<IResolver::Entry> result = mResolver->findAttribute(attribute.name);
+    if (!result || !result.value().attr) {
+        addUnresolvedSymbol(attribute.name, source);
+        return nullptr;
+    }
+
+    const IResolver::Entry& entry = result.value();
+    assert(entry.id.isValid());
+
+    if (mOptions.linkResourceIds) {
+        attribute.id = entry.id;
+    } else {
+        attribute.id = 0;
+    }
+    return entry.attr;
+}
+
 void Linker::visit(Reference& reference, ValueVisitorArgs& a) {
     Args& args = static_cast<Args&>(a);
 
     if (!reference.name.isValid()) {
         // We can't have a completely bad reference.
-        assert(reference.id.isValid());
+        if (!reference.id.isValid()) {
+            Logger::error() << "srsly? " << args.referrer << std::endl;
+            assert(reference.id.isValid());
+        }
 
         // This reference has no name but has an ID.
         // It is a really bad error to have no name and have the same
@@ -156,25 +177,7 @@ void Linker::visit(Reference& reference, ValueVisitorArgs& a) {
         return;
     }
 
-    Maybe<ResourceId> result = mResolver->findId(reference.name);
-    if (!result) {
-        addUnresolvedSymbol(reference.name, args.source);
-        return;
-    }
-
-    const ResourceId& id = result.value();
-    if (id.isValid()) {
-        reference.id = id;
-    } else {
-        // We need to update the ID when it is set, so add it
-        // to the graph.
-        mGraph[reference.name].push_back(Node{
-                args.referrer,
-                args.source.path,
-                args.source.line,
-                &reference
-        });
-    }
+    doResolveReference(reference, args.source);
 
     // TODO(adamlesinski): Verify the referencedType is another reference
     // or a compatible primitive.
@@ -192,7 +195,6 @@ void Linker::processAttributeValue(const ResourceNameRef& name, const SourceLine
             // We should never get here. All references would have been
             // parsed in the parser phase.
             assert(false);
-            //mTable->addResource(name, ConfigDescription{}, source, util::make_unique<Id>());
         };
 
         convertedValue = ResourceParser::parseItemForAttribute(*str.value, attr,
@@ -240,25 +242,10 @@ void Linker::visit(Style& style, ValueVisitorArgs& a) {
     }
 
     for (Style::Entry& styleEntry : style.entries) {
-        Maybe<IResolver::Entry> result = mResolver->findAttribute(styleEntry.key.name);
-        if (!result || !result.value().attr) {
-            addUnresolvedSymbol(styleEntry.key.name, args.source);
-            continue;
+        const Attribute* attr = doResolveAttribute(styleEntry.key, args.source);
+        if (attr) {
+            processAttributeValue(args.referrer, args.source, *attr, styleEntry.value);
         }
-
-        const IResolver::Entry& entry = result.value();
-        if (entry.id.isValid()) {
-            styleEntry.key.id = entry.id;
-        } else {
-            // Create a dependency for the style on this attribute.
-            mGraph[styleEntry.key.name].push_back(Node{
-                    args.referrer,
-                    args.source.path,
-                    args.source.line,
-                    &styleEntry.key
-            });
-        }
-        processAttributeValue(args.referrer, args.source, *entry.attr, styleEntry.value);
     }
 }
 
@@ -298,10 +285,6 @@ void Linker::visit(Plural& plural, ValueVisitorArgs& a) {
 
 void Linker::addUnresolvedSymbol(const ResourceNameRef& name, const SourceLine& source) {
     mUnresolvedSymbols[name.toResourceName()].push_back(source);
-}
-
-::std::ostream& operator<<(::std::ostream& out, const Linker::Node& node) {
-    return out << node.name << "(" << node.source << ":" << node.line << ")";
 }
 
 } // namespace aapt

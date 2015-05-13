@@ -47,6 +47,12 @@ public:
          * max SDK.
          */
         Maybe<size_t> maxSdkAttribute;
+
+        /**
+         * Setting this to true will keep the raw string value of
+         * an attribute's value when it has been resolved.
+         */
+        bool keepRawValues = false;
     };
 
     /**
