@@ -57,6 +57,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
 
     private boolean mConnected;
     private boolean mRegistered;
+    private long mNextAlarmTime;
 
     public ScheduleConditionProvider() {
         if (DEBUG) Slog.d(TAG, "new " + SIMPLE_NAME + "()");
@@ -84,6 +85,12 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
             pw.print(meetsSchedule(conditionId, now) ? "* " : "  ");
             pw.println(conditionId);
         }
+        pw.print("      mNextAlarmTime="); pw.print(mNextAlarmTime);
+        if (mNextAlarmTime > 0) {
+            pw.printf(" (%s, in %s, now=%s)", ts(mNextAlarmTime),
+                    formatDuration(mNextAlarmTime - now), ts(now));
+        }
+        pw.println();
     }
 
     @Override
@@ -141,7 +148,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     private void evaluateSubscriptions() {
         setRegistered(!mSubscriptions.isEmpty());
         final long now = System.currentTimeMillis();
-        long nextAlarmTime = 0;
+        mNextAlarmTime = 0;
         for (Uri conditionId : mSubscriptions) {
             final ScheduleCalendar cal = toScheduleCalendar(conditionId);
             if (cal != null && cal.isInSchedule(now)) {
@@ -152,13 +159,13 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
             if (cal != null) {
                 final long nextChangeTime = cal.getNextChangeTime(now);
                 if (nextChangeTime > 0 && nextChangeTime > now) {
-                    if (nextAlarmTime == 0 || nextChangeTime < nextAlarmTime) {
-                        nextAlarmTime = nextChangeTime;
+                    if (mNextAlarmTime == 0 || nextChangeTime < mNextAlarmTime) {
+                        mNextAlarmTime = nextChangeTime;
                     }
                 }
             }
         }
-        updateAlarm(now, nextAlarmTime);
+        updateAlarm(now, mNextAlarmTime);
     }
 
     private void updateAlarm(long now, long time) {
@@ -209,7 +216,8 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     }
 
     private void notifyCondition(Uri conditionId, int state, String reason) {
-        if (DEBUG) Slog.d(TAG, "notifyCondition " + Condition.stateToString(state)
+        if (DEBUG) Slog.d(TAG, "notifyCondition " + conditionId
+                + " " + Condition.stateToString(state)
                 + " reason=" + reason);
         notifyCondition(createCondition(conditionId, state));
     }
