@@ -281,12 +281,7 @@ public final class InputMethodManager {
     boolean mFullscreenMode;
     
     // -----------------------------------------------------------
-    
-    /**
-     * This is the root view of the overall window that currently has input
-     * method focus.
-     */
-    View mCurRootView;
+
     /**
      * This is the view that should currently be served by an input method,
      * regardless of the state of setting that up.
@@ -806,7 +801,6 @@ public final class InputMethodManager {
      * Disconnect any existing input connection, clearing the served view.
      */
     void finishInputLocked() {
-        mCurRootView = null;
         mNextServedView = null;
         if (mServedView != null) {
             if (DEBUG) Log.v(TAG, "FINISH INPUT: " + mServedView);
@@ -1290,10 +1284,9 @@ public final class InputMethodManager {
     void focusInLocked(View view) {
         if (DEBUG) Log.v(TAG, "focusIn: " + view);
         
-        if (mCurRootView != view.getRootView()) {
-            // This is a request from a window that isn't in the window with
-            // IME focus, so ignore it.
-            if (DEBUG) Log.v(TAG, "Not IME target window, ignoring");
+        if (!view.hasWindowFocus()) {
+            // This is a request from a window that doesn't have window focus, so ignore it.
+            if (DEBUG) Log.v(TAG, "Not focused window, ignoring");
             return;
         }
         
@@ -1310,16 +1303,9 @@ public final class InputMethodManager {
             if (DEBUG) Log.v(TAG, "focusOut: " + view
                     + " mServedView=" + mServedView
                     + " winFocus=" + view.hasWindowFocus());
-            if (mServedView != view) {
-                // The following code would auto-hide the IME if we end up
-                // with no more views with focus.  This can happen, however,
-                // whenever we go into touch mode, so it ends up hiding
-                // at times when we don't really want it to.  For now it
-                // seems better to just turn it all off.
-                if (false && view.hasWindowFocus()) {
-                    mNextServedView = null;
-                    scheduleCheckFocusLocked(view);
-                }
+            if (mServedView == view && view.hasWindowFocus()) {
+                mNextServedView = null;
+                scheduleCheckFocusLocked(view);
             }
         }
     }
@@ -1439,13 +1425,6 @@ public final class InputMethodManager {
                         controlFlags, softInputMode, windowFlags, null, null);
             } catch (RemoteException e) {
             }
-        }
-    }
-    
-    /** @hide */
-    public void startGettingWindowFocus(View rootView) {
-        synchronized (mH) {
-            mCurRootView = rootView;
         }
     }
     
@@ -2156,7 +2135,6 @@ public final class InputMethodManager {
                 + " mBindSequence=" + mBindSequence
                 + " mCurId=" + mCurId);
         p.println("  mCurMethod=" + mCurMethod);
-        p.println("  mCurRootView=" + mCurRootView);
         p.println("  mServedView=" + mServedView);
         p.println("  mNextServedView=" + mNextServedView);
         p.println("  mServedConnecting=" + mServedConnecting);
