@@ -2353,8 +2353,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
 
-            // Scrap view implies temporary detachment.
             isScrap[0] = true;
+
+            // Finish the temporary detach started in addScrapView().
+            transientView.dispatchFinishTemporaryDetach();
             return transientView;
         }
 
@@ -2367,7 +2369,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } else {
                 isScrap[0] = true;
 
-                child.dispatchFinishTemporaryDetach();
+                // Finish the temporary detach started in addScrapView().
+                transientView.dispatchFinishTemporaryDetach();
             }
         }
 
