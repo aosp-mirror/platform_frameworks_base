@@ -459,7 +459,7 @@ public final class WindowManagerGlobal {
         }
     }
 
-    public void dumpGfxInfo(FileDescriptor fd) {
+    public void dumpGfxInfo(FileDescriptor fd, String[] args) {
         FileOutputStream fout = new FileOutputStream(fd);
         PrintWriter pw = new FastPrintWriter(fout);
         try {
@@ -476,7 +476,7 @@ public final class WindowManagerGlobal {
                     HardwareRenderer renderer =
                             root.getView().mAttachInfo.mHardwareRenderer;
                     if (renderer != null) {
-                        renderer.dumpGfxInfo(pw, fd);
+                        renderer.dumpGfxInfo(pw, fd, args);
                     }
                 }
 
