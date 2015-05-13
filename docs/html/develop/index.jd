@@ -9,41 +9,52 @@ tabbedList=1
 excludeFromSuggestions=true
 @jd:body
 
-<section class="dac-expand dac-hero dac-light">
+    <section class="dac-expand dac-hero dac-blue">
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
         <img class="dac-hero-image" src="/images/develop/hero-android-studio-on-device.png">
       </div>
       <div class="col-1of2 col-pull-1of2">
-        <h1 class="dac-hero-title">Start!</h1>
+        <h1 class="dac-hero-title">Get Started with Android</h1>
         <p class="dac-hero-description">
-          Set up your environment and create an app. Build faster with sample projects and templates.
+        Everything you need to build incredible app experiences on phones and tablets, Wear, TV, and Auto. </p>
+
+<!--Set up your environment and create an app. Build faster with sample projects and templates.-->
         </p>
-        <a class="dac-hero-cta" href="/sdk/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}sdk/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Set up Android Studio
         </a><br>
-        <a class="dac-hero-cta" href="/training/basics/firstapp/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}training/basics/firstapp/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Make your first app
+          Build your first app
         </a><br>
-        <a class="dac-hero-cta" href="/guide/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}guide/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Learn about Android
         </a><br>
+        <a class="dac-hero-cta" href="{@docRoot}guide/index.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Sample projects
+        </a><br>
       </div>
     </div>
-    <div class="dac-section dac-small">
+    <!--<div class="dac-section dac-small">
       <div class="resource-widget resource-flow-layout col-16"
            data-query="collection:develop/landing/mainlinks"
            data-cardSizes="6x2"
            data-maxResults="6"></div>
-    </div>
+    </div>-->
   </div>
 </section>
+<div class="wrap dac-offset-parent">
+  <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
+    <i class="dac-sprite dac-arrow-down-gray"></i>
+  </a>
+</div>
 
-<section class="dac-section dac-gray dac-small dac-invert"><div class="wrap">
+<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/latest"
@@ -51,6 +62,19 @@ excludeFromSuggestions=true
        data-maxResults="3"></div>
 </div></section>
 
+<section class="dac-section dac-section-light"><div class="wrap">
+  <h1 class="dac-section-title">Tools for building apps</h1>
+  <div class="dac-section-subtitle">
+    Insights into Android's tools and libraries to speed your development.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/tools"
+       data-cardSizes="6x6"
+       data-maxResults="3"
+       data-sortOrder="random"></div>
+  <ul class="dac-section-links">
+  </ul>
+</div></section>
 
 <section class="dac-section dac-light"><div class="wrap">
   <h1 class="dac-section-title">Android performance patterns</h1>
@@ -69,21 +93,8 @@ excludeFromSuggestions=true
   </ul>
 </div></section>
 
-<section class="dac-section dac-section-light"><div class="wrap">
-  <h1 class="dac-section-title">Tools for building apps</h1>
-  <div class="dac-section-subtitle">
-    Insights into Android's tools and libraries to speed your development.
-  </div>
-  <div class="resource-widget resource-flow-layout col-16"
-       data-query="collection:develop/landing/tools"
-       data-cardSizes="6x6"
-       data-maxResults="3"></div>
-  <ul class="dac-section-links">
-  </ul>
-</div></section>
-
-<section class="dac-section dac-light"><div class="wrap">
-  <h1 class="dac-section-title">Ubiquitous computing</h1>
+<section class="dac-section dac-gray"><div class="wrap">
+  <h1 class="dac-section-title">Ubiquitous computing on Android</h1>
   <div class="dac-section-subtitle">
     Opening up new stuff.
   </div>
@@ -107,9 +118,10 @@ excludeFromSuggestions=true
   </ul>
 </div></section>
 
-<section class="dac-section dac-gray"><div class="wrap">
-  <h1 class="dac-section-title">Courses</h1>
-  <div class="dac-section-subtitle">Free online courses from Android experts that bring you step-by-step to building your own apps.</div>
+<section class="dac-section dac-light"><div class="wrap">
+  <h1 class="dac-section-title">Online Courses</h1>
+  <div class="dac-section-subtitle">Free online courses from Android
+    experts that bring you step-by-step to building your own apps.</div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/courses"
        data-cardSizes="6x6"

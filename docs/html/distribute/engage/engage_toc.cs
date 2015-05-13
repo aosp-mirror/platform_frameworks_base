@@ -31,14 +31,33 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
-        var:toroot?>distribute/engage/game-services.html">
-        <span class="en">Encourage Competition</span></a>
+        var:toroot?>distribute/engage/ads.html">
+        <span class="en">Drive engagement with Ads</span></a>
     </div>
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
+        var:toroot?>distribute/engage/appindexing.html">
+        <span class="en">Bring Users from Search</span></a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
+        var:toroot?>distribute/engage/intents.html">
+        <span class="en">Use the Power of Intents</span></a>
+    </div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/analytics.html">
         <span class="en">Understand User Behavior</span></a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
+        var:toroot?>distribute/engage/game-services.html">
+        <span class="en">Encourage Competition</span></a>
     </div>
   </li>
   <li class="nav-section">
