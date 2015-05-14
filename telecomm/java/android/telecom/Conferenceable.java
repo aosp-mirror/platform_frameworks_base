@@ -21,6 +21,6 @@ package android.telecom;
  * call with.  The {@link ConnectionService} implementation will only recognize
  * {@link Conferenceable}s which are {@link Connection}s or {@link Conference}s.
  */
-public interface Conferenceable {
-
+public abstract class Conferenceable {
+    Conferenceable() {}
 }
