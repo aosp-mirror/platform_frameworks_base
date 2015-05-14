@@ -2866,14 +2866,14 @@ public class MediaPlayer implements SubtitleController.Listener
                 return;
 
             case MEDIA_META_DATA:
-                if (mOnTimedMetaDataListener == null) {
+                if (mOnTimedMetaDataAvailableListener == null) {
                     return;
                 }
                 if (msg.obj instanceof Parcel) {
                     Parcel parcel = (Parcel) msg.obj;
                     TimedMetaData data = TimedMetaData.createTimedMetaDataFromParcel(parcel);
                     parcel.recycle();
-                    mOnTimedMetaDataListener.onTimedMetaData(mMediaPlayer, data);
+                    mOnTimedMetaDataAvailableListener.onTimedMetaDataAvailable(mMediaPlayer, data);
                 }
                 return;
 
@@ -3117,9 +3117,9 @@ public class MediaPlayer implements SubtitleController.Listener
      * Interface definition of a callback to be invoked when a
      * track has timed metadata available.
      *
-     * @see MediaPlayer#setOnTimedMetaDataListener(OnTimedMetaDataListener)
+     * @see MediaPlayer#setOnTimedMetaDataAvailableListener(OnTimedMetaDataAvailableListener)
      */
-    public interface OnTimedMetaDataListener
+    public interface OnTimedMetaDataAvailableListener
     {
         /**
          * Called to indicate avaliable timed metadata
@@ -3131,7 +3131,7 @@ public class MediaPlayer implements SubtitleController.Listener
          * @param mp             the MediaPlayer associated with this callback
          * @param data           the timed metadata sample associated with this event
          */
-        public void onTimedMetaData(MediaPlayer mp, TimedMetaData data);
+        public void onTimedMetaDataAvailable(MediaPlayer mp, TimedMetaData data);
     }
 
     /**
@@ -3141,17 +3141,17 @@ public class MediaPlayer implements SubtitleController.Listener
      * {@link TimedMetaData}.
      *
      * @see MediaPlayer#selectTrack(int)
-     * @see MediaPlayer.OnTimedMetaDataListener
+     * @see MediaPlayer.OnTimedMetaDataAvailableListener
      * @see TimedMetaData
      *
      * @param listener the callback that will be run
      */
-    public void setOnTimedMetaDataListener(OnTimedMetaDataListener listener)
+    public void setOnTimedMetaDataAvailableListener(OnTimedMetaDataAvailableListener listener)
     {
-        mOnTimedMetaDataListener = listener;
+        mOnTimedMetaDataAvailableListener = listener;
     }
 
-    private OnTimedMetaDataListener mOnTimedMetaDataListener;
+    private OnTimedMetaDataAvailableListener mOnTimedMetaDataAvailableListener;
 
     /* Do not change these values without updating their counterparts
      * in include/media/mediaplayer.h!
