@@ -544,7 +544,7 @@ public abstract class ConnectionService extends Service {
 
         @Override
         public void onConferenceablesChanged(
-                Connection connection, List<IConferenceable> conferenceables) {
+                Connection connection, List<Conferenceable> conferenceables) {
             mAdapter.setConferenceableConnections(
                     mIdByConnection.get(connection),
                     createIdList(conferenceables));
@@ -1184,14 +1184,14 @@ public abstract class ConnectionService extends Service {
 
     /**
      * Builds a list of {@link Connection} and {@link Conference} IDs based on the list of
-     * {@link IConferenceable}s passed in.
+     * {@link Conferenceable}s passed in.
      *
-     * @param conferenceables The {@link IConferenceable} connections and conferences.
+     * @param conferenceables The {@link Conferenceable} connections and conferences.
      * @return List of string conference and call Ids.
      */
-    private List<String> createIdList(List<IConferenceable> conferenceables) {
+    private List<String> createIdList(List<Conferenceable> conferenceables) {
         List<String> ids = new ArrayList<>();
-        for (IConferenceable c : conferenceables) {
+        for (Conferenceable c : conferenceables) {
             // Only allow Connection and Conference conferenceables.
             if (c instanceof Connection) {
                 Connection connection = (Connection) c;
