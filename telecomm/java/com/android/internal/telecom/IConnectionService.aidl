@@ -17,7 +17,7 @@
 package com.android.internal.telecom;
 
 import android.os.Bundle;
-import android.telecom.AudioState;
+import android.telecom.CallAudioState;
 import android.telecom.ConnectionRequest;
 import android.telecom.PhoneAccountHandle;
 
@@ -56,7 +56,7 @@ oneway interface IConnectionService {
 
     void unhold(String callId);
 
-    void onAudioStateChanged(String activeCallId, in AudioState audioState);
+    void onCallAudioStateChanged(String activeCallId, in CallAudioState callAudioState);
 
     void playDtmfTone(String callId, char digit);
 

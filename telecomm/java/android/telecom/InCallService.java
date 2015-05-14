@@ -52,7 +52,7 @@ public abstract class InCallService extends Service {
     private static final int MSG_ADD_CALL = 2;
     private static final int MSG_UPDATE_CALL = 3;
     private static final int MSG_SET_POST_DIAL_WAIT = 4;
-    private static final int MSG_ON_AUDIO_STATE_CHANGED = 5;
+    private static final int MSG_ON_CALL_AUDIO_STATE_CHANGED = 5;
     private static final int MSG_BRING_TO_FOREGROUND = 6;
     private static final int MSG_ON_CAN_ADD_CALL_CHANGED = 7;
 
@@ -87,8 +87,8 @@ public abstract class InCallService extends Service {
                     }
                     break;
                 }
-                case MSG_ON_AUDIO_STATE_CHANGED:
-                    mPhone.internalAudioStateChanged((AudioState) msg.obj);
+                case MSG_ON_CALL_AUDIO_STATE_CHANGED:
+                    mPhone.internalCallAudioStateChanged((CallAudioState) msg.obj);
                     break;
                 case MSG_BRING_TO_FOREGROUND:
                     mPhone.internalBringToForeground(msg.arg1 == 1);
@@ -133,8 +133,8 @@ public abstract class InCallService extends Service {
         }
 
         @Override
-        public void onAudioStateChanged(AudioState audioState) {
-            mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, audioState).sendToTarget();
+        public void onCallAudioStateChanged(CallAudioState callAudioState) {
+            mHandler.obtainMessage(MSG_ON_CALL_AUDIO_STATE_CHANGED, callAudioState).sendToTarget();
         }
 
         @Override
@@ -155,6 +155,10 @@ public abstract class InCallService extends Service {
         public void onAudioStateChanged(Phone phone, AudioState audioState) {
             InCallService.this.onAudioStateChanged(audioState);
         }
+
+        public void onCallAudioStateChanged(Phone phone, CallAudioState callAudioState) {
+            InCallService.this.onCallAudioStateChanged(callAudioState);
+        };
 
         /** ${inheritDoc} */
         @Override
@@ -248,14 +252,27 @@ public abstract class InCallService extends Service {
      *
      * @return An object encapsulating the audio state. Returns null if the service is not
      *         fully initialized.
+     * @deprecated Use {@link #getCallAudioState()} instead.
+     * @hide
      */
+    @Deprecated
     public final AudioState getAudioState() {
         return mPhone == null ? null : mPhone.getAudioState();
     }
 
     /**
+     * Obtains the current phone call audio state.
+     *
+     * @return An object encapsulating the audio state. Returns null if the service is not
+     *         fully initialized.
+     */
+    public final CallAudioState getCallAudioState() {
+        return mPhone == null ? null : mPhone.getCallAudioState();
+    }
+
+    /**
      * Sets the microphone mute state. When this request is honored, there will be change to
-     * the {@link #getAudioState()}.
+     * the {@link #getCallAudioState()}.
      *
      * @param state {@code true} if the microphone should be muted; {@code false} otherwise.
      */
@@ -267,7 +284,7 @@ public abstract class InCallService extends Service {
 
     /**
      * Sets the audio route (speaker, bluetooth, etc...).  When this request is honored, there will
-     * be change to the {@link #getAudioState()}.
+     * be change to the {@link #getCallAudioState()}.
      *
      * @param route The audio route to use.
      */
@@ -311,8 +328,19 @@ public abstract class InCallService extends Service {
      * Called when the audio state changes.
      *
      * @param audioState The new {@link AudioState}.
+     * @deprecated Use {@link #onCallAudioStateChanged(CallAudioState) instead}.
+     * @hide
      */
+    @Deprecated
     public void onAudioStateChanged(AudioState audioState) {
+    }
+
+    /**
+     * Called when the audio state changes.
+     *
+     * @param audioState The new {@link CallAudioState}.
+     */
+    public void onCallAudioStateChanged(CallAudioState audioState) {
     }
 
     /**
