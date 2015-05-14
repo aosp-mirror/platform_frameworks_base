@@ -58,7 +58,7 @@ public class BrightnessMirrorController {
                 .withEndAction(new Runnable() {
             @Override
             public void run() {
-                mBrightnessMirror.setVisibility(View.GONE);
+                mBrightnessMirror.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -77,12 +77,18 @@ public class BrightnessMirrorController {
 
     public void setLocation(View original) {
         original.getLocationInWindow(mInt2Cache);
-        int originalY = mInt2Cache[1];
-        mBrightnessMirror.getLocationInWindow(mInt2Cache);
-        int mirrorY = mInt2Cache[1];
 
-        mBrightnessMirror.setTranslationY(mBrightnessMirror.getTranslationY()
-                + originalY - mirrorY);
+        // Original is slightly larger than the mirror, so make sure to use the center for the
+        // positioning.
+        int originalX = mInt2Cache[0] + original.getWidth()/2;
+        int originalY = mInt2Cache[1];
+        mBrightnessMirror.setTranslationX(0);
+        mBrightnessMirror.setTranslationY(0);
+        mBrightnessMirror.getLocationInWindow(mInt2Cache);
+        int mirrorX = mInt2Cache[0] + mBrightnessMirror.getWidth()/2;
+        int mirrorY = mInt2Cache[1];
+        mBrightnessMirror.setTranslationX(originalX - mirrorX);
+        mBrightnessMirror.setTranslationY(originalY - mirrorY);
     }
 
     public View getMirror() {
