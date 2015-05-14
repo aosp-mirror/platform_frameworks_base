@@ -4161,7 +4161,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             // If there is nothing selected, add all candidates and remove the ones that the User
             // has explicitely put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state and
-            // also remove any Browser Apps ones.
+            // also remove any undefined ones and Browser Apps ones.
             // If there is still none after this pass, add all undefined one and Browser Apps and
             // let the User decide with the Disambiguation dialog if there are several ones.
             if (result.size() == 0) {
@@ -4169,6 +4169,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             result.removeAll(neverList);
             result.removeAll(matchAllList);
+            result.removeAll(undefinedList);
             if (result.size() == 0) {
                 result.addAll(undefinedList);
                 if ((flags & MATCH_ALL) != 0) {
