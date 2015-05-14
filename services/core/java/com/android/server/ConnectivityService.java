@@ -1982,7 +1982,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (msg.arg1 == 0) {
                         setProvNotificationVisibleIntent(false, msg.arg2, 0, null, null);
                     } else {
-                        NetworkAgentInfo nai = null;
+                        final NetworkAgentInfo nai;
                         synchronized (mNetworkForNetId) {
                             nai = mNetworkForNetId.get(msg.arg2);
                         }
@@ -1990,6 +1990,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
                             break;
                         }
+                        nai.captivePortalDetected = true;
                         setProvNotificationVisibleIntent(true, msg.arg2, nai.networkInfo.getType(),
                                 nai.networkInfo.getExtraInfo(), (PendingIntent)msg.obj);
                     }
@@ -2384,7 +2385,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Only prompt if the network is unvalidated and was explicitly selected by the user, and if
         // we haven't already been told to switch to it regardless of whether it validated or not.
-        if (nai == null || nai.everValidated ||
+        // Also don't prompt on captive portals because we're already prompting the user to sign in.
+        if (nai == null || nai.everValidated || nai.captivePortalDetected ||
                 !nai.networkMisc.explicitlySelected || nai.networkMisc.acceptUnvalidated) {
             return;
         }
