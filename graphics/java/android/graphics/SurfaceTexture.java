@@ -347,6 +347,14 @@ public class SurfaceTexture {
         nativeRelease();
     }
 
+    /**
+     * Returns true if the SurfaceTexture was released
+     * @hide
+     */
+    public boolean isReleased() {
+        return nativeIsReleased();
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -383,6 +391,7 @@ public class SurfaceTexture {
     private native int nativeAttachToGLContext(int texName);
     private native int nativeGetQueuedCount();
     private native void nativeRelease();
+    private native boolean nativeIsReleased();
 
     /*
      * We use a class initializer to allow the native code to cache some
