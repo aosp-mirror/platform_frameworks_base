@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.util.SparseIntArray;
 
 /**
@@ -151,27 +152,38 @@ public final class AudioDeviceInfo {
     /**
      * @return An array of sample rates supported by the audio device.
      */
-    public int[] getSampleRates() {
+    public @NonNull int[] getSampleRates() {
         return mPort.samplingRates();
     }
 
     /**
-     * @return An array of channel masks ({@link AudioFormat#CHANNEL_IN_STEREO},
-     * {@link AudioFormat#CHANNEL_OUT_7POINT1) for which this audio device can be configured.
+     * @return An array of channel position masks (e.g. {@link AudioFormat#CHANNEL_IN_STEREO},
+     * {@link AudioFormat#CHANNEL_OUT_7POINT1}) for which this audio device can be configured.
      *
      * @see AudioFormat
      */
-    public int[] getChannelMasks() {
+    public @NonNull int[] getChannelMasks() {
         return mPort.channelMasks();
     }
 
     /**
-     * @return An array of channel counts (1, 2, 4....) for which this audio device
+     * @return An array of channel index masks for which this audio device can be configured.
+     *
+     * @see AudioFormat
+     */
+    public @NonNull int[] getChannelIndexMasks() {
+        // TODO: implement
+        return new int[0];
+    }
+
+    /**
+     * @return An array of channel counts (1, 2, 4, ...) for which this audio device
      * can be configured.
      */
-    public int[] getChannelCounts() {
+    public @NonNull int[] getChannelCounts() {
         int[] masks = getChannelMasks();
         int[] counts = new int[masks.length];
+        // TODO: consider channel index masks
         for (int mask_index = 0; mask_index < masks.length; mask_index++) {
             counts[mask_index] = isSink()
                     ? AudioFormat.channelCountFromOutChannelMask(masks[mask_index])
@@ -181,12 +193,16 @@ public final class AudioDeviceInfo {
     }
 
     /**
-     * @return An array of audio format IDs (@link AudioFormat#ENCODING_PCM_16BIT,
-     * {@link AudioFormat#ENCODING_PCM_FLOAT}...) supported by the audio device.
+     * @return An array of audio encodings (e.g. {@link AudioFormat#ENCODING_PCM_16BIT},
+     * {@link AudioFormat#ENCODING_PCM_FLOAT}) supported by the audio device.
+     * <code>ENCODING_PCM_FLOAT</code> indicates the device supports more
+     * than 16 bits of integer precision.  Specifying <code>ENCODING_PCM_FLOAT</code>
+     * with {@link AudioTrack} or {@link AudioRecord} can preserve at least 24 bits of
+     * integer precision to that device.
      *
      * @see AudioFormat
      */
-    public int[] getFormats() {
+    public @NonNull int[] getFormats() {
         return mPort.formats();
     }
 
