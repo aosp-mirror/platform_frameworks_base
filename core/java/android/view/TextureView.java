@@ -717,6 +717,14 @@ public class TextureView extends View {
         if (surfaceTexture == null) {
             throw new NullPointerException("surfaceTexture must not be null");
         }
+        if (surfaceTexture == mSurface) {
+            throw new IllegalArgumentException("Trying to setSurfaceTexture to " +
+                    "the same SurfaceTexture that's already set.");
+        }
+        if (surfaceTexture.isReleased()) {
+            throw new IllegalArgumentException("Cannot setSurfaceTexture to a " +
+                    "released SurfaceTexture");
+        }
         if (mSurface != null) {
             mSurface.release();
         }
