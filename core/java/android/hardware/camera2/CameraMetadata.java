@@ -388,8 +388,8 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}</li>
      * <li>{@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}</li>
      * <li>{@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}</li>
-     * <li>android.tonemap.gamma</li>
-     * <li>android.tonemap.presetCurve</li>
+     * <li>{@link CaptureRequest#TONEMAP_GAMMA android.tonemap.gamma}</li>
+     * <li>{@link CaptureRequest#TONEMAP_PRESET_CURVE android.tonemap.presetCurve}</li>
      * </ul>
      * </li>
      * <li>
@@ -429,8 +429,10 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#SHADING_MODE
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @see CaptureRequest#TONEMAP_CURVE
+     * @see CaptureRequest#TONEMAP_GAMMA
      * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
      * @see CaptureRequest#TONEMAP_MODE
+     * @see CaptureRequest#TONEMAP_PRESET_CURVE
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2;
@@ -2185,22 +2187,26 @@ public abstract class CameraMetadata<TKey> {
     public static final int TONEMAP_MODE_HIGH_QUALITY = 2;
 
     /**
-     * <p>Use the gamma value specified in android.tonemap.gamma to peform
+     * <p>Use the gamma value specified in {@link CaptureRequest#TONEMAP_GAMMA android.tonemap.gamma} to peform
      * tonemapping.</p>
      * <p>All color enhancement and tonemapping must be disabled, except
-     * for applying the tonemapping curve specified by android.tonemap.gamma.</p>
+     * for applying the tonemapping curve specified by {@link CaptureRequest#TONEMAP_GAMMA android.tonemap.gamma}.</p>
      * <p>Must not slow down frame rate relative to raw sensor output.</p>
+     *
+     * @see CaptureRequest#TONEMAP_GAMMA
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_GAMMA_VALUE = 3;
 
     /**
      * <p>Use the preset tonemapping curve specified in
-     * android.tonemap.presetCurve to peform tonemapping.</p>
+     * {@link CaptureRequest#TONEMAP_PRESET_CURVE android.tonemap.presetCurve} to peform tonemapping.</p>
      * <p>All color enhancement and tonemapping must be disabled, except
      * for applying the tonemapping curve specified by
-     * android.tonemap.presetCurve.</p>
+     * {@link CaptureRequest#TONEMAP_PRESET_CURVE android.tonemap.presetCurve}.</p>
      * <p>Must not slow down frame rate relative to raw sensor output.</p>
+     *
+     * @see CaptureRequest#TONEMAP_PRESET_CURVE
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_PRESET_CURVE = 4;
