@@ -496,16 +496,16 @@ android_media_MediaRecorder_native_finalize(JNIEnv *env, jobject thiz)
     android_media_MediaRecorder_release(env, thiz);
 }
 
-void android_media_MediaRecorder_usePersistentSurface(
+void android_media_MediaRecorder_setInputSurface(
         JNIEnv* env, jobject thiz, jobject object) {
-    ALOGV("android_media_MediaRecorder_usePersistentSurface");
+    ALOGV("android_media_MediaRecorder_setInputSurface");
 
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
 
     sp<PersistentSurface> persistentSurface = get_persistentSurface(env, object);
 
-    process_media_recorder_call(env, mr->usePersistentSurface(persistentSurface),
-            "java/lang/IllegalArgumentException", "native_usePersistentSurface failed.");
+    process_media_recorder_call(env, mr->setInputSurface(persistentSurface),
+            "java/lang/IllegalArgumentException", "native_setInputSurface failed.");
 }
 
 // ----------------------------------------------------------------------------
@@ -534,7 +534,7 @@ static JNINativeMethod gMethods[] = {
     {"native_setup",         "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V",
                                                                 (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
-    {"native_usePersistentSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_usePersistentSurface },
+    {"native_setInputSurface", "(Landroid/view/Surface;)V", (void *)android_media_MediaRecorder_setInputSurface },
 };
 
 // This function only registers the native methods, and is called from
