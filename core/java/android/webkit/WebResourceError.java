@@ -36,8 +36,11 @@ public abstract class WebResourceError {
      * and thus can be used for communicating the problem to the user.
      *
      * @return The description of the error
+     *
+     * Will become abstract after updated WebView.apk will be submitted
+     * into the Android tree.
      */
-    public abstract CharSequence getDescription();
+    public CharSequence getDescription() { return ""; }
 
     /**
      * This class can not be subclassed by applications.

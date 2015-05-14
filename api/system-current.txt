@@ -41132,7 +41132,7 @@ package android.webkit {
 
   public abstract class WebResourceError {
     ctor public WebResourceError();
-    method public abstract java.lang.CharSequence getDescription();
+    method public java.lang.CharSequence getDescription();
     method public abstract int getErrorCode();
   }
 
