@@ -38,7 +38,7 @@ import java.util.List;
     private static final int HTTP_CONNECTION_TIMEOUT_MILLIS = 5000;
     private static final long HTTP_CONTENT_SIZE_LIMIT_IN_BYTES = 1024 * 1024;
     private static final int MAX_INCLUDE_LEVEL = 1;
-    private static final String WELL_KNOWN_STATEMENT_PATH = "/.well-known/associations.json";
+    private static final String WELL_KNOWN_STATEMENT_PATH = "/.well-known/statements.json";
 
     private final URLFetcher mUrlFetcher;
     private final AndroidPackageInfoFetcher mAndroidFetcher;
