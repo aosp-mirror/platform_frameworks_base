@@ -97,9 +97,6 @@ public final class InputEventConsistencyVerifier {
     // Set to true if we received hover enter.
     private boolean mHoverEntered;
 
-    // The bitset of buttons which we've received ACTION_BUTTON_PRESS for.
-    private int mButtonsPressed;
-
     // The current violation message.
     private StringBuilder mViolationMessage;
 
@@ -151,7 +148,6 @@ public final class InputEventConsistencyVerifier {
         mTouchEventStreamIsTainted = false;
         mTouchEventStreamUnhandled = false;
         mHoverEntered = false;
-        mButtonsPressed = 0;
 
         while (mKeyStateList != null) {
             final KeyState state = mKeyStateList;
@@ -470,8 +466,6 @@ public final class InputEventConsistencyVerifier {
 
             final int action = event.getAction();
             final int source = event.getSource();
-            final int buttonState = event.getButtonState();
-            final int actionButton = event.getActionButton();
             if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                 switch (action) {
                     case MotionEvent.ACTION_HOVER_ENTER:
@@ -491,62 +485,6 @@ public final class InputEventConsistencyVerifier {
                     case MotionEvent.ACTION_SCROLL:
                         ensureHistorySizeIsZeroForThisAction(event);
                         ensurePointerCountIsOneForThisAction(event);
-                        break;
-                    case MotionEvent.ACTION_BUTTON_PRESS:
-                        ensureActionButtonIsNonZeroForThisAction(event);
-                        if ((mButtonsPressed & actionButton) != 0) {
-                            problem("Action button for ACTION_BUTTON_PRESS event is " +
-                                    actionButton + ", but it has already been pressed and " +
-                                    "has yet to be released.");
-                        }
-
-                        mButtonsPressed |= actionButton;
-                        // The system will automatically mirror the stylus buttons onto the button
-                        // state as the old set of generic buttons for apps targeting pre-M. If
-                        // it looks this has happened, go ahead and set the generic buttons as
-                        // pressed to prevent spurious errors.
-                        if (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY &&
-                                (buttonState & MotionEvent.BUTTON_SECONDARY) != 0) {
-                            mButtonsPressed |= MotionEvent.BUTTON_SECONDARY;
-                        } else if (actionButton == MotionEvent.BUTTON_STYLUS_SECONDARY &&
-                                (buttonState & MotionEvent.BUTTON_TERTIARY) != 0) {
-                            mButtonsPressed |= MotionEvent.BUTTON_TERTIARY;
-                        }
-
-                        if (mButtonsPressed != buttonState) {
-                            problem(String.format("Reported button state differs from " +
-                                    "expected button state based on press and release events. " +
-                                    "Is 0x%08x but expected 0x%08x.",
-                                    buttonState, mButtonsPressed));
-                        }
-                        break;
-                    case MotionEvent.ACTION_BUTTON_RELEASE:
-                        ensureActionButtonIsNonZeroForThisAction(event);
-                        if ((mButtonsPressed & actionButton) != actionButton) {
-                            problem("Action button for ACTION_BUTTON_RELEASE event is " +
-                                    actionButton + ", but it was either never pressed or has " +
-                                    "already been released.");
-                        }
-
-                        mButtonsPressed &= ~actionButton;
-                        // The system will automatically mirror the stylus buttons onto the button
-                        // state as the old set of generic buttons for apps targeting pre-M. If
-                        // it looks this has happened, go ahead and set the generic buttons as
-                        // released to prevent spurious errors.
-                        if (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY &&
-                                (buttonState & MotionEvent.BUTTON_SECONDARY) == 0) {
-                            mButtonsPressed &= ~MotionEvent.BUTTON_SECONDARY;
-                        } else if (actionButton == MotionEvent.BUTTON_STYLUS_SECONDARY &&
-                                (buttonState & MotionEvent.BUTTON_TERTIARY) == 0) {
-                            mButtonsPressed &= ~MotionEvent.BUTTON_TERTIARY;
-                        }
-
-                        if (mButtonsPressed != buttonState) {
-                            problem(String.format("Reported button state differs from " +
-                                    "expected button state based on press and release events. " +
-                                    "Is 0x%08x but expected 0x%08x.",
-                                    buttonState, mButtonsPressed));
-                        }
                         break;
                     default:
                         problem("Invalid action for generic pointer event.");
@@ -622,15 +560,6 @@ public final class InputEventConsistencyVerifier {
         if (pointerCount != 1) {
             problem("Pointer count is " + pointerCount + " but it should always be 1 for "
                     + MotionEvent.actionToString(event.getAction()));
-        }
-    }
-
-    private void ensureActionButtonIsNonZeroForThisAction(MotionEvent event) {
-        final int actionButton = event.getActionButton();
-        if (actionButton == 0) {
-            problem("No action button set. Action button should always be non-zero for " +
-                    MotionEvent.actionToString(event.getAction()));
-
         }
     }
 
