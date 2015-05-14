@@ -170,6 +170,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1290,7 +1291,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         try {
             fis = mPolicyFile.openRead();
             final XmlPullParser in = Xml.newPullParser();
-            in.setInput(fis, null);
+            in.setInput(fis, StandardCharsets.UTF_8.name());
 
             int type;
             int version = VERSION_INIT;
@@ -1425,7 +1426,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
             fos = mPolicyFile.startWrite();
 
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
