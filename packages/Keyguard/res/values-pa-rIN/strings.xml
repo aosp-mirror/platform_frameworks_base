@@ -45,7 +45,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM ਕਾਰਡ PUK-ਲੌਕਡ ਹੈ।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM ਕਾਰਡ ਅਨਲੌਕ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ਪੈਟਰਨ ਅਨਲੌਕ।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ਚਿਹਰਾ ਅਨਲੌਕ।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin ਅਨਲੌਕ।"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ਪਾਸਵਰਡ ਅਨਲੌਕ।"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ਪੈਟਰਨ ਖੇਤਰ।"</string>
