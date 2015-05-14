@@ -1107,6 +1107,11 @@
     <permission android:name="android.permission.CAPTURE_TV_INPUT"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- @hide Allows TvInputService to access DVB device.
+   <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.DVB_DEVICE"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- @hide Allows enabling/disabling OEM unlock
    <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.OEM_UNLOCK_STATE"
