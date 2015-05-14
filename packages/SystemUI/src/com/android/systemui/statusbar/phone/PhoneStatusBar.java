@@ -312,6 +312,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // tracking calls to View.setSystemUiVisibility()
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
 
+    // last value sent to window manager
+    private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
+
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     // XXX: gesture research
@@ -2481,7 +2484,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void notifyUiVisibilityChanged(int vis) {
         try {
-            mWindowManagerService.statusBarVisibilityChanged(vis);
+            if (mLastDispatchedSystemUiVisibility != vis) {
+                mWindowManagerService.statusBarVisibilityChanged(vis);
+                mLastDispatchedSystemUiVisibility = vis;
+            }
         } catch (RemoteException ex) {
         }
     }
