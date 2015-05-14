@@ -472,7 +472,7 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link android.graphics.ImageFormat#PRIVATE } will be reprocessable into both
      *   {@link android.graphics.ImageFormat#YUV_420_888 } and
      *   {@link android.graphics.ImageFormat#JPEG } formats.</li>
-     * <li>The maximum available resolution for OPAQUE streams
+     * <li>The maximum available resolution for PRIVATE streams
      *   (both input/output) will match the maximum available
      *   resolution of JPEG streams.</li>
      * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
@@ -492,7 +492,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING = 4;
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING = 4;
 
     /**
      * <p>The camera device supports accurately reporting the sensor settings for many of
@@ -565,7 +565,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>The camera device supports the YUV_420_888 reprocessing use case, similar as
-     * OPAQUE_REPROCESSING, This capability requires the camera device to support the
+     * PRIVATE_REPROCESSING, This capability requires the camera device to support the
      * following:</p>
      * <ul>
      * <li>One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.</li>

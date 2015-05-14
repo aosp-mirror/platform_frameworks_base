@@ -1239,7 +1239,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * only the input buffer will be used to produce these output stream buffers, and a
      * new sensor image will not be captured.</p>
      * <p>For example, for Zero Shutter Lag (ZSL) still capture use case, the input
-     * stream image format will be OPAQUE, the associated output stream image format
+     * stream image format will be PRIVATE, the associated output stream image format
      * should be JPEG.</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>0 or 1.</p>
@@ -1326,7 +1326,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR MANUAL_SENSOR}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING MANUAL_POST_PROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING OPAQUE_REPROCESSING}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING PRIVATE_REPROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS READ_SENSOR_SETTINGS}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE BURST_CAPTURE}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING YUV_REPROCESSING}</li>
@@ -1339,7 +1339,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_RAW
-     * @see #REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS
      * @see #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE
      * @see #REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING
@@ -1536,12 +1536,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <tr>
      * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
      * <td align="left">{@link android.graphics.ImageFormat#JPEG }</td>
-     * <td align="left">OPAQUE_REPROCESSING</td>
+     * <td align="left">PRIVATE_REPROCESSING</td>
      * </tr>
      * <tr>
      * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
      * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="left">OPAQUE_REPROCESSING</td>
+     * <td align="left">PRIVATE_REPROCESSING</td>
      * </tr>
      * <tr>
      * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
@@ -1556,8 +1556,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </tbody>
      * </table>
      * <p>PRIVATE refers to a device-internal format that is not directly application-visible.  A
-     * PRIVATE input surface can be acquired by {@link android.media.ImageReader#newOpaqueInstance }.</p>
-     * <p>For a OPAQUE_REPROCESSING-capable camera device, using the PRIVATE format as either input
+     * PRIVATE input surface can be acquired by {@link android.media.ImageReader#newInstance }
+     * with {@link android.graphics.ImageFormat#PRIVATE } as the format.</p>
+     * <p>For a PRIVATE_REPROCESSING-capable camera device, using the PRIVATE format as either input
      * or output will never hurt maximum frame rate (i.e.  {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration getOutputStallDuration(ImageFormat.PRIVATE, size)} is always 0),</p>
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
@@ -2647,8 +2648,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * formats/sizes combination.</p>
      * <p>If this key reports 0, it means a reprocess request doesn't introduce any glitch to the
      * ongoing camera repeating request outputs, as if this reprocess request is never issued.</p>
-     * <p>This key is supported if the camera device supports OPAQUE or YUV reprocessing (
-     * i.e. {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains OPAQUE_REPROCESSING or
+     * <p>This key is supported if the camera device supports PRIVATE or YUV reprocessing (
+     * i.e. {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains PRIVATE_REPROCESSING or
      * YUV_REPROCESSING).</p>
      * <p><b>Units</b>: Number of frames.</p>
      * <p><b>Range of valid values:</b><br>

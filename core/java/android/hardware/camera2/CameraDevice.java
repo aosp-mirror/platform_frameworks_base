@@ -100,7 +100,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * means maximizing image quality without compromising preview frame rate.
      * AE/AWB/AF should be on auto mode.
      * This template is guaranteed to be supported on camera devices that support the
-     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING OPAQUE_REPROCESSING}
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING PRIVATE_REPROCESSING}
      * capability or the
      * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING YUV_REPROCESSING}
      * capability.
@@ -409,15 +409,15 @@ public abstract class CameraDevice implements AutoCloseable {
             CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException;
     /**
-     * Create a new reprocessible camera capture session by providing the desired reprocessing
+     * Create a new reprocessable camera capture session by providing the desired reprocessing
      * input Surface configuration and the target output set of Surfaces to the camera device.
      *
      * <p>If a camera device supports YUV reprocessing
-     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING}) or OPAQUE
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING}) or PRIVATE
      * reprocessing
-     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING}), besides
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING}), besides
      * the capture session created via {@link #createCaptureSession createCaptureSession}, the
-     * application can also create a reprocessible capture session to submit reprocess capture
+     * application can also create a reprocessable capture session to submit reprocess capture
      * requests in addition to regular capture requests. A reprocess capture request takes the next
      * available buffer from the session's input Surface, and sends it through the camera device's
      * processing pipeline again, to produce buffers for the request's target output Surfaces. No
@@ -426,7 +426,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * directly (e.g. for Zero-Shutter-Lag use case) or indirectly (e.g. combining multiple output
      * images).</p>
      *
-     * <p>The active reprocessible capture session determines an input {@link Surface} and the set
+     * <p>The active reprocessable capture session determines an input {@link Surface} and the set
      * of potential output Surfaces for the camera devices for each capture request. The application
      * can use {@link #createCaptureRequest createCaptureRequest} to create regular capture requests
      * to capture new images from the camera device, and use {@link #createReprocessCaptureRequest
@@ -448,30 +448,30 @@ public abstract class CameraDevice implements AutoCloseable {
      * they cannot be used as targets for a reprocessing request.</p>
      *
      * <p>Since the application cannot access {@link android.graphics.ImageFormat#PRIVATE} images
-     * directly, an output Surface created by {@link android.media.ImageReader#newOpaqueInstance}
-     * will be considered as intended to be used for reprocessing input and thus the
-     * {@link android.media.ImageReader} size must match one of the supported input sizes for
-     * {@link android.graphics.ImageFormat#PRIVATE} format. Otherwise, creating a reprocessible
-     * capture session will fail.</p>
+     * directly, an output Surface created by {@link android.media.ImageReader#newInstance} with
+     * {@link android.graphics.ImageFormat#PRIVATE} as the format will be considered as intended to
+     * be used for reprocessing input and thus the {@link android.media.ImageReader} size must
+     * match one of the supported input sizes for {@link android.graphics.ImageFormat#PRIVATE}
+     * format. Otherwise, creating a reprocessable capture session will fail.</p>
      *
      * <p>The guaranteed stream configurations listed in
      * {@link #createCaptureSession createCaptureSession} are also guaranteed to work for
-     * {@link #createReprocessibleCaptureSession createReprocessibleCaptureSession}. In addition,
-     * the configurations in the tables below are also guaranteed for creating a reprocessible
-     * capture session if the camera device supports YUV reprocessing or OPAQUE reprocessing.
-     * However, not all output targets used to create a reprocessible session may be used in a
+     * {@link #createReprocessableCaptureSession createReprocessableCaptureSession}. In addition,
+     * the configurations in the tables below are also guaranteed for creating a reprocessable
+     * capture session if the camera device supports YUV reprocessing or PRIVATE reprocessing.
+     * However, not all output targets used to create a reprocessable session may be used in a
      * {@link CaptureRequest} simultaneously. The guaranteed output targets that can be included
      * in a {@link CaptureRequest} simultaneously are listed in the tables under
      * {@link #createCaptureSession createCaptureSession}. For example, with a FULL-capability
      * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL} {@code == }
-     * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}) device that supports OPAQUE
-     * reprocessing, an application can create a reprocessible capture session with 1 input,
+     * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}) device that supports PRIVATE
+     * reprocessing, an application can create a reprocessable capture session with 1 input,
      * ({@code PRIV}, {@code MAXIMUM}), and 3 outputs, ({@code PRIV}, {@code MAXIMUM}),
      * ({@code PRIV}, {@code PREVIEW}), and ({@code YUV}, {@code MAXIMUM}). However, it's not
      * guaranteed that an application can submit a regular or reprocess capture with ({@code PRIV},
      * {@code MAXIMUM}) and ({@code YUV}, {@code MAXIMUM}) outputs based on the table listed under
      * {@link #createCaptureSession createCaptureSession}. In other words, use the tables below to
-     * determine the guaranteed stream configurations for creating a reprocessible capture session,
+     * determine the guaranteed stream configurations for creating a reprocessable capture session,
      * and use the tables under {@link #createCaptureSession createCaptureSession} to determine the
      * guaranteed output targets that can be submitted in a regular or reprocess
      * {@link CaptureRequest} simultaneously.</p>
@@ -482,12 +482,12 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>Limited-capability ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
      * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}) devices
-     * support at least the following stream combinations for creating a reprocessible capture
+     * support at least the following stream combinations for creating a reprocessable capture
      * session in addition to those listed in {@link #createCaptureSession createCaptureSession} for
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices:
      *
      * <table>
-     * <tr><th colspan="11">LIMITED-level additional guaranteed configurations for creating a reprocessible capture session<br>({@code PRIV} input is guaranteed only if OPAQUE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
+     * <tr><th colspan="11">LIMITED-level additional guaranteed configurations for creating a reprocessable capture session<br>({@code PRIV} input is guaranteed only if PRIVATE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
      * <tr><th colspan="2" id="rb">Input</th><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
      * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td></td><td id="rb"></td> <td>No-viewfinder still image reprocessing.</td> </tr>
@@ -499,12 +499,12 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>FULL-capability ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
      * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}) devices
-     * support at least the following stream combinations for creating a reprocessible capture
+     * support at least the following stream combinations for creating a reprocessable capture
      * session in addition to those for
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices:
      *
      * <table>
-     * <tr><th colspan="11">FULL-capability additional guaranteed configurations for creating a reprocessible capture session<br>({@code PRIV} input is guaranteed only if OPAQUE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
+     * <tr><th colspan="11">FULL-capability additional guaranteed configurations for creating a reprocessable capture session<br>({@code PRIV} input is guaranteed only if PRIVATE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
      * <tr><th colspan="2" id="rb">Input</th><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
      * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td></td><td id="rb"></td> <td></td><td id="rb"></td> <td>Maximum-resolution multi-frame image fusion in-app processing with regular preview.</td> </tr>
@@ -520,12 +520,12 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>RAW-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes
      * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}) devices additionally support
-     * at least the following stream combinations for creating a reprocessible capture session
+     * at least the following stream combinations for creating a reprocessable capture session
      * on both {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL} and
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices
      *
      * <table>
-     * <tr><th colspan="11">RAW-capability additional guaranteed configurations for creating a reprocessible capture session<br>({@code PRIV} input is guaranteed only if OPAQUE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
+     * <tr><th colspan="11">RAW-capability additional guaranteed configurations for creating a reprocessable capture session<br>({@code PRIV} input is guaranteed only if PRIVATE reprocessing is supported. {@code YUV} input is guaranteed only if YUV reprocessing is supported)</th></tr>
      * <tr><th colspan="2" id="rb">Input</th><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
      * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td></td><td id="rb"></td> <td>Mutually exclusive ZSL in-app processing and DNG capture.</td> </tr>
@@ -560,7 +560,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see android.media.ImageWriter
      * @see android.media.ImageReader
      */
-    public abstract void createReprocessibleCaptureSession(InputConfiguration inputConfig,
+    public abstract void createReprocessableCaptureSession(InputConfiguration inputConfig,
             List<Surface> outputs, CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException;
 
@@ -602,8 +602,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link CameraCaptureSession}'s input {@link Surface} to all output {@link Surface Surfaces}
      * included in the reprocess capture request. The reprocess input images must be generated from
      * one or multiple output images captured from the same camera device. The application can
-     * provide input images to camera device via
-     * {{@link android.media.ImageWriter#queueInputImage ImageWriter#queueInputImage}}.
+     * provide input images to camera device via {@link android.media.ImageWriter#queueInputImage}.
      * The application must use the capture result of one of those output images to create a
      * reprocess capture request so that the camera device can use the information to achieve
      * optimal reprocess image quality.
@@ -618,7 +617,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @see CaptureRequest.Builder
      * @see TotalCaptureResult
-     * @see CameraDevice#createReprocessibleCaptureSession
+     * @see CameraDevice#createReprocessableCaptureSession
      * @see android.media.ImageWriter
      */
     public abstract CaptureRequest.Builder createReprocessCaptureRequest(

@@ -13481,7 +13481,7 @@ package android.hardware.camera2 {
     method public abstract void close();
     method public abstract android.hardware.camera2.CameraDevice getDevice();
     method public abstract android.view.Surface getInputSurface();
-    method public abstract boolean isReprocessible();
+    method public abstract boolean isReprocessable();
     method public abstract void prepare(android.view.Surface) throws android.hardware.camera2.CameraAccessException;
     method public abstract int setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraCaptureSession.CaptureCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract int setRepeatingRequest(android.hardware.camera2.CaptureRequest, android.hardware.camera2.CameraCaptureSession.CaptureCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
@@ -13602,7 +13602,7 @@ package android.hardware.camera2 {
     method public abstract android.hardware.camera2.CaptureRequest.Builder createCaptureRequest(int) throws android.hardware.camera2.CameraAccessException;
     method public abstract void createCaptureSession(java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract android.hardware.camera2.CaptureRequest.Builder createReprocessCaptureRequest(android.hardware.camera2.TotalCaptureResult) throws android.hardware.camera2.CameraAccessException;
-    method public abstract void createReprocessibleCaptureSession(android.hardware.camera2.params.InputConfiguration, java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void createReprocessableCaptureSession(android.hardware.camera2.params.InputConfiguration, java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract java.lang.String getId();
     field public static final int TEMPLATE_MANUAL = 6; // 0x6
     field public static final int TEMPLATE_PREVIEW = 1; // 0x1
@@ -13781,7 +13781,7 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8; // 0x8
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2; // 0x2
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR = 1; // 0x1
-    field public static final int REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING = 4; // 0x4
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING = 4; // 0x4
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_RAW = 3; // 0x3
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS = 5; // 0x5
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING = 7; // 0x7
