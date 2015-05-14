@@ -1063,16 +1063,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void sleepPress(KeyEvent event) {
+    private void sleepPress(long eventTime) {
+        if (mShortPressOnSleepBehavior == SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME) {
+            launchHomeFromHotKey(false /* awakenDreams */, true /*respectKeyguard*/);
+        }
+    }
+
+    private void sleepRelease(long eventTime) {
         switch (mShortPressOnSleepBehavior) {
             case SHORT_PRESS_SLEEP_GO_TO_SLEEP:
-                mPowerManager.goToSleep(event.getEventTime(),
-                        PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
-                break;
             case SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME:
-                launchHomeFromHotKey(false /* awakenDreams */, true /*respectKeyguard*/);
-                mPowerManager.goToSleep(event.getEventTime(),
-                        PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
+                Slog.i(TAG, "sleepRelease() calling goToSleep(GO_TO_SLEEP_REASON_SLEEP_BUTTON)");
+                mPowerManager.goToSleep(eventTime,
+                       PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
                 break;
         }
     }
@@ -4779,7 +4782,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!mPowerManager.isInteractive()) {
                     useHapticFeedback = false; // suppress feedback if already non-interactive
                 }
-                sleepPress(event);
+                if (down) {
+                    sleepPress(event.getEventTime());
+                } else {
+                    sleepRelease(event.getEventTime());
+                }
                 break;
             }
 
