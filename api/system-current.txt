@@ -4877,8 +4877,6 @@ package android.app {
     method public android.app.Notification clone();
     method public int describeContents();
     method public java.lang.String getGroup();
-    method public android.graphics.drawable.Icon getLargeIcon();
-    method public android.graphics.drawable.Icon getSmallIcon();
     method public java.lang.String getSortKey();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
     method public void writeToParcel(android.os.Parcel, int);
@@ -5023,7 +5021,6 @@ package android.app {
     ctor public Notification.BigPictureStyle();
     ctor public Notification.BigPictureStyle(android.app.Notification.Builder);
     method public android.app.Notification.BigPictureStyle bigLargeIcon(android.graphics.Bitmap);
-    method public android.app.Notification.BigPictureStyle bigLargeIcon(android.graphics.drawable.Icon);
     method public android.app.Notification.BigPictureStyle bigPicture(android.graphics.Bitmap);
     method public android.app.Notification.BigPictureStyle setBigContentTitle(java.lang.CharSequence);
     method public android.app.Notification.BigPictureStyle setSummaryText(java.lang.CharSequence);
@@ -5062,7 +5059,6 @@ package android.app {
     method public android.app.Notification.Builder setGroup(java.lang.String);
     method public android.app.Notification.Builder setGroupSummary(boolean);
     method public android.app.Notification.Builder setLargeIcon(android.graphics.Bitmap);
-    method public android.app.Notification.Builder setLargeIcon(android.graphics.drawable.Icon);
     method public android.app.Notification.Builder setLights(int, int, int);
     method public android.app.Notification.Builder setLocalOnly(boolean);
     method public android.app.Notification.Builder setNumber(int);
@@ -5074,7 +5070,6 @@ package android.app {
     method public android.app.Notification.Builder setShowWhen(boolean);
     method public android.app.Notification.Builder setSmallIcon(int);
     method public android.app.Notification.Builder setSmallIcon(int, int);
-    method public android.app.Notification.Builder setSmallIcon(android.graphics.drawable.Icon);
     method public android.app.Notification.Builder setSortKey(java.lang.String);
     method public android.app.Notification.Builder setSound(android.net.Uri);
     method public deprecated android.app.Notification.Builder setSound(android.net.Uri, int);
