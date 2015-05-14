@@ -25,11 +25,11 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="icu4j" level="project" />
-    <orderEntry type="library" name="kxml2-2.3.0" level="project" />
     <orderEntry type="library" name="layoutlib_api-prebuilt" level="project" />
     <orderEntry type="library" name="ninepatch-prebuilt" level="project" />
     <orderEntry type="library" name="tools-common-prebuilt" level="project" />
     <orderEntry type="library" name="framework.jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="kxml2-2.3.0" level="project" />
     <orderEntry type="library" scope="TEST" name="guava" level="project" />
     <orderEntry type="module-library" scope="TEST">
       <library>
@@ -45,4 +45,3 @@
     <orderEntry type="library" scope="TEST" name="JUnit4" level="application" />
   </component>
 </module>
-

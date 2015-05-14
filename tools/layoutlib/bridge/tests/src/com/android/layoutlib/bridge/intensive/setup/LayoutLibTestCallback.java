@@ -17,6 +17,8 @@
 package com.android.layoutlib.bridge.intensive.setup;
 
 import com.android.SdkConstants;
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.ActionBarCallback;
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
@@ -27,6 +29,9 @@ import com.android.ide.common.resources.IntArrayWrapper;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 import com.android.utils.ILogger;
+
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -154,5 +159,11 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
     @Override
     public boolean supports(int ideFeature) {
         return false;
+    }
+
+    @NonNull
+    @Override
+    public XmlPullParser createParser(@Nullable String name) {
+        return new KXmlParser();
     }
 }
