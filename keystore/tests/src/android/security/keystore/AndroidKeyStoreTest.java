@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import com.android.org.bouncycastle.x509.X509V3CertificateGenerator;
 
 import com.android.org.conscrypt.NativeConstants;
 import com.android.org.conscrypt.OpenSSLEngine;
 
+import android.security.Credentials;
+import android.security.KeyStore;
+import android.security.KeyStoreParameter;
 import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
@@ -1319,9 +1322,9 @@ public class AndroidKeyStoreTest extends AndroidTestCase {
     }
 
     public void testKeyStore_GetType_Encrypted_Success() throws Exception {
-        assertEquals(AndroidKeyStore.NAME, mKeyStore.getType());
+        assertEquals(AndroidKeyStoreSpi.NAME, mKeyStore.getType());
         setupPassword();
-        assertEquals(AndroidKeyStore.NAME, mKeyStore.getType());
+        assertEquals(AndroidKeyStoreSpi.NAME, mKeyStore.getType());
     }
 
     public void testKeyStore_IsCertificateEntry_CA_Encrypted_Success() throws Exception {
