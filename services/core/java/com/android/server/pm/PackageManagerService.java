@@ -11458,6 +11458,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                     replace = true;
                     if (DEBUG_INSTALL) Slog.d(TAG, "Replace existing pacakge: " + pkgName);
                 }
+
+                // Prevent apps opting out from runtime permissions
+                if (replace) {
+                    PackageParser.Package oldPackage = mPackages.get(pkgName);
+                    final int oldTargetSdk = oldPackage.applicationInfo.targetSdkVersion;
+                    final int newTargetSdk = pkg.applicationInfo.targetSdkVersion;
+                    if (oldTargetSdk > Build.VERSION_CODES.LOLLIPOP_MR1
+                            && newTargetSdk <= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                        res.setError(PackageManager.INSTALL_FAILED_PERMISSION_MODEL_DOWNGRADE,
+                                "Package " + pkg.packageName + " new target SDK " + newTargetSdk
+                                        + " doesn't support runtime permissions but the old"
+                                        + " target SDK " + oldTargetSdk + " does.");
+                        return;
+                    }
+                }
             }
 
             PackageSetting ps = mSettings.mPackages.get(pkgName);
