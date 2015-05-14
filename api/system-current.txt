@@ -15910,7 +15910,7 @@ package android.media {
     method public int[] getChannelCounts();
     method public int[] getChannelIndexMasks();
     method public int[] getChannelMasks();
-    method public int[] getFormats();
+    method public int[] getEncodings();
     method public int getId();
     method public java.lang.CharSequence getProductName();
     method public int[] getSampleRates();
