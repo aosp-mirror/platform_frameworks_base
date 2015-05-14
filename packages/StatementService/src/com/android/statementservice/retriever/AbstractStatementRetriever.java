@@ -90,7 +90,7 @@ public abstract class AbstractStatementRetriever {
      * Creates a new StatementRetriever that directly retrieves statements from the asset.
      *
      * <p> For web assets, {@link AbstractStatementRetriever} will try to retrieve the statement
-     * file from URL: {@code [webAsset.site]/.well-known/associations.json"} where {@code
+     * file from URL: {@code [webAsset.site]/.well-known/statements.json"} where {@code
      * [webAsset.site]} is in the form {@code http{s}://[hostname]:[optional_port]}. The file
      * should contain one JSON array of statements.
      *
