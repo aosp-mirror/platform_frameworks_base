@@ -227,8 +227,10 @@ public class AppOpsManager {
     public static final int OP_BODY_SENSORS = 56;
     /** @hide Read previously received cell broadcast messages. */
     public static final int OP_READ_CELL_BROADCASTS = 57;
+    /** @hide Inject mock location into the system. */
+    public static final int OP_MOCK_LOCATION = 58;
     /** @hide */
-    public static final int _NUM_OP = 58;
+    public static final int _NUM_OP = 59;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -308,6 +310,9 @@ public class AppOpsManager {
     /** @hide Read previously received cell broadcast messages. */
     public static final String OPSTR_READ_CELL_BROADCASTS
             = "android:read_cell_broadcasts";
+    /** Inject mock location into the system. */
+    public static final String OPSTR_MOCK_LOCATION
+            = "android:mock_location";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -375,7 +380,8 @@ public class AppOpsManager {
             OP_PROCESS_OUTGOING_CALLS,
             OP_USE_FINGERPRINT,
             OP_BODY_SENSORS,
-            OP_READ_CELL_BROADCASTS
+            OP_READ_CELL_BROADCASTS,
+            OP_MOCK_LOCATION
     };
 
     /**
@@ -440,7 +446,8 @@ public class AppOpsManager {
             null,
             OPSTR_USE_FINGERPRINT,
             OPSTR_BODY_SENSORS,
-            OPSTR_READ_CELL_BROADCASTS
+            OPSTR_READ_CELL_BROADCASTS,
+            OPSTR_MOCK_LOCATION
     };
 
     /**
@@ -505,7 +512,8 @@ public class AppOpsManager {
             "PROCESS_OUTGOING_CALLS",
             "USE_FINGERPRINT",
             "BODY_SENSORS",
-            "READ_CELL_BROADCASTS"
+            "READ_CELL_BROADCASTS",
+            "MOCK_LOCATION"
     };
 
     /**
@@ -570,7 +578,8 @@ public class AppOpsManager {
             Manifest.permission.PROCESS_OUTGOING_CALLS,
             Manifest.permission.USE_FINGERPRINT,
             Manifest.permission.BODY_SENSORS,
-            Manifest.permission.READ_CELL_BROADCASTS
+            Manifest.permission.READ_CELL_BROADCASTS,
+            null
     };
 
     /**
@@ -636,7 +645,8 @@ public class AppOpsManager {
             null, // PROCESS_OUTGOING_CALLS
             null, // USE_FINGERPRINT
             null, // BODY_SENSORS
-            null  // READ_CELL_BROADCASTS
+            null, // READ_CELL_BROADCASTS
+            null  // MOCK_LOCATION
     };
 
     /**
@@ -701,7 +711,8 @@ public class AppOpsManager {
             false, // PROCESS_OUTGOING_CALLS
             false, // USE_FINGERPRINT
             false, // BODY_SENSORS
-            false  // READ_CELL_BROADCASTS
+            false, // READ_CELL_BROADCASTS
+            false  // MOCK_LOCATION
     };
 
     /**
@@ -765,7 +776,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED
+            AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ERRORED  // OP_MOCK_LOCATION
     };
 
     /**
@@ -792,6 +804,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,
