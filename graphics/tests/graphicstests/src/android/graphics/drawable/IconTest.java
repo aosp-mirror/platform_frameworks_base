@@ -112,8 +112,7 @@ public class IconTest extends AndroidTestCase {
         final Bitmap res1 = ((BitmapDrawable) getContext().getDrawable(R.drawable.landscape))
                 .getBitmap();
 
-        final Icon im1 = Icon.createWithResource(getContext().getResources(),
-                R.drawable.landscape);
+        final Icon im1 = Icon.createWithResource(getContext(), R.drawable.landscape);
         final Drawable draw1 = im1.loadDrawable(mContext);
         final Bitmap test1 = Bitmap.createBitmap(draw1.getIntrinsicWidth(),
                 draw1.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -223,7 +222,7 @@ public class IconTest extends AndroidTestCase {
         imgs.add(bit1);
         final Icon data1 = Icon.createWithData(pngdata, 0, pngdata.length);
         imgs.add(data1);
-        final Icon res1 = Icon.createWithResource(getContext().getResources(), R.drawable.landscape);
+        final Icon res1 = Icon.createWithResource(getContext(), R.drawable.landscape);
         imgs.add(res1);
 
         ArrayList<Icon> test = new ArrayList<>();
