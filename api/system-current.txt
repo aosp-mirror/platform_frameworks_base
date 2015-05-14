@@ -5731,7 +5731,7 @@ package android.app.admin {
     ctor public DeviceAdminReceiver();
     method public android.app.admin.DevicePolicyManager getManager(android.content.Context);
     method public android.content.ComponentName getWho(android.content.Context);
-    method public java.lang.String onChoosePrivateKeyAlias(android.content.Context, android.content.Intent, int, java.lang.String, int, java.lang.String, java.lang.String);
+    method public java.lang.String onChoosePrivateKeyAlias(android.content.Context, android.content.Intent, int, android.net.Uri, java.lang.String);
     method public java.lang.CharSequence onDisableRequested(android.content.Context, android.content.Intent);
     method public void onDisabled(android.content.Context, android.content.Intent);
     method public void onEnabled(android.content.Context, android.content.Intent);
@@ -30365,7 +30365,7 @@ package android.security {
   public final class KeyChain {
     ctor public KeyChain();
     method public static void choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, java.lang.String[], java.security.Principal[], java.lang.String, int, java.lang.String);
-    method public static void choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, java.lang.String[], java.security.Principal[], java.lang.String, int, java.lang.String, java.lang.String);
+    method public static void choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, java.lang.String[], java.security.Principal[], android.net.Uri, java.lang.String);
     method public static android.content.Intent createInstallIntent();
     method public static java.security.cert.X509Certificate[] getCertificateChain(android.content.Context, java.lang.String) throws java.lang.InterruptedException, android.security.KeyChainException;
     method public static java.security.PrivateKey getPrivateKey(android.content.Context, java.lang.String) throws java.lang.InterruptedException, android.security.KeyChainException;
