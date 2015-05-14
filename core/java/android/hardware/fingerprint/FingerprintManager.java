@@ -686,7 +686,7 @@ public class FingerprintManager {
 
         private void sendAuthenticatedResult(Fingerprint fp) {
             if (mAuthenticationCallback != null) {
-                if (fp.getFingerId() == 0 && fp.getGroupId() == 0) {
+                if (fp.getFingerId() == 0) {
                     // Fingerprint template valid but doesn't match one in database
                     mAuthenticationCallback.onAuthenticationFailed();
                 } else {
