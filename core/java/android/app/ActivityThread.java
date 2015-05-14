@@ -1082,7 +1082,7 @@ public final class ActivityThread {
         @Override
         public void dumpGfxInfo(FileDescriptor fd, String[] args) {
             dumpGraphicsInfo(fd);
-            WindowManagerGlobal.getInstance().dumpGfxInfo(fd);
+            WindowManagerGlobal.getInstance().dumpGfxInfo(fd, args);
         }
 
         private void dumpDatabaseInfo(FileDescriptor fd, String[] args) {
