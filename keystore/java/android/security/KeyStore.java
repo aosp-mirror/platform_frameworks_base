@@ -35,6 +35,11 @@ import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterBlob;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
+import android.security.keystore.KeyExpiredException;
+import android.security.keystore.KeyNotYetValidException;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore.KeyProperties;
+import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
 import java.security.InvalidKeyException;
@@ -101,10 +106,10 @@ public class KeyStore {
 
     private KeyStore(IKeystoreService binder) {
         mBinder = binder;
-        mContext = getContext();
+        mContext = getApplicationContext();
     }
 
-    private static Context getContext() {
+    static Context getApplicationContext() {
         ActivityThread activityThread = ActivityThread.currentActivityThread();
         if (activityThread == null) {
             throw new IllegalStateException(
@@ -131,10 +136,10 @@ public class KeyStore {
         return mToken;
     }
 
-    static int getKeyTypeForAlgorithm(@KeyStoreKeyProperties.KeyAlgorithmEnum String keyType) {
-        if (KeyStoreKeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyType)) {
+    static int getKeyTypeForAlgorithm(@KeyProperties.KeyAlgorithmEnum String keyType) {
+        if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyType)) {
             return NativeConstants.EVP_PKEY_RSA;
-        } else if (KeyStoreKeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyType)) {
+        } else if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyType)) {
             return NativeConstants.EVP_PKEY_EC;
         } else {
             return -1;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -30,10 +30,10 @@ import java.util.Collection;
 import java.util.Locale;
 
 /**
- * Properties of {@code AndroidKeyStore} keys.
+ * Properties of <a href="{@docRoot}training/articles/keystore.html">Android Keystore</a> keys.
  */
-public abstract class KeyStoreKeyProperties {
-    private KeyStoreKeyProperties() {}
+public abstract class KeyProperties {
+    private KeyProperties() {}
 
     /**
      * @hide
@@ -68,10 +68,13 @@ public abstract class KeyStoreKeyProperties {
      */
     public static final int PURPOSE_VERIFY = 1 << 3;
 
-    static abstract class Purpose {
+    /**
+     * @hide
+     */
+    public static abstract class Purpose {
         private Purpose() {}
 
-        static int toKeymaster(@PurposeEnum int purpose) {
+        public static int toKeymaster(@PurposeEnum int purpose) {
             switch (purpose) {
                 case PURPOSE_ENCRYPT:
                     return KeymasterDefs.KM_PURPOSE_ENCRYPT;
@@ -86,7 +89,7 @@ public abstract class KeyStoreKeyProperties {
             }
         }
 
-        static @PurposeEnum int fromKeymaster(int purpose) {
+        public static @PurposeEnum int fromKeymaster(int purpose) {
             switch (purpose) {
                 case KeymasterDefs.KM_PURPOSE_ENCRYPT:
                     return PURPOSE_ENCRYPT;
@@ -102,7 +105,7 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static int[] allToKeymaster(@PurposeEnum int purposes) {
+        public static int[] allToKeymaster(@PurposeEnum int purposes) {
             int[] result = getSetFlags(purposes);
             for (int i = 0; i < result.length; i++) {
                 result[i] = toKeymaster(result[i]);
@@ -110,7 +113,7 @@ public abstract class KeyStoreKeyProperties {
             return result;
         }
 
-        static @PurposeEnum int allFromKeymaster(@NonNull Collection<Integer> purposes) {
+        public static @PurposeEnum int allFromKeymaster(@NonNull Collection<Integer> purposes) {
             @PurposeEnum int result = 0;
             for (int keymasterPurpose : purposes) {
                 result |= fromKeymaster(keymasterPurpose);
@@ -159,10 +162,14 @@ public abstract class KeyStoreKeyProperties {
     /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-512 as the hash. */
     public static final String KEY_ALGORITHM_HMAC_SHA512 = "HmacSHA512";
 
-    static abstract class KeyAlgorithm {
+    /**
+     * @hide
+     */
+    public static abstract class KeyAlgorithm {
         private KeyAlgorithm() {}
 
-        static int toKeymasterSecretKeyAlgorithm(@NonNull @KeyAlgorithmEnum String algorithm) {
+        public static int toKeymasterSecretKeyAlgorithm(
+                @NonNull @KeyAlgorithmEnum String algorithm) {
             if (KEY_ALGORITHM_AES.equalsIgnoreCase(algorithm)) {
                 return KeymasterDefs.KM_ALGORITHM_AES;
             } else if (algorithm.toUpperCase(Locale.US).startsWith("HMAC")) {
@@ -174,7 +181,7 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static @KeyAlgorithmEnum String fromKeymasterSecretKeyAlgorithm(
+        public static @KeyAlgorithmEnum String fromKeymasterSecretKeyAlgorithm(
                 int keymasterAlgorithm, int keymasterDigest) {
             switch (keymasterAlgorithm) {
                 case KeymasterDefs.KM_ALGORITHM_AES:
@@ -210,7 +217,7 @@ public abstract class KeyStoreKeyProperties {
          *
          * @return keymaster digest or {@code -1} if the algorithm does not involve a digest.
          */
-        static int toKeymasterDigest(@NonNull @KeyAlgorithmEnum String algorithm) {
+        public static int toKeymasterDigest(@NonNull @KeyAlgorithmEnum String algorithm) {
             String algorithmUpper = algorithm.toUpperCase(Locale.US);
             if (algorithmUpper.startsWith("HMAC")) {
                 String digestUpper = algorithmUpper.substring("HMAC".length());
@@ -259,10 +266,13 @@ public abstract class KeyStoreKeyProperties {
     /** Galois/Counter Mode (GCM) block mode. */
     public static final String BLOCK_MODE_GCM = "GCM";
 
-    static abstract class BlockMode {
+    /**
+     * @hide
+     */
+    public static abstract class BlockMode {
         private BlockMode() {}
 
-        static int toKeymaster(@NonNull @BlockModeEnum String blockMode) {
+        public static int toKeymaster(@NonNull @BlockModeEnum String blockMode) {
             if (BLOCK_MODE_ECB.equalsIgnoreCase(blockMode)) {
                 return KeymasterDefs.KM_MODE_ECB;
             } else if (BLOCK_MODE_CBC.equalsIgnoreCase(blockMode)) {
@@ -277,7 +287,7 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static @BlockModeEnum String fromKeymaster(int blockMode) {
+        public static @BlockModeEnum String fromKeymaster(int blockMode) {
             switch (blockMode) {
                 case KeymasterDefs.KM_MODE_ECB:
                     return BLOCK_MODE_ECB;
@@ -293,7 +303,8 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static @BlockModeEnum String[] allFromKeymaster(@NonNull Collection<Integer> blockModes) {
+        public static @BlockModeEnum String[] allFromKeymaster(
+                @NonNull Collection<Integer> blockModes) {
             if ((blockModes == null) || (blockModes.isEmpty())) {
                 return EmptyArray.STRING;
             }
@@ -306,7 +317,7 @@ public abstract class KeyStoreKeyProperties {
             return result;
         }
 
-        static int[] allToKeymaster(@Nullable @BlockModeEnum String[] blockModes) {
+        public static int[] allToKeymaster(@Nullable @BlockModeEnum String[] blockModes) {
             if ((blockModes == null) || (blockModes.length == 0)) {
                 return EmptyArray.INT;
             }
@@ -350,10 +361,13 @@ public abstract class KeyStoreKeyProperties {
      */
     public static final String ENCRYPTION_PADDING_RSA_OAEP = "OAEPPadding";
 
-    static abstract class EncryptionPadding {
+    /**
+     * @hide
+     */
+    public static abstract class EncryptionPadding {
         private EncryptionPadding() {}
 
-        static int toKeymaster(@NonNull @EncryptionPaddingEnum String padding) {
+        public static int toKeymaster(@NonNull @EncryptionPaddingEnum String padding) {
             if (ENCRYPTION_PADDING_NONE.equalsIgnoreCase(padding)) {
                 return KeymasterDefs.KM_PAD_NONE;
             } else if (ENCRYPTION_PADDING_PKCS7.equalsIgnoreCase(padding)) {
@@ -369,7 +383,7 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static @EncryptionPaddingEnum String fromKeymaster(int padding) {
+        public static @EncryptionPaddingEnum String fromKeymaster(int padding) {
             switch (padding) {
                 case KeymasterDefs.KM_PAD_NONE:
                     return ENCRYPTION_PADDING_NONE;
@@ -386,7 +400,7 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static int[] allToKeymaster(@Nullable @EncryptionPaddingEnum String[] paddings) {
+        public static int[] allToKeymaster(@Nullable @EncryptionPaddingEnum String[] paddings) {
             if ((paddings == null) || (paddings.length == 0)) {
                 return EmptyArray.INT;
             }
@@ -508,10 +522,13 @@ public abstract class KeyStoreKeyProperties {
      */
     public static final String DIGEST_SHA512 = "SHA-512";
 
-    static abstract class Digest {
+    /**
+     * @hide
+     */
+    public static abstract class Digest {
         private Digest() {}
 
-        static int toKeymaster(@NonNull @DigestEnum String digest) {
+        public static int toKeymaster(@NonNull @DigestEnum String digest) {
             switch (digest.toUpperCase(Locale.US)) {
                 case DIGEST_SHA1:
                     return KeymasterDefs.KM_DIGEST_SHA1;
@@ -533,7 +550,7 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static @DigestEnum String fromKeymaster(int digest) {
+        public static @DigestEnum String fromKeymaster(int digest) {
             switch (digest) {
                 case KeymasterDefs.KM_DIGEST_NONE:
                     return DIGEST_NONE;
@@ -555,7 +572,7 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static @DigestEnum String[] allFromKeymaster(@NonNull Collection<Integer> digests) {
+        public static @DigestEnum String[] allFromKeymaster(@NonNull Collection<Integer> digests) {
             if (digests.isEmpty()) {
                 return EmptyArray.STRING;
             }
@@ -569,7 +586,7 @@ public abstract class KeyStoreKeyProperties {
         }
 
         @NonNull
-        static int[] allToKeymaster(@Nullable @DigestEnum String[] digests) {
+        public static int[] allToKeymaster(@Nullable @DigestEnum String[] digests) {
             if ((digests == null) || (digests.length == 0)) {
                 return EmptyArray.INT;
             }
@@ -606,10 +623,13 @@ public abstract class KeyStoreKeyProperties {
      */
     public static final int ORIGIN_UNKNOWN = 1 << 2;
 
-    static abstract class Origin {
+    /**
+     * @hide
+     */
+    public static abstract class Origin {
         private Origin() {}
 
-        static @OriginEnum int fromKeymaster(int origin) {
+        public static @OriginEnum int fromKeymaster(int origin) {
             switch (origin) {
                 case KeymasterDefs.KM_ORIGIN_GENERATED:
                     return ORIGIN_GENERATED;

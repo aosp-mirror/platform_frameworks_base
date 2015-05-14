@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import java.security.InvalidKeyException;
 

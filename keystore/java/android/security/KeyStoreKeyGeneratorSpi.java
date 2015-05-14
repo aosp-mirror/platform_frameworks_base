@@ -19,11 +19,16 @@ package android.security;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+
+import libcore.util.EmptyArray;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.ProviderException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.crypto.KeyGeneratorSpi;
@@ -96,13 +101,14 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
     private final int mKeymasterDigest;
     private final int mDefaultKeySizeBits;
 
-    private KeyGeneratorSpec mSpec;
+    private KeyGenParameterSpec mSpec;
     private SecureRandom mRng;
 
     protected int mKeySizeBits;
     private int[] mKeymasterPurposes;
     private int[] mKeymasterBlockModes;
     private int[] mKeymasterPaddings;
+    private int[] mKeymasterDigests;
 
     protected KeyStoreKeyGeneratorSpi(
             int keymasterAlgorithm,
@@ -129,14 +135,14 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
 
     @Override
     protected void engineInit(SecureRandom random) {
-        throw new UnsupportedOperationException("Cannot initialize without an "
-                + KeyGeneratorSpec.class.getName() + " parameter");
+        throw new UnsupportedOperationException("Cannot initialize without a "
+                + KeyGenParameterSpec.class.getName() + " parameter");
     }
 
     @Override
     protected void engineInit(int keySize, SecureRandom random) {
         throw new UnsupportedOperationException("Cannot initialize without a "
-                + KeyGeneratorSpec.class.getName() + " parameter");
+                + KeyGenParameterSpec.class.getName() + " parameter");
     }
 
     @Override
@@ -146,11 +152,11 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
 
         boolean success = false;
         try {
-            if ((params == null) || (!(params instanceof KeyGeneratorSpec))) {
-                throw new InvalidAlgorithmParameterException("Cannot initialize without an "
-                        + KeyGeneratorSpec.class.getName() + " parameter");
+            if ((params == null) || (!(params instanceof KeyGenParameterSpec))) {
+                throw new InvalidAlgorithmParameterException("Cannot initialize without a "
+                        + KeyGenParameterSpec.class.getName() + " parameter");
             }
-            KeyGeneratorSpec spec = (KeyGeneratorSpec) params;
+            KeyGenParameterSpec spec = (KeyGenParameterSpec) params;
             if (spec.getKeystoreAlias() == null) {
                 throw new InvalidAlgorithmParameterException("KeyStore entry alias not provided");
             }
@@ -168,13 +174,11 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             }
 
             try {
-                mKeymasterPurposes =
-                        KeyStoreKeyProperties.Purpose.allToKeymaster(spec.getPurposes());
-                mKeymasterPaddings = KeyStoreKeyProperties.EncryptionPadding.allToKeymaster(
+                mKeymasterPurposes = KeyProperties.Purpose.allToKeymaster(spec.getPurposes());
+                mKeymasterPaddings = KeyProperties.EncryptionPadding.allToKeymaster(
                         spec.getEncryptionPaddings());
-                mKeymasterBlockModes =
-                        KeyStoreKeyProperties.BlockMode.allToKeymaster(spec.getBlockModes());
-                if (((spec.getPurposes() & KeyStoreKeyProperties.PURPOSE_ENCRYPT) != 0)
+                mKeymasterBlockModes = KeyProperties.BlockMode.allToKeymaster(spec.getBlockModes());
+                if (((spec.getPurposes() & KeyProperties.PURPOSE_ENCRYPT) != 0)
                         && (spec.isRandomizedEncryptionRequired())) {
                     for (int keymasterBlockMode : mKeymasterBlockModes) {
                         if (!KeymasterUtils.isKeymasterBlockModeIndCpaCompatible(
@@ -182,14 +186,55 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                             throw new InvalidAlgorithmParameterException(
                                     "Randomized encryption (IND-CPA) required but may be violated"
                                     + " by block mode: "
-                                    + KeyStoreKeyProperties.BlockMode.fromKeymaster(
-                                            keymasterBlockMode)
-                                    + ". See " + KeyGeneratorSpec.class.getName()
+                                    + KeyProperties.BlockMode.fromKeymaster(keymasterBlockMode)
+                                    + ". See " + KeyGenParameterSpec.class.getName()
                                     + " documentation.");
                         }
                     }
                 }
-            } catch (IllegalArgumentException e) {
+                if (spec.isDigestsSpecified()) {
+                    // Digest(s) explicitly specified in the spec
+                    mKeymasterDigests = KeyProperties.Digest.allToKeymaster(spec.getDigests());
+                    if (mKeymasterDigest != -1) {
+                        // Key algorithm implies a digest -- ensure it's specified in the spec as
+                        // first digest.
+                        if (!com.android.internal.util.ArrayUtils.contains(
+                                mKeymasterDigests, mKeymasterDigest)) {
+                            throw new InvalidAlgorithmParameterException(
+                                    "Digests specified in algorithm parameters ("
+                                    + Arrays.asList(spec.getDigests()) + ") must include "
+                                    + " the digest "
+                                    + KeyProperties.Digest.fromKeymaster(mKeymasterDigest)
+                                    + " implied by key algorithm");
+                        }
+                        if (mKeymasterDigests[0] != mKeymasterDigest) {
+                            // The first digest is not the one implied by the key algorithm.
+                            // Swap the implied digest with the first one.
+                            for (int i = 0; i < mKeymasterDigests.length; i++) {
+                                if (mKeymasterDigests[i] == mKeymasterDigest) {
+                                    mKeymasterDigests[i] = mKeymasterDigests[0];
+                                    mKeymasterDigests[0] = mKeymasterDigest;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // No digest specified in the spec
+                    if (mKeymasterDigest != -1) {
+                        // Key algorithm implies a digest -- use that digest
+                        mKeymasterDigests = new int[] {mKeymasterDigest};
+                    } else {
+                        mKeymasterDigests = EmptyArray.INT;
+                    }
+                }
+                if (mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC) {
+                    if (mKeymasterDigests.length == 0) {
+                        throw new InvalidAlgorithmParameterException(
+                                "At least one digest algorithm must be specified");
+                    }
+                }
+            } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
 
@@ -212,29 +257,26 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
 
     @Override
     protected SecretKey engineGenerateKey() {
-        KeyGeneratorSpec spec = mSpec;
+        KeyGenParameterSpec spec = mSpec;
         if (spec == null) {
             throw new IllegalStateException("Not initialized");
         }
 
-        if ((spec.isEncryptionRequired())
+        if ((spec.isEncryptionAtRestRequired())
                 && (mKeyStore.state() != KeyStore.State.UNLOCKED)) {
             throw new IllegalStateException(
-                    "Android KeyStore must be in initialized and unlocked state if encryption is"
-                    + " required");
+                    "Requested to import a key which must be encrypted at rest using secure lock"
+                    + " screen credential, but the credential hasn't yet been entered by the user");
         }
 
         KeymasterArguments args = new KeymasterArguments();
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
-        if (mKeymasterDigest != -1) {
-            args.addInt(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest);
-        }
         args.addInts(KeymasterDefs.KM_TAG_PURPOSE, mKeymasterPurposes);
         args.addInts(KeymasterDefs.KM_TAG_BLOCK_MODE, mKeymasterBlockModes);
         args.addInts(KeymasterDefs.KM_TAG_PADDING, mKeymasterPaddings);
+        args.addInts(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
         KeymasterUtils.addUserAuthArgs(args,
-                spec.getContext(),
                 spec.isUserAuthenticationRequired(),
                 spec.getUserAuthenticationValidityDurationSeconds());
         args.addDate(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
@@ -247,7 +289,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 (spec.getKeyValidityForConsumptionEnd() != null)
                 ? spec.getKeyValidityForConsumptionEnd() : new Date(Long.MAX_VALUE));
 
-        if (((spec.getPurposes() & KeyStoreKeyProperties.PURPOSE_ENCRYPT) != 0)
+        if (((spec.getPurposes() & KeyProperties.PURPOSE_ENCRYPT) != 0)
                 && (!spec.isRandomizedEncryptionRequired())) {
             // Permit caller-provided IV when encrypting with this key
             args.addBoolean(KeymasterDefs.KM_TAG_CALLER_NONCE);
@@ -265,9 +307,9 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             throw new ProviderException(
                     "Keystore operation failed", KeyStore.getKeyStoreException(errorCode));
         }
-        @KeyStoreKeyProperties.KeyAlgorithmEnum String keyAlgorithmJCA;
+        @KeyProperties.KeyAlgorithmEnum String keyAlgorithmJCA;
         try {
-            keyAlgorithmJCA = KeyStoreKeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
+            keyAlgorithmJCA = KeyProperties.KeyAlgorithm.fromKeymasterSecretKeyAlgorithm(
                     mKeymasterAlgorithm, mKeymasterDigest);
         } catch (IllegalArgumentException e) {
             throw new ProviderException("Failed to obtain JCA secret key algorithm name", e);
