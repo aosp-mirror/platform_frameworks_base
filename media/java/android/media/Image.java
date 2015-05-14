@@ -163,10 +163,12 @@ public abstract class Image implements AutoCloseable {
      * Get the timestamp associated with this frame.
      * <p>
      * The timestamp is measured in nanoseconds, and is normally monotonically
-     * increasing. However, the behavior of the timestamp depends on the source
-     * of this image. See {@link android.hardware.Camera Camera},
-     * {@link android.hardware.camera2.CameraDevice CameraDevice}, {@link MediaPlayer} and
-     * {@link MediaCodec} for more details.
+     * increasing. The timestamps for the images from different sources may have
+     * different timebases therefore may not be comparable. The specific meaning and
+     * timebase of the timestamp depend on the source providing images. See
+     * {@link android.hardware.Camera Camera},
+     * {@link android.hardware.camera2.CameraDevice CameraDevice},
+     * {@link MediaPlayer} and {@link MediaCodec} for more details.
      * </p>
      */
     public abstract long getTimestamp();
@@ -175,9 +177,11 @@ public abstract class Image implements AutoCloseable {
      * Set the timestamp associated with this frame.
      * <p>
      * The timestamp is measured in nanoseconds, and is normally monotonically
-     * increasing. However, the behavior of the timestamp depends on
-     * the destination of this image. See {@link android.hardware.Camera Camera}
-     * , {@link android.hardware.camera2.CameraDevice CameraDevice},
+     * increasing. The timestamps for the images from different sources may have
+     * different timebases therefore may not be comparable. The specific meaning and
+     * timebase of the timestamp depend on the source providing images. See
+     * {@link android.hardware.Camera Camera},
+     * {@link android.hardware.camera2.CameraDevice CameraDevice},
      * {@link MediaPlayer} and {@link MediaCodec} for more details.
      * </p>
      * <p>
@@ -193,18 +197,6 @@ public abstract class Image implements AutoCloseable {
     public void setTimestamp(long timestamp) {
         throwISEIfImageIsInvalid();
         return;
-    }
-
-    /**
-     * <p>Check if the image is opaque.</p>
-     *
-     * <p>The pixel data of opaque images are not accessible to the application,
-     * and therefore {@link #getPlanes} will return an empty array for an opaque image.
-     * </p>
-     */
-    public boolean isOpaque() {
-        throwISEIfImageIsInvalid();
-        return false;
     }
 
     private Rect mCropRect;
@@ -243,10 +235,11 @@ public abstract class Image implements AutoCloseable {
 
     /**
      * Get the array of pixel planes for this Image. The number of planes is
-     * determined by the format of the Image. The application will get an
-     * empty array if the image is opaque because the opaque image pixel data
-     * is not directly accessible. The application can check if an image is
-     * opaque by calling {@link Image#isOpaque}.
+     * determined by the format of the Image. The application will get an empty
+     * array if the image format is {@link android.graphics.ImageFormat#PRIVATE
+     * PRIVATE}, because the image pixel data is not directly accessible. The
+     * application can check the image format by calling
+     * {@link Image#getFormat()}.
      */
     public abstract Plane[] getPlanes();
 
