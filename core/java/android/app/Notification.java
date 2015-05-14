@@ -30,6 +30,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
@@ -885,6 +886,9 @@ public class Notification implements Parcelable
      */
     public static final int HEADS_UP_REQUESTED = 2;
 
+    private Icon mSmallIcon;
+    private Icon mLargeIcon;
+
     /**
      * Structure to encapsulate a named action that can be shown as part of this notification.
      * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
@@ -1362,7 +1366,7 @@ public class Notification implements Parcelable
         int version = parcel.readInt();
 
         when = parcel.readLong();
-        icon = parcel.readInt();
+        mSmallIcon = Icon.CREATOR.createFromParcel(parcel);
         number = parcel.readInt();
         if (parcel.readInt() != 0) {
             contentIntent = PendingIntent.CREATOR.createFromParcel(parcel);
@@ -1380,7 +1384,7 @@ public class Notification implements Parcelable
             contentView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
         if (parcel.readInt() != 0) {
-            largeIcon = Bitmap.CREATOR.createFromParcel(parcel);
+            mLargeIcon = Icon.CREATOR.createFromParcel(parcel);
         }
         defaults = parcel.readInt();
         flags = parcel.readInt();
@@ -1445,7 +1449,7 @@ public class Notification implements Parcelable
      */
     public void cloneInto(Notification that, boolean heavy) {
         that.when = this.when;
-        that.icon = this.icon;
+        that.mSmallIcon = this.mSmallIcon;
         that.number = this.number;
 
         // PendingIntents are global, so there's no reason (or way) to clone them.
@@ -1462,8 +1466,8 @@ public class Notification implements Parcelable
         if (heavy && this.contentView != null) {
             that.contentView = this.contentView.clone();
         }
-        if (heavy && this.largeIcon != null) {
-            that.largeIcon = Bitmap.createBitmap(this.largeIcon);
+        if (heavy && this.mLargeIcon != null) {
+            that.mLargeIcon = this.mLargeIcon;
         }
         that.iconLevel = this.iconLevel;
         that.sound = this.sound; // android.net.Uri is immutable
@@ -1544,7 +1548,7 @@ public class Notification implements Parcelable
         contentView = null;
         bigContentView = null;
         headsUpContentView = null;
-        largeIcon = null;
+        mLargeIcon = null;
         if (extras != null) {
             extras.remove(Notification.EXTRA_LARGE_ICON);
             extras.remove(Notification.EXTRA_LARGE_ICON_BIG);
@@ -1586,7 +1590,7 @@ public class Notification implements Parcelable
         parcel.writeInt(1);
 
         parcel.writeLong(when);
-        parcel.writeInt(icon);
+        mSmallIcon.writeToParcel(parcel, 0);
         parcel.writeInt(number);
         if (contentIntent != null) {
             parcel.writeInt(1);
@@ -1618,9 +1622,9 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
-        if (largeIcon != null) {
+        if (mLargeIcon != null) {
             parcel.writeInt(1);
-            largeIcon.writeToParcel(parcel, 0);
+            mLargeIcon.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
         }
@@ -1865,6 +1869,27 @@ public class Notification implements Parcelable
     }
 
     /**
+     * The small icon representing this notification in the status bar and content view.
+     *
+     * @return the small icon representing this notification.
+     *
+     * @see Builder#getSmallIcon()
+     * @see Builder#setSmallIcon(Icon)
+     */
+    public Icon getSmallIcon() {
+        return mSmallIcon;
+    }
+
+    /**
+     * The large icon shown in this notification's content view.
+     * @see Builder#getLargeIcon()
+     * @see Builder#setLargeIcon(Icon)
+     */
+    public Icon getLargeIcon() {
+        return mLargeIcon;
+    }
+
+    /**
      * @hide
      */
     public boolean isValid() {
@@ -1966,7 +1991,7 @@ public class Notification implements Parcelable
         private Context mContext;
 
         private long mWhen;
-        private int mSmallIcon;
+        private Icon mSmallIcon, mLargeIcon;
         private int mSmallIconLevel;
         private int mNumber;
         private CharSequence mContentTitle;
@@ -1979,7 +2004,6 @@ public class Notification implements Parcelable
         private PendingIntent mFullScreenIntent;
         private CharSequence mTickerText;
         private RemoteViews mTickerView;
-        private Bitmap mLargeIcon;
         private Uri mSound;
         private int mAudioStreamType;
         private AudioAttributes mAudioAttributes;
@@ -2160,8 +2184,7 @@ public class Notification implements Parcelable
          * @see Notification#icon
          */
         public Builder setSmallIcon(@DrawableRes int icon) {
-            mSmallIcon = icon;
-            return this;
+            return setSmallIcon(Icon.createWithResource(mContext.getResources(), icon));
         }
 
         /**
@@ -2176,8 +2199,20 @@ public class Notification implements Parcelable
          * @see Notification#iconLevel
          */
         public Builder setSmallIcon(@DrawableRes int icon, int level) {
-            mSmallIcon = icon;
             mSmallIconLevel = level;
+            return setSmallIcon(icon);
+        }
+
+        /**
+         * Set the small icon, which will be used to represent the notification in the
+         * status bar and content view (unless overriden there by a
+         * {@link #setLargeIcon(Bitmap) large icon}).
+         *
+         * @param icon An Icon object to use.
+         * @see Notification#icon
+         */
+        public Builder setSmallIcon(Icon icon) {
+            mSmallIcon = icon;
             return this;
         }
 
@@ -2324,14 +2359,24 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Add a large icon to the notification (and the ticker on some devices).
+         * Add a large icon to the notification content view.
          *
          * In the platform template, this image will be shown on the left of the notification view
-         * in place of the {@link #setSmallIcon(int) small icon} (which will move to the right side).
-         *
-         * @see Notification#largeIcon
+         * in place of the {@link #setSmallIcon(Icon) small icon} (which will be placed in a small
+         * badge atop the large icon).
          */
-        public Builder setLargeIcon(Bitmap icon) {
+        public Builder setLargeIcon(Bitmap b) {
+            return setLargeIcon(b != null ? Icon.createWithBitmap(b) : null);
+        }
+
+        /**
+         * Add a large icon to the notification content view.
+         *
+         * In the platform template, this image will be shown on the left of the notification view
+         * in place of the {@link #setSmallIcon(Icon) small icon} (which will be placed in a small
+         * badge atop the large icon).
+         */
+        public Builder setLargeIcon(Icon icon) {
             mLargeIcon = icon;
             return this;
         }
@@ -2840,13 +2885,13 @@ public class Notification implements Parcelable
             boolean contentTextInLine2 = false;
 
             if (mLargeIcon != null) {
-                contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
+                contentView.setImageViewIcon(R.id.icon, mLargeIcon);
                 processLargeLegacyIcon(mLargeIcon, contentView);
-                contentView.setImageViewResource(R.id.right_icon, mSmallIcon);
+                contentView.setImageViewIcon(R.id.right_icon, mSmallIcon);
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 processSmallRightIcon(mSmallIcon, contentView);
             } else { // small icon at left
-                contentView.setImageViewResource(R.id.icon, mSmallIcon);
+                contentView.setImageViewIcon(R.id.icon, mSmallIcon);
                 contentView.setViewVisibility(R.id.icon, View.VISIBLE);
                 processSmallIconAsLarge(mSmallIcon, contentView);
             }
@@ -3086,14 +3131,16 @@ public class Notification implements Parcelable
         /**
          * Apply any necessary background to smallIcons being used in the largeIcon spot.
          */
-        private void processSmallIconAsLarge(int largeIconId, RemoteViews contentView) {
+        private void processSmallIconAsLarge(Icon largeIcon, RemoteViews contentView) {
             if (!isLegacy()) {
                 contentView.setDrawableParameters(R.id.icon, false, -1,
                         0xFFFFFFFF,
                         PorterDuff.Mode.SRC_ATOP, -1);
-            }
-            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, largeIconId)) {
                 applyLargeIconBackground(contentView);
+            } else {
+                if (mColorUtil.isGrayscaleIcon(mContext, largeIcon)) {
+                    applyLargeIconBackground(contentView);
+                }
             }
         }
 
@@ -3102,8 +3149,9 @@ public class Notification implements Parcelable
          * if it's grayscale).
          */
         // TODO: also check bounds, transparency, that sort of thing.
-        private void processLargeLegacyIcon(Bitmap largeIcon, RemoteViews contentView) {
-            if (isLegacy() && mColorUtil.isGrayscaleIcon(largeIcon)) {
+        private void processLargeLegacyIcon(Icon largeIcon, RemoteViews contentView) {
+            if (largeIcon != null && isLegacy()
+                    && mColorUtil.isGrayscaleIcon(mContext, largeIcon)) {
                 applyLargeIconBackground(contentView);
             } else {
                 removeLargeIconBackground(contentView);
@@ -3137,14 +3185,15 @@ public class Notification implements Parcelable
         /**
          * Recolor small icons when used in the R.id.right_icon slot.
          */
-        private void processSmallRightIcon(int smallIconDrawableId,
-                RemoteViews contentView) {
+        private void processSmallRightIcon(Icon smallIcon, RemoteViews contentView) {
             if (!isLegacy()) {
                 contentView.setDrawableParameters(R.id.right_icon, false, -1,
                         0xFFFFFFFF,
                         PorterDuff.Mode.SRC_ATOP, -1);
             }
-            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, smallIconDrawableId)) {
+            final boolean gray = (smallIcon.getType() == Icon.TYPE_RESOURCE
+                    && mColorUtil.isGrayscaleIcon(mContext, smallIcon.getResId()));
+            if (!isLegacy() || gray) {
                 contentView.setInt(R.id.right_icon,
                         "setBackgroundResource",
                         R.drawable.notification_icon_legacy_bg);
@@ -3180,7 +3229,10 @@ public class Notification implements Parcelable
         public Notification buildUnstyled() {
             Notification n = new Notification();
             n.when = mWhen;
-            n.icon = mSmallIcon;
+            n.mSmallIcon = mSmallIcon;
+            if (mSmallIcon.getType() == Icon.TYPE_RESOURCE) {
+                n.icon = mSmallIcon.getResId();
+            }
             n.iconLevel = mSmallIconLevel;
             n.number = mNumber;
 
@@ -3192,7 +3244,10 @@ public class Notification implements Parcelable
             n.fullScreenIntent = mFullScreenIntent;
             n.tickerText = mTickerText;
             n.tickerView = makeTickerView();
-            n.largeIcon = mLargeIcon;
+            n.mLargeIcon = mLargeIcon;
+            if (mLargeIcon != null && mLargeIcon.getType() == Icon.TYPE_BITMAP) {
+                n.largeIcon = mLargeIcon.getBitmap();
+            }
             n.sound = mSound;
             n.audioStreamType = mAudioStreamType;
             n.audioAttributes = mAudioAttributes;
@@ -3242,7 +3297,7 @@ public class Notification implements Parcelable
             extras.putCharSequence(EXTRA_TEXT, mContentText);
             extras.putCharSequence(EXTRA_SUB_TEXT, mSubText);
             extras.putCharSequence(EXTRA_INFO_TEXT, mContentInfo);
-            extras.putInt(EXTRA_SMALL_ICON, mSmallIcon);
+            extras.putParcelable(EXTRA_SMALL_ICON, mSmallIcon);
             extras.putInt(EXTRA_PROGRESS, mProgress);
             extras.putInt(EXTRA_PROGRESS_MAX, mProgressMax);
             extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mProgressIndeterminate);
@@ -3430,7 +3485,7 @@ public class Notification implements Parcelable
 
             // Notification fields.
             mWhen = n.when;
-            mSmallIcon = n.icon;
+            mSmallIcon = n.mSmallIcon;
             mSmallIconLevel = n.iconLevel;
             mNumber = n.number;
 
@@ -3441,7 +3496,7 @@ public class Notification implements Parcelable
             mFullScreenIntent = n.fullScreenIntent;
             mTickerText = n.tickerText;
             mTickerView = n.tickerView;
-            mLargeIcon = n.largeIcon;
+            mLargeIcon = n.mLargeIcon;
             mSound = n.sound;
             mAudioStreamType = n.audioStreamType;
             mAudioAttributes = n.audioAttributes;
@@ -3472,7 +3527,7 @@ public class Notification implements Parcelable
             mContentText = extras.getCharSequence(EXTRA_TEXT);
             mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
             mContentInfo = extras.getCharSequence(EXTRA_INFO_TEXT);
-            mSmallIcon = extras.getInt(EXTRA_SMALL_ICON);
+            mSmallIcon = extras.getParcelable(EXTRA_SMALL_ICON);
             mProgress = extras.getInt(EXTRA_PROGRESS);
             mProgressMax = extras.getInt(EXTRA_PROGRESS_MAX);
             mProgressIndeterminate = extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
@@ -3764,7 +3819,7 @@ public class Notification implements Parcelable
      */
     public static class BigPictureStyle extends Style {
         private Bitmap mPicture;
-        private Bitmap mBigLargeIcon;
+        private Icon mBigLargeIcon;
         private boolean mBigLargeIconSet = false;
 
         public BigPictureStyle() {
@@ -3803,8 +3858,15 @@ public class Notification implements Parcelable
          * Override the large icon when the big notification is shown.
          */
         public BigPictureStyle bigLargeIcon(Bitmap b) {
+            return bigLargeIcon(b != null ? Icon.createWithBitmap(b) : null);
+        }
+
+        /**
+         * Override the large icon when the big notification is shown.
+         */
+        public BigPictureStyle bigLargeIcon(Icon icon) {
             mBigLargeIconSet = true;
-            mBigLargeIcon = b;
+            mBigLargeIcon = icon;
             return this;
         }
 
@@ -3815,7 +3877,7 @@ public class Notification implements Parcelable
             //   1. mBigLargeIconSet -> mBigLargeIcon (null or non-null) applies, overrides
             //          mLargeIcon
             //   2. !mBigLargeIconSet -> mLargeIcon applies
-            Bitmap oldLargeIcon = null;
+            Icon oldLargeIcon = null;
             if (mBigLargeIconSet) {
                 oldLargeIcon = mBuilder.mLargeIcon;
                 mBuilder.mLargeIcon = mBigLargeIcon;

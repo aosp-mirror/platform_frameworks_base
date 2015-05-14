@@ -53,10 +53,14 @@ import java.io.OutputStream;
 public final class Icon implements Parcelable {
     private static final String TAG = "Icon";
 
-    private static final int TYPE_BITMAP   = 1;
-    private static final int TYPE_RESOURCE = 2;
-    private static final int TYPE_DATA     = 3;
-    private static final int TYPE_URI      = 4;
+    /** @hide */
+    public static final int TYPE_BITMAP   = 1;
+    /** @hide */
+    public static final int TYPE_RESOURCE = 2;
+    /** @hide */
+    public static final int TYPE_DATA     = 3;
+    /** @hide */
+    public static final int TYPE_URI      = 4;
 
     private static final int VERSION_STREAM_SERIALIZER = 1;
 
@@ -81,15 +85,34 @@ public final class Icon implements Parcelable {
     // TYPE_DATA: data offset
     private int             mInt2;
 
-    // Internal accessors for different mType variants
-    private Bitmap getBitmap() {
+    /**
+     * @return The type of image data held in this Icon. One of
+     * {@link #TYPE_BITMAP},
+     * {@link #TYPE_RESOURCE},
+     * {@link #TYPE_DATA}, or
+     * {@link #TYPE_URI}.
+     * @hide
+     */
+    public int getType() {
+        return mType;
+    }
+
+    /**
+     * @return The {@link android.graphics.Bitmap} held by this {@link #TYPE_BITMAP} Icon.
+     * @hide
+     */
+    public Bitmap getBitmap() {
         if (mType != TYPE_BITMAP) {
             throw new IllegalStateException("called getBitmap() on " + this);
         }
         return (Bitmap) mObj1;
     }
 
-    private int getDataLength() {
+    /**
+     * @return The length of the compressed bitmap byte array held by this {@link #TYPE_DATA} Icon.
+     * @hide
+     */
+    public int getDataLength() {
         if (mType != TYPE_DATA) {
             throw new IllegalStateException("called getDataLength() on " + this);
         }
@@ -98,7 +121,12 @@ public final class Icon implements Parcelable {
         }
     }
 
-    private int getDataOffset() {
+    /**
+     * @return The offset into the byte array held by this {@link #TYPE_DATA} Icon at which
+     * valid compressed bitmap data is found.
+     * @hide
+     */
+    public int getDataOffset() {
         if (mType != TYPE_DATA) {
             throw new IllegalStateException("called getDataOffset() on " + this);
         }
@@ -107,7 +135,12 @@ public final class Icon implements Parcelable {
         }
     }
 
-    private byte[] getDataBytes() {
+    /**
+     * @return The byte array held by this {@link #TYPE_DATA} Icon ctonaining compressed
+     * bitmap data.
+     * @hide
+     */
+    public byte[] getDataBytes() {
         if (mType != TYPE_DATA) {
             throw new IllegalStateException("called getDataBytes() on " + this);
         }
@@ -116,39 +149,58 @@ public final class Icon implements Parcelable {
         }
     }
 
-    private Resources getResources() {
+    /**
+     * @return The {@link android.content.res.Resources} for this {@link #TYPE_RESOURCE} Icon.
+     * @hide
+     */
+    public Resources getResources() {
         if (mType != TYPE_RESOURCE) {
             throw new IllegalStateException("called getResources() on " + this);
         }
         return (Resources) mObj1;
     }
 
-    private String getResPackage() {
+    /**
+     * @return The package containing resources for this {@link #TYPE_RESOURCE} Icon.
+     * @hide
+     */
+    public String getResPackage() {
         if (mType != TYPE_RESOURCE) {
             throw new IllegalStateException("called getResPackage() on " + this);
         }
         return mString1;
     }
 
-    private int getResId() {
+    /**
+     * @return The resource ID for this {@link #TYPE_RESOURCE} Icon.
+     * @hide
+     */
+    public int getResId() {
         if (mType != TYPE_RESOURCE) {
             throw new IllegalStateException("called getResId() on " + this);
         }
         return mInt1;
     }
 
-    private String getUriString() {
+    /**
+     * @return The URI (as a String) for this {@link #TYPE_URI} Icon.
+     * @hide
+     */
+    public String getUriString() {
         if (mType != TYPE_URI) {
             throw new IllegalStateException("called getUriString() on " + this);
         }
         return mString1;
     }
 
-    private Uri getUri() {
+    /**
+     * @return The {@link android.net.Uri} for this {@link #TYPE_URI} Icon.
+     * @hide
+     */
+    public Uri getUri() {
         return Uri.parse(getUriString());
     }
 
-    // Convert a int32 into a four-char string
     private static final String typeToString(int x) {
         switch (x) {
             case TYPE_BITMAP: return "BITMAP";
