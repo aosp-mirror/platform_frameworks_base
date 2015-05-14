@@ -90,7 +90,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_DISCONNECT = 6;
     private static final int MSG_HOLD = 7;
     private static final int MSG_UNHOLD = 8;
-    private static final int MSG_ON_AUDIO_STATE_CHANGED = 9;
+    private static final int MSG_ON_CALL_AUDIO_STATE_CHANGED = 9;
     private static final int MSG_PLAY_DTMF_TONE = 10;
     private static final int MSG_STOP_DTMF_TONE = 11;
     private static final int MSG_CONFERENCE = 12;
@@ -180,11 +180,11 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onAudioStateChanged(String callId, AudioState audioState) {
+        public void onCallAudioStateChanged(String callId, CallAudioState callAudioState) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callId;
-            args.arg2 = audioState;
-            mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, args).sendToTarget();
+            args.arg2 = callAudioState;
+            mHandler.obtainMessage(MSG_ON_CALL_AUDIO_STATE_CHANGED, args).sendToTarget();
         }
 
         @Override
@@ -304,12 +304,12 @@ public abstract class ConnectionService extends Service {
                 case MSG_UNHOLD:
                     unhold((String) msg.obj);
                     break;
-                case MSG_ON_AUDIO_STATE_CHANGED: {
+                case MSG_ON_CALL_AUDIO_STATE_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String callId = (String) args.arg1;
-                        AudioState audioState = (AudioState) args.arg2;
-                        onAudioStateChanged(callId, audioState);
+                        CallAudioState audioState = (CallAudioState) args.arg2;
+                        onCallAudioStateChanged(callId, new CallAudioState(audioState));
                     } finally {
                         args.recycle();
                     }
@@ -688,12 +688,14 @@ public abstract class ConnectionService extends Service {
         }
     }
 
-    private void onAudioStateChanged(String callId, AudioState audioState) {
-        Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
+    private void onCallAudioStateChanged(String callId, CallAudioState callAudioState) {
+        Log.d(this, "onAudioStateChanged %s %s", callId, callAudioState);
         if (mConnectionById.containsKey(callId)) {
-            findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
+            findConnectionForAction(callId, "onCallAudioStateChanged").setCallAudioState(
+                    callAudioState);
         } else {
-            findConferenceForAction(callId, "onAudioStateChanged").setAudioState(audioState);
+            findConferenceForAction(callId, "onCallAudioStateChanged").setCallAudioState(
+                    callAudioState);
         }
     }
 
