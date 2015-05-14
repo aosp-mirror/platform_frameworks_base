@@ -16,53 +16,9 @@
 
 package android.webkit;
 
-import java.io.InputStream;
-import java.util.Map;
-
 /**
- * Encapsulates a resource response received from the server.
- * This is an abstract class used by WebView callbacks.
+ * This class will be deleted after updated WebView.apk will be submitted
+ * into the Android tree.
  */
 public abstract class WebResourceResponseBase {
-    /**
-     * Gets the resource response's MIME type.
-     *
-     * @return The resource response's MIME type
-     */
-    public abstract String getMimeType();
-
-    /**
-     * Gets the resource response's encoding.
-     *
-     * @return The resource response's encoding
-     */
-    public abstract String getEncoding();
-
-    /**
-     * Gets the resource response's status code.
-     *
-     * @return The resource response's status code.
-     */
-    public abstract int getStatusCode();
-
-    /**
-     * Gets the description of the resource response's status code.
-     *
-     * @return The description of the resource response's status code.
-     */
-    public abstract String getReasonPhrase();
-
-    /**
-     * Gets the headers for the resource response.
-     *
-     * @return The headers for the resource response.
-     */
-    public abstract Map<String, String> getResponseHeaders();
-
-    /**
-     * Gets the input stream that provides the resource response's data.
-     *
-     * @return The input stream that provides the resource response's data
-     */
-    public abstract InputStream getData();
 }
