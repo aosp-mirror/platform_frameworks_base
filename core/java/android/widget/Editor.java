@@ -209,6 +209,10 @@ public class Editor {
     // Set when this TextView gained focus with some text selected. Will start selection mode.
     boolean mCreatedWithASelection;
 
+    boolean mDoubleTap = false;
+
+    private Runnable mSelectionModeWithoutSelectionRunnable;
+
     // The span controller helps monitoring the changes to which the Editor needs to react:
     // - EasyEditSpans, for which we have some UI to display on attach and on hide
     // - SelectionSpans, for which we need to call updateSelection if an IME is attached
@@ -347,6 +351,11 @@ public class Editor {
 
         if (mShowSuggestionRunnable != null) {
             mTextView.removeCallbacks(mShowSuggestionRunnable);
+        }
+
+        // Cancel the single tap delayed runnable.
+        if (mSelectionModeWithoutSelectionRunnable != null) {
+            mTextView.removeCallbacks(mSelectionModeWithoutSelectionRunnable);
         }
 
         destroyDisplayListsData();
@@ -3722,10 +3731,28 @@ public class Editor {
         public void show() {
             super.show();
 
-            final long durationSinceLastCutCopyOrTextChanged =
+            final long durationSinceCutOrCopy =
                     SystemClock.uptimeMillis() - TextView.sLastCutCopyOrTextChangedTime;
-            if (durationSinceLastCutCopyOrTextChanged < RECENT_CUT_COPY_DURATION) {
-                startSelectionActionModeWithoutSelection();
+
+            // Cancel the single tap delayed runnable.
+            if (mDoubleTap && mSelectionModeWithoutSelectionRunnable != null) {
+                mTextView.removeCallbacks(mSelectionModeWithoutSelectionRunnable);
+            }
+
+            // Prepare and schedule the single tap runnable to run exactly after the double tap
+            // timeout has passed.
+            if (!mDoubleTap && (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION)) {
+                if (mSelectionModeWithoutSelectionRunnable == null) {
+                    mSelectionModeWithoutSelectionRunnable = new Runnable() {
+                        public void run() {
+                            startSelectionActionModeWithoutSelection();
+                        }
+                    };
+                }
+
+                mTextView.postDelayed(
+                        mSelectionModeWithoutSelectionRunnable,
+                        ViewConfiguration.getDoubleTapTimeout() + 1);
             }
 
             hideAfterDelay();
@@ -4159,8 +4186,6 @@ public class Editor {
         // The offsets of that last touch down event. Remembered to start selection there.
         private int mMinTouchOffset, mMaxTouchOffset;
 
-        // Double tap detection
-        private long mPreviousTapUpTime = 0;
         private float mDownPositionX, mDownPositionY;
         private boolean mGestureStayedInTapRegion;
 
@@ -4242,8 +4267,7 @@ public class Editor {
 
                     // Double tap detection
                     if (mGestureStayedInTapRegion) {
-                        long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
-                        if (duration <= ViewConfiguration.getDoubleTapTimeout()) {
+                        if (mDoubleTap) {
                             final float deltaX = x - mDownPositionX;
                             final float deltaY = y - mDownPositionY;
                             final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
@@ -4352,7 +4376,6 @@ public class Editor {
                     break;
 
                 case MotionEvent.ACTION_UP:
-                    mPreviousTapUpTime = SystemClock.uptimeMillis();
                     if (mDragAcceleratorActive) {
                         // No longer dragging to select text, let the parent intercept events.
                         mTextView.getParent().requestDisallowInterceptTouchEvent(false);
