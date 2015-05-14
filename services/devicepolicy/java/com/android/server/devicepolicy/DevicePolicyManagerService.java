@@ -4122,8 +4122,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setDeviceInitializer(ComponentName who, ComponentName initializer,
-            String ownerName) {
+    public boolean setDeviceInitializer(ComponentName who, ComponentName initializer) {
         if (!mHasFeature) {
             return false;
         }
@@ -4142,10 +4141,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             if (mDeviceOwner == null) {
                 // Device owner state does not exist, create it.
-                mDeviceOwner = DeviceOwner.createWithDeviceInitializer(initializer, ownerName);
+                mDeviceOwner = DeviceOwner.createWithDeviceInitializer(initializer);
             } else {
                 // Device owner already exists, update it.
-                mDeviceOwner.setDeviceInitializer(initializer, ownerName);
+                mDeviceOwner.setDeviceInitializer(initializer);
             }
 
             addDeviceInitializerToLockTaskPackagesLocked(UserHandle.USER_OWNER);
