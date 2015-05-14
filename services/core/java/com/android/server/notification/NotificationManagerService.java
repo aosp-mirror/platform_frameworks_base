@@ -1622,16 +1622,16 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void notifyConditions(String pkg, IConditionProvider provider,
-                Condition[] conditions) {
+        public void notifyConditions(final String pkg, IConditionProvider provider,
+                final Condition[] conditions) {
             final ManagedServiceInfo info = mConditionProviders.checkServiceToken(provider);
             checkCallerIsSystemOrSameApp(pkg);
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mConditionProviders.notifyConditions(pkg, info, conditions);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mConditionProviders.notifyConditions(pkg, info, conditions);
+                }
+            });
         }
 
         @Override
