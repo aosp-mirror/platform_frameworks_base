@@ -135,8 +135,7 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
     for (size_t i = 0; i <= event->getHistorySize(); i++) {
         publishedSeq = mNextPublishedSeq++;
         status_t status = mInputPublisher.publishMotionEvent(publishedSeq,
-                event->getDeviceId(), event->getSource(),
-                event->getAction(), event->getActionButton(), event->getFlags(),
+                event->getDeviceId(), event->getSource(), event->getAction(), event->getFlags(),
                 event->getEdgeFlags(), event->getMetaState(), event->getButtonState(),
                 event->getXOffset(), event->getYOffset(),
                 event->getXPrecision(), event->getYPrecision(),
