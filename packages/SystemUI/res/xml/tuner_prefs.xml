@@ -19,4 +19,8 @@
 
         <!-- Tuner prefs go here -->
 
+        <Preference
+            android:key="qs_tuner"
+            android:title="@string/quick_settings" />
+
 </PreferenceScreen>
