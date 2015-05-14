@@ -9051,6 +9051,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 stopSelectionActionMode();
                 return true;
 
+            case ID_REPLACE:
+                if (mEditor != null) {
+                    mEditor.replace();
+                }
+                return true;
+
             case ID_SHARE:
                 shareSelectedText();
                 return true;
