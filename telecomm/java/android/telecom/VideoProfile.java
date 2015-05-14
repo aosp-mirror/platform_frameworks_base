@@ -48,6 +48,31 @@ public class VideoProfile implements Parcelable {
      */
     public static final int QUALITY_DEFAULT = 4;
 
+    /**
+     * Call is currently in an audio-only mode with no video transmission or receipt.
+     */
+    public static final int STATE_AUDIO_ONLY = 0x0;
+
+    /**
+     * Video transmission is enabled.
+     */
+    public static final int STATE_TX_ENABLED = 0x1;
+
+    /**
+     * Video reception is enabled.
+     */
+    public static final int STATE_RX_ENABLED = 0x2;
+
+    /**
+     * Video signal is bi-directional.
+     */
+    public static final int STATE_BIDIRECTIONAL = STATE_TX_ENABLED | STATE_RX_ENABLED;
+
+    /**
+     * Video is paused.
+     */
+    public static final int STATE_PAUSED = 0x4;
+
     private final int mVideoState;
 
     private final int mQuality;
@@ -74,11 +99,11 @@ public class VideoProfile implements Parcelable {
 
     /**
      * The video state of the call.
-     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoProfile.VideoState#TX_ENABLED},
-     * {@link VideoProfile.VideoState#RX_ENABLED},
-     * {@link VideoProfile.VideoState#PAUSED}.
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED},
+     * {@link VideoProfile#STATE_PAUSED}.
      */
     public int getVideoState() {
         return mVideoState;
@@ -162,28 +187,41 @@ public class VideoProfile implements Parcelable {
     public static class VideoState {
         /**
          * Call is currently in an audio-only mode with no video transmission or receipt.
+         * @deprecated Use {@link VideoProfile#STATE_AUDIO_ONLY} instead
+         * @hide
          */
-        public static final int AUDIO_ONLY = 0x0;
+        public static final int AUDIO_ONLY = VideoProfile.STATE_AUDIO_ONLY;
 
         /**
          * Video transmission is enabled.
+         * @deprecated Use {@link VideoProfile#STATE_TX_ENABLED} instead
+         * @hide
          */
-        public static final int TX_ENABLED = 0x1;
+        public static final int TX_ENABLED = VideoProfile.STATE_TX_ENABLED;
 
         /**
          * Video reception is enabled.
+         * @deprecated Use {@link VideoProfile#STATE_RX_ENABLED} instead
+         * @hide
          */
-        public static final int RX_ENABLED = 0x2;
+        public static final int RX_ENABLED = VideoProfile.STATE_RX_ENABLED;
 
         /**
          * Video signal is bi-directional.
+         * @deprecated Use {@link VideoProfile#STATE_BIDIRECTIONAL} instead
+         * @hide
          */
-        public static final int BIDIRECTIONAL = TX_ENABLED | RX_ENABLED;
+        public static final int BIDIRECTIONAL = VideoProfile.STATE_BIDIRECTIONAL;
 
         /**
          * Video is paused.
+         * @deprecated Use {@link VideoProfile#STATE_PAUSED} instead
+         * @hide
          */
-        public static final int PAUSED = 0x4;
+        public static final int PAUSED = VideoProfile.STATE_PAUSED;
+
+        /** @hide */
+        private VideoState() {}
 
         /**
          * Whether the video state is audio only.
@@ -191,7 +229,8 @@ public class VideoProfile implements Parcelable {
          * @return Returns true if the video state is audio only.
          */
         public static boolean isAudioOnly(int videoState) {
-            return !hasState(videoState, TX_ENABLED) && !hasState(videoState, RX_ENABLED);
+            return !hasState(videoState, VideoProfile.STATE_TX_ENABLED)
+                    && !hasState(videoState, VideoProfile.STATE_RX_ENABLED);
         }
 
         /**
@@ -201,8 +240,9 @@ public class VideoProfile implements Parcelable {
          * @return Returns true if the video state TX or RX or Bidirectional
          */
         public static boolean isVideo(int videoState) {
-            return hasState(videoState, TX_ENABLED) || hasState(videoState, RX_ENABLED)
-                    || hasState(videoState, BIDIRECTIONAL);
+            return hasState(videoState, VideoProfile.STATE_TX_ENABLED)
+                    || hasState(videoState, VideoProfile.STATE_RX_ENABLED)
+                    || hasState(videoState, VideoProfile.STATE_BIDIRECTIONAL);
         }
 
         /**
@@ -211,7 +251,7 @@ public class VideoProfile implements Parcelable {
          * @return Returns true if the video transmission is enabled.
          */
         public static boolean isTransmissionEnabled(int videoState) {
-            return hasState(videoState, TX_ENABLED);
+            return hasState(videoState, VideoProfile.STATE_TX_ENABLED);
         }
 
         /**
@@ -220,7 +260,7 @@ public class VideoProfile implements Parcelable {
          * @return Returns true if the video transmission is enabled.
          */
         public static boolean isReceptionEnabled(int videoState) {
-            return hasState(videoState, RX_ENABLED);
+            return hasState(videoState, VideoProfile.STATE_RX_ENABLED);
         }
 
         /**
@@ -229,7 +269,7 @@ public class VideoProfile implements Parcelable {
          * @return Returns true if the video signal is bi-directional.
          */
         public static boolean isBidirectional(int videoState) {
-            return hasState(videoState, BIDIRECTIONAL);
+            return hasState(videoState, VideoProfile.STATE_BIDIRECTIONAL);
         }
 
         /**
@@ -238,7 +278,7 @@ public class VideoProfile implements Parcelable {
          * @return Returns true if the video is paused.
          */
         public static boolean isPaused(int videoState) {
-            return hasState(videoState, PAUSED);
+            return hasState(videoState, VideoProfile.STATE_PAUSED);
         }
 
         /**
