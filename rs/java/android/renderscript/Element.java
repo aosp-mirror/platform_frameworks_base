@@ -548,8 +548,8 @@ public class Element extends BaseObj {
      *     @hide
      */
     public static Element F16_3(RenderScript rs) {
-        if(rs.mElement_FLOAT_3 == null) {
-            rs.mElement_FLOAT_3 = createVector(rs, DataType.FLOAT_16, 3);
+        if(rs.mElement_HALF_3 == null) {
+            rs.mElement_HALF_3 = createVector(rs, DataType.FLOAT_16, 3);
         }
         return rs.mElement_HALF_3;
     }
@@ -926,6 +926,7 @@ public class Element extends BaseObj {
 
         switch (dt) {
         // Support only primitive integer/float/boolean types as vectors.
+        case FLOAT_16:
         case FLOAT_32:
         case FLOAT_64:
         case SIGNED_8:
