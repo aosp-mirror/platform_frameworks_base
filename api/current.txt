@@ -30318,16 +30318,12 @@ package android.telecom {
 
   public final class PhoneAccount implements android.os.Parcelable {
     method public static android.telecom.PhoneAccount.Builder builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
-    method public android.graphics.drawable.Drawable createIconDrawable(android.content.Context);
     method public int describeContents();
     method public android.telecom.PhoneAccountHandle getAccountHandle();
     method public android.net.Uri getAddress();
     method public int getCapabilities();
     method public int getHighlightColor();
-    method public android.graphics.Bitmap getIconBitmap();
-    method public java.lang.String getIconPackageName();
-    method public int getIconResId();
-    method public int getIconTint();
+    method public android.graphics.drawable.Icon getIcon();
     method public java.lang.CharSequence getLabel();
     method public java.lang.CharSequence getShortDescription();
     method public android.net.Uri getSubscriptionAddress();
@@ -30343,7 +30339,6 @@ package android.telecom {
     field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
     field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccount> CREATOR;
     field public static final int NO_HIGHLIGHT_COLOR = 0; // 0x0
-    field public static final int NO_ICON_TINT = 0; // 0x0
     field public static final int NO_RESOURCE_ID = -1; // 0xffffffff
     field public static final java.lang.String SCHEME_SIP = "sip";
     field public static final java.lang.String SCHEME_TEL = "tel";
@@ -30358,11 +30353,7 @@ package android.telecom {
     method public android.telecom.PhoneAccount.Builder setAddress(android.net.Uri);
     method public android.telecom.PhoneAccount.Builder setCapabilities(int);
     method public android.telecom.PhoneAccount.Builder setHighlightColor(int);
-    method public android.telecom.PhoneAccount.Builder setIcon(android.content.Context, int);
-    method public android.telecom.PhoneAccount.Builder setIcon(java.lang.String, int);
-    method public android.telecom.PhoneAccount.Builder setIcon(android.content.Context, int, int);
-    method public android.telecom.PhoneAccount.Builder setIcon(java.lang.String, int, int);
-    method public android.telecom.PhoneAccount.Builder setIcon(android.graphics.Bitmap);
+    method public android.telecom.PhoneAccount.Builder setIcon(android.graphics.drawable.Icon);
     method public android.telecom.PhoneAccount.Builder setShortDescription(java.lang.CharSequence);
     method public android.telecom.PhoneAccount.Builder setSubscriptionAddress(android.net.Uri);
     method public android.telecom.PhoneAccount.Builder setSupportedUriSchemes(java.util.List<java.lang.String>);
