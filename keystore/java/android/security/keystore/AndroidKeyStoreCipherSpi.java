@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import android.os.IBinder;
+import android.security.KeyStore;
+import android.security.KeyStoreException;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
@@ -48,9 +50,10 @@ import javax.crypto.spec.IvParameterSpec;
  *
  * @hide
  */
-public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCryptoOperation {
+public abstract class AndroidKeyStoreCipherSpi extends CipherSpi
+        implements KeyStoreCryptoOperation {
 
-    public abstract static class AES extends KeyStoreCipherSpi {
+    public abstract static class AES extends AndroidKeyStoreCipherSpi {
         protected AES(int keymasterBlockMode, int keymasterPadding, boolean ivUsed) {
             super(KeymasterDefs.KM_ALGORITHM_AES,
                     keymasterBlockMode,
@@ -120,7 +123,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     // Fields below are populated by Cipher.init and KeyStore.begin and should be preserved after
     // doFinal finishes.
     protected boolean mEncrypting;
-    private KeyStoreSecretKey mKey;
+    private AndroidKeyStoreSecretKey mKey;
     private SecureRandom mRng;
     private boolean mFirstOperationInitiated;
     private byte[] mIv;
@@ -147,7 +150,7 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
      */
     private Exception mCachedException;
 
-    protected KeyStoreCipherSpi(
+    protected AndroidKeyStoreCipherSpi(
             int keymasterAlgorithm,
             int keymasterBlockMode,
             int keymasterPadding,
@@ -219,11 +222,11 @@ public abstract class KeyStoreCipherSpi extends CipherSpi implements KeyStoreCry
     }
 
     private void init(int opmode, Key key, SecureRandom random) throws InvalidKeyException {
-        if (!(key instanceof KeyStoreSecretKey)) {
+        if (!(key instanceof AndroidKeyStoreSecretKey)) {
             throw new InvalidKeyException(
                     "Unsupported key: " + ((key != null) ? key.getClass().getName() : "null"));
         }
-        mKey = (KeyStoreSecretKey) key;
+        mKey = (AndroidKeyStoreSecretKey) key;
         mRng = random;
         mIv = null;
         mFirstOperationInitiated = false;

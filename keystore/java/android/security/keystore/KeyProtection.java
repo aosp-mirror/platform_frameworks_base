@@ -20,8 +20,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
-import android.content.Context;
-import android.security.ArrayUtils;
 import android.security.KeyStore;
 
 import java.security.Key;

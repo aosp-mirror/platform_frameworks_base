@@ -109,7 +109,7 @@ public class KeyStore {
         mContext = getApplicationContext();
     }
 
-    static Context getApplicationContext() {
+    public static Context getApplicationContext() {
         ActivityThread activityThread = ActivityThread.currentActivityThread();
         if (activityThread == null) {
             throw new IllegalStateException(
@@ -136,7 +136,7 @@ public class KeyStore {
         return mToken;
     }
 
-    static int getKeyTypeForAlgorithm(@KeyProperties.KeyAlgorithmEnum String keyType) {
+    public static int getKeyTypeForAlgorithm(@KeyProperties.KeyAlgorithmEnum String keyType) {
         if (KeyProperties.KEY_ALGORITHM_RSA.equalsIgnoreCase(keyType)) {
             return NativeConstants.EVP_PKEY_RSA;
         } else if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyType)) {
@@ -632,7 +632,7 @@ public class KeyStore {
      * Returns a {@link KeyStoreException} corresponding to the provided keystore/keymaster error
      * code.
      */
-    static KeyStoreException getKeyStoreException(int errorCode) {
+    public static KeyStoreException getKeyStoreException(int errorCode) {
         if (errorCode > 0) {
             // KeyStore layer error
             switch (errorCode) {
@@ -674,7 +674,8 @@ public class KeyStore {
      * Returns an {@link InvalidKeyException} corresponding to the provided
      * {@link KeyStoreException}.
      */
-    InvalidKeyException getInvalidKeyException(String keystoreKeyAlias, KeyStoreException e) {
+    public InvalidKeyException getInvalidKeyException(
+            String keystoreKeyAlias, KeyStoreException e) {
         switch (e.getErrorCode()) {
             case LOCKED:
                 return new UserNotAuthenticatedException();
@@ -745,7 +746,7 @@ public class KeyStore {
      * Returns an {@link InvalidKeyException} corresponding to the provided keystore/keymaster error
      * code.
      */
-    InvalidKeyException getInvalidKeyException(String keystoreKeyAlias, int errorCode) {
+    public InvalidKeyException getInvalidKeyException(String keystoreKeyAlias, int errorCode) {
         return getInvalidKeyException(keystoreKeyAlias, getKeyStoreException(errorCode));
     }
 }
