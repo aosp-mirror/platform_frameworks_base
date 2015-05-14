@@ -341,6 +341,12 @@ static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
     surfaceTexture->abandon();
 }
 
+static jboolean SurfaceTexture_isReleased(JNIEnv* env, jobject thiz)
+{
+    sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    return surfaceTexture->isAbandoned();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
@@ -355,6 +361,7 @@ static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeGetTransformMatrix",   "([F)V", (void*)SurfaceTexture_getTransformMatrix },
     {"nativeGetTimestamp",         "()J",   (void*)SurfaceTexture_getTimestamp },
     {"nativeRelease",              "()V",   (void*)SurfaceTexture_release },
+    {"nativeIsReleased",           "()Z",   (void*)SurfaceTexture_isReleased },
 };
 
 int register_android_graphics_SurfaceTexture(JNIEnv* env)
