@@ -3888,7 +3888,11 @@ public class Editor {
 
         @Override
         protected int getHotspotX(Drawable drawable, boolean isRtlRun) {
-            return isRtlRun ? 0 : drawable.getIntrinsicWidth();
+            if (isRtlRun) {
+                return drawable.getIntrinsicWidth() / 4;
+            } else {
+                return (drawable.getIntrinsicWidth() * 3) / 4;
+            }
         }
 
         @Override
@@ -4006,7 +4010,11 @@ public class Editor {
 
         @Override
         protected int getHotspotX(Drawable drawable, boolean isRtlRun) {
-            return isRtlRun ? drawable.getIntrinsicWidth() : 0;
+            if (isRtlRun) {
+                return (drawable.getIntrinsicWidth() * 3) / 4;
+            } else {
+                return drawable.getIntrinsicWidth() / 4;
+            }
         }
 
         @Override
