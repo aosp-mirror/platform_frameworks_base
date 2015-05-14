@@ -14704,7 +14704,7 @@ package android.media {
     method public int[] getChannelMasks();
     method public int[] getFormats();
     method public int getId();
-    method public java.lang.CharSequence getName();
+    method public java.lang.CharSequence getProductName();
     method public int[] getSampleRates();
     method public int getType();
     method public boolean isSink();
