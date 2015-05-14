@@ -2320,9 +2320,9 @@ public class ActivityManager {
      * in {@link RunningAppProcessInfo}, giving you the highest importance of all the
      * processes that this package has code running inside of.  If there are no processes
      * running its code, {@link RunningAppProcessInfo#IMPORTANCE_GONE} is returned.
-     *
      * @hide
      */
+    @SystemApi
     public int getPackageImportance(String packageName) {
         try {
             int procState = ActivityManagerNative.getDefault().getPackageProcessState(packageName);
