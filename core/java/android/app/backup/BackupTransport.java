@@ -162,8 +162,17 @@ public class BackupTransport {
      * this is called, {@link #finishBackup} will be called to ensure the request
      * is sent and received successfully.
      *
+     * <p>If the transport returns anything other than TRANSPORT_OK from this method,
+     * the OS will halt the current initialize operation and schedule a retry in the
+     * near future.  Even if the transport is in a state such that attempting to
+     * "initialize" the backend storage is meaningless -- for example, if there is
+     * no current live dataset at all, or there is no authenticated account under which
+     * to store the data remotely -- the transport should return TRANSPORT_OK here
+     * and treat the initializeDevice() / finishBackup() pair as a graceful no-op.
+     *
      * @return One of {@link BackupTransport#TRANSPORT_OK} (OK so far) or
-     *   {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure).
+     *   {@link BackupTransport#TRANSPORT_ERROR} (to retry following network error
+     *   or other failure).
      */
     public int initializeDevice() {
         return BackupTransport.TRANSPORT_ERROR;
