@@ -400,8 +400,10 @@ public final class ScriptGroup extends BaseObj {
     /**
      * Executes a script group
      *
-     * @param inputs inputs to the script group
-     * @return outputs of the script group as an array of objects
+     * @param inputs Values for inputs to the script group, in the order as the
+     *        inputs are added via {@link Builder2#addInput}.
+     * @return Outputs of the script group as an array of objects, in the order
+     *         as futures are passed to {@link Builder2#create}.
      */
 
     public Object[] execute(Object... inputs) {
