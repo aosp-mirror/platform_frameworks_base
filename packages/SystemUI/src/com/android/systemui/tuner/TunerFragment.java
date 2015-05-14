@@ -15,7 +15,10 @@
  */
 package com.android.systemui.tuner;
 
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import android.view.MenuItem;
 
@@ -23,12 +26,25 @@ import com.android.systemui.R;
 
 public class TunerFragment extends PreferenceFragment {
 
+    private static final String KEY_QS_TUNER = "qs_tuner";
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.tuner_prefs);
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
+
+        findPreference(KEY_QS_TUNER).setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(android.R.id.content, new QsTuner(), "QsTuner");
+                ft.addToBackStack(null);
+                ft.commit();
+                return false;
+            }
+        });
     }
 
     @Override

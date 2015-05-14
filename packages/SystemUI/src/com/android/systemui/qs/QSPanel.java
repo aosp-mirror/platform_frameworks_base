@@ -50,12 +50,12 @@ public class QSPanel extends ViewGroup {
     private static final float TILE_ASPECT = 1.2f;
 
     private final Context mContext;
-    private final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
+    protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
     private final View mDetail;
     private final ViewGroup mDetailContent;
     private final TextView mDetailSettingsButton;
     private final TextView mDetailDoneButton;
-    private final View mBrightnessView;
+    protected final View mBrightnessView;
     private final QSDetailClipper mClipper;
     private final H mHandler = new H();
 
@@ -560,13 +560,13 @@ public class QSPanel extends ViewGroup {
         DetailAdapter detailAdapter;
     }
 
-    private static final class TileRecord extends Record {
-        QSTile<?> tile;
-        QSTileView tileView;
-        int row;
-        int col;
-        boolean scanState;
-        boolean openingDetail;
+    protected static final class TileRecord extends Record {
+        public QSTile<?> tile;
+        public QSTileView tileView;
+        public int row;
+        public int col;
+        public boolean scanState;
+        public boolean openingDetail;
     }
 
     private final AnimatorListenerAdapter mTeardownDetailWhenDone = new AnimatorListenerAdapter() {
