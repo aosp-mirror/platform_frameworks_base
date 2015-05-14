@@ -476,8 +476,18 @@ public final class StrictMode {
             }
 
             /**
-             * Enable detection of mismatches between defined resource types
+             * Enables detection of mismatches between defined resource types
              * and getter calls.
+             * <p>
+             * This helps detect accidental type mismatches and potentially
+             * expensive type conversions when obtaining typed resources.
+             * <p>
+             * For example, a strict mode violation would be thrown when
+             * calling {@link android.content.res.TypedArray#getInt(int, int)}
+             * on an index that contains a String-type resource. If the string
+             * value can be parsed as an integer, this method call will return
+             * a value without crashing; however, the developer should format
+             * the resource as an integer to avoid unnecessary type conversion.
              */
             public Builder detectResourceMismatches() {
                 return enable(DETECT_RESOURCE_MISMATCH);
