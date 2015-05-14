@@ -1222,6 +1222,19 @@ static jint Image_getHeight(JNIEnv* env, jobject thiz, jint format)
     }
 }
 
+static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
+{
+    if (isFormatOpaque(readerFormat)) {
+        // Assuming opaque reader produce opaque images.
+        return static_cast<jint>(PublicFormat::PRIVATE);
+    } else {
+        CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
+        PublicFormat publicFmt = android_view_Surface_mapHalFormatDataspaceToPublicFormat(
+                buffer->flexFormat, buffer->dataSpace);
+        return static_cast<jint>(publicFmt);
+    }
+}
+
 } // extern "C"
 
 // ----------------------------------------------------------------------------
@@ -1240,8 +1253,9 @@ static JNINativeMethod gImageMethods[] = {
     {"nativeImageGetBuffer",   "(II)Ljava/nio/ByteBuffer;",   (void*)Image_getByteBuffer },
     {"nativeCreatePlane",      "(II)Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
                                                               (void*)Image_createSurfacePlane },
-    {"nativeGetWidth",         "(I)I",                         (void*)Image_getWidth },
-    {"nativeGetHeight",        "(I)I",                         (void*)Image_getHeight },
+    {"nativeGetWidth",         "(I)I",                        (void*)Image_getWidth },
+    {"nativeGetHeight",        "(I)I",                        (void*)Image_getHeight },
+    {"nativeGetFormat",        "(I)I",                        (void*)Image_getFormat },
 };
 
 int register_android_media_ImageReader(JNIEnv *env) {
