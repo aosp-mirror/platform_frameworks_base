@@ -63,6 +63,7 @@ import java.util.ArrayList;
 final class TaskRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
+    private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
 
     static final String ATTR_TASKID = "task_id";
@@ -134,12 +135,11 @@ final class TaskRecord {
 
     /** Can't be put in lockTask mode. */
     final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
-    /** Can enter lockTask with user approval if not already in lockTask. */
+    /** Can enter lockTask with user approval. Can never start over existing lockTask task. */
     final static int LOCK_TASK_AUTH_PINNABLE = 1;
     /** Starts in LOCK_TASK_MODE_LOCKED automatically. Can start over existing lockTask task. */
     final static int LOCK_TASK_AUTH_LAUNCHABLE = 2;
-    /** Enters LOCK_TASK_MODE_LOCKED via startLockTask(), enters LOCK_TASK_MODE_PINNED from
-     * Overview. Can start over existing lockTask task. */
+    /** Can enter lockTask with user approval. Can start over existing lockTask task. */
     final static int LOCK_TASK_AUTH_WHITELISTED = 3;
     int mLockTaskAuth = LOCK_TASK_AUTH_PINNABLE;
 
@@ -744,21 +744,31 @@ final class TaskRecord {
     void setLockTaskAuth() {
         switch (mLockTaskMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
+                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
+                        " mLockTaskAuth=" + (isLockTaskWhitelistedLocked() ?
+                        "WHITELISTED" : "PINNABLE"));
                 mLockTaskAuth = isLockTaskWhitelistedLocked() ?
                     LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_NEVER:
+                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
+                        " mLockTaskAuth=" + (mPrivileged ? "DONT_LOCK" : "PINNABLE"));
                 mLockTaskAuth = mPrivileged ?
                         LOCK_TASK_AUTH_DONT_LOCK : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_ALWAYS:
+                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
+                        " mLockTaskAuth=" + (mPrivileged ? "LAUNCHABLE" : "PINNABLE"));
                 mLockTaskAuth = mPrivileged ?
                         LOCK_TASK_AUTH_LAUNCHABLE: LOCK_TASK_AUTH_PINNABLE;
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
+                if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "setLockTaskAuth: task=" + this +
+                        " mLockTaskAuth=" + (isLockTaskWhitelistedLocked() ?
+                        "LAUNCHABLE" : "PINNABLE"));
                 mLockTaskAuth = isLockTaskWhitelistedLocked() ?
                         LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
                 break;
