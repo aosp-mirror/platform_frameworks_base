@@ -38,11 +38,9 @@ built_ext_classes := $(call java-lib-files,ext)
 built_ext_data := $(call intermediates-dir-for, \
 			JAVA_LIBRARIES,ext,,COMMON)/javalib.jar
 built_icudata_dep := $(call java-lib-deps,icu4j-icudata-jarjar)
-built_icudata_data := $(call intermediates-dir-for, \
-                        JAVA_LIBRARIES,icu4j-icudata-jarjar,,COMMON)/javalib.jar
+built_icudata_data := $(call java-lib-files,icu4j-icudata-jarjar)
 built_icutzdata_dep := $(call java-lib-deps,icu4j-icutzdata-jarjar)
-built_icutzdata_data := $(call intermediates-dir-for, \
-                        JAVA_LIBRARIES,icu4j-icutzdata-jarjar,,COMMON)/javalib.jar
+built_icutzdata_data := $(call java-lib-files,icu4j-icutzdata-jarjar)
 
 built_layoutlib_create_jar := $(call intermediates-dir-for, \
 			JAVA_LIBRARIES,layoutlib_create,HOST)/javalib.jar
