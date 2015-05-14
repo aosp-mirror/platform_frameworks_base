@@ -63,7 +63,7 @@ public abstract class Conference implements Conferenceable {
             Collections.unmodifiableList(mConferenceableConnections);
 
     private PhoneAccountHandle mPhoneAccount;
-    private AudioState mAudioState;
+    private CallAudioState mCallAudioState;
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
     private int mConnectionCapabilities;
@@ -173,9 +173,22 @@ public abstract class Conference implements Conferenceable {
      * @return The audio state of the conference, describing how its audio is currently
      *         being routed by the system. This is {@code null} if this Conference
      *         does not directly know about its audio state.
+     * @deprecated Use {@link #getCallAudioState()} instead.
+     * @hide
      */
+    @Deprecated
+    @SystemApi
     public final AudioState getAudioState() {
-        return mAudioState;
+        return new AudioState(mCallAudioState);
+    }
+
+    /**
+     * @return The audio state of the conference, describing how its audio is currently
+     *         being routed by the system. This is {@code null} if this Conference
+     *         does not directly know about its audio state.
+     */
+    public final CallAudioState getCallAudioState() {
+        return mCallAudioState;
     }
 
     /**
@@ -249,8 +262,19 @@ public abstract class Conference implements Conferenceable {
      * Notifies this conference that the {@link #getAudioState()} property has a new value.
      *
      * @param state The new call audio state.
+     * @deprecated Use {@link #onCallAudioStateChanged(CallAudioState)} instead.
+     * @hide
      */
+    @SystemApi
+    @Deprecated
     public void onAudioStateChanged(AudioState state) {}
+
+    /**
+     * Notifies this conference that the {@link #getCallAudioState()} property has a new value.
+     *
+     * @param state The new call audio state.
+     */
+    public void onCallAudioStateChanged(CallAudioState state) {}
 
     /**
      * Notifies this conference that a connection has been added to it.
@@ -515,10 +539,11 @@ public abstract class Conference implements Conferenceable {
      * @param state The new audio state.
      * @hide
      */
-    final void setAudioState(AudioState state) {
-        Log.d(this, "setAudioState %s", state);
-        mAudioState = state;
-        onAudioStateChanged(state);
+    final void setCallAudioState(CallAudioState state) {
+        Log.d(this, "setCallAudioState %s", state);
+        mCallAudioState = state;
+        onAudioStateChanged(getAudioState());
+        onCallAudioStateChanged(state);
     }
 
     private void setState(int newState) {
