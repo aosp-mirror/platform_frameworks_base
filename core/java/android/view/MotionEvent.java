@@ -303,32 +303,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int ACTION_HOVER_EXIT       = 10;
 
     /**
-     * Constant for {@link #getActionMasked}: A button has been pressed.
-     *
-     * <p>
-     * Use {@link #getActionButton()} to get which button was pressed.
-     * </p><p>
-     * This action is not a touch event so it is delivered to
-     * {@link View#onGenericMotionEvent(MotionEvent)} rather than
-     * {@link View#onTouchEvent(MotionEvent)}.
-     * </p>
-     */
-    public static final int ACTION_BUTTON_PRESS   = 11;
-
-    /**
-     * Constant for {@link #getActionMasked}: A button has been released.
-     *
-     * <p>
-     * Use {@link #getActionButton()} to get which button was released.
-     * </p><p>
-     * This action is not a touch event so it is delivered to
-     * {@link View#onGenericMotionEvent(MotionEvent)} rather than
-     * {@link View#onTouchEvent(MotionEvent)}.
-     * </p>
-     */
-    public static final int ACTION_BUTTON_RELEASE  = 12;
-
-    /**
      * Bits in the action code that represent a pointer index, used with
      * {@link #ACTION_POINTER_DOWN} and {@link #ACTION_POINTER_UP}.  Shifting
      * down by {@link #ACTION_POINTER_INDEX_SHIFT} provides the actual pointer
@@ -1200,14 +1174,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int BUTTON_PRIMARY = 1 << 0;
 
     /**
-     * Button constant: Secondary button (right mouse button).
+     * Button constant: Secondary button (right mouse button, stylus first button).
      *
      * @see #getButtonState
      */
     public static final int BUTTON_SECONDARY = 1 << 1;
 
     /**
-     * Button constant: Tertiary button (middle mouse button).
+     * Button constant: Tertiary button (middle mouse button, stylus second button).
      *
      * @see #getButtonState
      */
@@ -1235,20 +1209,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int BUTTON_FORWARD = 1 << 4;
 
-    /**
-     * Button constant: Primary stylus button pressed.
-     *
-     * @see #getButtonState
-     */
-    public static final int BUTTON_STYLUS_PRIMARY = 1 << 5;
-
-    /**
-     * Button constant: Secondary stylus button pressed.
-     *
-     * @see #getButtonState
-     */
-    public static final int BUTTON_STYLUS_SECONDARY = 1 << 6;
-
     // NOTE: If you add a new axis here you must also add it to:
     //  native/include/android/input.h
 
@@ -1260,8 +1220,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         "BUTTON_TERTIARY",
         "BUTTON_BACK",
         "BUTTON_FORWARD",
-        "BUTTON_STYLUS_PRIMARY",
-        "BUTTON_STYLUS_SECONDARY",
+        "0x00000020",
+        "0x00000040",
         "0x00000080",
         "0x00000100",
         "0x00000200",
@@ -1397,8 +1357,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private static native void nativeSetEdgeFlags(long nativePtr, int action);
     private static native int nativeGetMetaState(long nativePtr);
     private static native int nativeGetButtonState(long nativePtr);
-    private static native void nativeSetButtonState(long nativePtr, int buttonState);
-    private static native int nativeGetActionButton(long nativePtr);
     private static native void nativeOffsetLocation(long nativePtr, float deltaX, float deltaY);
     private static native float nativeGetXOffset(long nativePtr);
     private static native float nativeGetYOffset(long nativePtr);
@@ -2254,33 +2212,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #BUTTON_TERTIARY
      * @see #BUTTON_FORWARD
      * @see #BUTTON_BACK
-     * @see #BUTTON_STYLUS_PRIMARY
-     * @see #BUTTON_STYLUS_SECONDARY
      */
     public final int getButtonState() {
         return nativeGetButtonState(mNativePtr);
-    }
-
-    /**
-     * Sets the bitfield indicating which buttons are pressed.
-     *
-     * @see #getButtonState()
-     * @hide
-     */
-    public final void setButtonState(int buttonState) {
-        nativeSetButtonState(mNativePtr, buttonState);
-    }
-
-    /**
-     * Gets which button has been modified during a press or release action.
-     *
-     * For actions other than {@link #ACTION_BUTTON_PRESS} and {@link #ACTION_BUTTON_RELEASE}
-     * the returned value is undefined.
-     *
-     * @see #getButtonState()
-     */
-    public final int getActionButton() {
-        return nativeGetActionButton(mNativePtr);
     }
 
     /**
@@ -3079,7 +3013,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public String toString() {
         StringBuilder msg = new StringBuilder();
         msg.append("MotionEvent { action=").append(actionToString(getAction()));
-        msg.append(", actionButton=").append(buttonStateToString(getActionButton()));
 
         final int pointerCount = getPointerCount();
         for (int i = 0; i < pointerCount; i++) {
@@ -3133,10 +3066,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 return "ACTION_HOVER_ENTER";
             case ACTION_HOVER_EXIT:
                 return "ACTION_HOVER_EXIT";
-            case ACTION_BUTTON_PRESS:
-                return "ACTION_BUTTON_PRESS";
-            case ACTION_BUTTON_RELEASE:
-                return "ACTION_BUTTON_RELEASE";
         }
         int index = (action & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
         switch (action & ACTION_MASK) {
@@ -3243,14 +3172,24 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #BUTTON_TERTIARY
      * @see #BUTTON_FORWARD
      * @see #BUTTON_BACK
-     * @see #BUTTON_STYLUS_PRIMARY
-     * @see #BUTTON_STYLUS_SECONDARY
      */
     public final boolean isButtonPressed(int button) {
         if (button == 0) {
             return false;
         }
         return (getButtonState() & button) == button;
+    }
+
+    /**
+     * Checks if a stylus is being used and if the first stylus button is
+     * pressed.
+     *
+     * @return True if the tool is a stylus and if the first stylus button is
+     *         pressed.
+     * @see #BUTTON_SECONDARY
+     */
+    public final boolean isStylusButtonPressed() {
+        return (isButtonPressed(BUTTON_SECONDARY) && getToolType(0) == TOOL_TYPE_STYLUS);
     }
 
     public static final Parcelable.Creator<MotionEvent> CREATOR
