@@ -118,6 +118,7 @@ public class Main {
                         "android.app.DatePickerDialog",     // b.android.com/28318
                         "android.app.TimePickerDialog",     // b.android.com/61515
                         "com.android.internal.view.menu.ActionMenu",
+                        "android.icu.**",                   // needed by LayoutLib
                     },
                     excludeClasses,
                     new String[] {

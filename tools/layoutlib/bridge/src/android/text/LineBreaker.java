@@ -39,6 +39,5 @@ public abstract class LineBreaker {
         mTabStops = tabStops;
     }
 
-    @NonNull
     public abstract void computeBreaks(@NonNull LineBreaks breakInfo);
 }

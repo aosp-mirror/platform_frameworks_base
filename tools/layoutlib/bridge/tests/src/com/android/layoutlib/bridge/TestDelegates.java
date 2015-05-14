@@ -192,12 +192,12 @@ public class TestDelegates extends TestCase {
         StringBuilder sb = new StringBuilder(method.getName() + "(");
         for (int j = 0; j < parameters.length; j++) {
             Class<?> theClass = parameters[j];
-            sb.append(theClass.getName());
             int dimensions = 0;
             while (theClass.isArray()) {
                 dimensions++;
                 theClass = theClass.getComponentType();
             }
+            sb.append(theClass.getName());
             for (int i = 0; i < dimensions; i++) {
                 sb.append("[]");
             }

@@ -40,7 +40,7 @@ import static org.junit.Assert.assertEquals;
 public class BridgeXmlBlockParserTest {
 
     @BeforeClass
-    public void setUp() {
+    public static void setUp() {
         ParserFactory.setLayoutlibCallback(new LayoutlibTestCallback());
     }
 
@@ -128,7 +128,7 @@ public class BridgeXmlBlockParserTest {
     }
 
     @AfterClass
-    public void tearDown() {
+    public static void tearDown() {
         ParserFactory.setLayoutlibCallback(null);
     }
 
