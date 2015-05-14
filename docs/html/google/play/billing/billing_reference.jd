@@ -172,8 +172,8 @@ does not include tax.</td>
   </tr>
   <tr>
     <td>{@code INAPP_DATA_SIGNATURE}</td>
-    <td>String containing the signature of the purchase data that was signed 
-with the private key of the developer. The data signature uses the 
+    <td>String containing the signature of the purchase data that was signed
+with the private key of the developer. The data signature uses the
 RSASSA-PKCS1-v1_5 scheme.</td>
   </tr>
 </table>
@@ -197,7 +197,13 @@ RSASSA-PKCS1-v1_5 scheme.</td>
       lose access at that time unless they re-enable automatic renewal
       (or manually renew, as described in
       <a href="{@docRoot}google/play/billing/billing_subscriptions.html#manual-renewal">Manual
-      Renewal</a>).</td>
+      Renewal</a>).
+      If you offer a <a href="{@docRoot}google/play/billing/billing_subscriptions.html#grace-period"
+      >grace period</a>, this value remains set to <code>true</code> for all
+      subscriptions, as long as the grace period has not lapsed. The next billing date
+      is extended dynamically every day until the end of the grace period or until the
+      user fixes their payment method.
+    </td>
   </tr>
   <tr>
     <td>{@code orderId}</td>
