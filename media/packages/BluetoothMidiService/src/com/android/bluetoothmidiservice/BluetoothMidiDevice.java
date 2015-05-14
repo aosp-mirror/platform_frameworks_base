@@ -234,10 +234,10 @@ public final class BluetoothMidiDevice {
                         break;
                     }
                     try {
-                        mPacketEncoder.sendWithTimestamp(event.data, 0, event.count,
+                        mPacketEncoder.send(event.data, 0, event.count,
                                 event.getTimestamp());
                     } catch (IOException e) {
-                        Log.e(TAG, "mPacketAccumulator.sendWithTimestamp failed", e);
+                        Log.e(TAG, "mPacketAccumulator.send failed", e);
                     }
                     mEventScheduler.addEventToPool(event);
                 }

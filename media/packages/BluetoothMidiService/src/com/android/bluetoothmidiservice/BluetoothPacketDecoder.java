@@ -86,7 +86,7 @@ public class BluetoothPacketDecoder extends PacketDecoder {
                     if (dataCount > 0) {
                         // send previous message separately since it has a different timestamp
                         try {
-                            receiver.sendWithTimestamp(mBuffer, 0, dataCount, nanoTimestamp);
+                            receiver.send(mBuffer, 0, dataCount, nanoTimestamp);
                         } catch (IOException e) {
                             // ???
                         }
@@ -106,7 +106,7 @@ public class BluetoothPacketDecoder extends PacketDecoder {
 
         if (dataCount > 0) {
             try {
-                receiver.sendWithTimestamp(mBuffer, 0, dataCount, nanoTimestamp);
+                receiver.send(mBuffer, 0, dataCount, nanoTimestamp);
             } catch (IOException e) {
                 // ???
             }

@@ -53,7 +53,7 @@ public class BluetoothPacketEncoder extends PacketEncoder {
     // This receives normalized data from mMidiFramer and accumulates it into a packet buffer
     private final MidiReceiver mFramedDataReceiver = new MidiReceiver() {
         @Override
-        public void onReceive(byte[] msg, int offset, int count, long timestamp)
+        public void onSend(byte[] msg, int offset, int count, long timestamp)
                 throws IOException {
 
             synchronized (mLock) {
@@ -130,7 +130,8 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                             flushLocked(true);
                             appendHeader(milliTimestamp);
                         }
-                        mAccumulationBuffer[mAccumulatedBytes++] = (byte)(0x80 | (milliTimestamp & 0x7F));
+                        mAccumulationBuffer[mAccumulatedBytes++] =
+                                (byte)(0x80 | (milliTimestamp & 0x7F));
                         mAccumulationBuffer[mAccumulatedBytes++] = MidiConstants.STATUS_END_SYSEX;
                     }
                 } else {
@@ -146,7 +147,8 @@ public class BluetoothPacketEncoder extends PacketEncoder {
 
                     // now copy data bytes
                     int dataLength = count - 1;
-                    System.arraycopy(msg, offset + 1, mAccumulationBuffer, mAccumulatedBytes, dataLength);
+                    System.arraycopy(msg, offset + 1, mAccumulationBuffer, mAccumulatedBytes,
+                            dataLength);
                     mAccumulatedBytes += dataLength;
                 }
 
@@ -160,7 +162,8 @@ public class BluetoothPacketEncoder extends PacketEncoder {
         // write header if we are starting a new packet
         if (mAccumulatedBytes == 0) {
             // header byte with timestamp bits 7 - 12
-            mAccumulationBuffer[mAccumulatedBytes++] = (byte)(0x80 | ((milliTimestamp >> 7) & 0x3F));
+            mAccumulationBuffer[mAccumulatedBytes++] =
+                    (byte)(0x80 | ((milliTimestamp >> 7) & 0x3F));
             mPacketTimestamp = milliTimestamp;
             return true;
         } else {
@@ -177,10 +180,10 @@ public class BluetoothPacketEncoder extends PacketEncoder {
     }
 
     @Override
-    public void onReceive(byte[] msg, int offset, int count, long timestamp)
+    public void onSend(byte[] msg, int offset, int count, long timestamp)
             throws IOException {
         // normalize the data by passing it through a MidiFramer first
-        mMidiFramer.sendWithTimestamp(msg, offset, count, timestamp);
+        mMidiFramer.send(msg, offset, count, timestamp);
     }
 
     @Override

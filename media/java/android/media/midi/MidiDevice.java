@@ -136,11 +136,14 @@ public final class MidiDevice implements Closeable {
     /**
      * Connects the supplied {@link MidiInputPort} to the output port of this device
      * with the specified port number. Once the connection is made, the MidiInput port instance
-     * can no longer receive data via its {@link MidiReceiver#onReceive} method.
-     * This method returns a {@link MidiDevice.MidiConnection} object, which can be used to close the connection
+     * can no longer receive data via its {@link MidiReceiver#onSend} method.
+     * This method returns a {@link MidiDevice.MidiConnection} object, which can be used
+     * to close the connection.
+     *
      * @param inputPort the inputPort to connect
      * @param outputPortNumber the port number of the output port to connect inputPort to.
-     * @return {@link MidiDevice.MidiConnection} object if the connection is successful, or null in case of failure
+     * @return {@link MidiDevice.MidiConnection} object if the connection is successful,
+     *         or null in case of failure.
      */
     public MidiConnection connectPorts(MidiInputPort inputPort, int outputPortNumber) {
         if (outputPortNumber < 0 || outputPortNumber >= mDeviceInfo.getOutputPortCount()) {

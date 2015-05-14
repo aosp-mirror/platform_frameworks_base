@@ -27,7 +27,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * This class subclasses {@link android.media.midi.MidiReceiver} and dispatches any data it receives
  * to its receiver list. Any receivers that throw an exception upon receiving data will
  * be automatically removed from the receiver list, but no IOException will be returned
- * from the dispatcher's {@link android.media.midi.MidiReceiver#onReceive} in that case.
+ * from the dispatcher's {@link android.media.midi.MidiReceiver#onSend} in that case.
  */
 public final class MidiDispatcher extends MidiReceiver {
 
@@ -35,21 +35,13 @@ public final class MidiDispatcher extends MidiReceiver {
             = new CopyOnWriteArrayList<MidiReceiver>();
 
     private final MidiSender mSender = new MidiSender() {
-        /**
-         * Called to connect a {@link android.media.midi.MidiReceiver} to the sender
-         *
-         * @param receiver the receiver to connect
-         */
-        public void connect(MidiReceiver receiver) {
+        @Override
+        public void onConnect(MidiReceiver receiver) {
             mReceivers.add(receiver);
         }
 
-        /**
-         * Called to disconnect a {@link android.media.midi.MidiReceiver} from the sender
-         *
-         * @param receiver the receiver to disconnect
-         */
-        public void disconnect(MidiReceiver receiver) {
+        @Override
+        public void onDisconnect(MidiReceiver receiver) {
             mReceivers.remove(receiver);
         }
     };
@@ -73,10 +65,10 @@ public final class MidiDispatcher extends MidiReceiver {
     }
 
     @Override
-    public void onReceive(byte[] msg, int offset, int count, long timestamp) throws IOException {
+    public void onSend(byte[] msg, int offset, int count, long timestamp) throws IOException {
        for (MidiReceiver receiver : mReceivers) {
             try {
-                receiver.sendWithTimestamp(msg, offset, count, timestamp);
+                receiver.send(msg, offset, count, timestamp);
             } catch (IOException e) {
                 // if the receiver fails we remove the receiver but do not propagate the exception
                 mReceivers.remove(receiver);
@@ -85,7 +77,7 @@ public final class MidiDispatcher extends MidiReceiver {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void onFlush() throws IOException {
        for (MidiReceiver receiver : mReceivers) {
             receiver.flush();
        }

@@ -49,6 +49,8 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
 
     /* package */ MidiInputPort(IMidiDeviceServer server, IBinder token,
             ParcelFileDescriptor pfd, int portNumber) {
+        super(MidiPortImpl.MAX_PACKET_DATA_SIZE);
+
         mDeviceServer = server;
         mToken = token;
         mParcelFileDescriptor = pfd;
@@ -71,7 +73,7 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
     }
 
     @Override
-    public void onReceive(byte[] msg, int offset, int count, long timestamp) throws IOException {
+    public void onSend(byte[] msg, int offset, int count, long timestamp) throws IOException {
         if (offset < 0 || count < 0 || offset + count > msg.length) {
             throw new IllegalArgumentException("offset or count out of range");
         }
@@ -89,7 +91,7 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void onFlush() throws IOException {
         synchronized (mBuffer) {
             if (mOutputStream == null) {
                 throw new IOException("MidiInputPort is closed");
@@ -110,11 +112,6 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
             }
             return pfd;
         }
-    }
-
-    @Override
-    public int getMaxMessageSize() {
-        return MidiPortImpl.MAX_PACKET_DATA_SIZE;
     }
 
     @Override

@@ -18562,7 +18562,7 @@ package android.media.midi {
     method public int getId();
     method public int getInputPortCount();
     method public int getOutputPortCount();
-    method public android.media.midi.MidiDeviceInfo.PortInfo[] getPortList();
+    method public android.media.midi.MidiDeviceInfo.PortInfo[] getPorts();
     method public android.os.Bundle getProperties();
     method public int getType();
     method public boolean isPrivate();
@@ -18610,20 +18610,15 @@ package android.media.midi {
   public final class MidiInputPort extends android.media.midi.MidiReceiver implements java.io.Closeable {
     method public void close() throws java.io.IOException;
     method public final int getPortNumber();
-    method public void onReceive(byte[], int, int, long) throws java.io.IOException;
+    method public void onSend(byte[], int, int, long) throws java.io.IOException;
   }
 
   public final class MidiManager {
-    method public android.media.midi.MidiDeviceInfo[] getDeviceList();
-    method public void openBluetoothDevice(android.bluetooth.BluetoothDevice, android.media.midi.MidiManager.BluetoothOpenCallback, android.os.Handler);
-    method public void openDevice(android.media.midi.MidiDeviceInfo, android.media.midi.MidiManager.DeviceOpenCallback, android.os.Handler);
+    method public android.media.midi.MidiDeviceInfo[] getDevices();
+    method public void openBluetoothDevice(android.bluetooth.BluetoothDevice, android.media.midi.MidiManager.OnDeviceOpenedListener, android.os.Handler);
+    method public void openDevice(android.media.midi.MidiDeviceInfo, android.media.midi.MidiManager.OnDeviceOpenedListener, android.os.Handler);
     method public void registerDeviceCallback(android.media.midi.MidiManager.DeviceCallback, android.os.Handler);
     method public void unregisterDeviceCallback(android.media.midi.MidiManager.DeviceCallback);
-  }
-
-  public static abstract class MidiManager.BluetoothOpenCallback {
-    ctor public MidiManager.BluetoothOpenCallback();
-    method public abstract void onDeviceOpened(android.bluetooth.BluetoothDevice, android.media.midi.MidiDevice);
   }
 
   public static class MidiManager.DeviceCallback {
@@ -18633,31 +18628,34 @@ package android.media.midi {
     method public void onDeviceStatusChanged(android.media.midi.MidiDeviceStatus);
   }
 
-  public static abstract class MidiManager.DeviceOpenCallback {
-    ctor public MidiManager.DeviceOpenCallback();
-    method public abstract void onDeviceOpened(android.media.midi.MidiDeviceInfo, android.media.midi.MidiDevice);
+  public static abstract interface MidiManager.OnDeviceOpenedListener {
+    method public abstract void onDeviceOpened(android.media.midi.MidiDevice);
   }
 
   public final class MidiOutputPort extends android.media.midi.MidiSender implements java.io.Closeable {
     method public void close() throws java.io.IOException;
-    method public void connect(android.media.midi.MidiReceiver);
-    method public void disconnect(android.media.midi.MidiReceiver);
     method public final int getPortNumber();
+    method public void onConnect(android.media.midi.MidiReceiver);
+    method public void onDisconnect(android.media.midi.MidiReceiver);
   }
 
   public abstract class MidiReceiver {
     ctor public MidiReceiver();
+    ctor public MidiReceiver(int);
     method public void flush() throws java.io.IOException;
-    method public int getMaxMessageSize();
-    method public abstract void onReceive(byte[], int, int, long) throws java.io.IOException;
+    method public final int getMaxMessageSize();
+    method public void onFlush() throws java.io.IOException;
+    method public abstract void onSend(byte[], int, int, long) throws java.io.IOException;
     method public void send(byte[], int, int) throws java.io.IOException;
-    method public void sendWithTimestamp(byte[], int, int, long) throws java.io.IOException;
+    method public void send(byte[], int, int, long) throws java.io.IOException;
   }
 
   public abstract class MidiSender {
     ctor public MidiSender();
-    method public abstract void connect(android.media.midi.MidiReceiver);
-    method public abstract void disconnect(android.media.midi.MidiReceiver);
+    method public void connect(android.media.midi.MidiReceiver);
+    method public void disconnect(android.media.midi.MidiReceiver);
+    method public abstract void onConnect(android.media.midi.MidiReceiver);
+    method public abstract void onDisconnect(android.media.midi.MidiReceiver);
   }
 
 }

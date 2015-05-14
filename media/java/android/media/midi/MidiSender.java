@@ -21,17 +21,42 @@ package android.media.midi;
  * MidiReceivers to a MIDI device.
  */
 abstract public class MidiSender {
+
+    /**
+     * Connects a {@link MidiReceiver} to the sender
+     *
+     * @param receiver the receiver to connect
+     */
+    public void connect(MidiReceiver receiver) {
+        if (receiver == null) {
+            throw new NullPointerException("receiver null in MidiSender.connect");
+        }
+        onConnect(receiver);
+    }
+
+    /**
+     * Disconnects a {@link MidiReceiver} from the sender
+     *
+     * @param receiver the receiver to disconnect
+     */
+    public void disconnect(MidiReceiver receiver) {
+        if (receiver == null) {
+            throw new NullPointerException("receiver null in MidiSender.disconnect");
+        }
+        onDisconnect(receiver);
+    }
+
     /**
      * Called to connect a {@link MidiReceiver} to the sender
      *
      * @param receiver the receiver to connect
      */
-    abstract public void connect(MidiReceiver receiver);
+    abstract public void onConnect(MidiReceiver receiver);
 
     /**
      * Called to disconnect a {@link MidiReceiver} from the sender
      *
      * @param receiver the receiver to disconnect
      */
-    abstract public void disconnect(MidiReceiver receiver);
+    abstract public void onDisconnect(MidiReceiver receiver);
 }

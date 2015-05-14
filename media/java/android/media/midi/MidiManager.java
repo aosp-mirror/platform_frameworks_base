@@ -151,29 +151,16 @@ public final class MidiManager {
     }
 
     /**
-     * Callback class used for receiving the results of {@link #openDevice}
+     * Listener class used for receiving the results of {@link #openDevice} and
+     * {@link #openBluetoothDevice}
      */
-    abstract public static class DeviceOpenCallback {
+    public interface OnDeviceOpenedListener {
         /**
          * Called to respond to a {@link #openDevice} request
          *
-         * @param deviceInfo the {@link MidiDeviceInfo} for the device to open
          * @param device a {@link MidiDevice} for opened device, or null if opening failed
          */
-        abstract public void onDeviceOpened(MidiDeviceInfo deviceInfo, MidiDevice device);
-    }
-
-    /**
-     * Callback class used for receiving the results of {@link #openBluetoothDevice}
-     */
-    abstract public static class BluetoothOpenCallback {
-        /**
-         * Called to respond to a {@link #openBluetoothDevice} request
-         *
-         * @param bluetoothDevice the {@link android.bluetooth.BluetoothDevice} to open
-         * @param device a {@link MidiDevice} for opened device, or null if opening failed
-         */
-        abstract public void onDeviceOpened(BluetoothDevice bluetoothDevice, MidiDevice device);
+        abstract public void onDeviceOpened(MidiDevice device);
     }
 
     /**
@@ -224,38 +211,25 @@ public final class MidiManager {
      *
      * @return an array of all MIDI devices
      */
-    public MidiDeviceInfo[] getDeviceList() {
+    public MidiDeviceInfo[] getDevices() {
         try {
-           return mService.getDeviceList();
+           return mService.getDevices();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getDeviceList");
+            Log.e(TAG, "RemoteException in getDevices");
             return new MidiDeviceInfo[0];
         }
     }
 
-    private void sendOpenDeviceResponse(final MidiDeviceInfo deviceInfo, final MidiDevice device,
-            final DeviceOpenCallback callback, Handler handler) {
+    private void sendOpenDeviceResponse(final MidiDevice device,
+            final OnDeviceOpenedListener listener, Handler handler) {
         if (handler != null) {
             handler.post(new Runnable() {
                     @Override public void run() {
-                        callback.onDeviceOpened(deviceInfo, device);
+                        listener.onDeviceOpened(device);
                     }
                 });
         } else {
-            callback.onDeviceOpened(deviceInfo, device);
-        }
-    }
-
-    private void sendBluetoothDeviceResponse(final BluetoothDevice bluetoothDevice,
-            final MidiDevice device, final BluetoothOpenCallback callback, Handler handler) {
-        if (handler != null) {
-            handler.post(new Runnable() {
-                    @Override public void run() {
-                        callback.onDeviceOpened(bluetoothDevice, device);
-                    }
-                });
-        } else {
-            callback.onDeviceOpened(bluetoothDevice, device);
+            listener.onDeviceOpened(device);
         }
     }
 
@@ -263,12 +237,13 @@ public final class MidiManager {
      * Opens a MIDI device for reading and writing.
      *
      * @param deviceInfo a {@link android.media.midi.MidiDeviceInfo} to open
-     * @param callback a {@link MidiManager.DeviceOpenCallback} to be called to receive the result
+     * @param listener a {@link MidiManager.OnDeviceOpenedListener} to be called 
+     *                 to receive the result
      * @param handler the {@link android.os.Handler Handler} that will be used for delivering
      *                the result. If handler is null, then the thread used for the
-     *                callback is unspecified.
+     *                listener is unspecified.
      */
-    public void openDevice(MidiDeviceInfo deviceInfo, DeviceOpenCallback callback,
+    public void openDevice(MidiDeviceInfo deviceInfo, OnDeviceOpenedListener listener,
             Handler handler) {
         MidiDevice device = null;
         try {
@@ -283,7 +258,7 @@ public final class MidiManager {
                     intent.setComponent(new ComponentName(serviceInfo.packageName,
                             serviceInfo.name));
                     final MidiDeviceInfo deviceInfoF = deviceInfo;
-                    final DeviceOpenCallback callbackF = callback;
+                    final OnDeviceOpenedListener listenerF = listener;
                     final Handler handlerF = handler;
                     if (mContext.bindService(intent,
                         new ServiceConnection() {
@@ -291,8 +266,9 @@ public final class MidiManager {
                             public void onServiceConnected(ComponentName name, IBinder binder) {
                                 IMidiDeviceServer server =
                                         IMidiDeviceServer.Stub.asInterface(binder);
-                                MidiDevice device = new MidiDevice(deviceInfoF, server, mContext, this);
-                                sendOpenDeviceResponse(deviceInfoF, device, callbackF, handlerF);
+                                MidiDevice device = new MidiDevice(deviceInfoF, server, mContext,
+                                        this);
+                                sendOpenDeviceResponse(device, listenerF, handlerF);
                             }
 
                             @Override
@@ -314,21 +290,21 @@ public final class MidiManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openDevice");
         }
-        sendOpenDeviceResponse(deviceInfo, device, callback, handler);
+        sendOpenDeviceResponse(device, listener, handler);
     }
 
     /**
      * Opens a Bluetooth MIDI device for reading and writing.
      *
      * @param bluetoothDevice a {@link android.bluetooth.BluetoothDevice} to open as a MIDI device
-     * @param callback a {@link MidiManager.BluetoothOpenCallback} to be called to receive the
+     * @param listener a {@link MidiManager.OnDeviceOpenedListener} to be called to receive the
      * result
      * @param handler the {@link android.os.Handler Handler} that will be used for delivering
      *                the result. If handler is null, then the thread used for the
-     *                callback is unspecified.
+     *                listener is unspecified.
      */
     public void openBluetoothDevice(final BluetoothDevice bluetoothDevice,
-            final BluetoothOpenCallback callback, final Handler handler) {
+            final OnDeviceOpenedListener listener, final Handler handler) {
         Intent intent = new Intent(BLUETOOTH_MIDI_SERVICE_INTENT);
         intent.setComponent(new ComponentName(BLUETOOTH_MIDI_SERVICE_PACKAGE,
                 BLUETOOTH_MIDI_SERVICE_CLASS));
@@ -343,10 +319,10 @@ public final class MidiManager {
                         // fetch MidiDeviceInfo from the server
                         MidiDeviceInfo deviceInfo = server.getDeviceInfo();
                         MidiDevice device = new MidiDevice(deviceInfo, server, mContext, this);
-                        sendBluetoothDeviceResponse(bluetoothDevice, device, callback, handler);
+                        sendOpenDeviceResponse(device, listener, handler);
                     } catch (RemoteException e) {
                         Log.e(TAG, "remote exception in onServiceConnected");
-                        sendBluetoothDeviceResponse(bluetoothDevice, null, callback, handler);
+                        sendOpenDeviceResponse(null, listener, handler);
                     }
                 }
 
@@ -358,7 +334,7 @@ public final class MidiManager {
             Context.BIND_AUTO_CREATE))
         {
             Log.e(TAG, "Unable to bind service: " + intent);
-            sendBluetoothDeviceResponse(bluetoothDevice, null, callback, handler);
+            sendOpenDeviceResponse(null, listener, handler);
         }
     }
 

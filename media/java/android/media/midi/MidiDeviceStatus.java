@@ -69,6 +69,7 @@ public final class MidiDeviceStatus implements Parcelable {
 
     /**
      * Returns true if an input port is open.
+     * An input port can only be opened by one client at a time.
      *
      * @param portNumber the input port's port number
      * @return input port open status
@@ -78,7 +79,8 @@ public final class MidiDeviceStatus implements Parcelable {
     }
 
     /**
-     * Returns the open count for an output port.
+     * Returns the number of clients currently connected to the specified output port.
+     * Unlike input ports, an output port can be opened by multiple clients at the same time.
      *
      * @param portNumber the output port's port number
      * @return output port open count
