@@ -111,6 +111,21 @@ public class ConfigGenerator {
                                                         .setSoftButtons(true)
                                                         .setNavigation(Navigation.NONAV);
 
+    public static final ConfigGenerator NEXUS_5_LAND = new ConfigGenerator()
+                                                        .setScreenHeight(1080)
+                                                        .setScreenWidth(1920)
+                                                        .setXdpi(445)
+                                                        .setYdpi(445)
+                                                        .setOrientation(ScreenOrientation.LANDSCAPE)
+                                                        .setDensity(Density.XXHIGH)
+                                                        .setRatio(ScreenRatio.NOTLONG)
+                                                        .setSize(ScreenSize.NORMAL)
+                                                        .setKeyboard(Keyboard.NOKEY)
+                                                        .setTouchScreen(TouchScreen.FINGER)
+                                                        .setKeyboardState(KeyboardState.SOFT)
+                                                        .setSoftButtons(true)
+                                                        .setNavigation(Navigation.NONAV);
+
     private static final String TAG_ATTR = "attr";
     private static final String TAG_ENUM = "enum";
     private static final String TAG_FLAG = "flag";
