@@ -47,42 +47,42 @@ meta.tags="monetization, inappbilling, subscriptions"
 </div>
 
 <p>Subscriptions let you sell content, services, or features in your app with
-automated, recurring billing. You can easily adapt an existing In-app Billing 
+automated, recurring billing. You can easily adapt an existing In-app Billing
 implementation to sell subscriptions.</p>
-<p>This document is focused on highlighting implementation details that are 
-specific to subscriptions, along with some strategies for the associated billing 
+<p>This document is focused on highlighting implementation details that are
+specific to subscriptions, along with some strategies for the associated billing
 and business models.</p>
 
 <h2 id="overview">Overview of Subscriptions</h2>
-<p>A <em>subscription</em> is a product type offered in In-app Billing that 
-lets you sell content, services, or features to users from inside your app with 
+<p>A <em>subscription</em> is a product type offered in In-app Billing that
+lets you sell content, services, or features to users from inside your app with
 recurring, automated billing at the interval you specify. You can sell subscriptions to almost
 any
 type of digital content, from any type of app or game.</p>
 
 <p>As with other in-app products, you configure and publish subscriptions using
-the Developer Console and then sell them from inside apps installed on 
+the Developer Console and then sell them from inside apps installed on
 Android devices. In the Developer console, you create subscription
 products and add them to a product list, then set a price and optional trial
 period for each, choose a billing interval, and then
-publish. For more information about using the Developer Console, see 
+publish. For more information about using the Developer Console, see
 <a href="#administering">Configuring Subscription Items</a>.</p>
 
-<p>When users purchase subscriptions in your apps, Google Play handles all 
-checkout details so your apps never have to directly process any financial 
-transactions. Google Play processes all payments for subscriptions through 
-Google Wallet, just as it does for standard in-app products and app purchases. 
+<p>When users purchase subscriptions in your apps, Google Play handles all
+checkout details so your apps never have to directly process any financial
+transactions. Google Play processes all payments for subscriptions through
+Google Wallet, just as it does for standard in-app products and app purchases.
 This ensures a consistent and familiar purchase flow for your users.</p>
 
 <img src="{@docRoot}images/in-app-billing/v3/billing_subscription_v3.png" style="float:right; border:4px solid ddd;">
 
-<p>After users have purchased subscriptions, they can view the subscriptions and 
-cancel them from the <strong>My Apps</strong> screen in the Play Store app or 
-from the app's product details page in the Play Store app. For more information 
+<p>After users have purchased subscriptions, they can view the subscriptions and
+cancel them from the <strong>My Apps</strong> screen in the Play Store app or
+from the app's product details page in the Play Store app. For more information
 about handling user cancellations, see <a href="#cancellation">Subscription Cancellation</a>.</p>
 
-<p>In addition to client-side API calls, you can use the server-side API for 
-In-app Billing to provide subscription purchasers with extended access to 
+<p>In addition to client-side API calls, you can use the server-side API for
+In-app Billing to provide subscription purchasers with extended access to
 content (for example, from your web site or another service).
 The server-side API lets you validate the status of a subscription when users
 sign into your other services. For more information about the API, see <a
@@ -95,12 +95,12 @@ Android apps.</p>
 your own business logic to your Android app to determine whether the user has
 already purchased a subscription elsewhere, then allow access to your content if
 so or offer a subscription purchase from Google Play if not.</li>
-<li>You can implement your own solution for sharing subscriptions across as 
-many different apps or products as you want. For example, you could sell a 
-subscription that gives a subscriber access to an entire collection of apps, 
-games, or other content for a monthly or annual fee. To implement this solution, 
-you could add your own business logic to your app to determine whether the user 
-has already purchased a given subscription and if so, allow access to your 
+<li>You can implement your own solution for sharing subscriptions across as
+many different apps or products as you want. For example, you could sell a
+subscription that gives a subscriber access to an entire collection of apps,
+games, or other content for a monthly or annual fee. To implement this solution,
+you could add your own business logic to your app to determine whether the user
+has already purchased a given subscription and if so, allow access to your
 content.</li>
 </ul>
 </p>
@@ -111,14 +111,14 @@ information about the current policies and terms, please read the <a
 href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en
 &answer=140504">policies document</a>.</p>
 
-<p>To learn about the minimum system requirements for 
+<p>To learn about the minimum system requirements for
 subscriptions, see the <a href="{@docRoot}google/play/billing/versions.html#Subs">Version Notes</a>.</p>
 
 <h2 id="administering">Configuring Subscription Items</h2>
 
 <p>To create and manage subscriptions, you can use the Developer Console to set
 up a
-product list for the app, then configure these attributes for each subscription 
+product list for the app, then configure these attributes for each subscription
 product:</p>
 
 <ul>
@@ -133,7 +133,7 @@ product:</p>
 <li>Additional currency pricing (can be auto-filled)</li>
 </ul>
 
-<p>For details on how to add and configure products in the Developer Console, 
+<p>For details on how to add and configure products in the Developer Console,
 see <a href="{@docRoot}google/play/billing/billing_admin.html">Administering
 In-app Billing</a>.</p>
 
@@ -149,18 +149,20 @@ price. You can price multiple subscriptions for the same content differently
 &mdash; for example you could offer a discount on an annual subscription
 relative to the monthly equivalent. </p>
 
-<p class="caution"><strong>Important</strong>: To change the price of a 
-subscription, you can publish a new subscription product ID at a new price, 
-then offer it in your app instead of the original product. Users who have 
-already purchased will continue to be charged at the 
+<p class="caution"><strong>Important</strong>: To change the price of a
+subscription, you can publish a new subscription product ID at a new price,
+then offer it in your app instead of the original product. Users who have
+already purchased will continue to be charged at the
 original price, but new users will be charged at the new price.</p>
 
 <h3 id="user-billing">User billing</h3>
 
-<p>In the Developer Console, you can configure subscription products with 
+<p>In the Developer Console, you can configure subscription products with
 automated recurring billing at your choice of intervals:</p>
 
 <ul>
+  <li>Weekly &mdash; Google Play bills the customer’s Google Wallet account at
+  the time of purchase and every week after the original purchase date.</li>
   <li>Monthly &mdash; Google Play bills the customer’s Google Wallet account at
   the time of purchase and monthly subsequent to the purchase date (exact billing
   intervals can vary slightly over time).</li>
@@ -183,32 +185,27 @@ monthly and annual subscriptions, billing cycles will always match subscription
 cycles, based on the purchase date. (Seasonal subscriptions are charged
 annually, on the first day of the season.)</p>
 
-<p>Over the life of a subscription, the form of payment billed remains the same
-&mdash; Google Play always bills the same form of payment (such as credit card
-or by Direct Carrier Billing) that was originally used to purchase the
-subscription.</p>
-
-<p>When the subscription payment is approved by Google Wallet, Google Play
+<p>When the subscription payment is approved, Google Play
 provides a purchase token back to the purchasing app through the In-app Billing
-API. Your apps can store the token locally or pass it to your backend servers, 
+API. Your apps can store the token locally or pass it to your backend servers,
 which can then use it to validate or cancel the subscription remotely using the
 <a
 href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google Play Developer API</a>.</p>
 
 <p>If a recurring payment fails (for example, because the customer’s credit
-card has become invalid), the subscription does not renew. How your app is 
+card has become invalid), the subscription does not renew. How your app is
 notified depends on the In-app Billing API version that you are using:</p>
 <ul>
-<li>With In-app Billing Version 3, the failed or expired subscription is no longer 
+<li>With In-app Billing Version 3, the failed or expired subscription is no longer
 returned when you call {@code getPurchases}.</li>
-<li>With In-app Billing Version 2, Google Play notifies your app at the end of 
-the active cycle that the purchase state of the subscription is now "Expired". 
+<li>With In-app Billing Version 2, Google Play notifies your app at the end of
+the active cycle that the purchase state of the subscription is now "Expired".
 </li>
 </ul>
 
-<p class="note"><strong>Recommendation</strong>: Include business logic in your 
-app to notify your backend servers of subscription purchases, tokens, and any 
-billing errors that may occur. Your backend servers can use the server-side API 
+<p class="note"><strong>Recommendation</strong>: Include business logic in your
+app to notify your backend servers of subscription purchases, tokens, and any
+billing errors that may occur. Your backend servers can use the server-side API
 to query and update your records and follow up with customers directly, if needed.</p>
 
 <h3 id="manual-renewal">Manual Renewal</h3>
@@ -220,8 +217,8 @@ is active, it is extended by the appropriate period at the current rate.</p>
 
 <p>For example, Achilles has a subscription to the <em>Modern Hoplite</em> app.
 His subscription is currently due to expire on August 1. On July 10, he
-purchases a 3-month subscription at the current rate. Those three months are
-added to his existing subscription, so the subscription now expires on November
+purchases a 1-month subscription at the current rate. This one month is
+added to his existing subscription, so the subscription now expires on September
 1.</p>
 
 <p>It is up to the app to convey this with an appropriate UI. For example, if a
@@ -311,9 +308,9 @@ date to 15 August 2015 14:00:00 UTC.</p>
 <h3 id="trials">Free trials</h3>
 
 <p>In the Developer Console, you can set up a free trial period that lets users
-try your subscription content before buying it. The trial period runs for the 
-period of time that you set and then automatically converts to a full 
-subscription managed according to the subscription's billing interval and 
+try your subscription content before buying it. The trial period runs for the
+period of time that you set and then automatically converts to a full
+subscription managed according to the subscription's billing interval and
 price. Free trials are supported for monthly and annual subscriptions only, and are not supported for seasonal subscriptions.</p>
 
 <p>To take advantage of a free trial, a user must "purchase" the full
@@ -328,7 +325,7 @@ by email that they have purchased a subscription that includes a free trial
 period and that the initial charge was $0.00. </p>
 
 <p>When the trial period ends, Google Play automatically initiates billing
-against the credit card that the user provided during the initial purchase, at 
+against the credit card that the user provided during the initial purchase, at
 the amount set
 for the full subscription, and continuing at the subscription interval. If
 necessary, the user can cancel the subscription at any time during the trial
@@ -367,15 +364,15 @@ publish the product before Google Play can make it available for purchase. Note
 that you must also publish the app itself before Google Play will make the
 products available for purchase inside the app. </p>
 
-<p class="caution"><strong>Important</strong>: You can remove the subscription 
-product from the product list offered in your app to prevent users from seeing 
+<p class="caution"><strong>Important</strong>: You can remove the subscription
+product from the product list offered in your app to prevent users from seeing
 or purchasing it.</p>
 
 <h2 id="cancellation">Subscription Cancellation</h2>
 
 <p>Users can view the status of all of their subscriptions and cancel them if
-necessary from the <strong>My Apps</strong> screen in the Play Store app. 
-Currently, the In-app Billing API does not provide support for programatically 
+necessary from the <strong>My Apps</strong> screen in the Play Store app.
+Currently, the In-app Billing API does not provide support for programatically
 canceling subscriptions from inside the purchasing app.</p>
 
 <p>When the user cancels a subscription, Google Play does not offer a refund for
@@ -404,12 +401,12 @@ href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en
 
 <h3 id="uninstall">App uninstallation</h3>
 
-<p>When the user uninstalls an app that includes purchased subscriptions, the 
-Play Store app will notify the user that there are active subscriptions. If the 
-user chooses to continue with the uninstallation, the app is removed and the 
-subscriptions remain active and recurring billing continues. The user can return 
-to cancel the associated subscriptions at any time in the <strong>My Apps</strong> 
-screen of the Play Store app. If the user chooses to cancel the uninstallation, 
+<p>When the user uninstalls an app that includes purchased subscriptions, the
+Play Store app will notify the user that there are active subscriptions. If the
+user chooses to continue with the uninstallation, the app is removed and the
+subscriptions remain active and recurring billing continues. The user can return
+to cancel the associated subscriptions at any time in the <strong>My Apps</strong>
+screen of the Play Store app. If the user chooses to cancel the uninstallation,
 the app and subscriptions remain as they were.</p>
 
 <h3 id="refunds">Refunding and revoking subscriptions</h3>
@@ -436,8 +433,8 @@ at this time.</p>
 <h2 id="payment">Payment Processing and Policies</h2>
 
 <p>In general, the terms of Google Play allow you to sell in-app subscriptions
-only through the standard payment processor, Google Wallet. For purchases of 
-any subscription products, the transaction fee is the same as the transaction 
+only through the standard payment processor, Google Wallet. For purchases of
+any subscription products, the transaction fee is the same as the transaction
 fee for application purchases (30%).</p>
 
 <p>Apps published on Google Play that are selling subscriptions must use In-app
@@ -451,7 +448,7 @@ document</a>.</p>
 <h3 id="orderId">Subscription order numbers</h3>
 
 <p>To help you track transactions relating to a given subscription, Google
-Wallet provides a base Merchant Order Number for all recurrences of the 
+Wallet provides a base Merchant Order Number for all recurrences of the
 subscription and denotes
 each recurring transaction by appending an integer as follows: </p>
 
@@ -461,9 +458,28 @@ each recurring transaction by appending an integer as follows: </p>
 <code>12999556515565155651.5565135565155651..2</code> (third recurrence orderID)<br />
 ...<br /></p>
 
-<p>Google Play provides the order number as the value of the 
-{@code orderId} field of the {@code INAPP_PURCHASE_DATA} JSON field (in V3) 
+<p>Google Play provides the order number as the value of the
+{@code orderId} field of the {@code INAPP_PURCHASE_DATA} JSON field (in V3)
 or the {@code PURCHASE_STATE_CHANGED} intent (in V2).</p>
+
+<h3 id="grace-period">Grace period for declined payments</h3>
+
+<p>
+  The Developer Console allows you to set a grace period for subscriptions, so you can give
+  your subscribers a chance to update their payment method if a recurring payment is declined.
+  This setting is useful if your subscribers have an expired credit card, subscribed using a
+  prepaid card, or canceled a card without updating their payment information. For
+  information about setting a grace period for subscriptions, see the Developer Console Help
+  topic <a href="https://support.google.com/googleplay/android-developer/answer/140504"
+  class="external-link">Add subscriptions &amp; recurring charges</a>.
+</p>
+
+</p>
+  For information on how setting a grace period affects data returned from the
+  {@code getBuyIntent()} method, see the
+  <a href="{@docRoot}google/play/billing/billing_reference.html#purchase-data-table"
+  >{@code INAPP_PURCHASE_DATA}</a> fields table.
+</p>
 
 <h2 id="strategies">Purchase Verification Strategies</h2>
 
