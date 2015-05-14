@@ -23,7 +23,15 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Shader.TileMode;
 
+import java.awt.PaintContext;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.Raster;
 
 /**
  * Delegate implementing the native methods of android.graphics.BitmapShader
@@ -67,9 +75,9 @@ public class BitmapShader_Delegate extends Shader_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static long nativeCreate(long native_bitmap, int shaderTileModeX,
+    /*package*/ static long nativeCreate(Bitmap androidBitmap, int shaderTileModeX,
             int shaderTileModeY) {
-        Bitmap_Delegate bitmap = Bitmap_Delegate.getDelegate(native_bitmap);
+        Bitmap_Delegate bitmap = Bitmap_Delegate.getDelegate(androidBitmap);
         if (bitmap == null) {
             return 0;
         }
@@ -83,17 +91,17 @@ public class BitmapShader_Delegate extends Shader_Delegate {
 
     // ---- Private delegate/helper methods ----
 
-    private BitmapShader_Delegate(java.awt.image.BufferedImage image,
+    private BitmapShader_Delegate(BufferedImage image,
             TileMode tileModeX, TileMode tileModeY) {
         mJavaPaint = new BitmapShaderPaint(image, tileModeX, tileModeY);
     }
 
     private class BitmapShaderPaint implements java.awt.Paint {
-        private final java.awt.image.BufferedImage mImage;
+        private final BufferedImage mImage;
         private final TileMode mTileModeX;
         private final TileMode mTileModeY;
 
-        BitmapShaderPaint(java.awt.image.BufferedImage image,
+        BitmapShaderPaint(BufferedImage image,
                 TileMode tileModeX, TileMode tileModeY) {
             mImage = image;
             mTileModeX = tileModeX;
@@ -101,29 +109,24 @@ public class BitmapShader_Delegate extends Shader_Delegate {
         }
 
         @Override
-        public java.awt.PaintContext createContext(
-                java.awt.image.ColorModel      colorModel,
-                java.awt.Rectangle             deviceBounds,
-                java.awt.geom.Rectangle2D      userBounds,
-                java.awt.geom.AffineTransform  xform,
-                java.awt.RenderingHints        hints) {
-
-            java.awt.geom.AffineTransform canvasMatrix;
+        public PaintContext createContext(ColorModel colorModel, Rectangle deviceBounds,
+                Rectangle2D userBounds, AffineTransform xform, RenderingHints hints) {
+            AffineTransform canvasMatrix;
             try {
                 canvasMatrix = xform.createInverse();
-            } catch (java.awt.geom.NoninvertibleTransformException e) {
+            } catch (NoninvertibleTransformException e) {
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_INVERSE,
                         "Unable to inverse matrix in BitmapShader", e, null /*data*/);
-                canvasMatrix = new java.awt.geom.AffineTransform();
+                canvasMatrix = new AffineTransform();
             }
 
-            java.awt.geom.AffineTransform localMatrix = getLocalMatrix();
+            AffineTransform localMatrix = getLocalMatrix();
             try {
                 localMatrix = localMatrix.createInverse();
-            } catch (java.awt.geom.NoninvertibleTransformException e) {
+            } catch (NoninvertibleTransformException e) {
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_MATRIX_INVERSE,
                         "Unable to inverse matrix in BitmapShader", e, null /*data*/);
-                localMatrix = new java.awt.geom.AffineTransform();
+                localMatrix = new AffineTransform();
             }
 
             if (!colorModel.isCompatibleRaster(mImage.getRaster())) {
@@ -134,16 +137,16 @@ public class BitmapShader_Delegate extends Shader_Delegate {
             return new BitmapShaderContext(canvasMatrix, localMatrix, colorModel);
         }
 
-        private class BitmapShaderContext implements java.awt.PaintContext {
+        private class BitmapShaderContext implements PaintContext {
 
-            private final java.awt.geom.AffineTransform mCanvasMatrix;
-            private final java.awt.geom.AffineTransform mLocalMatrix;
-            private final java.awt.image.ColorModel mColorModel;
+            private final AffineTransform mCanvasMatrix;
+            private final AffineTransform mLocalMatrix;
+            private final ColorModel mColorModel;
 
             public BitmapShaderContext(
-                    java.awt.geom.AffineTransform canvasMatrix,
-                    java.awt.geom.AffineTransform localMatrix,
-                    java.awt.image.ColorModel colorModel) {
+                    AffineTransform canvasMatrix,
+                    AffineTransform localMatrix,
+                    ColorModel colorModel) {
                 mCanvasMatrix = canvasMatrix;
                 mLocalMatrix = localMatrix;
                 mColorModel = colorModel;
@@ -154,13 +157,13 @@ public class BitmapShader_Delegate extends Shader_Delegate {
             }
 
             @Override
-            public java.awt.image.ColorModel getColorModel() {
+            public ColorModel getColorModel() {
                 return mColorModel;
             }
 
             @Override
-            public java.awt.image.Raster getRaster(int x, int y, int w, int h) {
-                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(
+            public Raster getRaster(int x, int y, int w, int h) {
+                BufferedImage image = new BufferedImage(
                     mColorModel, mColorModel.createCompatibleWritableRaster(w, h),
                     mColorModel.isAlphaPremultiplied(), null);
 

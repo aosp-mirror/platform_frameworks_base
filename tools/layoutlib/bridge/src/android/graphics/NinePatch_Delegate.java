@@ -90,7 +90,7 @@ public final class NinePatch_Delegate {
             if (oos != null) {
                 try {
                     oos.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
         }
@@ -136,7 +136,7 @@ public final class NinePatch_Delegate {
                 if (ois != null) {
                     try {
                         ois.close();
-                    } catch (IOException e) {
+                    } catch (IOException ignored) {
                     }
                 }
             }
@@ -150,15 +150,12 @@ public final class NinePatch_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean isNinePatchChunk(byte[] chunk) {
         NinePatchChunk chunkObject = getChunk(chunk);
-        if (chunkObject != null) {
-            return true;
-        }
+        return chunkObject != null;
 
-        return false;
     }
 
     @LayoutlibDelegate
-    /*package*/ static long validateNinePatchChunk(long bitmap, byte[] chunk) {
+    /*package*/ static long validateNinePatchChunk(byte[] chunk) {
         // the default JNI implementation only checks that the byte[] has the same
         // size as the C struct it represent. Since we cannot do the same check (serialization
         // will return different size depending on content), we do nothing.
@@ -173,7 +170,7 @@ public final class NinePatch_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDraw(long canvas_instance, RectF loc, long bitmap_instance,
+    /*package*/ static void nativeDraw(long canvas_instance, RectF loc, Bitmap bitmap_instance,
             long chunk, long paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
                 (int) loc.left, (int) loc.top, (int) loc.right, (int) loc.bottom,
@@ -182,7 +179,7 @@ public final class NinePatch_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDraw(long canvas_instance, Rect loc, long bitmap_instance,
+    /*package*/ static void nativeDraw(long canvas_instance, Rect loc, Bitmap bitmap_instance,
             long chunk, long paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
                 loc.left, loc.top, loc.right, loc.bottom,
@@ -191,7 +188,7 @@ public final class NinePatch_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long nativeGetTransparentRegion(long bitmap, long chunk, Rect location) {
+    /*package*/ static long nativeGetTransparentRegion(Bitmap bitmap, long chunk, Rect location) {
         return 0;
     }
 
@@ -199,7 +196,7 @@ public final class NinePatch_Delegate {
 
     private static void draw(long canvas_instance,
             final int left, final int top, final int right, final int bottom,
-            long bitmap_instance, long chunk, long paint_instance_or_null,
+            Bitmap bitmap_instance, long chunk, long paint_instance_or_null,
             final int destDensity, final int srcDensity) {
         // get the delegate from the native int.
         final Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);
