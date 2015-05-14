@@ -4265,12 +4265,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                     mForegroundInfo.mInsidePadding = a.getBoolean(attr,
                             mForegroundInfo.mInsidePadding);
+                    break;
                 case R.styleable.View_scrollIndicators:
                     final int scrollIndicators =
-                            a.getInt(attr, SCROLL_INDICATORS_NONE) & SCROLL_INDICATORS_PFLAG3_MASK;
+                            (a.getInt(attr, 0) << SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT)
+                                    & SCROLL_INDICATORS_PFLAG3_MASK;
                     if (scrollIndicators != 0) {
-                        viewFlagValues |= scrollIndicators;
-                        viewFlagMasks |= SCROLL_INDICATORS_PFLAG3_MASK;
+                        mPrivateFlags3 |= scrollIndicators;
                         initializeScrollIndicators = true;
                     }
                     break;
@@ -4884,7 +4885,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_scrollIndicators
      */
     public void setScrollIndicators(@ScrollIndicators int indicators) {
-        setScrollIndicators(indicators, SCROLL_INDICATORS_PFLAG3_MASK);
+        setScrollIndicators(indicators,
+                SCROLL_INDICATORS_PFLAG3_MASK >>> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT);
     }
 
     /**
@@ -4952,36 +4954,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public int getScrollIndicators() {
         return (mPrivateFlags3 & SCROLL_INDICATORS_PFLAG3_MASK)
                 >>> SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
-    }
-
-    /**
-     * Returns whether the specified scroll indicator is enabled.
-     * <p>
-     * Multiple indicator types may be queried by passing the logical OR of the
-     * desired types. If multiple types are specified, the return value
-     * represents whether they are all enabled.
-     *
-     * @param direction the indicator direction, or the logical OR of multiple
-     *             indicator directions. One or more of:
-     *             <ul>
-     *               <li>{@link #SCROLL_INDICATOR_TOP}</li>
-     *               <li>{@link #SCROLL_INDICATOR_BOTTOM}</li>
-     *               <li>{@link #SCROLL_INDICATOR_LEFT}</li>
-     *               <li>{@link #SCROLL_INDICATOR_RIGHT}</li>
-     *               <li>{@link #SCROLL_INDICATOR_START}</li>
-     *               <li>{@link #SCROLL_INDICATOR_END}</li>
-     *             </ul>
-     * @return {@code true} if the specified indicator(s) are enabled,
-     *         {@code false} otherwise
-     * @attr ref android.R.styleable#View_scrollIndicators
-     */
-    public boolean isScrollIndicatorEnabled(int direction) {
-        // Shift and sanitize input.
-        direction <<= SCROLL_INDICATORS_TO_PFLAGS3_LSHIFT;
-        direction &= SCROLL_INDICATORS_PFLAG3_MASK;
-
-        // All of the flags must be set.
-        return (mPrivateFlags3 & direction) == direction;
     }
 
     ListenerInfo getListenerInfo() {
