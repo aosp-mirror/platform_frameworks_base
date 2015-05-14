@@ -9673,6 +9673,7 @@ package android.content.pm {
     field public static final int INSTALL_FAILED_NO_SHARED_USER = -6; // 0xfffffffa
     field public static final int INSTALL_FAILED_OLDER_SDK = -12; // 0xfffffff4
     field public static final int INSTALL_FAILED_PACKAGE_CHANGED = -23; // 0xffffffe9
+    field public static final int INSTALL_FAILED_PERMISSION_MODEL_DOWNGRADE = -26; // 0xffffffe6
     field public static final int INSTALL_FAILED_REPLACE_COULDNT_DELETE = -10; // 0xfffffff6
     field public static final int INSTALL_FAILED_SHARED_USER_INCOMPATIBLE = -8; // 0xfffffff8
     field public static final int INSTALL_FAILED_TEST_ONLY = -15; // 0xfffffff1
