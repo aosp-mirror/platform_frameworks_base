@@ -757,7 +757,7 @@ public class WifiManager {
      * of state change events.
      * <p>
      * <b>Note:</b> If an application's target SDK version is
-     * {@link android.os.Build.VERSION_CODES#MNC} or newer, network
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP} or newer, network
      * communication may not use Wi-Fi even if Wi-Fi is connected; traffic may
      * instead be sent through another network, such as cellular data,
      * Bluetooth tethering, or Ethernet. For example, traffic will never use a
@@ -776,7 +776,7 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      */
     public boolean enableNetwork(int netId, boolean disableOthers) {
-        final boolean pin = disableOthers && mTargetSdkVersion < Build.VERSION_CODES.MNC;
+        final boolean pin = disableOthers && mTargetSdkVersion < Build.VERSION_CODES.LOLLIPOP;
         if (pin) {
             registerPinningNetworkCallback();
         }
