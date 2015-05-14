@@ -655,26 +655,26 @@ public class ImageReader implements AutoCloseable {
         @Override
         public int getFormat() {
             throwISEIfImageIsInvalid();
+            int readerFormat = ImageReader.this.getImageFormat();
+            // Assume opaque reader always produce opaque images.
+            mFormat = (readerFormat == ImageFormat.PRIVATE) ? readerFormat :
+                nativeGetFormat(readerFormat);
             return mFormat;
         }
 
         @Override
         public int getWidth() {
             throwISEIfImageIsInvalid();
-            if (mWidth == -1) {
-                mWidth = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getWidth() :
-                        nativeGetWidth(mFormat);
-            }
+            mWidth = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getWidth() :
+                    nativeGetWidth(mFormat);
             return mWidth;
         }
 
         @Override
         public int getHeight() {
             throwISEIfImageIsInvalid();
-            if (mHeight == -1) {
-                mHeight = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getHeight() :
-                        nativeGetHeight(mFormat);
-            }
+            mHeight = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getHeight() :
+                    nativeGetHeight(mFormat);
             return mHeight;
         }
 
@@ -822,6 +822,7 @@ public class ImageReader implements AutoCloseable {
         private synchronized native SurfacePlane nativeCreatePlane(int idx, int readerFormat);
         private synchronized native int nativeGetWidth(int format);
         private synchronized native int nativeGetHeight(int format);
+        private synchronized native int nativeGetFormat(int readerFormat);
     }
 
     private synchronized native void nativeInit(Object weakSelf, int w, int h,
