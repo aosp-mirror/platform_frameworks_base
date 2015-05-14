@@ -70,6 +70,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -670,7 +671,7 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             fis = userListFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
@@ -823,7 +824,7 @@ public class UserManagerService extends IUserManager.Stub {
 
             // XmlSerializer serializer = XmlUtils.serializerInstance();
             final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, "utf-8");
+            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -882,7 +883,7 @@ public class UserManagerService extends IUserManager.Stub {
 
             // XmlSerializer serializer = XmlUtils.serializerInstance();
             final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, "utf-8");
+            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -964,7 +965,7 @@ public class UserManagerService extends IUserManager.Stub {
                     new AtomicFile(new File(mUsersDir, Integer.toString(id) + XML_SUFFIX));
             fis = userFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
@@ -1569,7 +1570,7 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             fis = restrictionsFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             XmlUtils.nextElement(parser);
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 Slog.e(LOG_TAG, "Unable to read restrictions file "
@@ -1658,7 +1659,7 @@ public class UserManagerService extends IUserManager.Stub {
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
 
             final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, "utf-8");
+            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 

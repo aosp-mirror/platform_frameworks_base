@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -1814,7 +1815,7 @@ public class SyncStorageEngine extends Handler {
                 Log.v(TAG_FILE, "Reading " + mAccountInfoFile.getBaseFile());
             }
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
                     eventType != XmlPullParser.END_DOCUMENT) {
@@ -2153,7 +2154,7 @@ public class SyncStorageEngine extends Handler {
         try {
             fos = mAccountInfoFile.startWrite();
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -2445,7 +2446,7 @@ public class SyncStorageEngine extends Handler {
             }
             XmlPullParser parser;
             parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
 
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
@@ -2581,7 +2582,7 @@ public class SyncStorageEngine extends Handler {
             }
             fos = mPendingFile.startWrite();
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
 
             for (int i = 0; i < N; i++) {
                 PendingOperation pop = mPendingOperations.get(i);
@@ -2634,7 +2635,7 @@ public class SyncStorageEngine extends Handler {
 
         try {
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             writePendingOperationLocked(op, out);
             out.endDocument();
             mPendingFile.finishWrite(fos);

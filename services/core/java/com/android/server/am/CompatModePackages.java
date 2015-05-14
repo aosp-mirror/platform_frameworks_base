@@ -21,6 +21,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -86,7 +87,7 @@ public final class CompatModePackages {
         try {
             fis = mFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
                     eventType != XmlPullParser.END_DOCUMENT) {
@@ -362,7 +363,7 @@ public final class CompatModePackages {
         try {
             fos = mFile.startWrite();
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "compat-packages");

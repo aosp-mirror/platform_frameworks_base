@@ -79,6 +79,7 @@ import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1165,7 +1166,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         try {
             stream = new FileOutputStream(journal.chooseForWrite(), false);
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, "utf-8");
+            out.setOutput(stream, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
 
             out.startTag(null, "wp");
@@ -1248,7 +1249,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         try {
             stream = new FileInputStream(file);
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, null);
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
 
             int type;
             do {
