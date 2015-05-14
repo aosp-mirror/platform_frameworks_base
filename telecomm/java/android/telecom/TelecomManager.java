@@ -333,16 +333,24 @@ public class TelecomManager {
      * displayed to the user.
      */
 
-    /** Property is displayed normally. */
+    /**
+     * Indicates that the address or number of a call is allowed to be displayed for caller ID.
+    */
     public static final int PRESENTATION_ALLOWED = 1;
 
-    /** Property was blocked. */
+    /**
+     * Indicates that the address or number of a call is blocked by the other party.
+     */
     public static final int PRESENTATION_RESTRICTED = 2;
 
-    /** Presentation was not specified or is unknown. */
+    /**
+     * Indicates that the address or number of a call is not specified or known by the carrier.
+     */
     public static final int PRESENTATION_UNKNOWN = 3;
 
-    /** Property should be displayed as a pay phone. */
+    /**
+     * Indicates that the address or number of a call belongs to a pay phone.
+     */
     public static final int PRESENTATION_PAYPHONE = 4;
 
     private static final String TAG = "TelecomManager";
