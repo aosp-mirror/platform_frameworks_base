@@ -3886,10 +3886,20 @@ public class Editor {
 
         @Override
         public void updatePosition(float x, float y) {
-            final int trueOffset = mTextView.getOffsetForPosition(x, y);
-            final int currLine = mTextView.getLineAtCoordinate(y);
+            final int selectionEnd = mTextView.getSelectionEnd();
+            final Layout layout = mTextView.getLayout();
+            int initialOffset = mTextView.getOffsetForPosition(x, y);
+            int currLine = mTextView.getLineAtCoordinate(y);
             boolean positionCursor = false;
-            int offset = trueOffset;
+
+            if (initialOffset >= selectionEnd) {
+                // Handles have crossed, bound it to the last selected line and
+                // adjust by word / char as normal.
+                currLine = layout != null ? layout.getLineForOffset(selectionEnd) : mPrevLine;
+                initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
+            }
+
+            int offset = initialOffset;
             int end = getWordEnd(offset);
             int start = getWordStart(offset);
 
@@ -3905,8 +3915,7 @@ public class Editor {
                         offset = mPreviousOffset;
                     }
                 }
-                final Layout layout = mTextView.getLayout();
-                if (layout != null && offset < trueOffset) {
+                if (layout != null && offset < initialOffset) {
                     final float adjustedX = layout.getPrimaryHorizontal(offset);
                     mTouchWordDelta =
                             mTextView.convertToLocalHorizontalCoordinate(x) - adjustedX;
@@ -3922,8 +3931,7 @@ public class Editor {
                     if (currLine > mPrevLine) {
                         // We're on a different line, so we'll snap to word boundaries.
                         offset = start;
-                        final Layout layout = mTextView.getLayout();
-                        if (layout != null && offset < trueOffset) {
+                        if (layout != null && offset < initialOffset) {
                             final float adjustedX = layout.getPrimaryHorizontal(offset);
                             mTouchWordDelta =
                                     mTextView.convertToLocalHorizontalCoordinate(x) - adjustedX;
@@ -3937,18 +3945,10 @@ public class Editor {
                 }
             }
 
-            // Handles can not cross and selection is at least one character.
             if (positionCursor) {
-                final int selectionEnd = mTextView.getSelectionEnd();
+                // Handles can not cross and selection is at least one character.
                 if (offset >= selectionEnd) {
-                    // We can't cross the handles so let's just constrain the Y value.
-                    int alteredOffset = mTextView.getOffsetAtCoordinate(mPrevLine, x);
-                    if (alteredOffset >= selectionEnd) {
-                        // Can't pass the other drag handle.
-                        offset = getNextCursorOffset(selectionEnd, false);
-                    } else {
-                        offset = alteredOffset;
-                    }
+                    offset = getNextCursorOffset(selectionEnd, false);
                     mTouchWordDelta = 0.0f;
                 }
                 mInWord = !getWordIteratorWithText().isBoundary(offset);
@@ -4004,10 +4004,20 @@ public class Editor {
 
         @Override
         public void updatePosition(float x, float y) {
-            final int trueOffset = mTextView.getOffsetForPosition(x, y);
-            final int currLine = mTextView.getLineAtCoordinate(y);
-            int offset = trueOffset;
+            final int selectionStart = mTextView.getSelectionStart();
+            final Layout layout = mTextView.getLayout();
+            int initialOffset = mTextView.getOffsetForPosition(x, y);
+            int currLine = mTextView.getLineAtCoordinate(y);
             boolean positionCursor = false;
+
+            if (initialOffset <= selectionStart) {
+                // Handles have crossed, bound it to the first selected line and
+                // adjust by word / char as normal.
+                currLine = layout != null ? layout.getLineForOffset(selectionStart) : mPrevLine;
+                initialOffset = mTextView.getOffsetAtCoordinate(currLine, x);
+            }
+
+            int offset = initialOffset;
             int end = getWordEnd(offset);
             int start = getWordStart(offset);
 
@@ -4023,8 +4033,7 @@ public class Editor {
                         offset = mPreviousOffset;
                     }
                 }
-                final Layout layout = mTextView.getLayout();
-                if (layout != null && offset > trueOffset) {
+                if (layout != null && offset > initialOffset) {
                     final float adjustedX = layout.getPrimaryHorizontal(offset);
                     mTouchWordDelta =
                             adjustedX - mTextView.convertToLocalHorizontalCoordinate(x);
@@ -4040,8 +4049,7 @@ public class Editor {
                     if (currLine < mPrevLine) {
                         // We're on a different line, so we'll snap to word boundaries.
                         offset = end;
-                        final Layout layout = mTextView.getLayout();
-                        if (layout != null && offset > trueOffset) {
+                        if (layout != null && offset > initialOffset) {
                             final float adjustedX = layout.getPrimaryHorizontal(offset);
                             mTouchWordDelta =
                                     adjustedX - mTextView.convertToLocalHorizontalCoordinate(x);
@@ -4056,17 +4064,9 @@ public class Editor {
             }
 
             if (positionCursor) {
-                final int selectionStart = mTextView.getSelectionStart();
+                // Handles can not cross and selection is at least one character.
                 if (offset <= selectionStart) {
-                    // We can't cross the handles so let's just constrain the Y value.
-                    int alteredOffset = mTextView.getOffsetAtCoordinate(mPrevLine, x);
-                    int length = mTextView.getText().length();
-                    if (alteredOffset <= selectionStart) {
-                        // Can't pass the other drag handle.
-                        offset = getNextCursorOffset(selectionStart, true);
-                    } else {
-                        offset = Math.min(alteredOffset, length);
-                    }
+                    offset = getNextCursorOffset(selectionStart, true);
                     mTouchWordDelta = 0.0f;
                 }
                 mInWord = !getWordIteratorWithText().isBoundary(offset);
