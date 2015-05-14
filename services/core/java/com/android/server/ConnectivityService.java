@@ -463,11 +463,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        private void maybeLogBroadcast(NetworkAgentInfo nai, boolean connected, int type) {
+        private void maybeLogBroadcast(NetworkAgentInfo nai, boolean connected, int type,
+                boolean isDefaultNetwork) {
             if (DBG) {
                 log("Sending " + (connected ? "connected" : "disconnected") +
                         " broadcast for type " + type + " " + nai.name() +
-                        " isDefaultNetwork=" + isDefaultNetwork(nai));
+                        " isDefaultNetwork=" + isDefaultNetwork);
             }
         }
 
@@ -487,43 +488,45 @@ public class ConnectivityService extends IConnectivityManager.Stub
             list.add(nai);
 
             // Send a broadcast if this is the first network of its type or if it's the default.
-            if (list.size() == 1 || isDefaultNetwork(nai)) {
-                maybeLogBroadcast(nai, true, type);
+            final boolean isDefaultNetwork = isDefaultNetwork(nai);
+            if (list.size() == 1 || isDefaultNetwork) {
+                maybeLogBroadcast(nai, true, type, isDefaultNetwork);
                 sendLegacyNetworkBroadcast(nai, true, type);
             }
         }
 
         /** Removes the given network from the specified legacy type list. */
-        public void remove(int type, NetworkAgentInfo nai) {
+        public void remove(int type, NetworkAgentInfo nai, boolean wasDefault) {
             ArrayList<NetworkAgentInfo> list = mTypeLists[type];
             if (list == null || list.isEmpty()) {
                 return;
             }
 
-            boolean wasFirstNetwork = list.get(0).equals(nai);
+            final boolean wasFirstNetwork = list.get(0).equals(nai);
 
             if (!list.remove(nai)) {
                 return;
             }
 
-            if (wasFirstNetwork || isDefaultNetwork(nai)) {
-                maybeLogBroadcast(nai, false, type);
+            if (wasFirstNetwork || wasDefault) {
+                maybeLogBroadcast(nai, false, type, wasDefault);
                 sendLegacyNetworkBroadcast(nai, false, type);
             }
 
             if (!list.isEmpty() && wasFirstNetwork) {
                 if (DBG) log("Other network available for type " + type +
                               ", sending connected broadcast");
-                maybeLogBroadcast(list.get(0), false, type);
-                sendLegacyNetworkBroadcast(list.get(0), false, type);
+                final NetworkAgentInfo replacement = list.get(0);
+                maybeLogBroadcast(replacement, false, type, isDefaultNetwork(replacement));
+                sendLegacyNetworkBroadcast(replacement, false, type);
             }
         }
 
         /** Removes the given network from all legacy type lists. */
-        public void remove(NetworkAgentInfo nai) {
-            if (VDBG) log("Removing agent " + nai);
+        public void remove(NetworkAgentInfo nai, boolean wasDefault) {
+            if (VDBG) log("Removing agent " + nai + " wasDefault=" + wasDefault);
             for (int type = 0; type < mTypeLists.length; type++) {
-                remove(type, nai);
+                remove(type, nai, wasDefault);
             }
         }
 
@@ -2036,12 +2039,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 loge("Error connecting NetworkAgent");
                 NetworkAgentInfo nai = mNetworkAgentInfos.remove(msg.replyTo);
                 if (nai != null) {
+                    final boolean wasDefault = isDefaultNetwork(nai);
                     synchronized (mNetworkForNetId) {
                         mNetworkForNetId.remove(nai.network.netId);
                         mNetIdInUse.delete(nai.network.netId);
                     }
                     // Just in case.
-                    mLegacyTypeTracker.remove(nai);
+                    mLegacyTypeTracker.remove(nai, wasDefault);
                 }
             }
         }
@@ -2071,7 +2075,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 nai.networkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED,
                         null, null);
             }
-            if (isDefaultNetwork(nai)) {
+            final boolean wasDefault = isDefaultNetwork(nai);
+            if (wasDefault) {
                 mDefaultInetConditionPublished = 0;
             }
             notifyIfacesChanged();
@@ -2079,7 +2084,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
             updateClat(null, nai.linkProperties, nai);
-            mLegacyTypeTracker.remove(nai);
             synchronized (mNetworkForNetId) {
                 mNetworkForNetId.remove(nai.network.netId);
                 mNetIdInUse.delete(nai.network.netId);
@@ -2118,6 +2122,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 notifyLockdownVpn(nai);
                 requestNetworkTransitionWakelock(nai.name());
             }
+            mLegacyTypeTracker.remove(nai, wasDefault);
             for (NetworkAgentInfo networkToActivate : toActivate) {
                 unlinger(networkToActivate);
                 rematchNetworkAndRequests(networkToActivate, NascentState.NOT_JUST_VALIDATED,
@@ -2307,7 +2312,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
 
                     if (doRemove) {
-                        mLegacyTypeTracker.remove(nri.request.legacyType, nai);
+                        mLegacyTypeTracker.remove(nri.request.legacyType, nai, false);
                     }
                 }
 
@@ -4190,7 +4195,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // the new one connected.
                 if (oldDefaultNetwork != null) {
                     mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
-                                              oldDefaultNetwork);
+                                              oldDefaultNetwork, true);
                 }
                 mDefaultInetConditionPublished = newNetwork.everValidated ? 100 : 0;
                 mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
