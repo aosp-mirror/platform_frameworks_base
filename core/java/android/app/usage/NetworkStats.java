@@ -19,7 +19,6 @@ package android.app.usage;
 import android.content.Context;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
-import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
@@ -33,7 +32,7 @@ import dalvik.system.CloseGuard;
  * Class providing enumeration over buckets of network usage statistics. NetworkUsageStats objects
  * are returned as results to various queries in {@link NetworkStatsManager}.
  */
-public final class NetworkUsageStats implements AutoCloseable {
+public final class NetworkStats implements AutoCloseable {
     private final static String TAG = "NetworkUsageStats";
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
@@ -70,7 +69,7 @@ public final class NetworkUsageStats implements AutoCloseable {
     /**
      * Results of a summary query.
      */
-    private NetworkStats mSummary = null;
+    private android.net.NetworkStats mSummary = null;
 
     /**
      * Results of detail queries.
@@ -85,11 +84,11 @@ public final class NetworkUsageStats implements AutoCloseable {
     /**
      * Recycling entry objects to prevent heap fragmentation.
      */
-    private NetworkStats.Entry mRecycledSummaryEntry = null;
+    private android.net.NetworkStats.Entry mRecycledSummaryEntry = null;
     private NetworkStatsHistory.Entry mRecycledHistoryEntry = null;
 
     /** @hide */
-    NetworkUsageStats(Context context, NetworkTemplate template, long startTimestamp,
+    NetworkStats(Context context, NetworkTemplate template, long startTimestamp,
             long endTimestamp) throws RemoteException, SecurityException {
         final INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
@@ -136,14 +135,19 @@ public final class NetworkUsageStats implements AutoCloseable {
         public static final int STATE_FOREGROUND = 0x2;
 
         /**
+         * Special UID value for aggregate/unspecified.
+         */
+        public static final int UID_ALL = android.net.NetworkStats.UID_ALL;
+
+        /**
          * Special UID value for removed apps.
          */
-        public static final int UID_REMOVED = -4;
+        public static final int UID_REMOVED = TrafficStats.UID_REMOVED;
 
         /**
          * Special UID value for data usage by tethering.
          */
-        public static final int UID_TETHERING = -5;
+        public static final int UID_TETHERING = TrafficStats.UID_TETHERING;
 
         private int mUid;
         private int mState;
@@ -156,9 +160,9 @@ public final class NetworkUsageStats implements AutoCloseable {
 
         private static int convertState(int networkStatsSet) {
             switch (networkStatsSet) {
-                case NetworkStats.SET_ALL : return STATE_ALL;
-                case NetworkStats.SET_DEFAULT : return STATE_DEFAULT;
-                case NetworkStats.SET_FOREGROUND : return STATE_FOREGROUND;
+                case android.net.NetworkStats.SET_ALL : return STATE_ALL;
+                case android.net.NetworkStats.SET_DEFAULT : return STATE_DEFAULT;
+                case android.net.NetworkStats.SET_FOREGROUND : return STATE_FOREGROUND;
             }
             return 0;
         }
@@ -337,8 +341,8 @@ public final class NetworkUsageStats implements AutoCloseable {
     void startHistoryEnumeration(int uid) {
         mHistory = null;
         try {
-            mHistory = mSession.getHistoryForUid(mTemplate, uid, NetworkStats.SET_ALL,
-                    NetworkStats.TAG_NONE, NetworkStatsHistory.FIELD_ALL);
+            mHistory = mSession.getHistoryForUid(mTemplate, uid, android.net.NetworkStats.SET_ALL,
+                    android.net.NetworkStats.TAG_NONE, NetworkStatsHistory.FIELD_ALL);
             setSingleUid(uid);
         } catch (RemoteException e) {
             Log.w(TAG, e);
@@ -364,8 +368,9 @@ public final class NetworkUsageStats implements AutoCloseable {
             stepUid();
             mHistory = null;
             try {
-                mHistory = mSession.getHistoryForUid(mTemplate, getUid(), NetworkStats.SET_ALL,
-                        NetworkStats.TAG_NONE, NetworkStatsHistory.FIELD_ALL);
+                mHistory = mSession.getHistoryForUid(mTemplate, getUid(),
+                        android.net.NetworkStats.SET_ALL, android.net.NetworkStats.TAG_NONE,
+                        NetworkStatsHistory.FIELD_ALL);
             } catch (RemoteException e) {
                 Log.w(TAG, e);
                 // Leaving mHistory null
@@ -405,7 +410,7 @@ public final class NetworkUsageStats implements AutoCloseable {
         }
         Bucket bucket = new Bucket();
         if (mRecycledSummaryEntry == null) {
-            mRecycledSummaryEntry = new NetworkStats.Entry();
+            mRecycledSummaryEntry = new android.net.NetworkStats.Entry();
         }
         mSummary.getTotal(mRecycledSummaryEntry);
         fillBucketFromSummaryEntry(bucket);
