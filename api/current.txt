@@ -6060,22 +6060,14 @@ package android.app.usage {
     field public static final android.os.Parcelable.Creator<android.app.usage.ConfigurationStats> CREATOR;
   }
 
-  public class NetworkStatsManager {
-    method public android.app.usage.NetworkUsageStats queryDetails(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method public android.app.usage.NetworkUsageStats queryDetailsForUid(int, java.lang.String, long, long, int) throws android.os.RemoteException, java.lang.SecurityException;
-    method public android.app.usage.NetworkUsageStats querySummary(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method public android.app.usage.NetworkUsageStats.Bucket querySummaryForDevice(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method public android.app.usage.NetworkUsageStats.Bucket querySummaryForUser(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-  }
-
-  public final class NetworkUsageStats implements java.lang.AutoCloseable {
+  public final class NetworkStats implements java.lang.AutoCloseable {
     method public void close();
-    method public boolean getNextBucket(android.app.usage.NetworkUsageStats.Bucket);
+    method public boolean getNextBucket(android.app.usage.NetworkStats.Bucket);
     method public boolean hasNextBucket();
   }
 
-  public static class NetworkUsageStats.Bucket {
-    ctor public NetworkUsageStats.Bucket();
+  public static class NetworkStats.Bucket {
+    ctor public NetworkStats.Bucket();
     method public long getEndTimeStamp();
     method public long getRxBytes();
     method public long getRxPackets();
@@ -6087,8 +6079,17 @@ package android.app.usage {
     field public static final int STATE_ALL = -1; // 0xffffffff
     field public static final int STATE_DEFAULT = 1; // 0x1
     field public static final int STATE_FOREGROUND = 2; // 0x2
+    field public static final int UID_ALL = -1; // 0xffffffff
     field public static final int UID_REMOVED = -4; // 0xfffffffc
     field public static final int UID_TETHERING = -5; // 0xfffffffb
+  }
+
+  public class NetworkStatsManager {
+    method public android.app.usage.NetworkStats queryDetails(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkStats queryDetailsForUid(int, java.lang.String, long, long, int) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkStats querySummary(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkStats.Bucket querySummaryForDevice(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkStats.Bucket querySummaryForUser(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
   }
 
   public final class UsageEvents implements android.os.Parcelable {

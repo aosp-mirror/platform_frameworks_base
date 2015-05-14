@@ -16,18 +16,17 @@
 
 package android.app.usage;
 
-import android.app.usage.NetworkUsageStats.Bucket;
+import android.app.usage.NetworkStats.Bucket;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkIdentity;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
- * discrete bins of time called 'Buckets'. See {@link NetworkUsageStats.Bucket} for details.
+ * discrete bins of time called 'Buckets'. See {@link NetworkStats.Bucket} for details.
  * <p />
  * Queries can define a time interval in the form of start and end timestamps (Long.MIN_VALUE and
  * Long.MAX_VALUE can be used to simulate open ended intervals). All queries (except
@@ -37,15 +36,20 @@ import android.util.Log;
  * <h3>
  * Summary queries
  * </h3>
+ * {@link #querySummaryForDevice} <p />
+ * {@link #querySummaryForUser} <p />
+ * {@link #querySummary} <p />
  * These queries aggregate network usage across the whole interval. Therefore there will be only one
  * bucket for a particular key and state combination. In case of the user-wide and device-wide
  * summaries a single bucket containing the totalised network usage is returned.
  * <h3>
  * History queries
  * </h3>
+ * {@link #queryDetailsForUid} <p />
+ * {@link #queryDetails} <p />
  * These queries do not aggregate over time but do aggregate over state. Therefore there can be
  * multiple buckets for a particular key but all Bucket's state is going to be
- * {@link NetworkUsageStats.Bucket#STATE_ALL}.
+ * {@link NetworkStats.Bucket#STATE_ALL}.
  * <p />
  * <b>NOTE:</b> This API requires the permission
  * {@link android.Manifest.permission#PACKAGE_USAGE_STATS}, which is a system-level permission and
@@ -68,7 +72,10 @@ public class NetworkStatsManager {
     }
     /**
      * Query network usage statistics summaries. Result is summarised data usage for the whole
-     * device. Result is a single Bucket aggregated over time, state and uid.
+     * device. Result is a single Bucket aggregated over time, state and uid. This means the
+     * bucket's start and end timestamp are going to be the same as the 'startTime' and 'endTime'
+     * parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid
+     * {@link NetworkStats.Bucket#UID_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -89,7 +96,7 @@ public class NetworkStatsManager {
         }
 
         Bucket bucket = null;
-        NetworkUsageStats stats = new NetworkUsageStats(mContext, template, startTime, endTime);
+        NetworkStats stats = new NetworkStats(mContext, template, startTime, endTime);
         bucket = stats.getDeviceSummaryForNetwork(startTime, endTime);
 
         stats.close();
@@ -99,6 +106,9 @@ public class NetworkStatsManager {
     /**
      * Query network usage statistics summaries. Result is summarised data usage for all uids
      * belonging to calling user. Result is a single Bucket aggregated over time, state and uid.
+     * This means the bucket's start and end timestamp are going to be the same as the 'startTime' 
+     * and 'endTime' parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid
+     * {@link NetworkStats.Bucket#UID_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -118,8 +128,8 @@ public class NetworkStatsManager {
             return null;
         }
 
-        NetworkUsageStats stats;
-        stats = new NetworkUsageStats(mContext, template, startTime, endTime);
+        NetworkStats stats;
+        stats = new NetworkStats(mContext, template, startTime, endTime);
         stats.startSummaryEnumeration(startTime, endTime);
 
         stats.close();
@@ -129,7 +139,9 @@ public class NetworkStatsManager {
     /**
      * Query network usage statistics summaries. Result filtered to include only uids belonging to
      * calling user. Result is aggregated over time, hence all buckets will have the same start and
-     * end timestamps. Not aggregated over state or uid.
+     * end timestamps. Not aggregated over state or uid. This means buckets' start and end
+     * timestamps are going to be the same as the 'startTime' and 'endTime' parameters, state and 
+     * uid are going to vary.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -142,15 +154,15 @@ public class NetworkStatsManager {
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
-    public NetworkUsageStats querySummary(int networkType, String subscriberId, long startTime,
+    public NetworkStats querySummary(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (template == null) {
             return null;
         }
 
-        NetworkUsageStats result;
-        result = new NetworkUsageStats(mContext, template, startTime, endTime);
+        NetworkStats result;
+        result = new NetworkStats(mContext, template, startTime, endTime);
         result.startSummaryEnumeration(startTime, endTime);
 
         return result;
@@ -158,7 +170,9 @@ public class NetworkStatsManager {
 
     /**
      * Query network usage statistics details. Only usable for uids belonging to calling user.
-     * Result is aggregated over state but not aggregated over time.
+     * Result is aggregated over state but not aggregated over time. This means buckets' start and
+     * end timestamps are going to be between 'startTime' and 'endTime' parameters, state is going
+     * to be {@link NetworkStats.Bucket#STATE_ALL} and uid the same as the 'uid' parameter.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -172,15 +186,15 @@ public class NetworkStatsManager {
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
-    public NetworkUsageStats queryDetailsForUid(int networkType, String subscriberId,
+    public NetworkStats queryDetailsForUid(int networkType, String subscriberId,
             long startTime, long endTime, int uid) throws SecurityException, RemoteException {
         NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (template == null) {
             return null;
         }
 
-        NetworkUsageStats result;
-        result = new NetworkUsageStats(mContext, template, startTime, endTime);
+        NetworkStats result;
+        result = new NetworkStats(mContext, template, startTime, endTime);
         result.startHistoryEnumeration(uid);
 
         return result;
@@ -188,7 +202,9 @@ public class NetworkStatsManager {
 
     /**
      * Query network usage statistics details. Result filtered to include only uids belonging to
-     * calling user. Result is aggregated over state but not aggregated over time or uid.
+     * calling user. Result is aggregated over state but not aggregated over time or uid. This means
+     * buckets' start and end timestamps are going to be between 'startTime' and 'endTime'
+     * parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid will vary.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -201,14 +217,14 @@ public class NetworkStatsManager {
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
-    public NetworkUsageStats queryDetails(int networkType, String subscriberId, long startTime,
+    public NetworkStats queryDetails(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
         NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (template == null) {
             return null;
         }
-        NetworkUsageStats result;
-        result = new NetworkUsageStats(mContext, template, startTime, endTime);
+        NetworkStats result;
+        result = new NetworkStats(mContext, template, startTime, endTime);
         result.startUserUidEnumeration();
         return result;
     }
