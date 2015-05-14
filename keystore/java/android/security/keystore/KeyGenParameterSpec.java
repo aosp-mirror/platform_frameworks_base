@@ -21,7 +21,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.text.TextUtils;
-import android.security.ArrayUtils;
 import android.security.KeyStore;
 
 import java.math.BigInteger;

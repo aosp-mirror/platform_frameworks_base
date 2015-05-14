@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import android.os.IBinder;
+import android.security.KeyStore;
+import android.security.KeyStoreException;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
@@ -34,33 +36,33 @@ import javax.crypto.MacSpi;
  *
  * @hide
  */
-public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOperation {
+public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOperation {
 
-    public static class HmacSHA1 extends KeyStoreHmacSpi {
+    public static class HmacSHA1 extends AndroidKeyStoreHmacSpi {
         public HmacSHA1() {
             super(KeymasterDefs.KM_DIGEST_SHA1);
         }
     }
 
-    public static class HmacSHA224 extends KeyStoreHmacSpi {
+    public static class HmacSHA224 extends AndroidKeyStoreHmacSpi {
         public HmacSHA224() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_224);
         }
     }
 
-    public static class HmacSHA256 extends KeyStoreHmacSpi {
+    public static class HmacSHA256 extends AndroidKeyStoreHmacSpi {
         public HmacSHA256() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_256);
         }
     }
 
-    public static class HmacSHA384 extends KeyStoreHmacSpi {
+    public static class HmacSHA384 extends AndroidKeyStoreHmacSpi {
         public HmacSHA384() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_384);
         }
     }
 
-    public static class HmacSHA512 extends KeyStoreHmacSpi {
+    public static class HmacSHA512 extends AndroidKeyStoreHmacSpi {
         public HmacSHA512() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_512);
         }
@@ -71,14 +73,14 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
     private final int mMacSizeBits;
 
     // Fields below are populated by engineInit and should be preserved after engineDoFinal.
-    private KeyStoreSecretKey mKey;
+    private AndroidKeyStoreSecretKey mKey;
 
     // Fields below are reset when engineDoFinal succeeds.
     private KeyStoreCryptoOperationChunkedStreamer mChunkedStreamer;
     private IBinder mOperationToken;
     private long mOperationHandle;
 
-    protected KeyStoreHmacSpi(int keymasterDigest) {
+    protected AndroidKeyStoreHmacSpi(int keymasterDigest) {
         mKeymasterDigest = keymasterDigest;
         mMacSizeBits = KeymasterUtils.getDigestOutputSizeBits(keymasterDigest);
     }
@@ -109,11 +111,11 @@ public abstract class KeyStoreHmacSpi extends MacSpi implements KeyStoreCryptoOp
         InvalidAlgorithmParameterException {
         if (key == null) {
             throw new InvalidKeyException("key == null");
-        } else if (!(key instanceof KeyStoreSecretKey)) {
+        } else if (!(key instanceof AndroidKeyStoreSecretKey)) {
             throw new InvalidKeyException(
                     "Only Android KeyStore secret keys supported. Key: " + key);
         }
-        mKey = (KeyStoreSecretKey) key;
+        mKey = (AndroidKeyStoreSecretKey) key;
 
         if (params != null) {
             throw new InvalidAlgorithmParameterException(

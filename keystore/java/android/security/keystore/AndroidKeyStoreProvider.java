@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
+
+import android.security.KeyStore;
 
 import java.security.Provider;
 import java.security.Security;
@@ -38,25 +40,25 @@ public class AndroidKeyStoreProvider extends Provider {
     // Instead, they need to be offered by AndroidKeyStoreBCWorkaroundProvider. See its Javadoc
     // for details.
 
-    private static final String PACKAGE_NAME = "android.security";
+    private static final String PACKAGE_NAME = "android.security.keystore";
 
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
 
         // java.security.KeyStore
-        put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStore");
+        put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStoreSpi");
 
         // java.security.KeyPairGenerator
-        put("KeyPairGenerator.EC", PACKAGE_NAME + ".AndroidKeyPairGenerator$EC");
-        put("KeyPairGenerator.RSA", PACKAGE_NAME +  ".AndroidKeyPairGenerator$RSA");
+        put("KeyPairGenerator.EC", PACKAGE_NAME + ".AndroidKeyPairGeneratorSpi$EC");
+        put("KeyPairGenerator.RSA", PACKAGE_NAME +  ".AndroidKeyPairGeneratorSpi$RSA");
 
         // javax.crypto.KeyGenerator
-        put("KeyGenerator.AES", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$AES");
-        put("KeyGenerator.HmacSHA1", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA1");
-        put("KeyGenerator.HmacSHA224", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA224");
-        put("KeyGenerator.HmacSHA256", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA256");
-        put("KeyGenerator.HmacSHA384", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA384");
-        put("KeyGenerator.HmacSHA512", PACKAGE_NAME + ".KeyStoreKeyGeneratorSpi$HmacSHA512");
+        put("KeyGenerator.AES", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$AES");
+        put("KeyGenerator.HmacSHA1", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA1");
+        put("KeyGenerator.HmacSHA224", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA224");
+        put("KeyGenerator.HmacSHA256", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA256");
+        put("KeyGenerator.HmacSHA384", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA384");
+        put("KeyGenerator.HmacSHA512", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA512");
 
         // java.security.SecretKeyFactory
         putSecretKeyFactoryImpl("AES");
@@ -95,7 +97,7 @@ public class AndroidKeyStoreProvider extends Provider {
     }
 
     private void putSecretKeyFactoryImpl(String algorithm) {
-        put("SecretKeyFactory." + algorithm, PACKAGE_NAME + ".KeyStoreSecretKeyFactorySpi");
+        put("SecretKeyFactory." + algorithm, PACKAGE_NAME + ".AndroidKeyStoreSecretKeyFactorySpi");
     }
 
     /**

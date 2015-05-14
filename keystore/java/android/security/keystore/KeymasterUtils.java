@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import android.hardware.fingerprint.FingerprintManager;
+import android.security.GateKeeper;
+import android.security.KeyStore;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 

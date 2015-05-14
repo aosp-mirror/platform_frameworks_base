@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
+import android.security.Credentials;
+import android.security.KeyPairGeneratorSpec;
 import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
