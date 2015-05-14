@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
@@ -114,7 +115,11 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static long initRaster(long nativeBitmapOrZero) {
+    /*package*/ static long initRaster(@Nullable Bitmap bitmap) {
+        long nativeBitmapOrZero = 0;
+        if (bitmap != null) {
+            nativeBitmapOrZero = bitmap.refSkPixelRef();
+        }
         if (nativeBitmapOrZero > 0) {
             // get the Bitmap from the int
             Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(nativeBitmapOrZero);
@@ -132,8 +137,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/
-    static void native_setBitmap(long canvas, long bitmap, boolean copyState) {
+    /*package*/ static void native_setBitmap(long canvas, Bitmap bitmap) {
         Canvas_Delegate canvasDelegate = sManager.getDelegate(canvas);
         Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
         if (canvasDelegate == null || bitmapDelegate==null) {
@@ -427,8 +431,7 @@ public final class Canvas_Delegate {
 
         canvasDelegate.mDrawFilter = DrawFilter_Delegate.getDelegate(nativeFilter);
 
-        if (canvasDelegate.mDrawFilter != null &&
-                canvasDelegate.mDrawFilter.isSupported() == false) {
+        if (canvasDelegate.mDrawFilter != null && !canvasDelegate.mDrawFilter.isSupported()) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_DRAWFILTER,
                     canvasDelegate.mDrawFilter.getSupportMessage(), null, null /*data*/);
         }
@@ -444,7 +447,7 @@ public final class Canvas_Delegate {
         }
 
         Rectangle rect = canvasDelegate.getSnapshot().getClip().getBounds();
-        if (rect != null && rect.isEmpty() == false) {
+        if (rect != null && !rect.isEmpty()) {
             bounds.left = rect.x;
             bounds.top = rect.y;
             bounds.right = rect.x + rect.width;
@@ -720,7 +723,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawBitmap(Canvas thisCanvas, long nativeCanvas, long bitmap,
+    /*package*/ static void native_drawBitmap(Canvas thisCanvas, long nativeCanvas, Bitmap bitmap,
                                                  float left, float top,
                                                  long nativePaintOrZero,
                                                  int canvasDensity,
@@ -742,7 +745,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawBitmap(Canvas thisCanvas, long nativeCanvas, long bitmap,
+    /*package*/ static void native_drawBitmap(Canvas thisCanvas, long nativeCanvas, Bitmap bitmap,
                                  float srcLeft, float srcTop, float srcRight, float srcBottom,
                                  float dstLeft, float dstTop, float dstRight, float dstBottom,
                                  long nativePaintOrZero, int screenDensity, int bitmapDensity) {
@@ -783,7 +786,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDrawBitmapMatrix(long nCanvas, long nBitmap,
+    /*package*/ static void nativeDrawBitmapMatrix(long nCanvas, Bitmap bitmap,
                                                       long nMatrix, long nPaint) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nCanvas);
@@ -795,7 +798,7 @@ public final class Canvas_Delegate {
         Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(nPaint);
 
         // get the delegate from the native int.
-        Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(nBitmap);
+        Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(bitmap);
         if (bitmapDelegate == null) {
             return;
         }
@@ -824,7 +827,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDrawBitmapMesh(long nCanvas, long nBitmap,
+    /*package*/ static void nativeDrawBitmapMesh(long nCanvas, Bitmap bitmap,
             int meshWidth, int meshHeight, float[] verts, int vertOffset, int[] colors,
             int colorOffset, long nPaint) {
         // FIXME
@@ -1041,8 +1044,7 @@ public final class Canvas_Delegate {
     }
 
     /**
-     * Restores the {@link GcSnapshot} to <var>saveCount</var>
-     * @param saveCount the saveCount
+     * Restores the top {@link GcSnapshot}
      */
     private void restore() {
         mSnapshot = mSnapshot.restore();
@@ -1105,7 +1107,7 @@ public final class Canvas_Delegate {
         // before drawing it.
         if (bitmap.getConfig() == Bitmap.Config.ALPHA_8) {
             fixAlpha8Bitmap(image);
-        } else if (bitmap.hasAlpha() == false) {
+        } else if (!bitmap.hasAlpha()) {
             // hasAlpha is merely a rendering hint. There can in fact be alpha values
             // in the bitmap but it should be ignored at drawing time.
             // There is two ways to do this:
@@ -1125,7 +1127,7 @@ public final class Canvas_Delegate {
             }
 
             // if we can't force SRC mode, then create a temp bitmap of TYPE_RGB
-            if (forceSrcMode[0] == false) {
+            if (!forceSrcMode[0]) {
                 image = Bitmap_Delegate.createCopy(image, BufferedImage.TYPE_INT_RGB, 0xFF);
             }
         }

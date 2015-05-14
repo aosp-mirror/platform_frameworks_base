@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
@@ -83,6 +85,8 @@ public class Paint_Delegate {
     private float mTextScaleX;
     private float mTextSkewX;
     private int mHintingMode = Paint.HINTING_ON;
+    private int mHyphenEdit;
+    private float mLetterSpacing;  // not used in actual text rendering.
     // Variant of the font. A paint's variant can only be compact or elegant.
     private FontVariant mFontVariant = FontVariant.COMPACT;
 
@@ -100,6 +104,7 @@ public class Paint_Delegate {
 
     // ---- Public Helper methods ----
 
+    @Nullable
     public static Paint_Delegate getDelegate(long native_paint) {
         return sManager.getDelegate(native_paint);
     }
@@ -1088,18 +1093,107 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static float native_getLetterSpacing(long nativePaint) {
-        // TODO: throw a fidelity warning.
-        return 0;
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
+        if (delegate == null) {
+            return 0;
+        }
+        return delegate.mLetterSpacing;
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_setLetterSpacing(long nativePaint, float letterSpacing) {
-        // pass.
+        Bridge.getLog().fidelityWarning("textRendering", "Paint.setLetterSpacing() not supported.",
+                null, null);
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
+        if (delegate == null) {
+            return;
+        }
+        delegate.mLetterSpacing = letterSpacing;
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_setFontFeatureSettings(long nativePaint, String settings) {
-        // pass.
+        Bridge.getLog().fidelityWarning("textRendering",
+                "Paint.setFontFeatureSettings() not supported.", null, null);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static int native_getHyphenEdit(long nativePaint) {
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
+        if (delegate == null) {
+            return 0;
+        }
+        return delegate.mHyphenEdit;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void native_setHyphenEdit(long nativePaint, int hyphen) {
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
+        if (delegate == null) {
+            return;
+        }
+        delegate.mHyphenEdit = hyphen;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean native_hasGlyph(long nativePaint, long nativeTypeface, int bidiFlags,
+            String string) {
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
+        if (delegate == null) {
+            return false;
+        }
+        if (string.length() == 0) {
+            return false;
+        }
+        if (string.length() > 1) {
+            Bridge.getLog().fidelityWarning("textRendering",
+                    "Paint.hasGlyph() is not supported for ligatures.", null, null);
+            return false;
+        }
+        assert nativeTypeface == delegate.mNativeTypeface;
+        Typeface_Delegate typeface_delegate = Typeface_Delegate.getDelegate(nativeTypeface);
+
+        char c = string.charAt(0);
+        for (Font font : typeface_delegate.getFonts(delegate.mFontVariant)) {
+            if (font.canDisplay(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    @LayoutlibDelegate
+    /*package*/ static float native_getRunAdvance(long nativePaint, long nativeTypeface,
+            @NonNull char[] text, int start, int end, int contextStart, int contextEnd,
+            boolean isRtl, int offset) {
+        int count = end - start;
+        float[] advances = new float[count];
+        native_getTextRunAdvances(nativePaint, nativeTypeface, text, start, count,
+                contextStart, contextEnd - contextStart, isRtl, advances, 0);
+        float sum = 0;
+        for (int i = 0; i < offset; i++) {
+            sum += advances[i];
+        }
+        return sum;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static int native_getOffsetForAdvance(long nativePaint, long nativeTypeface,
+            char[] text, int start, int end, int contextStart, int contextEnd, boolean isRtl,
+            float advance) {
+        int count = end - start;
+        float[] advances = new float[count];
+        native_getTextRunAdvances(nativePaint, nativeTypeface, text, start, count,
+                contextStart, contextEnd - contextStart, isRtl, advances, 0);
+        float sum = 0;
+        int i;
+        for (i = 0; i < count && sum < advance; i++) {
+            sum += advances[i];
+        }
+        float distanceToI = sum - advance;
+        float distanceToIMinus1 = advance - (sum - advances[i]);
+        return distanceToI > distanceToIMinus1 ? i : i - 1;
     }
 
     // ---- Private delegate/helper methods ----
