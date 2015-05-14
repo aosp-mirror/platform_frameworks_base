@@ -1360,6 +1360,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * frequency.
      * When rate is larger than 1.0, pitch becomes higher.
      * When rate is smaller than 1.0, pitch becomes lower.
+     *
+     * @hide
      */
     public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 2;
 
@@ -1372,6 +1374,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * <p>
      * This mode is only supported for a limited range of playback speed factors,
      * e.g. between 1/2x and 2x.
+     *
+     * @hide
      */
     public static final int PLAYBACK_RATE_AUDIO_MODE_STRETCH = 1;
 
@@ -1383,6 +1387,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * Try to keep audio pitch when changing the playback rate, but allow the
      * system to determine how to change audio playback if the rate is out
      * of range.
+     *
+     * @hide
      */
     public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0;
 
@@ -1406,8 +1412,11 @@ public class MediaPlayer implements SubtitleController.Listener
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
      * @throws IllegalArgumentException if audioMode is not supported.
+     *
+     * @hide
      */
-    public void setPlaybackRate(float rate, @PlaybackRateAudioMode int audioMode) {
+    @NonNull
+    public PlaybackParams easyPlaybackParams(float rate, @PlaybackRateAudioMode int audioMode) {
         PlaybackParams params = new PlaybackParams();
         params.allowDefaults();
         switch (audioMode) {
@@ -1425,7 +1434,7 @@ public class MediaPlayer implements SubtitleController.Listener
             final String msg = "Audio playback mode " + audioMode + " is not supported";
             throw new IllegalArgumentException(msg);
         }
-        setPlaybackParams(params);
+        return params;
     }
 
     /**
