@@ -3796,10 +3796,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
 //        }
         updateTcpBufferSizes(networkAgent);
 
-        // TODO: deprecate and remove mDefaultDns when we can do so safely.
-        // For now, use it only when the network has Internet access. http://b/18327075
-        final boolean useDefaultDns = networkAgent.networkCapabilities.hasCapability(
-                NET_CAPABILITY_INTERNET);
+        // TODO: deprecate and remove mDefaultDns when we can do so safely. See http://b/18327075
+        // In L, we used it only when the network had Internet access but provided no DNS servers.
+        // For now, just disable it, and if disabling it doesn't break things, remove it.
+        // final boolean useDefaultDns = networkAgent.networkCapabilities.hasCapability(
+        //        NET_CAPABILITY_INTERNET);
+        final boolean useDefaultDns = false;
         final boolean flushDns = updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId, flushDns, useDefaultDns);
 
