@@ -19,7 +19,6 @@ package com.android.layoutlib.bridge.impl;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.ide.common.rendering.api.LayoutlibCallback;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -44,10 +43,11 @@ public class ParserFactory {
 
     // Used to get a new XmlPullParser from the client.
     @Nullable
-    private static LayoutlibCallback sLayoutlibCallback;
+    private static com.android.ide.common.rendering.api.ParserFactory sParserFactory;
 
-    public static void setLayoutlibCallback(@Nullable LayoutlibCallback callback) {
-        sLayoutlibCallback = callback;
+    public static void setParserFactory(
+            @Nullable com.android.ide.common.rendering.api.ParserFactory parserFactory) {
+        sParserFactory = parserFactory;
     }
 
     @NonNull
@@ -77,10 +77,10 @@ public class ParserFactory {
     @NonNull
     public static XmlPullParser instantiateParser(@Nullable String name)
             throws XmlPullParserException {
-        if (sLayoutlibCallback == null) {
+        if (sParserFactory == null) {
             throw new XmlPullParserException("ParserFactory not initialized.");
         }
-        XmlPullParser parser = sLayoutlibCallback.createParser(name);
+        XmlPullParser parser = sParserFactory.createParser(name);
         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
         return parser;
     }
