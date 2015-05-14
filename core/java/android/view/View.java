@@ -5221,8 +5221,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the event was consumed.
      */
     private boolean performStylusActionOnButtonPress(MotionEvent event) {
-        if (isStylusButtonPressable() && !mInStylusButtonPress
-                && !mHasPerformedLongPress && event.isStylusButtonPressed()) {
+        if (isStylusButtonPressable() && !mInStylusButtonPress && !mHasPerformedLongPress
+                && event.isButtonPressed(MotionEvent.BUTTON_STYLUS_SECONDARY)) {
             if (performStylusButtonPress()) {
                 mInStylusButtonPress = true;
                 setPressed(true, event.getX(), event.getY());
