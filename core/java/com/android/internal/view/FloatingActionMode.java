@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.android.internal.util.Preconditions;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.FloatingToolbar;
 
@@ -32,20 +33,28 @@ public class FloatingActionMode extends ActionMode {
     private final Context mContext;
     private final ActionMode.Callback2 mCallback;
     private final MenuBuilder mMenu;
-    private final FloatingToolbar mFloatingToolbar;
     private final Rect mContentRect;
     private final Rect mContentRectOnWindow;
     private final Rect mPreviousContentRectOnWindow;
     private final int[] mViewPosition;
     private final View mOriginatingView;
+    private FloatingToolbar mFloatingToolbar;
 
     public FloatingActionMode(
-            Context context, ActionMode.Callback2 callback, View originatingView,
-            FloatingToolbar floatingToolbar) {
+            Context context, ActionMode.Callback2 callback, View originatingView) {
         mContext = context;
         mCallback = callback;
         mMenu = new MenuBuilder(context).setDefaultShowAsAction(
                 MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        setType(ActionMode.TYPE_FLOATING);
+        mContentRect = new Rect();
+        mContentRectOnWindow = new Rect();
+        mPreviousContentRectOnWindow = new Rect();
+        mViewPosition = new int[2];
+        mOriginatingView = originatingView;
+    }
+
+    public void setFloatingToolbar(FloatingToolbar floatingToolbar) {
         mFloatingToolbar = floatingToolbar
                 .setMenu(mMenu)
                 .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -54,12 +63,6 @@ public class FloatingActionMode extends ActionMode {
                         return mCallback.onActionItemClicked(FloatingActionMode.this, item);
                     }
                 });
-        setType(ActionMode.TYPE_FLOATING);
-        mContentRect = new Rect();
-        mContentRectOnWindow = new Rect();
-        mPreviousContentRectOnWindow = new Rect();
-        mViewPosition = new int[2];
-        mOriginatingView = originatingView;
     }
 
     @Override
@@ -79,6 +82,7 @@ public class FloatingActionMode extends ActionMode {
 
     @Override
     public void invalidate() {
+        Preconditions.checkNotNull(mFloatingToolbar);
         mCallback.onPrepareActionMode(this, mMenu);
         mFloatingToolbar.updateLayout();
         invalidateContentRect();
@@ -86,11 +90,13 @@ public class FloatingActionMode extends ActionMode {
 
     @Override
     public void invalidateContentRect() {
+        Preconditions.checkNotNull(mFloatingToolbar);
         mCallback.onGetContentRect(this, mOriginatingView, mContentRect);
         repositionToolbar();
     }
 
     public void updateViewLocationInWindow() {
+        Preconditions.checkNotNull(mFloatingToolbar);
         mOriginatingView.getLocationInWindow(mViewPosition);
         repositionToolbar();
     }
