@@ -47,7 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
  * longer used and associated resources may be recovered.
  */
-public abstract class Connection implements Conferenceable {
+public abstract class Connection extends Conferenceable {
 
     public static final int STATE_INITIALIZING = 0;
 
