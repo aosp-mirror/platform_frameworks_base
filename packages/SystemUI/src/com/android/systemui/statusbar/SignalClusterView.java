@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 
@@ -42,7 +43,7 @@ import java.util.List;
 // Intimately tied to the design of res/layout/signal_cluster_view.xml
 public class SignalClusterView
         extends LinearLayout
-        implements NetworkControllerImpl.SignalCluster,
+        implements NetworkControllerImpl.SignalCallback,
         SecurityController.SecurityControllerCallback {
 
     static final String TAG = "SignalClusterView";
@@ -59,7 +60,7 @@ public class SignalClusterView
     private int mWifiStrengthId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
-    private int mAirplaneContentDescription;
+    private String mAirplaneContentDescription;
     private String mWifiDescription;
     private String mEthernetDescription;
     private ArrayList<PhoneState> mPhoneStates = new ArrayList<PhoneState>();
@@ -166,35 +167,36 @@ public class SignalClusterView
     }
 
     @Override
-    public void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription) {
-        mWifiVisible = visible;
-        mWifiStrengthId = strengthIcon;
-        mWifiDescription = contentDescription;
+    public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
+            boolean activityIn, boolean activityOut, String description) {
+        mWifiVisible = statusIcon.visible;
+        mWifiStrengthId = statusIcon.icon;
+        mWifiDescription = statusIcon.contentDescription;
 
         apply();
     }
 
     @Override
-    public void setMobileDataIndicators(boolean visible, int strengthIcon, int darkStrengthIcon,
-            int typeIcon, String contentDescription, String typeContentDescription,
-            boolean isTypeIconWide, int subId) {
+    public void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int darkStatusIcon,
+            int statusType, int qsType, boolean activityIn, boolean activityOut,
+            String typeContentDescription, String description, boolean isWide, int subId) {
         PhoneState state = getOrInflateState(subId);
-        state.mMobileVisible = visible;
-        state.mMobileStrengthId = strengthIcon;
-        state.mMobileDarkStrengthId = darkStrengthIcon;
-        state.mMobileTypeId = typeIcon;
-        state.mMobileDescription = contentDescription;
+        state.mMobileVisible = statusIcon.visible;
+        state.mMobileStrengthId = statusIcon.icon;
+        state.mMobileDarkStrengthId = darkStatusIcon;
+        state.mMobileTypeId = statusType;
+        state.mMobileDescription = statusIcon.contentDescription;
         state.mMobileTypeDescription = typeContentDescription;
-        state.mIsMobileTypeIconWide = isTypeIconWide;
+        state.mIsMobileTypeIconWide = statusType != 0 && isWide;
 
         apply();
     }
 
     @Override
-    public void setEthernetIndicators(boolean visible, int icon, String contentDescription) {
-        mEthernetVisible = visible;
-        mEthernetIconId = icon;
-        mEthernetDescription = contentDescription;
+    public void setEthernetIndicators(IconState state) {
+        mEthernetVisible = state.visible;
+        mEthernetIconId = state.icon;
+        mEthernetDescription = state.contentDescription;
 
         apply();
     }
@@ -239,12 +241,17 @@ public class SignalClusterView
     }
 
     @Override
-    public void setIsAirplaneMode(boolean is, int airplaneIconId, int contentDescription) {
-        mIsAirplaneMode = is;
-        mAirplaneIconId = airplaneIconId;
-        mAirplaneContentDescription = contentDescription;
+    public void setIsAirplaneMode(IconState icon) {
+        mIsAirplaneMode = icon.visible;
+        mAirplaneIconId = icon.icon;
+        mAirplaneContentDescription = icon.contentDescription;
 
         apply();
+    }
+
+    @Override
+    public void setMobileDataEnabled(boolean enabled) {
+        // Don't care.
     }
 
     @Override
@@ -343,8 +350,7 @@ public class SignalClusterView
 
         if (mIsAirplaneMode) {
             mAirplane.setImageResource(mAirplaneIconId);
-            mAirplane.setContentDescription(mAirplaneContentDescription != 0 ?
-                    mContext.getString(mAirplaneContentDescription) : null);
+            mAirplane.setContentDescription(mAirplaneContentDescription);
             mAirplane.setVisibility(View.VISIBLE);
         } else {
             mAirplane.setVisibility(View.GONE);
