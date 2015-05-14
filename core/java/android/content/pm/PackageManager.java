@@ -1930,6 +1930,14 @@ public abstract class PackageManager {
     @SystemApi
     public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE =  1 << 3;
 
+    /**
+     * Permission flag: The permission is set in its current state
+     * because the app is a component that is a part of the system.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_SYSTEM_FIXED =  1 << 4;
 
     /**
      * Mask for all permission flags.
@@ -1937,7 +1945,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    public static final int MASK_PERMISSION_FLAGS = 0xF;
+    public static final int MASK_PERMISSION_FLAGS = 0xFF;
 
     /**
      * Retrieve overall information about an application package that is
@@ -2435,7 +2443,8 @@ public abstract class PackageManager {
     @IntDef({FLAG_PERMISSION_USER_SET,
             FLAG_PERMISSION_USER_FIXED,
             FLAG_PERMISSION_POLICY_FIXED,
-            FLAG_PERMISSION_REVOKE_ON_UPGRADE})
+            FLAG_PERMISSION_REVOKE_ON_UPGRADE,
+            FLAG_PERMISSION_SYSTEM_FIXED})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
 
