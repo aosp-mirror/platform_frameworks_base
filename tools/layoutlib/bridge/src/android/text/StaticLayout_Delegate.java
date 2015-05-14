@@ -106,7 +106,7 @@ public class StaticLayout_Delegate {
                 break;
             case HIGH_QUALITY:
                 // TODO
-                break;
+//                break;
             case BALANCED:
                 builder.mLineBreaker = new OptimizingLineBreaker(primitives, lineWidth,
                         tabStopCalculator);
