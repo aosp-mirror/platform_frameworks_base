@@ -3191,8 +3191,9 @@ public class Notification implements Parcelable
                         0xFFFFFFFF,
                         PorterDuff.Mode.SRC_ATOP, -1);
             }
-            final boolean gray = (smallIcon.getType() == Icon.TYPE_RESOURCE
-                    && mColorUtil.isGrayscaleIcon(mContext, smallIcon.getResId()));
+            final boolean gray = isLegacy()
+                    && smallIcon.getType() == Icon.TYPE_RESOURCE
+                    && mColorUtil.isGrayscaleIcon(mContext, smallIcon.getResId());
             if (!isLegacy() || gray) {
                 contentView.setInt(R.id.right_icon,
                         "setBackgroundResource",
