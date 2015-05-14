@@ -184,7 +184,7 @@
 
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
-                  android:icon="@drawable/icon"
+                  android:icon="@*android:drawable/stat_sys_adb"
                   android:theme="@android:style/Theme.Material.Settings"
                   android:label="@string/system_ui_tuner"
                   android:exported="true">
