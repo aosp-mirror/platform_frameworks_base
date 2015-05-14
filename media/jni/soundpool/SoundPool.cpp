@@ -738,12 +738,16 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
             // do not create a new audio track if current track is compatible with sample parameters
     #ifdef USE_SHARED_MEM_BUFFER
             newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
-                    channelMask, sample->getIMemory(), AUDIO_OUTPUT_FLAG_FAST, callback, userData);
+                    channelMask, sample->getIMemory(), AUDIO_OUTPUT_FLAG_FAST, callback, userData,
+                    0 /*default notification frames*/, AUDIO_SESSION_ALLOCATE,
+                    AudioTrack::TRANSFER_DEFAULT,
+                    NULL /*offloadInfo*/, -1 /*uid*/, -1 /*pid*/, mSoundPool->attributes());
     #else
             uint32_t bufferFrames = (totalFrames + (kDefaultBufferCount - 1)) / kDefaultBufferCount;
             newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
                     channelMask, frameCount, AUDIO_OUTPUT_FLAG_FAST, callback, userData,
-                    bufferFrames);
+                    bufferFrames, AUDIO_SESSION_ALLOCATE, AudioTrack::TRANSFER_DEFAULT,
+                    NULL /*offloadInfo*/, -1 /*uid*/, -1 /*pid*/, mSoundPool->attributes());
     #endif
             oldTrack = mAudioTrack;
             status = newTrack->initCheck();
