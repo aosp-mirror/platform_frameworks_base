@@ -402,7 +402,7 @@ public class DevicePolicyManager {
      * has completed successfully.
      *
      * <p>The broadcast is limited to the primary profile, to the app specified in the provisioning
-     * intent (@see #ACTION_PROVISION_MANAGED_PROFILE).
+     * intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}.
      *
      * <p>This intent will contain the extra {@link #EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE} which
      * corresponds to the account requested to be migrated at provisioning time, if any.
