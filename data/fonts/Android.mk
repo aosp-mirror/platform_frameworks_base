@@ -17,6 +17,11 @@
 
 LOCAL_PATH := $(call my-dir)
 
+# Use full Noto Sans Japanese font on extended footprint
+ifeq ($(EXTENDED_FONT_FOOTPRINT),true)
+FONT_NOTOSANS_JP_FULL := true
+endif
+
 ##########################################
 # create symlink for given font
 # $(1): new font $(2): link target
