@@ -836,9 +836,7 @@
 
     <!-- Allows an application to create mock location providers for testing. -->
     <permission android:name="android.permission.ACCESS_MOCK_LOCATION"
-        android:label="@string/permlab_accessMockLocation"
-        android:description="@string/permdesc_accessMockLocation"
-        android:protectionLevel="normal" />
+        android:protectionLevel="signature" />
 
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
