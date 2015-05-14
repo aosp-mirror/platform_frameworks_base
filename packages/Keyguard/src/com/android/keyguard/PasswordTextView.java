@@ -92,6 +92,11 @@ public class PasswordTextView extends View {
     private Interpolator mDisappearInterpolator;
     private Interpolator mFastOutSlowInInterpolator;
     private boolean mShowPassword;
+    private UserActivityListener mUserActivityListener;
+
+    public interface UserActivityListener {
+        void onUserActivity();
+    }
 
     public PasswordTextView(Context context) {
         this(context, null);
@@ -206,8 +211,15 @@ public class PasswordTextView extends View {
         sendAccessibilityEventTypeViewTextChanged(textbefore, textbefore.length(), 0, 1);
     }
 
+    public void setUserActivityListener(UserActivityListener userActivitiListener) {
+        mUserActivityListener = userActivitiListener;
+    }
+
     private void userActivity() {
         mPM.userActivity(SystemClock.uptimeMillis(), false);
+        if (mUserActivityListener != null) {
+            mUserActivityListener.onUserActivity();
+        }
     }
 
     public void deleteLastChar() {
