@@ -38818,8 +38818,7 @@ package android.webkit {
   }
 
   public abstract class WebResourceError {
-    ctor public WebResourceError();
-    method public abstract java.lang.String getDescription();
+    method public abstract java.lang.CharSequence getDescription();
     method public abstract int getErrorCode();
   }
 
@@ -38849,12 +38848,6 @@ package android.webkit {
 
   public abstract class WebResourceResponseBase {
     ctor public WebResourceResponseBase();
-    method public abstract java.io.InputStream getData();
-    method public abstract java.lang.String getEncoding();
-    method public abstract java.lang.String getMimeType();
-    method public abstract java.lang.String getReasonPhrase();
-    method public abstract java.util.Map<java.lang.String, java.lang.String> getResponseHeaders();
-    method public abstract int getStatusCode();
   }
 
   public abstract class WebSettings {
@@ -39186,6 +39179,7 @@ package android.webkit {
     method public void onReceivedError(android.webkit.WebView, android.webkit.WebResourceRequest, android.webkit.WebResourceError);
     method public void onReceivedHttpAuthRequest(android.webkit.WebView, android.webkit.HttpAuthHandler, java.lang.String, java.lang.String);
     method public void onReceivedHttpError(android.webkit.WebView, android.webkit.WebResourceRequest, android.webkit.WebResourceResponseBase);
+    method public void onReceivedHttpError(android.webkit.WebView, android.webkit.WebResourceRequest, android.webkit.WebResourceResponse);
     method public void onReceivedLoginRequest(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String);
     method public void onReceivedSslError(android.webkit.WebView, android.webkit.SslErrorHandler, android.net.http.SslError);
     method public void onScaleChanged(android.webkit.WebView, float, float);

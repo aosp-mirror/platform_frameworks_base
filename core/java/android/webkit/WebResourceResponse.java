@@ -20,12 +20,15 @@ import java.io.InputStream;
 import java.io.StringBufferInputStream;
 import java.util.Map;
 
+import android.annotation.SystemApi;
+
 /**
  * Encapsulates a resource response. Applications can return an instance of this
  * class from {@link WebViewClient#shouldInterceptRequest} to provide a custom
  * response when the WebView requests a particular resource.
  */
 public class WebResourceResponse extends WebResourceResponseBase {
+    private boolean mImmutable;
     private String mMimeType;
     private String mEncoding;
     private int mStatusCode;
@@ -80,13 +83,15 @@ public class WebResourceResponse extends WebResourceResponseBase {
      * @param mimeType The resource response's MIME type
      */
     public void setMimeType(String mimeType) {
+        checkImmutable();
         mMimeType = mimeType;
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the resource response's MIME type.
+     *
+     * @return The resource response's MIME type
      */
-    @Override
     public String getMimeType() {
         return mMimeType;
     }
@@ -98,13 +103,15 @@ public class WebResourceResponse extends WebResourceResponseBase {
      * @param encoding The resource response's encoding
      */
     public void setEncoding(String encoding) {
+        checkImmutable();
         mEncoding = encoding;
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the resource response's encoding.
+     *
+     * @return The resource response's encoding
      */
-    @Override
     public String getEncoding() {
         return mEncoding;
     }
@@ -118,6 +125,7 @@ public class WebResourceResponse extends WebResourceResponseBase {
      *                     and not empty.
      */
     public void setStatusCodeAndReasonPhrase(int statusCode, String reasonPhrase) {
+        checkImmutable();
         if (statusCode < 100)
             throw new IllegalArgumentException("statusCode can't be less than 100.");
         if (statusCode > 599)
@@ -140,17 +148,19 @@ public class WebResourceResponse extends WebResourceResponseBase {
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the resource response's status code.
+     *
+     * @return The resource response's status code.
      */
-    @Override
     public int getStatusCode() {
         return mStatusCode;
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the description of the resource response's status code.
+     *
+     * @return The description of the resource response's status code.
      */
-    @Override
     public String getReasonPhrase() {
         return mReasonPhrase;
     }
@@ -161,13 +171,15 @@ public class WebResourceResponse extends WebResourceResponseBase {
      * @param headers Mapping of header name -> header value.
      */
     public void setResponseHeaders(Map<String, String> headers) {
+        checkImmutable();
         mResponseHeaders = headers;
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the headers for the resource response.
+     *
+     * @return The headers for the resource response.
      */
-    @Override
     public Map<String, String> getResponseHeaders() {
         return mResponseHeaders;
     }
@@ -180,6 +192,7 @@ public class WebResourceResponse extends WebResourceResponseBase {
      *             StringBufferInputStream.
      */
     public void setData(InputStream data) {
+        checkImmutable();
         // If data is (or is a subclass of) StringBufferInputStream
         if (data != null && StringBufferInputStream.class.isAssignableFrom(data.getClass())) {
             throw new IllegalArgumentException("StringBufferInputStream is deprecated and must " +
@@ -189,10 +202,32 @@ public class WebResourceResponse extends WebResourceResponseBase {
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the input stream that provides the resource response's data.
+     *
+     * @return The input stream that provides the resource response's data
      */
-    @Override
     public InputStream getData() {
         return mInputStream;
+    }
+
+    /**
+     * The internal version of the constructor that doesn't perform arguments checks.
+     * @hide
+     */
+    @SystemApi
+    public WebResourceResponse(boolean immutable, String mimeType, String encoding, int statusCode,
+            String reasonPhrase, Map<String, String> responseHeaders, InputStream data) {
+        mImmutable = immutable;
+        mMimeType = mimeType;
+        mEncoding = encoding;
+        mStatusCode = statusCode;
+        mReasonPhrase = reasonPhrase;
+        mResponseHeaders = responseHeaders;
+        mInputStream = data;
+    }
+
+    private void checkImmutable() {
+        if (mImmutable)
+            throw new IllegalStateException("This WebResourceResponse instance is immutable");
     }
 }
