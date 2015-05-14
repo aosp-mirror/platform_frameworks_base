@@ -15341,8 +15341,8 @@ package android.media {
     method public void setCallback(android.media.MediaCodec.Callback);
     method public void setInputSurface(android.view.Surface);
     method public void setOnFrameRenderedListener(android.media.MediaCodec.OnFrameRenderedListener, android.os.Handler);
+    method public void setOutputSurface(android.view.Surface);
     method public final void setParameters(android.os.Bundle);
-    method public void setSurface(android.view.Surface);
     method public final void setVideoScalingMode(int);
     method public final void signalEndOfInputStream();
     method public final void start();
