@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,6 +33,14 @@ public class NavigationBar extends CustomBar {
 
     /** Navigation bar background color attribute name. */
     private static final String ATTR_COLOR = "navigationBarColor";
+    // These correspond to @dimen/navigation_side_padding in the system ui code.
+    private static final int PADDING_WIDTH_DEFAULT = 36;
+    private static final int PADDING_WIDTH_SW360 = 40;
+    private static final int PADDING_WIDTH_SW400 = 50;
+    // These corresponds to @dimen/navigation_key_width in the system ui code.
+    private static final int WIDTH_DEFAULT = 36;
+    private static final int WIDTH_SW360 = 40;
+    private static final int WIDTH_SW600 = 48;
 
     /**
      * Constructor to be used when creating the {@link NavigationBar} as a regular control.
@@ -45,7 +54,7 @@ public class NavigationBar extends CustomBar {
                 ((BridgeContext) context).getConfiguration().getLayoutDirection() ==
                         View.LAYOUT_DIRECTION_RTL,
                 (context.getApplicationInfo().flags & ApplicationInfo.FLAG_SUPPORTS_RTL) != 0,
-                context.getApplicationInfo().targetSdkVersion);
+                0);
     }
 
     public NavigationBar(BridgeContext context, Density density, int orientation, boolean isRtl,
@@ -61,19 +70,70 @@ public class NavigationBar extends CustomBar {
         // We do know the order though.
         // 0 is a spacer.
         int back = 1;
-        int recent = 3;
+        int recent = 5;
         if (orientation == LinearLayout.VERTICAL || (isRtl && !rtlEnabled)) {
             // If RTL is enabled, then layoutlib mirrors the layout for us.
-            back = 3;
+            back = 5;
             recent = 1;
         }
 
         //noinspection SpellCheckingInspection
-        loadIcon(back,   "ic_sysbar_back.png",   density, isRtl);
+        loadIcon(back, "ic_sysbar_back.png", density, isRtl);
         //noinspection SpellCheckingInspection
-        loadIcon(2,      "ic_sysbar_home.png",   density, isRtl);
+        loadIcon(3, "ic_sysbar_home.png", density, isRtl);
         //noinspection SpellCheckingInspection
         loadIcon(recent, "ic_sysbar_recent.png", density, isRtl);
+        setupNavBar(context, orientation);
+    }
+
+    private void setupNavBar(BridgeContext context, int orientation) {
+        View leftPadding = getChildAt(0);
+        View rightPadding = getChildAt(6);
+        setSize(context, leftPadding, orientation, getSidePadding(context));
+        setSize(context, rightPadding, orientation, getSidePadding(context));
+        for (int i = 1; i < 6; i += 2) {
+            View navButton = getChildAt(i);
+            setSize(context, navButton, orientation, getWidth(context));
+        }
+    }
+
+    private static void setSize(BridgeContext context, View view, int orientation, int size) {
+        size *= context.getMetrics().density;
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        if (orientation == HORIZONTAL) {
+            layoutParams.width = size;
+        } else {
+            layoutParams.height = size;
+        }
+        view.setLayoutParams(layoutParams);
+    }
+
+    private static int getSidePadding(BridgeContext context) {
+        DisplayMetrics metrics = context.getMetrics();
+        float sw = metrics.widthPixels > metrics.heightPixels
+                ? metrics.heightPixels : metrics.widthPixels;
+        sw /= metrics.density;
+        if (sw >= 400) {
+            return PADDING_WIDTH_SW400;
+        }
+        if (sw >= 360) {
+            return PADDING_WIDTH_SW360;
+        }
+        return PADDING_WIDTH_DEFAULT;
+    }
+
+    private static int getWidth(BridgeContext context) {
+        DisplayMetrics metrics = context.getMetrics();
+        float sw = metrics.widthPixels > metrics.heightPixels
+                ? metrics.heightPixels : metrics.widthPixels;
+        sw /= metrics.density;
+        if (sw >= 600) {
+            return WIDTH_SW600;
+        }
+        if (sw >= 360) {
+            return WIDTH_SW360;
+        }
+        return WIDTH_DEFAULT;
     }
 
     @Override
