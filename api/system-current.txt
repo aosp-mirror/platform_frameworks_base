@@ -42849,6 +42849,7 @@ package android.widget {
     method public void setImageAlpha(int);
     method public void setImageBitmap(android.graphics.Bitmap);
     method public void setImageDrawable(android.graphics.drawable.Drawable);
+    method public void setImageIcon(android.graphics.drawable.Icon);
     method public void setImageLevel(int);
     method public void setImageMatrix(android.graphics.Matrix);
     method public void setImageResource(int);
@@ -43429,7 +43430,9 @@ package android.widget {
     method public void setDouble(int, java.lang.String, double);
     method public void setEmptyView(int, int);
     method public void setFloat(int, java.lang.String, float);
+    method public void setIcon(int, java.lang.String, android.graphics.drawable.Icon);
     method public void setImageViewBitmap(int, android.graphics.Bitmap);
+    method public void setImageViewIcon(int, android.graphics.drawable.Icon);
     method public void setImageViewResource(int, int);
     method public void setImageViewUri(int, android.net.Uri);
     method public void setInt(int, java.lang.String, int);
