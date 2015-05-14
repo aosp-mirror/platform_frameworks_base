@@ -1585,7 +1585,7 @@ public final class Pm {
     }
 
     private int runGrantRevokePermission(boolean grant) {
-        int userId = UserHandle.USER_CURRENT;
+        int userId = UserHandle.USER_OWNER;
 
         String opt = null;
         while ((opt = nextOption()) != null) {
