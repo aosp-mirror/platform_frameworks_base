@@ -19,8 +19,8 @@ package android.text;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
-import com.ibm.icu.text.Bidi;
 
+import android.icu.text.Bidi;
 
 /**
  * Delegate used to provide new implementation for the native methods of {@link AndroidBidi}

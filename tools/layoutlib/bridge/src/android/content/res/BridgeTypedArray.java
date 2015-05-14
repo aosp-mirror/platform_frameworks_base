@@ -758,6 +758,17 @@ public final class BridgeTypedArray extends TypedArray {
         return s != null && ResourceHelper.parseFloatAttribute(mNames[index], s, outValue, false);
     }
 
+    @Override
+    public int getType(int index) {
+        if (!hasValue(index)) {
+            return TypedValue.TYPE_NULL;
+        }
+        ResourceValue value = mResourceData[index];
+        ResourceType resourceType = value.getResourceType();
+        return 0;
+        // TODO: fixme.
+    }
+
     /**
      * Determines whether there is an attribute at <var>index</var>.
      *
