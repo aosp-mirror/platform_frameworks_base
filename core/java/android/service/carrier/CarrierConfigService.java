@@ -16,8 +16,8 @@ package android.service.carrier;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 
 /**
  * A service that sets carrier configuration for telephony services.
@@ -68,16 +68,16 @@ public abstract class CarrierConfigService extends Service {
      * </p>
      * <p>
      * Implementations should use the keys defined in {@link android.telephony.CarrierConfigManager
-     * CarrierConfigManager}. Any configuration values not set in the returned {@link Bundle} may be
-     * overridden by the system's default configuration service.
+     * CarrierConfigManager}. Any configuration values not set in the returned {@link
+     * PersistableBundle} may be overridden by the system's default configuration service.
      * </p>
      *
      * @param id contains details about the current carrier that can be used do decide what
      *            configuration values to return.
-     * @return a {@link Bundle} object containing the configuration or null if default values should
-     *         be used.
+     * @return a {@link PersistableBundle} object containing the configuration or null if default
+     *         values should be used.
      */
-    public abstract Bundle onLoadConfig(CarrierIdentifier id);
+    public abstract PersistableBundle onLoadConfig(CarrierIdentifier id);
 
     /** @hide */
     @Override
@@ -97,7 +97,7 @@ public abstract class CarrierConfigService extends Service {
     private class ICarrierConfigServiceWrapper extends ICarrierConfigService.Stub {
 
         @Override
-        public Bundle getCarrierConfig(CarrierIdentifier id) {
+        public PersistableBundle getCarrierConfig(CarrierIdentifier id) {
             return CarrierConfigService.this.onLoadConfig(id);
         }
     }
