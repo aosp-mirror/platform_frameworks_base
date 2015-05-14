@@ -24,17 +24,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library name="layoutlib_api-prebuilt">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/layoutlib_api/layoutlib_api-prebuilt.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/layoutlib_api/layoutlib_api-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="layoutlib_api-prebuilt" level="project" />
     <orderEntry type="module-library">
       <library name="ninepatch-prebuilt">
         <CLASSES>
@@ -60,19 +50,7 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library name="framework.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../../out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../core/java" />
-          <root url="file://$MODULE_DIR$/../../../graphics/java" />
-          <root url="file://$MODULE_DIR$/../../../../../libcore/luni/src/main/java" />
-        </SOURCES>
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="framework.jar" level="project" />
     <orderEntry type="module-library" scope="TEST">
       <library name="kxml2-2.3.0">
         <CLASSES>
