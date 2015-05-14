@@ -184,12 +184,8 @@ public class Paint {
     /** @hide bit mask for the flag enabling vertical rendering for text */
     public static final int VERTICAL_TEXT_FLAG = 0x1000;
 
-
-    /** @hide default flags, even if unspecified */
-    public static final int HIDDEN_DEFAULT_PAINT_FLAGS =
-            DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG;
-    /** @hide default flags for no-param constructor */
-    public static final int DEFAULT_PAINT_FLAGS = ANTI_ALIAS_FLAG;
+    // These flags are always set on a new/reset paint, even if flags 0 is passed.
+    static final int HIDDEN_DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG;
 
     /**
      * Font hinter option that disables font hinting.
@@ -419,11 +415,9 @@ public class Paint {
 
     /**
      * Create a new paint with default settings.
-     *
-     * As of {@link android.os.Build.VERSION_CODES#MNC}, sets {@link #ANTI_ALIAS_FLAG}.
      */
     public Paint() {
-        this(DEFAULT_PAINT_FLAGS);
+        this(0);
     }
 
     /**
@@ -458,7 +452,7 @@ public class Paint {
     /** Restores the paint to its default settings. */
     public void reset() {
         native_reset(mNativePaint);
-        setFlags(DEFAULT_PAINT_FLAGS | HIDDEN_DEFAULT_PAINT_FLAGS);
+        setFlags(HIDDEN_DEFAULT_PAINT_FLAGS);
 
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning
