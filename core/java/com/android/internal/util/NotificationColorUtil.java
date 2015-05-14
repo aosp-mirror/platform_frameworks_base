@@ -24,7 +24,6 @@ import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.graphics.drawable.VectorDrawable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -127,20 +126,6 @@ public class NotificationColorUtil {
             return true;
         } else {
             return false;
-        }
-    }
-
-    public boolean isGrayscaleIcon(Context context, Icon icon) {
-        if (icon == null) {
-            return false;
-        }
-        switch (icon.getType()) {
-            case Icon.TYPE_BITMAP:
-                return isGrayscaleIcon(icon.getBitmap());
-            case Icon.TYPE_RESOURCE:
-                return isGrayscaleIcon(context, icon.getResId());
-            default:
-                return false;
         }
     }
 

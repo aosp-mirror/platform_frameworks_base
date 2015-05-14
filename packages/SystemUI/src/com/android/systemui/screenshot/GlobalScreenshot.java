@@ -194,7 +194,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         // we compose the final post-save notification below.
         mNotificationBuilder.setLargeIcon(croppedIcon);
         // But we still don't set it for the expanded view, allowing the smallIcon to show here.
-        mNotificationStyle.bigLargeIcon((Bitmap) null);
+        mNotificationStyle.bigLargeIcon(null);
     }
 
     @Override

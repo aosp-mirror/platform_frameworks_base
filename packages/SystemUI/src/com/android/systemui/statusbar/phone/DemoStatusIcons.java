@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.Gravity;
@@ -133,7 +132,8 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
                     break;
                 } else {
                     StatusBarIcon icon = v.getStatusBarIcon();
-                    icon.icon = Icon.createWithResource(icon.icon.getResPackage(), iconId);
+                    icon.iconPackage = iconPkg;
+                    icon.iconId = iconId;
                     v.set(icon);
                     v.updateDrawable();
                     return;
