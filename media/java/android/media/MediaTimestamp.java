@@ -37,22 +37,36 @@ package android.media;
 public final class MediaTimestamp
 {
     /**
-     * Media time in microseconds.
+     * Get the media time of the anchor in microseconds.
      */
-    public final long mediaTimeUs;
+    public long getAnchorMediaTimeUs() {
+        return mediaTimeUs;
+    }
 
     /**
-     * The {@link java.lang.System#nanoTime system time} corresponding to the media time
+     * Get the {@link java.lang.System#nanoTime system time} corresponding to the media time
      * in nanoseconds.
      */
-    public final long nanoTime;
+    public long getAnchorSytemNanoTime() {
+        return nanoTime;
+    }
 
     /**
-     * The rate of the media clock in relation to the system time.
+     * Get the rate of the media clock in relation to the system time.
+     * <p>
      * It is 1.0 if media clock advances in sync with the system clock;
      * greater than 1.0 if media clock is faster than the system clock;
      * less than 1.0 if media clock is slower than the system clock.
      */
+    public float getMediaClockRate() {
+        return clockRate;
+    }
+
+    /** @hide - accessor shorthand */
+    public final long mediaTimeUs;
+    /** @hide - accessor shorthand */
+    public final long nanoTime;
+    /** @hide - accessor shorthand */
     public final float clockRate;
 
     /** @hide */
