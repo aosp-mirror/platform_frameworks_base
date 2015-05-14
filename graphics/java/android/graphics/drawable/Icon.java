@@ -18,9 +18,9 @@ package android.graphics.drawable;
 
 import android.annotation.DrawableRes;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -29,15 +29,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.util.Log;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.lang.IllegalArgumentException;
-import java.lang.Override;
+import java.io.OutputStream;
 
 /**
  * An umbrella container for several serializable graphics representations, including Bitmaps,
@@ -56,6 +57,8 @@ public final class Icon implements Parcelable {
     private static final int TYPE_RESOURCE = 2;
     private static final int TYPE_DATA     = 3;
     private static final int TYPE_URI      = 4;
+
+    private static final int VERSION_STREAM_SERIALIZER = 1;
 
     private final int mType;
 
@@ -281,8 +284,70 @@ public final class Icon implements Parcelable {
         return loadDrawable(context);
     }
 
+    /**
+     * Writes a serialized version of an Icon to the specified stream.
+     *
+     * @param stream The stream on which to serialize the Icon.
+     * @hide
+     */
+    public void writeToStream(OutputStream stream) throws IOException {
+        DataOutputStream dataStream = new DataOutputStream(stream);
+
+        dataStream.writeInt(VERSION_STREAM_SERIALIZER);
+        dataStream.writeByte(mType);
+
+        switch (mType) {
+            case TYPE_BITMAP:
+                getBitmap().compress(Bitmap.CompressFormat.PNG, 100, dataStream);
+                break;
+            case TYPE_DATA:
+                dataStream.writeInt(getDataLength());
+                dataStream.write(getDataBytes(), getDataOffset(), getDataLength());
+                break;
+            case TYPE_RESOURCE:
+                dataStream.writeUTF(getResPackage());
+                dataStream.writeInt(getResId());
+                break;
+            case TYPE_URI:
+                dataStream.writeUTF(getUriString());
+                break;
+        }
+    }
+
     private Icon(int mType) {
         this.mType = mType;
+    }
+
+    /**
+     * Create an Icon from the specified stream.
+     *
+     * @param stream The input stream from which to reconstruct the Icon.
+     * @hide
+     */
+    public static Icon createFromStream(InputStream stream) throws IOException {
+        DataInputStream inputStream = new DataInputStream(stream);
+
+        final int version = inputStream.readInt();
+        if (version >= VERSION_STREAM_SERIALIZER) {
+            final int type = inputStream.readByte();
+            switch (type) {
+                case TYPE_BITMAP:
+                    return createWithBitmap(BitmapFactory.decodeStream(inputStream));
+                case TYPE_DATA:
+                    final int length = inputStream.readInt();
+                    final byte[] data = new byte[length];
+                    inputStream.read(data, 0 /* offset */, length);
+                    return createWithData(data, 0 /* offset */, length);
+                case TYPE_RESOURCE:
+                    final String packageName = inputStream.readUTF();
+                    final int resId = inputStream.readInt();
+                    return createWithResource(packageName, resId);
+                case TYPE_URI:
+                    final String uriOrPath = inputStream.readUTF();
+                    return createWithContentUri(uriOrPath);
+            }
+        }
+        return null;
     }
 
     /**
@@ -291,6 +356,9 @@ public final class Icon implements Parcelable {
      * @param resId ID of the drawable resource
      */
     public static Icon createWithResource(Resources res, @DrawableRes int resId) {
+        if (res == null) {
+            throw new IllegalArgumentException("Resource must not be null.");
+        }
         final Icon rep = new Icon(TYPE_RESOURCE);
         rep.mObj1 = res;
         rep.mInt1 = resId;
@@ -304,6 +372,9 @@ public final class Icon implements Parcelable {
      * @param resId ID of the drawable resource
      */
     public static Icon createWithResource(String resPackage, @DrawableRes int resId) {
+        if (resPackage == null) {
+            throw new IllegalArgumentException("Resource package name must not be null.");
+        }
         final Icon rep = new Icon(TYPE_RESOURCE);
         rep.mInt1 = resId;
         rep.mString1 = resPackage;
@@ -315,6 +386,9 @@ public final class Icon implements Parcelable {
      * @param bits A valid {@link android.graphics.Bitmap} object
      */
     public static Icon createWithBitmap(Bitmap bits) {
+        if (bits == null) {
+            throw new IllegalArgumentException("Bitmap must not be null.");
+        }
         final Icon rep = new Icon(TYPE_BITMAP);
         rep.mObj1 = bits;
         return rep;
@@ -329,6 +403,9 @@ public final class Icon implements Parcelable {
      * @param length Length of the bitmap data
      */
     public static Icon createWithData(byte[] data, int offset, int length) {
+        if (data == null) {
+            throw new IllegalArgumentException("Data must not be null.");
+        }
         final Icon rep = new Icon(TYPE_DATA);
         rep.mObj1 = data;
         rep.mInt1 = length;
@@ -342,6 +419,9 @@ public final class Icon implements Parcelable {
      * @param uri A uri referring to local content:// or file:// image data.
      */
     public static Icon createWithContentUri(String uri) {
+        if (uri == null) {
+            throw new IllegalArgumentException("Uri must not be null.");
+        }
         final Icon rep = new Icon(TYPE_URI);
         rep.mString1 = uri;
         return rep;
@@ -353,6 +433,9 @@ public final class Icon implements Parcelable {
      * @param uri A uri referring to local content:// or file:// image data.
      */
     public static Icon createWithContentUri(Uri uri) {
+        if (uri == null) {
+            throw new IllegalArgumentException("Uri must not be null.");
+        }
         final Icon rep = new Icon(TYPE_URI);
         rep.mString1 = uri.toString();
         return rep;
@@ -365,6 +448,9 @@ public final class Icon implements Parcelable {
      *           a type that {@link android.graphics.BitmapFactory} can decode.
      */
     public static Icon createWithFilePath(String path) {
+        if (path == null) {
+            throw new IllegalArgumentException("Path must not be null.");
+        }
         final Icon rep = new Icon(TYPE_URI);
         rep.mString1 = path;
         return rep;
