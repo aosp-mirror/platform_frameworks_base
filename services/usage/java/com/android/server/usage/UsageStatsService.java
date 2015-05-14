@@ -100,7 +100,7 @@ public class UsageStatsService extends SystemService implements
 
     static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = DEBUG ? ONE_MINUTE * 4
             : 1L * 24 * 60 * ONE_MINUTE; // 1 day
-    static final long DEFAULT_CHECK_IDLE_INTERVAL = DEBUG ? ONE_MINUTE / 4
+    static final long DEFAULT_CHECK_IDLE_INTERVAL = DEBUG ? ONE_MINUTE
             : 8 * 60 * ONE_MINUTE; // 8 hours
     static final long DEFAULT_PAROLE_INTERVAL = DEBUG ? ONE_MINUTE * 10
             : 24 * 60 * ONE_MINUTE; // 24 hours between paroles
@@ -336,6 +336,7 @@ public class UsageStatsService extends SystemService implements
 
     /** Check all running users' apps to see if they enter an idle state. */
     void checkIdleStates() {
+        if (DEBUG) Slog.d(TAG, "Checking idle state");
         final int[] runningUsers;
         try {
             runningUsers = ActivityManagerNative.getDefault().getRunningUserIds();
