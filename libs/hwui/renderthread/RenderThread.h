@@ -19,8 +19,8 @@
 
 #include "RenderTask.h"
 
-#include "../JankTracker.h"
-#include "TimeLord.h"
+#include <memory>
+#include <set>
 
 #include <cutils/compiler.h>
 #include <utils/Looper.h>
@@ -28,8 +28,7 @@
 #include <utils/Singleton.h>
 #include <utils/Thread.h>
 
-#include <memory>
-#include <set>
+#include "TimeLord.h"
 
 namespace android {
 
@@ -86,12 +85,9 @@ public:
     // the next vsync. If it is not currently registered this does nothing.
     void pushBackFrameCallback(IFrameCallback* callback);
 
-    void setFrameInterval(nsecs_t frameInterval);
-
     TimeLord& timeLord() { return mTimeLord; }
     RenderState& renderState() { return *mRenderState; }
     EglManager& eglManager() { return *mEglManager; }
-    JankTracker& jankTracker() { return *mJankTracker; }
 
 protected:
     virtual bool threadLoop();
@@ -136,8 +132,6 @@ private:
     TimeLord mTimeLord;
     RenderState* mRenderState;
     EglManager* mEglManager;
-
-    JankTracker* mJankTracker;
 };
 
 } /* namespace renderthread */
