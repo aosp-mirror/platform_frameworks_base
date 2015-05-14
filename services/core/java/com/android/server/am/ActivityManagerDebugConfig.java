@@ -51,6 +51,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_IMMERSIVE = DEBUG_ALL || false;
     static final boolean DEBUG_LOCKSCREEN = DEBUG_ALL || false;
+    static final boolean DEBUG_LOCKTASK = DEBUG_ALL || false;
     static final boolean DEBUG_LRU = DEBUG_ALL || false;
     static final boolean DEBUG_MU = DEBUG_ALL || false;
     static final boolean DEBUG_OOM_ADJ = DEBUG_ALL || false;
@@ -82,6 +83,7 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_FOCUS = (APPEND_CATEGORY_NAME) ? "_Focus" : "";
     static final String POSTFIX_IMMERSIVE = (APPEND_CATEGORY_NAME) ? "_Immersive" : "";
     static final String POSTFIX_LOCKSCREEN = (APPEND_CATEGORY_NAME) ? "_LOCKSCREEN" : "";
+    static final String POSTFIX_LOCKTASK = (APPEND_CATEGORY_NAME) ? "_LOCKTASK" : "";
     static final String POSTFIX_LRU = (APPEND_CATEGORY_NAME) ? "_LRU" : "";
     static final String POSTFIX_MU = "_MU";
     static final String POSTFIX_OOM_ADJ = (APPEND_CATEGORY_NAME) ? "_OomAdj" : "";
