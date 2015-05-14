@@ -13,7 +13,7 @@ namespace flag {
 struct Flag {
     std::string name;
     std::string description;
-    std::function<void(const StringPiece&)> action;
+    std::function<bool(const StringPiece&, std::string*)> action;
     bool required;
     bool* flagResult;
     bool flagValueWhenSet;
@@ -23,22 +23,38 @@ struct Flag {
 static std::vector<Flag> sFlags;
 static std::vector<std::string> sArgs;
 
+static std::function<bool(const StringPiece&, std::string*)> wrap(
+        const std::function<void(const StringPiece&)>& action) {
+    return [action](const StringPiece& arg, std::string*) -> bool {
+        action(arg);
+        return true;
+    };
+}
+
 void optionalFlag(const StringPiece& name, const StringPiece& description,
                   std::function<void(const StringPiece&)> action) {
-    sFlags.push_back(
-            Flag{ name.toString(), description.toString(), action, false, nullptr, false, false });
+    sFlags.push_back(Flag{
+            name.toString(), description.toString(), wrap(action),
+            false, nullptr, false, false });
 }
 
 void requiredFlag(const StringPiece& name, const StringPiece& description,
                   std::function<void(const StringPiece&)> action) {
-    sFlags.push_back(
-            Flag{ name.toString(), description.toString(), action, true, nullptr, false, false });
+    sFlags.push_back(Flag{ name.toString(), description.toString(), wrap(action),
+            true, nullptr, false, false });
+}
+
+void requiredFlag(const StringPiece& name, const StringPiece& description,
+                  std::function<bool(const StringPiece&, std::string*)> action) {
+    sFlags.push_back(Flag{ name.toString(), description.toString(), action,
+            true, nullptr, false, false });
 }
 
 void optionalSwitch(const StringPiece& name, const StringPiece& description, bool resultWhenSet,
                     bool* result) {
     sFlags.push_back(Flag{
-            name.toString(), description.toString(), {}, false, result, resultWhenSet, false });
+            name.toString(), description.toString(), {},
+            false, result, resultWhenSet, false });
 }
 
 void usageAndDie(const StringPiece& command) {
@@ -62,6 +78,7 @@ void usageAndDie(const StringPiece& command) {
 }
 
 void parse(int argc, char** argv, const StringPiece& command) {
+    std::string errorStr;
     for (int i = 0; i < argc; i++) {
         const StringPiece arg(argv[i]);
         if (*arg.data() != '-') {
@@ -83,7 +100,11 @@ void parse(int argc, char** argv, const StringPiece& command) {
                                   << std::endl;
                         usageAndDie(command);
                     }
-                    flag.action(argv[i]);
+
+                    if (!flag.action(argv[i], &errorStr)) {
+                        std::cerr << errorStr << "." << std::endl << std::endl;
+                        usageAndDie(command);
+                    }
                 }
                 break;
             }

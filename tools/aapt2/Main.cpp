@@ -293,6 +293,10 @@ struct AaptOptions {
     // referencing attributes defined in a newer SDK
     // level than the style or layout is defined for.
     bool versionStylesAndLayouts = true;
+
+    // The target style that will have it's style hierarchy dumped
+    // when the phase is DumpStyleGraph.
+    ResourceName dumpStyleTarget;
 };
 
 bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
@@ -1001,6 +1005,17 @@ static AaptOptions prepareArgs(int argc, char** argv) {
         flag::requiredFlag("-o", "Output path", [&options](const StringPiece& arg) {
             options.output = Source{ arg.toString() };
         });
+    } else if (options.phase == AaptOptions::Phase::DumpStyleGraph) {
+        flag::requiredFlag("--style", "Name of the style to dump",
+                [&options](const StringPiece& arg, std::string* outError) -> bool {
+                    Reference styleReference;
+                    if (!ResourceParser::parseStyleParentReference(util::utf8ToUtf16(arg),
+                                &styleReference, outError)) {
+                        return false;
+                    }
+                    options.dumpStyleTarget = styleReference.name;
+                    return true;
+                });
     }
 
     bool help = false;
@@ -1062,7 +1077,7 @@ static bool doDump(const AaptOptions& options) {
         if (options.phase == AaptOptions::Phase::Dump) {
             Debug::printTable(table);
         } else if (options.phase == AaptOptions::Phase::DumpStyleGraph) {
-            Debug::printStyleGraph(table);
+            Debug::printStyleGraph(table, options.dumpStyleTarget);
         }
     }
     return true;
