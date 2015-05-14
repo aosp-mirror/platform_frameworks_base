@@ -4133,7 +4133,10 @@ public final class Settings {
          * LocationManager service for testing purposes during application development.  These
          * locations and status values  override actual location and status information generated
          * by network, gps, or other location providers.
+         *
+         * @deprecated This settings is not used anymore.
          */
+        @Deprecated
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
 
         /**
