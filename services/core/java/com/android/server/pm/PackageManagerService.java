@@ -4130,7 +4130,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         synchronized (mPackages) {
             final int count = candidates.size();
-            // First, try to use the domain prefered App
+            // First, try to use the domain prefered App. Partition the candidates into four lists:
+            // one for the final results, one for the "do not use ever", one for "undefined status"
+            // and finally one for "Browser App type".
             for (int n=0; n<count; n++) {
                 ResolveInfo info = candidates.get(n);
                 String packageName = info.activityInfo.packageName;
@@ -4152,19 +4154,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
+            // Add all undefined Apps as we want them to appear in the Disambiguation dialog.
+            result.addAll(undefinedList);
             // If there is nothing selected, add all candidates and remove the ones that the User
             // has explicitely put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state and
-            // also remove any undefined ones and Browser Apps ones.
-            // If there is still none after this pass, add all undefined one and Browser Apps and
+            // also remove Browser Apps ones.
+            // If there is still none after this pass, add all Browser Apps and
             // let the User decide with the Disambiguation dialog if there are several ones.
             if (result.size() == 0) {
                 result.addAll(candidates);
             }
             result.removeAll(neverList);
             result.removeAll(matchAllList);
-            result.removeAll(undefinedList);
             if (result.size() == 0) {
-                result.addAll(undefinedList);
                 if ((flags & MATCH_ALL) != 0) {
                     result.addAll(matchAllList);
                 } else {
