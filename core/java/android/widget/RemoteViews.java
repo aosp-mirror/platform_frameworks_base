@@ -35,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -1072,6 +1073,7 @@ public class RemoteViews implements Parcelable, Filter {
         static final int BUNDLE = 13;
         static final int INTENT = 14;
         static final int COLOR_STATE_LIST = 15;
+        static final int ICON = 16;
 
         String methodName;
         int type;
@@ -1150,6 +1152,10 @@ public class RemoteViews implements Parcelable, Filter {
                         this.value = ColorStateList.CREATOR.createFromParcel(in);
                     }
                     break;
+                case ICON:
+                    if (in.readInt() != 0) {
+                        this.value = Icon.CREATOR.createFromParcel(in);
+                    }
                 default:
                     break;
             }
@@ -1225,6 +1231,13 @@ public class RemoteViews implements Parcelable, Filter {
                     if (this.value != null) {
                         ((ColorStateList)this.value).writeToParcel(out, flags);
                     }
+                    break;
+                case ICON:
+                    out.writeInt(this.value != null ? 1 : 0);
+                    if (this.value != null) {
+                        ((Icon)this.value).writeToParcel(out, flags);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -1262,6 +1275,8 @@ public class RemoteViews implements Parcelable, Filter {
                     return Intent.class;
                 case COLOR_STATE_LIST:
                     return ColorStateList.class;
+                case ICON:
+                    return Icon.class;
                 default:
                     return null;
             }
@@ -2082,6 +2097,16 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Equivalent to calling ImageView.setImageIcon
+     *
+     * @param viewId The id of the view whose bitmap should change
+     * @param icon The new Icon for the ImageView
+     */
+    public void setImageViewIcon(int viewId, Icon icon) {
+        setIcon(viewId, "setImageIcon", icon);
+    }
+
+    /**
      * Equivalent to calling AdapterView.setEmptyView
      *
      * @param viewId The id of the view on which to set the empty view
@@ -2516,6 +2541,17 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setIntent(int viewId, String methodName, Intent value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.INTENT, value));
+    }
+
+    /**
+     * Call a method taking one Icon on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param value The {@link android.graphics.drawable.Icon} to pass the method.
+     */
+    public void setIcon(int viewId, String methodName, Icon value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.ICON, value));
     }
 
     /**
