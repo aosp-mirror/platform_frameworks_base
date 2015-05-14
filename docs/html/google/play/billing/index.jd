@@ -7,7 +7,7 @@ page.tags="billing, inapp, iap"
 
 <p>In-app Billing is a Google Play service that lets you sell digital content from inside
 your applications. You can use the service to sell a wide range of content, including downloadable
-content such as media files or photos, virtual content such as game levels or potions, premium services 
+content such as media files or photos, virtual content such as game levels or potions, premium services
 and features, and more. You can use In-app Billing to sell products as</p>
 
 <div class="sidebox-wrapper">
@@ -34,17 +34,14 @@ and features, and more. You can use In-app Billing to sell products as</p>
     <a href="billing_subscriptions.html#deferred-billing">defer</a> a
     subscriber's next billing date until the date you choose. The user still has
     access to the content but is not charged during the deferral period.</li>
-  <li><strong>Google Play Developer API</strong>&mdash;The
-    <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google
-    Play Developer API</a> allows you to perform a number of publishing and
-    app-management tasks. It includes the functionality previously known as the
-    <em>Purchase Status API.</em> </li>
-  <li><strong>Refund/Revoke subscription</strong>&mdash;You can use the
-    Google Play Developer API to <a href="billing_subscriptions.html#refunds">refund
-    and revoke</a> a user's subscription. If you do this, the user's
-    subscription ends
-    immediately, and his or her most recent subscription payment is
-    refunded.</li>
+  <li><strong>Weekly subscriptions</strong>&mdash;You can now set up a
+    recurring <a href="billing_subscriptions.html#user-billing">subscription</a>
+    that bills the user every week.</li>
+  <li><strong>Payment grace period</strong>&mdash;If a subscriber misses a
+    subscription payment due to an expired credit card, you can define a
+    <a href="billing_subscriptions.html#grace-period">grace period</a>
+    to the continue the subscription until payment is successful.</li>
+
  </ul>
 </div>
 </div>
@@ -69,7 +66,7 @@ Wallet merchant account.</p>
 provides a sample application that demonstrates how to sell standard in-app
 products and subscriptions from inside an app.</p>
 
-<p>To get started, read the documents below or take the <a href="{@docRoot}training/in-app-billing/index.html">Selling 
+<p>To get started, read the documents below or take the <a href="{@docRoot}training/in-app-billing/index.html">Selling
     In-app Products</a> training class.</p>
 
 <dl>
