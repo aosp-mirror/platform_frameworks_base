@@ -29,11 +29,11 @@ import java.util.List;
  * <p>A CameraCaptureSession is created by providing a set of target output surfaces to
  * {@link CameraDevice#createCaptureSession createCaptureSession}, or by providing an
  * {@link android.hardware.camera2.params.InputConfiguration} and a set of target output surfaces to
- * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession} for a
- * reprocessible capture session. Once created, the session is active until a new session is
+ * {@link CameraDevice#createReprocessableCaptureSession createReprocessableCaptureSession} for a
+ * reprocessable capture session. Once created, the session is active until a new session is
  * created by the camera device, or the camera device is closed.</p>
  *
- * <p>All capture sessions can be used for capturing images from the camera but only reprocessible
+ * <p>All capture sessions can be used for capturing images from the camera but only reprocessable
  * capture sessions can reprocess images captured from the camera in the same session previously.
  * </p>
  *
@@ -41,7 +41,7 @@ import java.util.List;
  * it requires configuring the camera device's internal pipelines and allocating memory buffers for
  * sending images to the desired targets. Therefore the setup is done asynchronously, and
  * {@link CameraDevice#createCaptureSession createCaptureSession} and
- * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession} will
+ * {@link CameraDevice#createReprocessableCaptureSession createReprocessableCaptureSession} will
  * send the ready-to-use CameraCaptureSession to the provided listener's
  * {@link CameraCaptureSession.StateCallback#onConfigured onConfigured} callback. If configuration
  * cannot be completed, then the
@@ -156,7 +156,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>All capture sessions can be used for capturing images from the camera but only capture
      * sessions created by
-     * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession}
+     * {@link CameraDevice#createReprocessableCaptureSession createReprocessableCaptureSession}
      * can submit reprocess capture requests. Submitting a reprocess request to a regular capture
      * session will result in an {@link IllegalArgumentException}.</p>
      *
@@ -179,9 +179,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalArgumentException if the request targets no Surfaces or Surfaces that are not
      *                                  configured as outputs for this session; or the request
      *                                  targets a set of Surfaces that cannot be submitted
-     *                                  simultaneously in a reprocessible capture session; or a
+     *                                  simultaneously in a reprocessable capture session; or a
      *                                  reprocess capture request is submitted in a
-     *                                  non-reprocessible capture session; or the reprocess capture
+     *                                  non-reprocessable capture session; or the reprocess capture
      *                                  request was created with a {@link TotalCaptureResult} from
      *                                  a different session; or the capture targets a Surface in
      *                                  the middle of being {@link #prepare prepared}; or the
@@ -192,7 +192,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see #abortCaptures
-     * @see CameraDevice#createReprocessibleCaptureSession
+     * @see CameraDevice#createReprocessableCaptureSession
      */
     public abstract int capture(CaptureRequest request, CaptureCallback listener, Handler handler)
             throws CameraAccessException;
@@ -214,7 +214,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>All capture sessions can be used for capturing images from the camera but only capture
      * sessions created by
-     * {@link CameraDevice#createReprocessibleCaptureSession createReprocessibleCaptureSession}
+     * {@link CameraDevice#createReprocessableCaptureSession createReprocessableCaptureSession}
      * can submit reprocess capture requests. Submitting a reprocess request to a regular
      * capture session will result in an {@link IllegalArgumentException}.</p>
      *
@@ -238,9 +238,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @throws IllegalArgumentException If the requests target no Surfaces, or the requests target
      *                                  Surfaces not currently configured as outputs; or one of the
      *                                  requests targets a set of Surfaces that cannot be submitted
-     *                                  simultaneously in a reprocessible capture session; or a
+     *                                  simultaneously in a reprocessable capture session; or a
      *                                  reprocess capture request is submitted in a
-     *                                  non-reprocessible capture session; or one of the reprocess
+     *                                  non-reprocessable capture session; or one of the reprocess
      *                                  capture requests was created with a
      *                                  {@link TotalCaptureResult} from a different session; or one
      *                                  of the captures targets a Surface in the middle of being
@@ -425,7 +425,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * <p>This method is the fastest way to switch the camera device to a new session with
      * {@link CameraDevice#createCaptureSession} or
-     * {@link CameraDevice#createReprocessibleCaptureSession}, at the cost of discarding in-progress
+     * {@link CameraDevice#createReprocessableCaptureSession}, at the cost of discarding in-progress
      * work. It must be called before the new session is created. Once all pending requests are
      * either completed or thrown away, the {@link StateCallback#onReady} callback will be called,
      * if the session has not been closed. Otherwise, the {@link StateCallback#onClosed}
@@ -448,7 +448,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see CameraDevice#createCaptureSession
-     * @see CameraDevice#createReprocessibleCaptureSession
+     * @see CameraDevice#createReprocessableCaptureSession
      */
     public abstract void abortCaptures() throws CameraAccessException;
 
@@ -459,14 +459,14 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @return {@code true} if the application can submit reprocess capture requests with this
      *         camera capture session. {@code false} otherwise.
      *
-     * @see CameraDevice#createReprocessibleCaptureSession
+     * @see CameraDevice#createReprocessableCaptureSession
      */
-    public abstract boolean isReprocessible();
+    public abstract boolean isReprocessable();
 
     /**
-     * Get the input Surface associated with a reprocessible capture session.
+     * Get the input Surface associated with a reprocessable capture session.
      *
-     * <p>Each reprocessible capture session has an input {@link Surface} where the reprocess
+     * <p>Each reprocessable capture session has an input {@link Surface} where the reprocess
      * capture requests get the input images from, rather than the camera device. The application
      * can create a {@link android.media.ImageWriter} with this input {@link Surface} and use it to
      * provide input images for reprocess capture requests.</p>
@@ -474,7 +474,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @return The {@link Surface} where reprocessing capture requests get the input images from. If
      *         this is not a reprocess capture session, {@code null} will be returned.
      *
-     * @see CameraDevice#createReprocessibleCaptureSession
+     * @see CameraDevice#createReprocessableCaptureSession
      * @see android.media.ImageWriter
      * @see android.media.ImageReader
      */

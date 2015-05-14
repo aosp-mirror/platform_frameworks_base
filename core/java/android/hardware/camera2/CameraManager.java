@@ -556,7 +556,7 @@ public final class CameraManager {
      * {@link CameraManager#registerTorchCallback} to be notified of such status changes.
      * </p>
      *
-     * @see registerTorchCallback
+     * @see #registerTorchCallback
      */
     public static abstract class TorchCallback {
         /**

@@ -480,16 +480,16 @@ public class CameraDeviceImpl extends CameraDevice {
     }
 
     @Override
-    public void createReprocessibleCaptureSession(InputConfiguration inputConfig,
+    public void createReprocessableCaptureSession(InputConfiguration inputConfig,
             List<Surface> outputs, CameraCaptureSession.StateCallback callback, Handler handler)
             throws CameraAccessException {
         if (DEBUG) {
-            Log.d(TAG, "createReprocessibleCaptureSession");
+            Log.d(TAG, "createReprocessableCaptureSession");
         }
 
         if (inputConfig == null) {
             throw new IllegalArgumentException("inputConfig cannot be null when creating a " +
-                    "reprocessible capture session");
+                    "reprocessable capture session");
         }
         List<OutputConfiguration> outConfigurations = new ArrayList<>(outputs.size());
         for (Surface surface : outputs) {
