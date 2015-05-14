@@ -18,6 +18,7 @@
 package android.media;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * For supplying media data to the framework. Implement this if your app has
@@ -29,34 +30,32 @@ import java.io.Closeable;
  * you don't need to do your own synchronization unless you're modifying the
  * MediaDataSource from another thread while it's being used by the framework.</p>
  */
-public interface MediaDataSource extends Closeable {
+public abstract class MediaDataSource implements Closeable {
     /**
      * Called to request data from the given position.
      *
      * Implementations should should write up to {@code size} bytes into
      * {@code buffer}, and return the number of bytes written.
      *
-     * Return {@code 0} to indicate that {@code position} is at, or beyond, the
-     * end of the source.
+     * Return {@code 0} if size is zero (thus no bytes are read).
      *
-     * Return {@code -1} to indicate that a fatal error occurred. The failed
-     * read will not be retried, so transient errors should be handled
-     * internally.
-     *
-     * Throwing an exception from this method will have the same effect as
-     * returning {@code -1}.
+     * Return {@code -1} to indicate that end of stream is reached.
      *
      * @param position the position in the data source to read from.
      * @param buffer the buffer to read the data into.
+     * @param offset the offset within buffer to read the data into.
      * @param size the number of bytes to read.
+     * @throws IOException on fatal errors.
      * @return the number of bytes read, or -1 if there was an error.
      */
-    public int readAt(long position, byte[] buffer, int size);
+    public abstract int readAt(long position, byte[] buffer, int offset, int size)
+            throws IOException;
 
     /**
      * Called to get the size of the data source.
      *
+     * @throws IOException on fatal errors
      * @return the size of data source in bytes, or -1 if the size is unknown.
      */
-    public long getSize();
+    public abstract long getSize() throws IOException;
 }
