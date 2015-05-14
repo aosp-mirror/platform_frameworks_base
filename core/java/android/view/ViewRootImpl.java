@@ -40,6 +40,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -5352,7 +5353,7 @@ public final class ViewRootImpl implements ViewParent,
         //Log.d(TAG, ">>>>>> CALLING relayout");
         if (params != null && mOrigWindowType != params.type) {
             // For compatibility with old apps, don't crash here.
-            if (mTargetSdkVersion < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            if (mTargetSdkVersion < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 Slog.w(TAG, "Window type can not be changed after "
                         + "the window is added; ignoring change of " + mView);
                 params.type = mOrigWindowType;
@@ -5777,6 +5778,7 @@ public final class ViewRootImpl implements ViewParent,
 
     void enqueueInputEvent(InputEvent event,
             InputEventReceiver receiver, int flags, boolean processImmediately) {
+        adjustInputEventForCompatibility(event);
         QueuedInputEvent q = obtainQueuedInputEvent(event, receiver, flags);
 
         // Always enqueue the input event in order, regardless of its time stamp.
@@ -5880,6 +5882,19 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         recycleQueuedInputEvent(q);
+    }
+
+    private void adjustInputEventForCompatibility(InputEvent e) {
+        if (mTargetSdkVersion < Build.VERSION_CODES.MNC && e instanceof MotionEvent) {
+            MotionEvent motion = (MotionEvent) e;
+            final int mask =
+                MotionEvent.BUTTON_STYLUS_PRIMARY | MotionEvent.BUTTON_STYLUS_SECONDARY;
+            final int buttonState = motion.getButtonState();
+            final int compatButtonState = (buttonState & mask) >> 4;
+            if (compatButtonState != 0) {
+                motion.setButtonState(buttonState | compatButtonState);
+            }
+        }
     }
 
     static boolean isTerminalInputEvent(InputEvent event) {
