@@ -468,7 +468,7 @@ public class ImageView extends View {
      *
      * <p class="note">Depending on the Icon type, this may do Bitmap reading and decoding
      * on the UI thread, which can cause UI jank.  If that's a concern, consider using
-     * {@link Icon#loadDrawableAsync(Context, Handler, Icon.OnDrawableLoadedListener)}
+     * {@link Icon#loadDrawableAsync(Context, Icon.OnDrawableLoadedListener, Handler)}
      * and then {@link #setImageDrawable(android.graphics.drawable.Drawable)} instead.</p>
      *
      * @param icon an Icon holding the desired image
