@@ -30,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Represents a conference call which can contain any number of {@link Connection} objects.
  */
-public abstract class Conference implements Conferenceable {
+public abstract class Conference extends Conferenceable {
 
     /**
      * Used to indicate that the conference connection time is not specified.  If not specified,
