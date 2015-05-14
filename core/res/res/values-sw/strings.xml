@@ -337,8 +337,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Inaruhusu programu kuongeza, kuondoa, kubadilisha matukio ambayo unaweza kurekebisha kwenye kompyuta kibao yako, yakijumulisha yale ya marafiki na wafanyakazi wenza. Hii inaweza kuruhusu programu kutuma ujumbe unaonekana kuwa unatoka kwa mmiliki wa kalenda, au kurekebisha matukio bila mmiliki kujua."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Huruhusu programu kuongeza, kuondoa, kubadilisha matukio unayoweza kurekebisha kwenye runinga chako, ikiwa ni pamoja na yale ya marafiki au wafanyakazi wenza. Hii inaweza kuruhusu programu kutuma ujumbe unaoonekana kutoka kwa wamiliki wa kalenda, au kurekebisha matukio bila ya wamiliki kufahamu."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Inaruhusu programu kuongeza, kuondoa, kubadilisha matukio ambayo unaweza kurekebisha kwenye simu yako, yakijumulisha yale ya marafiki na wafanyakazi wenza. Hii inaweza kuruhusu programu kutuma ujumbe unaonekana kuwa unatoka kwa mmiliki wa kalenda, au kurekebisha matukio bila mmiliki kujia."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"vyanzo vya jaribio la mahali kwa lengo la majaribio"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Unda vyanzo vya majaribio ya eneo vya kujaribia au usakinishe mtoaji huduma mpya wa eneo. Hii inaruhusu programu kufuta eneo na/au hali inayorudishwa na vyanzo vingine vya eneo kama vile GPS au watoaji huduma wa eneo."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"fikia amri za ziada za mtoa huduma ya mahali"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ruhusu programu kufikia amri za ziada za mtoa huduma za mahali. Hii huenda ikaruhusu programu ikatize matumizi ya GPS au vyanzo vingine vya eneo."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"kutambua eneo sahihi (GPS na mtandao)"</string>
@@ -440,6 +438,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Utendaji wa kitambulisho imeghairiwa."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Majaribio mengi mno. Jaribu tena baadaye."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Jaribu tena."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"kusoma mipangilio ya usawazishaji"</string>
@@ -1044,12 +1044,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Ukiwasha hifadhi ya USB, baadhi ya programu unazozitumia zitakoma na huenda zisipatikane hadi uzime hifadhi ya USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Uendeshaji wa USB hujafanikiwa"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Sawa"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Imeunganishwa kama kifaa cha midia"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Imeunganishwa kama kamera"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Kimeunganishwa kama kifaa cha MIDI"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Imeunganishwa kama kisakinishi"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Imeunganishwa kwa kifuasi cha USB"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Gusa ili uone chaguo zingine za USB."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Fomati hifadhi ya USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Ungependa kutayarisha kadi ya SD ili iweze kutumika?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Faili zote zilizohifadhiwa katika hifadhi yako ya USB zitafutwa. Hatua hii haiwezi kubadilishwa!"</string>
@@ -1468,18 +1474,22 @@
       <item quantity="other">Kwa dakika %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Kwa dakika moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">Kwa saa %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Kwa saa moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">Kwa dakika %d</item>
       <item quantity="one">Kwa dakika moja</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">Kwa saa %d</item>
       <item quantity="one">Kwa saa moja</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"Hadi <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Hadi utakapozima hili"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

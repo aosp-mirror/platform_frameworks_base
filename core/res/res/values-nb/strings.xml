@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Lar appen legge til, fjerne og endre aktiviteter du kan redigere på nettbrettet ditt, inkludert aktiviteter for venner eller kolleger. Dette kan gjøre at appen sender meldinger som ser ut som om de kommer fra kalendereiere eller endre aktiviteter uten at eierne vet om det."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Gjør at appen kan legge til, fjerne eller endre aktiviteter du kan endre på TV-en, herunder aktivitetene til venner eller kollegaer. Dette kan føre til at appen kan sende meldinger som viser seg å komme fra eiere av kalendere eller at den kan moderere hendelser uten at eieren vet om det."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Lar appen legge til, fjerne og endre aktiviteter du kan redigere på telefonen din, inkludert aktiviteter for venner eller kolleger. Dette kan gjøre at appen sender meldinger som ser ut som om de kommer fra kalendereiere eller endre aktiviteter uten at eierne vet om det."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"lage simulerte posisjonskilder for testing"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Opprette fiktive posisjonskilder for testing eller installere en ny posisjonsangiver. Dette gjør at appen kan overstyre posisjonen eller statusen som rapporteres av ekte posisjonskilder, som for eksempel GPS eller posisjonsangivere."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"bruke ekstra posisjonskommandoer"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Appen gis tillatelse til å bruke ekstra kommandoer fra posisjonsleverandører. Dette kan gi appen tillatelse til å påvirke bruken av GPS eller andre posisjonskilder."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"presis posisjon (GPS- og nettverksbasert)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Fingeravtrykk-operasjonen ble avbrutt."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"For mange forsøk. Prøve på nytt senere."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Prøv igjen."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Hvis du aktiverer USB-lagring, virker ikke enkelte av appene du bruker lenger, og de kan forbli utilgjengelige inntil du deaktiverer USB-lagringen."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB-handling mislyktes"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Tilkoblet som medieenhet"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Tilkoblet som kamera"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Koblet til som MIDI-enhet"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tilkoblet som installasjonsprogram"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Koblet til et USB-tilbehør"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Trykk for få andre USB-alternativer."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formatere USB-lagr.?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Vil du formatere SD-kortet?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Alle filer som er lagret på USB-lagringen blir slettet. Denne handlingen kan ikke angres."</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">I %1$d minutter (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I 1 minutt (til <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">For %1$d timer (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">I 1 time (til <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">I %d minutter</item>
       <item quantity="one">I 1 minutt</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">I %d timer</item>
       <item quantity="one">I 1 time</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Inntil du slår av funksjonen"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

@@ -129,6 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"બંધ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi પસંદ કર્યું"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"સેલ્યુલર પસંદ કર્યું"</string>
@@ -219,27 +220,27 @@
     <string name="user_owner_label" msgid="6465364741001216388">"વ્યક્તિગત એપ્લિકેશન્સ"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"કાર્યાલય"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"સંપર્કો"</string>
-    <string name="permgroupdesc_contacts" msgid="1437393511338346185">"તમારા સંપર્કોને ઍક્સેસ કરો અને સંશોધિત કરો"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"તમારા સંપર્કોને ઍક્સેસ કરો"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="536889867433972794">"તમારા સ્થાનને ઍક્સેસ કરો"</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"તમારી સામાજિક માહિતી"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"તમારા સંપર્કો અને સામાજિક કનેક્શન્સ વિશેની માહિતીની સીધી ઍક્સેસ."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"કૅલેન્ડર"</string>
-    <string name="permgroupdesc_calendar" msgid="2116049656685591803">"તમારા કેલેન્ડરને ઍક્સેસ કરો અને સંશોધિત કરો"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"તમારા કેલેન્ડરને ઍક્સેસ કરો"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="3695085582674524761">"SMS ને ઍક્સેસ કરો અને સંશોધિત કરો"</string>
+    <string name="permgroupdesc_sms" msgid="3714409903876407981">"SMS સંદેશા જુઓ અને સંચાલિત કરો"</string>
     <string name="permgrouplab_dictionary" msgid="8114410334955871144">"વપરાશકર્તા શબ્દકોશ"</string>
     <string name="permgroupdesc_dictionary" msgid="7586787746354378335">"વપરાશકર્તા શબ્દકોશમાં શબ્દો વાંચો અથવા લખો."</string>
     <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"બુકમાર્ક્સ અને ઇતિહાસ"</string>
     <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"બુકમાર્ક્સ અને બ્રાઉઝર ઇતિહાસની સીધી ઍક્સેસ."</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"માઇક્રોફોન"</string>
-    <string name="permgroupdesc_microphone" msgid="1296196977187629181">"ઉપકરણ માઇક્રોફોનનો ઉપયોગ કરો"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ઑડિઓ રેકોર્ડ કરો"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"કૅમેરો"</string>
-    <string name="permgroupdesc_camera" msgid="2429930670410559293">"ઉપકરણ કેમેરાનો ઉપયોગ કરો"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ચિત્રો લો અને વિડિઓ રેકોર્ડ કરો"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ફોન"</string>
-    <string name="permgroupdesc_phone" msgid="2016641188146068700">"ઉપકરણ ટેલિફોનીનો ઉપયોગ કરો"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ફોન કૉલ કરો તથા સંચાલિત કરો"</string>
     <string name="permgrouplab_sensors" msgid="7416703484233940260">"સેન્સર્સ"</string>
-    <string name="permgroupdesc_sensors" msgid="2987451839455524494">"સેન્સર્સ અને પહેરવાલાયકને ઍક્સેસ કરો"</string>
+    <string name="permgroupdesc_sensors" msgid="6376772456799240169">"સેન્સર્સ અને પહેરવાલાયક ઉપકરણોથી ડેટા ઍક્સેસ કરો"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"વિંડો સામગ્રી પુનર્પ્રાપ્ત કરો"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"તમે જેની સાથે ક્રિયાપ્રતિક્રિયા કરી રહ્યાં છો તે વિંડોની સામગ્રીની તપાસ કરો."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ટચ કરીને અન્વેષણ કરો સક્ષમ કરો"</string>
@@ -334,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"એપ્લિકેશનને મિત્રોના અથવા સહકાર્યકરો સહિત તમારા ટેબ્લેટ પર તમે સંશોધિત કરી શકો તે ઇવેન્ટ્સ ઉમેરવા, દૂર કરવા, બદલવાની મંજૂરી આપે છે. આ એપ્લિકેશનને કૅલેન્ડર માલિક તરફથી આવતાં હોય તેવા સંદેશા મોકલવાની અથવા માલિકની જાણ વિના ઇવેન્ટ્સ સંશોધિત કરવાની મંજૂરી આપી શકે છે."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"એપ્લિકેશનને મિત્રોના અથવા સહકાર્યકરો સહિત તમારા ટીવી પર તમે સંશોધિત કરી શકો તે ઇવેન્ટ્સ ઉમેરવા, દૂર કરવા, બદલવાની મંજૂરી આપે છે. આ એપ્લિકેશનને કૅલેન્ડર માલિક તરફથી આવતાં હોય તેવા સંદેશા મોકલવાની અથવા માલિકની જાણ વિના ઇવેન્ટ્સ સંશોધિત કરવાની મંજૂરી આપી શકે છે."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"એપ્લિકેશનને મિત્રોના અથવા સહકાર્યકરો સહિત તમારા ફોન પર તમે સંશોધિત કરી શકો તે ઇવેન્ટ્સ ઉમેરવા, દૂર કરવા, બદલવાની મંજૂરી આપે છે. આ એપ્લિકેશનને કૅલેન્ડર માલિક તરફથી આવતાં હોય તેવા સંદેશા મોકલવાની અથવા માલિકની જાણ વિના ઇવેન્ટ્સ સંશોધિત કરવાની મંજૂરી આપી શકે છે."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"પરીક્ષણ માટે નકલી સ્થાન સ્રોતો"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"પરીક્ષણ માટે નકલી સ્થાન સ્રોતો બનાવો અથવા એક નવો સ્થાન પ્રદાતા ઇન્સ્ટોલ કરો. આ એપ્લિકેશનને GPS અથવા સ્થાન પ્રદાતાઓ જેવા અન્ય સ્થાન સ્રોતો દ્વારા પરત કરાયેલ સ્થાન અને/અથવા સ્થિતિને ઓવરરાઇડ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરો"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"એપ્લિકેશનને વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને GPS અથવા અન્ય સ્થાન સ્રોતોના ઓપરેશનમાં દખલ કરવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"નિશ્ચિત સ્થાન (GPS અને નેટવર્ક-આધારિત)"</string>
@@ -437,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ફિંગરપ્રિન્ટ ઓપરેશન રદ કર્યું."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ઘણા બધા પ્રયત્નો. પછીથી ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ફરી પ્રયાસ કરો."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"સમન્વયન સેટિંગ્સ વાંચો"</string>
@@ -1041,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"જો તમે USB સંગ્રહને ચાલુ કરો છો, તો તમે ઉપયોગમાં લઈ રહ્યાં છો તે કેટલીક એપ્લિકેશન્સ બંધ થઈ જશે અને જ્યાં સુધી તમે USB સંગ્રહ બંધ ન કરી લો ત્યાં સુધી અનુપલબ્ધ હોઈ શકે છે."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB ઓપરેશન અસફળ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ઑકે"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"એક મીડિયા ઉપકરણ તરીકે કનેક્ટ થયું"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"કૅમેરા તરીકે કનેક્ટ કર્યું"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI ઉપકરણ તરીકે કનેક્ટ થયું"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ઇન્સ્ટોલર તરીકે કનેક્ટ કર્યું"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ઍક્સેસરીથી કનેક્ટ થયાં"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"અન્ય USB વિકલ્પો માટે ટચ કરો."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB સંગ્રહને ફોર્મેટ કરીએ?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD કાર્ડ ફોર્મેટ કરીએ?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"તમારા USB સંગ્રહમાં સંગ્રહિત તમામ ફાઇલો કાઢી નાખવામાં આવશે. આ ક્રિયા પલટાવી શકાતી નથી!"</string>
@@ -1078,22 +1085,14 @@
     <string name="ext_media_init_action" msgid="8317198948634872507">"સેટઅપ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"બહાર કાઢો"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"અન્વેષણ કરો"</string>
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ખૂટે છે"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"આ ઉપકરણ ફરીથી દાખલ કરો"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ખસેડી રહ્યાં છીએ"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"ડેટાને ખસેડી રહ્યાં છીએ"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ખસેડવાનું પૂર્ણ થયું"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"ડેટાને <xliff:g id="NAME">%s</xliff:g> પર ખસેડી રહ્યાં છીએ"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ડેટા ખસેડી શક્યાં નથી"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"મૂળ સ્થાન પર બાકી ડેટા"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"કોઈ મેળ ખાતી પ્રવૃત્તિઓ મળી નથી."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"મીડિયા આઉટપુટ રૂટ કરો"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"એપ્લિકેશનને અન્ય બાહ્ય ઉપકરણો પર મીડિયા આઉટપુટને રૂટ કરવની મંજૂરી આપે છે."</string>
@@ -1466,32 +1465,38 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"અનપિન કરતા પહેલાં અનલૉક પેટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"તમારા વ્યવસ્થાપક દ્વારા ઇન્સ્ટોલ કરેલ"</string>
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ થયેલ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખેલ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"બૅટરી આવરદા વધુ સારી કરવામાં સહાય માટે, બૅટરી સેવર તમારા ઉપકરણના પ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને મોટાભાગના પૃષ્ઠભૂમિ ડેટાને સીમિત કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય એપ્લિકેશન્સ જે સમન્વયન પર આધાર રાખે છે તે તમે તેમને ખોલશો નહીં ત્યાં સુધી અપડેટ થઈ શકતી નથી.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જાય છે."</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d મિનિટ માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>
       <item quantity="other">%1$d મિનિટ માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">%1$d કલાક માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>
       <item quantity="other">%1$d કલાક માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">%d મિનિટ માટે</item>
       <item quantity="other">%d મિનિટ માટે</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">%d કલાક માટે</item>
       <item quantity="other">%d કલાક માટે</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> સુધી"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"તમે આ બંધ ન કરો ત્યાં સુધી"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"સંકુચિત કરો"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"ખલેલ પાડશો નહીં"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ડાઉનટાઇમ"</string>
-    <string name="zen_mode_default_weeknights_name" msgid="2069189413656431610">"સપ્તાહાંત સિવાયની રાત્રે"</string>
-    <string name="zen_mode_default_weekends_name" msgid="2377398437072017011">"સપ્તાહાંત"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"સપ્તાહાંત રાત્રિ"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"સપ્તાહાંત"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ઇવેન્ટ"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> દ્વારા મ્યૂટ કરાયું"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"તમારા ઉપકરણમાં આંતરિક સમસ્યા છે અને જ્યાં સુધી તમે ફેક્ટરી ડેટા ફરીથી સેટ કરશો નહીં ત્યાં સુધી તે અસ્થિર રહી શકે છે."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"તમારા ઉપકરણમાં આંતરિક સમસ્યા છે. વિગતો માટે તમારા નિર્માતાનો સંપર્ક કરો."</string>

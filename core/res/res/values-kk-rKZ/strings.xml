@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Қолданбаға планшеттегі сізге өзгертуге болатын шараларды, достарыңыз бен әріптестеріңіздің шараларын қоса, қосу, алу және өзгерту мүмкіндігін береді. Бұл қолданбаға күнтізбе иелерінен келген сияқты көрсетілетін хабарлар жіберу немесе иесінің хабарынсыз шараларды өзгерту мүмкіндігін береді."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Қолданбаға сіз теледидарда өзгерте алатын оқиғаларды, соның ішінде, достардың немесе әріптестердің оқиғаларын қосуға, жоюға, өзгертуге рұқсат етеді. Бұл қолданбаға күнтізбе иелерінен келген болып көрінетін хабарларды жіберуге немесе иесінің білуінсіз оқиғаларды өзгертуге мүмкіндік беруі мүмкін."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Қолданбаға телефондағы сізге өзгертуге болатын шараларды, достарыңыз бен әріптестеріңіздің шараларын қоса, қосу, алу және өзгерту мүмкіндігін береді. Бұл қолданбаға күнтізбе иелерінен келген сияқты көрсетілетін хабарлар жіберу немесе иесінің хабарынсыз шараларды өзгерту мүмкіндігін береді."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"тест үшін аймақ көздеріне еліктеу"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Тексеру үшін жасанды аймақ көздерін жасақтаңыз немесе жаңа аймақ жабдықтаушы орнатыңыз. Бұл қолданбаға аймақты және/немесе GPS немесе аймақ жабдықтаушы сияқты аймақ көздерінен оралған күйлерін үстінен жазу мүмкіндігін береді."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"қосымша аймақ жабдықтаушы пәрмендеріне қол жетімділік"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Қолданбаға орын жеткізушісінің қосымша пәрмендеріне қатынасуға рұқсат береді. Бұл қолданбаға GPS немесе басқа орын көздерінің жұмысына кедергі келтіруге рұқсат беруі мүмкін."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"нақты аймақ (GPS және желі негізделген)"</string>
@@ -397,7 +395,7 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Қолданбаға байланысқан желілік қосылымның күйін өзгертуге рұқсат береді."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi байланыстарын көру"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Қолданбаға Wi-Fi желісі туралы, мысалы, Wi-Fi байланысының қосылғаны немесе қосылған Wi-Fi құрылғыларының атаулары сияқты, ақпаратты көру мүмкіндігін береді."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi жалғану және ажырау"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi желісіне қосылу/ажырау"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Қолданбаларға Wi-Fi нүктелеріне қосылу және ажырау және Wi-Fi желілеріне арналған құрылғы конфигурацияларына өзгерістер енгізу мүмкіндігін береді."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi бірнеше мекенжайға ақпарат тарату мүмкіндігі"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Қолданбаға Wi-Fi желісіндегі барлық құрылғыларға мекенжайлар тобы арқылы, сіздің планшетіңіз арқылы ғана емес, жіберілген жинақтарды алу мүмкіндігін береді. Бұл мекенжайлар тобы емес режимге қарағанда қуатты көбірек тұтынуы мүмкін."</string>
@@ -417,7 +415,7 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Қолданбаға планшеттегі Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Қолданбаға теледидардағы Bluetooth конфигурациясын көруге және жұпталған құрылғылармен байланыстарды қабылдауға рұқсат етеді."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Қолданбаға телефондағы Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді"</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"Жақын Өріс Байланысын басқару"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"NFC функциясын басқару"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Саусақ ізі операциясынан бас тартылған."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Талпыныстар тым көп. Кейінірек қайталап көріңіз."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Әрекетті қайталаңыз."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"синх параметрлерін оқу"</string>
@@ -446,7 +446,7 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Қолданбаға есептік жазбаның синхрондау параметрлерін жөндеу мүмкіндігін береді. Мысалы, бұл People қолданбасын есептік жазбамен синхрондауды қосу үшін қолданылуы мүмкін."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"үйлестіру санақтық ақпаратын оқу"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Қолданбаға есептік жазбаның синхрондалу статистикаларын, оның ішінде синхрондау шараларының тарихы және қанша дерек синхрондалғаны жайлы, оқу мүмкіндігін береді."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"жазылма материалдарын жазу"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"жазылған ағындарды жазу"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Қолданбаға қазіргі уақытта синхрондалған арналарды өзгертуге рұқсат береді. Зиянкес қолданбалар синхрондалған арналарды өзгертуі мүмкін."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"сөздікке сіз қосқан шарттарды оқу"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Қолданбаға пайдаланушы сөздігінде сақталған барлық сөздер, аттар және фразаларды оқу мүмкіндігін береді."</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Егер USB жадын қоссаңыз, қолданыстағы қолданбалар тоқтайды және USB жадын қайта қосқанша қол жетімсіз болады."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB жұмысы сәтсіз"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Жарайды"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Медиа құралы ретінде қосылған"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Камера ретінде жалғанған"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI құрылғысы ретінде қосылу орындалды"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Орнату құрылғысына жалғанған"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB жабдығына қосылған"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Басқа USB oпцияларын түрту."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB қой. піш. к. пе?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD картасын пішімдеу керек пе?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB қоймасында сақталған бүкіл файлдар өшіріледі. Бұл әрекетті қайтару мүмкін емес!"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">%1$d минут бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
       <item quantity="one">Бір минут бойы (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d сағат бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
       <item quantity="one">Бір сағат бойы (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d минут бойы</item>
       <item quantity="one">Бір минут бойы</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d сағат бойы</item>
       <item quantity="one">Бір сағат бойы</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Сіз осыны өшіргенше"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

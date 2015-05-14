@@ -337,8 +337,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Приложение сможет добавлять, удалять и изменять мероприятия, доступные для редактирования на вашем планшетном ПК, включая мероприятия, добавленные другими людьми. Так приложение сможет рассылать сообщения от имени владельца календаря и изменять мероприятия без его ведома."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Добавление, удаление и изменение сохраненных на телевизоре мероприятий, к которым у вас есть доступ для записи, в том числе добавленных друзьями или коллегами. Приложение сможет отправлять сообщения от имени владельцев календарей, а также изменять мероприятия без ведома владельца."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Приложение сможет добавлять, удалять и изменять мероприятия, доступные для редактирования на вашем телефоне, включая мероприятия, добавленные другими людьми. Так приложение сможет рассылать сообщения от имени владельца календаря и изменять мероприятия без его ведома."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"Установка фиктивного местоположения для отладки"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Приложение сможет создавать фиктивные местоположения для тестирования или установки нового источника геоданных и переопределять местоположение и/или статус, возвращаемые другими источниками, такими как система GPS."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Доступ к дополнительным командам управления источниками геоданных"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Доступ к дополнительным командам управления источниками геоданных и вмешательство в работу системы GPS или других источников геоданных."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"Точное местоположение (на основе сети и сигналов GPS)"</string>
@@ -440,6 +438,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Операция с отпечатком отменена."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Слишком много попыток. Повторите позже."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторите попытку."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Просмотр настроек синхронизации"</string>
@@ -1056,12 +1056,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"При подключении USB-накопителя некоторые приложения могут прекратить работу и оставаться недоступными до его отключения."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Ошибка при подключении USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Подключен как устройство хранения данных"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Подключен как камера"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Подключено как MIDI-устройство"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Подключен как установщик"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB-устройство подключено"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Нажмите, чтобы открыть список опций."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Отформатировать USB-накопитель?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Отформатировать SD-карту?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Все файлы, сохраненные на USB-накопителе, будут удалены. Это действие невозможно отменить."</string>
@@ -1486,24 +1492,28 @@
       <item quantity="many">%1$d минут (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d минут (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">%1$d час (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d часа (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d часов (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d часов (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">%d минута</item>
       <item quantity="few">%d минуты</item>
       <item quantity="many">%d минут</item>
       <item quantity="other">%d минут</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">%d час</item>
       <item quantity="few">%d часа</item>
       <item quantity="many">%d часов</item>
       <item quantity="other">%d часов</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Пока я не отключу"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

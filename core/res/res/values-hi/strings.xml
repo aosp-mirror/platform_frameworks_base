@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ऐप्स  को मित्रों या सहकर्मियों के ईवेंट के साथ ही वे ईवेंट जोड़ने, निकालने, बदलने देता है जिन्हें आप अपने टेबलेट पर संशोधित कर सकते हैं. इससे ऐप्स ,अपनी जानकारी के बिना उन संदेशों को भेज सकता है जो कैलेंडर स्वामियों की ओर से आते दिखाई देते हैं, या ईवेंट संशोधित कर सकता है."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"ऐप को ऐसे ईवेंट जोड़ने, निकालने, बदलने देती है जिन्हें आप अपने डिवाइस पर बदल सकते हैं, जिनमें मित्रों या सहकर्मियों के ईवेंट शामिल हैं. इससे ऐप ऐसे संदेश भेज सकता है जो कैलेंडर स्वामी से आते हुए प्रतीत होते हैं या ऐप स्वामी की जानकारी के बिना ईवेंट बदल सकता है."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ऐप्स  को मित्रों या सहकर्मियों के ईवेंट के साथ ही वे ईवेंट जोड़ने, निकालने, बदलने देता है जिन्हें आप अपने फ़ोन पर संशोधित कर सकते हैं. इससे ऐप्स , अपनी जानकारी के बिना उन संदेशों को भेज सकता है जो कैलेंडर स्वामियों की ओर से आते दिखाई देते हैं, या ईवेंट संशोधित कर सकता है."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"परीक्षण के लिए नकली स्‍थान स्रोत"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"परीक्षण के लिए कृत्रिम स्थान स्रोत बनाएं या एक नया स्थान प्रदाता इंस्‍टॉल करें. यह ऐप्स  को स्‍थान और/या अन्‍य स्थान स्रोतों जैसे GPS या स्‍थान प्रदाताओं द्वारा लौटाई गई स्थिति को ओवरराइड करने देता है."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अतिरिक्त स्‍थान प्रदाता आदेशों में पहुंचे"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ऐप्स को अतिरिक्त स्थान प्रदाता आदेशों पर पहुंचने देती है. इससे ऐप्स GPS या अन्य स्थान स्रोतों के संचालन में अवरोध पहुंचा सकता है."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"सटीक स्थान (GPS और नेटवर्क-आधारित)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"फ़िंगरप्रिंट क्रियान्वयन रोक दिया गया."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"बहुत अधिक प्रयास कर लिए गए हैं. बाद में पुन: प्रयास करें."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास करें."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समन्वयन सेटिंग पढ़ें"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"यदि आप USB मेमोरी चालू करते हैं, तो आपके द्वारा उपयोग किए जा रहे कुछ ऐप्स रुक जाएंगे और हो सकता है कि वे तब तक अनुपलब्‍ध रहें जब तक कि आप USB मेमोरी बंद नहीं कर देते."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB कार्यवाही विफल"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ठीक है"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"किसी मीडिया डिवाइस के रूप में कनेक्‍ट किया गया"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"कैमरे के रूप में कनेक्‍ट करें"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI डिवाइस के रूप में कनेक्‍ट है"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"किसी इंस्‍टॉलर के रूप में कनेक्‍ट किया गया"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB सहायक सामग्री से कनेक्‍ट कि‍या गया"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"अन्‍य USB विकल्‍पों के लिए स्पर्श करें."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB मेमोरी फ़ॉर्मेट करें?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD कार्ड प्रारूपित करें?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"आपके USB मेमोरी में संग्रहीत सभी फ़ाइलें मिट जाएंगी. यह क्रिया पूर्ववत नहीं की जा सकती!"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="one">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
       <item quantity="other">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">%1$d घंटे के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
       <item quantity="other">%1$d घंटे के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">%d मिनट के लिए</item>
       <item quantity="other">%d मिनट के लिए</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">%d घंटे के लिए</item>
       <item quantity="other">%d घंटे के लिए</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"जब तक आप इसे बंद नहीं कर देते"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

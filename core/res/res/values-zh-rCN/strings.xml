@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"允许该应用添加、删除、更改您可在平板电脑上修改的活动，包括朋友或同事的活动。此权限可让该应用冒充日历所有者发送消息，或在所有者不知情的情况下修改活动。"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"允许应用添加、移除和更改您可在电视上修改的活动，包括朋友或同事的活动。此权限可让应用冒充日历所有者来发送消息，或在所有者不知情的情况下修改活动。"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"允许该应用添加、删除、更改您可在手机上修改的活动，包括朋友或同事的活动。此权限可让该应用冒充日历所有者发送消息，或在所有者不知情的情况下修改活动。"</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"使用模拟地点来源进行测试"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"创建用于测试的模拟位置源或安装新的位置提供程序。此权限可让该应用覆盖由其他位置源（如GPS）或位置提供程序返回的位置和/或状态信息。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"获取额外的位置信息提供程序命令"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允许该应用使用其他的位置信息提供程序命令。此权限使该应用可以干扰GPS或其他位置信息源的运作。"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"精确位置（基于GPS和网络）"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"指纹操作已取消。"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"尝试次数过多，请稍后重试。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"请重试。"</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"读取同步设置"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"如果您打开USB存储设备，您正在使用的某些应用将会停止，并且在您关闭USB存储设备前都将无法使用。"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB操作失败"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"确定"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"已作为媒体设备连接"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"作为相机连接"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"已作为 MIDI 设备连接"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"作为安装程序连接"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已连接到USB配件"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"触摸可显示其他USB选项。"</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"格式化USB存储设备吗？"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"要格式化SD卡吗？"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"您的USB存储设备中存储的所有文件都将清除。该操作无法撤消！"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">%1$d 分钟（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
       <item quantity="one">1 分钟（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d 小时（到<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>）</item>
       <item quantity="one">1 小时（到<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>）</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d 分钟</item>
       <item quantity="one">1 分钟</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d 小时</item>
       <item quantity="one">1 小时</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"到<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"直到您将其关闭"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

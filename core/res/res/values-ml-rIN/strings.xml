@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"സുഹൃത്തുക്കളുടെയും സഹപ്രവർത്തകരുടെയും ഉൾപ്പെടെ, നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ പരിഷ്‌ക്കരിക്കാനാകുന്ന ഇവന്റുകൾ ചേർക്കാനും നീക്കംചെയ്യാനും മാറ്റാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. കലണ്ടർ ഉടമകളിൽ നിന്നുള്ളതായി തോന്നുന്ന സന്ദേശങ്ങൾ അയയ്‌ക്കാനോ ഉടമയുടെ അറിവില്ലാതെ ഇവന്റുകൾ പരിഷ്‌ക്കരിക്കാനോ ഇത് അപ്ലിക്കേഷനെ അനുവദിച്ചേക്കാം."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"സുഹൃത്തുക്കളുടെതോ സഹപ്രവർത്തകരുടെതോ ഉൾപ്പെടെ, നിങ്ങളുടെ ടിവിയിൽ പരിഷ്‌‌ക്കരിക്കാനാകുന്ന ഇവന്റുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും മാറ്റുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുക. ഇത്, കലണ്ടർ ഉടമകളിൽ നിന്നും വരുന്ന സന്ദേശങ്ങൾ അയയ്‌ക്കുന്നതിനോ ഉടമയുടെ അറിവില്ലാതെ ഇവന്റുകൾ പരിഷ്‌ക്കരിക്കുന്നതിനോ അപ്ലിക്കേഷനെ അനുവദിച്ചേക്കാം."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"സുഹൃത്തുക്കളുടെയും സഹപ്രവർത്തകരുടെയും ഉൾപ്പെടെ, നിങ്ങളുടെ ഫോണിൽ പരിഷ്‌ക്കരിക്കാനാകുന്ന ഇവന്റുകൾ ചേർക്കാനും നീക്കംചെയ്യാനും മാറ്റാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. കലണ്ടർ ഉടമകളിൽ നിന്നുള്ളതായി തോന്നുന്ന സന്ദേശങ്ങൾ അയയ്‌ക്കാനോ ഉടമയുടെ അറിവില്ലാതെ ഇവന്റുകൾ പരിഷ്‌ക്കരിക്കാനോ ഇത് അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"പരിശോധിക്കുന്നതിനായുള്ള വ്യാജ ലൊക്കേഷൻ ഉറവിടങ്ങൾ"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"പുതിയ ലൊക്കേഷൻ ദാതാവിനെ പരിശോധിക്കാനോ ഇൻസ്റ്റാളുചെയ്യാനോ യഥാർത്ഥമല്ലാത്ത ലൊക്കേഷൻ ഉറവിടങ്ങൾ സൃഷ്‌ടിക്കുന്നു. ഇത് GPS അല്ലെങ്കിൽ ലൊക്കേഷൻ ദാതാക്കൾ പോലുള്ള മറ്റ് ലൊക്കേഷൻ ഉറവിടങ്ങൾ നൽകുന്ന ലൊക്കേഷനോ കൂടാതെ/അല്ലെങ്കിൽ നിലയോ അസാധുവാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യുക"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് GPS-ന്റെയോ മറ്റ് ലൊക്കേഷൻ ഉറവിടങ്ങളുടെയോ പ്രവർത്തനത്തിൽ ഇടപെടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"കൃത്യമായ ലൊക്കേഷൻ (GPS-ഉം നെറ്റ്‌വർക്കും അടിസ്ഥാനമാക്കിയുള്ളത്)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"വീണ്ടും ശ്രമിക്കൂ."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യുക"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"നിങ്ങൾ USB സംഭരണം ഓൺ ചെയ്യുകയാണെങ്കിൽ, നിങ്ങൾ ഉപയോഗിക്കുന്ന ചില അപ്ലിക്കേഷനുകൾ USB സംഭരണം ഓഫുചെയ്യുന്നതുവരെ പ്രവർത്തനം നിർത്താനും ലഭ്യമാകാതിരിക്കാനും ഇടയുണ്ട്."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB പ്രവർത്തനം പരാജയപ്പെട്ടു"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ശരി"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"മീഡിയ ഉപകരണമായി കണക്‌റ്റുചെയ്‌തു"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ഒരു ക്യാമറയായി കണക്‌റ്റുചെയ്‌തു"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI ഉപകരണമായി കണക്‌റ്റുചെയ്‌തു"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ഇൻസ്‌റ്റാളറായി കണക്‌റ്റുചെയ്തു"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ഒരു USB ആക്‌സസ്സറി കണക്റ്റുചെയ്‌തു"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"മറ്റ് USB ഓപ്‌ഷനുകൾക്കായി സ്പർശിക്കുക."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB സംഭരണം ഫോർമാറ്റുചെയ്യണോ?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD കാർഡ് ഫോർമാറ്റുചെയ്യണോ?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB സംഭരണത്തിൽ ശേഖരിച്ചിട്ടുള്ള നിങ്ങളുടെ എല്ലാ ഫയലുകളും മായ്ക്കും. ഈ പ്രവർത്തനം പഴയപടിയാക്കാനാവില്ല!"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">%1$d മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
       <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d മണിക്കൂർ സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
       <item quantity="one">ഒരു മണിക്കൂർ സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d മിനിറ്റ് സമയത്തേക്ക്</item>
       <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക്</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d മണിക്കൂർ സമയത്തേക്ക്</item>
       <item quantity="one">ഒരു മണിക്കൂർ സമയത്തേക്ക്</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"നിങ്ങൾ ഇത് ഓ‌ഫാക്കും വരെ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

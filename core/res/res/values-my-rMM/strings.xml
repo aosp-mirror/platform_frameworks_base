@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"အပလီကေးရှင်းအား သင်၏ တက်ဘလက်တွင် သူငယ်ချင်း အလုပ်ဖော်များ အပါအဝင် သင်၏ ပြောင်းလဲအဖြစ်အပျက်များအား ထည့်ခြင်း၊ ထုတ်ခြင်းအား ခွင့်ပြုရန်။ ဤခွင့်ပြုချက်သည် အပလီကေးရှင်းအား သတင်းများပို့ခြင်းကို ပြက္ခဒိန်ပိုင်ရှင်ဆီမှ လာသလို အနေဖြင့် ပေးပို့ခြင်း သို့မဟုတ် အဖြစ်အပျက်များကို ပိုင်ရှင်မသိပဲ ပြင်ဆင်နိုင်ပါသည်။"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"သင့် သူငယ်ချင်းများ သို့မဟုတ် လုပ်ဖော်ကိုင်ဖက်များ၏ လှုပ်ရှားမှုများ အပါအဝင်၊ သင့်တီဗွီရှိ လှုပ်ရှားမှုများကို ထပ်ထည့်ရန်၊ ဖယ်ထုတ်ရန်၊ ပြောင်းလဲရန် app အား ခွင့်ပြုပါ။ ဤသို့ပြုပါက ပြက္ခဒိန် ပိုင်ရှင်ဆီမှ စာတိုများ လာသကဲ့သို့ စာများပို့ရန်၊ သို့မဟုတ် ပိုင်ရှင်၏ ခွင့်ပြုချက်မရှိဘဲ လှုပ်ရှားမှုများကို ပြင်ဆင်ရန် app အား ခွင့်ပြုထားခြင်း ဖြစ်၏။"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"အပလီကေးရှင်းအား သင်၏ ဖုန်းတွင် သူငယ်ချင်း အလုပ်ဖော်များ အပါအဝင် သင်၏ ပြောင်းလဲအဖြစ်အပျက်များအား ထည့်ခြင်း၊ ထုတ်ခြင်းအား ခွင့်ပြုရန်။ ဤခွင့်ပြုချက်သည် အပလီကေးရှင်းအား သတင်းများပို့ခြင်းကို ပြက္ခဒိန်ပိုင်ရှင်ဆီမှ လာသလို အနေဖြင့် ပေးပို့ခြင်း သို့မဟုတ် အဖြစ်အပျက်များကို ပိုင်ရှင်မသိပဲ ပြင်ဆင်နိုင်ပါသည်။"</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"စမ်းသပ်ရန်အတွက် တည်နေရာပုံစံတုမူရင်း"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"စမ်းသပ်ရန် သို့ နေရာပြပံ့ပို့းမှု အသစ်သွင်းရန် တည်နေရာဇစ်မြစ်အတုကို ဖန်တီးပါ။ ဤသို့လုပ်ခြင်းအားဖြင့် အပလီကေးရှင်းမှ တည်နေရာကို ကျော်ဖြတ်ပြင်ဆင်ခြင်းနှင်ူ ဂျီပီအက်စ် သို့ နေရာပြပံ့ပိုးမှုကဲ့သို့သော အခြား တည်နေရာဇစ်မြစ်များ၏ အခြေအနေကို ပြန်ပို့ပေးနိုင်မည်ဖြစ်သည်။"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"တည်နေရာပံ့ပိုးမှုညွှန်ကြားချက်အပိုအား ဝင်ရောက်ကြည့်ခြင်း"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"appအား တည်နေရာ စီမံပေးရေး ညွှန်ကြားချက် အပိုများကို ရယူခွင့်ပြုသည်။ သို့ဖြစ်၍ appသည် GPS သို့မဟုတ် အခြား တည်နေရာ ရင်းမြစ်ကို သုံးကြသူတို့၏ လုပ်ငန်းများကို ဝင်စွက်ခွင့် ပြုနိုင်သည်။"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"တည်နေရာ အတိအကျ (ဂျီပီအက်စ် နှင့် ကွန်ရက်အခြေခံ)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"လက်ဗွေရာ လုပ်ငန်း ဖျက်သိမ်းခဲ့၏။"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ကြိုးစာမှု အကြိမ်များနေ၏။ နောက်မှ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ပြန်ကြိုးစားပါ"</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ထပ်တူပြုအဆင်အပြင်အားဖတ်ခြင်း"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"သင် ယူအက်စ်ဘီ နဲ့ သိမ်းဆည်းမှုကို ဖွင့်လိုက်ပါက တချို့ အပလီကေးရှင်းများ က ယူအက်စ်ဘီ နဲ့ သိမ်းဆည်းမှု ပြန်ပိတ်သည်အထိ အလုပ်မလုပ် သို့ သုံးစွဲရန် ရှိနေမည် မဟုတ်ပါ"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USBဆောင်ရွက်မှုမအောင်မြင်ပါ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ကောင်းပြီ"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"မီဒီယာစက်အနေဖြင့် ချိတ်ဆက်သည်"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ကင်မရာအနေဖြင့်ဆက်သွယ်ခြင်း"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI စက်ပစ္စည်းအဖြစ် ချိတ်ဆက်ထားသည်"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"installerအနေဖြင့် ချိတ်ဆက်သည်"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBတွဲဖက်ပစ္စည်းအား ချိတ်ဆက်ထားသည်"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"အခြား USB စိတ်ကြိုက်ရွေးချယ်ခွင့်များ အတွက် တို့ထိပါ။"</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB သိုလှောင်ခန်းကို ပုံစံပြန်ချမလား?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD ကဒ်ကို ပုံစံပြန်ချမလား?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"သင်၏ USB သိုလှောင်ခန်းထဲ သိုလှောင်ထားသည့် ဖိုင်အားလုံး ဖျက်ခံရမည်။ ဒီလုပ်ရပ်ကို ပြန်ပြီး ပြောင်းလဲ မရနိုင်ပါ။"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">%1$d မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>အထိ)</item>
       <item quantity="one">တစ်မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> အထိ)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d နာရီကြာ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>အထိ)</item>
       <item quantity="one">တစ်နာရီကြာ (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> အထိ)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d မိနစ်တွင်</item>
       <item quantity="one">တစ်မိနစ်တွင်</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d နာရီကြာ</item>
       <item quantity="one">တစ်နာရီကြာ</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>အထိ"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"သင်က ဒါကို ပိတ်မပစ်သည့် အထိ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ایپ کو وہ ایونٹس جن میں آپ اپنے ٹیبلٹ پر ترمیم کرسکتے ہیں، بشمول دوسروں یا ساتھی کارکنوں کے ایونٹس شامل کرنے، ہٹانے، تبدیل کرنے کی اجازت دیتا ہے۔ یہ ایپ کو ایسے پیغامات بھیجنے کی جو کیلنڈر مالکان کی جانب سے آنے والے معلوم پڑتے ہیں یا مالکان کی جانکاری کے بغیر ایونٹس میں ترمیم کرنے کی اجازت دے سکتا ہے۔"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"‏ایپ کو وہ ایونٹس جن میں آپ TV پر ترمیم کر سکتے ہیں بشمول دوستوں یا ساتھی کارکنان کے ایونٹس شامل کرنے، ہٹانے، تبدیل کرنے کی اجازت دیتا ہے۔ یہ ایپ کو ایسے پیغامات بھیجنے کی جو کیلنڈر مالکان کی جانب سے آئے ہوئے معلوم پڑتے ہیں، یا مالکان کی جانکاری کے بغیر ایونٹس میں ترمیم کرنے کی اجازت دے سکتا ہے۔"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ایپ کو وہ ایونٹس جن میں آپ اپنے فون پر ترمیم کرسکتے ہیں، بشمول دوسروں یا ساتھی کارکنوں کے ایونٹس شامل کرنے، ہٹانے، تبدیل کرنے کی اجازت دیتا ہے۔ یہ ایپ کو ایسے پیغامات بھیجنے کی جو کیلنڈر مالکان کی جانب سے آئے ہوئے معلوم پڑتے ہیں یا مالکان کی جانکاری کے بغیر ایونٹس میں ترمیم کرنے کی اجازت دے سکتا ہے۔"</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"ٹیسٹنگ کیلئے فرضی مقام کے ذرائع"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"‏ٹیسٹ کرنے کیلئے فرضی مقام کے مآخذ بنائیں یا ایک نیا مقام فراہم کنندہ انسٹال کریں۔ یہ ایپ کو مقام کے دوسرے مآخذ جیسے GPS یا مقام فراہم کنندگان کے ذریعہ واپس کردہ مقام اور/یا اسٹیٹس کو اوور رائیڈ کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏ایپ کو اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کرنے کی اجازت دیتی ہے۔ یہ ایپ کو GPS یا دوسرے مقام کے مآخذ کے عمل کے ساتھ مداخلت کرنے کی اجازت دے سکتی ہے۔"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"‏قطعی مقام (GPS اور نیٹ ورک پر مبنی)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"فنگر پرنٹ کی کارروائی منسوخ ہوگئی۔"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"کافی زیادہ کوششیں کی گئیں۔ بعد میں دوباہ کوشش کریں۔"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"دوبارہ کوشش کریں۔"</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"‏اگر آپ USB اسٹوریج کو آن کرتے ہیں تو آپ کے زیر استعمال کچھ ایپس بند ہو جائیں گے اور جب تک آپ USB اسٹوریج آف نہ کر دیں تب تک غیر دستیاب رہ سکتی ہیں۔"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"‏USB کارروائی ناکام رہی"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ٹھیک ہے"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"ایک میڈیا آلہ کے بطور مربوط کر دیا گیا"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ایک کیمرہ کے بطور مربوط ہے"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"‏MIDI آلہ کے بطور منسلک"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ایک انسٹالر کے بطور مربوط ہے"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏ایک USB لوازم سے مربوط ہے"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"‏USB کے دوسرے اختیارات کیلئے چھوئیں۔"</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"‏USB اسٹوریج فارمیٹ کریں؟"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"‏SD کارڈ فارمیٹ کریں؟"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏آپ کی USB اسٹوریج میں اسٹور کردہ سبھی فائلوں کو ہٹا دیا جائے گا۔ اس کارروائی کو لوٹایا نہیں جا سکتا ہے!"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">‏%1$d منٹ کیلئے (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> تک)</item>
       <item quantity="one">ایک منٹ کیلئے (تک <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">‏%1$d گھنٹے کیلئے (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> تک)</item>
       <item quantity="one">ایک گھنٹہ کیلئے (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> تک)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">‏‎%d منٹ کیلئے</item>
       <item quantity="one">ایک منٹ کیلئے</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">‏‎%d گھنٹے کیلئے</item>
       <item quantity="one">ایک گھنٹہ کیلئے</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"جب تک آپ اسے آف نہ کر دیں"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
