@@ -15894,6 +15894,7 @@ package android.media {
 
   public final class AudioDeviceInfo {
     method public int[] getChannelCounts();
+    method public int[] getChannelIndexMasks();
     method public int[] getChannelMasks();
     method public int[] getFormats();
     method public int getId();
