@@ -280,6 +280,7 @@ void PathCache::clear() {
 }
 
 void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
+    ATRACE_NAME("Upload Path Texture");
     SkAutoLockPixels alp(bitmap);
     if (!bitmap.readyToDraw()) {
         ALOGE("Cannot generate texture from bitmap");
