@@ -1698,7 +1698,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>This control (except for MANUAL) is only effective if
      * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
      * <p>ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
-     * contains OPAQUE_REPROCESSING or YUV_REPROCESSING. MANUAL will be supported if
+     * contains PRIVATE_REPROCESSING or YUV_REPROCESSING. MANUAL will be supported if
      * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR. Other intent values are
      * always supported.</p>
      * <p><b>Possible values:</b>
