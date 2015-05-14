@@ -174,9 +174,16 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         }.start();
     }
 
+    protected void onUserInput() {
+        if (mCallback != null) {
+            mCallback.userActivity();
+        }
+        mSecurityMessageDisplay.setMessage("", false);
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        mCallback.userActivity();
+        onUserInput();
         return false;
     }
 
