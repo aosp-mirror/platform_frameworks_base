@@ -1,138 +1,129 @@
-page.title=Monetize with Ads
-page.metaDescription=Ads are a quick and easy way to incorporate a monetization option into both your free and paid apps.
-page.tags="monetizing", "free", "freemium", "ads"
-page.image=/distribute/images/advertising.jpg
-
+page.title=Earn Revenue from AdMob Ads
+page.metaDescription=Gain insights about your users, drive more in-app purchases, and maximize your ad revenue.
+page.tags="monetizing", "ads", "admob", "ads"
+page.image=distribute/images/advertising.jpg
 @jd:body
 
 <div class="figure">
   <img src="{@docRoot}distribute/images/advertising.jpg" style="width:460px;">
 </div>
 
-<p>
-  Ads can be a quick and easy way to earn more from your <a href=
-  "{@docRoot}distribute/monetize/freemium.html">freemium</a>, <a href=
-  "{@docRoot}distribute/monetize/premium.html">premium</a>, and <a href=
-  "{@docRoot}distribute/monetize/subscriptions.html">subscription</a> apps.
-  AdMob and the Google Mobile Ads SDK let you add advertising to your apps with
-  just a few lines of code.
-</p>
+<p>Ads are an effective and easy way to earn revenue from your apps. AdMob brings
+together best-in-class technology in a single ad platform for your app, so you
+can gain insights about your users, drive more in-app purchases, and maximize
+your ad revenue. You won’t need to rely on a combination of tools or use
+precious development resources to build your own solution.</p>
 
-<p>
-  The question is: which model gets the best results for your app? Google's ad
-  tools are made to help you figure out what combination works best for both
-  your audience and your bottom line. </p>
-
-<p>Start by linking your AdMob and Google
-  Analytics accounts to get better insights and more earning power: for
-  instance, AdMob can promote in-app purchases to the people who buy them most
-  often, while showing income-generating ads to those less likely to buy right
-  now.
-</p>
-
-<p>
-  Using <a href=
-  "http://www.google.com/ads/admob/monetize.html#subid=us-en-et-dac">AdMob</a>
-  and the <a href="{@docRoot}google/play-services/ads.html">Google Mobile Ads
-  SDK</a> included in Google Play Services, you’re able to add advertising into
-  your apps, with just a few lines of code.
-</p>
-
-<p>
-  When including ads in your apps you should consider:
-</p>
+<p>Why choose AdMob?</p>
 
 <ul>
-  <li>
-    <p>
-      <strong>Placement within your apps</strong> &mdash; Well-placed ads make
-      it more likely that users will click through and convert. Poorly-placed
-      ads lead to lower click-through rates, and even poor ratings and users
-      abandoning your apps. Our <a href=
-      "{@docRoot}training/monetization/ads-and-ux.html">developer training</a>
-      on using ads shows some of the best ways to place ads.
-    </p>
-  </li>
-
-  <li>
-    <p>
-      <strong>Ad formats</strong> &mdash; Every app offers a different type of
-      experience for users, so it’s important that your ad formats match that
-      experience. While banner ads may work well for a flashlight utility app,
-      an immersive gaming app may benefit more from a video interstitial.
-      Mismatched ad formats can make users unhappy and leave money on the
-      table.
-    </p>
-  </li>
-
-  <li>
-    <p>
-      <strong>Maximizing your performance</strong> &mdash; Make sure you’re
-      optimizing your advertising revenue by maximizing your CPMs and fill
-      rate. Ad providers often cite their very high CPMs but don't mention low
-      fill rates that can severely decrease your effective CPM. Be sure to look
-      at both of these figures. Consider using a <a href=
-      "https://support.google.com/admob/v2/answer/3063564?hl=en&amp;ref_topic=3063091#subid=us-en-et-dac">
-      mediation</a> solution if you’d like to use multiple ad providers in your
-      apps. Look for solutions that offer yield management or <a href=
-      "https://support.google.com/admob/v2/answer/3379794?hl=en&amp;ref_topic=3379793#subid=us-en-et-dac">
-      network optimization</a> features to serve the highest paying ad for each
-      impression.
-    </p>
-  </li>
-
-  <li>
-    <p>
-      <strong>Exercising control options</strong> &mdash; A variety of ads may
-      show up within your app. It may make sense to <a href=
-      "https://support.google.com/admob/v2/answer/3150235?hl=enl#subid=us-en-et-dac">
-      block</a> certain of those advertisements from appearing, depending on
-      your goals and the type of experience you want to provide. Some
-      developers, for instance, don’t want ads for apps in their same category
-      showing to their users, while others don’t mind at all.
-    </p>
-  </li>
-
-  <li>
-    <p>
-      <strong>Cross promoting your other apps</strong> &mdash; Ads can do more
-      than earn revenue. Consider running <a href=
-      "https://support.google.com/admob/v2/answer/3210452?hl=en#subid=us-en-et-dac">
-      house ads</a> within your apps to promote other apps in your portfolio.
-      When you launch a new app, this kind of promotion is a free and easy way
-      to attract new users quickly.
-    </p>
-  </li>
+  <li> Over 650,000 apps use AdMob
+  <li> $1 billion+ paid to developers in the last 2 years
+  <li> Fast, reliable payment in local currencies
+  <li> High CPMs and the best fill rates
+  <li> Industry-leading mediation platform
 </ul>
 
-<p>
-  Don't forget that paid channels like AdWords and YouTube can help you cast a
-  wider net by reaching targeted audiences outside the app ecosystem. They're a
-  great way to find new users at a price that you control. <a href=
-  "https://support.google.com/adwords/answer/2549053">Learn more</a>.
-</p>
+<p><a href="http://www.google.com/ads/admob/#subid=us-en-et-dac">Sign-up for AdMob</a>
+today and start showing ads by integrating the <a
+href="https://developers.google.com/mobile-ads-sdk/download">Google Mobile Ads SDK</a>
+in your app with a few lines of code.</p>
 
-<p>
-  To start monetizing with ads, sign up for AdMob and integrate the Google
-  Mobile Ads SDK into your apps. If you also need to manage direct deals with
-  advertisers, consider using DoubleClick for Publishers Small Business.
-</p>
+<h2 id="key_features">Key features</h2>
+
+<div style="display:inline-block">
+<h3 id="maximize_your_ad_revenue">Maximize your ad revenue</h3>
+
+<div class="col-4">
+  <h4 id="maximize_earnings">Maximize earnings</h4>
+  <p>Earn more with our industry-leading ad service, which includes <a href=
+  "https://support.google.com/admob/answer/3063564">free mediation</a> to
+  automatically improve your earnings, and access to all of Google’s advertiser
+  demand from AdMob, AdWords, and the DoubleClick Ad Exchange.</p>
+</div>
+
+<div class="col-4">
+  <h4 id="get_paid_fast">Get paid fast</h4>
+  <p>Get paid in local currencies quickly and reliably, with no wire fees charged by
+  AdMob.</p>
+</div>
+
+<div class="col-4">
+  <h4 id="easy_and_free">Easy and free</h4>
+  <p>The SDK can be installed quickly, and there are no standard fees for using the
+  platform.</p>
+</div>
+</div>
+
+<div style="display:inline-block">
+<h3 id="grow_your_business_with_a_trusted_partner">Grow your business with a trusted partner</h3>
+
+<div class="col-6">
+  <h4 id="powered_by_googles_ad_technology">Powered by Google’s ad technology</h4>
+  <p>For over a decade, Google has helped millions of developers grow their digital
+  businesses.</p>
+</div>
+
+<div class="col-6">
+<h4 id="auto_updates_on_google_play">Auto updates on Google Play</h4>
+<p>AdMob’s integration with Google Play services pushes automatic performance
+  improvements to Android apps without additional SDK changes.</p>
+</div>
+</div>
+
+<div style="display:inline-block">
+<h3 id="drive_more_in-app_purchases_and_downloads">Drive more in-app purchases and downloads</h3>
+
+<div class="col-6">
+<h4 id="sell_more_in-app_purchases">Sell more in-app purchases</h4>
+<p>Earn more revenue by intelligently promoting your in-app purchases to the users
+most likely to buy them.</p>
+</div>
+
+<div class="col-6">
+<h4 id="promote_your_apps_for_free">Promote your apps for free</h4>
+<p>Cross-sell your other apps (or your friend’s apps) to your existing users,
+using free AdMob <a href="https://support.google.com/admob/answer/3210452">house ads</a>.</p>
+</div>
+</div>
+
+<div style="display:inline-block">
+<h3 id="drive_more_in-app_purchases_and_downloads">Drive more in-app purchases and downloads</h3>
+
+<div class="col-6">
+<h4 id="analytics_for_apps">Analytics for apps</h4>
+<p>Analyze your app’s performance from within AdMob with Google Analytics.
+Discover where people are downloading your app, and the features they use the
+most in real time.</p>
+</div>
+
+<div class="col-6">
+<h4 id="flow_visualization_reports">Flow visualization reports</h4>
+<p>In Analytics, see how people are navigating through your app with graphical
+<a href="https://support.google.com/analytics/answer/2519986">flow reports</a>.
+View the path they take to making a purchase, and the point where they exit
+the app, plus much more.</p>
+</div>
+</div>
 
 
-<p>
-  To start monetizing with ads sign up for <a href=
-  "http://www.google.com/ads/admob/#subid=us-en-et-dac">AdMob</a> and integrate
-  the <a href="https://developers.google.com/mobile-ads-sdk/download">Google
-  Mobile Ads SDK</a> into your apps. If you also need to manage direct deals
-  with advertisers, consider using <a href=
-  "http://www.google.com/doubleclick/publishers/small-business/index.html#subid=us-en-et-dac">
-  DoubleClick for Publishers Small Business</a>.
-</p>
+<h2 id=tips>Tips</h2>
 
-<div class="headerLine"><h2 id="related-resources">Related resources</h2></div>
+<ul>
+  <li> Place ads wisely, they shouldn't be too intrusive but still need to be clearly
+visible to attract clickthroughs.
+  <li> Use banner, interstitial, and other ad formats appropriately.
+  <li> Make use of targeting features to match ads with your users and your app.
+  <li> Remember that ads form part of your app and must match its age rating.
+  <li> Exercise control options sensibly, don't get carried away excluding potentially
+competing ads at the expense of revenue.
+</ul>
+
+
+<h2 id=related_resources>Related resources</h2>
 
 <div class="resource-widget resource-flow-layout col-13"
-  data-query="collection:distribute/monetize/advertising"
+  data-query="collection:distribute/monetize/admob"
   data-sortOrder="-timestamp"
   data-cardSizes="9x3"
   data-maxResults="6"></div>
