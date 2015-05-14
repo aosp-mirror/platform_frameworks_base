@@ -34,6 +34,8 @@ namespace renderthread {
 DrawFrameTask::DrawFrameTask()
         : mRenderThread(NULL)
         , mContext(NULL)
+        , mFrameTimeNanos(0)
+        , mRecordDurationNanos(0)
         , mDensity(1.0f) // safe enough default
         , mSyncResult(kSync_OK) {
 }
@@ -66,11 +68,17 @@ void DrawFrameTask::removeLayerUpdate(DeferredLayerUpdater* layer) {
     }
 }
 
-int DrawFrameTask::drawFrame() {
+int DrawFrameTask::drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos) {
     LOG_ALWAYS_FATAL_IF(!mContext, "Cannot drawFrame with no CanvasContext!");
 
     mSyncResult = kSync_OK;
+    mFrameTimeNanos = frameTimeNanos;
+    mRecordDurationNanos = recordDurationNanos;
     postAndWait();
+
+    // Reset the single-frame data
+    mFrameTimeNanos = 0;
+    mRecordDurationNanos = 0;
 
     return mSyncResult;
 }
@@ -85,7 +93,7 @@ void DrawFrameTask::run() {
     ATRACE_NAME("DrawFrame");
 
     mContext->profiler().setDensity(mDensity);
-    mContext->profiler().startFrame();
+    mContext->profiler().startFrame(mRecordDurationNanos);
 
     bool canUnblockUiThread;
     bool canDrawThisFrame;
@@ -114,7 +122,7 @@ void DrawFrameTask::run() {
 
 bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     ATRACE_CALL();
-    mRenderThread->timeLord().vsyncReceived(mFrameInfo[FrameInfoIndex::kVsync]);
+    mRenderThread->timeLord().vsyncReceived(mFrameTimeNanos);
     mContext->makeCurrent();
     Caches::getInstance().textureCache.resetMarkInUse();
 
@@ -122,7 +130,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
         mContext->processLayerUpdate(mLayers[i].get());
     }
     mLayers.clear();
-    mContext->prepareTree(info, mFrameInfo);
+    mContext->prepareTree(info);
 
     // This is after the prepareTree so that any pending operations
     // (RenderNode tree state, prefetched layers, etc...) will be flushed.

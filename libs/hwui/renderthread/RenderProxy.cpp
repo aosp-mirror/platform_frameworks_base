@@ -16,14 +16,14 @@
 
 #include "RenderProxy.h"
 
-#include "DeferredLayerUpdater.h"
-#include "DisplayList.h"
-#include "LayerRenderer.h"
-#include "Rect.h"
-#include "renderthread/CanvasContext.h"
-#include "renderthread/RenderTask.h"
-#include "renderthread/RenderThread.h"
-#include "utils/Macros.h"
+#include "CanvasContext.h"
+#include "RenderTask.h"
+#include "RenderThread.h"
+
+#include "../DeferredLayerUpdater.h"
+#include "../DisplayList.h"
+#include "../LayerRenderer.h"
+#include "../Rect.h"
 
 namespace android {
 namespace uirenderer {
@@ -51,11 +51,6 @@ namespace renderthread {
                 METHOD_INVOKE_PAYLOAD_SIZE, sizeof(ARGS(method))); \
     MethodInvokeRenderTask* task = new MethodInvokeRenderTask((RunnableMethod) Bridge_ ## method); \
     ARGS(method) *args = (ARGS(method) *) task->payload()
-
-HWUI_ENUM(DumpFlags,
-        kFrameStats = 1 << 0,
-        kReset      = 1 << 1,
-);
 
 CREATE_BRIDGE4(createContext, RenderThread* thread, bool translucent,
         RenderNode* rootRenderNode, IContextFactory* contextFactory) {
@@ -97,7 +92,7 @@ void RenderProxy::destroyContext() {
 }
 
 CREATE_BRIDGE2(setFrameInterval, RenderThread* thread, nsecs_t frameIntervalNanos) {
-    args->thread->setFrameInterval(args->frameIntervalNanos);
+    args->thread->timeLord().setFrameInterval(args->frameIntervalNanos);
     return NULL;
 }
 
@@ -180,8 +175,7 @@ CREATE_BRIDGE7(setup, CanvasContext* context, int width, int height,
 }
 
 void RenderProxy::setup(int width, int height, const Vector3& lightCenter, float lightRadius,
-        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha, float density) {
-    mDrawFrameTask.setDensity(density);
+        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     SETUP_TASK(setup);
     args->context = mContext;
     args->width = width;
@@ -205,12 +199,10 @@ void RenderProxy::setOpaque(bool opaque) {
     post(task);
 }
 
-int64_t* RenderProxy::frameInfo() {
-    return mDrawFrameTask.frameInfo();
-}
-
-int RenderProxy::syncAndDrawFrame() {
-    return mDrawFrameTask.drawFrame();
+int RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos,
+        float density) {
+    mDrawFrameTask.setDensity(density);
+    return mDrawFrameTask.drawFrame(frameTimeNanos, recordDurationNanos);
 }
 
 CREATE_BRIDGE1(destroy, CanvasContext* context) {
@@ -379,28 +371,19 @@ void RenderProxy::notifyFramePending() {
     mRenderThread.queueAtFront(task);
 }
 
-CREATE_BRIDGE3(dumpProfileInfo, CanvasContext* context, int fd, int dumpFlags) {
+CREATE_BRIDGE2(dumpProfileInfo, CanvasContext* context, int fd) {
     args->context->profiler().dumpData(args->fd);
-
-    if (args->dumpFlags & DumpFlags::kFrameStats) {
-        args->context->dumpFrames(args->fd);
-    }
-    if (args->dumpFlags & DumpFlags::kReset) {
-        args->context->resetFrameStats();
-    }
     return NULL;
 }
 
-void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {
+void RenderProxy::dumpProfileInfo(int fd) {
     SETUP_TASK(dumpProfileInfo);
     args->context = mContext;
     args->fd = fd;
-    args->dumpFlags = dumpFlags;
     postAndWait(task);
 }
 
-CREATE_BRIDGE2(outputLogBuffer, int fd, RenderThread* thread) {
-    args->thread->jankTracker().dump(args->fd);
+CREATE_BRIDGE1(outputLogBuffer, int fd) {
     RenderNode::outputLogBuffer(args->fd);
     return NULL;
 }
@@ -408,7 +391,6 @@ CREATE_BRIDGE2(outputLogBuffer, int fd, RenderThread* thread) {
 void RenderProxy::outputLogBuffer(int fd) {
     SETUP_TASK(outputLogBuffer);
     args->fd = fd;
-    args->thread = &RenderThread::getInstance();
     staticPostAndWait(task);
 }
 
