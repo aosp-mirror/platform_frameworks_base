@@ -292,8 +292,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // New state used to change background based on whether this TextView is multiline.
     private static final int[] MULTILINE_STATE_SET = { R.attr.state_multiline };
 
-    // System wide time for last cut or copy action.
-    static long LAST_CUT_OR_COPY_TIME;
+    // System wide time for last cut, copy or text changed action.
+    static long sLastCutCopyOrTextChangedTime;
 
     /**
      * @hide
@@ -8005,6 +8005,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * through a thunk.
      */
     void sendAfterTextChanged(Editable text) {
+        sLastCutCopyOrTextChangedTime = 0;
+
         if (mListeners != null) {
             final ArrayList<TextWatcher> list = mListeners;
             final int count = list.size();
@@ -9341,7 +9343,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
             stopSelectionActionMode();
-            LAST_CUT_OR_COPY_TIME = 0;
+            sLastCutCopyOrTextChangedTime = 0;
         }
     }
 
@@ -9361,7 +9363,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ClipboardManager clipboard = (ClipboardManager) getContext().
                 getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(clip);
-        LAST_CUT_OR_COPY_TIME = SystemClock.uptimeMillis();
+        sLastCutCopyOrTextChangedTime = SystemClock.uptimeMillis();
     }
 
     /**

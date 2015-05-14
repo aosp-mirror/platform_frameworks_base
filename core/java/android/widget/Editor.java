@@ -3721,9 +3721,9 @@ public class Editor {
         public void show() {
             super.show();
 
-            final long durationSinceCutOrCopy =
-                    SystemClock.uptimeMillis() - TextView.LAST_CUT_OR_COPY_TIME;
-            if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
+            final long durationSinceLastCutCopyOrTextChanged =
+                    SystemClock.uptimeMillis() - TextView.sLastCutCopyOrTextChangedTime;
+            if (durationSinceLastCutCopyOrTextChanged < RECENT_CUT_COPY_DURATION) {
                 startSelectionActionModeWithoutSelection();
             }
 
