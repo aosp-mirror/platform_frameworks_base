@@ -16,15 +16,15 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.MissingResourceException;
 import java.util.Objects;
 
 /**
@@ -32,24 +32,34 @@ import java.util.Objects;
  */
 public final class StatusHints implements Parcelable {
 
-    private final ComponentName mPackageName;
     private final CharSequence mLabel;
-    private final int mIconResId;
+    private final Icon mIcon;
     private final Bundle mExtras;
 
+    /**
+     * @hide
+     */
+    @SystemApi @Deprecated
     public StatusHints(ComponentName packageName, CharSequence label, int iconResId,
             Bundle extras) {
-        mPackageName = packageName;
+        this(label, Icon.createWithResource(packageName.getPackageName(), iconResId), extras);
+    }
+
+    public StatusHints(CharSequence label, Icon icon, Bundle extras) {
         mLabel = label;
-        mIconResId = iconResId;
+        mIcon = icon;
         mExtras = extras;
     }
 
     /**
      * @return A package used to load the icon.
+     *
+     * @hide
      */
+    @SystemApi @Deprecated
     public ComponentName getPackageName() {
-        return mPackageName;
+        // Minimal compatibility shim for legacy apps' tests
+        return new ComponentName("", "");
     }
 
     /**
@@ -63,16 +73,30 @@ public final class StatusHints implements Parcelable {
      * The icon resource ID for the icon to show.
      *
      * @return A resource ID.
+     *
+     * @hide
      */
+    @SystemApi @Deprecated
     public int getIconResId() {
-        return mIconResId;
+        // Minimal compatibility shim for legacy apps' tests
+        return 0;
     }
 
     /**
      * @return An icon displayed in the in-call UI.
+     *
+     * @hide
      */
+    @SystemApi @Deprecated
     public Drawable getIcon(Context context) {
-        return getIcon(context, mIconResId);
+        return mIcon.loadDrawable(context);
+    }
+
+    /**
+     * @return An icon depicting the status.
+     */
+    public Icon getIcon() {
+        return mIcon;
     }
 
     /**
@@ -89,9 +113,8 @@ public final class StatusHints implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeParcelable(mPackageName, flags);
         out.writeCharSequence(mLabel);
-        out.writeInt(mIconResId);
+        out.writeParcelable(mIcon, 0);
         out.writeParcelable(mExtras, 0);
     }
 
@@ -107,36 +130,17 @@ public final class StatusHints implements Parcelable {
     };
 
     private StatusHints(Parcel in) {
-        mPackageName = in.readParcelable(getClass().getClassLoader());
         mLabel = in.readCharSequence();
-        mIconResId = in.readInt();
+        mIcon = in.readParcelable(getClass().getClassLoader());
         mExtras = in.readParcelable(getClass().getClassLoader());
-    }
-
-    private Drawable getIcon(Context context, int resId) {
-        Context packageContext;
-        try {
-            packageContext = context.createPackageContext(mPackageName.getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(this, e, "Cannot find package %s", mPackageName.getPackageName());
-            return null;
-        }
-        try {
-            return packageContext.getDrawable(resId);
-        } catch (MissingResourceException e) {
-            Log.e(this, e, "Cannot find icon %d in package %s",
-                    resId, mPackageName.getPackageName());
-            return null;
-        }
     }
 
     @Override
     public boolean equals(Object other) {
         if (other != null && other instanceof StatusHints) {
             StatusHints otherHints = (StatusHints) other;
-            return Objects.equals(otherHints.getPackageName(), getPackageName()) &&
-                    Objects.equals(otherHints.getLabel(), getLabel()) &&
-                    otherHints.getIconResId() == getIconResId() &&
+            return Objects.equals(otherHints.getLabel(), getLabel()) &&
+                    Objects.equals(otherHints.getIcon(), getIcon()) &&
                     Objects.equals(otherHints.getExtras(), getExtras());
         }
         return false;
@@ -144,7 +148,6 @@ public final class StatusHints implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mPackageName) + Objects.hashCode(mLabel) + mIconResId +
-                Objects.hashCode(mExtras);
+        return Objects.hashCode(mLabel) + Objects.hashCode(mIcon) + Objects.hashCode(mExtras);
     }
 }
