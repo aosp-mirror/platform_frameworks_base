@@ -370,7 +370,7 @@ static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    event->initialize(deviceId, source, action, flags, edgeFlags, metaState, buttonState, 0,
+    event->initialize(deviceId, source, action, flags, edgeFlags, metaState, buttonState,
             xOffset, yOffset, xPrecision, yPrecision,
             downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
@@ -456,12 +456,6 @@ static void android_view_MotionEvent_nativeSetAction(JNIEnv* env, jclass clazz,
     event->setAction(action);
 }
 
-static int android_view_MotionEvent_nativeGetActionButton(JNIEnv* env, jclass clazz,
-        jlong nativePtr) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getActionButton();
-}
-
 static jboolean android_view_MotionEvent_nativeIsTouchEvent(JNIEnv* env, jclass clazz,
         jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -502,12 +496,6 @@ static jint android_view_MotionEvent_nativeGetButtonState(JNIEnv* env, jclass cl
         jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     return event->getButtonState();
-}
-
-static void android_view_MotionEvent_nativeSetButtonState(JNIEnv* env, jclass clazz,
-        jlong nativePtr, jint buttonState) {
-    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    event->setButtonState(buttonState);
 }
 
 static void android_view_MotionEvent_nativeOffsetLocation(JNIEnv* env, jclass clazz,
@@ -776,9 +764,6 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeSetAction",
             "(JI)V",
             (void*)android_view_MotionEvent_nativeSetAction },
-    { "nativeGetActionButton",
-            "(J)I",
-            (void*)android_view_MotionEvent_nativeGetActionButton},
     { "nativeIsTouchEvent",
             "(J)Z",
             (void*)android_view_MotionEvent_nativeIsTouchEvent },
@@ -800,9 +785,6 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeGetButtonState",
             "(J)I",
             (void*)android_view_MotionEvent_nativeGetButtonState },
-    { "nativeSetButtonState",
-            "(JI)V",
-            (void*)android_view_MotionEvent_nativeSetButtonState },
     { "nativeOffsetLocation",
             "(JFF)V",
             (void*)android_view_MotionEvent_nativeOffsetLocation },
