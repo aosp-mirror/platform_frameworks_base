@@ -39,7 +39,7 @@ JMediaDataSource::JMediaDataSource(JNIEnv* env, jobject source)
     ScopedLocalRef<jclass> mediaDataSourceClass(env, env->GetObjectClass(mMediaDataSourceObj));
     CHECK(mediaDataSourceClass.get() != NULL);
 
-    mReadMethod = env->GetMethodID(mediaDataSourceClass.get(), "readAt", "(J[BI)I");
+    mReadMethod = env->GetMethodID(mediaDataSourceClass.get(), "readAt", "(J[BII)I");
     CHECK(mReadMethod != NULL);
     mGetSizeMethod = env->GetMethodID(mediaDataSourceClass.get(), "getSize", "()J");
     CHECK(mGetSizeMethod != NULL);
@@ -80,7 +80,7 @@ ssize_t JMediaDataSource::readAt(off64_t offset, size_t size) {
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jint numread = env->CallIntMethod(mMediaDataSourceObj, mReadMethod,
-                                      (jlong)offset, mByteArrayObj, (jint)size);
+            (jlong)offset, mByteArrayObj, (jint)0, (jint)size);
     if (env->ExceptionCheck()) {
         ALOGW("An exception occurred in readAt()");
         LOGW_EX(env);
@@ -89,9 +89,14 @@ ssize_t JMediaDataSource::readAt(off64_t offset, size_t size) {
         return -1;
     }
     if (numread < 0) {
-        ALOGW("An error occurred in readAt()");
-        mJavaObjStatus = UNKNOWN_ERROR;
-        return -1;
+        if (numread != -1) {
+            ALOGW("An error occurred in readAt()");
+            mJavaObjStatus = UNKNOWN_ERROR;
+            return -1;
+        } else {
+            // numread == -1 indicates EOF
+            return 0;
+        }
     }
     if ((size_t)numread > size) {
         ALOGE("readAt read too many bytes.");
