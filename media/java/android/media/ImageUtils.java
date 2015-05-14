@@ -57,7 +57,7 @@ class ImageUtils {
             case ImageFormat.RAW_SENSOR:
             case ImageFormat.RAW10:
                 return 1;
-            case PixelFormat.OPAQUE:
+            case ImageFormat.PRIVATE:
                 return 0;
             default:
                 throw new UnsupportedOperationException(
@@ -70,10 +70,11 @@ class ImageUtils {
      * Copy source image data to destination Image.
      * </p>
      * <p>
-     * Only support the copy between two non-opaque images with same properties
-     * (format, size, etc.). The data from the source image will be copied to
-     * the byteBuffers from the destination Image starting from position zero,
-     * and the destination image will be rewound to zero after copy is done.
+     * Only support the copy between two non-{@link ImageFormat#PRIVATE PRIVATE} format
+     * images with same properties (format, size, etc.). The data from the
+     * source image will be copied to the byteBuffers from the destination Image
+     * starting from position zero, and the destination image will be rewound to
+     * zero after copy is done.
      * </p>
      *
      * @param src The source image to be copied from.
@@ -88,8 +89,9 @@ class ImageUtils {
         if (src.getFormat() != dst.getFormat()) {
             throw new IllegalArgumentException("Src and dst images should have the same format");
         }
-        if (src.isOpaque() || dst.isOpaque()) {
-            throw new IllegalArgumentException("Opaque image is not copyable");
+        if (src.getFormat() == ImageFormat.PRIVATE ||
+                dst.getFormat() == ImageFormat.PRIVATE) {
+            throw new IllegalArgumentException("PRIVATE format images are not copyable");
         }
         if (!(dst.getOwner() instanceof ImageWriter)) {
             throw new IllegalArgumentException("Destination image is not from ImageWriter. Only"
