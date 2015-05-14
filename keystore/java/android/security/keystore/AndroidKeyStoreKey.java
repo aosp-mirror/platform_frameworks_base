@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import java.security.Key;
 
@@ -23,11 +23,11 @@ import java.security.Key;
  *
  * @hide
  */
-public class KeyStoreKey implements Key {
+public class AndroidKeyStoreKey implements Key {
     private final String mAlias;
     private final String mAlgorithm;
 
-    public KeyStoreKey(String alias, String algorithm) {
+    public AndroidKeyStoreKey(String alias, String algorithm) {
         mAlias = alias;
         mAlgorithm = algorithm;
     }

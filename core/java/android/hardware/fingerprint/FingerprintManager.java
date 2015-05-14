@@ -32,7 +32,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.hardware.fingerprint.FingerprintManager.EnrollmentCallback;
-import android.security.AndroidKeyStoreProvider;
+import android.security.keystore.AndroidKeyStoreProvider;
 import android.util.Log;
 import android.util.Slog;
 

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import android.os.IBinder;
+import android.security.KeyStore;
+import android.security.KeyStoreException;
 import android.security.keymaster.OperationResult;
 
 import libcore.util.EmptyArray;

@@ -18,7 +18,6 @@ package android.security.keystore;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.security.ArrayUtils;
 
 import java.security.PrivateKey;
 import java.security.spec.KeySpec;

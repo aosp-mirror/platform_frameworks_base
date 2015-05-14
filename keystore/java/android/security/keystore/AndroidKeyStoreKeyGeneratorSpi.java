@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
+import android.security.Credentials;
+import android.security.KeyStore;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
@@ -39,9 +41,9 @@ import javax.crypto.SecretKey;
  *
  * @hide
  */
-public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
+public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
 
-    public static class AES extends KeyStoreKeyGeneratorSpi {
+    public static class AES extends AndroidKeyStoreKeyGeneratorSpi {
         public AES() {
             super(KeymasterDefs.KM_ALGORITHM_AES, 128);
         }
@@ -58,7 +60,7 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
     }
 
-    protected static abstract class HmacBase extends KeyStoreKeyGeneratorSpi {
+    protected static abstract class HmacBase extends AndroidKeyStoreKeyGeneratorSpi {
         protected HmacBase(int keymasterDigest) {
             super(KeymasterDefs.KM_ALGORITHM_HMAC,
                     keymasterDigest,
@@ -110,13 +112,13 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
     private int[] mKeymasterPaddings;
     private int[] mKeymasterDigests;
 
-    protected KeyStoreKeyGeneratorSpi(
+    protected AndroidKeyStoreKeyGeneratorSpi(
             int keymasterAlgorithm,
             int defaultKeySizeBits) {
         this(keymasterAlgorithm, -1, defaultKeySizeBits);
     }
 
-    protected KeyStoreKeyGeneratorSpi(
+    protected AndroidKeyStoreKeyGeneratorSpi(
             int keymasterAlgorithm,
             int keymasterDigest,
             int defaultKeySizeBits) {
@@ -314,6 +316,6 @@ public abstract class KeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         } catch (IllegalArgumentException e) {
             throw new ProviderException("Failed to obtain JCA secret key algorithm name", e);
         }
-        return new KeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
+        return new AndroidKeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
     }
 }

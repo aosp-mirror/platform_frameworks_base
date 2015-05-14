@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import com.android.org.conscrypt.OpenSSLEngine;
 import com.android.org.conscrypt.OpenSSLKeyHolder;
 
 import libcore.util.EmptyArray;
 
+import android.security.Credentials;
+import android.security.KeyStoreParameter;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
@@ -81,7 +83,7 @@ import javax.crypto.SecretKey;
  *
  * @hide
  */
-public class AndroidKeyStore extends KeyStoreSpi {
+public class AndroidKeyStoreSpi extends KeyStoreSpi {
     public static final String NAME = "AndroidKeyStore";
 
     private android.security.KeyStore mKeyStore;
@@ -140,7 +142,7 @@ public class AndroidKeyStore extends KeyStoreSpi {
                         new UnrecoverableKeyException("Unsupported secret key type").initCause(e);
             }
 
-            return new KeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmString);
+            return new AndroidKeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmString);
         }
 
         return null;
@@ -476,10 +478,10 @@ public class AndroidKeyStore extends KeyStoreSpi {
         }
         KeyProtection params = (KeyProtection) param;
 
-        if (key instanceof KeyStoreSecretKey) {
+        if (key instanceof AndroidKeyStoreSecretKey) {
             // KeyStore-backed secret key. It cannot be duplicated into another entry and cannot
             // overwrite its own entry.
-            String keyAliasInKeystore = ((KeyStoreSecretKey) key).getAlias();
+            String keyAliasInKeystore = ((AndroidKeyStoreSecretKey) key).getAlias();
             if (keyAliasInKeystore == null) {
                 throw new KeyStoreException("KeyStore-backed secret key does not have an alias");
             }
