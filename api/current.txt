@@ -35364,7 +35364,6 @@ package android.view {
     method public static java.lang.String axisToString(int);
     method public final int findPointerIndex(int);
     method public final int getAction();
-    method public final int getActionButton();
     method public final int getActionIndex();
     method public final int getActionMasked();
     method public final float getAxisValue(int);
@@ -35428,6 +35427,7 @@ package android.view {
     method public final float getY(int);
     method public final float getYPrecision();
     method public final boolean isButtonPressed(int);
+    method public final boolean isStylusButtonPressed();
     method public static android.view.MotionEvent obtain(long, long, int, int, android.view.MotionEvent.PointerProperties[], android.view.MotionEvent.PointerCoords[], int, int, float, float, int, int, int, int);
     method public static deprecated android.view.MotionEvent obtain(long, long, int, int, int[], android.view.MotionEvent.PointerCoords[], int, float, float, int, int, int, int);
     method public static android.view.MotionEvent obtain(long, long, int, float, float, float, float, int, float, float, int, int);
@@ -35443,8 +35443,6 @@ package android.view {
     method public final void setSource(int);
     method public final void transform(android.graphics.Matrix);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int ACTION_BUTTON_PRESS = 11; // 0xb
-    field public static final int ACTION_BUTTON_RELEASE = 12; // 0xc
     field public static final int ACTION_CANCEL = 3; // 0x3
     field public static final int ACTION_DOWN = 0; // 0x0
     field public static final int ACTION_HOVER_ENTER = 9; // 0x9
@@ -35513,8 +35511,6 @@ package android.view {
     field public static final int BUTTON_FORWARD = 16; // 0x10
     field public static final int BUTTON_PRIMARY = 1; // 0x1
     field public static final int BUTTON_SECONDARY = 2; // 0x2
-    field public static final int BUTTON_STYLUS_PRIMARY = 32; // 0x20
-    field public static final int BUTTON_STYLUS_SECONDARY = 64; // 0x40
     field public static final int BUTTON_TERTIARY = 4; // 0x4
     field public static final android.os.Parcelable.Creator<android.view.MotionEvent> CREATOR;
     field public static final int EDGE_BOTTOM = 2; // 0x2
