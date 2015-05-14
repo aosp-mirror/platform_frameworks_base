@@ -1583,6 +1583,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    @Override
     @ServiceThreadOnly
     void setAutoDeviceOff(boolean enabled) {
         assertRunOnServiceThread();
@@ -1659,7 +1660,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected void onStandby(boolean initiatedByCec) {
+    protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
         // Seq #11
         if (!mService.isControlEnabled()) {
