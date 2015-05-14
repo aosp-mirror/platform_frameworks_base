@@ -6296,10 +6296,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return;
             }
 
+            ActivityInfo[] receivers = null;
             try {
-                ActivityInfo[] receivers  = mContext.getPackageManager().getPackageInfo(
+                receivers  = mContext.getPackageManager().getPackageInfo(
                         deviceOwnerPackage, PackageManager.GET_RECEIVERS).receivers;
-                if (receivers != null) {
+            } catch (NameNotFoundException e) {
+                Log.e(LOG_TAG, "Cannot find device owner package", e);
+            }
+            if (receivers != null) {
+                long ident = Binder.clearCallingIdentity();
+                try {
                     for (int i = 0; i < receivers.length; i++) {
                         if (permission.BIND_DEVICE_ADMIN.equals(receivers[i].permission)) {
                             intent.setComponent(new ComponentName(deviceOwnerPackage,
@@ -6307,9 +6313,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             mContext.sendBroadcastAsUser(intent, UserHandle.OWNER);
                         }
                     }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
                 }
-            } catch (NameNotFoundException e) {
-                Log.e(LOG_TAG, "Cannot find device owner package", e);
             }
         }
     }
