@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 /**
@@ -108,7 +109,7 @@ public class DisplaySettings {
         boolean success = false;
         try {
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, null);
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
@@ -193,7 +194,7 @@ public class DisplaySettings {
 
         try {
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, "utf-8");
+            out.setOutput(stream, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.startTag(null, "display-settings");
 

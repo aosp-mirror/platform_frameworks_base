@@ -78,6 +78,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -6814,7 +6815,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             final ByteArrayOutputStream memStream = new ByteArrayOutputStream();
             try {
                 XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(memStream, "utf-8");
+                out.setOutput(memStream, StandardCharsets.UTF_8.name());
                 writeDailyItemsLocked(out);
                 BackgroundThread.getHandler().post(new Runnable() {
                     @Override
@@ -6900,7 +6901,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         try {
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, null);
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
             readDailyItemsLocked(parser);
         } catch (XmlPullParserException e) {
         } finally {

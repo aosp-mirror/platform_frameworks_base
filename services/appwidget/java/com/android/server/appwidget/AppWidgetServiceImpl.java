@@ -95,6 +95,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -2494,7 +2495,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         try {
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(stream, "utf-8");
+            out.setOutput(stream, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.startTag(null, "gs");
             out.attribute(null, "version", String.valueOf(CURRENT_VERSION));
@@ -2557,7 +2558,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         int version = -1;
         try {
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, null);
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
 
             int legacyProviderIndex = -1;
             int legacyHostIndex = -1;
@@ -3642,7 +3643,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
                 try {
                     XmlSerializer out = new FastXmlSerializer();
-                    out.setOutput(stream, "utf-8");
+                    out.setOutput(stream, StandardCharsets.UTF_8.name());
                     out.startDocument(null, true);
                     out.startTag(null, "ws");      // widget state
                     out.attribute(null, "version", String.valueOf(WIDGET_STATE_VERSION));
@@ -3734,7 +3735,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 ArrayList<Host> restoredHosts = new ArrayList<>();
 
                 XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(stream, null);
+                parser.setInput(stream, StandardCharsets.UTF_8.name());
 
                 synchronized (mLock) {
                     int type;
