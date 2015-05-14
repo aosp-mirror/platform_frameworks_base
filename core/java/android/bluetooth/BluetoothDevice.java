@@ -567,19 +567,16 @@ public final class BluetoothDevice implements Parcelable {
 
      /**
       * No preferrence of physical transport for GATT connections to remote dual-mode devices
-      * @hide
       */
     public static final int TRANSPORT_AUTO = 0;
 
     /**
      * Prefer BR/EDR transport for GATT connections to remote dual-mode devices
-     * @hide
      */
     public static final int TRANSPORT_BREDR = 1;
 
     /**
      * Prefer LE transport for GATT connections to remote dual-mode devices
-     * @hide
      */
     public static final int TRANSPORT_LE = 2;
 
@@ -1564,7 +1561,6 @@ public final class BluetoothDevice implements Parcelable {
      *             {@link BluetoothDevice#TRANSPORT_AUTO} or
      *             {@link BluetoothDevice#TRANSPORT_BREDR} or {@link BluetoothDevice#TRANSPORT_LE}
      * @throws IllegalArgumentException if callback is null
-     * @hide
      */
     public BluetoothGatt connectGatt(Context context, boolean autoConnect,
                                      BluetoothGattCallback callback, int transport) {
