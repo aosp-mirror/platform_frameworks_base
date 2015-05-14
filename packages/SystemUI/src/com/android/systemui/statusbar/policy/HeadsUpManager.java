@@ -179,7 +179,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         if (alert) {
             HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(headsUp.key);
             headsUpEntry.updateEntry();
-            setEntryPinned(headsUpEntry, !mIsExpanded /* isPinned */);
+            setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUp));
         }
     }
 
@@ -190,11 +190,19 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         headsUpEntry.setEntry(entry);
         mHeadsUpEntries.put(entry.key, headsUpEntry);
         entry.row.setHeadsUp(true);
-        setEntryPinned(headsUpEntry, !mIsExpanded /* isPinned */);
+        setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(entry));
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, true);
         }
         entry.row.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+    }
+
+    private boolean shouldHeadsUpBecomePinned(NotificationData.Entry entry) {
+        return !mIsExpanded || hasFullScreenIntent(entry);
+    }
+
+    private boolean hasFullScreenIntent(NotificationData.Entry entry) {
+        return entry.notification.getNotification().fullScreenIntent != null;
     }
 
     private void setEntryPinned(HeadsUpEntry headsUpEntry, boolean isPinned) {
@@ -350,6 +358,10 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
+        if (mIsExpanded) {
+            // The touchable region is always the full area when expanded
+            return;
+        }
         if (mHasPinnedNotification) {
             int minX = Integer.MAX_VALUE;
             int maxX = 0;
@@ -445,7 +457,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
             if (isExpanded) {
-                unpinAll();
                 // make sure our state is sane
                 mWaitingOnCollapseWhenGoingAway = false;
                 mHeadsUpGoingAway = false;
@@ -542,16 +553,12 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             earliestRemovaltime = currentTime + mMinimumDisplayTime;
             postTime = Math.max(postTime, currentTime);
             removeAutoRemovalCallbacks();
-            if (canEntryDecay()) {
+            if (!hasFullScreenIntent(entry)) {
                 long finishTime = postTime + mHeadsUpNotificationDecay;
                 long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
                 mHandler.postDelayed(mRemoveHeadsUpRunnable, removeDelay);
             }
             updateSortOrder(HeadsUpEntry.this);
-        }
-
-        private boolean canEntryDecay() {
-            return entry.notification.getNotification().fullScreenIntent == null;
         }
 
         @Override

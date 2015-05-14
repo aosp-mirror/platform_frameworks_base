@@ -485,7 +485,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         int minStackHeight = getMinStackHeight();
         int stackHeight;
         float paddingOffset;
-        boolean trackingHeadsUp = mTrackingHeadsUp;
+        boolean trackingHeadsUp = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp();
         int normalUnfoldPositionStart = trackingHeadsUp ? mHeadsUpManager.getTopHeadsUpHeight()
                 : minStackHeight;
         if (newStackHeight - mTopPadding - mTopPaddingOverflow >= normalUnfoldPositionStart
@@ -608,7 +608,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean updateSwipeProgress(View animView, boolean dismissable, float swipeProgress) {
-        if (isPinnedHeadsUp(animView) && canChildBeDismissed(animView)) {
+        if (!mIsExpanded && isPinnedHeadsUp(animView) && canChildBeDismissed(animView)) {
             mScrimController.setTopHeadsUpDragAmount(animView,
                     Math.min(Math.abs(swipeProgress - 1.0f), 1.0f));
         }
@@ -618,7 +618,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onBeginDrag(View v) {
         setSwipingInProgress(true);
         mAmbientState.onBeginDrag(v);
-        if (mAnimationsEnabled && !isPinnedHeadsUp(v)) {
+        if (mAnimationsEnabled && (mIsExpanded || !isPinnedHeadsUp(v))) {
             mDragAnimPendingChildren.add(v);
             mNeedsAnimation = true;
         }
@@ -710,7 +710,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
-                    if (row.isHeadsUp() && row.isPinned()
+                    if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
                             && mHeadsUpManager.getTopEntry().entry.row != row) {
                         continue;
                     }
@@ -1871,17 +1871,18 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean isHeadsUp = eventPair.second;
             int type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_OTHER;
             boolean onBottom = false;
+            boolean pinnedAndClosed = row.isPinned() && !mIsExpanded;
             if (!mIsExpanded && !isHeadsUp) {
                 type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
-            } else if (mAddedHeadsUpChildren.contains(row) || (row.isPinned() && !mIsExpanded)) {
-                if (row.isPinned() || shouldHunAppearFromBottom(row)) {
+            } else if (isHeadsUp && (mAddedHeadsUpChildren.contains(row) || pinnedAndClosed)) {
+                if (pinnedAndClosed || shouldHunAppearFromBottom(row)) {
                     // Our custom add animation
                     type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;
                 } else {
                     // Normal add animation
                     type = AnimationEvent.ANIMATION_TYPE_ADD;
                 }
-                onBottom = !row.isPinned();
+                onBottom = !pinnedAndClosed;
             }
             AnimationEvent event = new AnimationEvent(row, type);
             event.headsUpFromBottom = onBottom;
