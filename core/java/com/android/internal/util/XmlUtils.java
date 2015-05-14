@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ProtocolException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -182,7 +183,7 @@ public class XmlUtils {
     public static final void writeMapXml(Map val, OutputStream out)
             throws XmlPullParserException, java.io.IOException {
         XmlSerializer serializer = new FastXmlSerializer();
-        serializer.setOutput(out, "utf-8");
+        serializer.setOutput(out, StandardCharsets.UTF_8.name());
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         writeMapXml(val, null, serializer);
@@ -205,7 +206,7 @@ public class XmlUtils {
     throws XmlPullParserException, java.io.IOException
     {
         XmlSerializer serializer = Xml.newSerializer();
-        serializer.setOutput(out, "utf-8");
+        serializer.setOutput(out, StandardCharsets.UTF_8.name());
         serializer.startDocument(null, true);
         serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
         writeListXml(val, null, serializer);
@@ -732,7 +733,7 @@ public class XmlUtils {
     throws XmlPullParserException, java.io.IOException
     {
         XmlPullParser   parser = Xml.newPullParser();
-        parser.setInput(in, null);
+        parser.setInput(in, StandardCharsets.UTF_8.name());
         return (HashMap<String, ?>) readValueXml(parser, new String[1]);
     }
 
@@ -753,7 +754,7 @@ public class XmlUtils {
     throws XmlPullParserException, java.io.IOException
     {
         XmlPullParser   parser = Xml.newPullParser();
-        parser.setInput(in, null);
+        parser.setInput(in, StandardCharsets.UTF_8.name());
         return (ArrayList)readValueXml(parser, new String[1]);
     }
     

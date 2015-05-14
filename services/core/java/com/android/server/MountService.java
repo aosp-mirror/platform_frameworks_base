@@ -1204,7 +1204,7 @@ class MountService extends IMountService.Stub
         try {
             fis = mSettingsFile.openRead();
             final XmlPullParser in = Xml.newPullParser();
-            in.setInput(fis, null);
+            in.setInput(fis, StandardCharsets.UTF_8.name());
 
             int type;
             while ((type = in.next()) != END_DOCUMENT) {
@@ -1244,7 +1244,7 @@ class MountService extends IMountService.Stub
             fos = mSettingsFile.startWrite();
 
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.startTag(null, TAG_VOLUMES);
             writeIntAttribute(out, ATTR_VERSION, VERSION_FIX_PRIMARY);

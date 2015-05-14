@@ -71,6 +71,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Keeps track of device idleness and drives low power mode based on that.
@@ -679,7 +680,7 @@ public class DeviceIdleController extends SystemService {
         }
         try {
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(stream, null);
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
             readConfigFileLocked(parser);
         } catch (XmlPullParserException e) {
         } finally {
@@ -756,7 +757,7 @@ public class DeviceIdleController extends SystemService {
         try {
             synchronized (this) {
                 XmlSerializer out = new FastXmlSerializer();
-                out.setOutput(memStream, "utf-8");
+                out.setOutput(memStream, StandardCharsets.UTF_8.name());
                 writeConfigFileLocked(out);
             }
         } catch (IOException e) {
