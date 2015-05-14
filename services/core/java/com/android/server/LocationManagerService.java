@@ -2352,22 +2352,16 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     // Mock Providers
 
-    private void checkMockPermissionsSafe() {
-        boolean allowMocks = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ALLOW_MOCK_LOCATION, 0) == 1;
-        if (!allowMocks) {
-            throw new SecurityException("Requires ACCESS_MOCK_LOCATION secure setting");
-        }
-
-        if (mContext.checkCallingPermission(ACCESS_MOCK_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires ACCESS_MOCK_LOCATION permission");
-        }
+    private boolean canCallerAccessMockLocation(String opPackageName) {
+        return mAppOps.noteOp(AppOpsManager.OP_MOCK_LOCATION, Binder.getCallingUid(),
+                opPackageName) == AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
-    public void addTestProvider(String name, ProviderProperties properties) {
-        checkMockPermissionsSafe();
+    public void addTestProvider(String name, ProviderProperties properties, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
 
         if (LocationManager.PASSIVE_PROVIDER.equals(name)) {
             throw new IllegalArgumentException("Cannot mock the passive location provider");
@@ -2402,15 +2396,18 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void removeTestProvider(String provider) {
-        checkMockPermissionsSafe();
+    public void removeTestProvider(String provider, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
 
             // These methods can't be called after removing the test provider, so first make sure
             // we don't leave anything dangling.
-            clearTestProviderEnabled(provider);
-            clearTestProviderLocation(provider);
-            clearTestProviderStatus(provider);
+            clearTestProviderEnabled(provider, opPackageName);
+            clearTestProviderLocation(provider, opPackageName);
+            clearTestProviderStatus(provider, opPackageName);
 
             MockProvider mockProvider = mMockProviders.remove(provider);
             if (mockProvider == null) {
@@ -2432,8 +2429,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void setTestProviderLocation(String provider, Location loc) {
-        checkMockPermissionsSafe();
+    public void setTestProviderLocation(String provider, Location loc, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2447,8 +2447,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void clearTestProviderLocation(String provider) {
-        checkMockPermissionsSafe();
+    public void clearTestProviderLocation(String provider, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2459,8 +2462,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void setTestProviderEnabled(String provider, boolean enabled) {
-        checkMockPermissionsSafe();
+    public void setTestProviderEnabled(String provider, boolean enabled, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2482,8 +2488,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void clearTestProviderEnabled(String provider) {
-        checkMockPermissionsSafe();
+    public void clearTestProviderEnabled(String provider, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2498,8 +2507,12 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
-        checkMockPermissionsSafe();
+    public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime,
+            String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2510,8 +2523,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void clearTestProviderStatus(String provider) {
-        checkMockPermissionsSafe();
+    public void clearTestProviderStatus(String provider, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {

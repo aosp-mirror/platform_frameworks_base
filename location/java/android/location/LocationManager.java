@@ -37,7 +37,6 @@ import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.Manifest.permission.ACCESS_MOCK_LOCATION;
 
 /**
  * This class provides access to the system location services.  These
@@ -1218,12 +1217,11 @@ public class LocationManager {
      *
      * @param name the provider name
      *
-     * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
-     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
-     * Settings.Secure.ALLOW_MOCK_LOCATION} system setting is not enabled
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
      * @throws IllegalArgumentException if a provider with the given name already exists
      */
-    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void addTestProvider(String name, boolean requiresNetwork, boolean requiresSatellite,
             boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
             boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
@@ -1235,7 +1233,7 @@ public class LocationManager {
         }
 
         try {
-            mService.addTestProvider(name, properties);
+            mService.addTestProvider(name, properties, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
         }
@@ -1246,15 +1244,14 @@ public class LocationManager {
      *
      * @param provider the provider name
      *
-     * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
-     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
-     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
      */
-    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void removeTestProvider(String provider) {
         try {
-            mService.removeTestProvider(provider);
+            mService.removeTestProvider(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
         }
@@ -1270,13 +1267,12 @@ public class LocationManager {
      * @param provider the provider name
      * @param loc the mock location
      *
-     * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
-     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
-     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
      * @throws IllegalArgumentException if the location is incomplete
      */
-    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void setTestProviderLocation(String provider, Location loc) {
         if (!loc.isComplete()) {
             IllegalArgumentException e = new IllegalArgumentException(
@@ -1292,7 +1288,7 @@ public class LocationManager {
         }
 
         try {
-            mService.setTestProviderLocation(provider, loc);
+            mService.setTestProviderLocation(provider, loc, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
         }
@@ -1303,15 +1299,14 @@ public class LocationManager {
      *
      * @param provider the provider name
      *
-     * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
-     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
-     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
      */
-    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void clearTestProviderLocation(String provider) {
         try {
-            mService.clearTestProviderLocation(provider);
+            mService.clearTestProviderLocation(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
         }
@@ -1324,15 +1319,14 @@ public class LocationManager {
      * @param provider the provider name
      * @param enabled the mock enabled value
      *
-     * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
-     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
-     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
      */
-    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void setTestProviderEnabled(String provider, boolean enabled) {
         try {
-            mService.setTestProviderEnabled(provider, enabled);
+            mService.setTestProviderEnabled(provider, enabled, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
         }
@@ -1343,15 +1337,14 @@ public class LocationManager {
      *
      * @param provider the provider name
      *
-     * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
-     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
-     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
      */
-    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void clearTestProviderEnabled(String provider) {
         try {
-            mService.clearTestProviderEnabled(provider);
+            mService.clearTestProviderEnabled(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
         }
@@ -1366,15 +1359,15 @@ public class LocationManager {
      * @param extras a Bundle containing mock extras
      * @param updateTime the mock update time
      *
-     * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
-     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
-     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
      */
-    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
         try {
-            mService.setTestProviderStatus(provider, status, extras, updateTime);
+            mService.setTestProviderStatus(provider, status, extras, updateTime,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
         }
@@ -1385,15 +1378,14 @@ public class LocationManager {
      *
      * @param provider the provider name
      *
-     * @throws SecurityException if the ACCESS_MOCK_LOCATION permission is not present
-     * or the {@link android.provider.Settings.Secure#ALLOW_MOCK_LOCATION
-     * Settings.Secure.ALLOW_MOCK_LOCATION}} system setting is not enabled
+     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
+     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
+     * allowed} for your app.
      * @throws IllegalArgumentException if no provider with the given name exists
      */
-    @RequiresPermission(value = ACCESS_MOCK_LOCATION, conditional = true)
     public void clearTestProviderStatus(String provider) {
         try {
-            mService.clearTestProviderStatus(provider);
+            mService.clearTestProviderStatus(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException", e);
         }

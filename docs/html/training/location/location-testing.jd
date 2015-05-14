@@ -79,7 +79,7 @@ trainingnavtop=true
 <h2 id="TurnOnMockMode">Turn On Mock Mode</h2>
 <p>
     To send mock locations to Location Services in mock mode, a test app must request the permission
-    {@link android.Manifest.permission#ACCESS_MOCK_LOCATION}. In addition, you must enable mock
+    android.Manifest.permission#ACCESS_MOCK_LOCATION. In addition, you must enable mock
     locations on the test device using the option <b>Enable mock locations</b>. To learn how to
     enable mock locations on the device, see
     <a href="{@docRoot}tools/device.html#setting-up">Setting up a Device for Development</a>.
