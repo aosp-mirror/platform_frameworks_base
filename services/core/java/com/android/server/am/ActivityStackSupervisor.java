@@ -117,6 +117,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -124,6 +125,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
+    private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
     private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -1183,7 +1185,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         final TaskRecord task = r.task;
         if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
-            setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "lockTaskLaunchMode attribute");
+            setLockTaskModeLocked(task, LOCK_TASK_MODE_LOCKED, "mLockTaskAuth==LAUNCHABLE");
         }
 
         final ActivityStack stack = task.stack;
@@ -3327,6 +3329,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    private String lockTaskModeToString() {
+        switch (mLockTaskModeState) {
+            case LOCK_TASK_MODE_LOCKED:
+                return "LOCKED";
+            case LOCK_TASK_MODE_PINNED:
+                return "PINNED";
+            case LOCK_TASK_MODE_NONE:
+                return "NONE";
+            default: return "unknown=" + mLockTaskModeState;
+        }
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mFocusedStack=" + mFocusedStack);
                 pw.print(" mLastFocusedStack="); pw.println(mLastFocusedStack);
@@ -3334,7 +3348,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
         pw.print(prefix); pw.println("mCurTaskId=" + mCurTaskId);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);
         pw.print(prefix); pw.println("mActivityContainers=" + mActivityContainers);
-        pw.print(prefix); pw.println("mLockTaskModeTasks" + mLockTaskModeTasks);
+        pw.print(prefix); pw.print("mLockTaskModeState=" + lockTaskModeToString());
+                final SparseArray<String[]> packages = mService.mLockTaskPackages;
+                if (packages.size() > 0) {
+                    pw.println(" mLockTaskPackages (userId:packages)=");
+                    for (int i = 0; i < packages.size(); ++i) {
+                        pw.print(prefix); pw.print(prefix); pw.print(packages.keyAt(i));
+                        pw.print(":"); pw.println(Arrays.toString(packages.valueAt(i)));
+                    }
+                }
+                pw.println(" mLockTaskModeTasks" + mLockTaskModeTasks);
     }
 
     ArrayList<ActivityRecord> getDumpActivitiesLocked(String name) {
@@ -3654,6 +3677,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void removeLockedTaskLocked(final TaskRecord task) {
         if (mLockTaskModeTasks.remove(task) && mLockTaskModeTasks.isEmpty()) {
             // Last one.
+            if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "removeLockedTask: task=" + task +
+                    " last task, reverting locktask mode. Callers=" + Debug.getCallers(3));
             final Message lockTaskMsg = Message.obtain();
             lockTaskMsg.arg1 = task.userId;
             lockTaskMsg.what = LOCK_TASK_END_MSG;
@@ -3679,20 +3704,26 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 removeLockedTaskLocked(lockedTask);
                 if (!mLockTaskModeTasks.isEmpty()) {
                     // There are locked tasks remaining, can only finish this task, not unlock it.
+                    if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK,
+                            "setLockTaskModeLocked: Tasks remaining, can't unlock");
                     lockedTask.performClearTaskLocked();
                     resumeTopActivitiesLocked();
                     return;
                 }
             }
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK,
+                    "setLockTaskModeLocked: No tasks to unlock. Callers=" + Debug.getCallers(4));
             return;
         }
 
         // Should have already been checked, but do it again.
         if (task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK,
+                    "setLockTaskModeLocked: Can't lock due to auth");
             return;
         }
         if (isLockTaskModeViolation(task)) {
-            Slog.e(TAG, "setLockTaskMode: Attempt to start an unauthorized lock task.");
+            Slog.e(TAG_LOCKTASK, "setLockTaskMode: Attempt to start an unauthorized lock task.");
             return;
         }
 
@@ -3706,6 +3737,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             mHandler.sendMessage(lockTaskMsg);
         }
         // Add it or move it to the top.
+        if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "setLockTaskModeLocked: Locking to " + task +
+                " Callers=" + Debug.getCallers(4));
         mLockTaskModeTasks.remove(task);
         mLockTaskModeTasks.add(task);
 
@@ -3758,6 +3791,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 final ActivityStack stack = stacks.get(stackNdx);
                 stack.onLockTaskPackagesUpdatedLocked();
             }
+        }
+        final ActivityRecord r = topRunningActivityLocked();
+        final TaskRecord task = r != null ? r.task : null;
+        if (mLockTaskModeTasks.isEmpty() && task != null
+                && task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE) {
+            // This task must have just been authorized.
+            setLockTaskModeLocked(task, ActivityManager.LOCK_TASK_MODE_LOCKED, "package updated");
         }
         if (didSomething) {
             resumeTopActivitiesLocked();
