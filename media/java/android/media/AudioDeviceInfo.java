@@ -122,8 +122,9 @@ public final class AudioDeviceInfo {
     /**
      * @return The human-readable name of the audio device.
      */
-    public CharSequence getName() {
-        return mPort.name();
+    public CharSequence getProductName() {
+        String portName = mPort.name();
+        return portName.length() != 0 ? portName : android.os.Build.MODEL;
     }
 
     /**
