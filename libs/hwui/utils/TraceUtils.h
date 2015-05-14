@@ -35,7 +35,7 @@ public:
     };
 
     static void atraceFormatBegin(const char* fmt, ...) {
-        if (CC_UNLIKELY(!ATRACE_ENABLED())) return;
+        if (CC_LIKELY(!ATRACE_ENABLED())) return;
 
         const int BUFFER_SIZE = 256;
         va_list ap;
