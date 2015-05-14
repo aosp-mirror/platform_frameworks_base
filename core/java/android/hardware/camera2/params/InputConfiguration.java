@@ -19,11 +19,11 @@ package android.hardware.camera2.params;
 import android.hardware.camera2.utils.HashCodeHelpers;
 
 /**
- * Immutable class to store an input configuration that is used to create a reprocessible capture
+ * Immutable class to store an input configuration that is used to create a reprocessable capture
  * session.
  *
- * @see CameraDevice#createReprocessibleCaptureSession
- * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+ * @see android.hardware.camera2.CameraDevice#createReprocessableCaptureSession
+ * @see android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
  */
 public final class InputConfiguration {
 
