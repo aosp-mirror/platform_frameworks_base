@@ -50,12 +50,11 @@ public class NetworkAgentInfo {
     public final NetworkMisc networkMisc;
     // Indicates if netd has been told to create this Network.  Once created the appropriate routing
     // rules are setup and routes are added so packets can begin flowing over the Network.
-    // NOTE: This is a sticky bit; once set it is never cleared.
+    // This is a sticky bit; once set it is never cleared.
     public boolean created;
     // Set to true if this Network successfully passed validation or if it did not satisfy the
     // default NetworkRequest in which case validation will not be attempted.
-    // NOTE: This is a sticky bit; once set it is never cleared even if future validation attempts
-    // fail.
+    // This is a sticky bit; once set it is never cleared even if future validation attempts fail.
     public boolean everValidated;
 
     // The result of the last validation attempt on this network (true if validated, false if not).
@@ -64,6 +63,10 @@ public class NetworkAgentInfo {
     // networks becoming unvalidated.
     // TODO: Fix the network scoring code, remove this, and rename everValidated to validated.
     public boolean lastValidated;
+
+    // Whether a captive portal was ever detected on this network.
+    // This is a sticky bit; once set it is never cleared.
+    public boolean captivePortalDetected;
 
     // This represents the last score received from the NetworkAgent.
     private int currentScore;
@@ -101,9 +104,6 @@ public class NetworkAgentInfo {
         currentScore = score;
         networkMonitor = new NetworkMonitor(context, handler, this, defaultRequest);
         networkMisc = misc;
-        created = false;
-        everValidated = false;
-        lastValidated = false;
     }
 
     public void addRequest(NetworkRequest networkRequest) {
@@ -166,6 +166,7 @@ public class NetworkAgentInfo {
                 "created{" + created + "}  " +
                 "explicitlySelected{" + networkMisc.explicitlySelected + "} " +
                 "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} " +
+                "captivePortalDetected{" + captivePortalDetected + "} " +
                 "}";
     }
 
