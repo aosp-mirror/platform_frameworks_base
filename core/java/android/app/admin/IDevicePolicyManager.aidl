@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.net.ProxyInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
@@ -131,7 +132,7 @@ interface IDevicePolicyManager {
     void enforceCanManageCaCerts(in ComponentName admin);
 
     boolean installKeyPair(in ComponentName who, in byte[] privKeyBuffer, in byte[] certBuffer, String alias);
-    void choosePrivateKeyAlias(int uid, in String host, int port, in String url, in String alias, IBinder aliasCallback);
+    void choosePrivateKeyAlias(int uid, in Uri uri, in String alias, IBinder aliasCallback);
 
     void setCertInstallerPackage(in ComponentName who, String installerPackage);
     String getCertInstallerPackage(in ComponentName who);

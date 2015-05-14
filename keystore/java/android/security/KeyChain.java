@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
@@ -119,19 +120,7 @@ public final class KeyChain {
      * Extra for use with {@link #ACTION_CHOOSER}
      * @hide Also used by KeyChainActivity implementation
      */
-    public static final String EXTRA_HOST = "host";
-
-    /**
-     * Extra for use with {@link #ACTION_CHOOSER}
-     * @hide Also used by KeyChainActivity implementation
-     */
-    public static final String EXTRA_PORT = "port";
-
-    /**
-     * Extra for use with {@link #ACTION_CHOOSER}
-     * @hide Also used by KeyChainActivity implementation
-     */
-    public static final String EXTRA_URL = "url";
+    public static final String EXTRA_URI = "uri";
 
     /**
      * Extra for use with {@link #ACTION_CHOOSER}
@@ -270,7 +259,13 @@ public final class KeyChain {
             @NonNull KeyChainAliasCallback response,
             @KeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
             @Nullable String host, int port, @Nullable String alias) {
-        choosePrivateKeyAlias(activity, response, keyTypes, issuers, host, port, null, alias);
+        Uri uri = null;
+        if (host != null) {
+            uri = new Uri.Builder()
+                    .authority(host + (port != -1 ? ":" + port : ""))
+                    .build();
+        }
+        choosePrivateKeyAlias(activity, response, keyTypes, issuers, uri, alias);
     }
 
     /**
@@ -303,11 +298,7 @@ public final class KeyChain {
      *     "EC" or "RSA", or a null array.
      * @param issuers The acceptable certificate issuers for the
      *     certificate matching the private key, or null.
-     * @param host The host name of the server requesting the
-     *     certificate, or null if unavailable.
-     * @param port The port number of the server requesting the
-     *     certificate, or -1 if unavailable.
-     * @param url The full url the server is requesting the certificate
+     * @param uri The full URI the server is requesting the certificate
      *     for, or null if unavailable.
      * @param alias The alias to preselect if available, or null if
      *     unavailable.
@@ -315,7 +306,7 @@ public final class KeyChain {
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
             @KeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
-            @Nullable String host, int port, @Nullable String url, @Nullable String alias) {
+            @Nullable Uri uri, @Nullable String alias) {
         /*
          * TODO currently keyTypes, issuers are unused. They are meant
          * to follow the semantics and purpose of X509KeyManager
@@ -341,9 +332,7 @@ public final class KeyChain {
         Intent intent = new Intent(ACTION_CHOOSER);
         intent.setPackage(KEYCHAIN_PACKAGE);
         intent.putExtra(EXTRA_RESPONSE, new AliasResponse(response));
-        intent.putExtra(EXTRA_HOST, host);
-        intent.putExtra(EXTRA_PORT, port);
-        intent.putExtra(EXTRA_URL, url);
+        intent.putExtra(EXTRA_URI, uri);
         intent.putExtra(EXTRA_ALIAS, alias);
         // the PendingIntent is used to get calling package name
         intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(), 0));
