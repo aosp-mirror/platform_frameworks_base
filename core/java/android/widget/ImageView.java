@@ -36,8 +36,10 @@ import android.graphics.RectF;
 import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -459,6 +461,21 @@ public class ImageView extends View {
             }
             invalidate();
         }
+    }
+
+    /**
+     * Sets the content of this ImageView to the specified Icon.
+     *
+     * <p class="note">Depending on the Icon type, this may do Bitmap reading and decoding
+     * on the UI thread, which can cause UI jank.  If that's a concern, consider using
+     * {@link Icon#loadDrawableAsync(Context, Handler, Icon.OnDrawableLoadedListener)}
+     * and then {@link #setImageDrawable(android.graphics.drawable.Drawable)} instead.</p>
+     *
+     * @param icon an Icon holding the desired image
+     */
+    @android.view.RemotableViewMethod
+    public void setImageIcon(Icon icon) {
+        setImageDrawable(icon.loadDrawable(mContext));
     }
 
     /**
