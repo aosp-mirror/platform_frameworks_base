@@ -21,7 +21,7 @@ import android.annotation.NonNull;
 /**
  * An immutable value type representing a statement, consisting of a source, target, and relation.
  * This reflects an assertion that the relation holds for the source, target pair. For example, if a
- * web site has the following in its associations.json file:
+ * web site has the following in its statements.json file:
  *
  * <pre>
  * {

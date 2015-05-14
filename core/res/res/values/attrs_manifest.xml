@@ -1105,7 +1105,7 @@
          intern filter data scheme is set to "http" or "https". When set to true, the intent filter
          will need to use its data tag for getting the URIs to verify with.
 
-         For each URI, an HTTPS network request will be done to <code>/.well-known/associations.json</code>
+         For each URI, an HTTPS network request will be done to <code>/.well-known/statements.json</code>
          host to verify that the web site is okay with the app intercepting the URI.
          -->
     <attr name="autoVerify" format="boolean" />
