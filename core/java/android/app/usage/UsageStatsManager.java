@@ -234,4 +234,15 @@ public final class UsageStatsManager {
         }
         return false;
     }
+
+    /**
+     * @hide
+     */
+    public void setAppInactive(String packageName, boolean inactive) {
+        try {
+            mService.setAppInactive(packageName, inactive, UserHandle.myUserId());
+        } catch (RemoteException e) {
+            // fall through
+        }
+    }
 }
