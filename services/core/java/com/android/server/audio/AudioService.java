@@ -564,8 +564,6 @@ public class AudioService extends IAudioService.Stub {
         return "card=" + card + ";device=" + device + ";";
     }
 
-    private final String DEVICE_NAME_A2DP = "a2dp-device";
-
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -4387,7 +4385,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     // must be called synchronized on mConnectedDevices
-    private void makeA2dpDeviceAvailable(String address) {
+    private void makeA2dpDeviceAvailable(String address, String name) {
         // enable A2DP before notifying A2DP connection to avoid unecessary processing in
         // audio policy manager
         VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
@@ -4395,12 +4393,12 @@ public class AudioService extends IAudioService.Stub {
                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, streamState, 0);
         setBluetoothA2dpOnInt(true);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_AVAILABLE, address, DEVICE_NAME_A2DP);
+                AudioSystem.DEVICE_STATE_AVAILABLE, address, name);
         // Reset A2DP suspend state each time a new sink is connected
         AudioSystem.setParameters("A2dpSuspended=false");
         mConnectedDevices.put(
                 makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address),
-                new DeviceListSpec(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, DEVICE_NAME_A2DP,
+                new DeviceListSpec(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, name,
                                    address));
     }
 
@@ -4414,7 +4412,7 @@ public class AudioService extends IAudioService.Stub {
             mAvrcpAbsVolSupported = false;
         }
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, DEVICE_NAME_A2DP);
+                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "");
         mConnectedDevices.remove(
                 makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         synchronized (mCurAudioRoutes) {
@@ -4444,17 +4442,17 @@ public class AudioService extends IAudioService.Stub {
     // must be called synchronized on mConnectedDevices
     private void makeA2dpSrcAvailable(String address) {
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_AVAILABLE, address, DEVICE_NAME_A2DP);
+                AudioSystem.DEVICE_STATE_AVAILABLE, address, "");
         mConnectedDevices.put(
                 makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address),
-                new DeviceListSpec(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, DEVICE_NAME_A2DP,
+                new DeviceListSpec(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, "",
                                    address));
     }
 
     // must be called synchronized on mConnectedDevices
     private void makeA2dpSrcUnavailable(String address) {
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, DEVICE_NAME_A2DP);
+                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, "");
         mConnectedDevices.remove(
                 makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address));
     }
@@ -4520,7 +4518,7 @@ public class AudioService extends IAudioService.Stub {
                         makeA2dpDeviceUnavailableNow(mDockAddress);
                     }
                 }
-                makeA2dpDeviceAvailable(address);
+                makeA2dpDeviceAvailable(address, btDevice.getName());
                 synchronized (mCurAudioRoutes) {
                     String name = btDevice.getAliasName();
                     if (!TextUtils.equals(mCurAudioRoutes.bluetoothName, name)) {
@@ -4871,7 +4869,7 @@ public class AudioService extends IAudioService.Stub {
                 if (btDevice == null) {
                     return;
                 }
-
+ 
                 address = btDevice.getAddress();
                 BluetoothClass btClass = btDevice.getBluetoothClass();
                 if (btClass != null) {
@@ -4891,9 +4889,11 @@ public class AudioService extends IAudioService.Stub {
                 }
 
                 boolean connected = (state == BluetoothProfile.STATE_CONNECTED);
+
+                String btDeviceName =  btDevice.getName();
                 boolean success =
-                    handleDeviceConnection(connected, outDevice, address, "Bluetooth Headset") &&
-                    handleDeviceConnection(connected, inDevice, address, "Bluetooth Headset");
+                    handleDeviceConnection(connected, outDevice, address, btDeviceName) &&
+                    handleDeviceConnection(connected, inDevice, address, btDeviceName);
                 if (success) {
                     synchronized (mScoClients) {
                         if (connected) {
