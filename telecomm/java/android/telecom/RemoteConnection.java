@@ -220,7 +220,7 @@ public final class RemoteConnection {
 
             public void onCameraCapabilitiesChanged(
                     VideoProvider videoProvider,
-                    CameraCapabilities cameraCapabilities) {}
+                    VideoProfile.CameraCapabilities cameraCapabilities) {}
 
             public void onVideoQualityChanged(VideoProvider videoProvider, int videoQuality) {}
         }
@@ -267,7 +267,8 @@ public final class RemoteConnection {
             }
 
             @Override
-            public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
+            public void changeCameraCapabilities(
+                    VideoProfile.CameraCapabilities cameraCapabilities) {
                 for (Listener l : mListeners) {
                     l.onCameraCapabilitiesChanged(VideoProvider.this, cameraCapabilities);
                 }
