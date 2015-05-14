@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.security.KeyChain;
 
@@ -249,13 +250,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final String EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID = "android.app.extra.CHOOSE_PRIVATE_KEY_SENDER_UID";
 
     /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_HOST = "android.app.extra.CHOOSE_PRIVATE_KEY_HOST";
-
-    /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_PORT = "android.app.extra.CHOOSE_PRIVATE_KEY_PORT";
-
-    /** @hide */
-    public static final String EXTRA_CHOOSE_PRIVATE_KEY_URL = "android.app.extra.CHOOSE_PRIVATE_KEY_URL";
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_URI = "android.app.extra.CHOOSE_PRIVATE_KEY_URI";
 
     /** @hide */
     public static final String EXTRA_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.extra.CHOOSE_PRIVATE_KEY_ALIAS";
@@ -487,15 +482,13 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      * @param uid The uid asking for the private key and certificate pair.
-     * @param host The authentication host, may be null.
-     * @param port The authentication port, or -1.
-     * @param url The URL to authenticate, may be null.
+     * @param uri The URI to authenticate, may be null.
      * @param alias The alias preselected by the client, or null.
      * @return The private key alias to return and grant access to.
      * @see KeyChain#choosePrivateKeyAlias
      */
-    public String onChoosePrivateKeyAlias(Context context, Intent intent, int uid, String host,
-            int port, String url, String alias) {
+    public String onChoosePrivateKeyAlias(Context context, Intent intent, int uid, Uri uri,
+            String alias) {
         return null;
     }
 
@@ -546,12 +539,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onProfileProvisioningComplete(context, intent);
         } else if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {
             int uid = intent.getIntExtra(EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, -1);
-            String host = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_HOST);
-            int port = intent.getIntExtra(EXTRA_CHOOSE_PRIVATE_KEY_PORT, -1);
-            String url = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_URL);
+            Uri uri = intent.getParcelableExtra(EXTRA_CHOOSE_PRIVATE_KEY_URI);
             String alias = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_ALIAS);
-            String chosenAlias = onChoosePrivateKeyAlias(context, intent, uid, host, port, url,
-                    alias);
+            String chosenAlias = onChoosePrivateKeyAlias(context, intent, uid, uri, alias);
             setResultData(chosenAlias);
         } else if (ACTION_LOCK_TASK_ENTERING.equals(action)) {
             String pkg = intent.getStringExtra(EXTRA_LOCK_TASK_PACKAGE);
