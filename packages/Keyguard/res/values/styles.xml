@@ -41,7 +41,7 @@
     </style>
     <style name="widget_big_thin">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
-        <item name="android:fontFamily">sans-serif-thin</item>
+        <item name="android:fontFamily">sans-serif-light</item>
     </style>
 
     <style name="BouncerSecurityContainer">

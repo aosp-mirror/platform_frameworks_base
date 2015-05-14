@@ -30,6 +30,8 @@
         android:layout_height="wrap_content"
         android:textColor="@color/clock_white"
         style="@style/widget_label"
+        android:textAllCaps="true"
+        android:letterSpacing="0.15"
         android:gravity="center"
         />
     <TextView android:id="@+id/alarm_status"
@@ -38,6 +40,8 @@
         android:drawablePadding="6dp"
         android:drawableStart="@drawable/ic_access_alarms_big"
         android:textColor="@color/clock_gray"
+        android:letterSpacing="0.15"
+        android:textAllCaps="true"
         style="@style/widget_label"
         android:layout_marginStart="6dp"
         android:gravity="center"
