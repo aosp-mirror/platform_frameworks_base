@@ -4369,6 +4369,17 @@
             <!-- Line breaking stratgegy balances line lengths. -->
             <enum name="balanced" value="2" />
         </attr>
+        <!-- Frequency of automatic hyphenation. -->
+        <attr name="hyphenationFrequency">
+            <!-- No hyphenation. -->
+            <enum name="none" value="0" />
+            <!-- Less frequent hyphenation, useful for informal use cases, such
+            as chat messages. -->
+            <enum name="normal" value="1" />
+            <!-- Standard amount of hyphenation, useful for running text and for
+            screens with limited space for text. -->
+            <enum name="full" value="2" />
+        </attr>
         <!-- Array of indents, one dimension value per line, left side. -->
         <attr name="leftIndents" format="reference" />
         <!-- Array of indents, one dimension value per line, right side. -->
