@@ -616,6 +616,9 @@ public abstract class PanelView extends FrameLayout {
             boolean expandBecauseOfFalsing) {
         cancelPeek();
         float target = expand ? getMaxPanelHeight() : 0.0f;
+        if (!expand) {
+            mClosing = true;
+        }
         flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
 
