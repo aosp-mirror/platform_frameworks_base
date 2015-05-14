@@ -88,24 +88,33 @@ class KeyguardMessageArea extends TextView {
             }
         }
 
+        @Override
         public void setMessage(CharSequence msg, boolean important) {
             if (!TextUtils.isEmpty(msg) && important) {
                 mMessageArea.mMessage = msg;
                 mMessageArea.securityMessageChanged();
+            } else {
+                mMessageArea.clearMessage();
             }
         }
 
+        @Override
         public void setMessage(int resId, boolean important) {
             if (resId != 0 && important) {
                 mMessageArea.mMessage = mMessageArea.getContext().getResources().getText(resId);
                 mMessageArea.securityMessageChanged();
+            } else {
+                mMessageArea.clearMessage();
             }
         }
 
+        @Override
         public void setMessage(int resId, boolean important, Object... formatArgs) {
             if (resId != 0 && important) {
                 mMessageArea.mMessage = mMessageArea.getContext().getString(resId, formatArgs);
                 mMessageArea.securityMessageChanged();
+            } else {
+                mMessageArea.clearMessage();
             }
         }
 
@@ -174,6 +183,11 @@ class KeyguardMessageArea extends TextView {
         mHandler.removeCallbacksAndMessages(ANNOUNCE_TOKEN);
         mHandler.postAtTime(new AnnounceRunnable(this, getText()), ANNOUNCE_TOKEN,
                 (SystemClock.uptimeMillis() + ANNOUNCEMENT_DELAY));
+    }
+
+    public void clearMessage() {
+        mHandler.removeCallbacks(mClearMessageRunnable);
+        mHandler.post(mClearMessageRunnable);
     }
 
     /**
