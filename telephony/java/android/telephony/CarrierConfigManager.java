@@ -18,6 +18,8 @@ package android.telephony;
 
 import com.android.internal.telephony.ICarrierConfigLoader;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.PersistableBundle;
@@ -279,6 +281,7 @@ public class CarrierConfigManager {
      * @return A {@link PersistableBundle} containing the config for the given subId, or default
      *         values for an invalid subId.
      */
+    @Nullable
     public PersistableBundle getConfigForSubId(int subId) {
         try {
             return getICarrierConfigLoader().getConfigForSubId(subId);
@@ -297,6 +300,7 @@ public class CarrierConfigManager {
      *
      * @see #getConfigForSubId
      */
+    @Nullable
     public PersistableBundle getConfig() {
         return getConfigForSubId(SubscriptionManager.getDefaultSubId());
     }
@@ -348,6 +352,7 @@ public class CarrierConfigManager {
      *
      * @hide
      */
+    @NonNull
     @SystemApi
     public static PersistableBundle getDefaultConfig() {
         return new PersistableBundle(sDefaults);
