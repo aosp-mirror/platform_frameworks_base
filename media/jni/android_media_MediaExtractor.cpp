@@ -715,6 +715,11 @@ static void android_media_MediaExtractor_setDataSourceCallback(
     status_t err = extractor->setDataSource(bridge);
 
     if (err != OK) {
+        // Clear bridge so that JMediaDataSource::close() is called _before_
+        // we throw the IOException.
+        // Otherwise close() gets called when we go out of scope, it calls
+        // Java with a pending exception and crashes the process.
+        bridge.clear();
         jniThrowException(
                 env,
                 "java/io/IOException",
