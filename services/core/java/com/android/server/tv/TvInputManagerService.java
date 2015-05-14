@@ -39,6 +39,7 @@ import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.media.tv.DvbDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
@@ -64,6 +65,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -80,22 +82,33 @@ import com.android.server.SystemService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.IllegalArgumentException;
+import java.lang.Integer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** This class provides a system service that manages television inputs. */
 public final class TvInputManagerService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputManagerService";
+
+    // Pattern for selecting the DVB frontend devices from the list of files in the /dev directory.
+    private static final Pattern sFrontEndDevicePattern =
+            Pattern.compile("^dvb([0-9]+)\\.frontend([0-9]+)$");
 
     private final Context mContext;
     private final TvInputHardwareManager mTvInputHardwareManager;
@@ -1501,6 +1514,74 @@ public final class TvInputManagerService extends SystemService {
             try {
                 mTvInputHardwareManager.releaseHardware(
                         deviceId, hardware, callingUid, resolvedUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public List<DvbDeviceInfo> getDvbDeviceList() throws RemoteException {
+            if (mContext.checkCallingPermission(android.Manifest.permission.DVB_DEVICE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires DVB_DEVICE permission");
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                ArrayList<DvbDeviceInfo> deviceInfos = new ArrayList<>();
+                File devDirectory = new File("/dev");
+                for (String fileName : devDirectory.list()) {
+                    Matcher matcher = sFrontEndDevicePattern.matcher(fileName);
+                    if (matcher.find()) {
+                        int adapterId = Integer.parseInt(matcher.group(1));
+                        int deviceId = Integer.parseInt(matcher.group(2));
+                        deviceInfos.add(new DvbDeviceInfo(adapterId, deviceId));
+                    }
+                }
+                return Collections.unmodifiableList(deviceInfos);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public ParcelFileDescriptor openDvbDevice(DvbDeviceInfo info, int device)
+                throws RemoteException {
+            if (mContext.checkCallingPermission(android.Manifest.permission.DVB_DEVICE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires DVB_DEVICE permission");
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                String deviceFileName;
+                switch (device) {
+                    case TvInputManager.DVB_DEVICE_DEMUX:
+                        deviceFileName = String.format("/dev/dvb%d.demux%d", info.getAdapterId(),
+                                info.getDeviceId());
+                        break;
+                    case TvInputManager.DVB_DEVICE_DVR:
+                        deviceFileName = String.format("/dev/dvb%d.dvr%d", info.getAdapterId(),
+                                info.getDeviceId());
+                        break;
+                    case TvInputManager.DVB_DEVICE_FRONTEND:
+                        deviceFileName = String.format("/dev/dvb%d.frontend%d", info.getAdapterId(),
+                                info.getDeviceId());
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid DVB device: " + device);
+                }
+                try {
+                    // The DVB frontend device only needs to be opened in read/write mode, which
+                    // allows performing tuning operations. The DVB demux and DVR device are enough
+                    // to be opened in read only mode.
+                    return ParcelFileDescriptor.open(new File(deviceFileName),
+                            TvInputManager.DVB_DEVICE_FRONTEND == device
+                                    ? ParcelFileDescriptor.MODE_READ_WRITE
+                                    : ParcelFileDescriptor.MODE_READ_ONLY);
+                } catch (FileNotFoundException e) {
+                    return null;
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
