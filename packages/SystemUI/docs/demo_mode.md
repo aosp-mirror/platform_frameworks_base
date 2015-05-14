@@ -38,6 +38,8 @@ Command              | Subcommand                 | Argument       | Description
                      |                            | ```datatype``` | Values: ```1x```, ```3g```, ```4g```, ```e```, ```g```, ```h```, ```lte```, ```roam```, any other value to hide
                      |                            | ```level```    | Sets mobile signal strength level (null or 0-4)
                      | ```carriernetworkchange``` |                | Sets mobile signal icon to carrier network change UX when disconnected (```show``` to show icon, any other value to hide)
+                     | ```sims```                 |                | Sets the number of sims (1-8)
+                     | ```nosim```                |                | ```show``` to show icon, any other value to hide
 ```bars```           |                            |                | Control the visual style of the bars (opaque, translucent, etc)
                      | ```mode```                 |                | Sets the bars visual style (opaque, translucent, semi-transparent)
 ```status```         |                            |                | Control the system status icons
