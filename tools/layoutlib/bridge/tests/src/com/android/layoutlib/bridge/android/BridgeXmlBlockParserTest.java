@@ -16,14 +16,35 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.annotations.NonNull;
+import com.android.ide.common.rendering.api.ActionBarCallback;
+import com.android.ide.common.rendering.api.AdapterBinding;
+import com.android.ide.common.rendering.api.ILayoutPullParser;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
+import com.android.ide.common.rendering.api.ResourceReference;
+import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.impl.ParserFactory;
+import com.android.resources.ResourceType;
+import com.android.util.Pair;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.kxml2.io.KXmlParser;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class BridgeXmlBlockParserTest extends TestCase {
+public class BridgeXmlBlockParserTest {
+
+    @BeforeClass
+    public void setUp() {
+        ParserFactory.setLayoutlibCallback(new LayoutlibTestCallback());
+    }
+
+    @Test
     public void testXmlBlockParser() throws Exception {
 
         XmlPullParser parser = ParserFactory.create(
@@ -65,7 +86,7 @@ public class BridgeXmlBlockParserTest extends TestCase {
     //------------
 
     /**
-     * Quick'n'dirty debug helper that dumps an XML structure to stdout.
+     * Quick 'n' dirty debug helper that dumps an XML structure to stdout.
      */
     @SuppressWarnings("unused")
     private void dump(Node node, String prefix) {
@@ -104,7 +125,82 @@ public class BridgeXmlBlockParserTest extends TestCase {
         if (n != null) {
             dump(n, prefix);
         }
-
     }
 
+    @AfterClass
+    public void tearDown() {
+        ParserFactory.setLayoutlibCallback(null);
+    }
+
+    private static class LayoutlibTestCallback extends LayoutlibCallback {
+
+        @NonNull
+        @Override
+        public XmlPullParser createParser(String displayName) throws XmlPullParserException {
+            return new KXmlParser();
+        }
+
+        @Override
+        public boolean supports(int ideFeature) {
+            throw new AssertionError();
+        }
+
+        @Override
+        public Object loadView(String name, Class[] constructorSignature, Object[] constructorArgs)
+                throws Exception {
+            throw new AssertionError();
+        }
+
+        @Override
+        public String getNamespace() {
+            throw new AssertionError();
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public Pair<ResourceType, String> resolveResourceId(int id) {
+            throw new AssertionError();
+        }
+
+        @Override
+        public String resolveResourceId(int[] id) {
+            throw new AssertionError();
+        }
+
+        @Override
+        public Integer getResourceId(ResourceType type, String name) {
+            throw new AssertionError();
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public ILayoutPullParser getParser(String layoutName) {
+            throw new AssertionError();
+        }
+
+        @Override
+        public ILayoutPullParser getParser(ResourceValue layoutResource) {
+            throw new AssertionError();
+        }
+
+        @Override
+        public Object getAdapterItemValue(ResourceReference adapterView, Object adapterCookie,
+                ResourceReference itemRef, int fullPosition, int positionPerType,
+                int fullParentPosition, int parentPositionPerType, ResourceReference viewRef,
+                ViewAttribute viewAttribute, Object defaultValue) {
+            throw new AssertionError();
+        }
+
+        @Override
+        public AdapterBinding getAdapterBinding(ResourceReference adapterViewRef,
+                Object adapterCookie,
+                Object viewObject) {
+            throw new AssertionError();
+        }
+
+        @Override
+        public ActionBarCallback getActionBarCallback() {
+            throw new AssertionError();
+        }
+    }
 }
