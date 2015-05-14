@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import java.security.Provider;
 
@@ -40,9 +40,9 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
     // classes when this provider is instantiated and installed early on during each app's
     // initialization process.
 
-    private static final String PACKAGE_NAME = "android.security";
+    private static final String PACKAGE_NAME = "android.security.keystore";
     private static final String KEYSTORE_SECRET_KEY_CLASS_NAME =
-            PACKAGE_NAME + ".KeyStoreSecretKey";
+            PACKAGE_NAME + ".AndroidKeyStoreSecretKey";
 
     AndroidKeyStoreBCWorkaroundProvider() {
         super("AndroidKeyStoreBCWorkaround",
@@ -50,25 +50,25 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
                 "Android KeyStore security provider to work around Bouncy Castle");
 
         // javax.crypto.Mac
-        putMacImpl("HmacSHA1", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA1");
-        putMacImpl("HmacSHA224", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA224");
-        putMacImpl("HmacSHA256", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA256");
-        putMacImpl("HmacSHA384", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA384");
-        putMacImpl("HmacSHA512", PACKAGE_NAME + ".KeyStoreHmacSpi$HmacSHA512");
+        putMacImpl("HmacSHA1", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA1");
+        putMacImpl("HmacSHA224", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA224");
+        putMacImpl("HmacSHA256", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA256");
+        putMacImpl("HmacSHA384", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA384");
+        putMacImpl("HmacSHA512", PACKAGE_NAME + ".AndroidKeyStoreHmacSpi$HmacSHA512");
 
         // javax.crypto.Cipher
         putSymmetricCipherImpl("AES/ECB/NoPadding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$ECB$NoPadding");
+                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$ECB$NoPadding");
         putSymmetricCipherImpl("AES/ECB/PKCS7Padding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$ECB$PKCS7Padding");
+                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$ECB$PKCS7Padding");
 
         putSymmetricCipherImpl("AES/CBC/NoPadding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CBC$NoPadding");
+                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$CBC$NoPadding");
         putSymmetricCipherImpl("AES/CBC/PKCS7Padding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CBC$PKCS7Padding");
+                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$CBC$PKCS7Padding");
 
         putSymmetricCipherImpl("AES/CTR/NoPadding",
-                PACKAGE_NAME + ".KeyStoreCipherSpi$AES$CTR$NoPadding");
+                PACKAGE_NAME + ".AndroidKeyStoreCipherSpi$AES$CTR$NoPadding");
     }
 
     private void putMacImpl(String algorithm, String implClass) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
 
 import javax.crypto.SecretKey;
 
@@ -23,9 +23,9 @@ import javax.crypto.SecretKey;
  *
  * @hide
  */
-public class KeyStoreSecretKey extends KeyStoreKey implements SecretKey {
+public class AndroidKeyStoreSecretKey extends AndroidKeyStoreKey implements SecretKey {
 
-    public KeyStoreSecretKey(String alias, String algorithm) {
+    public AndroidKeyStoreSecretKey(String alias, String algorithm) {
         super(alias, algorithm);
     }
 }

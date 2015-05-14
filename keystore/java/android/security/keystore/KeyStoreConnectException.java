@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package android.security;
+package android.security.keystore;
+
+import java.security.ProviderException;
 
 /**
- * Cryptographic operation backed by {@link KeyStore}.
+ * Indicates a communications error with keystore service.
  *
  * @hide
  */
-public interface KeyStoreCryptoOperation {
-    /**
-     * Gets the KeyStore operation handle of this crypto operation.
-     *
-     * @return handle or {@code 0} if the KeyStore operation is not in progress.
-     */
-    long getOperationHandle();
+public class KeyStoreConnectException extends ProviderException {
+    public KeyStoreConnectException() {
+        super("Failed to communicate with keystore service");
+    }
 }
