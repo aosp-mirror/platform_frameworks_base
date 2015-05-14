@@ -100,7 +100,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_SIM_STATE_CHANGE = 304;
     private static final int MSG_RINGER_MODE_CHANGED = 305;
     private static final int MSG_PHONE_STATE_CHANGED = 306;
-    private static final int MSG_CLOCK_VISIBILITY_CHANGED = 307;
     private static final int MSG_DEVICE_PROVISIONED = 308;
     private static final int MSG_DPM_STATE_CHANGED = 309;
     private static final int MSG_USER_SWITCHING = 310;
@@ -171,9 +170,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_PHONE_STATE_CHANGED:
                     handlePhoneStateChanged((String) msg.obj);
-                    break;
-                case MSG_CLOCK_VISIBILITY_CHANGED:
-                    handleClockVisibilityChanged();
                     break;
                 case MSG_DEVICE_PROVISIONED:
                     handleDeviceProvisioned();
@@ -756,15 +752,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHING,
                                     newUserId, 0, reply));
-                            mSwitchingUser = true;
-                            updateFingerprintListeningState();
                         }
                         @Override
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
                                     newUserId, 0));
-                            mSwitchingUser = false;
-                            updateFingerprintListeningState();
                         }
                         @Override
                         public void onForegroundProfileSwitch(int newProfileId) {
@@ -869,6 +861,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_USER_SWITCHING}
      */
     protected void handleUserSwitching(int userId, IRemoteCallback reply) {
+        mSwitchingUser = true;
+        updateFingerprintListeningState();
+
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -885,6 +880,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Handle {@link #MSG_USER_SWITCH_COMPLETE}
      */
     protected void handleUserSwitchComplete(int userId) {
+        mSwitchingUser = false;
+        updateFingerprintListeningState();
+
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1044,19 +1042,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
-     * Handle {@link #MSG_CLOCK_VISIBILITY_CHANGED}
-     */
-    private void handleClockVisibilityChanged() {
-        if (DEBUG) Log.d(TAG, "handleClockVisibilityChanged()");
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onClockVisibilityChanged();
-            }
-        }
-    }
-
-    /**
      * Handle {@link #MSG_KEYGUARD_VISIBILITY_CHANGED}
      */
     private void handleKeyguardVisibilityChanged(int showing) {
@@ -1100,21 +1085,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    public boolean isKeyguardVisible() {
-        return mKeyguardIsVisible;
-    }
-
-    /**
-     * @return if the keyguard is currently in bouncer mode.
-     */
-    public boolean isKeyguardBouncer() {
-        return mBouncer;
-    }
-
-    public boolean isSwitchingUser() {
-        return mSwitchingUser;
-    }
-
     private static boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {
         final boolean nowPluggedIn = current.isPluggedIn();
         final boolean wasPluggedIn = old.isPluggedIn();
@@ -1137,13 +1107,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             return true;
         }
         return false;
-    }
-
-    /**
-     * @return The default plmn (no service)
-     */
-    private CharSequence getDefaultPlmn() {
-        return mContext.getResources().getText(R.string.keyguard_carrier_default);
     }
 
     /**
@@ -1209,11 +1172,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         Message message = mHandler.obtainMessage(MSG_KEYGUARD_BOUNCER_CHANGED);
         message.arg1 = showingBouncer ? 1 : 0;
         message.sendToTarget();
-    }
-
-    public void reportClockVisible(boolean visible) {
-        mClockVisible = visible;
-        mHandler.obtainMessage(MSG_CLOCK_VISIBILITY_CHANGED).sendToTarget();
     }
 
     /**
