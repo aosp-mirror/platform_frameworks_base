@@ -1117,6 +1117,8 @@
         </activity>
         <activity android:name="android.app.activity.LaunchpadTabActivity" android:multiprocess="true">
         </activity>
+        <activity android:name="com.android.internal.app.WindowDecorActionBarTestActivity">
+        </activity>
 
         <receiver android:name="android.app.activity.AbortReceiver">
             <intent-filter android:priority="1">
