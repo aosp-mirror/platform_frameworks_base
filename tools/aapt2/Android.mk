@@ -30,6 +30,7 @@ sources := \
 	BinaryXmlPullParser.cpp \
 	BindingXmlPullParser.cpp \
 	ConfigDescription.cpp \
+	Debug.cpp \
 	Files.cpp \
 	Flag.cpp \
 	JavaClassGenerator.cpp \
