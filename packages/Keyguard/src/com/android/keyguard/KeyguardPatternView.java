@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -32,6 +33,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
+import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 
@@ -59,6 +61,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     private CountDownTimer mCountdownTimer = null;
     private LockPatternUtils mLockPatternUtils;
+    private AsyncTask<?, ?, ?> mPendingLockCheck;
     private LockPatternView mLockPatternView;
     private KeyguardSecurityCallback mCallback;
 
@@ -214,8 +217,28 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             mCallback.userActivity();
         }
 
-        public void onPatternDetected(List<LockPatternView.Cell> pattern) {
-            if (mLockPatternUtils.checkPattern(pattern, KeyguardUpdateMonitor.getCurrentUser())) {
+        public void onPatternDetected(final List<LockPatternView.Cell> pattern) {
+            mLockPatternView.disableInput();
+            if (mPendingLockCheck != null) {
+                mPendingLockCheck.cancel(false);
+            }
+
+            mPendingLockCheck = LockPatternChecker.checkPattern(
+                    mLockPatternUtils,
+                    pattern,
+                    KeyguardUpdateMonitor.getCurrentUser(),
+                    new LockPatternChecker.OnCheckCallback() {
+                        @Override
+                        public void onChecked(boolean matched) {
+                            mLockPatternView.enableInput();
+                            mPendingLockCheck = null;
+                            onPatternChecked(pattern, matched);
+                        }
+                    });
+        }
+
+        private void onPatternChecked(List<LockPatternView.Cell> pattern, boolean matched) {
+            if (matched) {
                 mCallback.reportUnlockAttempt(true);
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Correct);
                 mCallback.dismiss(true);
@@ -276,6 +299,10 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         if (mCountdownTimer != null) {
             mCountdownTimer.cancel();
             mCountdownTimer = null;
+        }
+        if (mPendingLockCheck != null) {
+            mPendingLockCheck.cancel(false);
+            mPendingLockCheck = null;
         }
     }
 
