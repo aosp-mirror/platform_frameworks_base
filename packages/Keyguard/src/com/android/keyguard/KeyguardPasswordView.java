@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
@@ -137,20 +138,6 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
-
-        mPasswordEntry.addTextChangedListener(new TextWatcher() {
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void afterTextChanged(Editable s) {
-                if (mCallback != null) {
-                    mCallback.userActivity();
-                }
-            }
-        });
 
         mPasswordEntry.requestFocus();
 
@@ -293,6 +280,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     @Override
     public void afterTextChanged(Editable s) {
+        // Poor man's user edit detection, assuming empty text is programmatic and everything else
+        // is from the user.
+        if (!TextUtils.isEmpty(s)) {
+            onUserInput();
+        }
     }
 
     @Override
