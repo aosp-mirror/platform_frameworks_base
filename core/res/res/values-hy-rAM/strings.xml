@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Թույլ է տալիս հավելվածին ավելացնել, հեռացնել, փոխել իրադարձություններ, որոնք դուք կարող եք փոփոխել ձեր գրասալիկում, այդ թվում ընկերների կամ աշխատակիցների իրադարձությունները: Սա կարող է թույլ տալ հավելվածին ուղարկել հաղորդագրություններ, որոնք երևում են որպես օրացույցի սեփականատերերից ուղարկված, կամ փոփոխել իրադարձություններն առանց սեփականատերերի իմացության:"</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Թույլ է տալիս հավելվածին ավելացնել, հեռացնել, փոփոխել իրադարձությունները, որոնք կարող եք փոփոխել ձեր հեռուստացույցի մեջ, այդ թվում` ընկերների կամ աշխատակիցների հետ կապված իրադարձությունները: Սա կարող է թույլատրել հավելվածին ուղարկել հաղորդագրություններ, որոնք հայտնվում են օրացույցի սեփականատերերից կամ փոփոխել իրադարձություններն` առանց սեփականատերերի իմացության:"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Թույլ է տալիս հավելվածին ավելացնել, հեռացնել, փոխել այն իրադարձությունները, որոնք կարող եք փոփոխել ձեր հեռախոսից, այդ թվում` ընկերների կամ գործընկերների: Սա կարող է թույլ տալ հավելվածին ուղարկել հաղորդագրություններ, որոնք իբրև գալիս են օրացույցի սեփականատիրոջից, կամ փոփոխել իրադարձությունները` առանց սեփականատիրոջ իմացության:"</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"կեղծ տեղանքի աղբյուրներ փորձարկման համար"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Ստեղծել կեղծ տեղանքի աղբյուրներ` փորձարկման կամ տեղադրության նոր ծառայություն մատուցողի տեղադրման համար: Սա հնարավորություն է տալիս, որ ծրագիրը անտեսի տեղադրությունը և/կամ կարգավիճակը` տրամադրված տեղանքի այլ աղբյուրների կողմից, ինչպիսիք են GPS-ը կամ տեղադրության ծառայություն մատուցողները:"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"օգտագործել տեղադրություն տրամադրող հավելվյալ հրամաններ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ծրագրին թույլ է տալիս օգտագործել տեղադրության մասին տվյալների աղբյուրների կառավարման լրացուցիչ հրահանգներ: Սա կարող է ծրագրին թույլ տալ միջամտել GPS-ի կամ տեղադրության մասին տվյալների այլ աղբյուրների գործառույթներին:"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ճշգրիտ վայրը (ըստ GPS-ի և ցանցի)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Իսկորոշումը մատնահետքի միջոցով չեղարկվեց:"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Չափից շատ փորձ եք կատարել: Փորձեք նորից քիչ հետո:"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Փորձեք նորից:"</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"կարդալ համաժամեցման կարգավորումները"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Եթե ​​դուք միացնեք USB կրիչը, որոշ ծրագրեր,որոնցից օգտվում եք, կդադարեն աշխատել և կարող են անհասանելի լինել, քանի դեռ չեք անջատել USB կրիչը:"</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB գործողությունը անհաջող էր"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Լավ"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Կապակցված է որպես մեդիա սարք"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Միացված է որպես ֆոտոխցիկ"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Կապակցված է որպես MIDI սարք"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Միացված է որպես տեղադրիչ"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Կապակցված է USB լրասարքի"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Հպեք` այլ USB ընտրանքների համար:"</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Ֆորմատավորե՞լ USB կրիչը:"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Ֆորմատավորե՞լ SD քարտը:"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Ձեր USB կրիչում պահվող բոլոր ֆայլերը կջնջվեն: Այս գործողությունը անշրջելի է:"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="one">%1$d րոպե (մինչև <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d րոպե (մինչև <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">%1$d ժամ (մինչև <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d ժամ (մինչև <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">%d րոպե</item>
       <item quantity="other">%d րոպե</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">%d ժամ</item>
       <item quantity="other">%d ժամ</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"Մինչև <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Քանի դեռ չեք անջատել"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ອະນຸຍາດໃຫ້ແອັບຯເພີ່ມ, ລຶບ ແລະປ່ຽນກິດຈະກຳທີ່ທ່ານສາມາດແກ້ໄຂ ໃນແທັບເລັດຂອງທ່ານໄດ້ ຮວມທັງກິດຈະກຳຂອງໝູ່ ຫຼືໝູ່ຮ່ວມເຮັດວຽກ ເຊິ່ງອາດອະນຸຍາດໃຫ້ແອັບຯສົ່ງຂໍ້ຄວາມທີ່ຄືກັບວ່າ ມາຈາກເຈົ້າຂອງປະຕິທິນ ຫຼືແກ້ໄຂການນັດໝາຍໄດ້ ໂດຍບໍ່ໃຫ້ເຈົ້າຂອງຮັບຮູ້."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"ອະນຸຍາດໃຫ້ແອັບເພີ່ມ, ລຶບ, ປ່ຽນແປງເຫດການທີ່ທ່ານສາມາດແກ້ໄຂໃນໂທລະພາບຂອງທ່ານໄດ້, ລວມທັງອັນ​ທີ່​ເປັນ​ຂອງໝູ່ ແລະຂອງເພື່ອນຮ່ວມງານ. ອັນນີ້ອາດຈະອະນຸຍາດໃຫ້ແອັບສົ່ງຂໍ້ຄວາມໃນຖານະເຈົ້າຂອງປະຕິທິນ ຫຼືປ່ຽນແປງເຫດການໂດຍທີ່ເຈົ້າຂອງບໍ່ຮູ້ໄດ້."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ອະນຸຍາດໃຫ້ແອັບຯ ເພີ່ມ, ລຶບ, ປ່ຽນແປງນັດໝາຍທີ່ທ່ານສາມາດແກ້ໄຂໄດ້ໃນໂທລະສັບຂອງທ່ານ, ຮວມທັງຂອງໝູ່ຄູ່ ຫຼືເພື່ອນຮ່ວມວຽກ. ນີ້ອາດເຮັດໃຫ້ແອັບຯສາມາດສົ່ງຂໍ້ຄວາມ ທີ່ເບິ່ງຄືວ່າມາຈາກເຈົ້າຂອງປະຕິທິນ ຫຼືແກ້ໄຂນັດໝາຍໂດຍທີ່ທ່ານບໍ່ໄດ້ຮັບຮູ້ໄດ້."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"ຈຳລອງແຫລ່ງຂໍ້ມູນສະຖານທີ່ເພື່ອການທົດສອບ"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"ສ້າງແຫລ່ງຂໍ້ມູນຈຳລອງຂອງສະຖານທີ່ ເພື່ອການທົດສອບ ຫຼືຕິດຕັ້ງແຫລ່ງຂໍ້ມູນສະຖານທີ່ໃໝ່. ນີ້ຈະອະນຸຍາດໃຫ້ແອັບຯສາມາດຂຽນທັບຂໍ້ມູນຂອງສະຖານທີ່ ແລະ/ຫຼື ຂໍ້ມູນທີ່ສົ່ງກັບມາຈາກແຫລ່ງຂໍ້ມູນສະຖານທີ່ອື່ນ ເຊັ່ນ: GPS ຫຼືແຫລ່ງຂໍ້ມູນສະຖານທີ່ອື່ນໄດ້."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ເຂົ້າເຖິງຄຳສັ່ງຜູ່ໃຫ້ບໍລິການພິກັດສະຖານທີ່"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ອະນຸຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າເຖິງ​ຄຳສັ່ງ​ເພີ່ມເຕີມ​ຂອງ​ຜູ່​ໃຫ້​ບໍລິການ​ສະຖານທີ່. ນີ້​ອາດ​ຈະ​ເປັນ​ການ​ເຮັດ​ໃຫ້​ແອັບຯ ລົບກວນ​ການ​ເຮັດ​ວຽກ​ຂອງ GPS ຫຼື​ແຫລ່ງ​ຂໍ້ມູນ​ສະຖານທີ່​ອື່ນໆ​ໄດ້."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ສະຖານທີ່ແນ່ນອນ (ອ້າງອີງຈາກ GPS ແລະເຄືອຂ່າຍ)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ຍົກ​ເລີກ​ການ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ແລ້ວ."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ມີ​ຄວາມ​ພະ​ຍາ​ຍາມ​ຫຼາຍ​ຄັ້ງ​ເກີນ​ໄປ. ລອງ​ໃໝ່​ພາຍ​ຫຼັງ."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ລອງໃໝ່ອີກຄັ້ງ."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ອ່ານການຕັ້ງຄ່າຊິ້ງຂໍ້ມູນ"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"ຫາກທ່ານເປີດນຳໃຊ້ບ່ອນຈັດເກັບຂໍ້ມູນ USB ຈະເຮັດໃຫ້ບາງແອັບຯທີ່ທ່ານເຮັດວຽກຢູ່ນັ້ນ ຢຸດເຮັດວຽກ ແລະອາດຈະບໍ່ສາມາດໃຊ້ໄດ້ຈົນກວ່າທ່ານປິດບ່ອນຈັດເກັບຂໍ້ມູນ USB ກ່ອນ."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"ປະຕິບັດການ USB ບໍ່ສຳເລັດ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ຕົກລົງ"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"ເຊື່ອມຕໍ່ເປັນອຸປະກອນສື່"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ເຊື່ອມຕໍ່ເປັນກ້ອງຖ່າຍຮູບແລ້ວ"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"​ເຊື່ອມ​ຕໍ່​ເປັນ​ອຸ​ປະ​ກອນ​ MIDI ແລ້ວ"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ເຊື່ອມຕໍ່ໃນນາມຕົວຕິດຕັ້ງ"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ເຊື່ອມຕໍ່ກັບອຸປະກອນເສີມ USB ແລ້ວ"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"ແຕະເພື່ອເບິ່ງໂຕເລືອກເລືອກ USB ອື່ນໆ."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"ຟໍແມັດ ບ່ອນຈັດເກັບຂໍ້ມູນ USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"ຟໍແມັດ SD card?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ໄຟລ໌ທັງໝົດທີ່ຢູ່ໃນບ່ອນຈັດເກັບຂໍ້ມູນ USB ຂອງທ່ານຈະຖືກລຶບອອກໝົດ. ການກະທຳຈະບໍ່ສາມາດຍົກເລີກໄດ້!"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">ເປັນ​ເວ​ລາ %1$d ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">ເປັນ​ເວ​ລາ %1$d ຊົ່ວ​ໂມງ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">ເປັນ​ເວ​ລາ 1 ຊົ່ວ​ໂມງ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">ເປັນ​ເວ​ລາ %d ນາ​ທີ</item>
       <item quantity="one">ເປັນ​ເວລາໜຶ່ງ​ນາ​ທີ</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">ເປັນ​ເວລາ​ %d ຊົ່ວ​ໂມງ</item>
       <item quantity="one">ເປັນ​ເວລາໜຶ່ງ​ຊົ່ວ​ໂມງ</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ​"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

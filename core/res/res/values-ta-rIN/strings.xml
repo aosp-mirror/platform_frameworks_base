@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"நண்பர்கள் அல்லது சகப் பணியாளர்கள் உள்பட உங்கள் டேப்லெட்டில் நீங்கள் திருத்தக்கூடிய நிகழ்வுகளைச் சேர்க்கவும், அகற்றவும், மேலும் மாற்றவும் பயன்பாட்டை அனுமதிக்கிறது. இது கேலெண்டர் உரிமையாளர்களிடமிருந்து வரும் செய்திகளை அனுப்பவும் அல்லது உரிமையாளரின் ஒப்புதல் இல்லாமல் நிகழ்வுகளைத் திருத்தவும் பயன்பாட்டை அனுமதிக்கலாம்."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"நண்பர்கள் அல்லது சகப் பணியாளர்களின் நிகழ்வுகள் உள்ளிட்ட உங்கள் டிவியில் நீங்கள் மாற்றக்கூடிய நிகழ்வுகளைச் சேர்க்க, அகற்ற மற்றும் மாற்ற, பயன்பாட்டை அனுமதிக்கிறது. இது கேலெண்டர் உரிமையாளர்கள் அனுப்புவது போன்ற செய்திகளை அனுப்ப அல்லது உரிமையாளரின் அனுமதி இல்லாமல் நிகழ்வுகளை மாற்ற, அனுமதிக்கிறது."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"நண்பர்கள் அல்லது சகப் பணியாளர்கள் உள்பட உங்கள் மொபைலில் நீங்கள் திருத்தக்கூடிய நிகழ்வுகளைச் சேர்க்கவும், அகற்றவும், மேலும் மாற்றவும் பயன்பாட்டை அனுமதிக்கிறது. இது கேலெண்டர் உரிமையாளர்களிடமிருந்து வரும் செய்திகளை அனுப்பவும் அல்லது உரிமையாளரின் ஒப்புதல் இல்லாமல் நிகழ்வுகளைத் திருத்தவும் பயன்பாட்டை அனுமதிக்கலாம்."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"சோதனைக்கான போலி இட மூலங்கள்"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"சோதனைக்காக போலி இருப்பிட மூலங்களை உருவாக்கவும் அல்லது புதிய இருப்பிட வழங்குநரை நிறுவவும். இது, இருப்பிடத்தை மற்றும்/அல்லது GPS அல்லது இருப்பிட வழங்குநர்கள் போன்ற பிற இருப்பிட மூலங்கள் மூலம் வழங்கப்பட்ட நிலையை மேலெழுதப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"கூடுதல் இட வழங்குநரின் கட்டளைகளின் அணுகல்"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"கூடுதல் இட வழங்குநர் கட்டளைகளை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. இது, GPS அல்லது பிற இருப்பிட மூலங்களின் செயல்பாட்டை இடைமறிக்க பயன்பாட்டை அனுமதிக்கலாம்."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"துல்லியமான இருப்பிடம் (GPS மற்றும் நெட்வொர்க் சார்ந்தது)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"கைரேகை செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"அதிகமான முயற்சிகள். பிறகு முயற்சிக்கவும்."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"மீண்டும் முயற்சிக்கவும்."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ஒத்திசைவு அமைப்புகளைப் படித்தல்"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"நீங்கள் USB சேமிப்பிடத்தை இயக்கினால், நீங்கள் பயன்படுத்தும் சில பயன்பாடுகள் நின்றுவிடும், மேலும் நீங்கள் USB சேமிப்பிடத்தை முடக்கும்வரை அவை கிடைக்காமல் இருக்கலாம்."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB செயல்முறை தோல்வியடைந்தது"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"சரி"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"மீடியா சாதனமாக இணைக்கப்பட்டது"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"கேமராவாக இணைக்கப்பட்டுள்ளது"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI சாதனமாக இணைக்கப்பட்டது"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"நிறுவியாக இணைக்கப்பட்டது"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB துணைக்கருவியுடன் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"மற்ற USB விருப்பங்களுக்குத் தொடவும்."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB சேமிப்பகத்தில் உள்ளவற்றை அழிக்கவா?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD கார்டில் உள்ளவற்றை அழிக்கவா?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB சேமிப்பகத்தில் சேமித்த எல்லா கோப்புகளும் அழிக்கப்படும். இந்தச் செயலைச் செயல்தவிர்க்க முடியாது."</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
       <item quantity="one">ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
       <item quantity="one">ஒரு மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d நிமிடங்களுக்கு</item>
       <item quantity="one">ஒரு நிமிடத்திற்கு</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d மணிநேரத்திற்கு</item>
       <item quantity="one">ஒரு மணிநேரத்திற்கு</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"இதை முடக்கும்வரை"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

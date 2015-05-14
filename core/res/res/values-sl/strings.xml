@@ -337,8 +337,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Aplikaciji omogoča dodajanje, odstranjevanje in spreminjanje dogodkov, ki jih je mogoče spreminjati v tabličnem računalniku, vključno z dogodki prijateljev in sodelavcev. S tem lahko aplikacija pošilja sporočila, za katera je videti, da jih pošiljajo lastniki koledarjev, ali spreminjajo dogodke brez vednosti lastnikov."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Aplikaciji dovoljuje dodajanje, odstranjevanje in spreminjanje dogodkov, ki jih lahko spremenite v televizorju, vključno z dogodki prijateljev in sodelavcev. S tem lahko aplikacija pošilja sporočila, ki so videti, kot da jih pošiljajo lastniki koledarjev, ali spreminja dogodke brez vednosti lastnikov."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Aplikaciji omogoča dodajanje, odstranjevanje in spreminjanje dogodkov, ki jih je mogoče spreminjati v telefonu, vključno z dogodki prijateljev in sodelavcev. S tem lahko aplikacija pošilja sporočila, za katera je videti, da jih pošiljajo lastniki koledarjev, ali spreminjajo dogodke brez vednosti lastnikov."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"simulirani viri lokacije za preverjanje"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Ustvarjanje simuliranih virov lokacije za preverjanje ali namestitev novega ponudnika lokacije. S tem lahko aplikacija preglasi lokacijo in/ali stanje, ki ga vrnejo drugi viri lokacije, kot so GPS in ponudniki lokacij."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"dostopanje do ukazov ponudnika dodatnih lokacij"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Aplikaciji omogoča dostop do dodatnih ukazov ponudnika lokacij. S tem lahko aplikacija moti delovanje sistema GPS ali drugih virov lokacije."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"natančna lokacija (na podlagi podatkov GPS in omrežja)"</string>
@@ -440,6 +438,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Dejanje s prstnim odtisom je bilo preklicano."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Preveč poskusov. Poskusite znova pozneje."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Poskusite znova."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"branje nastavitev sinhronizacije"</string>
@@ -1056,12 +1056,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Če vklopite pomnilnik USB, se bodo nekatere aplikacije, ki jih uporabljate, ustavile in ne bodo na voljo, dokler ne izklopite pomnilnika USB."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Operacija v pomnilniku USB ni uspela"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"V redu"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Povezan kot predstavnostna naprava"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Povezan kot fotoaparat"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Povezano kot naprava MIDI"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Povezan kot namestitveni program"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Priključen na dodatek USB"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Dotaknite se za prikaz drugih možnosti za USB."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Ali želite formatirati pomnilnik USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Želite formatirati kartico SD?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Vse datoteke, shranjene v v pomnilniku USB, bodo izbrisane. Tega dejanja ni mogoče razveljaviti!"</string>
@@ -1486,24 +1492,28 @@
       <item quantity="few">%d minute (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">%1$d uro (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="two">%1$d uri (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="few">%1$d ure (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">%1$d ur (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">%d minuto</item>
       <item quantity="two">%d minuti</item>
       <item quantity="few">%d minute</item>
       <item quantity="other">%d minut</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">%d uro</item>
       <item quantity="two">%d uri</item>
       <item quantity="few">%d ure</item>
       <item quantity="other">%d ur</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Dokler tega ne izklopite"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

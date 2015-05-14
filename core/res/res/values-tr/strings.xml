@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Uygulamaya, arkadaşlarınızın veya iş arkadaşlarınızın etkinlikleri de dahil olmak üzere tabletinizde değiştirebileceğiniz etkinlikleri ekleme, kaldırma ve değiştirme izni verir. Bu izin, uygulamanın takvim sahiplerinden geliyormuş gibi görünen iletiler göndermesine veya etkinlikleri sahibinden habersiz olarak değiştirmesine olanak sağlar."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Uygulamaya, arkadaşlarınızın veya iş arkadaşlarınızın etkinlikleri de dahil olmak üzere cihazınızda değiştirebileceğiniz etkinlikleri ekleme, kaldırma ve değiştirme izni verir. Bu izin, uygulamanın, takvim sahiplerinden gelmiş gibi görünen iletiler göndermesine veya takvim sahiplerinin bilgisi olmadan etkinlikleri değiştirmesine olanak sağlayabilir."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Uygulamaya, arkadaşlarınızın veya iş arkadaşlarınızın etkinlikleri de dahil olmak üzere telefonunuzda değiştirebileceğiniz etkinlikleri ekleme, kaldırma ve değiştirme izni verir. Bu izin, uygulamanın takvim sahiplerinden geliyormuş gibi görünen iletiler göndermesine veya etkinlikleri sahibinden habersiz olarak değiştirmesine olanak sağlar."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"test için sahte konum kaynakları"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Test amacıyla veya yeni bir konum sağlayıcı yüklemek için sahte konum kaynakları oluşturma. Bu izin, uygulamanın GPS veya konum sağlayıcıları gibi diğer konum kaynakları tarafından döndürülen konum ve/veya durum bilgisini geçersiz kılmasına olanak sağlar."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ek konum sağlayıcı komutlarına eriş"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Uygulamanın, ekstra konum sağlayıcı komutlarına erişmesine izin verir. Bu izin, uygulamanın GPS veya diğer konum kaynaklarının çalışmasını kesmesine olanak sağlayabilir."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"hassas konum (GPS ve ağ tabanlı)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Parmak izi işlemi iptal edildi."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Tekrar deneyin."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını okuma"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"USB belleği açarsanız, kullanmakta olduğunuz bazı uygulamalar durur ve USB bellek kapatılıncaya kadar kullanılamayabilir."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB işlemi başarısız oldu"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Medya cihazı olarak bağlandı"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Kamera olarak bağlandı"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI cihazı olarak bağlandı"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Yükleyici olarak bağlandı"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB aksesuarına bağlandı"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Diğer USB seçenekleri için dokunun."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB bellek biçimlendirilsin mi?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD kart biçimlendirilsin mi?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB belleğinizdeki tüm dosyalar silinecek. Bu işlem geri alınamaz!"</string>
@@ -1466,18 +1472,22 @@
       <item quantity="other">%1$d dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Bir dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Bir saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d dakika süreyle</item>
       <item quantity="one">Bir dakika süreyle</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d saat için</item>
       <item quantity="one">Bir saat için</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"Şu saate kadar: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Siz bunu kapatana kadar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

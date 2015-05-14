@@ -335,8 +335,6 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Овозможува апликацијата да додава, отстранува, менува настани кои може да ги менувате на вашиот таблет, вклучувајќи ги и оние на пријатели или соработници. Ова може да овозможи апликацијата да праќа пораки за кои се чини дека доаѓаат од сопственици на календар или да менува настани без знаење на сопствениците."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Дозволува апликацијата да додава, отстранува и менува настани кои може да ги менувате на вашиот телевизор, вклучувајќи ги и оние на пријателите и соработниците. Ова може да ѝ дозволи на апликацијата да испраќа пораки кои изгледаат како да доаѓаат од сопствениците на календарот или да менува настани без знаење на сопствениците."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Овозможува апликацијата да додава, отстранува, менува настани кои може да ги менувате на вашиот телефон, вклучувајќи ги и оние на пријатели или соработници. Ова може да овозможи апликацијата да праќа пораки за кои се чини дека доаѓаат од сопственици на календар или да менува настани без знаење на сопствениците."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"извори на лажна локација за тестирање"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Создадете извори на лажна локација за тестирање или инсталирајте нов давател на локација. Ова ѝ овозможува на апликацијата да ги избегне локацијата и / или статусот вратени од друга локација извори како што се GPS или локација на даватели."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"пристапи кон наредби на давателот на дополнителна локација"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Овозможува апликацијата да пристапи кон дополнителни наредби на давател на локација. Ова може да овозможи апликацијата да го попечи функционирањето на ГПС или други извори на локација."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"прецизна локација (ГПС и базирана на мрежа)"</string>
@@ -438,6 +436,8 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Операцијата со отпечаток од прст се откажа."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Премногу обиди. Обидете се повторно подоцна."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Обидете се повторно."</string>
+    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
+    <skip />
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"прочитај синхронизирани подесувања"</string>
@@ -1042,12 +1042,18 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Ако вклучите УСБ меморија, некои апликации што ги користите ќе запрат и може да се недостапни додека не ја исклучите УСБ меморијата."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"Операцијата со УСБ уредот е неуспешна"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Во ред"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Поврзан како уред за медиуми"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Поврзан како фотоапарат"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Поврзан како уред со MIDI"</string>
+    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
+    <skip />
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Поврзан како инсталатор"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Поврзан со УСБ додаток"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Допри за други опции на УСБ."</string>
+    <!-- no translation found for usb_notification_message (7347368030849048437) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Форматирај УСБ-склад?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Да се форматира СД-картичката?"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Сите датотеки складирани на УСБ-склад ќе се избришат. Дејството не може да се отповика."</string>
@@ -1468,18 +1474,22 @@
       <item quantity="one">За %1$d минута (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">За %1$d минути (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">За %1$d час (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">За %1$d часа (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="one">За %d минута</item>
       <item quantity="other">За %d минути</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">За % d час</item>
       <item quantity="other">За % d часа</item>
     </plurals>
+    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Додека не го исклучите"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
