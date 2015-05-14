@@ -25,7 +25,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
         AssetAtlas.cpp \
         DamageAccumulator.cpp \
         FontRenderer.cpp \
-        FrameInfo.cpp \
         GammaFontRenderer.cpp \
         Caches.cpp \
         DisplayList.cpp \
@@ -40,7 +39,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
         GradientCache.cpp \
         Image.cpp \
         Interpolator.cpp \
-        JankTracker.cpp \
         Layer.cpp \
         LayerCache.cpp \
         LayerRenderer.cpp \

@@ -32,7 +32,7 @@ bool TimeLord::vsyncReceived(nsecs_t vsync) {
     return false;
 }
 
-nsecs_t TimeLord::computeFrameTimeNanos() {
+nsecs_t TimeLord::computeFrameTimeMs() {
     // Logic copied from Choreographer.java
     nsecs_t now = systemTime(CLOCK_MONOTONIC);
     nsecs_t jitterNanos = now - mFrameTimeNanos;
@@ -40,11 +40,7 @@ nsecs_t TimeLord::computeFrameTimeNanos() {
         nsecs_t lastFrameOffset = jitterNanos % mFrameIntervalNanos;
         mFrameTimeNanos = now - lastFrameOffset;
     }
-    return mFrameTimeNanos;
-}
-
-nsecs_t TimeLord::computeFrameTimeMs() {
-    return nanoseconds_to_milliseconds(computeFrameTimeNanos());
+    return nanoseconds_to_milliseconds(mFrameTimeNanos);
 }
 
 } /* namespace renderthread */

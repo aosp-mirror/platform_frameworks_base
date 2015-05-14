@@ -17,14 +17,7 @@
 #ifndef CANVASCONTEXT_H_
 #define CANVASCONTEXT_H_
 
-#include "DamageAccumulator.h"
-#include "DrawProfiler.h"
-#include "IContextFactory.h"
-#include "FrameInfo.h"
-#include "RenderNode.h"
-#include "utils/RingBuffer.h"
-#include "renderthread/RenderTask.h"
-#include "renderthread/RenderThread.h"
+#include <set>
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
@@ -32,7 +25,14 @@
 #include <utils/Functor.h>
 #include <utils/Vector.h>
 
-#include <set>
+#include "../DamageAccumulator.h"
+#include "../DrawProfiler.h"
+#include "../IContextFactory.h"
+#include "../RenderNode.h"
+#include "RenderTask.h"
+#include "RenderThread.h"
+
+#define FUNCTOR_PROCESS_DELAY 4
 
 namespace android {
 namespace uirenderer {
@@ -75,7 +75,7 @@ public:
     void setOpaque(bool opaque);
     void makeCurrent();
     void processLayerUpdate(DeferredLayerUpdater* layerUpdater);
-    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo);
+    void prepareTree(TreeInfo& info);
     void draw();
     void destroy();
 
@@ -102,9 +102,6 @@ public:
     void notifyFramePending();
 
     DrawProfiler& profiler() { return mProfiler; }
-
-    void dumpFrames(int fd);
-    void resetFrameStats();
 
 private:
     friend class RegisterFrameCallbackTask;
@@ -136,9 +133,6 @@ private:
     const sp<RenderNode> mRootRenderNode;
 
     DrawProfiler mProfiler;
-    FrameInfo* mCurrentFrameInfo;
-    // Ring buffer large enough for 1 second worth of frames
-    RingBuffer<FrameInfo, 60> mFrames;
 
     std::set<RenderNode*> mPrefetechedLayers;
 };
