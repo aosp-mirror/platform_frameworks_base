@@ -138,6 +138,8 @@ class AlarmManagerService extends SystemService {
     long mLastAlarmDeliveryTime;
     long mStartCurrentDelayTime;
     long mNextNonWakeupDeliveryTime;
+    long mLastTimeChangeClockTime;
+    long mLastTimeChangeRealtime;
     int mNumTimeChanged;
 
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
@@ -1023,6 +1025,11 @@ class AlarmManagerService extends SystemService {
             pw.print("nowRTC="); pw.print(nowRTC);
             pw.print("="); pw.print(sdf.format(new Date(nowRTC)));
             pw.print(" nowELAPSED="); TimeUtils.formatDuration(nowELAPSED, pw);
+            pw.println();
+            pw.print("mLastTimeChangeClockTime="); pw.print(mLastTimeChangeClockTime);
+            pw.print("="); pw.println(sdf.format(new Date(mLastTimeChangeClockTime)));
+            pw.print("mLastTimeChangeRealtime=");
+            TimeUtils.formatDuration(mLastTimeChangeRealtime, pw);
             pw.println();
             if (!mInteractive) {
                 pw.print("Time since non-interactive: ");
@@ -1955,77 +1962,102 @@ class AlarmManagerService extends SystemService {
 
                 triggerList.clear();
 
+                final long nowRTC = System.currentTimeMillis();
+                final long nowELAPSED = SystemClock.elapsedRealtime();
+
                 if ((result & TIME_CHANGED_MASK) != 0) {
-                    if (DEBUG_BATCH) {
-                        Slog.v(TAG, "Time changed notification from kernel; rebatching");
-                    }
-                    removeImpl(mTimeTickSender);
-                    rebatchAllAlarms();
-                    mClockReceiver.scheduleTimeTickEvent();
+                    // The kernel can give us spurious time change notifications due to
+                    // small adjustments it makes internally; we want to filter those out.
+                    final long lastTimeChangeClockTime;
+                    final long expectedClockTime;
                     synchronized (mLock) {
-                        mNumTimeChanged++;
+                        lastTimeChangeClockTime = mLastTimeChangeClockTime;
+                        expectedClockTime = lastTimeChangeClockTime
+                                + (nowELAPSED - mLastTimeChangeRealtime);
                     }
-                    Intent intent = new Intent(Intent.ACTION_TIME_CHANGED);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
-                            | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                    getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+                    if (lastTimeChangeClockTime == 0 || nowRTC < (expectedClockTime-500)
+                            || nowRTC > (expectedClockTime+500)) {
+                        // The change is by at least +/- 500 ms (or this is the first change),
+                        // let's do it!
+                        if (DEBUG_BATCH) {
+                            Slog.v(TAG, "Time changed notification from kernel; rebatching");
+                        }
+                        removeImpl(mTimeTickSender);
+                        rebatchAllAlarms();
+                        mClockReceiver.scheduleTimeTickEvent();
+                        synchronized (mLock) {
+                            mNumTimeChanged++;
+                            mLastTimeChangeClockTime = nowRTC;
+                            mLastTimeChangeRealtime = nowELAPSED;
+                        }
+                        Intent intent = new Intent(Intent.ACTION_TIME_CHANGED);
+                        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                                | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+
+                        // The world has changed on us, so we need to re-evaluate alarms
+                        // regardless of whether the kernel has told us one went off.
+                        result |= IS_WAKEUP_MASK;
+                    }
                 }
-                
-                synchronized (mLock) {
-                    final long nowRTC = System.currentTimeMillis();
-                    final long nowELAPSED = SystemClock.elapsedRealtime();
-                    if (localLOGV) Slog.v(
-                        TAG, "Checking for alarms... rtc=" + nowRTC
-                        + ", elapsed=" + nowELAPSED);
 
-                    if (WAKEUP_STATS) {
-                        if ((result & IS_WAKEUP_MASK) != 0) {
-                            long newEarliest = nowRTC - RECENT_WAKEUP_PERIOD;
-                            int n = 0;
-                            for (WakeupEvent event : mRecentWakeups) {
-                                if (event.when > newEarliest) break;
-                                n++; // number of now-stale entries at the list head
-                            }
-                            for (int i = 0; i < n; i++) {
-                                mRecentWakeups.remove();
-                            }
+                if (result != TIME_CHANGED_MASK) {
+                    // If this was anything besides just a time change, then figure what if
+                    // anything to do about alarms.
+                    synchronized (mLock) {
+                        if (localLOGV) Slog.v(
+                            TAG, "Checking for alarms... rtc=" + nowRTC
+                            + ", elapsed=" + nowELAPSED);
 
-                            recordWakeupAlarms(mAlarmBatches, nowELAPSED, nowRTC);
-                        }
-                    }
+                        if (WAKEUP_STATS) {
+                            if ((result & IS_WAKEUP_MASK) != 0) {
+                                long newEarliest = nowRTC - RECENT_WAKEUP_PERIOD;
+                                int n = 0;
+                                for (WakeupEvent event : mRecentWakeups) {
+                                    if (event.when > newEarliest) break;
+                                    n++; // number of now-stale entries at the list head
+                                }
+                                for (int i = 0; i < n; i++) {
+                                    mRecentWakeups.remove();
+                                }
 
-                    boolean hasWakeup = triggerAlarmsLocked(triggerList, nowELAPSED, nowRTC);
-                    if (!hasWakeup && checkAllowNonWakeupDelayLocked(nowELAPSED)) {
-                        // if there are no wakeup alarms and the screen is off, we can
-                        // delay what we have so far until the future.
-                        if (mPendingNonWakeupAlarms.size() == 0) {
-                            mStartCurrentDelayTime = nowELAPSED;
-                            mNextNonWakeupDeliveryTime = nowELAPSED
-                                    + ((currentNonWakeupFuzzLocked(nowELAPSED)*3)/2);
-                        }
-                        mPendingNonWakeupAlarms.addAll(triggerList);
-                        mNumDelayedAlarms += triggerList.size();
-                        rescheduleKernelAlarmsLocked();
-                        updateNextAlarmClockLocked();
-                    } else {
-                        // now deliver the alarm intents; if there are pending non-wakeup
-                        // alarms, we need to merge them in to the list.  note we don't
-                        // just deliver them first because we generally want non-wakeup
-                        // alarms delivered after wakeup alarms.
-                        rescheduleKernelAlarmsLocked();
-                        updateNextAlarmClockLocked();
-                        if (mPendingNonWakeupAlarms.size() > 0) {
-                            calculateDeliveryPriorities(mPendingNonWakeupAlarms);
-                            triggerList.addAll(mPendingNonWakeupAlarms);
-                            Collections.sort(triggerList, mAlarmDispatchComparator);
-                            final long thisDelayTime = nowELAPSED - mStartCurrentDelayTime;
-                            mTotalDelayTime += thisDelayTime;
-                            if (mMaxDelayTime < thisDelayTime) {
-                                mMaxDelayTime = thisDelayTime;
+                                recordWakeupAlarms(mAlarmBatches, nowELAPSED, nowRTC);
                             }
-                            mPendingNonWakeupAlarms.clear();
                         }
-                        deliverAlarmsLocked(triggerList, nowELAPSED);
+
+                        boolean hasWakeup = triggerAlarmsLocked(triggerList, nowELAPSED, nowRTC);
+                        if (!hasWakeup && checkAllowNonWakeupDelayLocked(nowELAPSED)) {
+                            // if there are no wakeup alarms and the screen is off, we can
+                            // delay what we have so far until the future.
+                            if (mPendingNonWakeupAlarms.size() == 0) {
+                                mStartCurrentDelayTime = nowELAPSED;
+                                mNextNonWakeupDeliveryTime = nowELAPSED
+                                        + ((currentNonWakeupFuzzLocked(nowELAPSED)*3)/2);
+                            }
+                            mPendingNonWakeupAlarms.addAll(triggerList);
+                            mNumDelayedAlarms += triggerList.size();
+                            rescheduleKernelAlarmsLocked();
+                            updateNextAlarmClockLocked();
+                        } else {
+                            // now deliver the alarm intents; if there are pending non-wakeup
+                            // alarms, we need to merge them in to the list.  note we don't
+                            // just deliver them first because we generally want non-wakeup
+                            // alarms delivered after wakeup alarms.
+                            rescheduleKernelAlarmsLocked();
+                            updateNextAlarmClockLocked();
+                            if (mPendingNonWakeupAlarms.size() > 0) {
+                                calculateDeliveryPriorities(mPendingNonWakeupAlarms);
+                                triggerList.addAll(mPendingNonWakeupAlarms);
+                                Collections.sort(triggerList, mAlarmDispatchComparator);
+                                final long thisDelayTime = nowELAPSED - mStartCurrentDelayTime;
+                                mTotalDelayTime += thisDelayTime;
+                                if (mMaxDelayTime < thisDelayTime) {
+                                    mMaxDelayTime = thisDelayTime;
+                                }
+                                mPendingNonWakeupAlarms.clear();
+                            }
+                            deliverAlarmsLocked(triggerList, nowELAPSED);
+                        }
                     }
                 }
             }
