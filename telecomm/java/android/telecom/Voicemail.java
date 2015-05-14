@@ -28,6 +28,7 @@ import android.os.Parcelable;
 public class Voicemail implements Parcelable {
     private final Long mTimestamp;
     private final String mNumber;
+    private final PhoneAccountHandle mPhoneAccount;
     private final Long mId;
     private final Long mDuration;
     private final String mSource;
@@ -36,10 +37,12 @@ public class Voicemail implements Parcelable {
     private final Boolean mIsRead;
     private final Boolean mHasContent;
 
-    private Voicemail(Long timestamp, String number, Long id, Long duration, String source,
-            String providerData, Uri uri, Boolean isRead, Boolean hasContent) {
+    private Voicemail(Long timestamp, String number, PhoneAccountHandle phoneAccountHandle, Long id,
+            Long duration, String source, String providerData, Uri uri, Boolean isRead,
+            Boolean hasContent) {
         mTimestamp = timestamp;
         mNumber = number;
+        mPhoneAccount = phoneAccountHandle;
         mId = id;
         mDuration = duration;
         mSource = source;
@@ -77,6 +80,7 @@ public class Voicemail implements Parcelable {
     public static class Builder {
         private Long mBuilderTimestamp;
         private String mBuilderNumber;
+        private PhoneAccountHandle mBuilderPhoneAccount;
         private Long mBuilderId;
         private Long mBuilderDuration;
         private String mBuilderSourcePackage;
@@ -96,6 +100,11 @@ public class Voicemail implements Parcelable {
 
         public Builder setTimestamp(long timestamp) {
             mBuilderTimestamp = timestamp;
+            return this;
+        }
+
+        public Builder setPhoneAccount(PhoneAccountHandle phoneAccount) {
+            mBuilderPhoneAccount = phoneAccount;
             return this;
         }
 
@@ -139,9 +148,9 @@ public class Voicemail implements Parcelable {
             mBuilderTimestamp = mBuilderTimestamp == null ? 0 : mBuilderTimestamp;
             mBuilderDuration = mBuilderDuration == null ? 0: mBuilderDuration;
             mBuilderIsRead = mBuilderIsRead == null ? false : mBuilderIsRead;
-            return new Voicemail(mBuilderTimestamp, mBuilderNumber, mBuilderId, mBuilderDuration,
-                    mBuilderSourcePackage, mBuilderSourceData, mBuilderUri, mBuilderIsRead,
-                    mBuilderHasContent);
+            return new Voicemail(mBuilderTimestamp, mBuilderNumber, mBuilderPhoneAccount,
+                    mBuilderId, mBuilderDuration, mBuilderSourcePackage, mBuilderSourceData,
+                    mBuilderUri, mBuilderIsRead, mBuilderHasContent);
         }
     }
 
@@ -159,6 +168,11 @@ public class Voicemail implements Parcelable {
     /** The number of the person leaving the voicemail, empty string if unknown, null if not set. */
     public String getNumber() {
         return mNumber;
+    }
+
+    /** The phone account associated with the voicemail, null if not set. */
+    public PhoneAccountHandle getPhoneAccount() {
+        return mPhoneAccount;
     }
 
     /** The timestamp the voicemail was received, in millis since the epoch, zero if not set. */
@@ -225,6 +239,12 @@ public class Voicemail implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mTimestamp);
         dest.writeCharSequence(mNumber);
+        if (mPhoneAccount == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            mPhoneAccount.writeToParcel(dest, flags);
+        }
         dest.writeLong(mId);
         dest.writeLong(mDuration);
         dest.writeCharSequence(mSource);
@@ -263,6 +283,11 @@ public class Voicemail implements Parcelable {
     private Voicemail(Parcel in) {
         mTimestamp = in.readLong();
         mNumber = (String) in.readCharSequence();
+        if (in.readInt() > 0) {
+            mPhoneAccount = PhoneAccountHandle.CREATOR.createFromParcel(in);
+        } else {
+            mPhoneAccount = null;
+        }
         mId = in.readLong();
         mDuration = in.readLong();
         mSource = (String) in.readCharSequence();
