@@ -134,6 +134,20 @@ public class RenderScript {
     static final long sMinorVersion = 1;
 
     /**
+     * @hide
+     *
+     * Only exist to be compatible with old version RenderScript Support lib.
+     * Will eventually be removed.
+     *
+     * @return Always return 1
+     *
+     */
+    public static long getMinorID() {
+        return 1;
+    }
+
+
+    /**
      * Returns an identifier that can be used to identify a particular
      * minor version of RS.
      *
