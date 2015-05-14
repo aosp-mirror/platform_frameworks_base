@@ -1102,8 +1102,8 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void native_setLetterSpacing(long nativePaint, float letterSpacing) {
-        Bridge.getLog().fidelityWarning("textRendering", "Paint.setLetterSpacing() not supported.",
-                null, null);
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_TEXT_RENDERING,
+                "Paint.setLetterSpacing() not supported.", null, null);
         Paint_Delegate delegate = sManager.getDelegate(nativePaint);
         if (delegate == null) {
             return;
@@ -1113,7 +1113,7 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void native_setFontFeatureSettings(long nativePaint, String settings) {
-        Bridge.getLog().fidelityWarning("textRendering",
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_TEXT_RENDERING,
                 "Paint.setFontFeatureSettings() not supported.", null, null);
     }
 
@@ -1146,7 +1146,7 @@ public class Paint_Delegate {
             return false;
         }
         if (string.length() > 1) {
-            Bridge.getLog().fidelityWarning("textRendering",
+            Bridge.getLog().fidelityWarning(LayoutLog.TAG_TEXT_RENDERING,
                     "Paint.hasGlyph() is not supported for ligatures.", null, null);
             return false;
         }
