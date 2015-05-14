@@ -3146,6 +3146,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void grantRuntimePermission(String packageName, String name, int userId) {
         if (!sUserManager.exists(userId)) {
+            Log.e(TAG, "No such user:" + userId);
             return;
         }
 
@@ -3203,6 +3204,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void revokeRuntimePermission(String packageName, String name, int userId) {
         if (!sUserManager.exists(userId)) {
+            Log.e(TAG, "No such user:" + userId);
             return;
         }
 
