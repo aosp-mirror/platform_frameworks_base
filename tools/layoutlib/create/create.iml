@@ -11,8 +11,17 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="asm-4.0" level="project" />
+    <orderEntry type="module-library">
+      <library name="asm-4.0">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/asm/asm-4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../../../prebuilts/misc/common/asm/src.zip!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntry type="library" scope="TEST" name="JUnit4" level="application" />
   </component>
 </module>
-

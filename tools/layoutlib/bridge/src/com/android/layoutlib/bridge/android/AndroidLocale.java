@@ -16,9 +16,9 @@
 
 package com.android.layoutlib.bridge.android;
 
-import java.util.Locale;
+import android.icu.util.ULocale;
 
-import com.ibm.icu.util.ULocale;
+import java.util.Locale;
 
 /**
  * This class provides an alternate implementation for {@code java.util.Locale#toLanguageTag}

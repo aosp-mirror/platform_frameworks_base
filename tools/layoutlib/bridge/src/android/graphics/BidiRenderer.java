@@ -19,6 +19,12 @@ package android.graphics;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 
+import android.graphics.Paint_Delegate.FontInfo;
+import android.icu.lang.UScript;
+import android.icu.lang.UScriptRun;
+import android.icu.text.Bidi;
+import android.icu.text.BidiRun;
+
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
@@ -28,13 +34,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import com.ibm.icu.lang.UScript;
-import com.ibm.icu.lang.UScriptRun;
-import com.ibm.icu.text.Bidi;
-import com.ibm.icu.text.BidiRun;
-
-import android.graphics.Paint_Delegate.FontInfo;
 
 /**
  * Render the text by breaking it into various scripts and using the right font for each script.

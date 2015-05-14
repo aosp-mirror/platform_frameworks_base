@@ -16,9 +16,6 @@
 
 package com.android.layoutlib.bridge;
 
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
-import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
-
 import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.Capability;
 import com.android.ide.common.rendering.api.DrawableParams;
@@ -36,13 +33,12 @@ import com.android.resources.ResourceType;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 import com.android.util.Pair;
-import com.ibm.icu.util.ULocale;
-import libcore.io.MemoryMappedFile_Delegate;
 
 import android.content.res.BridgeAssetManager;
 import android.graphics.Bitmap;
 import android.graphics.FontFamily_Delegate;
 import android.graphics.Typeface_Delegate;
+import android.icu.util.ULocale;
 import android.os.Looper;
 import android.os.Looper_Accessor;
 import android.view.View;
@@ -59,6 +55,11 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+
+import libcore.io.MemoryMappedFile_Delegate;
+
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
+import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
 /**
  * Main entry point of the LayoutLib Bridge.

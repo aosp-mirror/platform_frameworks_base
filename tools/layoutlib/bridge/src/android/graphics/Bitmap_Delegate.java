@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
@@ -80,6 +81,12 @@ public final class Bitmap_Delegate {
      */
     public static Bitmap_Delegate getDelegate(long native_bitmap) {
         return sManager.getDelegate(native_bitmap);
+    }
+
+    @Nullable
+    public static Bitmap_Delegate getDelegate(@Nullable Bitmap bitmap) {
+        // refSkPixelRef is a hack to get the native pointer: see #nativeRefPixelRef()
+        return bitmap == null ? null : getDelegate(bitmap.refSkPixelRef());
     }
 
     /**
@@ -180,18 +187,7 @@ public final class Bitmap_Delegate {
         return createBitmap(delegate, createFlags, density.getDpiValue());
     }
 
-    public static int getBufferedImageType(int nativeBitmapConfig) {
-        switch (Config.nativeToConfig(nativeBitmapConfig)) {
-            case ALPHA_8:
-                return BufferedImage.TYPE_INT_ARGB;
-            case RGB_565:
-                return BufferedImage.TYPE_INT_ARGB;
-            case ARGB_4444:
-                return BufferedImage.TYPE_INT_ARGB;
-            case ARGB_8888:
-                return BufferedImage.TYPE_INT_ARGB;
-        }
-
+    private static int getBufferedImageType() {
         return BufferedImage.TYPE_INT_ARGB;
     }
 
@@ -218,10 +214,6 @@ public final class Bitmap_Delegate {
         return mHasAlpha && mConfig != Config.RGB_565;
     }
 
-    public boolean hasMipMap() {
-        // TODO: check if more checks are required as in hasAlpha.
-        return mHasMipMap;
-    }
     /**
      * Update the generationId.
      *
@@ -236,7 +228,7 @@ public final class Bitmap_Delegate {
     @LayoutlibDelegate
     /*package*/ static Bitmap nativeCreate(int[] colors, int offset, int stride, int width,
             int height, int nativeConfig, boolean isMutable) {
-        int imageType = getBufferedImageType(nativeConfig);
+        int imageType = getBufferedImageType();
 
         // create the image
         BufferedImage image = new BufferedImage(width, height, imageType);
@@ -264,7 +256,7 @@ public final class Bitmap_Delegate {
         int width = srcImage.getWidth();
         int height = srcImage.getHeight();
 
-        int imageType = getBufferedImageType(nativeConfig);
+        int imageType = getBufferedImageType();
 
         // create the image
         BufferedImage image = new BufferedImage(width, height, imageType);
@@ -353,22 +345,16 @@ public final class Bitmap_Delegate {
     /*package*/ static boolean nativeHasAlpha(long nativeBitmap) {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
-        if (delegate == null) {
-            return true;
-        }
+        return delegate == null || delegate.mHasAlpha;
 
-        return delegate.mHasAlpha;
     }
 
     @LayoutlibDelegate
     /*package*/ static boolean nativeHasMipMap(long nativeBitmap) {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
-        if (delegate == null) {
-            return true;
-        }
+        return delegate == null || delegate.mHasMipMap;
 
-        return delegate.mHasMipMap;
     }
 
     @LayoutlibDelegate
@@ -489,11 +475,6 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativePrepareToDraw(long nativeBitmap) {
-        // nothing to be done here.
-    }
-
-    @LayoutlibDelegate
     /*package*/ static boolean nativeIsPremultiplied(long nativeBitmap) {
         // get the delegate from the native int.
         Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
@@ -577,6 +558,14 @@ public final class Bitmap_Delegate {
         }
 
         return Arrays.equals(argb1, argb2);
+    }
+
+    // Only used by AssetAtlasService, which we don't care about.
+    @LayoutlibDelegate
+    /*package*/ static long nativeRefPixelRef(long nativeBitmap) {
+        // Hack: This is called by Bitmap.refSkPixelRef() and LayoutLib uses that method to get
+        // the native pointer from a Bitmap. So, we return nativeBitmap here.
+        return nativeBitmap;
     }
 
     // ---- Private delegate/helper methods ----
