@@ -702,18 +702,40 @@ static void android_media_AudioTrack_set_playback_params(JNIEnv *env,  jobject t
         return;
     }
 
-    PlaybackParams pbs;
-    pbs.fillFromJobject(env, gPlaybackParamsFields, params);
+    PlaybackParams pbp;
+    pbp.fillFromJobject(env, gPlaybackParamsFields, params);
 
     ALOGV("setPlaybackParams: %d:%f %d:%f %d:%u %d:%u",
-            pbs.speedSet, pbs.audioRate.mSpeed,
-            pbs.pitchSet, pbs.audioRate.mPitch,
-            pbs.audioFallbackModeSet, pbs.audioRate.mFallbackMode,
-            pbs.audioStretchModeSet, pbs.audioRate.mStretchMode);
+            pbp.speedSet, pbp.audioRate.mSpeed,
+            pbp.pitchSet, pbp.audioRate.mPitch,
+            pbp.audioFallbackModeSet, pbp.audioRate.mFallbackMode,
+            pbp.audioStretchModeSet, pbp.audioRate.mStretchMode);
 
-    if (lpTrack->setPlaybackRate(pbs.audioRate) != OK) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
-                "arguments out of range");
+    // to simulate partially set params, we do a read-modify-write.
+    // TODO: pass in the valid set mask into AudioTrack.
+    AudioPlaybackRate rate = lpTrack->getPlaybackRate();
+    bool updatedRate = false;
+    if (pbp.speedSet) {
+        rate.mSpeed = pbp.audioRate.mSpeed;
+        updatedRate = true;
+    }
+    if (pbp.pitchSet) {
+        rate.mPitch = pbp.audioRate.mPitch;
+        updatedRate = true;
+    }
+    if (pbp.audioFallbackModeSet) {
+        rate.mFallbackMode = pbp.audioRate.mFallbackMode;
+        updatedRate = true;
+    }
+    if (pbp.audioStretchModeSet) {
+        rate.mStretchMode = pbp.audioRate.mStretchMode;
+        updatedRate = true;
+    }
+    if (updatedRate) {
+        if (lpTrack->setPlaybackRate(rate) != OK) {
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                    "arguments out of range");
+        }
     }
 }
 
