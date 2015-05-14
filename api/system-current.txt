@@ -16923,9 +16923,10 @@ package android.media {
     ctor public MediaCryptoException(java.lang.String);
   }
 
-  public abstract interface MediaDataSource implements java.io.Closeable {
-    method public abstract long getSize();
-    method public abstract int readAt(long, byte[], int);
+  public abstract class MediaDataSource implements java.io.Closeable {
+    ctor public MediaDataSource();
+    method public abstract long getSize() throws java.io.IOException;
+    method public abstract int readAt(long, byte[], int, int) throws java.io.IOException;
   }
 
   public class MediaDescription implements android.os.Parcelable {
