@@ -16459,9 +16459,9 @@ package android.media {
   }
 
   public final class MediaTimestamp {
-    field public final float clockRate;
-    field public final long mediaTimeUs;
-    field public final long nanoTime;
+    method public long getAnchorMediaTimeUs();
+    method public long getAnchorSytemNanoTime();
+    method public float getMediaClockRate();
   }
 
   public final class NotProvisionedException extends android.media.MediaDrmException {
