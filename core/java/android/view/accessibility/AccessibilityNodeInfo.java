@@ -1057,6 +1057,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void addAction(AccessibilityAction action) {
         enforceNotSealed();
 
+        addActionUnchecked(action);
+    }
+
+    private void addActionUnchecked(AccessibilityAction action) {
         if (action == null) {
             return;
         }
@@ -2892,9 +2896,9 @@ public class AccessibilityNodeInfo implements Parcelable {
             addLegacyStandardActions(legacyStandardActions);
             final int nonLegacyActionCount = actionCount - Integer.bitCount(legacyStandardActions);
             for (int i = 0; i < nonLegacyActionCount; i++) {
-                AccessibilityAction action = new AccessibilityAction(
+                final AccessibilityAction action = new AccessibilityAction(
                         parcel.readInt(), parcel.readCharSequence());
-                addAction(action);
+                addActionUnchecked(action);
             }
         }
 
