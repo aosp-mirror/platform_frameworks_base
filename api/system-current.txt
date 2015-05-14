@@ -32204,7 +32204,7 @@ package android.telecom {
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
 
-  public abstract class Conference implements android.telecom.Conferenceable {
+  public abstract class Conference extends android.telecom.Conferenceable {
     ctor public Conference(android.telecom.PhoneAccountHandle);
     method public final boolean addConnection(android.telecom.Connection);
     method public final void destroy();
@@ -32248,10 +32248,10 @@ package android.telecom {
     field public static final long CONNECT_TIME_NOT_SPECIFIED = 0L; // 0x0L
   }
 
-  public abstract interface Conferenceable {
+  public abstract class Conferenceable {
   }
 
-  public abstract class Connection implements android.telecom.Conferenceable {
+  public abstract class Connection extends android.telecom.Conferenceable {
     ctor public Connection();
     method public static java.lang.String capabilitiesToString(int);
     method public static android.telecom.Connection createCanceledConnection();
