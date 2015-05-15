@@ -22,6 +22,7 @@ import android.util.SparseLongArray;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -37,6 +38,7 @@ import java.io.IOException;
 public class KernelUidCpuTimeReader {
     private static final String TAG = "KernelUidCpuTimeReader";
     private static final String sProcFile = "/proc/uid_cputime/show_uid_stat";
+    private static final String sRemoveUidProcFile = "/proc/uid_cputime/remove_uid_range";
 
     /**
      * Callback interface for processing each line of the proc file.
@@ -66,12 +68,22 @@ public class KernelUidCpuTimeReader {
                 final long systemTimeUs = Long.parseLong(splitter.next(), 10);
 
                 if (callback != null) {
+                    long userTimeDeltaUs = userTimeUs;
+                    long systemTimeDeltaUs = systemTimeUs;
                     int index = mLastUserTimeUs.indexOfKey(uid);
-                    if (index < 0) {
-                        callback.onUidCpuTime(uid, userTimeUs, systemTimeUs);
-                    } else {
-                        callback.onUidCpuTime(uid, userTimeUs - mLastUserTimeUs.valueAt(index),
-                                systemTimeUs - mLastSystemTimeUs.valueAt(index));
+                    if (index >= 0) {
+                        userTimeDeltaUs -= mLastUserTimeUs.valueAt(index);
+                        systemTimeDeltaUs -= mLastSystemTimeUs.valueAt(index);
+
+                        if (userTimeDeltaUs < 0 || systemTimeDeltaUs < 0) {
+                            // The UID must have been removed from accounting, then added back.
+                            userTimeDeltaUs = userTimeUs;
+                            systemTimeDeltaUs = systemTimeUs;
+                        }
+                    }
+
+                    if (userTimeDeltaUs != 0 || systemTimeDeltaUs != 0) {
+                        callback.onUidCpuTime(uid, userTimeDeltaUs, systemTimeDeltaUs);
                     }
                 }
                 mLastUserTimeUs.put(uid, userTimeUs);
@@ -79,6 +91,25 @@ public class KernelUidCpuTimeReader {
             }
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read uid_cputime", e);
+        }
+    }
+
+    /**
+     * Removes the UID from the kernel module and from internal accounting data.
+     * @param uid The UID to remove.
+     */
+    public void removeUid(int uid) {
+        int index = mLastUserTimeUs.indexOfKey(uid);
+        if (index >= 0) {
+            mLastUserTimeUs.removeAt(index);
+            mLastSystemTimeUs.removeAt(index);
+        }
+
+        try (FileWriter writer = new FileWriter(sRemoveUidProcFile)) {
+            writer.write(Integer.toString(uid) + "-" + Integer.toString(uid));
+            writer.flush();
+        } catch (IOException e) {
+            Slog.e(TAG, "failed to remove uid from uid_cputime module", e);
         }
     }
 }
