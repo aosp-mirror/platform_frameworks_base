@@ -15,12 +15,20 @@
  */
 package com.android.server.camera;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.hardware.ICameraService;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserManager;
 
 import com.android.server.SystemService;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * CameraService is the system_server analog to the camera service running in mediaserver.
@@ -38,29 +46,78 @@ public class CameraService extends SystemService {
     public static final int NO_EVENT = 0; // NOOP
     public static final int USER_SWITCHED = 1; // User changed, argument is the new user handle
 
+    private final Context mContext;
+    private UserManager mUserManager;
+    private Set<Integer> mEnabledCameraUsers;
+
     public CameraService(Context context) {
         super(context);
+        mContext = context;
     }
 
     @Override
-    public void onStart() {}
+    public void onStart() {
+        mUserManager = UserManager.get(mContext);
+        if (mUserManager == null) {
+            // Should never see this unless someone messes up the SystemServer service boot order.
+            throw new IllegalStateException("UserManagerService must start before CameraService!");
+        }
+    }
+
+    @Override
+    public void onStartUser(int userHandle) {
+        if (mEnabledCameraUsers == null) {
+            // Initialize mediaserver, or update mediaserver if we are recovering from a crash.
+            onSwitchUser(userHandle);
+        }
+    }
 
     @Override
     public void onSwitchUser(int userHandle) {
-        super.onSwitchUser(userHandle);
+        Set<Integer> currentUserHandles = getEnabledUserHandles(userHandle);
+        if (mEnabledCameraUsers == null || !mEnabledCameraUsers.equals(currentUserHandles)) {
+            // Some user handles have been added or removed, update mediaserver.
+            mEnabledCameraUsers = currentUserHandles;
+            notifyMediaserver(USER_SWITCHED, currentUserHandles);
+        }
+    }
 
-        /**
-         * Forward the user switch event to the native camera service running in mediaserver.
-         */
+
+    private Set<Integer> getEnabledUserHandles(int currentUserHandle) {
+        List<UserInfo> userProfiles = mUserManager.getEnabledProfiles(currentUserHandle);
+        Set<Integer> handles = new HashSet<>(userProfiles.size());
+
+        for (UserInfo i : userProfiles) {
+            handles.add(i.id);
+        }
+
+        return handles;
+    }
+
+    private void notifyMediaserver(int eventType, Set<Integer> updatedUserHandles) {
+        // Forward the user switch event to the native camera service running in the mediaserver
+        // process.
         IBinder cameraServiceBinder = getBinderService(CAMERA_SERVICE_BINDER_NAME);
         if (cameraServiceBinder == null) {
-            return; // Camera service not active, there is no need to evict user clients.
+            return; // Camera service not active, cannot evict user clients.
         }
+
         ICameraService cameraServiceRaw = ICameraService.Stub.asInterface(cameraServiceBinder);
+
         try {
-            cameraServiceRaw.notifySystemEvent(USER_SWITCHED, userHandle);
+            cameraServiceRaw.notifySystemEvent(eventType, toArray(updatedUserHandles));
         } catch (RemoteException e) {
-            // Do nothing, if camera service is dead, there is no need to evict user clients.
+            // Not much we can do if camera service is dead.
         }
+    }
+
+    private static int[] toArray(Collection<Integer> c) {
+        int len = c.size();
+        int[] ret = new int[len];
+        int idx = 0;
+        for (Integer i : c) {
+            ret[idx++] = i;
+        }
+        return ret;
     }
 }
