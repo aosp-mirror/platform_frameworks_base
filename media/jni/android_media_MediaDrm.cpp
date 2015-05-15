@@ -99,7 +99,7 @@ struct EventTypes {
 struct EventWhat {
     jint kWhatDrmEvent;
     jint kWhatExpirationUpdate;
-    jint kWhatKeysChange;
+    jint kWhatKeyStatusChange;
 } gEventWhat;
 
 struct KeyTypes {
@@ -221,7 +221,7 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
             jwhat = gEventWhat.kWhatExpirationUpdate;
             break;
          case DrmPlugin::kDrmPluginEventKeysChange:
-            jwhat = gEventWhat.kWhatKeysChange;
+            jwhat = gEventWhat.kWhatKeyStatusChange;
             break;
         default:
             ALOGE("Invalid event DrmPlugin::EventType %d, ignored", (int)eventType);
@@ -609,8 +609,8 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gEventWhat.kWhatDrmEvent = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "EXPIRATION_UPDATE", "I");
     gEventWhat.kWhatExpirationUpdate = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "KEYS_CHANGE", "I");
-    gEventWhat.kWhatKeysChange = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "KEY_STATUS_CHANGE", "I");
+    gEventWhat.kWhatKeyStatusChange = env->GetStaticIntField(clazz, field);
 
     GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_STREAMING", "I");
     gKeyTypes.kKeyTypeStreaming = env->GetStaticIntField(clazz, field);
@@ -618,13 +618,6 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gKeyTypes.kKeyTypeOffline = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_RELEASE", "I");
     gKeyTypes.kKeyTypeRelease = env->GetStaticIntField(clazz, field);
-
-    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_INITIAL", "I");
-    gKeyRequestTypes.kKeyRequestTypeInitial = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_RENEWAL", "I");
-    gKeyRequestTypes.kKeyRequestTypeRenewal = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_RELEASE", "I");
-    gKeyRequestTypes.kKeyRequestTypeRelease = env->GetStaticIntField(clazz, field);
 
     GET_STATIC_FIELD_ID(field, clazz, "CERTIFICATE_TYPE_NONE", "I");
     gCertificateTypes.kCertificateTypeNone = env->GetStaticIntField(clazz, field);
@@ -635,6 +628,13 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_FIELD_ID(gFields.keyRequest.data, clazz, "mData", "[B");
     GET_FIELD_ID(gFields.keyRequest.defaultUrl, clazz, "mDefaultUrl", "Ljava/lang/String;");
     GET_FIELD_ID(gFields.keyRequest.requestType, clazz, "mRequestType", "I");
+
+    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_INITIAL", "I");
+    gKeyRequestTypes.kKeyRequestTypeInitial = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_RENEWAL", "I");
+    gKeyRequestTypes.kKeyRequestTypeRenewal = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_RELEASE", "I");
+    gKeyRequestTypes.kKeyRequestTypeRelease = env->GetStaticIntField(clazz, field);
 
     FIND_CLASS(clazz, "android/media/MediaDrm$ProvisionRequest");
     GET_FIELD_ID(gFields.provisionRequest.data, clazz, "mData", "[B");
