@@ -19,8 +19,6 @@ package android.security.keystore;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.KeyguardManager;
-import android.security.KeyStore;
 
 import java.security.Key;
 import java.security.KeyStore.ProtectionParameter;
@@ -34,8 +32,7 @@ import javax.crypto.Cipher;
  * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore facility</a>. This class
  * specifies parameters such as whether user authentication is required for using the key, what uses
  * the key is authorized for (e.g., only in {@code CTR} mode, or only for signing -- decryption not
- * permitted), whether the key should be encrypted at rest, the key's and validity start and end
- * dates.
+ * permitted), the key's and validity start and end dates.
  *
  * <p>To import a key or key pair into the Android KeyStore, create an instance of this class using
  * the {@link Builder} and pass the instance into {@link java.security.KeyStore#setEntry(String, java.security.KeyStore.Entry, ProtectionParameter) KeyStore.setEntry}
@@ -101,7 +98,6 @@ import javax.crypto.Cipher;
  * }</pre>
  */
 public final class KeyProtection implements ProtectionParameter {
-    private final int mFlags;
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
@@ -115,7 +111,6 @@ public final class KeyProtection implements ProtectionParameter {
     private final int mUserAuthenticationValidityDurationSeconds;
 
     private KeyProtection(
-            int flags,
             Date keyValidityStart,
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
@@ -133,7 +128,6 @@ public final class KeyProtection implements ProtectionParameter {
                     "userAuthenticationValidityDurationSeconds must not be negative");
         }
 
-        mFlags = flags;
         mKeyValidityStart = keyValidityStart;
         mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
         mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
@@ -147,22 +141,6 @@ public final class KeyProtection implements ProtectionParameter {
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
-    }
-
-    /**
-     * @hide
-     */
-    public int getFlags() {
-        return mFlags;
-    }
-
-    /**
-     * Returns {@code true} if the {@link java.security.KeyStore} entry must be encrypted at rest.
-     * This will protect the entry with the secure lock screen credential (e.g., password, PIN, or
-     * pattern).
-     */
-    public boolean isEncryptionAtRestRequired() {
-        return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
     }
 
     /**
@@ -310,7 +288,6 @@ public final class KeyProtection implements ProtectionParameter {
     public final static class Builder {
         private @KeyProperties.PurposeEnum int mPurposes;
 
-        private int mFlags;
         private Date mKeyValidityStart;
         private Date mKeyValidityForOriginationEnd;
         private Date mKeyValidityForConsumptionEnd;
@@ -335,29 +312,6 @@ public final class KeyProtection implements ProtectionParameter {
          */
         public Builder(@KeyProperties.PurposeEnum int purposes) {
             mPurposes = purposes;
-        }
-
-        /**
-         * Sets whether this {@link java.security.KeyStore} entry must be encrypted at rest.
-         * Encryption at rest will protect the entry with the secure lock screen credential (e.g.,
-         * password, PIN, or pattern).
-         *
-         * <p>Note that enabling this feature requires that the secure lock screen (e.g., password,
-         * PIN, pattern) is set up, otherwise setting the {@code KeyStore} entry will fail.
-         * Moreover, this entry will be deleted when the secure lock screen is disabled or reset
-         * (e.g., by the user or a Device Administrator). Finally, this entry cannot be used until
-         * the user unlocks the secure lock screen after boot.
-         *
-         * @see KeyguardManager#isDeviceSecure()
-         */
-        @NonNull
-        public Builder setEncryptionAtRestRequired(boolean required) {
-            if (required) {
-                mFlags |= KeyStore.FLAG_ENCRYPTED;
-            } else {
-                mFlags &= ~KeyStore.FLAG_ENCRYPTED;
-            }
-            return this;
         }
 
         /**
@@ -589,7 +543,6 @@ public final class KeyProtection implements ProtectionParameter {
         @NonNull
         public KeyProtection build() {
             return new KeyProtection(
-                    mFlags,
                     mKeyValidityStart,
                     mKeyValidityForOriginationEnd,
                     mKeyValidityForConsumptionEnd,
