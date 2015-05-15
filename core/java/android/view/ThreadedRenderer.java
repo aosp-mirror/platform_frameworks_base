@@ -19,11 +19,10 @@ package android.view;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -31,7 +30,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
 import android.util.Log;
-import android.util.LongSparseArray;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 
@@ -41,8 +39,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Hardware renderer that proxies the rendering to a render thread. Most calls
@@ -197,10 +193,10 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void setup(int width, int height, Rect surfaceInsets) {
-        final float lightX = width / 2.0f;
+    void setup(int width, int height, AttachInfo attachInfo, Rect surfaceInsets) {
         mWidth = width;
         mHeight = height;
+
         if (surfaceInsets != null && (surfaceInsets.left != 0 || surfaceInsets.right != 0
                 || surfaceInsets.top != 0 || surfaceInsets.bottom != 0)) {
             mHasInsets = true;
@@ -218,10 +214,23 @@ public class ThreadedRenderer extends HardwareRenderer {
             mSurfaceWidth = width;
             mSurfaceHeight = height;
         }
+
         mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
-        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight,
-                lightX, mLightY, mLightZ, mLightRadius,
+        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight, mLightRadius,
                 mAmbientShadowAlpha, mSpotShadowAlpha);
+
+        setLightCenter(attachInfo);
+    }
+
+    @Override
+    void setLightCenter(AttachInfo attachInfo) {
+        // Adjust light position for window offsets.
+        final Point displaySize = attachInfo.mPoint;
+        attachInfo.mDisplay.getRealSize(displaySize);
+        final float lightX = displaySize.x / 2f - attachInfo.mWindowLeft;
+        final float lightY = mLightY - attachInfo.mWindowTop;
+
+        nSetLightCenter(mNativeProxy, lightX, lightY, mLightZ);
     }
 
     @Override
@@ -500,8 +509,9 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native boolean nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height,
-            float lightX, float lightY, float lightZ, float lightRadius,
-            int ambientShadowAlpha, int spotShadowAlpha);
+            float lightRadius, int ambientShadowAlpha, int spotShadowAlpha);
+    private static native void nSetLightCenter(long nativeProxy,
+            float lightX, float lightY, float lightZ);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
     private static native void nDestroy(long nativeProxy);
