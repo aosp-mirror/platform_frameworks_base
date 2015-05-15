@@ -577,46 +577,6 @@ final class BackStackRecord extends FragmentTransaction implements
         return this;
     }
 
-    /** TODO: remove this */
-    @Override
-    public FragmentTransaction setSharedElement(View sharedElement, String name) {
-        String transitionName = sharedElement.getTransitionName();
-        if (transitionName == null) {
-            throw new IllegalArgumentException("Unique transitionNames are required for all" +
-                    " sharedElements");
-        }
-        mSharedElementSourceNames = new ArrayList<String>(1);
-        mSharedElementSourceNames.add(transitionName);
-
-        mSharedElementTargetNames = new ArrayList<String>(1);
-        mSharedElementTargetNames.add(name);
-        return this;
-    }
-
-    /** TODO: remove this */
-    @Override
-    public FragmentTransaction setSharedElements(Pair<View, String>... sharedElements) {
-        if (sharedElements == null || sharedElements.length == 0) {
-            mSharedElementSourceNames = null;
-            mSharedElementTargetNames = null;
-        } else {
-            ArrayList<String> sourceNames = new ArrayList<String>(sharedElements.length);
-            ArrayList<String> targetNames = new ArrayList<String>(sharedElements.length);
-            for (int i = 0; i < sharedElements.length; i++) {
-                String transitionName = sharedElements[i].first.getTransitionName();
-                if (transitionName == null) {
-                    throw new IllegalArgumentException("Unique transitionNames are required for all"
-                            + " sharedElements");
-                }
-                sourceNames.add(transitionName);
-                targetNames.add(sharedElements[i].second);
-            }
-            mSharedElementSourceNames = sourceNames;
-            mSharedElementTargetNames = targetNames;
-        }
-        return this;
-    }
-
     public FragmentTransaction setTransitionStyle(int styleRes) {
         mTransitionStyle = styleRes;
         return this;
