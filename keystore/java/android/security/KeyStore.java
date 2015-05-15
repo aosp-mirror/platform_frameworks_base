@@ -146,10 +146,10 @@ public class KeyStore {
         }
     }
 
-    public State state() {
+    public State state(int userId) {
         final int ret;
         try {
-            ret = mBinder.test();
+            ret = mBinder.getState(userId);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             throw new AssertionError(e);
@@ -161,6 +161,10 @@ public class KeyStore {
             case UNINITIALIZED: return State.UNINITIALIZED;
             default: throw new AssertionError(mError);
         }
+    }
+
+    public State state() {
+        return state(UserHandle.myUserId());
     }
 
     public boolean isUnlocked() {
@@ -211,13 +215,24 @@ public class KeyStore {
         return contains(key, UID_SELF);
     }
 
-    public String[] saw(String prefix, int uid) {
+    /**
+     * List all entries in the keystore for {@code uid} starting with {@code prefix}.
+     */
+    public String[] list(String prefix, int uid) {
         try {
-            return mBinder.saw(prefix, uid);
+            return mBinder.list(prefix, uid);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return null;
         }
+    }
+
+    public String[] list(String prefix) {
+        return list(prefix, UID_SELF);
+    }
+
+    public String[] saw(String prefix, int uid) {
+        return list(prefix, uid);
     }
 
     public String[] saw(String prefix) {
@@ -233,13 +248,23 @@ public class KeyStore {
         }
     }
 
-    public boolean lock() {
+    /**
+     * Attempt to lock the keystore for {@code user}.
+     *
+     * @param user Android user to lock.
+     * @return whether {@code user}'s keystore was locked.
+     */
+    public boolean lock(int userId) {
         try {
-            return mBinder.lock() == NO_ERROR;
+            return mBinder.lock(userId) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
         }
+    }
+
+    public boolean lock() {
+        return lock(UserHandle.myUserId());
     }
 
     /**
@@ -267,13 +292,20 @@ public class KeyStore {
         return unlock(UserHandle.getUserId(Process.myUid()), password);
     }
 
-    public boolean isEmpty() {
+    /**
+     * Check if the keystore for {@code userId} is empty.
+     */
+    public boolean isEmpty(int userId) {
         try {
-            return mBinder.zero() == KEY_NOT_FOUND;
+            return mBinder.isEmpty(userId) != 0;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
         }
+    }
+
+    public boolean isEmpty() {
+        return isEmpty(UserHandle.myUserId());
     }
 
     public boolean generate(String key, int uid, int keyType, int keySize, int flags,
@@ -306,12 +338,7 @@ public class KeyStore {
     }
 
     public boolean delKey(String key, int uid) {
-        try {
-            return mBinder.del_key(key, uid) == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
+        return delete(key, uid);
     }
 
     public boolean delKey(String key) {
@@ -398,36 +425,6 @@ public class KeyStore {
     public boolean clearUid(int uid) {
         try {
             return mBinder.clear_uid(uid) == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
-    }
-
-    public boolean resetUid(int uid) {
-        try {
-            mError = mBinder.reset_uid(uid);
-            return mError == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
-    }
-
-    public boolean syncUid(int sourceUid, int targetUid) {
-        try {
-            mError = mBinder.sync_uid(sourceUid, targetUid);
-            return mError == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
-    }
-
-    public boolean passwordUid(String password, int uid) {
-        try {
-            mError = mBinder.password_uid(password, uid);
-            return mError == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
