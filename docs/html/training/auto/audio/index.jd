@@ -21,6 +21,7 @@ page.image=auto/images/assets/icons/media_app_playback.png
       <li><a href="#config_manifest">Configure Your Manifest</a></li>
       <li><a href="#implement_browser">Build a Browser Service</a></li>
       <li><a href="#implement_callback">Implement Play Controls</a></li>
+      <li><a href="#support_voice">Support Voice Actions</a></li>
     </ol>
 
     <h2>Related Samples</h2>
@@ -28,6 +29,8 @@ page.image=auto/images/assets/icons/media_app_playback.png
     <ul>
       <li><a href="{@docRoot}samples/MediaBrowserService/index.html">
         MediaBrowserService</a></li>
+      <li><a href="//github.com/googlesamples/android-UniversalMusicPlayer">Universal Media
+      Player</a></li>
     </ul>
 
     <h2>See Also</h2>
@@ -58,7 +61,7 @@ href="https://www.youtube.com/watch?v=Q96Sw6v4ULg">
   Drivers want to access their music and other audio content on the road. Audio books, podcasts,
   sports commentary, and recorded talks can make a long trip educational, inspirational, and
   enjoyable. The Android framework allows you to extend your audio app so users can listen to their
-  favorite tunes and audio content using a simpler, safer user interface.
+  favorite tunes and audio content using a simple, yet customizable user interface.
 </p>
 
 <p>
@@ -280,7 +283,7 @@ token with the appropriate menu node or content item.</p>
 <p class="note"><strong>Note:</strong> You should consider providing different content
 hierarchies depending on what client is making the query. In particular, Auto
 applications have strict limits on how large a menu they can display. This is
-intended to prevent distracting the driver, and to make it easy for the driver
+intended to minimize distracting the driver, and to make it easy for the driver
 to operate the app via voice commands. For more information on the Auto user
 experience restrictions, see the <a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">
 Auto Audio Apps</a> guidelines.</p>
@@ -383,7 +386,7 @@ the token with your browser service:</p>
 
 <pre>
 public void onCreate() {
-        super.onCreate();
+    super.onCreate();
 
     ...
     // Start a new MediaSession
@@ -470,3 +473,196 @@ to be played over the car's speakers.</p>
 <a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a>,
 <a href="{@docRoot}training/managing-audio/index.html">Managing Audio Playback</a>, and
 <a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.</p>
+
+
+<h2 id="support_voice">Support Voice Actions</h2>
+
+<p>To reduce driver distractions, you can add voice actions in your audio playback app. With voice
+action support, users can launch your app and play audio by providing voice input on Auto screens.
+If your audio playback app is already active and the user says
+<i>“Play a song”</i>, the system starts playing music without requiring the user to look at or touch
+the screen.</p>
+
+<h3 id="enable_playback">Enable your app to handle audio playback requests</h3>
+
+<p>Enable your audio app to launch with a voice command such as <i>"Play [search query] on
+[your app name]"</i> by adding the following entry in your manifest:</p>
+
+<pre>
+&lt;activity>
+    &lt;intent-filter>
+        &lt;action android:name=
+             "android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+        &lt;category android:name=
+             "android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>When the user says <i>“Play music on [your app name]”</i> on an Auto screen, Auto
+attempts to launch your app and play audio by calling your app’s
+<a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onPlayFromSearch(java.lang.String, android.os.Bundle)"><code>MediaSession.Callback.onPlayFromSearch()</code></a>
+method. If the user has not specified criteria such as a track name or music genre, the
+<a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onPlayFromSearch(java.lang.String, android.os.Bundle)"><code>MediaSession.Callback.onPlayFromSearch()</code></a>
+method receives an empty query parameter. Your app should respond by immediately playing audio, such
+as a song from a random queue or the most recent playlist.
+</p>
+
+<h3 id="parse_voice">Parse the voice query to build the playback queue</h3>
+
+<p>When a user searches for a specific criteria, such as <i>“Play jazz on [your app name]”</i>
+or <i>“Listen to [song title]”</i>, the
+<a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onPlayFromSearch(java.lang.String, android.os.Bundle)"><code>onPlayFromSearch()</code></a>
+callback method receives the voice search results in the query parameter and an extras bundle. For
+more information on how to handle search queries to play audio content, see
+<a href="https://developer.android.com/guide/components/intents-common.html#PlaySearch">Play music
+based on a search query</a>.
+</p>
+
+<p>To parse the voice search query to play back audio content in your app, follow these steps:</p>
+
+<ol>
+  <li>Use the extras bundle and search query string returned from the voice search to filter
+  results.</li>
+  <li>Build the audio content queue based on these results.</li>
+  <li>Play the audio content.</li>
+</ol>
+
+<p>The
+<a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onPlayFromSearch(java.lang.String, android.os.Bundle)"><code>onPlayFromSearch()</code></a>
+method takes an extras parameter with more detailed information from the voice search.
+These extras help you find the audio content in your app for playback. If the search results are
+unable to provide this data, you can implement logic to parse the raw search query and play the
+appropriate tracks based on the query.
+</p>
+
+<p>The following extras are supported in Android Auto:</p>
+
+<ul>
+  <li><a href="{@docRoot}reference/android/provider/MediaStore.html#EXTRA_MEDIA_ALBUM"><code>android.intent.extra.album</code></a></li>
+  <li><a href="{@docRoot}reference/android/provider/MediaStore.html#EXTRA_MEDIA_ARTIST"><code>android.intent.extra.artist</code></a></li>
+  <li><a href="{@docRoot}reference/android/provider/MediaStore.html#EXTRA_MEDIA_GENRE"><code>android.intent.extra.genre</code></a></li>
+  <li><a href="{@docRoot}reference/android/provider/MediaStore.html#EXTRA_MEDIA_PLAYLIST"><code>android.intent.extra.playlist</code></a></li>
+  <li><a href="{@docRoot}reference/android/provider/MediaStore.html#EXTRA_MEDIA_TITLE"><code>android.intent.extra.title</code></a></li>
+</ul>
+
+<p>The following snippet shows how to override the
+<a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onPlayFromSearch(java.lang.String, android.os.Bundle)"><code>onPlayFromSearch()</code></a>
+method in your
+<a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html"><code>MediaSession.Callback</code></a>
+implementation to handle the search query and extras for playing audio content in your app:
+</p>
+
+<pre>
+&#64;Override
+public void onPlayFromSearch(String query, Bundle extras) {
+    if (TextUtils.isEmpty(query)) {
+        // The user provided generic string e.g. 'Play music'
+        // Build appropriate playlist queue
+    } else {
+        // Build a queue based on songs that match "query" or "extras" param
+        String mediaFocus = extras.getString(MediaStore.EXTRA_MEDIA_FOCUS);
+        if (TextUtils.equals(mediaFocus,
+                MediaStore.Audio.Artists.ENTRY_CONTENT_TYPE)) {
+            isArtistFocus = true;
+            artist = extras.getString(MediaStore.EXTRA_MEDIA_ARTIST);
+        } else if (TextUtils.equals(mediaFocus,
+                MediaStore.Audio.Albums.ENTRY_CONTENT_TYPE)) {
+            isAlbumFocus = true;
+            album = extras.getString(MediaStore.EXTRA_MEDIA_ALBUM);
+        }
+
+        // Implement additional "extras" param filtering
+    }
+
+    // Implement your logic to retrieve the queue
+    if (isArtistFocus) {
+        result = searchMusicByArtist(artist);
+    } else if (isAlbumFocus) {
+        result = searchMusicByAlbum(album);
+    }
+
+    if (result == null) {
+        // No focus found, search by query for song title
+        result = searchMusicBySongTitle(query);
+    }
+
+    if (result != null && !result.isEmpty()) {
+        // Immediately start playing from the beginning of the search results
+        // Implement your logic to start playing music
+        playMusic(result);
+    } else {
+        // Handle no queue found. Stop playing if the app
+        // is currently playing a song
+    }
+}
+</pre>
+
+<p class="note">
+  <strong>Note:</strong> To minimize driver distractions, immediately initiate audio content
+  playback in the
+  <a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onPlayFromSearch(java.lang.String, android.os.Bundle)"><code>onPlayFromSearch()</code></a>
+  method when you have generated the audio content queue based on the user's request.
+</p>
+
+<p>For a more detailed example on how to implement voice search to play audio content in your app,
+see the
+<a href="//github.com/googlesamples/android-UniversalMusicPlayer/">Universal Media Player</a>
+sample.
+</p>
+
+<h3 id="implement_playback_controls">Implement playback control actions</h3>
+
+<p>To provide a hands-free experience while users drive and listen to audio content in Android Auto,
+your app should allow users to control audio content playback with voice actions. When users speak
+commands such as <i>“Next song”</i>, <i>“Pause music”</i>, or <i>“Resume music”</i>, the system
+triggers the corresponding callback method where you implement the playback control action.
+</p>
+
+<p>To provide voice-enabled playback controls, first enable the hardware controls by setting these
+flags in your app’s
+<a href="{@docRoot}reference/android/media/session/MediaSession.html"><code>MediaSession</code></a>
+object:
+</p>
+
+<pre>
+mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
+    MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+</pre>
+
+<p>Then, implement the callback methods with the playback controls that you support in your app.
+Here’s a list of voice-enabled playback controls supported by Android Auto:
+</p>
+
+<table>
+  <tr>
+    <th>Example phrase</th>
+    <th>Callback method</th>
+  </tr>
+  <tr>
+    <td><i>"Next song"</i></td>
+    <td><a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onSkipToNext()"><code>onSkipToNext()</code></a></td>
+  </tr>
+  <tr>
+    <td><i>"Previous song"</i></td>
+    <td><a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onSkipToPrevious()"><code>onSkipToPrevious()</code></a></td>
+  </tr>
+  <tr>
+    <td><i>"Pause music"</i></td>
+    <td><a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onPause()"><code>onPause()</code></a></td>
+  </tr>
+  <tr>
+    <td><i>"Stop music"</i></td>
+    <td><a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onStop()"><code>onStop()</code></a></td>
+  </tr>
+  <tr>
+    <td><i>"Resume music"</i></td>
+    <td><a href="{@docRoot}reference/android/media/session/MediaSession.Callback.html#onPlay()"><code>onPlay()</code></a></td>
+  </tr>
+</table>
+
+<p>For a more detailed example on how to implement voice-enabled playback actions in your app, see
+the
+<a href="//github.com/googlesamples/android-UniversalMusicPlayer/">Universal Media Player</a>
+sample.
+</p>
