@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.Rect;
-import android.media.MediaPlayer;
-import android.media.tv.DvbDeviceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -44,7 +42,6 @@ import android.view.View;
 
 import com.android.internal.util.Preconditions;
 
-import java.lang.IllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -1298,11 +1295,11 @@ public final class TvInputManager {
      * {@link DvbDeviceInfo}
      *
      * @param info A {@link DvbDeviceInfo} to open a DVB device.
-     * @param device A DVB device. The DVB device can be {@link DVB_DEVICE_DEMUX},
-     *            {@link DVB_DEVICE_DVR} or {@link DVB_DEVICE_FRONTEND}.
+     * @param device A DVB device. The DVB device can be {@link #DVB_DEVICE_DEMUX},
+     *            {@link #DVB_DEVICE_DVR} or {@link #DVB_DEVICE_FRONTEND}.
      * @return a {@link ParcelFileDescriptor} of a specified DVB device for a given
-     *            {@link DvbDeviceInfo}, or {@code null} if the given {@link DvbDeviceInfo} was
-     *            invalid or the specified DVB device was busy with a previous request.
+     *         {@link DvbDeviceInfo}, or {@code null} if the given {@link DvbDeviceInfo} was invalid
+     *         or the specified DVB device was busy with a previous request.
      * @hide
      */
     public ParcelFileDescriptor openDvbDevice(DvbDeviceInfo info, int device) {
@@ -1764,9 +1761,6 @@ public final class TvInputManager {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
-            }
-            if (audioMode != MediaPlayer.PLAYBACK_RATE_AUDIO_MODE_RESAMPLE) {
-                throw new IllegalArgumentException("Unknown audio playback mode " + audioMode);
             }
             try {
                 mService.timeShiftSetPlaybackRate(mToken, rate, audioMode, mUserId);
