@@ -89,6 +89,7 @@ public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
     private KeyStore mKeyStore;
 
     private KeyGenParameterSpec mSpec;
+    private boolean mEncryptionAtRestRequired;
     private @KeyProperties.KeyAlgorithmEnum String mKeyAlgorithm;
     private int mKeyType;
     private int mKeySize;
@@ -123,7 +124,7 @@ public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
 
         }
 
-        final int flags = mSpec.getFlags();
+        final int flags = (mEncryptionAtRestRequired) ? KeyStore.FLAG_ENCRYPTED : 0;
         if (((flags & KeyStore.FLAG_ENCRYPTED) != 0)
                 && (mKeyStore.state() != KeyStore.State.UNLOCKED)) {
             throw new IllegalStateException(
@@ -296,6 +297,7 @@ public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
 
         String keyAlgorithm;
         KeyGenParameterSpec spec;
+        boolean encryptionAtRestRequired = false;
         if (params instanceof KeyPairGeneratorSpec) {
             KeyPairGeneratorSpec legacySpec = (KeyPairGeneratorSpec) params;
             try {
@@ -353,7 +355,7 @@ public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
                 specBuilder.setCertificateSerialNumber(legacySpec.getSerialNumber());
                 specBuilder.setCertificateNotBefore(legacySpec.getStartDate());
                 specBuilder.setCertificateNotAfter(legacySpec.getEndDate());
-                specBuilder.setEncryptionAtRestRequired(legacySpec.isEncryptionRequired());
+                encryptionAtRestRequired = legacySpec.isEncryptionRequired();
                 specBuilder.setUserAuthenticationRequired(false);
 
                 spec = specBuilder.build();
@@ -390,6 +392,7 @@ public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
         mKeyType = keyType;
         mKeySize = keySize;
         mSpec = spec;
+        mEncryptionAtRestRequired = encryptionAtRestRequired;
         mKeyStore = KeyStore.getInstance();
     }
 }
