@@ -23,6 +23,7 @@ import android.app.Notification.Builder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -204,6 +205,7 @@ public class NotificationManager
                 notification.sound.checkFileUriExposed("Notification.sound");
             }
         }
+        fixLegacySmallIcon(notification, pkg);
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         Notification stripped = notification.clone();
         Builder.stripForDelivery(stripped);
@@ -231,6 +233,7 @@ public class NotificationManager
                 notification.sound.checkFileUriExposed("Notification.sound");
             }
         }
+        fixLegacySmallIcon(notification, pkg);
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         Notification stripped = notification.clone();
         Builder.stripForDelivery(stripped);
@@ -241,6 +244,12 @@ public class NotificationManager
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
         } catch (RemoteException e) {
+        }
+    }
+
+    private void fixLegacySmallIcon(Notification n, String pkg) {
+        if (n.getSmallIcon() == null && n.icon != 0) {
+            n.setSmallIcon(Icon.createWithResource(pkg, n.icon));
         }
     }
 
