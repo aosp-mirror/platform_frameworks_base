@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
@@ -380,6 +382,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         if (mService != null && isEnabled()
