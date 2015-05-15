@@ -615,6 +615,7 @@ public final class BatteryStatsHelper {
                 mStatsType);
         if (bs.sumPower() > 0) {
             aggregateSippers(bs, mBluetoothSippers, "Bluetooth");
+            mUsageList.add(bs);
         }
     }
 
