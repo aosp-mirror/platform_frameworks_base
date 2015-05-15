@@ -2404,8 +2404,7 @@
     <permission android:name="android.permission.REMOVE_DRM_CERTIFICATES"
         android:protectionLevel="signature|system" />
 
-    <!-- Must be required by a {@link android.service.carrier.CarrierMessagingService}.
-         Any service that filters for this intent must be a carrier privileged app. -->
+    <!-- @deprecated Use {@link android.Manifest.permission#BIND_CARRIER_SERVICES} instead -->
     <permission android:name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"
         android:protectionLevel="signature|system" />
 
@@ -2427,13 +2426,12 @@
                 android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
                 android:protectionLevel="signature" />
 
-    <!-- The system process that pulls carrier configuration from carrier apps will
-         have this permission. Carrier apps that provide
-         {@link android.service.carrier.CarrierConfigService} should require this
-         permission for clients binding to their service. -->
-    <permission android:name="android.permission.BIND_CARRIER_CONFIG_SERVICE"
-        android:label="@string/permlab_bindCarrierConfigService"
-        android:description="@string/permdesc_bindCarrierConfigService"
+    <!-- The system process that is allowed to bind to services in carrier apps will
+         have this permission. Carrier apps should use this permission to protect
+         their services that only the system is allowed to bind to. -->
+    <permission android:name="android.permission.BIND_CARRIER_SERVICES"
+        android:label="@string/permlab_bindCarrierServices"
+        android:description="@string/permdesc_bindCarrierServices"
         android:protectionLevel="signature|system" />
 
     <!-- Allows an application to query whether DO_NOT_ASK_CREDENTIALS_ON_BOOT
