@@ -16,8 +16,10 @@
 
 package com.android.server;
 
+import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readStringAttribute;
+import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -37,6 +39,7 @@ import android.content.res.ObbInfo;
 import android.mtp.MtpStorage;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
 import android.os.FileUtils;
@@ -174,6 +177,7 @@ class MountService extends IMountService.Stub
     private static final boolean WATCHDOG_ENABLE = false;
 
     private static final String TAG = "MountService";
+    private static final String TAG_STORAGE_BENCHMARK = "storage_benchmark";
 
     private static final String VOLD_TAG = "VoldConnector";
 
@@ -233,6 +237,7 @@ class MountService extends IMountService.Stub
         public static final int VOLUME_DESTROYED = 659;
 
         public static final int MOVE_STATUS = 660;
+        public static final int BENCHMARK_RESULT = 661;
 
         /*
          * 700 series - fstrim
@@ -247,6 +252,7 @@ class MountService extends IMountService.Stub
     private static final String TAG_VOLUMES = "volumes";
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_PRIMARY_STORAGE_UUID = "primaryStorageUuid";
+    private static final String ATTR_FORCE_ADOPTABLE = "forceAdoptable";
     private static final String TAG_VOLUME = "volume";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_FS_UUID = "fsUuid";
@@ -276,6 +282,8 @@ class MountService extends IMountService.Stub
     private ArrayMap<String, VolumeRecord> mRecords = new ArrayMap<>();
     @GuardedBy("mLock")
     private String mPrimaryStorageUuid;
+    @GuardedBy("mLock")
+    private boolean mForceAdoptable;
 
     /** Map from disk ID to latches */
     @GuardedBy("mLock")
@@ -810,7 +818,8 @@ class MountService extends IMountService.Stub
                 if (cooked.length != 3) break;
                 final String id = cooked[1];
                 int flags = Integer.parseInt(cooked[2]);
-                if (SystemProperties.getBoolean(StorageManager.PROP_FORCE_ADOPTABLE, false)) {
+                if (SystemProperties.getBoolean(StorageManager.PROP_FORCE_ADOPTABLE, false)
+                        || mForceAdoptable) {
                     flags |= DiskInfo.FLAG_ADOPTABLE;
                 }
                 mDisks.put(id, new DiskInfo(id, flags));
@@ -924,6 +933,12 @@ class MountService extends IMountService.Stub
             case VoldResponseCode.MOVE_STATUS: {
                 final int status = Integer.parseInt(cooked[1]);
                 onMoveStatusLocked(status);
+                break;
+            }
+
+            case VoldResponseCode.BENCHMARK_RESULT: {
+                final DropBoxManager dropBox = mContext.getSystemService(DropBoxManager.class);
+                dropBox.addText(TAG_STORAGE_BENCHMARK, raw);
                 break;
             }
 
@@ -1199,6 +1214,7 @@ class MountService extends IMountService.Stub
     private void readSettingsLocked() {
         mRecords.clear();
         mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
+        mForceAdoptable = false;
 
         FileInputStream fis = null;
         try {
@@ -1220,6 +1236,7 @@ class MountService extends IMountService.Stub
                             mPrimaryStorageUuid = readStringAttribute(in,
                                     ATTR_PRIMARY_STORAGE_UUID);
                         }
+                        mForceAdoptable = readBooleanAttribute(in, ATTR_FORCE_ADOPTABLE, false);
 
                     } else if (TAG_VOLUME.equals(tag)) {
                         final VolumeRecord rec = readVolumeRecord(in);
@@ -1249,6 +1266,7 @@ class MountService extends IMountService.Stub
             out.startTag(null, TAG_VOLUMES);
             writeIntAttribute(out, ATTR_VERSION, VERSION_FIX_PRIMARY);
             writeStringAttribute(out, ATTR_PRIMARY_STORAGE_UUID, mPrimaryStorageUuid);
+            writeBooleanAttribute(out, ATTR_FORCE_ADOPTABLE, mForceAdoptable);
             final int size = mRecords.size();
             for (int i = 0; i < size; i++) {
                 final VolumeRecord rec = mRecords.valueAt(i);
@@ -1406,6 +1424,19 @@ class MountService extends IMountService.Stub
     }
 
     @Override
+    public long benchmark(String volId) {
+        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+        waitForReady();
+
+        try {
+            final NativeDaemonEvent res = mConnector.execute("volume", "benchmark", volId);
+            return Long.parseLong(res.getMessage());
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
     public void partitionPublic(String diskId) {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         waitForReady();
@@ -1512,6 +1543,21 @@ class MountService extends IMountService.Stub
 
             if (!Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, mPrimaryStorageUuid)) {
                 mPrimaryStorageUuid = getDefaultPrimaryStorageUuid();
+            }
+
+            writeSettingsLocked();
+            resetIfReadyAndConnected();
+        }
+    }
+
+    @Override
+    public void setDebugFlags(int flags, int mask) {
+        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        waitForReady();
+
+        synchronized (mLock) {
+            if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
+                mForceAdoptable = (flags & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0;
             }
 
             writeSettingsLocked();
@@ -3014,6 +3060,7 @@ class MountService extends IMountService.Stub
 
             pw.println();
             pw.println("Primary storage UUID: " + mPrimaryStorageUuid);
+            pw.println("Force adoptable: " + mForceAdoptable);
         }
 
         synchronized (mObbMounts) {
