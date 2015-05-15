@@ -129,6 +129,7 @@ import android.app.INotificationManager;
 import android.app.IProcessObserver;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
+import android.app.IUidObserver;
 import android.app.IUiAutomationConnection;
 import android.app.IUserSwitchObserver;
 import android.app.Instrumentation;
@@ -253,7 +254,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class ActivityManagerService extends ActivityManagerNative
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
 
-    private static final String USER_DATA_DIR = "/data/user/";
     // File that stores last updated system version and called preboot receivers
     static final String CALLED_PRE_BOOTS_FILENAME = "called_pre_boots.dat";
 
@@ -278,6 +278,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static final String TAG_SERVICE = TAG + POSTFIX_SERVICE;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
+    private static final String TAG_UID_OBSERVERS = TAG + POSTFIX_UID_OBSERVERS;
     private static final String TAG_URI_PERMISSION = TAG + POSTFIX_URI_PERMISSION;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
 
@@ -655,9 +656,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     long mPreviousProcessVisibleTime;
 
     /**
+     * Track all uids that have actively running processes.
+     */
+    final SparseArray<UidRecord> mActiveUids = new SparseArray<>();
+
+    /**
      * Which uses have been started, so are allowed to run code.
      */
-    final SparseArray<UserStartedState> mStartedUsers = new SparseArray<UserStartedState>();
+    final SparseArray<UserStartedState> mStartedUsers = new SparseArray<>();
 
     /**
      * LRU list of history of current users.  Most recently current is at the end.
@@ -1023,6 +1029,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     private IVoiceInteractionSession mRunningVoice;
 
     /**
+     * For some direct access we need to power manager.
+     */
+    PowerManagerInternal mLocalPowerManager;
+
+    /**
      * We want to hold a wake lock while running a voice interaction session, since
      * this may happen with the screen off and we need to keep the CPU running to
      * be able to continue to interact with the user.
@@ -1174,7 +1185,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final long[] mTmpLong = new long[1];
 
-    static class ProcessChangeItem {
+    static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
         static final int CHANGE_PROCESS_STATE = 1<<1;
         int changes;
@@ -1184,14 +1195,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean foregroundActivities;
     }
 
-    final RemoteCallbackList<IProcessObserver> mProcessObservers
-            = new RemoteCallbackList<IProcessObserver>();
+    final RemoteCallbackList<IProcessObserver> mProcessObservers = new RemoteCallbackList<>();
     ProcessChangeItem[] mActiveProcessChanges = new ProcessChangeItem[5];
 
-    final ArrayList<ProcessChangeItem> mPendingProcessChanges
-            = new ArrayList<ProcessChangeItem>();
-    final ArrayList<ProcessChangeItem> mAvailProcessChanges
-            = new ArrayList<ProcessChangeItem>();
+    final ArrayList<ProcessChangeItem> mPendingProcessChanges = new ArrayList<>();
+    final ArrayList<ProcessChangeItem> mAvailProcessChanges = new ArrayList<>();
+
+    final RemoteCallbackList<IUidObserver> mUidObservers = new RemoteCallbackList<>();
+    UidRecord.ChangeItem[] mActiveUidChanges = new UidRecord.ChangeItem[5];
+
+    final ArrayList<UidRecord.ChangeItem> mPendingUidChanges = new ArrayList<>();
+    final ArrayList<UidRecord.ChangeItem> mAvailUidChanges = new ArrayList<>();
 
     /**
      * Runtime CPU use collection thread.  This object's lock is used to
@@ -1316,6 +1330,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 51;
     static final int DELETE_DUMPHEAP_MSG = 52;
     static final int FOREGROUND_PROFILE_CHANGED_MSG = 53;
+    static final int DISPATCH_UIDS_CHANGED = 54;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1538,6 +1553,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 d.dismiss();
                 break;
             }
+            case DISPATCH_PROCESSES_CHANGED: {
+                dispatchProcessesChanged();
+                break;
+            }
+            case DISPATCH_PROCESS_DIED: {
+                final int pid = msg.arg1;
+                final int uid = msg.arg2;
+                dispatchProcessDied(pid, uid);
+                break;
+            }
+            case DISPATCH_UIDS_CHANGED: {
+                dispatchUidsChanged();
+            } break;
             }
         }
     }
@@ -1723,16 +1751,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
                 }
             } break;
-            case DISPATCH_PROCESSES_CHANGED: {
-                dispatchProcessesChanged();
-                break;
-            }
-            case DISPATCH_PROCESS_DIED: {
-                final int pid = msg.arg1;
-                final int uid = msg.arg2;
-                dispatchProcessDied(pid, uid);
-                break;
-            }
             case REPORT_MEM_USAGE_MSG: {
                 final ArrayList<ProcessMemInfo> memInfos = (ArrayList<ProcessMemInfo>)msg.obj;
                 Thread thread = new Thread() {
@@ -2091,7 +2109,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.pid = MY_PID;
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
-                mProcessNames.put(app.processName, app.uid, app);
                 synchronized (mPidsSelfLocked) {
                     mPidsSelfLocked.put(app.pid, app);
                 }
@@ -2343,6 +2360,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void initPowerManagement() {
         mStackSupervisor.initPowerManagement();
         mBatteryStatsService.initPowerManagement();
+        mLocalPowerManager = LocalServices.getService(PowerManagerInternal.class);
         PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         mVoiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*voice*");
         mVoiceWakeLock.setReferenceCounted(false);
@@ -3073,10 +3091,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return null;
             }
             app.crashHandler = crashHandler;
-            mProcessNames.put(processName, app.uid, app);
-            if (isolated) {
-                mIsolatedProcesses.put(app.uid, app);
-            }
             checkTime(startTime, "startProcess: done creating new process record");
         } else {
             // If this is a new package in the process, add the package to the list
@@ -3562,7 +3576,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mActiveProcessChanges = new ProcessChangeItem[N];
             }
             mPendingProcessChanges.toArray(mActiveProcessChanges);
-            mAvailProcessChanges.addAll(mPendingProcessChanges);
             mPendingProcessChanges.clear();
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                     "*** Delivering " + N + " process changes");
@@ -3595,6 +3608,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         mProcessObservers.finishBroadcast();
+
+        synchronized (this) {
+            for (int j=0; j<N; j++) {
+                mAvailProcessChanges.add(mActiveProcessChanges[j]);
+            }
+        }
     }
 
     private void dispatchProcessDied(int pid, int uid) {
@@ -3610,6 +3629,67 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         mProcessObservers.finishBroadcast();
+    }
+
+    private void dispatchUidsChanged() {
+        int N;
+        synchronized (this) {
+            N = mPendingUidChanges.size();
+            if (mActiveUidChanges.length < N) {
+                mActiveUidChanges = new UidRecord.ChangeItem[N];
+            }
+            for (int i=0; i<N; i++) {
+                final UidRecord.ChangeItem change = mPendingUidChanges.get(i);
+                mActiveUidChanges[i] = change;
+                change.uidRecord.pendingChange = null;
+                change.uidRecord = null;
+            }
+            mPendingUidChanges.clear();
+            if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                    "*** Delivering " + N + " uid changes");
+        }
+
+        if (mLocalPowerManager != null) {
+            for (int j=0; j<N; j++) {
+                UidRecord.ChangeItem item = mActiveUidChanges[j];
+                if (item.gone) {
+                    mLocalPowerManager.uidGone(item.uid);
+                } else {
+                    mLocalPowerManager.updateUidProcState(item.uid, item.processState);
+                }
+            }
+        }
+
+        int i = mUidObservers.beginBroadcast();
+        while (i > 0) {
+            i--;
+            final IUidObserver observer = mUidObservers.getBroadcastItem(i);
+            if (observer != null) {
+                try {
+                    for (int j=0; j<N; j++) {
+                        UidRecord.ChangeItem item = mActiveUidChanges[j];
+                        if (item.gone) {
+                            if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                                    "UID gone uid=" + item.uid);
+                            observer.onUidGone(item.uid);
+                        } else {
+                            if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                                    "UID CHANGED uid=" + item.uid
+                                    + ": " + item.processState);
+                            observer.onUidStateChanged(item.uid, item.processState);
+                        }
+                    }
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mUidObservers.finishBroadcast();
+
+        synchronized (this) {
+            for (int j=0; j<N; j++) {
+                mAvailUidChanges.add(mActiveUidChanges[j]);
+            }
+        }
     }
 
     @Override
@@ -5623,6 +5703,47 @@ public final class ActivityManagerService extends ActivityManagerNative
         return didSomething;
     }
 
+    private final ProcessRecord removeProcessNameLocked(final String name, final int uid) {
+        ProcessRecord old = mProcessNames.remove(name, uid);
+        if (old != null) {
+            old.uidRecord.numProcs--;
+            if (old.uidRecord.numProcs == 0) {
+                // No more processes using this uid, tell clients it is gone.
+                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                        "No more processes in " + old.uidRecord);
+                enqueueUidChangeLocked(old.uidRecord, true);
+                mActiveUids.remove(uid);
+            }
+            old.uidRecord = null;
+        }
+        mIsolatedProcesses.remove(uid);
+        return old;
+    }
+
+    private final void addProcessNameLocked(ProcessRecord proc) {
+        // We shouldn't already have a process under this name, but just in case we
+        // need to clean up whatever may be there now.
+        ProcessRecord old = removeProcessNameLocked(proc.processName, proc.uid);
+        if (old != null) {
+            Slog.wtf(TAG, "Already have existing proc " + old + " when adding " + proc);
+        }
+        UidRecord uidRec = mActiveUids.get(proc.uid);
+        if (uidRec == null) {
+            uidRec = new UidRecord(proc.uid);
+            // This is the first appearance of the uid, report it now!
+            if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                    "Creating new process uid: " + uidRec);
+            mActiveUids.put(proc.uid, uidRec);
+            enqueueUidChangeLocked(uidRec, false);
+        }
+        proc.uidRecord = uidRec;
+        uidRec.numProcs++;
+        mProcessNames.put(proc.processName, proc.uid, proc);
+        if (proc.isolated) {
+            mIsolatedProcesses.put(proc.uid, proc);
+        }
+    }
+
     private final boolean removeProcessLocked(ProcessRecord app,
             boolean callerWillRestart, boolean allowRestart, String reason) {
         final String name = app.processName;
@@ -5630,8 +5751,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (DEBUG_PROCESSES) Slog.d(TAG_PROCESSES,
             "Force removing proc " + app.toShortString() + " (" + name + "/" + uid + ")");
 
-        mProcessNames.remove(name, uid);
-        mIsolatedProcesses.remove(app.uid);
+        removeProcessNameLocked(name, uid);
         if (mHeavyWeightProcess == app) {
             mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
                     mHeavyWeightProcess.userId, 0));
@@ -5684,8 +5804,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, "Process " + app + " failed to attach");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_START_TIMEOUT, app.userId,
                     pid, app.uid, app.processName);
-            mProcessNames.remove(app.processName, app.uid);
-            mIsolatedProcesses.remove(app.uid);
+            removeProcessNameLocked(app.processName, app.uid);
             if (mHeavyWeightProcess == app) {
                 mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
                         mHeavyWeightProcess.userId, 0));
@@ -9885,7 +10004,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     final ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
             boolean isolated, int isolatedUid) {
         String proc = customProcess != null ? customProcess : info.processName;
-        BatteryStatsImpl.Uid.Proc ps = null;
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
@@ -9920,6 +10038,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
             r.persistent = true;
         }
+        addProcessNameLocked(r);
         return r;
     }
 
@@ -9934,10 +10053,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (app == null) {
             app = newProcessRecordLocked(info, null, isolated, 0);
-            mProcessNames.put(info.processName, app.uid, app);
-            if (isolated) {
-                mIsolatedProcesses.put(app.uid, app);
-            }
             updateLruProcessLocked(app, false, null);
             updateOomAdjLocked();
         }
@@ -10610,6 +10725,21 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void unregisterProcessObserver(IProcessObserver observer) {
         synchronized (this) {
             mProcessObservers.unregister(observer);
+        }
+    }
+
+    public void registerUidObserver(IUidObserver observer) {
+        enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
+                "registerUidObserver()");
+        synchronized (this) {
+            mUidObservers.register(observer);
+        }
+    }
+
+    @Override
+    public void unregisterUidObserver(IUidObserver observer) {
+        synchronized (this) {
+            mUidObservers.unregister(observer);
         }
     }
 
@@ -12932,6 +13062,20 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        if (mActiveUids.size() > 0) {
+            if (needSep) {
+                pw.println();
+            }
+            pw.println("  UID states:");
+            for (int i=0; i<mActiveUids.size(); i++) {
+                UidRecord uidRec = mActiveUids.valueAt(i);
+                pw.print("    UID "); UserHandle.formatUid(pw, uidRec.uid);
+                pw.print(": "); pw.println(uidRec);
+            }
+            needSep = true;
+            printedAnything = true;
+        }
+
         if (mLruProcesses.size() > 0) {
             if (needSep) {
                 pw.println();
@@ -15174,7 +15318,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mAvailProcessChanges.add(item);
             }
         }
-        mHandler.obtainMessage(DISPATCH_PROCESS_DIED, app.pid, app.info.uid, null).sendToTarget();
+        mUiHandler.obtainMessage(DISPATCH_PROCESS_DIED, app.pid, app.info.uid, null).sendToTarget();
 
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
@@ -15185,8 +15329,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (!app.persistent || app.isolated) {
             if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
                     "Removing non-persistent process during cleanup: " + app);
-            mProcessNames.remove(app.processName, app.uid);
-            mIsolatedProcesses.remove(app.uid);
+            removeProcessNameLocked(app.processName, app.uid);
             if (mHeavyWeightProcess == app) {
                 mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
                         mHeavyWeightProcess.userId, 0));
@@ -15218,7 +15361,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (index < 0) {
                 ProcessList.remove(app.pid);
             }
-            mProcessNames.put(app.processName, app.uid, app);
+            addProcessNameLocked(app);
             startProcessLocked(app, "restart", app.processName);
             return true;
         } else if (app.pid > 0 && app.pid != MY_PID) {
@@ -18310,7 +18453,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (NA > 0) {
                     item = mAvailProcessChanges.remove(NA-1);
                     if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
-                            "Retreiving available item: " + item);
+                            "Retrieving available item: " + item);
                 } else {
                     item = new ProcessChangeItem();
                     if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
@@ -18322,7 +18465,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (mPendingProcessChanges.size() == 0) {
                     if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                             "*** Enqueueing dispatch processes changed!");
-                    mHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED).sendToTarget();
+                    mUiHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED).sendToTarget();
                 }
                 mPendingProcessChanges.add(item);
             }
@@ -18339,6 +18482,31 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         return success;
+    }
+
+    private final void enqueueUidChangeLocked(UidRecord uidRec, boolean gone) {
+        if (uidRec.pendingChange == null) {
+            if (mPendingUidChanges.size() == 0) {
+                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                        "*** Enqueueing dispatch uid changed!");
+                mUiHandler.obtainMessage(DISPATCH_UIDS_CHANGED).sendToTarget();
+            }
+            final int NA = mAvailUidChanges.size();
+            if (NA > 0) {
+                uidRec.pendingChange = mAvailUidChanges.remove(NA-1);
+                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                        "Retrieving available item: " + uidRec.pendingChange);
+            } else {
+                uidRec.pendingChange = new UidRecord.ChangeItem();
+                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                        "Allocating new item: " + uidRec.pendingChange);
+            }
+            uidRec.pendingChange.uidRecord = uidRec;
+            uidRec.pendingChange.uid = uidRec.uid;
+            mPendingUidChanges.add(uidRec.pendingChange);
+        }
+        uidRec.pendingChange.gone = gone;
+        uidRec.pendingChange.processState = uidRec.setProcState;
     }
 
     private void maybeUpdateUsageStats(ProcessRecord app) {
@@ -18482,6 +18650,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             RuntimeException e = new RuntimeException();
             e.fillInStackTrace();
             Slog.i(TAG, "updateOomAdj: top=" + TOP_ACT, e);
+        }
+
+        // Reset state in all uid records.
+        for (int i=mActiveUids.size()-1; i>=0; i--) {
+            final UidRecord uidRec = mActiveUids.valueAt(i);
+            if (false && DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                    "Starting update of " + uidRec);
+            uidRec.reset();
         }
 
         mAdjSeq++;
@@ -18631,6 +18807,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // good to avoid having whatever code was running in them
                     // left sitting around after no longer needed.
                     app.kill("isolated not needed", true);
+                } else {
+                    // Keeping this process, update its uid.
+                    final UidRecord uidRec = app.uidRecord;
+                    if (uidRec != null && uidRec.curProcState > app.curProcState) {
+                        uidRec.curProcState = app.curProcState;
+                    }
                 }
 
                 if (app.curProcState >= ActivityManager.PROCESS_STATE_HOME
@@ -18824,6 +19006,18 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (allChanged) {
             requestPssAllProcsLocked(now, false, mProcessStats.isMemFactorLowered());
+        }
+
+        // Update from any uid changes.
+        for (int i=mActiveUids.size()-1; i>=0; i--) {
+            final UidRecord uidRec = mActiveUids.valueAt(i);
+            if (uidRec.setProcState != uidRec.curProcState) {
+                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
+                        "Changes in " + uidRec + ": proc state from " + uidRec.setProcState
+                        + " to " + uidRec.curProcState);
+                uidRec.setProcState = uidRec.curProcState;
+                enqueueUidChangeLocked(uidRec, false);
+            }
         }
 
         if (mProcessStats.shouldWriteNowLocked(now)) {

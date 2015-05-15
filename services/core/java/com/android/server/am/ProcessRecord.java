@@ -62,8 +62,8 @@ final class ProcessRecord {
     final int userId;           // user of process.
     final String processName;   // name of the process
     // List of packages running in the process
-    final ArrayMap<String, ProcessStats.ProcessStateHolder> pkgList
-            = new ArrayMap<String, ProcessStats.ProcessStateHolder>();
+    final ArrayMap<String, ProcessStats.ProcessStateHolder> pkgList = new ArrayMap<>();
+    UidRecord uidRecord;        // overall state of process's uid.
     ArraySet<String> pkgDeps;   // additional packages we have a dependency on
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
@@ -142,24 +142,20 @@ final class ProcessRecord {
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     Runnable crashHandler;      // Optional local handler to be invoked in the process crash.
 
-    // contains HistoryRecord objects
-    final ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
+    // all activities running in the process
+    final ArrayList<ActivityRecord> activities = new ArrayList<>();
     // all ServiceRecord running in this process
-    final ArraySet<ServiceRecord> services = new ArraySet<ServiceRecord>();
+    final ArraySet<ServiceRecord> services = new ArraySet<>();
     // services that are currently executing code (need to remain foreground).
-    final ArraySet<ServiceRecord> executingServices
-             = new ArraySet<ServiceRecord>();
+    final ArraySet<ServiceRecord> executingServices = new ArraySet<>();
     // All ConnectionRecord this process holds
-    final ArraySet<ConnectionRecord> connections
-            = new ArraySet<ConnectionRecord>();
+    final ArraySet<ConnectionRecord> connections = new ArraySet<>();
     // all IIntentReceivers that are registered from this process.
-    final ArraySet<ReceiverList> receivers = new ArraySet<ReceiverList>();
+    final ArraySet<ReceiverList> receivers = new ArraySet<>();
     // class (String) -> ContentProviderRecord
-    final ArrayMap<String, ContentProviderRecord> pubProviders
-            = new ArrayMap<String, ContentProviderRecord>();
+    final ArrayMap<String, ContentProviderRecord> pubProviders = new ArrayMap<>();
     // All ContentProviderRecord process is using
-    final ArrayList<ContentProviderConnection> conProviders
-            = new ArrayList<ContentProviderConnection>();
+    final ArrayList<ContentProviderConnection> conProviders = new ArrayList<>();
 
     boolean execServicesFg;     // do we need to be executing services in the foreground?
     boolean persistent;         // always keep this application running?

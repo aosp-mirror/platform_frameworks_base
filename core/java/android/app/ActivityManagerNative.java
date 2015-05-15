@@ -1970,6 +1970,22 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case REGISTER_UID_OBSERVER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IUidObserver observer = IUidObserver.Stub.asInterface(
+                    data.readStrongBinder());
+            registerUidObserver(observer);
+            return true;
+        }
+
+        case UNREGISTER_UID_OBSERVER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IUidObserver observer = IUidObserver.Stub.asInterface(
+                    data.readStrongBinder());
+            unregisterUidObserver(observer);
+            return true;
+        }
+
         case GET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION:
         {
             data.enforceInterface(IActivityManager.descriptor);
@@ -5079,6 +5095,28 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(observer != null ? observer.asBinder() : null);
         mRemote.transact(UNREGISTER_PROCESS_OBSERVER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void registerUidObserver(IUidObserver observer) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(observer != null ? observer.asBinder() : null);
+        mRemote.transact(REGISTER_UID_OBSERVER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void unregisterUidObserver(IUidObserver observer) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(observer != null ? observer.asBinder() : null);
+        mRemote.transact(UNREGISTER_UID_OBSERVER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

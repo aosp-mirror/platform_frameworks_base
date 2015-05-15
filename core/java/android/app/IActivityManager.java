@@ -387,6 +387,9 @@ public interface IActivityManager extends IInterface {
     public void registerProcessObserver(IProcessObserver observer) throws RemoteException;
     public void unregisterProcessObserver(IProcessObserver observer) throws RemoteException;
 
+    public void registerUidObserver(IUidObserver observer) throws RemoteException;
+    public void unregisterUidObserver(IUidObserver observer) throws RemoteException;
+
     public boolean isIntentSenderTargetedToPackage(IIntentSender sender) throws RemoteException;
 
     public boolean isIntentSenderAnActivity(IIntentSender sender) throws RemoteException;
@@ -846,4 +849,6 @@ public interface IActivityManager extends IInterface {
     int UPDATE_DEVICE_OWNER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+295;
     int UPDATE_PREFERRED_SETUP_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+296;
     int KEYGUARD_GOING_AWAY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+297;
+    int REGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+298;
+    int UNREGISTER_UID_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+299;
 }
