@@ -31,7 +31,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"video"
   },
   {
-    "title":"Whats New in Google Play",
+    "title":"What's New in GPFE",
     "titleFriendly":"",
     "summary":"Learn about the vision and philosophy behind Google Play for Education",
     "url":"https://www.youtube.com/watch?v=IKhU180eJMo",
@@ -44,6 +44,124 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image":"http://i1.ytimg.com/vi/IKhU180eJMo/maxresdefault.jpg",
     "type":"video"
   },
+  {
+    "title":"Get started with Google Cast",
+    "titleFriendly":"",
+    "summary":"Build multi-screen experiences, let the user send video and audio content to TVs and speakers.",
+    "url":"https://developers.google.com/cast/docs/ux_guidelines",
+    "group":"",
+    "keywords": ["cast", "chromecast", "video", "audio"],
+    "tags": [],
+    "image":"images/cards/card-cast_2x.jpg",
+    "type":"Guide"
+  },
+  {
+    "title":"Android Sender Applications",
+    "titleFriendly":"",
+    "summary":"Get an overview of how your Android app can act as a Google Cast sender app.",
+    "url":"https://developers.google.com/cast/docs/android_sender",
+    "group":"",
+    "keywords": ["cast", "sender"],
+    "tags": [],
+    "image":"images/cards/card-cast_2x.jpg",
+    "type":"Guide"
+  },
+  {
+    "title":"Cast sample apps",
+    "titleFriendly":"",
+    "summary":"Get example Google Cast applications for both senders and receivers.",
+    "url":"http://www.github.com/googlecast",
+    "group":"",
+    "keywords": ["cast", "samples"],
+    "tags": [],
+    "image":"images/cards/card-cast_2x.jpg",
+    "type":"Samples"
+  },
+  {
+    "title":"Get Cardboard",
+    "titleFriendly":"",
+    "summary":"Get your own Cardboard, today. Buy one from a manufacturer or build your own, and start developing.",
+    "url":"https://www.google.com/get/cardboard/",
+    "group":"",
+    "keywords": ["carboard","vr"],
+    "tags": [],
+    "image":"images/cards/card-cardboard_2x.jpg",
+    "type":"Guide"
+  },
+    {
+    "title":"Download the Cardboard SDK",
+    "titleFriendly":"",
+    "summary":"Grab the Cardboard libraries from GitHub and start creating VR apps in your favorite development environment.",
+    "url":"https://developers.google.com/cardboard/android/download",
+    "group":"",
+    "keywords": ["carboard","vr"],
+    "tags": [],
+    "image":"images/cards/card-cardboard_2x.png",
+    "type":"Guide"
+  },
+  {
+    "title":"Cardboard design guidelines",
+    "titleFriendly":"",
+    "summary":"Focus on overall usability and avoiding common VR pitfalls while creating an immersive experience of your own.",
+    "url":"http://www.google.com/design/spec-vr",
+    "group":"",
+    "keywords": ["carboard","vr"],
+    "tags": [],
+    "image":"images/cards/card-cardboard_2x.png",
+    "type":"Design"
+  },
+
+
+
+  {
+    "title":"Maps",
+    "titleFriendly":"",
+    "summary":"Give users the map that more than a billion people use every month.",
+    "url":"https://developers.google.com/maps/documentation/android/",
+    "group":"",
+    "keywords": ["maps"],
+    "tags": [],
+    "image":"images/google/gps-maps.png",
+    "type":"Guide"
+  },
+    {
+    "title":"Places API",
+    "titleFriendly":"",
+    "summary":"give your users contextual information about where they are, when they’re there.",
+    "url":"https://developers.google.com/places/android/",
+    "group":"",
+    "keywords": ["places","location", "context"],
+    "tags": [],
+    "image":"images/cards/card-places_2x.png",
+    "type":"Guide"
+  },
+    {
+    "title":"Google Cloud Messaging",
+    "titleFriendly":"",
+    "summary":"Send push notifications and pubsub from your server to your users’ devices around the world.",
+    "url":"https://developers.google.com/gcm/android/",
+    "group":"",
+    "keywords": ["push","gcm"],
+    "tags": [],
+    "image":"images/gcm/gcm-logo.png",
+    "type":"Guide"
+  },
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   {
     "title":"ClassDojo Developer Story",
     "titleFriendly":"",
@@ -229,7 +347,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["auto"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/KNKGM4ss5Sc/maxresdefault.jpg",
+    "image":"http://i1.ytimg.com/vi/ctiaVxgclsg/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -1255,6 +1373,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
+    "url": "https://developers.google.com/+/mobile/android/sign-in",
+    "timestamp": 1194884220000,
+    "image": 'images/google/gps-googleplus.png',
+    "title": "Sign-in with Google",
+    "summary": "Get users into your app quickly and securely.",
+    "keywords": ["signin", "Google+"],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
     "url": "https://support.google.com/googleplay/android-developer/answer/2528691",
     "timestamp": 1194884220000,
     "image": "images/play_dev.jpg",
@@ -1541,12 +1672,12 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "lang": "en",
     "group": "",
-    "tags": ["analytics"],
+    "tags": [],
     "url": "https://developers.google.com/analytics/devguides/collection/android/",
     "timestamp": null,
-    "image": "https://developers.google.com/analytics/images/home/gear-logo.png",
-    "title": "Google Mobile App Analytics SDK",
-    "summary": "Get started with the Google Analytics SDK for Android.",
+    "image": "images/cards/analytics-mobile_2x.jpg",
+    "title": "Mobile App Analytics",
+    "summary": "Measure everything about your app. Get started with the Google Analytics SDK for Android.",
     "keywords": ["analytics, user behavior"],
     "type": "sdk",
     "titleFriendly": ""
@@ -2572,7 +2703,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "title":"Scale with Google Cloud Platform",
     "titleFriendly":"",
-    "summary":"With Google Cloud Platform, developers can build, test and deploy applications on Google's highly-scalable and reliable infrastructure for your web, mobile and backend solutions.",
+    "summary":"Build, test, and deploy applications on Google's highly-scalable and reliable infrastructure for your web, mobile and backend solutions.",
     "url":"https://cloud.google.com/docs/",
     "group":"",
     "keywords": [],
@@ -2932,21 +3063,21 @@ var CAROUSEL_OVERRIDE = {
     "title": "Designed for Families",
     "summary": "Introducing a new Google Play section to promote family friendly apps. Your apps in the program can benefit from enhanced discoverability in addition to maintaining their existing categories, rankings, and reviews elsewhere on the Google Play store."
   },
-  "http://www.youtube.com/watch?v=Pd49vTkvu0U": {
+  "http://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
     "image": "images/distribute/hero-jelly-button.jpg",
     "title": "How Jelly Button Games are growing globally through data",
     "summary": "To really understand their users, Jelly Button Games analyses over 3 billion events each month using Google Analytics and Google BigQuery."
   },
-  "http://www.youtube.com/watch?v=700gYRkhkLM": {
+  "http://www.youtube.com/watch?v=700gYRkhkLM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
     "image": "images/distribute/hero-outfit7.jpg",
     "title": "Outfit7 — Building an entertainment company with Google",
     "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories...."
   },
-  "http://www.youtube.com/watch?v=MPnH7h12h0U": {
+  "http://www.youtube.com/watch?v=MPnH7h12h0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
     "image": "images/distribute/hero-haystack.jpg",
     "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen."
   },
-  "http://www.youtube.com/watch?v=ekxABqJeRBc": {
+  "http://www.youtube.com/watch?v=ekxABqJeRBc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c": {
     "image": "images/distribute/hero-ginlemon.jpg",
     "title": "How GinLemon is breaking through with Google Play",
     "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy."
