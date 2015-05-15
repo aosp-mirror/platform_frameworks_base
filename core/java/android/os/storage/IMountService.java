@@ -1005,6 +1005,22 @@ public interface IMountService extends IInterface {
             }
 
             @Override
+            public long benchmark(String volId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(volId);
+                    mRemote.transact(Stub.TRANSACTION_benchmark, _data, _reply, 0);
+                    _reply.readException();
+                    return _reply.readLong();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
             public void partitionPublic(String diskId) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -1105,6 +1121,22 @@ public interface IMountService extends IInterface {
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     mRemote.transact(Stub.TRANSACTION_forgetAllVolumes, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void setDebugFlags(int _flags, int _mask) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(_flags);
+                    _data.writeInt(_mask);
+                    mRemote.transact(Stub.TRANSACTION_setDebugFlags, _data, _reply, 0);
                     _reply.readException();
                 } finally {
                     _reply.recycle();
@@ -1256,6 +1288,9 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_getPrimaryStorageUuid = IBinder.FIRST_CALL_TRANSACTION + 57;
         static final int TRANSACTION_setPrimaryStorageUuid = IBinder.FIRST_CALL_TRANSACTION + 58;
+
+        static final int TRANSACTION_benchmark = IBinder.FIRST_CALL_TRANSACTION + 59;
+        static final int TRANSACTION_setDebugFlags = IBinder.FIRST_CALL_TRANSACTION + 60;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1726,6 +1761,14 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
+                case TRANSACTION_benchmark: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volId = data.readString();
+                    long res = benchmark(volId);
+                    reply.writeNoException();
+                    reply.writeLong(res);
+                    return true;
+                }
                 case TRANSACTION_partitionPublic: {
                     data.enforceInterface(DESCRIPTOR);
                     String diskId = data.readString();
@@ -1775,6 +1818,14 @@ public interface IMountService extends IInterface {
                 case TRANSACTION_forgetAllVolumes: {
                     data.enforceInterface(DESCRIPTOR);
                     forgetAllVolumes();
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_setDebugFlags: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int _flags = data.readInt();
+                    int _mask = data.readInt();
+                    setDebugFlags(_flags, _mask);
                     reply.writeNoException();
                     return true;
                 }
@@ -2088,6 +2139,7 @@ public interface IMountService extends IInterface {
     public void mount(String volId) throws RemoteException;
     public void unmount(String volId) throws RemoteException;
     public void format(String volId) throws RemoteException;
+    public long benchmark(String volId) throws RemoteException;
 
     public void partitionPublic(String diskId) throws RemoteException;
     public void partitionPrivate(String diskId) throws RemoteException;
@@ -2097,6 +2149,7 @@ public interface IMountService extends IInterface {
     public void setVolumeUserFlags(String fsUuid, int flags, int mask) throws RemoteException;
     public void forgetVolume(String fsUuid) throws RemoteException;
     public void forgetAllVolumes() throws RemoteException;
+    public void setDebugFlags(int flags, int mask) throws RemoteException;
 
     public String getPrimaryStorageUuid() throws RemoteException;
     public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback)
