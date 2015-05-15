@@ -151,7 +151,9 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         mAnimating = true;
 
         if (!isRunning()) {
-            run();
+            // Start from 0th frame.
+            setFrame(0, false, mAnimationState.getChildCount() > 1
+                    || !mAnimationState.mOneShot);
         }
     }
 
