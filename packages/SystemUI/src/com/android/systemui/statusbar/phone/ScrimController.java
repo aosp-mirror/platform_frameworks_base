@@ -45,7 +45,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public static final long ANIMATION_DURATION = 220;
 
     private static final float SCRIM_BEHIND_ALPHA = 0.62f;
-    private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.55f;
+    private static final float SCRIM_BEHIND_ALPHA_KEYGUARD = 0.45f;
     private static final float SCRIM_BEHIND_ALPHA_UNLOCKING = 0.2f;
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
     private static final int TAG_KEY_ANIM = R.id.scrim;
