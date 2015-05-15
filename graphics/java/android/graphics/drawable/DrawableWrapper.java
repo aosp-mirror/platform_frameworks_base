@@ -432,7 +432,8 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
 
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations | mDrawableState.getChangingConfigurations();
+            return mChangingConfigurations
+                    | (mDrawableState != null ? mDrawableState.getChangingConfigurations() : 0);
         }
 
         public boolean canConstantState() {
