@@ -16,9 +16,13 @@
 
 package android.widget;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.GetChars;
+import android.text.Selection;
+import android.text.Spannable;
 
 /**
  * TextViewTest tests {@link TextView}.
@@ -53,5 +57,67 @@ public class TextViewTest extends AndroidTestCase {
         assertEquals('W', c2[3]);
         assertEquals('o', c2[4]);
         assertEquals('\0', c2[5]);
+    }
+
+    public void testProcessTextActivityResultNonEditable() {
+        TextView tv = new TextView(mContext);
+        CharSequence originalText = "This is some text.";
+        tv.setText(originalText, TextView.BufferType.SPANNABLE);
+        assertEquals(originalText, tv.getText().toString());
+        tv.setTextIsSelectable(true);
+        Selection.setSelection((Spannable) tv.getText(), 0, tv.getText().length());
+
+        CharSequence newText = "Text is replaced.";
+        Intent data = new Intent();
+        data.putExtra(Intent.EXTRA_PROCESS_TEXT, newText);
+        tv.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK, data);
+
+        // This is a TextView, which can't be modified. Hence no change should have been made.
+        assertEquals(originalText, tv.getText().toString());
+    }
+
+    public void testProcessTextActivityResultEditable() {
+        EditText tv = new EditText(mContext);
+        CharSequence originalText = "This is some text.";
+        tv.setText(originalText, TextView.BufferType.SPANNABLE);
+        assertEquals(originalText, tv.getText().toString());
+        tv.setTextIsSelectable(true);
+        Selection.setSelection(tv.getText(), 0, tv.getText().length());
+
+        CharSequence newText = "Text is replaced.";
+        Intent data = new Intent();
+        data.putExtra(Intent.EXTRA_PROCESS_TEXT, newText);
+        tv.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK, data);
+
+        assertEquals(newText, tv.getText().toString());
+    }
+
+    public void testProcessTextActivityResultCancel() {
+        EditText tv = new EditText(mContext);
+        CharSequence originalText = "This is some text.";
+        tv.setText(originalText, TextView.BufferType.SPANNABLE);
+        assertEquals(originalText, tv.getText().toString());
+        tv.setTextIsSelectable(true);
+        Selection.setSelection(tv.getText(), 0, tv.getText().length());
+
+        CharSequence newText = "Text is replaced.";
+        Intent data = new Intent();
+        data.putExtra(Intent.EXTRA_PROCESS_TEXT, newText);
+        tv.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_CANCELED, data);
+
+        assertEquals(originalText, tv.getText().toString());
+    }
+
+    public void testProcessTextActivityNoData() {
+        EditText tv = new EditText(mContext);
+        CharSequence originalText = "This is some text.";
+        tv.setText(originalText, TextView.BufferType.SPANNABLE);
+        assertEquals(originalText, tv.getText().toString());
+        tv.setTextIsSelectable(true);
+        Selection.setSelection(tv.getText(), 0, tv.getText().length());
+
+        tv.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK, null);
+
+        assertEquals(originalText, tv.getText().toString());
     }
 }
