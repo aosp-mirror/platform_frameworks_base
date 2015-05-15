@@ -1,5 +1,7 @@
 page.title=Google Play Developer API
 page.tags="In-app Billing", "Google Play", "inapp billing", "in app billing", "iab", "billing", "publishing"
+page.image=/images/play_dev.jpg
+page.metaDescription=A REST-based web service for remote app publishing and catalog management through Google Play.
 
 
 @jd:body
@@ -23,8 +25,8 @@ page.tags="In-app Billing", "Google Play", "inapp billing", "in app billing", "i
 
   <h2>See also</h2>
   <ol>
-    <li><a href="https://developers.google.com/android-publisher/">Google Play
-        Developer API</a> documentation</li>
+    <li><a href="https://developers.google.com/android-publisher/">
+        Developer API reference</a></li>
     <li><a href="https://support.google.com/googleplay/android-developer/answer/6071616">Google
         Help Center</a> overview of the Google Play Developer API</li>
   </ol>
@@ -51,8 +53,6 @@ app-management tasks, including:</p>
     app subscriptions</li>
 </li>
 </ul>
-
-
 
 <p>The Google Play Developer API lets you focus on designing and developing your
 app, while spending less time and effort managing your releases, even as you

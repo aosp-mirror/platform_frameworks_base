@@ -1,0 +1,49 @@
+page.title=Stream Your Content with Google Cast
+page.metaDescription=Let users stream your video and audio content to TVs and speakers.
+page.image=images/cards/card-cast_2x.jpg
+page.tags=cast, video, chromecast
+@jd:body
+
+<p>
+  The average person spends 3 hours per day watching the TV. With Google Cast
+  you make it easy for users to include your content as part of their viewing
+  schedule. All they need is an Android TV, a TV with a Chromecast plugged in,
+  or a Cast for audio device connected to their audio system.
+</p>
+
+<div>
+<img src="{@docRoot}images/distribute/cast.jpg">
+</div>
+
+<p>
+  Google Cast is a great way to add value and convenience to your content
+  consumption apps, and extend their engagement with your users.
+</p>
+
+<p>
+  <a href="https://developers.google.com/cast/">Find out how to get your app Google
+  Cast-ready</a>. 
+</p>
+
+<h2 id="tips">Tips</h2>
+<ul>
+  <li>Cast devices can be low-power devices with memory, CPU, and GPU limitations,
+  so the receiver application should be as lightweight as possible.</li>
+  <li>User interaction should only take place on the Cast sender (phone, tablet,
+  or Chrome browser), not the Cast receiver.</li>
+  <li>While content is loading, provide animated loading indicators and use transitions
+  to help make things feel faster on the Cast sender interface.</li>
+  <li>Let users know your app is “Google Card-enabled” in your store listing and use
+  the <a href="https://developers.google.com/cast/docs/ux_guidelines#brand-guidelines">Google
+  Cast badge</a> on your website and marketing materials.</li>
+</ul>
+
+<h2 style="clear:both" id="related-resources">Related Resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/cast"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+
