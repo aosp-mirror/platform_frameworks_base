@@ -82,6 +82,9 @@ public class StorageManager {
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
 
+    /** {@hide} */
+    public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
+
     private final Context mContext;
     private final ContentResolver mResolver;
 
