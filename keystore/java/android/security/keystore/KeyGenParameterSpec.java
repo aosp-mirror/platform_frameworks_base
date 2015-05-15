@@ -16,12 +16,10 @@
 
 package android.security.keystore;
 
-import android.app.KeyguardManager;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.text.TextUtils;
-import android.security.KeyStore;
 
 import java.math.BigInteger;
 import java.security.KeyPairGenerator;
@@ -37,8 +35,8 @@ import javax.security.auth.x500.X500Principal;
  * {@link AlgorithmParameterSpec} for initializing a {@link KeyPairGenerator} or a
  * {@link KeyGenerator} of the <a href="{@docRoot}training/articles/keystore.html">Android Keystore
  * system</a>. The spec determines whether user authentication is required for using the key, what
- * uses the key is authorized for (e.g., only for signing -- decryption not permitted), whether the
- * key should be encrypted at rest, the key's and validity start and end dates.
+ * uses the key is authorized for (e.g., only for signing -- decryption not permitted), the key's
+ * validity start and end dates.
  *
  * <p>To generate an asymmetric key pair or a symmetric key, create an instance of this class using
  * the {@link Builder}, initialize a {@code KeyPairGenerator} or a {@code KeyGenerator} of the
@@ -127,7 +125,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private final BigInteger mCertificateSerialNumber;
     private final Date mCertificateNotBefore;
     private final Date mCertificateNotAfter;
-    private final int mFlags;
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
@@ -151,7 +148,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             BigInteger certificateSerialNumber,
             Date certificateNotBefore,
             Date certificateNotAfter,
-            int flags,
             Date keyValidityStart,
             Date keyValidityForOriginationEnd,
             Date keyValidityForConsumptionEnd,
@@ -195,7 +191,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mCertificateSerialNumber = certificateSerialNumber;
         mCertificateNotBefore = certificateNotBefore;
         mCertificateNotAfter = certificateNotAfter;
-        mFlags = flags;
         mKeyValidityStart = keyValidityStart;
         mKeyValidityForOriginationEnd = keyValidityForOriginationEnd;
         mKeyValidityForConsumptionEnd = keyValidityForConsumptionEnd;
@@ -268,29 +263,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     @NonNull
     public Date getCertificateNotAfter() {
         return mCertificateNotAfter;
-    }
-
-    /**
-     * @hide
-     */
-    public int getFlags() {
-        return mFlags;
-    }
-
-    /**
-     * Returns {@code true} if the key must be encrypted at rest. This will protect the key with the
-     * secure lock screen credential (e.g., password, PIN, or pattern).
-     *
-     * <p>Note that encrypting the key at rest requires that the secure lock screen (e.g., password,
-     * PIN, pattern) is set up, otherwise key generation will fail. Moreover, this key will be
-     * deleted when the secure lock screen is disabled or reset (e.g., by the user or a Device
-     * Administrator). Finally, this key cannot be used until the user unlocks the secure lock
-     * screen after boot.
-     *
-     * @see KeyguardManager#isDeviceSecure()
-     */
-    public boolean isEncryptionAtRestRequired() {
-        return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
     }
 
     /**
@@ -450,7 +422,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private BigInteger mCertificateSerialNumber;
         private Date mCertificateNotBefore;
         private Date mCertificateNotAfter;
-        private int mFlags;
         private Date mKeyValidityStart;
         private Date mKeyValidityForOriginationEnd;
         private Date mKeyValidityForConsumptionEnd;
@@ -572,28 +543,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                 throw new NullPointerException("date == null");
             }
             mCertificateNotAfter = date;
-            return this;
-        }
-
-        /**
-         * Sets whether this key pair or key must be encrypted at rest. This will protect the key
-         * pair or key with the secure lock screen credential (e.g., password, PIN, or pattern).
-         *
-         * <p>Note that enabling this feature requires that the secure lock screen (e.g., password,
-         * PIN, pattern) is set up, otherwise key generation will fail. Moreover, this key will be
-         * deleted when the secure lock screen is disabled or reset (e.g., by the user or a Device
-         * Administrator). Finally, this key cannot be used until the user unlocks the secure lock
-         * screen after boot.
-         *
-         * @see KeyguardManager#isDeviceSecure()
-         */
-        @NonNull
-        public Builder setEncryptionAtRestRequired(boolean required) {
-            if (required) {
-                mFlags |= KeyStore.FLAG_ENCRYPTED;
-            } else {
-                mFlags &= ~KeyStore.FLAG_ENCRYPTED;
-            }
             return this;
         }
 
@@ -839,7 +788,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                     mCertificateSerialNumber,
                     mCertificateNotBefore,
                     mCertificateNotAfter,
-                    mFlags,
                     mKeyValidityStart,
                     mKeyValidityForOriginationEnd,
                     mKeyValidityForConsumptionEnd,
