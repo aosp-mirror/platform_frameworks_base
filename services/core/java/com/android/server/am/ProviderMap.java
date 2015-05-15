@@ -205,8 +205,11 @@ public final class ProviderMap {
     boolean collectForceStopProviders(String name, int appId,
             boolean doit, boolean evenPersistent, int userId,
             ArrayList<ContentProviderRecord> result) {
-        boolean didSomething = collectForceStopProvidersLocked(name, appId, doit,
-                evenPersistent, userId, mSingletonByClass, result);
+        boolean didSomething = false;
+        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_OWNER) {
+            didSomething = collectForceStopProvidersLocked(name, appId, doit,
+                    evenPersistent, userId, mSingletonByClass, result);
+        }
         if (!doit && didSomething) {
             return true;
         }
