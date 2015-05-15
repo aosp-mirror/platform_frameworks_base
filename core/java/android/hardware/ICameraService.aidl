@@ -81,5 +81,5 @@ interface ICameraService
      *
      * Callers require the android.permission.CAMERA_SEND_SYSTEM_EVENTS permission.
      */
-    oneway void notifySystemEvent(int eventId, int arg0);
+    oneway void notifySystemEvent(int eventId, in int[] args);
 }
