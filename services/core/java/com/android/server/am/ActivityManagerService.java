@@ -2441,7 +2441,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            long[] cpuSpeedTimes = mProcessCpuTracker.getLastCpuSpeedTimes();
             final BatteryStatsImpl bstats = mBatteryStatsService.getActiveStatistics();
             synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
@@ -2472,7 +2471,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                                 pr.info.uid, pr.processName);
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime - otherUTime,
-                                            st.rel_stime - otherSTime, cpuSpeedTimes);
+                                            st.rel_stime - otherSTime);
                                     pr.curCpuTime += st.rel_utime + st.rel_stime;
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
@@ -2481,7 +2480,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                                 bstats.mapUid(st.uid), st.name);
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime - otherUTime,
-                                            st.rel_stime - otherSTime, cpuSpeedTimes);
+                                            st.rel_stime - otherSTime);
                                 }
                             }
                             final int userTime = mProcessCpuTracker.getLastUserTime();
@@ -2492,7 +2491,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             final int idleTime = mProcessCpuTracker.getLastIdleTime();
                             bstats.finishAddingCpuLocked(perc, remainUTime,
                                     remainSTime, totalUTime, totalSTime, userTime, systemTime,
-                                    iowaitTime, irqTime, softIrqTime, idleTime, cpuSpeedTimes);
+                                    iowaitTime, irqTime, softIrqTime, idleTime);
                         }
                     }
                 }
