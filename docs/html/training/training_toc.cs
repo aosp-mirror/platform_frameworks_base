@@ -672,12 +672,59 @@ include the action bar on devices running Android 2.1 or higher."
   <!-- End connectivity and cloud -->
 
 
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/building-location.html">
+      <span class="small">Building Apps with</span><br/>
+              Location &amp; Maps
+      </a>
+    </div>
+    <ul>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/location/index.html"
+             description="How to add location-aware features to your app by getting the user's current location.">
+             Making Your App Location-Aware
+          </a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/location/retrieve-current.html">
+            Getting the Last Known Location
+            </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/location/receive-location-updates.html">
+            Receiving Location Updates
+            </a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/location/display-address.html">
+            Displaying a Location Address
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/location/geofencing.html">
+            Creating and Monitoring Geofences
+          </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-section">
+        <a href="<?cs var:toroot ?>training/maps/index.html"
+           description="How to add maps and mapping information to your app.">
+           Adding Maps
+        </a>
+      </li>
+    </ul>
+  </li>
+  <!-- End location and maps -->
+
 
   <li class="nav-section">
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/building-userinfo.html">
       <span class="small">Building Apps with</span><br/>
-              User Info &amp; Location
+              User Info &amp; Sign-In
       </a>
     </div>
     <ul>
@@ -712,39 +759,15 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
-
       <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/location/index.html"
-             description="How to add location-aware features to your app by getting the user's current location.">
-             Making Your App Location-Aware
-          </a>
-        </div>
-        <ul>
-          <li>
-            <a href="<?cs var:toroot ?>training/location/retrieve-current.html">
-            Getting the Last Known Location
-            </a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot ?>training/location/receive-location-updates.html">
-            Receiving Location Updates
-            </a>
-          </li>
-          <li>
-            <a href="<?cs var:toroot ?>training/location/display-address.html">
-            Displaying a Location Address
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/location/geofencing.html">
-            Creating and Monitoring Geofences
-          </a>
-          </li>
-        </ul>
+        <a href="<?cs var:toroot ?>training/sign-in/index.html"
+           description="How to add user sign-in functionality to your app.">
+           Adding Sign-In
+        </a>
       </li>
     </ul>
   </li>
-  <!-- End privacy and location -->
+  <!-- End user info and sign-in -->
 
 
   <li class="nav-section">
@@ -1802,19 +1825,18 @@ results."
           >Updating Your Security Provider to Protect Against SSL Exploits</a>
       </li>
 
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/enterprise/index.html"
-             description=
-             "How to implement device management policies for enterprise-oriented apps."
-            >Developing for Enterprise</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/enterprise/device-management-policy.html">
-            Enhancing Security with Device Management Policies
-          </a>
-          </li>
-        </ul>
+      <li>
+        <a href="<?cs var:toroot ?>training/safetynet/index.html"
+           description=
+           "How to use the SafetyNet service to analyze a device where your app is running
+            and get information about its compatibility with your app."
+          >Checking Device Compatibility with SafetyNet</a>
+      </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/enterprise/device-management-policy.html"
+            description="How to create an application that enforces security policies on devices."
+            >Enhancing Security with Device Management Policies</a>
       </li>
     </ul>
   </li>
@@ -1952,21 +1974,6 @@ results."
           </li>
           <li><a href="<?cs var:toroot ?>training/multiple-apks/multiple.html">
             Creating Multiple APKs with 2+ Dimensions
-          </a>
-          </li>
-        </ul>
-      </li>
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/monetization/index.html"
-             description=
-             "How to implement monetization strategies for your app without compromising
-             the user experience."
-            >Monetizing Your App</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/monetization/ads-and-ux.html">
-            Advertising without Compromising User Experience
           </a>
           </li>
         </ul>

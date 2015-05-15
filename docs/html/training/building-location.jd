@@ -1,0 +1,11 @@
+page.title=Building Apps with Location &amp; Maps
+page.trainingcourse=true
+
+@jd:body
+
+
+<p>
+  These classes teach you how to add user location and mapping information to your app.
+  Make your app more helpful and relevant to users by providing information about where
+  they are and the world around them.
+</p>

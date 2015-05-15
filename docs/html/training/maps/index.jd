@@ -1,0 +1,70 @@
+page.title=Adding Maps
+page.tags=mapview,location
+page.article=true
+page.trainingcourse=true
+@jd:body
+
+
+<img src="{@docRoot}images/google/gps-maps.png"
+  width="300"
+  style="float:right;margin:0 0 20px 20px"
+  alt="Google maps sample image">
+
+<p>
+  Allow your users to explore the world with rich maps provided by Google. Identify
+  locations with custom markers, augment the map data with image overlays, embed one
+  or more maps as fragments, and much more.
+</p>
+
+<p>
+  The <a href="https://developers.google.com/maps/documentation/android/">Google
+  Maps Android API</a> allows you to include maps and customized mapping information
+  in your app.
+</p>
+
+
+<h2 id="features">Key Developer Features</h2>
+
+<h4>Add maps to your app</h4>
+<p>
+  With Google Maps Android API v2, you can embed maps into an activity as a fragment with a simple
+  XML snippet. The new Maps offer exciting features such as 3D maps; indoor, satellite, terrain,
+  and hybrid maps; vector-based tiles for efficient caching and drawing; animated transitions; and
+  much more. <a class="external-link" href=
+  "https://developers.google.com/maps/documentation/android/map">Add a map object</a>.
+</p>
+
+<h4>Customize the map</h4>
+<p>
+  Add markers onto the map to indicate special points of interest for your users. You can define
+  custom colors or icons for your map markers to match your app's look and feel. To further enhance
+  the app, draw polylines and polygons to indicate paths or regions, or provide complete image
+  overlays. <a class="external-link" href=
+  "https://developers.google.com/maps/documentation/android/marker">Draw markers</a>.
+</p>
+
+<h4>Control the user's view</h4>
+<p>
+  Give your users a different view of the world with the ability to control the rotation, tilt,
+  zoom, and pan properties of the "camera" perspective of the map. <a class="external-link" href=
+  "https://developers.google.com/maps/documentation/android/views">Change the view</a>.
+</p>
+
+<h4>Add Street View to your app</h4>
+<p>
+  Embed Street View into an activity and let your users explore the world through panoramic
+  360-degree views. Programmatically control the zoom and orientation (tilt and bearing) of the
+  Street View camera, and animate the camera movements over a given duration. <a class=
+  "external-link" href="https://developers.google.com/maps/documentation/android/streetview">Add
+  Street View</a>.
+</p>
+
+
+<h2 id="start">Get Started</h2>
+<p>
+  Google Maps Android API is part of the Google Play services platform. To use Google Maps,
+  set up the Google Play services SDK in your app development project. For more information,
+  see the <a class="external-link"
+  href="https://developers.google.com/maps/documentation/android/start">Getting Started</a> guide
+  for the Google Maps Android API.
+</p>
