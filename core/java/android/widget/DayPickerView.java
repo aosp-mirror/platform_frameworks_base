@@ -176,6 +176,8 @@ class DayPickerView extends ViewGroup {
                 }
             }
         });
+
+        updateButtonVisibility(mViewPager.getCurrentItem());
     }
 
     private void updateButtonVisibility(int position) {
