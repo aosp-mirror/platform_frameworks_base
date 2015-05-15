@@ -1541,6 +1541,15 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Returns the actual rect containing the node bounds in screen coordinates.
+     *
+     * @hide Not safe to expose outside the framework.
+     */
+    public Rect getBoundsInScreen() {
+        return mBoundsInScreen;
+    }
+
+    /**
      * Sets the node bounds in screen coordinates.
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
