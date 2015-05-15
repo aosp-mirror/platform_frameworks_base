@@ -7721,7 +7721,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      * @param info The energy information from the bluetooth controller.
      */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info) {
-        if (info != null && mOnBatteryInternal && false) {
+        if (info != null && mOnBatteryInternal) {
             mHasBluetoothEnergyReporting = true;
             mBluetoothActivityCounters[CONTROLLER_RX_TIME].addCountLocked(
                     info.getControllerRxTimeMillis());
