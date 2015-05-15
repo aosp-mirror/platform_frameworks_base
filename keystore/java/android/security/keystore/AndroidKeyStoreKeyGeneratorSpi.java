@@ -264,13 +264,6 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             throw new IllegalStateException("Not initialized");
         }
 
-        if ((spec.isEncryptionAtRestRequired())
-                && (mKeyStore.state() != KeyStore.State.UNLOCKED)) {
-            throw new IllegalStateException(
-                    "Requested to import a key which must be encrypted at rest using secure lock"
-                    + " screen credential, but the credential hasn't yet been entered by the user");
-        }
-
         KeymasterArguments args = new KeymasterArguments();
         args.addInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
         args.addInt(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
@@ -300,7 +293,7 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         byte[] additionalEntropy =
                 KeyStoreCryptoOperationUtils.getRandomBytesToMixIntoKeystoreRng(
                         mRng, (mKeySizeBits + 7) / 8);
-        int flags = spec.getFlags();
+        int flags = 0;
         String keyAliasInKeystore = Credentials.USER_SECRET_KEY + spec.getKeystoreAlias();
         KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
         int errorCode = mKeyStore.generateKey(
