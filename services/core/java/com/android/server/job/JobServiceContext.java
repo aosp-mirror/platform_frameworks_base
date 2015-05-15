@@ -154,7 +154,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
 
             mRunningJob = job;
             final boolean isDeadlineExpired =
-                    job.getLatestRunTimeElapsed() >= SystemClock.elapsedRealtime();
+                    job.hasDeadlineConstraint() &&
+                            (job.getLatestRunTimeElapsed() < SystemClock.elapsedRealtime());
             mParams = new JobParameters(this, job.getJobId(), job.getExtras(), isDeadlineExpired);
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
