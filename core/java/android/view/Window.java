@@ -1784,14 +1784,6 @@ public abstract class Window {
     public void setAllowReturnTransitionOverlap(boolean allow) {}
 
     /**
-     * TODO: remove this.
-     * @hide
-     */
-    public void setAllowExitTransitionOverlap(boolean allow) {
-        setAllowReturnTransitionOverlap(allow);
-    }
-
-    /**
      * Returns how the transition set in
      * {@link #setExitTransition(android.transition.Transition)} overlaps with the exit
      * transition of the called Activity when reentering after if finishes. When true,
@@ -1803,12 +1795,6 @@ public abstract class Window {
      * @attr ref android.R.styleable#Window_windowAllowReturnTransitionOverlap
      */
     public boolean getAllowReturnTransitionOverlap() { return true; }
-
-    /**
-     * TODO: remove this.
-     * @hide
-     */
-    public boolean getAllowExitTransitionOverlap() { return getAllowReturnTransitionOverlap(); }
 
     /**
      * Returns the duration, in milliseconds, of the window background fade
