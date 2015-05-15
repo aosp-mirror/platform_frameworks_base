@@ -39,6 +39,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
+import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -174,6 +175,7 @@ class MountService extends IMountService.Stub
     private static final boolean WATCHDOG_ENABLE = false;
 
     private static final String TAG = "MountService";
+    private static final String TAG_STORAGE_BENCHMARK = "storage_benchmark";
 
     private static final String VOLD_TAG = "VoldConnector";
 
@@ -233,6 +235,7 @@ class MountService extends IMountService.Stub
         public static final int VOLUME_DESTROYED = 659;
 
         public static final int MOVE_STATUS = 660;
+        public static final int BENCHMARK_RESULT = 661;
 
         /*
          * 700 series - fstrim
@@ -927,6 +930,12 @@ class MountService extends IMountService.Stub
                 break;
             }
 
+            case VoldResponseCode.BENCHMARK_RESULT: {
+                final DropBoxManager dropBox = mContext.getSystemService(DropBoxManager.class);
+                dropBox.addText(TAG_STORAGE_BENCHMARK, raw);
+                break;
+            }
+
             case VoldResponseCode.FstrimCompleted: {
                 EventLogTags.writeFstrimFinish(SystemClock.elapsedRealtime());
                 break;
@@ -1400,6 +1409,19 @@ class MountService extends IMountService.Stub
         final VolumeInfo vol = findVolumeById(volId);
         try {
             mConnector.execute("volume", "format", vol.id);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public long benchmark(String volId) {
+        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+        waitForReady();
+
+        try {
+            final NativeDaemonEvent res = mConnector.execute("volume", "benchmark", volId);
+            return Long.parseLong(res.getMessage());
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }

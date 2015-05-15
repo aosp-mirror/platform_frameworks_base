@@ -641,6 +641,15 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public long benchmark(String volId) {
+        try {
+            return mMountService.benchmark(volId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
     public void partitionPublic(String diskId) {
         try {
             mMountService.partitionPublic(diskId);
