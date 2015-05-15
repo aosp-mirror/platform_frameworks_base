@@ -953,7 +953,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
         OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
                 true, args, null, out);
-        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        assertEquals("Begin should expect authorization", KeyStore.OP_AUTH_NEEDED,
+                result.resultCode);
         IBinder token = result.token;
         result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
         assertEquals("Update should require authorization",
