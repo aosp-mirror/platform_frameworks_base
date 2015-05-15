@@ -26,12 +26,14 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * An active intent broadcast.
@@ -164,7 +166,7 @@ final class BroadcastRecord extends Binder {
         final int N = receivers != null ? receivers.size() : 0;
         String p2 = prefix + "  ";
         PrintWriterPrinter printer = new PrintWriterPrinter(pw);
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             Object o = receivers.get(i);
             pw.print(prefix); pw.print("Receiver #"); pw.print(i);
                     pw.print(": "); pw.println(o);
@@ -203,6 +205,36 @@ final class BroadcastRecord extends Binder {
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
+    }
+
+    boolean cleanupDisabledPackageReceiversLocked(
+            String packageName, Set<String> filterByClasses, int userId, boolean doit) {
+        if ((userId != UserHandle.USER_ALL && this.userId != userId) || receivers == null) {
+            return false;
+        }
+
+        boolean didSomething = false;
+        Object o;
+        for (int i = receivers.size() - 1; i >= 0; i--) {
+            o = receivers.get(i);
+            if (!(o instanceof ResolveInfo)) {
+                continue;
+            }
+            ActivityInfo info = ((ResolveInfo)o).activityInfo;
+
+            final boolean sameComponent = packageName == null
+                    || (info.applicationInfo.packageName.equals(packageName)
+                    && (filterByClasses == null || filterByClasses.contains(info.name)));
+            if (sameComponent) {
+                if (!doit) {
+                    return true;
+                }
+                didSomething = true;
+                receivers.remove(i);
+            }
+        }
+
+        return didSomething;
     }
 
     public String toString() {

@@ -5299,7 +5299,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final boolean killPackageProcessesLocked(String packageName, int appId,
             int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
             boolean doit, boolean evenPersistent, String reason) {
-        ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
+        ArrayList<ProcessRecord> procs = new ArrayList<>();
 
         // Remove all processes this package may have touched: all with the
         // same UID (except for the system or root user), and all whose name
@@ -5446,6 +5446,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int i = providers.size() - 1; i >= 0; i--) {
             removeDyingProviderLocked(null, providers.get(i), true);
         }
+
+        // Clean-up disabled broadcast receivers.
+        for (int i = mBroadcastQueues.length - 1; i >= 0; i--) {
+            mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
+                    packageName, disabledClasses, userId, true);
+        }
+
     }
 
     private final boolean forceStopPackageLocked(String packageName, int appId,
@@ -5541,6 +5548,13 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Remove transient permissions granted from/to this package/user
         removeUriPermissionsForPackageLocked(packageName, userId, false);
+
+        if (doit) {
+            for (i = mBroadcastQueues.length - 1; i >= 0; i--) {
+                didSomething |= mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
+                        packageName, null, userId, doit);
+            }
+        }
 
         if (packageName == null || uninstalling) {
             // Remove pending intents.  For now we only do this when force
