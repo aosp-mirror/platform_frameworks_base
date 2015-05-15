@@ -1863,7 +1863,7 @@ public class WebView extends AbsoluteLayout
      *          practices, the user should not specify a wildcard (*) when
      *          specifying the origin.
      */
-    public void postMessageToMainFrame(WebMessage message, Uri targetOrigin) {
+    public void postWebMessage(WebMessage message, Uri targetOrigin) {
         checkThread();
         mProvider.postMessageToMainFrame(message, targetOrigin);
     }

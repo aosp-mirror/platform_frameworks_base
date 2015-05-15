@@ -41420,9 +41420,9 @@ package android.webkit {
     method public boolean pageDown(boolean);
     method public boolean pageUp(boolean);
     method public void pauseTimers();
-    method public void postMessageToMainFrame(android.webkit.WebMessage, android.net.Uri);
     method public void postUrl(java.lang.String, byte[]);
     method public void postVisualStateCallback(long, android.webkit.WebView.VisualStateCallback);
+    method public void postWebMessage(android.webkit.WebMessage, android.net.Uri);
     method public void reload();
     method public void removeJavascriptInterface(java.lang.String);
     method public void requestFocusNodeHref(android.os.Message);
