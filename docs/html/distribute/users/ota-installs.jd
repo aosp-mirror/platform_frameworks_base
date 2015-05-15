@@ -1,0 +1,51 @@
+page.title=Offer Over-the-air Installs
+page.metaDescription=Let users send your app directly to their devices when they sign in with Google.
+page.tags="google", "identity", "installs"
+page.image=images/cards/google-sign-in_2x.png
+
+
+@jd:body
+
+<p>Google sign-in is a trusted registration system that's familiar to users and
+consistent across devices. With minimal effort, you can improve your sign-in conversion
+with a fast and secure authentication option for users. And by using Google sign-in,
+you can offer users the option to send your app directly to their Android devices when
+they sign-in, without the need for them to visit the Play store. Using this approach,
+some developers have seen app installation acceptance rates of 40%.</p>
+
+<p>Get started with <a href="https://developers.google.com/identity/sign-in/android/">
+Google sign-in for Android/a> and then enable <a
+href="https://developers.google.com/identity/sign-in/web/android-app-installs">over-the-air
+installs</a> for your web site.</p>
+
+<div class="wrap">
+  <div class="cols" style="margin-top:2em;">
+    <div class="col-8of12 col-push-1of12">
+     <img src="{@docRoot}images/distribute/ota-installs.gif">
+    </div>
+  </div>
+</div>
+
+
+<h2>Tips</h2>
+
+<ul>
+  <li>Adding Google sign-in to your app can increase conversions by reducing the burden
+  and friction of sign-in, while helping users keep their accounts secure.</li>
+  <li>Focus on the quality of your app to ensure that it passes the quality threshold for
+  over-the-air installation.</li>
+  <li>Measure impressions of the Android install prompt, installs, and success rate by
+  day, week, and month with Platform Insights.</li>
+</ul>
+
+
+<h2 style="clear:both" id="related-resources">Related Resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/otas"
+  data-sortorder="-timestamp"
+  data-cardsizes="9x3"
+  data-maxresults="4">
+</div>
+
+

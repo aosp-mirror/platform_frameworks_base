@@ -31,8 +31,6 @@ nonavpage=true
   data in AdMob</a> and have the full picture of your app revenue.
 </p>
 
-<div class="dynamic-grid">
-
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/analyzelanding"
     data-cardSizes="6x6"

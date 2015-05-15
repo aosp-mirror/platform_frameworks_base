@@ -1,12 +1,11 @@
 page.title=Build VR with Google Cardboard
 page.metaDescription=Build apps and games with VR, for a viewer anyone can buy.
-page.image=images/cards/card-cardboard_2x.jpg
 page.tags=vr, carboard, games
 @jd:body
 
 <p>
   Virtual reality promises to transform the way players view games, taking them from a
-  flat world into the realm of 3D. And it’s not just games, any application that provides
+  flat world into the realm of 3D. In fact, any application that provides
   a way to visually explore has the possibility to offer users more immersive experiences
   with VR &mdash; like a virtual tour of a famous landmark or a way to visualise atoms in a
   chemical compound.

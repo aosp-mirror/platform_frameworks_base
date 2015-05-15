@@ -1,0 +1,34 @@
+page.title=Drive installs from YouTube
+page.metaDescription=Bring users from videos to your store listing with a merchandise card available on YouTube.
+page.image=images/cards/card-youtube_2x.png
+page.tags="users, youtube, cards, videos"
+@jd:body
+
+<p>Now you can bring users who discover your app videos on YouTube to your store listing with a merchandise card, one of several card types available to add to YouTube videos. Once published the presence of the merchandise card is indicated in the video with an information icon. When a viewer opens the card they follow the link to your app on the Play Store, where they can install your app.</p>
+
+<div class="wrap" style="margin:2em auto">
+  <div class="cols">
+    <div class="col-9of12">
+      <img src="{@docRoot}images/distribute/youtube-card-example.png">
+    </div>
+  </div>
+</div>
+
+<p>Get started <a href="https://support.google.com/youtube/answer/6140493">adding merchandise cards to your uploaded videos</a>.</p>
+
+<h2>Tips</h2>
+<ul>
+<li>Don’t indicate the location of a card within your video, cards might be positioned differently on different devices.</li>
+<li>When you add cards, featured video or playlist highlights in your video are hidden. </li>
+<li>In order to display cards, your account needs to be in good standing.</li>
+<li>Performance reporting for cards is available in YouTube Analytics.</li>
+<li>Cards work better when they're not too close to each other. Try spacing them out.</li>
+</ul>
+
+<h2 id="related-resources">Related resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/youtube"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>

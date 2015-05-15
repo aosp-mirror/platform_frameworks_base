@@ -11,56 +11,67 @@ ongoing engagement. AdWords is a powerful and effective way to do both.</p>
 
 <h2 id=drive_installs>Drive installs</h2>
 
-<p><a href="http://adwords.google.com">AdWords</a> promotes your app to interested users where they spend time on phones and
+<p><a href="http://adwords.google.com">AdWords</a> promotes your app to interested
+users where they spend time on phones and
 tablets – with app install ads on Google Search, YouTube, Gmail, and within
 apps and across the web on  the Google Display Network. AdWords is a powerful
 way to scale app promotion across Google networks and find customers that are
 most likely to install your app. </p>
 
-<p><a href="https://support.google.com/adwords/answer/6032059">Get started with AdWords app install ads</a>.</p>
+<p><a href="https://support.google.com/adwords/answer/6032059">Get started with AdWords
+app install ads</a>.</p>
 
-<div style="display:inline-block">
- <div class="figure-left" style="width:40%;">
+
+
+<div class="wrap">
+  <div class="cols" style="margin-top:1em;">
+    <div class="col-4of12">
    <h3>From Google Play</h3>
-   <img src="/images/distribute/promote_ads_play.png">
-    <p class="figure-caption">Search ads on Google Play are still undergoing testing and not yet available to
-buy. <a href="http://android-developers.blogspot.com/2015/02/a-new-way-to-promote-your-app-on-google.html">Find out more</a>.</p>
-  </div>
-  <div class="figure-right" style="width:40%;">
-    <h3>From apps</h3>
+    <img src="/images/distribute/promote_ads_play.png">
+    <p class="figure-caption">Search ads on Google Play are still undergoing testing and
+    not yet available to buy. <a
+    href="http://android-developers.blogspot.com/2015/02/a-new-way-to-promote-your-app-on-google.html">Find
+    out more</a>.</p>
+    </div>
+    <div class="col-4of12">
+  <h3>From search</h3>
     <img src="/images/distribute/promote_ads_search.png">
-    <p class="figure-caption">Connect with users as they search for content and services provided by your
-app.</p>
-  </div>
-</div>
-
-<div style="display:inline-block">
- <div class="figure-left" style="width:40%;">
+    <p class="figure-caption">Connect with users as they search for content and services
+    provided by your app.</p>
+    </div>
+    <div class="col-4of12">
    <h3>From YouTube</h3>
    <img src="/images/distribute/promote_ads_youtube.png">
     <p class="figure-caption">Promote your app when users are watching related videos.</p>
+    </div>
   </div>
-  <div class="figure-right" style="width:40%;">
+</div>
+
+<div class="wrap">
+  <div class="cols" style="margin-top:1em;">
+    <div class="col-4of12">
     <h3>From apps</h3>
     <img src="/images/distribute/promote_ads_apps.png">
-    <p class="figure-caption">Reach users while they’re engaged with apps and games across the AdMob network.</p>
-  </div>
-</div>
-
-<div style="display:inline-block">
- <div class="figure-left" style="width:40%;">
+    <p class="figure-caption">Reach users while they’re engaged with apps and games across the
+    AdMob network.</p>
+    </div>
+    <div class="col-4of12">
    <h3>From the web</h3>
    <img src="/images/distribute/promote_ads_web.png">
-    <p class="figure-caption">Reach users while they’re engaged with websites across the Google Display Network.</p>
-  </div>
-  <div class="figure-right" style="width:40%;">
+    <p class="figure-caption">Reach users while they’re engaged with websites across the Google
+    Display Network.</p>
+    </div>
+    <div class="col-4of12">
     <h3>From Gmail</h3>
     <img src="/images/distribute/promote_ads_gmail.png">
-    <p class="figure-caption">Promote your app while users communicate and get things done in Gmail.</p>
+    <p class="figure-caption">Promote your app while users communicate and get things done in
+    Gmail.</p>
+    </div>
   </div>
 </div>
 
-<h3>Tips</h3>
+
+<h2>Tips</h3>
 
 <ul>
   <li> Estimate how much an app user is worth to your business, so that you can work
@@ -89,20 +100,24 @@ in mind with users who’ve already installed it on their phone. AdWords can
 remind them of key features and encourage them to try your app again, or help
 them complete an activity they didn't know your app could handle.</p>
 
-<div>
- <div class="figure-left" style="width:46%;">
+
+<div class="wrap">
+  <div class="cols" style="margin-top:1em;">
+    <div class="col-4of12">
    <h3>From search</h3>
    <img src="/images/distribute/promote_ads.png">
     <p class="figure-caption">Add deep links to your app, then bring users straight
     to relevant app content when they’re searching.</p>
-  </div>
-  <div class="figure-right" style="width:46%;">
+    </div>
+    <div class="col-4of12">
     <h3>From apps</h3>
     <img src="/images/distribute/promote_ads_inapp.png">
     <p class="figure-caption">Use remarketing and deep links to bring users to just the right
     place in your app to re-engage and convert, from other apps and games they love.</p>
+    </div>
   </div>
 </div>
+
 
 <h3>Tips</h3>
 

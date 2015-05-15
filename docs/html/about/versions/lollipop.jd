@@ -3,46 +3,9 @@ page.title=Android Lollipop
 @jd:body
 
 
-
-
-
-
-
-
-
-
-  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
-    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
-  </div>
-
-  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
-  <div class="col-4 normal-links highlights" style="font-size:12px;">
-    <h3 id="thisd" >Key Developer Features</h3>
-    <ul style="list-style-type:none;">
-  <li><a href="#Material">Material design</a></li>
-  <li><a href="#Perf">Performance focus</a></li>
-  <li><a href="#Notifications">Notifications</a></li>
-  <li><a href="#TV">Your apps on the big screen</a></li>
-  <li><a href="#Documents">Document-centric apps</a></li>
-  <li><a href="#Connectivity">Advanced connectivity</a></li>
-  <li><a href="#Graphics">High-performance graphics</a></li>
-  <li><a href="#Audio">More powerful audio</a></li>
-  <li><a href="#Camera">Enhanced camera & video</a></li>
-  <li><a href="#Work">Android in the workplace</a></li>
-  <li><a href="#ScreenCapture">Screen capturing and sharing</a></li>
-  <li><a href="#Sensors">New types of sensors</a></li>
-  <li><a href="#WebView">Chromium WebView</a></li>
-  <li><a href="#Accessibility">Accessibility & input</a></li>
-  <li><a href="#Battery">Tools for battery-efficient apps</a></li>
-    </ul>
-  </div>
+<div style="float:right;">
+  <img src="{@docRoot}images/home/l-hero_2x.png" srcset="/images/home/l-hero.png 1x, /images/home/l-hero_2x.png 2x">
 </div>
-
-
-
-
-
-
 
 <p>Welcome to Android 5.0 Lollipop&mdash;the largest and most ambitious release for Android yet!</p>
 
@@ -55,46 +18,62 @@ about Android 5.0 for consumers at
 <a href="http://www.android.com/versions/lollipop-5-0/"
 >www.android.com</a>.</p>
 
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Key developer features</h2>
+  <ol>
+      <ul style="list-style-type:none;">
+        <li><a href="#Material">Material design</a></li>
+        <li><a href="#Perf">Performance focus</a></li>
+        <li><a href="#Notifications">Notifications</a></li>
+        <li><a href="#TV">Your apps on the big screen</a></li>
+        <li><a href="#Documents">Document-centric apps</a></li>
+        <li><a href="#Connectivity">Advanced connectivity</a></li>
+        <li><a href="#Graphics">High-performance graphics</a></li>
+        <li><a href="#Audio">More powerful audio</a></li>
+        <li><a href="#Camera">Enhanced camera & video</a></li>
+        <li><a href="#Work">Android in the workplace</a></li>
+        <li><a href="#ScreenCapture">Screen capturing and sharing</a></li>
+        <li><a href="#Sensors">New types of sensors</a></li>
+        <li><a href="#WebView">Chromium WebView</a></li>
+        <li><a href="#Accessibility">Accessibility & input</a></li>
+        <li><a href="#Battery">Tools for battery-efficient apps</a></li>
+      </ol>
+</div>
+</div>
+
 <p class="note">
   <strong>Note:</strong> The Android 5.1 Lollipop MR1 update is available with additional features
   and fixes. For more information, see the
   <a href="{@docRoot}about/versions/android-5.1.html">Android 5.1 API Overview</a>.
 </p>
 
-
 <h2 id="Material">Material design</h2>
 
 <p>Android 5.0 brings <a href="http://www.google.com/design/spec">Material design</a> to Android and gives you an expanded UI toolkit for integrating the new design patterns easily in your apps.  </p>
 
-
-
 <p>New <strong>3D views</strong> let you set a z-level to raise elements off of the view hierarchy and cast <strong>realtime shadows</strong>, even as they move.</p>
-
 
 <p>Built-in <strong>activity transitions</strong> take the user seamlessly from one state to another with beautiful, animated motion. The material theme adds transitions for your activities, including the ability to use <strong>shared visual elements</strong> across activities.</p>
 
-
-
-<div style="width:290px;margin-right:35px;float:left">
+<div style="float:left;max-width:280px;margin-right:1em;">
   <div class="framed-nexus5-port-span-5">
   <video class="play-on-hover" autoplay="">
-    <source src="/design/material/videos/ContactsAnim.mp4">
-    <source src="/design/videos/ContactsAnim.webm">
-    <source src="/design/videos/ContactsAnim.ogv">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4">
+    <source src="{@docRoot}design/videos/ContactsAnim.webm">
+    <source src="{@docRoot}design/videos/ContactsAnim.ogv">
   </video>
-  </div>
-  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+</div>
+  <p style="img-caption">
     <em>To replay the movie, click on the device screen</em>
-  </div>
+  </p>
 </div>
 
-
-<p>Ripple animations are available for buttons, checkboxes, and other touch controls in your app.
+<p>Ripple animations are available for buttons, checkboxes, and other touch controls in your app.</p>
 
 <p>You can also define vector drawables in XML and animate them in a variety of ways. Vector drawables scale without losing definition, so they are perfect for single-color in-app icons.</p>
 
 <p>A new system-managed processing thread called <strong>RenderThread</strong> keeps animations smooth even when there are delays in the main UI thread. </p>
-
 
 <h2 id="Perf">Performance focus</h2>
 
@@ -112,9 +91,12 @@ video apps and games to display smooth synchronized content.</p>
 
 <h2 id="Notifications">Notifications</h2>
 
+<div style="float:right;clear:left;margin:1em;">
+<img src="{@docRoot}images/versions/notification-headsup.png" />
+</div>
+
 <p>Notifications in Android 5.0 are more visible, accessible, and configurable. </p>
 
-<img src="{@docRoot}images/versions/notification-headsup.png" style="float:right; margin:0 0 40px 60px" width="300" height="224" />
 
 <p>Varying notification details may appear <strong>on the lock screen</strong> if desired by the user. Users may elect to allow none, some, or all notification content to be shown on a secure lock screen. </p>
 
@@ -123,8 +105,6 @@ video apps and games to display smooth synchronized content.</p>
 <p>You can now add <strong>new metadata</strong> to notifications to collect associated contacts (for ranking), category, and priority.</p>
 
 <p>A new media notification template provides consistent media controls for notifications with up to 6 action buttons, including custom controls such as "thumbs up"&mdash;no more need for RemoteViews!</p>
-
-
 
 <h2 id="TV">Your apps on the big screen</h2>
 
@@ -136,18 +116,19 @@ video apps and games to display smooth synchronized content.</p>
 
 <p>The TV Input Framework provides access to a wide variety of live TV input sources and brings them together in a single user interface for users to browse, view, and enjoy content. Building a TV input service for your content can help make your content more accessible on TV devices.</p>
 
-
-
-<img src="{@docRoot}images/versions/recents_screen_2x.png" srcset="{@docRoot}images/versions/recents_screen.png 1x, {@docRoot}images/versions/recents_screen_2x.png 2x" style="float:right; margin:0 0 40px 60px" width="300" height="521" />
-
 <h2 id="Documents">Document-centric apps</h2>
+
+<div style="float:right;margin:1em;max-width:320px">
+<img src="{@docRoot}images/versions/recents_screen_2x.png"
+    srcset="/images/versions/recents_screen.png 1x, /images/versions/recents_screen_2x.png 2x" />
+<p class="img-caption">Document-centric recents.</p>
+</div>
 
 <p>Android 5.0 introduces a redesigned Overview space (formerly called Recents) that’s more versatile and useful for multitasking.</p>
 
 <p>New APIs allow you to show separate activities in your app as individual documents alongside other recent screens.</p>
 
 <p>You can take advantage of concurrent documents to provide users instant access to more of your content or services. For example, you might use concurrent documents to represent files in a productivity app, player matches in a game, or chats in a messaging app. </p>
-
 
 
 <h2 id="Connectivity">Advanced connectivity</h2>
@@ -164,13 +145,12 @@ video apps and games to display smooth synchronized content.</p>
 
 <p>Support for <strong><a href="http://www.khronos.org/opengles/3_X/">Khronos OpenGL ES 3.1</a></strong> now provides games and other apps the highest-performance 2D and 3D graphics capabilities on supported devices. </p>
 
-<p>OpenGL ES 3.1 adds compute shaders, stencil textures, accelerated visual effects, high quality ETC2/EAC texture compression, advanced texture rendering, standardized texture size and render-buffer formats, and more.</p>
-
-
-<div class="figure" style="width:350px; margin:0 0 0 60px">
-<img src="{@docRoot}images/versions/rivalknights.png" style="float:right;" width="350" height="525" />
+<div style="float:right;margin:1em;max-width:350px">
+<img src="{@docRoot}images/versions/rivalknights.png"  />
 <p class="img-caption">Gameloft's Rival Knights uses ASTC (Adaptive Scalable Texture Compression) from AEP and Compute Shaders from ES 3.1 to deliver HDR (High Dynamic Range) Bloom effects and provide more graphical detail.</p>
 </div>
+
+<p>OpenGL ES 3.1 adds compute shaders, stencil textures, accelerated visual effects, high quality ETC2/EAC texture compression, advanced texture rendering, standardized texture size and render-buffer formats, and more.</p>
 
 <p>Android 5.0 also introduces the <strong>Android Extension Pack</strong> (AEP), a set of OpenGL ES extensions that give you access to features like tessellation shaders, geometry shaders, ASTC texture compression, per-sample interpolation and shading, and other advanced rendering capabilities. With AEP you can deliver high-performance graphics across a range of GPUs.</p>
 
@@ -187,7 +167,7 @@ video apps and games to display smooth synchronized content.</p>
 
 <p>Android now includes support for standard <strong>USB audio</strong> peripherals, allowing users to connect USB headsets, speakers, microphones, or other high performance digital peripherals. Android 5.0 also adds support for <strong>Opus</strong> audio codecs.</p>
 
-<p>New <strong>{@link android.media.session.MediaSession}</strong> APIs for controlling media playback now make it easier to provide consistent media controls across screens and other controllers.</p>
+<p>New <strong><code><a href="{@docRoot}reference/android/media/session/MediaSession.html">MediaSession</a></code></strong> APIs for controlling media playback now make it easier to provide consistent media controls across screens and other controllers.</p>
 
 
 <h2 id="Camera">Enhanced camera &amp; video</h2>
@@ -203,18 +183,16 @@ provide metadata that describes the capture settings of each frame.</p>
 <p>Android 5.0 also adds support for <strong>multimedia tunneling</strong> to provide the best experience for ultra-high definition (4K) content and the ability to play compressed audio and video data together. </p>
 
 
+<h2 id="Work">Android in the workplace</h2>
 
-<div class="figure" style="width:320px; margin:1em 0 0 20px;padding-left:2em;">
-<img style="float:right; margin:0 1em 1em 2em"
+<div style="float:right;margin:1em;max-width:330px">
+<img 
     src="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png"
-    srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"
-    alt="" width="300" />
+    srcset="/images/android-5.0/managed_apps_launcher@2x.png 2x"
+    alt="" />
 <p class="img-caption">Users have a unified view of their personal and work apps, which are
 badged for easy identification.</p>
 </div>
-
-
-<h2 id="Work">Android in the workplace</h2>
 
 <p>To enable bring-your-own-device for enterprise environments, a new
 <a href="{@docRoot}about/versions/android-5.0.html#Enterprise">managed provisioning process</a>
@@ -231,8 +209,6 @@ app is used by both profiles.</p>
 issue these devices with a device owner app already installed that
 can configure global device settings.</p>
 
-
-
 <h2 id="ScreenCapture">Screen capturing and sharing</h2>
 
 <p>Android 5.0 lets you add screen capturing and screen sharing capabilities to your app. </p>
@@ -247,22 +223,19 @@ can configure global device settings.</p>
 <p>New <strong>interaction composite sensors</strong> are now available to detect special interactions such as a <em>wake up</em> gesture, a <em>pick up</em> gesture, and a <em>glance</em> gesture.</p>
 
 
-
 <h2 id="WebView">Chromium WebView</h2>
 
 <div style="float:right;margin:1em 2em 1em 2em;">
-  <img src="/images/kk-chromium-icon.png" alt="" height="160" style="margin-bottom:0em;">
+  <img src="{@docRoot}images/kk-chromium-icon.png" alt="" height="160" style="margin-bottom:0em;">
 </div>
 
-<p>The initial release for Android 5.0 includes a version of Chromium for {@link android.webkit.WebView} based on the Chromium M37 release, adding support for <strong>WebRTC</strong>, <strong>WebAudio</strong>, and <strong>WebGL</strong>. </p>
+<p>The initial release for Android 5.0 includes a version of Chromium for <code><a href="{@docRoot}reference/android/webkit/WebView.html">WebView</a></code> based on the Chromium M37 release, adding support for <strong>WebRTC</strong>, <strong>WebAudio</strong>, and <strong>WebGL</strong>. </p>
 
 <p>Chromium M37 also includes native support for all of the <strong>Web Components</strong> specifications: Custom Elements, Shadow DOM, HTML Imports, and Templates. This means you can use <a href="http://polymer-project.org/">Polymer</a> and its <a href="https://www.polymer-project.org/docs/elements/material.html">material design elements</a> in a WebView without needing polyfills.</p>
 
 <p>Although WebView has been based on Chromium since Android 4.4, the Chromium layer is now updatable from Google Play.</p>
 
 <p>As new versions of Chromium become available, users can update from Google Play to ensure they get the latest enhancements and bug fixes for WebView, providing the latest web APIs and bug fixes for apps using WebView on Android 5.0 and higher.</p>
-
-
 
 <h2 id="Accessibility">Accessibility &amp; input</h2>
 
@@ -271,13 +244,12 @@ can configure global device settings.</p>
 <p>New Input method editor (IME) APIs enable faster switching to other IMEs directly from the input method.</p>
 
 
-
 <h2 id="Battery">Tools for building battery-efficient apps</h2>
 
 <p>New <strong>job scheduling</strong> APIs allow you optimize battery life by deferring jobs for the system to run at a later time or under specified conditions, such as when the device is charging or connected to Wi-Fi.</p>
 
 <p>A new <code>dumpsys batterystats</code> command generates <strong>battery usage statistics</strong> that you can use to understand system-wide power use and understand the impact of your app on the device battery. You can look at a history of power events, approximate power use per UID and system component, and more.</p>
 
-<img src="{@docRoot}images/versions/battery_historian.png" srcset="{@docRoot}images/versions/battery_historian@2x.png 2x" alt="" width="760" height="462" />
+<img src="{@docRoot}images/versions/battery_historian.png" srcset="/images/versions/battery_historian@2x.png 2x" alt="" width="760" height="462" />
 <p class="img-caption">Battery Historian is a new tool to convert the statistics from <code>dumpsys batterystats</code> into a visualization for battery-related debugging. You can find it at <a href="https://github.com/google/battery-historian"
 >https://github.com/google/battery-historian</a>.</p>
