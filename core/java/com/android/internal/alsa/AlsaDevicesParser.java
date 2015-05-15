@@ -98,14 +98,24 @@ public class AlsaDevicesParser {
                         break;
 
                     case kToken_CardNum:
-                        mCardNum = Integer.parseInt(token);
-                        if (line.charAt(delimOffset) != '-') {
-                            tokenIndex++; // no device # in the token stream
+                        try {
+                            mCardNum = Integer.parseInt(token);
+                            if (line.charAt(delimOffset) != '-') {
+                                tokenIndex++; // no device # in the token stream
+                            }
+                        } catch (NumberFormatException e) {
+                            Slog.e(TAG, "Failed to parse card number: " token);
+                            return false;
                         }
                         break;
 
                     case kToken_DeviceNum:
-                        mDeviceNum = Integer.parseInt(token);
+                        try {
+                            mDeviceNum = Integer.parseInt(token);
+                        } catch (NumberFormatException e) {
+                            Slog.e(TAG, "Failed to parse device number: " token);
+                            return false;
+                        }
                         break;
 
                     case kToken_Type0:
