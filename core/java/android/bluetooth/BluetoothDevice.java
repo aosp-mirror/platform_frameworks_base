@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -709,6 +711,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @return the Bluetooth name, or null if there was a problem.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public String getName() {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot get Remote Device name");
@@ -729,6 +732,7 @@ public final class BluetoothDevice implements Parcelable {
      *                         {@link #DEVICE_TYPE_DUAL}.
      *         {@link #DEVICE_TYPE_UNKNOWN} if it's not available
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getType() {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot get Remote Device type");
@@ -807,6 +811,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @return false on immediate error, true if bonding will begin
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean createBond() {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot create bond to Remote Device");
@@ -948,6 +953,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @return the bond state
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getBondState() {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot get bond state");
@@ -1014,6 +1020,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @return Bluetooth class object, or null on error
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothClass getBluetoothClass() {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot get Bluetooth Class");
@@ -1039,6 +1046,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return the supported features (UUIDs) of the remote device,
      *         or null on error
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
      public ParcelUuid[] getUuids() {
          if (sService == null || isBluetoothEnabled() == false) {
             Log.e(TAG, "BT not enabled. Cannot get remote device Uuids");
@@ -1065,6 +1073,7 @@ public final class BluetoothDevice implements Parcelable {
       *               of initiating an ACL connection to the remote device
       *               was started.
       */
+     @RequiresPermission(Manifest.permission.BLUETOOTH)
      public boolean fetchUuidsWithSdp() {
         IBluetooth service = sService;
         if (service == null || isBluetoothEnabled() == false) {
@@ -1144,6 +1153,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return true confirmation has been sent out
      *         false for error
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean setPairingConfirmation(boolean confirm) {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot set pairing confirmation");
@@ -1405,6 +1415,7 @@ public final class BluetoothDevice implements Parcelable {
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothSocket createRfcommSocketToServiceRecord(UUID uuid) throws IOException {
         if (isBluetoothEnabled() == false) {
             Log.e(TAG, "Bluetooth is not enabled");
@@ -1443,6 +1454,7 @@ public final class BluetoothDevice implements Parcelable {
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothSocket createInsecureRfcommSocketToServiceRecord(UUID uuid) throws IOException {
         if (isBluetoothEnabled() == false) {
             Log.e(TAG, "Bluetooth is not enabled");
