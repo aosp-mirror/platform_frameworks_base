@@ -16143,10 +16143,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             final int uid = intentExtras != null
                                     ? intentExtras.getInt(Intent.EXTRA_UID) : -1;
                             if (uid >= 0) {
-                                BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
-                                synchronized (bs) {
-                                    bs.removeUidStatsLocked(uid);
-                                }
+                                mBatteryStatsService.removeUid(uid);
                                 mAppOpsService.uidRemoved(uid);
                             }
                             break;
