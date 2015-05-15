@@ -26,19 +26,13 @@
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/deep-linking.html">
-        <span class="en">Deep Link to Bring Users Back</span></a>
+        <span class="en">Drive Usage with Search</span></a>
     </div>
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/ads.html">
         <span class="en">Drive engagement with Ads</span></a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
-        var:toroot?>distribute/engage/appindexing.html">
-        <span class="en">Bring Users from Search</span></a>
     </div>
   </li>
   <li class="nav-section">

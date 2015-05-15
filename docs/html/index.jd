@@ -27,13 +27,12 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Watch Videos
       </a></div>
-      <div><a href="{@docRoot}distribute/googleplay/developer-console.html">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        Manage Your Apps
-      </a></div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
 </div><!-- end .actions-bar -->
+
+<div class="dac-hero-carousel" data-carousel-query="collection:distribute/landing/carousel">
+</div>
 
 <section class="dac-section dac-section-light" id="build-apps"><div class="wrap">
   <h1 class="dac-section-title">Build Beautiful Apps</h1>

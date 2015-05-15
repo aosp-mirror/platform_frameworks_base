@@ -7,15 +7,12 @@ page.tags="families"
 @jd:body
 
 <p>
-  In several weeks, a new family-focused experience on Google Play will give
-  users new ways to browse, search, and discover high quality apps and games
-  for their families.
+  If you got great apps targeting kids and/or families, the family-focused experience
+  on Google Play is a great way to make them discoverable by parents.
 </p>
 
-<p>
-  To support a more family-friendly store, developers are invited to opt-in
-  family-focused apps and games to the new Designed for Families program. Apps
-  that meet the <a href=
+<p>Developers are invited to opt-in these apps and games to the new Designed for
+  Families program. Apps that meet the <a href=
   "https://support.google.com/googleplay/android-developer/answer/6184502">program
   requirements</a> will be shown in the new family experience so that
   parents can find suitable, trusted, high-quality apps and games more easily.
@@ -31,11 +28,62 @@ page.tags="families"
   store.
 </p>
 
+<h2 id="benefits">Benefits</h2>
+
+<p>
+  By opting-in to Designed for Families, parents can easily find your family-friendly
+  content on the Google Play store however they are accessing it.
+</p>
+
+<h3>Search</h3> 
+
+<p>
+  Only content opted-in to the Designed for Families program will show up in search results
+  from any of the family sections. This is a huge boost to this content as a majority of
+  searches on the Play Store containing the terms “apps for” or “games for” are related to
+  kids.
+</p>
+
+<h3>Browse</h3>
+
+<p>
+  Family sections within Apps, Games, Movies & TV and Music provide enhanced discovery for
+  parents. These sections act as true home pages and contain unique categories tailored to kids
+  content, specific age-based categories, and merchandised content.
+</p>
+
+<h3>Character pages</h3>
+
+<p>
+  All content for particular popular characters can now be found in one place on character pages,
+  including apps, games, movies, tv, and books. It’s a powerful way to promote children’s brands
+  across content, and allows you to reach a highly relevant and targeted audience. Character
+  pages are also a way to alleviate concerns around IP protection, since only properly licensed
+  content is on these pages. 
+</p>
+
+<h3>Merchandising</h3>
+
+<p>
+  The family sections have their own merchandised content, with new opportunities for featuring
+  on the home pages of the family sections and and within the age-specific home pages. The pages
+  are curated to ensure quality and limited to only content opted-in to Designed for Families
+  and appropriate for specific age ranges.
+</p>
+
+<h3>Badging</h3>
+
+<p>
+  Apps opted-in to Designed for Families will receive family-friendly badges, which are a marker
+  of quality and signal to parents that apps are suitable for users of specific ages groups.
+  Clicking on a badge also leads you to other apps and games with that badge. 
+</p>
+
 <h2 id="elibibility">Eligibility</h2>
 
 <p>
-  Apps in the family-friendly experience on Google Play will be more
-  discoverable by parents and families, who expect the apps to be age
+  Apps in the family-friendly experience on Google Play are more
+  discoverable by parents and families, who expect the apps to appeal to kids under 13 and be age
   appropriate. The Designed for Families program is designed to be inclusive of
   apps that are made for kids as well as those that can be enjoyed by the
   entire family. To address this audience, there are specific guidelines and

@@ -13,14 +13,12 @@ excludeFromSuggestions=true
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="/images/develop/hero-android-studio-on-device.png">
+        <img class="dac-hero-image" src="{@docRoot}images/develop/studio-open.png">
       </div>
       <div class="col-1of2 col-pull-1of2">
-        <h1 class="dac-hero-title">Get Started with Android</h1>
+        <h1 class="dac-hero-title">Get Started with Android Studio</h1>
         <p class="dac-hero-description">
         Everything you need to build incredible app experiences on phones and tablets, Wear, TV, and Auto. </p>
-
-<!--Set up your environment and create an app. Build faster with sample projects and templates.-->
         </p>
         <a class="dac-hero-cta" href="{@docRoot}sdk/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
@@ -34,7 +32,7 @@ excludeFromSuggestions=true
           <span class="dac-sprite dac-auto-chevron"></span>
           Learn about Android
         </a><br>
-        <a class="dac-hero-cta" href="{@docRoot}guide/index.html">
+        <a class="dac-hero-cta" href="{@docRoot}samples/index.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Sample projects
         </a><br>
