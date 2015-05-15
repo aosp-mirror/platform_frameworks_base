@@ -1004,14 +1004,14 @@ public class Editor {
                 stopSelectionActionMode();
             } else {
                 stopSelectionActionMode();
-                startSelectionActionModeWithSelectionAndStartDrag();
+                selectCurrentWordAndStartDrag();
             }
             handled = true;
         }
 
         // Start a new selection
         if (!handled) {
-            handled = startSelectionActionModeWithSelectionAndStartDrag();
+            handled = selectCurrentWordAndStartDrag();
         }
 
         return handled;
@@ -1724,22 +1724,9 @@ public class Editor {
     }
 
     /**
-     * Starts a Selection Action Mode with the current selection and enters drag mode. This should
-     * be used whenever the mode is started from a touch event.
-     *
-     * @return true if the selection mode was actually started.
-     */
-    private boolean startSelectionActionModeWithSelectionAndStartDrag() {
-        boolean selectionStarted = startSelectionActionModeWithSelectionInternal();
-        if (selectionStarted) {
-            getSelectionController().enterDrag();
-        }
-        return selectionStarted;
-    }
-
-    /**
      * Starts a Selection Action Mode with the current selection and ensures the selection handles
-     * are shown. This should be used when the mode is started from a non-touch event.
+     * are shown if there is a selection, otherwise the insertion handle is shown. This should be
+     * used when the mode is started from a non-touch event.
      *
      * @return true if the selection mode was actually started.
      */
@@ -1747,38 +1734,65 @@ public class Editor {
         boolean selectionStarted = startSelectionActionModeWithSelectionInternal();
         if (selectionStarted) {
             getSelectionController().show();
+        } else if (getInsertionController() != null) {
+            getInsertionController().show();
         }
         return selectionStarted;
     }
 
-    private boolean startSelectionActionModeWithSelectionInternal() {
+    /**
+     * If the TextView allows text selection, selects the current word when no existing selection
+     * was available and starts a drag.
+     *
+     * @return true if the drag was started.
+     */
+    private boolean selectCurrentWordAndStartDrag() {
         if (extractedTextModeWillBeStarted()) {
             // Cancel the single tap delayed runnable.
             if (mSelectionModeWithoutSelectionRunnable != null) {
                 mTextView.removeCallbacks(mSelectionModeWithoutSelectionRunnable);
             }
+            return false;
+        }
+        if (mSelectionActionMode != null) {
+            mSelectionActionMode.finish();
+        }
+        if (!checkFieldAndSelectCurrentWord()) {
+            return false;
+        }
+        getSelectionController().enterDrag();
+        return true;
+    }
 
+    /**
+     * Checks whether a selection can be performed on the current TextView and if so selects
+     * the current word.
+     *
+     * @return true if there already was a selection or if the current word was selected.
+     */
+    private boolean checkFieldAndSelectCurrentWord() {
+        if (!mTextView.canSelectText() || !mTextView.requestFocus()) {
+            Log.w(TextView.LOG_TAG,
+                    "TextView does not support text selection. Selection cancelled.");
             return false;
         }
 
+        if (!mTextView.hasSelection()) {
+            // There may already be a selection on device rotation
+            return selectCurrentWord();
+        }
+        return true;
+    }
+
+    private boolean startSelectionActionModeWithSelectionInternal() {
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
             mSelectionActionMode.invalidate();
             return false;
         }
 
-        if (!mTextView.canSelectText() || !mTextView.requestFocus()) {
-            Log.w(TextView.LOG_TAG,
-                    "TextView does not support text selection. Action mode cancelled.");
+        if (!checkFieldAndSelectCurrentWord()) {
             return false;
-        }
-
-        if (!mTextView.hasSelection()) {
-            // There may already be a selection on device rotation
-            if (!selectCurrentWord()) {
-                // No word found under cursor or text selection not permitted.
-                return false;
-            }
         }
 
         boolean willExtract = extractedTextModeWillBeStarted();
@@ -4377,7 +4391,7 @@ public class Editor {
                             boolean stayedInArea = distanceSquared < doubleTapSlop * doubleTapSlop;
 
                             if (stayedInArea && isPositionOnText(eventX, eventY)) {
-                                startSelectionActionModeWithSelectionAndStartDrag();
+                                selectCurrentWordAndStartDrag();
                                 mDiscardNextActionUp = true;
                             }
                         }
@@ -4480,6 +4494,7 @@ public class Editor {
                         mEndHandle.showAtLocation(endOffset);
 
                         // No longer the first dragging motion, reset.
+                        startSelectionActionModeWithSelection();
                         mDragAcceleratorActive = false;
                         mStartOffset = -1;
                     }
