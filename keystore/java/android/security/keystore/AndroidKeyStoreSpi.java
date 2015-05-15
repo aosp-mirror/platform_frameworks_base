@@ -274,6 +274,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
     private void setPrivateKeyEntry(String alias, PrivateKey key, Certificate[] chain,
             java.security.KeyStore.ProtectionParameter param) throws KeyStoreException {
+        int flags = 0;
         KeyProtection spec;
         if (param instanceof KeyStoreParameter) {
             KeyStoreParameter legacySpec = (KeyStoreParameter) param;
@@ -319,7 +320,9 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 } else {
                     throw new KeyStoreException("Unsupported key algorithm: " + keyAlgorithm);
                 }
-                specBuilder.setEncryptionAtRestRequired(legacySpec.isEncryptionRequired());
+                if (legacySpec.isEncryptionRequired()) {
+                    flags = android.security.KeyStore.FLAG_ENCRYPTED;
+                }
                 specBuilder.setUserAuthenticationRequired(false);
 
                 spec = specBuilder.build();
@@ -448,8 +451,6 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             Credentials.deleteCertificateTypesForAlias(mKeyStore, alias);
             Credentials.deleteSecretKeyTypeForAlias(mKeyStore, alias);
         }
-
-        final int flags = (spec == null) ? 0 : spec.getFlags();
 
         if (shouldReplacePrivateKey
                 && !mKeyStore.importKey(Credentials.USER_PRIVATE_KEY + alias, keyBytes,
@@ -636,7 +637,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 args,
                 KeymasterDefs.KM_KEY_FORMAT_RAW,
                 keyMaterial,
-                params.getFlags(),
+                0, // flags
                 new KeyCharacteristics());
         if (errorCode != android.security.KeyStore.NO_ERROR) {
             throw new KeyStoreException("Failed to import secret key. Keystore error code: "
