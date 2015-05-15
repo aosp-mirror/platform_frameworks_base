@@ -966,6 +966,12 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        invalidateRectOnScreen(dirty);
+
+        return null;
+    }
+
+    private void invalidateRectOnScreen(Rect dirty) {
         final Rect localDirty = mDirty;
         if (!localDirty.isEmpty() && !localDirty.contains(dirty)) {
             mAttachInfo.mSetIgnoreDirtyState = true;
@@ -985,8 +991,6 @@ public final class ViewRootImpl implements ViewParent,
         if (!mWillDrawSoon && (intersected || mIsAnimating)) {
             scheduleTraversals();
         }
-
-        return null;
     }
 
     void setWindowStopped(boolean stopped) {
@@ -6393,7 +6397,14 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         // Refresh the node for the focused virtual view.
+        final Rect oldBounds = mTempRect;
+        mAccessibilityFocusedVirtualView.getBoundsInScreen(oldBounds);
         mAccessibilityFocusedVirtualView = provider.createAccessibilityNodeInfo(focusedChildId);
+        final Rect newBounds = mAccessibilityFocusedVirtualView.getBoundsInScreen();
+        if (!oldBounds.equals(newBounds)) {
+            oldBounds.union(newBounds);
+            invalidateRectOnScreen(oldBounds);
+        }
     }
 
     @Override
