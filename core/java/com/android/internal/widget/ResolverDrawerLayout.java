@@ -661,13 +661,20 @@ public class ResolverDrawerLayout extends ViewGroup {
             }
         }
 
+        final int oldCollapsibleHeight = mCollapsibleHeight;
         mCollapsibleHeight = Math.max(0,
                 heightUsed - alwaysShowHeight - getMaxCollapsedHeight());
         mUncollapsibleHeight = heightUsed - mCollapsibleHeight;
 
         if (isLaidOut()) {
             final boolean isCollapsedOld = mCollapseOffset != 0;
-            mCollapseOffset = Math.min(mCollapseOffset, mCollapsibleHeight);
+            if (oldCollapsibleHeight < mCollapsibleHeight
+                    && mCollapseOffset == oldCollapsibleHeight) {
+                // Stay closed even at the new height.
+                mCollapseOffset = mCollapsibleHeight;
+            } else {
+                mCollapseOffset = Math.min(mCollapseOffset, mCollapsibleHeight);
+            }
             final boolean isCollapsedNew = mCollapseOffset != 0;
             if (isCollapsedOld != isCollapsedNew) {
                 notifyViewAccessibilityStateChangedIfNeeded(
