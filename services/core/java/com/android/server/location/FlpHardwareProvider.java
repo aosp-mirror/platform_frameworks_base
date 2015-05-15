@@ -48,7 +48,7 @@ public class FlpHardwareProvider {
     // Capabilities provided by FlpCallbacks
     private boolean mHaveBatchingCapabilities;
     private int mBatchingCapabilities;
-    private int mVersion;
+    private int mVersion = 1;
 
     private static FlpHardwareProvider sSingletonInstance = null;
 
@@ -154,7 +154,9 @@ public class FlpHardwareProvider {
 
     private void setVersion(int version) {
         mVersion = version;
-        getGeofenceHardwareSink().setVersion(version);
+        if (mGeofenceHardwareSink != null) {
+            mGeofenceHardwareSink.setVersion(version);
+        }
     }
 
     private void maybeSendCapabilities() {
@@ -480,6 +482,7 @@ public class FlpHardwareProvider {
     private GeofenceHardwareImpl getGeofenceHardwareSink() {
         if (mGeofenceHardwareSink == null) {
             mGeofenceHardwareSink = GeofenceHardwareImpl.getInstance(mContext);
+            mGeofenceHardwareSink.setVersion(mVersion);
         }
 
         return mGeofenceHardwareSink;
