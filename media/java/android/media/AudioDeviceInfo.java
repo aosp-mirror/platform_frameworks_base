@@ -203,7 +203,7 @@ public final class AudioDeviceInfo {
      *
      * @see AudioFormat
      */
-    public @NonNull int[] getFormats() {
+    public @NonNull int[] getEncodings() {
         return mPort.formats();
     }
 
