@@ -1921,7 +1921,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * android.control.* are mostly disabled, and the camera device implements
      * one of the scene mode settings (such as ACTION, SUNSET, or PARTY)
      * as it wishes. The camera device scene mode 3A settings are provided by
-     * android.control.sceneModeOverrides.</p>
+     * {@link android.hardware.camera2.CaptureResult capture results}.</p>
      * <p>When set to OFF_KEEP_STATE, it is similar to OFF mode, the only difference
      * is that this frame will not be used by camera device background 3A statistics
      * update, as if this frame is never captured. This mode can be used in the scenario
