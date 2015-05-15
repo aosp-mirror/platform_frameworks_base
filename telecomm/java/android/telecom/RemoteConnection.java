@@ -960,7 +960,7 @@ public final class RemoteConnection {
             record.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    callback.onPostDialWait(connection, String.valueOf(nextChar));
+                    callback.onPostDialChar(connection, nextChar);
                 }
             });
         }
