@@ -1,0 +1,51 @@
+page.title=Build VR with Google Cardboard
+page.metaDescription=Build apps and games with VR, for a viewer anyone can buy.
+page.image=images/cards/card-cardboard_2x.jpg
+page.tags=vr, carboard, games
+@jd:body
+
+<p>
+  Virtual reality promises to transform the way players view games, taking them from a
+  flat world into the realm of 3D. And it’s not just games, any application that provides
+  a way to visually explore has the possibility to offer users more immersive experiences
+  with VR &mdash; like a virtual tour of a famous landmark or a way to visualise atoms in a
+  chemical compound.
+</p>
+
+<div>
+<img src="{@docRoot}images/distribute/cardboard.jpg" />
+</div>
+
+<p>
+  Google Cardboard and the Cardboard SDK provides you with a practical, accessible way to
+  start developing VR, and your users with a simple, fun, and natural way to experience your
+  VR apps and games.
+</p>
+
+<p>
+  Order or make your own <a href="https://www.google.com/get/cardboard/get-cardboard.html">
+  Viewer that works with Google Cardboard</a>. And then find out more about <a
+  href="https://developers.google.com/cardboard/">developing with the Cardboard SDK</a>.
+</p>
+
+<h2 id="tips">Tips</h2>
+<ul>
+  <li>Review our <a
+href="http://www.google.com/design/spec-vr/designing-for-google-cardboard/a-new-dimension.html">
+  best practices for designing Cardboard apps.</li>
+  <li>Check out our <a href="http://stackoverflow.com/questions/tagged/google-cardboard">Stack
+  Overflow tag</a> to find and ask questions about Cardboard development.</li>
+  <li>Join the <a href="https://plus.google.com/communities/111524380182206513071">Cardboard
+  &amp; VR Developers community</a> on Google+ to stay up-to-date on Cardboard and
+  connect with other developers.</li>
+</ul>
+
+<h2 style="clear:both" id="related-resources">Related Resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/cardboard"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+
