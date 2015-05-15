@@ -139,6 +139,10 @@ final class ContentProviderRecord {
         return (externalProcessTokenToHandle != null || externalProcessNoHandleCount > 0);
     }
 
+    public boolean hasConnectionOrHandle() {
+        return !connections.isEmpty() || hasExternalProcessHandles();
+    }
+
     void dump(PrintWriter pw, String prefix, boolean full) {
         if (full) {
             pw.print(prefix); pw.print("package=");
