@@ -90,8 +90,10 @@ void Layer::updateLightPosFromRenderer(const OpenGLRenderer& rootRenderer) {
         // re-init renderer's light position, based upon last cached location in window
         Vector3 lightPos = rootRenderer.getLightCenter();
         cachedInvTransformInWindow.mapPoint3d(lightPos);
-        renderer->initLight(lightPos, rootRenderer.getLightRadius(),
-                rootRenderer.getAmbientShadowAlpha(), rootRenderer.getSpotShadowAlpha());
+        renderer->initLight(rootRenderer.getLightRadius(),
+                rootRenderer.getAmbientShadowAlpha(),
+                rootRenderer.getSpotShadowAlpha());
+        renderer->setLightCenter(lightPos);
         rendererLightPosDirty = false;
     }
 }
