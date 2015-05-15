@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -100,13 +101,23 @@ public class StatusBarIconView extends AnimatedImageView {
         return a.equals(b);
     }
 
+    public boolean equalIcons(Icon a, Icon b) {
+        if (a == b) return true;
+        if (a.getType() != b.getType()) return false;
+        switch (a.getType()) {
+            case Icon.TYPE_RESOURCE:
+                return a.getResPackage().equals(b.getResPackage()) && a.getResId() == b.getResId();
+            case Icon.TYPE_URI:
+                return a.getUriString().equals(b.getUriString());
+            default:
+                return false;
+        }
+    }
     /**
      * Returns whether the set succeeded.
      */
     public boolean set(StatusBarIcon icon) {
-        final boolean iconEquals = mIcon != null
-                && streq(mIcon.iconPackage, icon.iconPackage)
-                && mIcon.iconId == icon.iconId;
+        final boolean iconEquals = mIcon != null && equalIcons(mIcon.icon, icon.icon);
         final boolean levelEquals = iconEquals
                 && mIcon.iconLevel == icon.iconLevel;
         final boolean visibilityEquals = mIcon != null
@@ -167,45 +178,18 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     /**
-     * Returns the right icon to use for this item, respecting the iconId and
-     * iconPackage (if set)
+     * Returns the right icon to use for this item
      *
-     * @param context Context to use to get resources if iconPackage is not set
+     * @param context Context to use to get resources
      * @return Drawable for this item, or null if the package or item could not
      *         be found
      */
     public static Drawable getIcon(Context context, StatusBarIcon icon) {
-        Resources r = null;
-
-        if (icon.iconPackage != null) {
-            try {
-                int userId = icon.user.getIdentifier();
-                if (userId == UserHandle.USER_ALL) {
-                    userId = UserHandle.USER_OWNER;
-                }
-                r = context.getPackageManager()
-                        .getResourcesForApplicationAsUser(icon.iconPackage, userId);
-            } catch (PackageManager.NameNotFoundException ex) {
-                Log.e(TAG, "Icon package not found: " + icon.iconPackage);
-                return null;
-            }
-        } else {
-            r = context.getResources();
+        int userId = icon.user.getIdentifier();
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_OWNER;
         }
-
-        if (icon.iconId == 0) {
-            return null;
-        }
-
-        try {
-            return r.getDrawable(icon.iconId);
-        } catch (RuntimeException e) {
-            Log.w(TAG, "Icon not found in "
-                  + (icon.iconPackage != null ? icon.iconId : "<system>")
-                  + ": " + Integer.toHexString(icon.iconId));
-        }
-
-        return null;
+        return icon.icon.loadDrawableAsUser(context, userId);
     }
 
     public StatusBarIcon getStatusBarIcon() {
