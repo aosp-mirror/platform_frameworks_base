@@ -2015,8 +2015,8 @@ public final class ViewRootImpl implements ViewParent,
                 mLastWasImTarget = imTarget;
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null && imTarget) {
-                    imm.startGettingWindowFocus(mView);
-                    imm.onWindowFocus(mView, mView.findFocus(),
+                    imm.onPreWindowFocus(mView, true /* hasWindowFocus */);
+                    imm.onPostWindowFocus(mView, mView.findFocus(),
                             mWindowAttributes.softInputMode,
                             !mHasHadWindowFocus, mWindowAttributes.flags);
                 }
@@ -3321,11 +3321,10 @@ public final class ViewRootImpl implements ViewParent,
                             .mayUseInputMethod(mWindowAttributes.flags);
 
                     InputMethodManager imm = InputMethodManager.peekInstance();
+                    if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
+                        imm.onPreWindowFocus(mView, hasWindowFocus);
+                    }
                     if (mView != null) {
-                        if (hasWindowFocus && imm != null && mLastWasImTarget &&
-                                !isInLocalFocusMode()) {
-                            imm.startGettingWindowFocus(mView);
-                        }
                         mAttachInfo.mKeyDispatchState.reset();
                         mView.dispatchWindowFocusChanged(hasWindowFocus);
                         mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
@@ -3335,7 +3334,7 @@ public final class ViewRootImpl implements ViewParent,
                     // so all of the view state is set up correctly.
                     if (hasWindowFocus) {
                         if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
-                            imm.onWindowFocus(mView, mView.findFocus(),
+                            imm.onPostWindowFocus(mView, mView.findFocus(),
                                     mWindowAttributes.softInputMode,
                                     !mHasHadWindowFocus, mWindowAttributes.flags);
                         }
