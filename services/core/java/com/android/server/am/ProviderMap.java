@@ -210,8 +210,11 @@ public final class ProviderMap {
     boolean collectPackageProvidersLocked(String packageName, Set<String> filterByClasses,
             boolean doit, boolean evenPersistent, int userId,
             ArrayList<ContentProviderRecord> result) {
-        boolean didSomething = collectPackageProvidersLocked(packageName, filterByClasses,
-                doit, evenPersistent, mSingletonByClass, result);
+        boolean didSomething = false;
+        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_OWNER) {
+            didSomething = collectPackageProvidersLocked(packageName, filterByClasses,
+                    doit, evenPersistent, mSingletonByClass, result);
+        }
         if (!doit && didSomething) {
             return true;
         }
