@@ -8425,6 +8425,7 @@ public final class BatteryStatsImpl extends BatteryStats {
      * Remove the statistics object for a particular uid.
      */
     public void removeUidStatsLocked(int uid) {
+        mKernelUidCpuTimeReader.removeUid(uid);
         mUidStats.remove(uid);
     }
 
