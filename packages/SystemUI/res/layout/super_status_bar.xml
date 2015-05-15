@@ -63,7 +63,7 @@
                  android:layout_gravity="@integer/notification_panel_layout_gravity"
                  android:paddingLeft="@dimen/notification_side_padding"
                  android:paddingRight="@dimen/notification_side_padding"
-                 android:visibility="gone">
+                 android:visibility="invisible">
         <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
