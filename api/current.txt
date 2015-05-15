@@ -8922,7 +8922,6 @@ package android.content.pm {
     field public int descriptionRes;
     field public boolean enabled;
     field public int flags;
-    field public int fullBackupContent;
     field public boolean hardwareAccelerated;
     field public int largestWidthLimitDp;
     field public java.lang.String manageSpaceActivityName;
