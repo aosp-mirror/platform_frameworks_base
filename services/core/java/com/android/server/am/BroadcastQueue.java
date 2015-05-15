@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -209,7 +210,7 @@ public final class BroadcastQueue {
     }
 
     public final boolean replaceParallelBroadcastLocked(BroadcastRecord r) {
-        for (int i=mParallelBroadcasts.size()-1; i>=0; i--) {
+        for (int i = mParallelBroadcasts.size() - 1; i >= 0; i--) {
             if (r.intent.filterEquals(mParallelBroadcasts.get(i).intent)) {
                 if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                         "***** DROPPING PARALLEL ["
@@ -222,7 +223,7 @@ public final class BroadcastQueue {
     }
 
     public final boolean replaceOrderedBroadcastLocked(BroadcastRecord r) {
-        for (int i=mOrderedBroadcasts.size()-1; i>0; i--) {
+        for (int i = mOrderedBroadcasts.size() - 1; i > 0; i--) {
             if (r.intent.filterEquals(mOrderedBroadcasts.get(i).intent)) {
                 if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                         "***** DROPPING ORDERED ["
@@ -1097,6 +1098,28 @@ public final class BroadcastQueue {
         mSummaryHistoryNext = ringAdvance(mSummaryHistoryNext, 1, MAX_BROADCAST_SUMMARY_HISTORY);
     }
 
+    boolean cleanupDisabledPackageReceiversLocked(
+            String packageName, Set<String> filterByClasses, int userId, boolean doit) {
+        boolean didSomething = false;
+        for (int i = mParallelBroadcasts.size() - 1; i >= 0; i--) {
+            didSomething |= mParallelBroadcasts.get(i).cleanupDisabledPackageReceiversLocked(
+                    packageName, filterByClasses, userId, doit);
+            if (!doit && didSomething) {
+                return true;
+            }
+        }
+
+        for (int i = mOrderedBroadcasts.size() - 1; i >= 0; i--) {
+            didSomething |= mOrderedBroadcasts.get(i).cleanupDisabledPackageReceiversLocked(
+                    packageName, filterByClasses, userId, doit);
+            if (!doit && didSomething) {
+                return true;
+            }
+        }
+
+        return didSomething;
+    }
+
     final void logBroadcastReceiverDiscardLocked(BroadcastRecord r) {
         if (r.nextReceiver > 0) {
             Object curReceiver = r.receivers.get(r.nextReceiver-1);
@@ -1130,7 +1153,7 @@ public final class BroadcastQueue {
         if (mParallelBroadcasts.size() > 0 || mOrderedBroadcasts.size() > 0
                 || mPendingBroadcast != null) {
             boolean printed = false;
-            for (int i=mParallelBroadcasts.size()-1; i>=0; i--) {
+            for (int i = mParallelBroadcasts.size() - 1; i >= 0; i--) {
                 BroadcastRecord br = mParallelBroadcasts.get(i);
                 if (dumpPackage != null && !dumpPackage.equals(br.callerPackage)) {
                     continue;
@@ -1148,7 +1171,7 @@ public final class BroadcastQueue {
             }
             printed = false;
             needSep = true;
-            for (int i=mOrderedBroadcasts.size()-1; i>=0; i--) {
+            for (int i = mOrderedBroadcasts.size() - 1; i >= 0; i--) {
                 BroadcastRecord br = mOrderedBroadcasts.get(i);
                 if (dumpPackage != null && !dumpPackage.equals(br.callerPackage)) {
                     continue;
