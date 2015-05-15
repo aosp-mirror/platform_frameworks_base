@@ -16,6 +16,80 @@ static const String16 k_pdf = String16("\xE2\x80\xac");
 static const String16 k_placeholder_open = String16("\xc2\xbb");
 static const String16 k_placeholder_close = String16("\xc2\xab");
 
+static const char16_t k_arg_start = '{';
+static const char16_t k_arg_end = '}';
+
+Pseudolocalizer::Pseudolocalizer(PseudolocalizationMethod m)
+    : mImpl(nullptr), mLastDepth(0) {
+  setMethod(m);
+}
+
+void Pseudolocalizer::setMethod(PseudolocalizationMethod m) {
+  if (mImpl) {
+    delete mImpl;
+  }
+  if (m == PSEUDO_ACCENTED) {
+    mImpl = new PseudoMethodAccent();
+  } else if (m == PSEUDO_BIDI) {
+    mImpl = new PseudoMethodBidi();
+  } else {
+    mImpl = new PseudoMethodNone();
+  }
+}
+
+String16 Pseudolocalizer::text(const String16& text) {
+  String16 out;
+  size_t depth = mLastDepth;
+  size_t lastpos, pos;
+  const size_t length= text.size();
+  const char16_t* str = text.string();
+  bool escaped = false;
+  for (lastpos = pos = 0; pos < length; pos++) {
+    char16_t c = str[pos];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (c == '\'') {
+      escaped = true;
+      continue;
+    }
+
+    if (c == k_arg_start) {
+      depth++;
+    } else if (c == k_arg_end && depth) {
+      depth--;
+    }
+
+    if (mLastDepth != depth || pos == length - 1) {
+      bool pseudo = ((mLastDepth % 2) == 0);
+      size_t nextpos = pos;
+      if (!pseudo || depth == mLastDepth) {
+        nextpos++;
+      }
+      size_t size = nextpos - lastpos;
+      if (size) {
+        String16 chunk = String16(text, size, lastpos);
+        if (pseudo) {
+          chunk = mImpl->text(chunk);
+        } else if (str[lastpos] == k_arg_start &&
+                   str[nextpos - 1] == k_arg_end) {
+          chunk = mImpl->placeholder(chunk);
+        }
+        out.append(chunk);
+      }
+      if (pseudo && depth < mLastDepth) { // End of message
+        out.append(mImpl->end());
+      } else if (!pseudo && depth > mLastDepth) { // Start of message
+        out.append(mImpl->start());
+      }
+      lastpos = nextpos;
+      mLastDepth = depth;
+    }
+  }
+  return out;
+}
+
 static const char*
 pseudolocalize_char(const char16_t c)
 {
@@ -78,8 +152,7 @@ pseudolocalize_char(const char16_t c)
     }
 }
 
-static bool
-is_possible_normal_placeholder_end(const char16_t c) {
+static bool is_possible_normal_placeholder_end(const char16_t c) {
     switch (c) {
         case 's': return true;
         case 'S': return true;
@@ -106,8 +179,7 @@ is_possible_normal_placeholder_end(const char16_t c) {
     }
 }
 
-String16
-pseudo_generate_expansion(const unsigned int length) {
+static String16 pseudo_generate_expansion(const unsigned int length) {
     String16 result = k_expansion_string;
     const char16_t* s = result.string();
     if (result.size() < length) {
@@ -127,18 +199,47 @@ pseudo_generate_expansion(const unsigned int length) {
     return result;
 }
 
+static bool is_space(const char16_t c) {
+  return (c == ' ' || c == '\t' || c == '\n');
+}
+
+String16 PseudoMethodAccent::start() {
+  String16 result;
+  if (mDepth == 0) {
+    result = String16(String8("["));
+  }
+  mWordCount = mLength = 0;
+  mDepth++;
+  return result;
+}
+
+String16 PseudoMethodAccent::end() {
+  String16 result;
+  if (mLength) {
+    result.append(String16(String8(" ")));
+    result.append(pseudo_generate_expansion(
+        mWordCount > 3 ? mLength : mLength / 2));
+  }
+  mWordCount = mLength = 0;
+  mDepth--;
+  if (mDepth == 0) {
+    result.append(String16(String8("]")));
+  }
+  return result;
+}
+
 /**
  * Converts characters so they look like they've been localized.
  *
  * Note: This leaves escape sequences untouched so they can later be
  * processed by ResTable::collectString in the normal way.
  */
-String16
-pseudolocalize_string(const String16& source)
+String16 PseudoMethodAccent::text(const String16& source)
 {
     const char16_t* s = source.string();
     String16 result;
     const size_t I = source.size();
+    bool lastspace = true;
     for (size_t i=0; i<I; i++) {
         char16_t c = s[i];
         if (c == '\\') {
@@ -170,23 +271,24 @@ pseudolocalize_string(const String16& source)
             }
         } else if (c == '%') {
             // Placeholder syntax, no need to pseudolocalize
-            result += k_placeholder_open;
+            String16 chunk;
             bool end = false;
-            result.append(&c, 1);
+            chunk.append(&c, 1);
             while (!end && i < I) {
                 ++i;
                 c = s[i];
-                result.append(&c, 1);
+                chunk.append(&c, 1);
                 if (is_possible_normal_placeholder_end(c)) {
                     end = true;
                 } else if (c == 't') {
                     ++i;
                     c = s[i];
-                    result.append(&c, 1);
+                    chunk.append(&c, 1);
                     end = true;
                 }
             }
-            result += k_placeholder_close;
+            // Treat chunk as a placeholder unless it ends with %.
+            result += ((c == '%') ? chunk : placeholder(chunk));
         } else if (c == '<' || c == '&') {
             // html syntax, no need to pseudolocalize
             bool tag_closed = false;
@@ -234,35 +336,52 @@ pseudolocalize_string(const String16& source)
             if (p != NULL) {
                 result += String16(p);
             } else {
+                bool space = is_space(c);
+                if (lastspace && !space) {
+                  mWordCount++;
+                }
+                lastspace = space;
                 result.append(&c, 1);
             }
+            // Count only pseudolocalizable chars and delimiters
+            mLength++;
         }
     }
     return result;
 }
+String16 PseudoMethodAccent::placeholder(const String16& source) {
+  // Surround a placeholder with brackets
+  return k_placeholder_open + source + k_placeholder_close;
+}
 
-String16
-pseudobidi_string(const String16& source)
+String16 PseudoMethodBidi::text(const String16& source)
 {
     const char16_t* s = source.string();
     String16 result;
-    result += k_rlm;
-    result += k_rlo;
+    bool lastspace = true;
+    bool space = true;
     for (size_t i=0; i<source.size(); i++) {
         char16_t c = s[i];
-        switch(c) {
-            case ' ': result += k_pdf;
-                      result += k_rlm;
-                      result.append(&c, 1);
-                      result += k_rlm;
-                      result += k_rlo;
-                      break;
-            default: result.append(&c, 1);
-                     break;
+        space = is_space(c);
+        if (lastspace && !space) {
+          // Word start
+          result += k_rlm + k_rlo;
+        } else if (!lastspace && space) {
+          // Word end
+          result += k_pdf + k_rlm;
         }
+        lastspace = space;
+        result.append(&c, 1);
     }
-    result += k_pdf;
-    result += k_rlm;
+    if (!lastspace) {
+      // End of last word
+      result += k_pdf + k_rlm;
+    }
     return result;
+}
+
+String16 PseudoMethodBidi::placeholder(const String16& source) {
+  // Surround a placeholder with directionality change sequence
+  return k_rlm + k_rlo + source + k_pdf + k_rlm;
 }
 

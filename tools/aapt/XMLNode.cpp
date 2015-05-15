@@ -213,16 +213,14 @@ status_t parseStyledString(Bundle* /* bundle */,
     Vector<StringPool::entry_style_span> spanStack;
     String16 curString;
     String16 rawString;
+    Pseudolocalizer pseudo(pseudolocalize);
     const char* errorMsg;
     int xliffDepth = 0;
     bool firstTime = true;
 
     size_t len;
     ResXMLTree::event_code_t code;
-    // Bracketing if pseudolocalization accented method specified.
-    if (pseudolocalize == PSEUDO_ACCENTED) {
-        curString.append(String16(String8("[")));
-    }
+    curString.append(pseudo.start());
     while ((code=inXml->next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
         if (code == ResXMLTree::TEXT) {
             String16 text(inXml->getText(&len));
@@ -231,18 +229,12 @@ status_t parseStyledString(Bundle* /* bundle */,
                 if (text.string()[0] == '@') {
                     // If this is a resource reference, don't do the pseudoloc.
                     pseudolocalize = NO_PSEUDOLOCALIZATION;
+                    pseudo.setMethod(pseudolocalize);
+                    curString = String16();
                 }
             }
             if (xliffDepth == 0 && pseudolocalize > 0) {
-                String16 pseudo;
-                if (pseudolocalize == PSEUDO_ACCENTED) {
-                    pseudo = pseudolocalize_string(text);
-                } else if (pseudolocalize == PSEUDO_BIDI) {
-                    pseudo = pseudobidi_string(text);
-                } else {
-                    pseudo = text;
-                }
-                curString.append(pseudo);
+                curString.append(pseudo.text(text));
             } else {
                 if (isFormatted && hasSubstitutionErrors(fileName, inXml, text) != NO_ERROR) {
                     return UNKNOWN_ERROR;
@@ -382,24 +374,7 @@ moveon:
         }
     }
 
-    // Bracketing if pseudolocalization accented method specified.
-    if (pseudolocalize == PSEUDO_ACCENTED) {
-        const char16_t* str = outString->string();
-        const char16_t* p = str;
-        const char16_t* e = p + outString->size();
-        int words_cnt = 0;
-        while (p < e) {
-            if (isspace(*p)) {
-                words_cnt++;
-            }
-            p++;
-        }
-        unsigned int length = words_cnt > 3 ? outString->size() :
-            outString->size() / 2;
-        curString.append(String16(String8(" ")));
-        curString.append(pseudo_generate_expansion(length));
-        curString.append(String16(String8("]")));
-    }
+    curString.append(pseudo.end());
 
     if (code == ResXMLTree::BAD_DOCUMENT) {
             SourcePos(String8(fileName), inXml->getLineNumber()).error(
