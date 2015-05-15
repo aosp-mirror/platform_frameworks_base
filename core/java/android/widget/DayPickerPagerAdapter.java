@@ -186,11 +186,12 @@ class DayPickerPagerAdapter extends PagerAdapter {
     }
 
     private int getMonthForPosition(int position) {
-        return position % MONTHS_IN_YEAR + mMinDate.get(Calendar.MONTH);
+        return (position + mMinDate.get(Calendar.MONTH)) % MONTHS_IN_YEAR;
     }
 
     private int getYearForPosition(int position) {
-        return position / MONTHS_IN_YEAR + mMinDate.get(Calendar.YEAR);
+        final int yearOffset = (position + mMinDate.get(Calendar.MONTH)) / MONTHS_IN_YEAR;
+        return yearOffset + mMinDate.get(Calendar.YEAR);
     }
 
     private int getPositionForDay(@Nullable Calendar day) {
@@ -198,8 +199,8 @@ class DayPickerPagerAdapter extends PagerAdapter {
             return -1;
         }
 
-        final int yearOffset = (day.get(Calendar.YEAR) - mMinDate.get(Calendar.YEAR));
-        final int monthOffset = (day.get(Calendar.MONTH) - mMinDate.get(Calendar.MONTH));
+        final int yearOffset = day.get(Calendar.YEAR) - mMinDate.get(Calendar.YEAR);
+        final int monthOffset = day.get(Calendar.MONTH) - mMinDate.get(Calendar.MONTH);
         final int position = yearOffset * MONTHS_IN_YEAR + monthOffset;
         return position;
     }
