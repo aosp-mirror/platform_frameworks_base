@@ -353,15 +353,26 @@ public final class Icon implements Parcelable {
 
     /**
      * Create an Icon pointing to a drawable resource.
-     * @param res Resources for a package containing the resource in question
+     * @param context The context for the application whose resources should be used to resolve the
+     *                given resource ID.
      * @param resId ID of the drawable resource
+     */
+    public static Icon createWithResource(Context context, @DrawableRes int resId) {
+        final Icon rep = new Icon(TYPE_RESOURCE);
+        rep.mInt1 = resId;
+        rep.mString1 = context.getPackageName();
+        return rep;
+    }
+
+    /**
+     * Version of createWithResource that takes Resources. Do not use.
+     * @hide
      */
     public static Icon createWithResource(Resources res, @DrawableRes int resId) {
         if (res == null) {
             throw new IllegalArgumentException("Resource must not be null.");
         }
         final Icon rep = new Icon(TYPE_RESOURCE);
-        rep.mObj1 = res;
         rep.mInt1 = resId;
         rep.mString1 = res.getResourcePackageName(resId);
         return rep;
