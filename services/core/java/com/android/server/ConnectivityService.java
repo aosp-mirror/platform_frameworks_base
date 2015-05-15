@@ -23,6 +23,10 @@ import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
@@ -716,8 +720,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private NetworkRequest createInternetRequestForTransport(int transportType) {
         NetworkCapabilities netCap = new NetworkCapabilities();
-        netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        netCap.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+        netCap.addCapability(NET_CAPABILITY_INTERNET);
+        netCap.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
         if (transportType > -1) {
             netCap.addTransportType(transportType);
         }
@@ -1073,9 +1077,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (nai.created) {
                     NetworkCapabilities nc = new NetworkCapabilities(nai.networkCapabilities);
                     if (nai.lastValidated) {
-                        nc.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                        nc.addCapability(NET_CAPABILITY_VALIDATED);
                     } else {
-                        nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                        nc.removeCapability(NET_CAPABILITY_VALIDATED);
                     }
                     return nc;
                 }
@@ -1188,9 +1192,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (nai) {
                 NetworkCapabilities nc = new NetworkCapabilities(nai.networkCapabilities);
                 if (nai.lastValidated) {
-                    nc.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                    nc.addCapability(NET_CAPABILITY_VALIDATED);
                 } else {
-                    nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                    nc.removeCapability(NET_CAPABILITY_VALIDATED);
                 }
                 return nc;
             }
@@ -3530,7 +3534,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceNetworkRequestPermissions(NetworkCapabilities networkCapabilities) {
-        if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+        if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
                 == false) {
             enforceConnectivityInternalPermission();
         } else {
@@ -3558,7 +3562,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void enforceMeteredApnPolicy(NetworkCapabilities networkCapabilities) {
         // if UID is restricted, don't allow them to bring up metered APNs
-        if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+        if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
                 == false) {
             final int uidRules;
             final int uid = Binder.getCallingUid();
@@ -3568,7 +3572,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if ((uidRules & (RULE_REJECT_METERED | RULE_REJECT_ALL)) != 0) {
                 // we could silently fail or we can filter the available nets to only give
                 // them those they have access to.  Chose the more useful
-                networkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+                networkCapabilities.addCapability(NET_CAPABILITY_NOT_METERED);
             }
         }
     }
@@ -3774,7 +3778,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO: deprecate and remove mDefaultDns when we can do so safely.
         // For now, use it only when the network has Internet access. http://b/18327075
         final boolean useDefaultDns = networkAgent.networkCapabilities.hasCapability(
-                NetworkCapabilities.NET_CAPABILITY_INTERNET);
+                NET_CAPABILITY_INTERNET);
         final boolean flushDns = updateRoutes(newLp, oldLp, netId);
         updateDnses(newLp, oldLp, netId, flushDns, useDefaultDns);
 
