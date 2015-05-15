@@ -114,35 +114,40 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         if (mPendingLockCheck != null) {
             mPendingLockCheck.cancel(false);
         }
+
+        if (entry.length() < MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT) {
+            // to avoid accidental lockout, only count attempts that are long enough to be a
+            // real password. This may require some tweaking.
+            setPasswordEntryInputEnabled(true);
+            onPasswordChecked(entry, false, 0);
+            return;
+        }
+
         mPendingLockCheck = LockPatternChecker.checkPassword(
                 mLockPatternUtils,
                 entry,
                 KeyguardUpdateMonitor.getCurrentUser(),
                 new LockPatternChecker.OnCheckCallback() {
                     @Override
-                    public void onChecked(boolean matched) {
+                    public void onChecked(boolean matched, int timeoutMs) {
                         setPasswordEntryInputEnabled(true);
                         mPendingLockCheck = null;
-                        onPasswordChecked(entry, matched);
+                        onPasswordChecked(entry, matched, timeoutMs);
                     }
                 });
     }
 
-    private void onPasswordChecked(String entry, boolean matched) {
+    private void onPasswordChecked(String entry, boolean matched, int timeoutMs) {
         if (matched) {
-            mCallback.reportUnlockAttempt(true);
+            mCallback.reportUnlockAttempt(true, 0);
             mCallback.dismiss(true);
         } else {
-            if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
-                // to avoid accidental lockout, only count attempts that are long enough to be a
-                // real password. This may require some tweaking.
-                mCallback.reportUnlockAttempt(false);
-                int attempts = KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts();
-                if (0 == (attempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
-                    long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
-                            KeyguardUpdateMonitor.getCurrentUser());
-                    handleAttemptLockout(deadline);
-                }
+            mCallback.reportUnlockAttempt(false, timeoutMs);
+            int attempts = KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts();
+            if (timeoutMs > 0) {
+                long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
+                        KeyguardUpdateMonitor.getCurrentUser(), timeoutMs);
+                handleAttemptLockout(deadline);
             }
             mSecurityMessageDisplay.setMessage(getWrongPasswordStringId(), true);
         }
