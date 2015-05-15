@@ -425,6 +425,24 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getMobileRadioActiveTime(int which);
         public abstract int getMobileRadioActiveCount(int which);
 
+        /**
+         * Get the total cpu time (in microseconds) this UID had processes executing in userspace.
+         */
+        public abstract long getUserCpuTimeUs(int which);
+
+        /**
+         * Get the total cpu time (in microseconds) this UID had processes executing kernel syscalls.
+         */
+        public abstract long getSystemCpuTimeUs(int which);
+
+        /**
+         * Returns the approximate cpu time (in milliseconds) spent at a certain CPU speed.
+         * @param speedStep the index of the CPU speed. This is not the actual speed of the CPU.
+         * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
+         * @see BatteryStats#getCpuSpeedSteps()
+         */
+        public abstract long getTimeAtCpuSpeed(int step, int which);
+
         public static abstract class Sensor {
             /*
              * FIXME: it's not correct to use this magic value because it
@@ -505,15 +523,6 @@ public abstract class BatteryStats implements Parcelable {
              * @return foreground cpu time in microseconds
              */
             public abstract long getForegroundTime(int which);
-
-            /**
-             * Returns the approximate cpu time (in milliseconds) spent at a certain CPU speed.
-             * @param speedStep the index of the CPU speed. This is not the actual speed of the
-             * CPU.
-             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
-             * @see BatteryStats#getCpuSpeedSteps()
-             */
-            public abstract long getTimeAtCpuSpeedStep(int speedStep, int which);
 
             public abstract int countExcessivePowers();
 
@@ -3871,6 +3880,16 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println(sb.toString());
                     uidActivity = true;
                 }
+            }
+
+            final long userCpuTimeUs = u.getUserCpuTimeUs(which);
+            final long systemCpuTimeUs = u.getSystemCpuTimeUs(which);
+            if (userCpuTimeUs > 0 || systemCpuTimeUs > 0) {
+                sb.setLength(0);
+                sb.append(prefix);
+                sb.append("    Total cpu time: ");
+                formatTimeMs(sb, (userCpuTimeUs + systemCpuTimeUs) / 1000);
+                pw.println(sb.toString());
             }
 
             final ArrayMap<String, ? extends BatteryStats.Uid.Proc> processStats
