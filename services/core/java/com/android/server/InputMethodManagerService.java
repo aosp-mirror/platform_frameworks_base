@@ -1704,7 +1704,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     vis = 0;
                 }
                 mImeWindowVis = vis;
-                mInputShown = ((mImeWindowVis & InputMethodService.IME_VISIBLE) != 0);
                 mBackDisposition = backDisposition;
                 // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
                 final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked();
