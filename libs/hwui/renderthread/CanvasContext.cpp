@@ -127,10 +127,15 @@ bool CanvasContext::pauseSurface(ANativeWindow* window) {
 }
 
 // TODO: don't pass viewport size, it's automatic via EGL
-void CanvasContext::setup(int width, int height, const Vector3& lightCenter, float lightRadius,
+void CanvasContext::setup(int width, int height, float lightRadius,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     if (!mCanvas) return;
-    mCanvas->initLight(lightCenter, lightRadius, ambientShadowAlpha, spotShadowAlpha);
+    mCanvas->initLight(lightRadius, ambientShadowAlpha, spotShadowAlpha);
+}
+
+void CanvasContext::setLightCenter(const Vector3& lightCenter) {
+    if (!mCanvas) return;
+    mCanvas->setLightCenter(lightCenter);
 }
 
 void CanvasContext::setOpaque(bool opaque) {

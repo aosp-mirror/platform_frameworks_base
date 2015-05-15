@@ -172,24 +172,34 @@ bool RenderProxy::pauseSurface(const sp<ANativeWindow>& window) {
     return (bool) postAndWait(task);
 }
 
-CREATE_BRIDGE7(setup, CanvasContext* context, int width, int height,
-        Vector3 lightCenter, float lightRadius,
-        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
-    args->context->setup(args->width, args->height, args->lightCenter, args->lightRadius,
+CREATE_BRIDGE6(setup, CanvasContext* context, int width, int height,
+        float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
+    args->context->setup(args->width, args->height, args->lightRadius,
             args->ambientShadowAlpha, args->spotShadowAlpha);
     return nullptr;
 }
 
-void RenderProxy::setup(int width, int height, const Vector3& lightCenter, float lightRadius,
+void RenderProxy::setup(int width, int height, float lightRadius,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     SETUP_TASK(setup);
     args->context = mContext;
     args->width = width;
     args->height = height;
-    args->lightCenter = lightCenter;
     args->lightRadius = lightRadius;
     args->ambientShadowAlpha = ambientShadowAlpha;
     args->spotShadowAlpha = spotShadowAlpha;
+    post(task);
+}
+
+CREATE_BRIDGE2(setLightCenter, CanvasContext* context, Vector3 lightCenter) {
+    args->context->setLightCenter(args->lightCenter);
+    return nullptr;
+}
+
+void RenderProxy::setLightCenter(const Vector3& lightCenter) {
+    SETUP_TASK(setLightCenter);
+    args->context = mContext;
+    args->lightCenter = lightCenter;
     post(task);
 }
 
