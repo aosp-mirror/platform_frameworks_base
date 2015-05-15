@@ -31,12 +31,12 @@ import java.util.List;
  * A service that receives calls from the system when new SMS and MMS are
  * sent or received.
  * <p>To extend this class, you must declare the service in your manifest file with
- * the {@link android.Manifest.permission#BIND_CARRIER_MESSAGING_SERVICE} permission
+ * the {@link android.Manifest.permission#BIND_CARRIER_SERVICES} permission
  * and include an intent filter with the {@link #SERVICE_INTERFACE} action. For example:</p>
  * <pre>
  * &lt;service android:name=".MyMessagingService"
  *          android:label="&#64;string/service_name"
- *          android:permission="android.permission.BIND_CARRIER_MESSAGING_SERVICE">
+ *          android:permission="android.permission.BIND_CARRIER_SERVICES">
  *     &lt;intent-filter>
  *         &lt;action android:name="android.service.carrier.CarrierMessagingService" />
  *     &lt;/intent-filter>

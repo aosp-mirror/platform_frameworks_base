@@ -23,14 +23,14 @@ import android.os.PersistableBundle;
  * A service that sets carrier configuration for telephony services.
  * <p>
  * To extend this class, you must declare the service in your manifest file to require the
- * {@link android.Manifest.permission#BIND_CARRIER_CONFIG_SERVICE} permission and include an intent
+ * {@link android.Manifest.permission#BIND_CARRIER_SERVICES} permission and include an intent
  * filter with the {@link #SERVICE_INTERFACE} action. For example:
  * </p>
  *
  * <pre>{@code
  * <service android:name=".MyCarrierConfigService"
  *       android:label="@string/service_name"
- *       android:permission="android.permission.BIND_CARRIER_CONFIG_SERVICE">
+ *       android:permission="android.permission.BIND_CARRIER_SERVICES">
  *  <intent-filter>
  *      <action android:name="android.service.carrier.CarrierConfigService" />
  *  </intent-filter>
