@@ -72,8 +72,9 @@ public:
     bool pauseSurface(ANativeWindow* window);
     bool hasSurface() { return mNativeWindow.get(); }
 
-    void setup(int width, int height, const Vector3& lightCenter, float lightRadius,
+    void setup(int width, int height, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
     void makeCurrent();
     void processLayerUpdate(DeferredLayerUpdater* layerUpdater);

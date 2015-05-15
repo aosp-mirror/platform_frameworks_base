@@ -94,12 +94,15 @@ void OpenGLRenderer::initProperties() {
     }
 }
 
-void OpenGLRenderer::initLight(const Vector3& lightCenter, float lightRadius,
-        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
-    mLightCenter = lightCenter;
+void OpenGLRenderer::initLight(float lightRadius, uint8_t ambientShadowAlpha,
+        uint8_t spotShadowAlpha) {
     mLightRadius = lightRadius;
     mAmbientShadowAlpha = ambientShadowAlpha;
     mSpotShadowAlpha = spotShadowAlpha;
+}
+
+void OpenGLRenderer::setLightCenter(const Vector3& lightCenter) {
+    mLightCenter = lightCenter;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

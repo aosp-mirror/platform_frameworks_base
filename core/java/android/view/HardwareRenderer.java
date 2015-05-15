@@ -260,7 +260,7 @@ public abstract class HardwareRenderer {
 
     /**
      * Gets the current width of the surface. This is the width that the surface
-     * was last set to in a call to {@link #setup(int, int, Rect)}.
+     * was last set to in a call to {@link #setup(int, int, View.AttachInfo, Rect)}.
      *
      * @return the current width of the surface
      */
@@ -268,7 +268,7 @@ public abstract class HardwareRenderer {
 
     /**
      * Gets the current height of the surface. This is the height that the surface
-     * was last set to in a call to {@link #setup(int, int, Rect)}.
+     * was last set to in a call to {@link #setup(int, int, View.AttachInfo, Rect)}.
      *
      * @return the current width of the surface
      */
@@ -373,19 +373,20 @@ public abstract class HardwareRenderer {
      *
      * @param width The width of the drawing surface.
      * @param height The height of the drawing surface.
+     * @param attachInfo Information about the window.
      * @param surface The surface to hardware accelerate
      * @param surfaceInsets The drawing surface insets to apply
      *
      * @return true if the surface was initialized, false otherwise. Returning
      *         false might mean that the surface was already initialized.
      */
-    boolean initializeIfNeeded(int width, int height, Surface surface, Rect surfaceInsets)
-            throws OutOfResourcesException {
+    boolean initializeIfNeeded(int width, int height, View.AttachInfo attachInfo,
+            Surface surface, Rect surfaceInsets) throws OutOfResourcesException {
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
                 if (initialize(surface)) {
-                    setup(width, height, surfaceInsets);
+                    setup(width, height, attachInfo, surfaceInsets);
                     return true;
                 }
             }
@@ -398,9 +399,17 @@ public abstract class HardwareRenderer {
      *
      * @param width The width of the drawing surface.
      * @param height The height of the drawing surface.
+     * @param attachInfo Information about the window.
      * @param surfaceInsets The drawing surface insets to apply
      */
-    abstract void setup(int width, int height, Rect surfaceInsets);
+    abstract void setup(int width, int height, View.AttachInfo attachInfo, Rect surfaceInsets);
+
+    /**
+     * Updates the light position based on the position of the window.
+     *
+     * @param attachInfo Information about the window.
+     */
+    abstract void setLightCenter(View.AttachInfo attachInfo);
 
     /**
      * Optional, sets the name of the renderer. Useful for debugging purposes.
