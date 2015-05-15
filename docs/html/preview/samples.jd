@@ -13,25 +13,72 @@ page.title=Samples
 </p>
 
 
-<h3 id="id">Sample 1</h3>
+<h3 id="RuntimePermissions">Runtime Permissions</h3>
 
 <p>
-  This sample demonstrates how to turducken frankfurter boudin, ham brisket alcatra kielbasa pork
-  loin pork. Jowl kielbasa kevin, sausage landjaeger corned beef cow spare ribs pastrami leberkas
-  drumstick.
+ Android M changes the way system permissions work. Users are asked to approve permission
+ requests at runtime instead of during installation. This sample shows how to request these
+ permissions.
 </p>
 
-<p><a href="#">Get it on GitHub</a></p>
+<p><a href="https://github.com/googlesamples/android-RuntimePermissions">Get it on GitHub</a></p>
 
-
-<h3 id="id">Sample 2</h3>
+<h3 id="RuntimePermissionsCompat">Runtime Permissions Compat</h3>
 
 <p>
-  This sample demonstrates how to turducken frankfurter boudin, ham brisket alcatra kielbasa pork
-  loin pork. Jowl kielbasa kevin, sausage landjaeger corned beef cow spare ribs pastrami leberkas
-  drumstick.
+ To support devices on previous versions of Android, this sample demonstrates how to work with the
+ new permissions system introduced in Android M by using a support library.
 </p>
 
-<p><a href="#">Get it on GitHub</a></p>
+<p><a href="https://github.com/googlesamples/android-RuntimePermissionsCompat">Get it on
+GitHub</a></p>
+
+<h3 id="VoiceCamera">Voice Camera</h3>
+
+<p>
+  This sample demonstrates how to implement the "OK Google, take a selfie" voice command and confirm
+  the user intent with the <code>VoiceInteraction</code> API.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-VoiceCamera">Get it on GitHub</a></p>
+
+
+<h3 id="DeepLinkSharing">Deep Link Sharing</h3>
+
+<p>
+  This sample shows how to handle content shared via deep links in your app. It demonstrates how to
+  implement the <code>ChooserTargetService</code>.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-DeepLinkSharing">Get it on GitHub</a></p>
+
+<h3 id="NotificationBuilder">Notification Builder</h3>
+
+<p>
+  This sample demonstrates the improved
+  <a href="{@docRoot}reference/android/app/Notification.html"><code>Notification</code></a>
+  memory footprint and simplified creation of notifications with custom views.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-NotificationBuilder">Get it on GitHub</a></p>
+
+<h3 id="ActiveNotification">Active Notification</h3>
+
+<p>
+  This sample demonstrates how the
+  <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a>
+  can tell you how many notifications your app is currently showing.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ActiveNotification">Get it on GitHub</a></p>
+
+<h3 id="VoiceSynthesizer">Voice Synthesizer</h3>
+
+<p>
+  This sample demonstrates how to use the <code>NativeAudio</code> APIs to demonstrate low-latency
+  audio processing.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-VoiceSynthesizer">Get it on GitHub</a></p>
 
 
