@@ -42,7 +42,8 @@ public final class StatusHints implements Parcelable {
     @SystemApi @Deprecated
     public StatusHints(ComponentName packageName, CharSequence label, int iconResId,
             Bundle extras) {
-        this(label, Icon.createWithResource(packageName.getPackageName(), iconResId), extras);
+        this(label, iconResId == 0 ? null : Icon.createWithResource(packageName.getPackageName(),
+            iconResId), extras);
     }
 
     public StatusHints(CharSequence label, Icon icon, Bundle extras) {
