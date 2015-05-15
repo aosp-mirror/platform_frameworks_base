@@ -82,6 +82,9 @@ public class StorageManager {
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
 
+    /** {@hide} */
+    public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
+
     private final Context mContext;
     private final ContentResolver mResolver;
 
@@ -635,6 +638,15 @@ public class StorageManager {
     public void format(String volId) {
         try {
             mMountService.format(volId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
+    public long benchmark(String volId) {
+        try {
+            return mMountService.benchmark(volId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

@@ -71,6 +71,8 @@ public final class Sm {
             runHasAdoptable();
         } else if ("get-primary-storage-uuid".equals(op)) {
             runGetPrimaryStorageUuid();
+        } else if ("set-force-adoptable".equals(op)) {
+            runSetForceAdoptable();
         } else if ("partition".equals(op)) {
             runPartition();
         } else if ("mount".equals(op)) {
@@ -116,12 +118,17 @@ public final class Sm {
     }
 
     public void runHasAdoptable() {
-        System.out.println(SystemProperties.getBoolean(StorageManager.PROP_HAS_ADOPTABLE, false)
-                || SystemProperties.getBoolean(StorageManager.PROP_FORCE_ADOPTABLE, false));
+        System.out.println(SystemProperties.getBoolean(StorageManager.PROP_HAS_ADOPTABLE, false));
     }
 
     public void runGetPrimaryStorageUuid() throws RemoteException {
         System.out.println(mSm.getPrimaryStorageUuid());
+    }
+
+    public void runSetForceAdoptable() throws RemoteException {
+        final boolean forceAdoptable = Boolean.parseBoolean(nextArg());
+        mSm.setDebugFlags(forceAdoptable ? StorageManager.DEBUG_FORCE_ADOPTABLE : 0,
+                StorageManager.DEBUG_FORCE_ADOPTABLE);
     }
 
     public void runPartition() throws RemoteException {
@@ -177,6 +184,7 @@ public final class Sm {
         System.err.println("       sm list-volumes [public|private|emulated|all]");
         System.err.println("       sm has-adoptable");
         System.err.println("       sm get-primary-storage-uuid");
+        System.err.println("       sm set-force-adoptable [true|false]");
         System.err.println("");
         System.err.println("       sm partition DISK [public|private|mixed] [ratio]");
         System.err.println("       sm mount VOLUME");
