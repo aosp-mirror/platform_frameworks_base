@@ -10,28 +10,9 @@ meta.tags="monetization, inappbilling, subscriptions"
 <div id="qv-wrapper">
 <div id="qv">
   <h2>Quickview</h2>
-  <ul>
-    <li>Subscriptions let you sell products with automated, recurring billing
-        at a variety of intervals.</li>
-    <li>You can offer a configurable trial period for monthly and
-        annual subscriptions.</li>
-    <li>You can manage subscriptions through the Developer Console, or by using
-        the
-        <a href="https://developers.google.com/android-publisher/">Google Play
-        Developer API</a>.</li>
-    <li>Users purchase your subscriptions from inside your apps, rather than
-        directly from Google Play.</li>
-    <li>Users can renew their subscriptions while a current subscription is
-        active.</li>
-    <li>Users can upgrade or downgrade a subscription in the middle of a
-        subscription period. The old subscription's cost is pro-rated, and the
-        unused portion is applied to the replacement subscription.</li>
-    <li>You can defer billing for a particular user's subscription, to manage
-        accounts or offer rewards.</li>
-  </ul>
   <h2>In this document</h2>
   <ol>
-    <li><a href="#overview">Overview of Subscriptions</a></li>
+    <li><a href="#overview">Overview</a></li>
     <li><a href="#administering">Configuring Subscriptions Items</a></li>
     <li><a href="#cancellation">Subscription Cancellation</a></li>
     <li><a href="#payment">Payment Processing and Policies</a></li>
@@ -53,7 +34,27 @@ implementation to sell subscriptions.</p>
 specific to subscriptions, along with some strategies for the associated billing
 and business models.</p>
 
-<h2 id="overview">Overview of Subscriptions</h2>
+  <ul>
+    <li>Subscriptions let you sell products with automated, recurring billing
+        at a variety of intervals.</li>
+    <li>You can offer a configurable trial period for monthly and
+        annual subscriptions.</li>
+    <li>You can manage subscriptions through the Developer Console, or by using
+        the
+        <a href="https://developers.google.com/android-publisher/">Google Play
+        Developer API</a>.</li>
+    <li>Users purchase your subscriptions from inside your apps, rather than
+        directly from Google Play.</li>
+    <li>Users can renew their subscriptions while a current subscription is
+        active.</li>
+    <li>Users can upgrade or downgrade a subscription in the middle of a
+        subscription period. The old subscription's cost is pro-rated, and the
+        unused portion is applied to the replacement subscription.</li>
+    <li>You can defer billing for a particular user's subscription, to manage
+        accounts or offer rewards.</li>
+  </ul>
+
+<h2 id="overview">Overview</h2>
 <p>A <em>subscription</em> is a product type offered in In-app Billing that
 lets you sell content, services, or features to users from inside your app with
 recurring, automated billing at the interval you specify. You can sell subscriptions to almost
@@ -86,7 +87,7 @@ In-app Billing to provide subscription purchasers with extended access to
 content (for example, from your web site or another service).
 The server-side API lets you validate the status of a subscription when users
 sign into your other services. For more information about the API, see <a
-href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google Play Developer API</a>. </p>
+href="{@docRoot}google/play/developer-api.html">Google Play Developer API</a>. </p>
 
 <p>You can also build on your existing external subscriber base from inside your
 Android apps.</p>
@@ -138,7 +139,7 @@ see <a href="{@docRoot}google/play/billing/billing_admin.html">Administering
 In-app Billing</a>.</p>
 
 <p>You can also create and manage subscriptions using the
-<a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">
+<a href="{@docRoot}google/play/developer-api.html">
 Google Play Developer API</a>.</p>
 
 <h3 id="pricing">Subscription pricing</h3>
@@ -190,7 +191,7 @@ provides a purchase token back to the purchasing app through the In-app Billing
 API. Your apps can store the token locally or pass it to your backend servers,
 which can then use it to validate or cancel the subscription remotely using the
 <a
-href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google Play Developer API</a>.</p>
+href="{@docRoot}google/play/developer-api.html">Google Play Developer API</a>.</p>
 
 <p>If a recurring payment fails (for example, because the customer’s credit
 card has become invalid), the subscription does not renew. How your app is
@@ -270,7 +271,7 @@ is used up.</p>
 <h3 id="deferred-billing">Deferred Billing</h3>
 
 <p>Using the
-<a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google
+<a href="{@docRoot}google/play/developer-api.html">Google
 Play Developer API</a>, you can defer the next billing date for a
 subscriber. The user continues to be subscribed to the content, and has full
 access to it, but is not charged during the deferral period. This allows you
@@ -416,11 +417,11 @@ will need to request a refund. They can request a refund from the <strong>My
 Orders</strong> page in the Play Store, or by contacting you directly.</p>
 
 <p>If you receive requests for refunds, you can use the
-<a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google Play
+<a href="{@docRoot}google/play/developer-api.html">Google Play
 Developer API</a> or the Merchant Center to cancel the subscription, verify that it
 is already canceled, or refund the user's payment without canceling it. You
 can also use the
-<a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google
+<a href="{@docRoot}google/play/developer-api.html">Google
 Play Developer API</a> to <em>refund and revoke</em> a
 user's subscription. If you refund and revoke a subscription, the user's
 subscription is immediately canceled, and the user's most recent subscription
@@ -512,5 +513,5 @@ managing subscriptions, as well as extending and integrating subscriptions with
 other services.</p>
 
 <p>For complete information, see
-<a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google Play
+<a href="{@docRoot}google/play/developer-api.html">Google Play
 Developer API</a>.</p>
