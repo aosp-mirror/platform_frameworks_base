@@ -3102,7 +3102,16 @@ public final class Settings {
         public static final String EGG_MODE = "egg_mode";
 
         /** @hide */
-        public static final Validator EGG_MODE_VALIDATOR = sBooleanValidator;
+        public static final Validator EGG_MODE_VALIDATOR = new Validator() {
+            @Override
+            public boolean validate(String value) {
+                try {
+                    return Long.parseLong(value) >= 0;
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        };
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
