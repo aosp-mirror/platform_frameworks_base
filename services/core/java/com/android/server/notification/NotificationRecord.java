@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -106,10 +107,14 @@ public final class NotificationRecord {
 
     void dump(PrintWriter pw, String prefix, Context baseContext) {
         final Notification notification = sbn.getNotification();
+        final Icon icon = notification.getSmallIcon();
+        String iconStr = String.valueOf(icon);
+        if (icon != null && icon.getType() == Icon.TYPE_RESOURCE) {
+            iconStr += " / " + idDebugString(baseContext, icon.getResPackage(), icon.getResId());
+        }
         pw.println(prefix + this);
         pw.println(prefix + "  uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
-        pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
-                + " / " + idDebugString(baseContext, sbn.getPackageName(), notification.icon));
+        pw.println(prefix + "  icon=" + iconStr);
         pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.getScore());
         pw.println(prefix + "  key=" + sbn.getKey());
         pw.println(prefix + "  seen=" + mIsSeen);
