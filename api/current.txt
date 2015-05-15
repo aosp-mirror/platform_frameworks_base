@@ -15732,7 +15732,7 @@ package android.media {
     method public void restoreKeys(byte[], byte[]);
     method public void setOnEventListener(android.media.MediaDrm.OnEventListener);
     method public void setOnExpirationUpdateListener(android.media.MediaDrm.OnExpirationUpdateListener, android.os.Handler);
-    method public void setOnKeysChangeListener(android.media.MediaDrm.OnKeysChangeListener, android.os.Handler);
+    method public void setOnKeyStatusChangeListener(android.media.MediaDrm.OnKeyStatusChangeListener, android.os.Handler);
     method public void setPropertyByteArray(java.lang.String, byte[]);
     method public void setPropertyString(java.lang.String, java.lang.String);
     field public static final int EVENT_KEY_EXPIRED = 3; // 0x3
@@ -15740,11 +15740,6 @@ package android.media {
     field public static final deprecated int EVENT_PROVISION_REQUIRED = 1; // 0x1
     field public static final int EVENT_SESSION_RECLAIMED = 5; // 0x5
     field public static final int EVENT_VENDOR_DEFINED = 4; // 0x4
-    field public static final int KEY_STATUS_EXPIRED = 1; // 0x1
-    field public static final int KEY_STATUS_INTERNAL_ERROR = 4; // 0x4
-    field public static final int KEY_STATUS_OUTPUT_NOT_ALLOWED = 2; // 0x2
-    field public static final int KEY_STATUS_PENDING = 3; // 0x3
-    field public static final int KEY_STATUS_USABLE = 0; // 0x0
     field public static final int KEY_TYPE_OFFLINE = 2; // 0x2
     field public static final int KEY_TYPE_RELEASE = 3; // 0x3
     field public static final int KEY_TYPE_STREAMING = 1; // 0x1
@@ -15753,9 +15748,6 @@ package android.media {
     field public static final java.lang.String PROPERTY_DEVICE_UNIQUE_ID = "deviceUniqueId";
     field public static final java.lang.String PROPERTY_VENDOR = "vendor";
     field public static final java.lang.String PROPERTY_VERSION = "version";
-    field public static final int REQUEST_TYPE_INITIAL = 0; // 0x0
-    field public static final int REQUEST_TYPE_RELEASE = 2; // 0x2
-    field public static final int REQUEST_TYPE_RENEWAL = 1; // 0x1
   }
 
   public final class MediaDrm.CryptoSession {
@@ -15769,11 +15761,19 @@ package android.media {
     method public byte[] getData();
     method public java.lang.String getDefaultUrl();
     method public int getRequestType();
+    field public static final int REQUEST_TYPE_INITIAL = 0; // 0x0
+    field public static final int REQUEST_TYPE_RELEASE = 2; // 0x2
+    field public static final int REQUEST_TYPE_RENEWAL = 1; // 0x1
   }
 
   public static final class MediaDrm.KeyStatus {
     method public byte[] getKeyId();
     method public int getStatusCode();
+    field public static final int STATUS_EXPIRED = 1; // 0x1
+    field public static final int STATUS_INTERNAL_ERROR = 4; // 0x4
+    field public static final int STATUS_OUTPUT_NOT_ALLOWED = 2; // 0x2
+    field public static final int STATUS_PENDING = 3; // 0x3
+    field public static final int STATUS_USABLE = 0; // 0x0
   }
 
   public static final class MediaDrm.MediaDrmStateException extends java.lang.IllegalStateException {
@@ -15788,8 +15788,8 @@ package android.media {
     method public abstract void onExpirationUpdate(android.media.MediaDrm, byte[], long);
   }
 
-  public static abstract interface MediaDrm.OnKeysChangeListener {
-    method public abstract void onKeysChange(android.media.MediaDrm, byte[], java.util.List<android.media.MediaDrm.KeyStatus>, boolean);
+  public static abstract interface MediaDrm.OnKeyStatusChangeListener {
+    method public abstract void onKeyStatusChange(android.media.MediaDrm, byte[], java.util.List<android.media.MediaDrm.KeyStatus>, boolean);
   }
 
   public static final class MediaDrm.ProvisionRequest {
