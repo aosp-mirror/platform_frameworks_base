@@ -176,8 +176,6 @@ class DayPickerView extends ViewGroup {
                 }
             }
         });
-
-        updateButtonVisibility(mViewPager.getCurrentItem());
     }
 
     private void updateButtonVisibility(int position) {
@@ -346,6 +344,8 @@ class DayPickerView extends ViewGroup {
         // Changing the min/max date changes the selection position since we
         // don't really have stable IDs. Jumps immediately to the new position.
         setDate(mSelectedDay.getTimeInMillis(), false, false);
+
+        updateButtonVisibility(mViewPager.getCurrentItem());
     }
 
     /**
