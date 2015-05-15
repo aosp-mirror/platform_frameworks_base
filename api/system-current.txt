@@ -30452,7 +30452,6 @@ package android.security.keystore {
     method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
     method public boolean isDigestsSpecified();
-    method public boolean isEncryptionAtRestRequired();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUserAuthenticationRequired();
   }
@@ -30467,7 +30466,6 @@ package android.security.keystore {
     method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateSerialNumber(java.math.BigInteger);
     method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateSubject(javax.security.auth.x500.X500Principal);
     method public android.security.keystore.KeyGenParameterSpec.Builder setDigests(java.lang.String...);
-    method public android.security.keystore.KeyGenParameterSpec.Builder setEncryptionAtRestRequired(boolean);
     method public android.security.keystore.KeyGenParameterSpec.Builder setEncryptionPaddings(java.lang.String...);
     method public android.security.keystore.KeyGenParameterSpec.Builder setKeySize(int);
     method public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityEnd(java.util.Date);
@@ -30556,7 +30554,6 @@ package android.security.keystore {
     method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
     method public boolean isDigestsSpecified();
-    method public boolean isEncryptionAtRestRequired();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUserAuthenticationRequired();
   }
@@ -30566,7 +30563,6 @@ package android.security.keystore {
     method public android.security.keystore.KeyProtection build();
     method public android.security.keystore.KeyProtection.Builder setBlockModes(java.lang.String...);
     method public android.security.keystore.KeyProtection.Builder setDigests(java.lang.String...);
-    method public android.security.keystore.KeyProtection.Builder setEncryptionAtRestRequired(boolean);
     method public android.security.keystore.KeyProtection.Builder setEncryptionPaddings(java.lang.String...);
     method public android.security.keystore.KeyProtection.Builder setKeyValidityEnd(java.util.Date);
     method public android.security.keystore.KeyProtection.Builder setKeyValidityForConsumptionEnd(java.util.Date);
