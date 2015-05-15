@@ -105,7 +105,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 125 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 126 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -131,6 +131,9 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
+
+    private final KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
+    private final KernelCpuSpeedReader mKernelCpuSpeedReader = new KernelCpuSpeedReader();
 
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
@@ -791,20 +794,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             mCount.set(mLoadedCount);
             mLastCount = 0;
             mUnpluggedCount = mPluggedCount = mLoadedCount;
-        }
-    }
-
-    public static class SamplingCounter extends Counter {
-        SamplingCounter(TimeBase timeBase, Parcel in) {
-            super(timeBase, in);
-        }
-
-        SamplingCounter(TimeBase timeBase) {
-            super(timeBase);
-        }
-
-        public void addCountAtomic(long count) {
-            mCount.addAndGet((int)count);
         }
     }
 
@@ -2918,8 +2907,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void finishAddingCpuLocked(int perc, int remainUTime, int remainSTtime,
             int totalUTime, int totalSTime, int statUserTime, int statSystemTime,
-            int statIOWaitTime, int statIrqTime, int statSoftIrqTime, int statIdleTime,
-            long[] cpuSpeedTimes) {
+            int statIOWaitTime, int statIrqTime, int statSoftIrqTime, int statIdleTime) {
         if (DEBUG) Slog.d(TAG, "Adding cpu: tuser=" + totalUTime + " tsys=" + totalSTime
                 + " user=" + statUserTime + " sys=" + statSystemTime
                 + " io=" + statIOWaitTime + " irq=" + statIrqTime
@@ -2959,7 +2947,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                             remainSTtime -= mySTime;
                             num--;
                             Uid.Proc proc = uid.getProcessStatsLocked("*wakelock*");
-                            proc.addCpuTimeLocked(myUTime, mySTime, cpuSpeedTimes);
+                            proc.addCpuTimeLocked(myUTime, mySTime);
                         }
                     }
                 }
@@ -2970,7 +2958,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 Uid uid = getUidStatsLocked(Process.SYSTEM_UID);
                 if (uid != null) {
                     Uid.Proc proc = uid.getProcessStatsLocked("*lost*");
-                    proc.addCpuTimeLocked(remainUTime, remainSTtime, cpuSpeedTimes);
+                    proc.addCpuTimeLocked(remainUTime, remainSTtime);
                 }
             }
         }
@@ -4398,6 +4386,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         long mCurStepUserTime;
         long mCurStepSystemTime;
 
+        LongSamplingCounter mUserCpuTime = new LongSamplingCounter(mOnBatteryTimeBase);
+        LongSamplingCounter mSystemCpuTime = new LongSamplingCounter(mOnBatteryTimeBase);
+        LongSamplingCounter[] mSpeedBins;
+
         /**
          * The statistics we have collected for this uid's wake locks.
          */
@@ -4455,6 +4447,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mWifiMulticastTimer = new StopwatchTimer(Uid.this, WIFI_MULTICAST_ENABLED,
                     mWifiMulticastTimers, mOnBatteryTimeBase);
             mProcessStateTimer = new StopwatchTimer[NUM_PROCESS_STATE];
+            mSpeedBins = new LongSamplingCounter[getCpuSpeedSteps()];
         }
 
         @Override
@@ -4925,6 +4918,26 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
+        public long getUserCpuTimeUs(int which) {
+            return mUserCpuTime.getCountLocked(which);
+        }
+
+        @Override
+        public long getSystemCpuTimeUs(int which) {
+            return mSystemCpuTime.getCountLocked(which);
+        }
+
+        @Override
+        public long getTimeAtCpuSpeed(int step, int which) {
+            if (step >= 0 && step < mSpeedBins.length) {
+                if (mSpeedBins[step] != null) {
+                    return mSpeedBins[step].getCountLocked(which);
+                }
+            }
+            return 0;
+        }
+
+        @Override
         public long getWifiControllerActivity(int type, int which) {
             if (type >= 0 && type < NUM_CONTROLLER_ACTIVITY_TYPES &&
                     mWifiControllerTime[type] != null) {
@@ -5023,6 +5036,15 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                 if (mBluetoothControllerTime[i] != null) {
                     mBluetoothControllerTime[i].reset(false);
+                }
+            }
+
+            mUserCpuTime.reset(false);
+            mSystemCpuTime.reset(false);
+            for (int i = 0; i < mSpeedBins.length; i++) {
+                LongSamplingCounter c = mSpeedBins[i];
+                if (c != null) {
+                    c.reset(false);
                 }
             }
 
@@ -5159,6 +5181,15 @@ public final class BatteryStatsImpl extends BatteryStats {
                     }
                 }
                 mPids.clear();
+
+                mUserCpuTime.detach();
+                mSystemCpuTime.detach();
+                for (int i = 0; i < mSpeedBins.length; i++) {
+                    LongSamplingCounter c = mSpeedBins[i];
+                    if (c != null) {
+                        c.detach();
+                    }
+                }
             }
 
             return !active;
@@ -5313,6 +5344,20 @@ public final class BatteryStatsImpl extends BatteryStats {
                 if (mBluetoothControllerTime[i] != null) {
                     out.writeInt(1);
                     mBluetoothControllerTime[i].writeToParcel(out);
+                } else {
+                    out.writeInt(0);
+                }
+            }
+
+            mUserCpuTime.writeToParcel(out);
+            mSystemCpuTime.writeToParcel(out);
+
+            out.writeInt(mSpeedBins.length);
+            for (int i = 0; i < mSpeedBins.length; i++) {
+                LongSamplingCounter c = mSpeedBins[i];
+                if (c != null) {
+                    out.writeInt(1);
+                    c.writeToParcel(out);
                 } else {
                     out.writeInt(0);
                 }
@@ -5480,6 +5525,18 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mBluetoothControllerTime[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
                 } else {
                     mBluetoothControllerTime[i] = null;
+                }
+            }
+
+            mUserCpuTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
+            mSystemCpuTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
+
+            int bins = in.readInt();
+            int steps = getCpuSpeedSteps();
+            mSpeedBins = new LongSamplingCounter[bins >= steps ? bins : steps];
+            for (int i = 0; i < bins; i++) {
+                if (in.readInt() != 0) {
+                    mSpeedBins[i] = new LongSamplingCounter(mOnBatteryTimeBase, in);
                 }
             }
         }
@@ -5762,14 +5819,11 @@ public final class BatteryStatsImpl extends BatteryStats {
              */
             int mProcessState = PROCESS_STATE_NONE;
 
-            SamplingCounter[] mSpeedBins;
-
             ArrayList<ExcessivePower> mExcessivePower;
 
             Proc(String name) {
                 mName = name;
                 mOnBatteryTimeBase.add(this);
-                mSpeedBins = new SamplingCounter[getCpuSpeedSteps()];
             }
 
             public void onTimeStarted(long elapsedRealtime, long baseUptime, long baseRealtime) {
@@ -5791,25 +5845,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mLoadedStarts = mLoadedNumCrashes = mLoadedNumAnrs = 0;
                 mUnpluggedUserTime = mUnpluggedSystemTime = mUnpluggedForegroundTime = 0;
                 mUnpluggedStarts = mUnpluggedNumCrashes = mUnpluggedNumAnrs = 0;
-                for (int i = 0; i < mSpeedBins.length; i++) {
-                    SamplingCounter c = mSpeedBins[i];
-                    if (c != null) {
-                        c.reset(false);
-                    }
-                }
                 mExcessivePower = null;
             }
 
             void detach() {
                 mActive = false;
                 mOnBatteryTimeBase.remove(this);
-                for (int i = 0; i < mSpeedBins.length; i++) {
-                    SamplingCounter c = mSpeedBins[i];
-                    if (c != null) {
-                        mOnBatteryTimeBase.remove(c);
-                        mSpeedBins[i] = null;
-                    }
-                }
             }
 
             public int countExcessivePowers() {
@@ -5903,18 +5944,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(mUnpluggedStarts);
                 out.writeInt(mUnpluggedNumCrashes);
                 out.writeInt(mUnpluggedNumAnrs);
-
-                out.writeInt(mSpeedBins.length);
-                for (int i = 0; i < mSpeedBins.length; i++) {
-                    SamplingCounter c = mSpeedBins[i];
-                    if (c != null) {
-                        out.writeInt(1);
-                        c.writeToParcel(out);
-                    } else {
-                        out.writeInt(0);
-                    }
-                }
-
                 writeExcessivePowerToParcelLocked(out);
             }
 
@@ -5937,39 +5966,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mUnpluggedStarts = in.readInt();
                 mUnpluggedNumCrashes = in.readInt();
                 mUnpluggedNumAnrs = in.readInt();
-
-                int bins = in.readInt();
-                int steps = getCpuSpeedSteps();
-                mSpeedBins = new SamplingCounter[bins >= steps ? bins : steps];
-                for (int i = 0; i < bins; i++) {
-                    if (in.readInt() != 0) {
-                        mSpeedBins[i] = new SamplingCounter(mOnBatteryTimeBase, in);
-                    }
-                }
-
                 readExcessivePowerFromParcelLocked(in);
             }
 
-            public BatteryStatsImpl getBatteryStats() {
-                return BatteryStatsImpl.this;
-            }
-
-            public void addCpuTimeLocked(int utime, int stime, long[] speedStepBins) {
+            public void addCpuTimeLocked(int utime, int stime) {
                 mUserTime += utime;
-                mCurStepUserTime += utime;
                 mSystemTime += stime;
-                mCurStepSystemTime += stime;
-
-                for (int i = 0; i < mSpeedBins.length && i < speedStepBins.length; i++) {
-                    long amt = speedStepBins[i];
-                    if (amt != 0) {
-                        SamplingCounter c = mSpeedBins[i];
-                        if (c == null) {
-                            mSpeedBins[i] = c = new SamplingCounter(mOnBatteryTimeBase);
-                        }
-                        c.addCountAtomic(speedStepBins[i]);
-                    }
-                }
             }
 
             public void addForegroundTimeLocked(long ttime) {
@@ -6057,16 +6059,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                     val -= mUnpluggedNumAnrs;
                 }
                 return val;
-            }
-
-            @Override
-            public long getTimeAtCpuSpeedStep(int speedStep, int which) {
-                if (speedStep < mSpeedBins.length) {
-                    SamplingCounter c = mSpeedBins[speedStep];
-                    return c != null ? c.getCountLocked(which) : 0;
-                } else {
-                    return 0;
-                }
             }
         }
 
@@ -7785,6 +7777,32 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /**
+     * Read and distribute CPU usage across apps.
+     */
+    public void updateCpuTimeLocked(boolean firstTime) {
+        final int cpuSpeedSteps = getCpuSpeedSteps();
+        final long[] cpuSpeeds = mKernelCpuSpeedReader.readDelta();
+        KernelUidCpuTimeReader.Callback callback = null;
+        if (mOnBatteryInternal && !firstTime) {
+            callback = new KernelUidCpuTimeReader.Callback() {
+                @Override
+                public void onUidCpuTime(int uid, long userTimeUs, long systemTimeUs) {
+                    final Uid u = getUidStatsLocked(mapUid(uid));
+                    u.mUserCpuTime.addCountLocked(userTimeUs);
+                    u.mSystemCpuTime.addCountLocked(systemTimeUs);
+                    for (int i = 0; i < cpuSpeedSteps; i++) {
+                        if (u.mSpeedBins[i] == null) {
+                            u.mSpeedBins[i] = new LongSamplingCounter(mOnBatteryTimeBase);
+                        }
+                        u.mSpeedBins[i].addCountLocked(cpuSpeeds[i]);
+                    }
+                }
+            };
+        }
+        mKernelUidCpuTimeReader.readDelta(callback);
+    }
+
     boolean setChargingLocked(boolean charging) {
         if (mCharging != charging) {
             mCharging = charging;
@@ -8440,58 +8458,6 @@ public final class BatteryStatsImpl extends BatteryStats {
         return u.getServiceStatsLocked(pkg, name);
     }
 
-    /**
-     * Massage data to distribute any reasonable work down to more specific
-     * owners.  Must only be called on a dead BatteryStats object!
-     */
-    public void distributeWorkLocked(int which) {
-        // Aggregate all CPU time associated with WIFI.
-        Uid wifiUid = mUidStats.get(Process.WIFI_UID);
-        if (wifiUid != null) {
-            long uSecTime = computeBatteryRealtime(SystemClock.elapsedRealtime() * 1000, which);
-            for (int ip=wifiUid.mProcessStats.size()-1; ip>=0; ip--) {
-                Uid.Proc proc = wifiUid.mProcessStats.valueAt(ip);
-                long totalRunningTime = getGlobalWifiRunningTime(uSecTime, which);
-                for (int i=0; i<mUidStats.size(); i++) {
-                    Uid uid = mUidStats.valueAt(i);
-                    if (uid.mUid != Process.WIFI_UID) {
-                        long uidRunningTime = uid.getWifiRunningTime(uSecTime, which);
-                        if (uidRunningTime > 0) {
-                            Uid.Proc uidProc = uid.getProcessStatsLocked("*wifi*");
-                            long time = proc.getUserTime(which);
-                            time = (time*uidRunningTime)/totalRunningTime;
-                            uidProc.mUserTime += time;
-                            proc.mUserTime -= time;
-                            time = proc.getSystemTime(which);
-                            time = (time*uidRunningTime)/totalRunningTime;
-                            uidProc.mSystemTime += time;
-                            proc.mSystemTime -= time;
-                            time = proc.getForegroundTime(which);
-                            time = (time*uidRunningTime)/totalRunningTime;
-                            uidProc.mForegroundTime += time;
-                            proc.mForegroundTime -= time;
-                            for (int sb=0; sb<proc.mSpeedBins.length; sb++) {
-                                SamplingCounter sc = proc.mSpeedBins[sb];
-                                if (sc != null) {
-                                    time = sc.getCountLocked(which);
-                                    time = (time*uidRunningTime)/totalRunningTime;
-                                    SamplingCounter uidSc = uidProc.mSpeedBins[sb];
-                                    if (uidSc == null) {
-                                        uidSc = new SamplingCounter(mOnBatteryTimeBase);
-                                        uidProc.mSpeedBins[sb] = uidSc;
-                                    }
-                                    uidSc.mCount.addAndGet((int)time);
-                                    sc.mCount.addAndGet((int)-time);
-                                }
-                            }
-                            totalRunningTime -= uidRunningTime;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     public void shutdownLocked() {
         recordShutdownLocked(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
         writeSyncLocked();
@@ -8950,6 +8916,23 @@ public final class BatteryStatsImpl extends BatteryStats {
                 u.mMobileRadioActiveCount.readSummaryFromParcelLocked(in);
             }
 
+            u.mUserCpuTime.readSummaryFromParcelLocked(in);
+            u.mSystemCpuTime.readSummaryFromParcelLocked(in);
+
+            int NSB = in.readInt();
+            if (NSB > 100) {
+                Slog.w(TAG, "File corrupt: too many speed bins " + NSB);
+                return;
+            }
+
+            u.mSpeedBins = new LongSamplingCounter[NSB];
+            for (int i=0; i<NSB; i++) {
+                if (in.readInt() != 0) {
+                    u.mSpeedBins[i] = new LongSamplingCounter(mOnBatteryTimeBase);
+                    u.mSpeedBins[i].readSummaryFromParcelLocked(in);
+                }
+            }
+
             int NW = in.readInt();
             if (NW > 100) {
                 Slog.w(TAG, "File corrupt: too many wake locks " + NW);
@@ -9007,18 +8990,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 p.mStarts = p.mLoadedStarts = in.readInt();
                 p.mNumCrashes = p.mLoadedNumCrashes = in.readInt();
                 p.mNumAnrs = p.mLoadedNumAnrs = in.readInt();
-                int NSB = in.readInt();
-                if (NSB > 100) {
-                    Slog.w(TAG, "File corrupt: too many speed bins " + NSB);
-                    return;
-                }
-                p.mSpeedBins = new SamplingCounter[NSB];
-                for (int i=0; i<NSB; i++) {
-                    if (in.readInt() != 0) {
-                        p.mSpeedBins[i] = new SamplingCounter(mOnBatteryTimeBase);
-                        p.mSpeedBins[i].readSummaryFromParcelLocked(in);
-                    }
-                }
                 if (!p.readExcessivePowerFromParcelLocked(in)) {
                     return;
                 }
@@ -9278,6 +9249,20 @@ public final class BatteryStatsImpl extends BatteryStats {
                 u.mMobileRadioActiveCount.writeSummaryFromParcelLocked(out);
             }
 
+            u.mUserCpuTime.writeSummaryFromParcelLocked(out);
+            u.mSystemCpuTime.writeSummaryFromParcelLocked(out);
+
+            out.writeInt(u.mSpeedBins.length);
+            for (int i = 0; i < u.mSpeedBins.length; i++) {
+                LongSamplingCounter speedBin = u.mSpeedBins[i];
+                if (speedBin != null) {
+                    out.writeInt(1);
+                    speedBin.writeSummaryFromParcelLocked(out);
+                } else {
+                    out.writeInt(0);
+                }
+            }
+
             final ArrayMap<String, Uid.Wakelock> wakeStats = u.mWakelockStats.getMap();
             int NW = wakeStats.size();
             out.writeInt(NW);
@@ -9344,16 +9329,6 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(ps.mStarts);
                 out.writeInt(ps.mNumCrashes);
                 out.writeInt(ps.mNumAnrs);
-                final int N = ps.mSpeedBins.length;
-                out.writeInt(N);
-                for (int i=0; i<N; i++) {
-                    if (ps.mSpeedBins[i] != null) {
-                        out.writeInt(1);
-                        ps.mSpeedBins[i].writeSummaryFromParcelLocked(out);
-                    } else {
-                        out.writeInt(0);
-                    }
-                }
                 ps.writeExcessivePowerToParcelLocked(out);
             }
 
