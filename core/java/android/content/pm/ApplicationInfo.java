@@ -107,6 +107,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @see {@link android.content.Context#getNoBackupFilesDir}
      * @see {@link #FLAG_ALLOW_BACKUP}
+     *
+     * @hide
      */
     public int fullBackupContent = 0;
 
