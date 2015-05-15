@@ -127,8 +127,9 @@ public:
     void setViewport(int width, int height) { mState.setViewport(width, height); }
 
     void initProperties();
-    void initLight(const Vector3& lightCenter, float lightRadius,
-            uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    void initLight(float lightRadius, uint8_t ambientShadowAlpha,
+            uint8_t spotShadowAlpha);
+    void setLightCenter(const Vector3& lightCenter);
 
     /*
      * Prepares the renderer to draw a frame. This method must be invoked

@@ -1813,15 +1813,15 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
 
-            if (mAttachInfo.mHardwareRenderer != null &&
-                    mAttachInfo.mHardwareRenderer.isEnabled()) {
-                if (hwInitialized ||
-                        mWidth != mAttachInfo.mHardwareRenderer.getWidth() ||
-                        mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
-                    mAttachInfo.mHardwareRenderer.setup(
-                            mWidth, mHeight, mWindowAttributes.surfaceInsets);
+            final HardwareRenderer hardwareRenderer = mAttachInfo.mHardwareRenderer;
+            if (hardwareRenderer != null && hardwareRenderer.isEnabled()) {
+                if (hwInitialized
+                        || mWidth != hardwareRenderer.getWidth()
+                        || mHeight != hardwareRenderer.getHeight()) {
+                    hardwareRenderer.setup(mWidth, mHeight, mAttachInfo,
+                            mWindowAttributes.surfaceInsets);
                     if (!hwInitialized) {
-                        mAttachInfo.mHardwareRenderer.invalidate(mSurface);
+                        hardwareRenderer.invalidate(mSurface);
                         mFullRedrawNeeded = true;
                     }
                 }
@@ -1897,6 +1897,11 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mAttachInfo.mWindowLeft = frame.left;
                 mAttachInfo.mWindowTop = frame.top;
+
+                // Update the light position for the new window offsets.
+                if (mAttachInfo.mHardwareRenderer != null) {
+                    mAttachInfo.mHardwareRenderer.setLightCenter(mAttachInfo);
+                }
             }
         }
 
@@ -2605,7 +2610,7 @@ public final class ViewRootImpl implements ViewParent,
 
                     try {
                         mAttachInfo.mHardwareRenderer.initializeIfNeeded(
-                                mWidth, mHeight, mSurface, surfaceInsets);
+                                mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
                     } catch (OutOfResourcesException e) {
                         handleOutOfResourcesException(e);
                         return;
@@ -3300,7 +3305,7 @@ public final class ViewRootImpl implements ViewParent,
                                 final WindowManager.LayoutParams lp = mWindowAttributes;
                                 final Rect surfaceInsets = lp != null ? lp.surfaceInsets : null;
                                 mAttachInfo.mHardwareRenderer.initializeIfNeeded(
-                                        mWidth, mHeight, mSurface, surfaceInsets);
+                                        mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
                             } catch (OutOfResourcesException e) {
                                 Log.e(TAG, "OutOfResourcesException locking surface", e);
                                 try {
