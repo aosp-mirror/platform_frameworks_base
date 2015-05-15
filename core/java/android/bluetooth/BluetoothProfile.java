@@ -17,6 +17,9 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
+
 import java.util.List;
 
 /**
@@ -163,6 +166,7 @@ public interface BluetoothProfile {
      *
      * @return List of devices. The list will be empty on error.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getConnectedDevices();
 
     /**
@@ -179,6 +183,7 @@ public interface BluetoothProfile {
      *              {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING},
      * @return List of devices. The list will be empty on error.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states);
 
     /**
@@ -191,6 +196,7 @@ public interface BluetoothProfile {
      *               {@link #STATE_CONNECTED}, {@link #STATE_CONNECTING},
      *               {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING}
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getConnectionState(BluetoothDevice device);
 
     /**

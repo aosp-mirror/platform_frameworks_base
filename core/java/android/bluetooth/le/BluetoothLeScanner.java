@@ -16,6 +16,8 @@
 
 package android.bluetooth.le;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -80,6 +82,7 @@ public final class BluetoothLeScanner {
      * @param callback Callback used to deliver scan results.
      * @throws IllegalArgumentException If {@code callback} is null.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void startScan(final ScanCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback is null");
@@ -97,6 +100,7 @@ public final class BluetoothLeScanner {
      * @param callback Callback used to deliver scan results.
      * @throws IllegalArgumentException If {@code settings} or {@code callback} is null.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void startScan(List<ScanFilter> filters, ScanSettings settings,
             final ScanCallback callback) {
         startScan(filters, settings, callback, null);
@@ -151,6 +155,7 @@ public final class BluetoothLeScanner {
      *
      * @param callback
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void stopScan(ScanCallback callback) {
         BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         synchronized (mLeScanClients) {
