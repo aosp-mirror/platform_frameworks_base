@@ -1097,8 +1097,11 @@ public class LockPatternUtils {
             Log.w(TAG, "Only device owner may call setCredentialRequiredForDecrypt()");
             return;
         }
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
+
+        if (isDeviceEncryptionEnabled()){
+            Settings.Global.putInt(mContext.getContentResolver(),
+               Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
+        }
     }
 
     private boolean isDoNotAskCredentialsOnBootSet() {
