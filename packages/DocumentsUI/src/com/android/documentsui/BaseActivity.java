@@ -269,14 +269,16 @@ abstract class BaseActivity extends Activity {
         /** Derived after loader */
         public int derivedSortOrder = SORT_ORDER_DISPLAY_NAME;
 
-        public boolean allowMultiple = false;
-        public boolean showSize = false;
-        public boolean localOnly = false;
-        public boolean forceAdvanced = false;
-        public boolean showAdvanced = false;
-        public boolean stackTouched = false;
-        public boolean restored = false;
-        public boolean directoryCopy = false;
+        public boolean allowMultiple;
+        public boolean showSize;
+        public boolean localOnly ;
+        public boolean forceAdvanced ;
+        public boolean showAdvanced ;
+        public boolean stackTouched ;
+        public boolean restored ;
+        public boolean directoryCopy ;
+        /** Transfer mode for file copy/move operations. */
+        public int transferMode;
 
         /** Current user navigation stack; empty implies recents. */
         public DocumentStack stack = new DocumentStack();

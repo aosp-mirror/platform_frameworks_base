@@ -61,6 +61,11 @@ public class CopyService extends IntentService {
     public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
     public static final String EXTRA_STACK = "com.android.documentsui.STACK";
     public static final String EXTRA_FAILURE = "com.android.documentsui.FAILURE";
+    public static final String EXTRA_TRANSFER_MODE = "com.android.documentsui.TRANSFER_MODE";
+
+    public static final int TRANSFER_MODE_NONE = 0;
+    public static final int TRANSFER_MODE_COPY = 1;
+    public static final int TRANSFER_MODE_MOVE = 2;
 
     // TODO: Move it to a shared file when more operations are implemented.
     public static final int FAILURE_COPY = 1;
@@ -101,15 +106,19 @@ public class CopyService extends IntentService {
      * @param srcDocs A list of src files to copy.
      * @param dstStack The copy destination stack.
      */
-    public static void start(Context context, List<DocumentInfo> srcDocs, DocumentStack dstStack) {
+    public static void start(Context context, List<DocumentInfo> srcDocs, DocumentStack dstStack,
+            int mode) {
         final Resources res = context.getResources();
         final Intent copyIntent = new Intent(context, CopyService.class);
         copyIntent.putParcelableArrayListExtra(
                 EXTRA_SRC_LIST, new ArrayList<DocumentInfo>(srcDocs));
         copyIntent.putExtra(EXTRA_STACK, (Parcelable) dstStack);
+        copyIntent.putExtra(EXTRA_TRANSFER_MODE, mode);
 
+        int toastMessage = (mode == TRANSFER_MODE_COPY) ? R.plurals.copy_begin
+                : R.plurals.move_begin;
         Toast.makeText(context,
-                res.getQuantityString(R.plurals.copy_begin, srcDocs.size(), srcDocs.size()),
+                res.getQuantityString(toastMessage, srcDocs.size(), srcDocs.size()),
                 Toast.LENGTH_SHORT).show();
         context.startService(copyIntent);
     }
@@ -131,6 +140,8 @@ public class CopyService extends IntentService {
 
         final ArrayList<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
         final DocumentStack stack = intent.getParcelableExtra(EXTRA_STACK);
+        // Copy by default.
+        final int transferMode = intent.getIntExtra(EXTRA_TRANSFER_MODE, TRANSFER_MODE_COPY);
 
         try {
             // Acquire content providers.
@@ -142,7 +153,7 @@ public class CopyService extends IntentService {
             setupCopyJob(srcs, stack);
 
             for (int i = 0; i < srcs.size() && !mIsCancelled; ++i) {
-                copy(srcs.get(i), stack.peek());
+                copy(srcs.get(i), stack.peek(), transferMode);
             }
         } catch (Exception e) {
             // Catch-all to prevent any copy errors from wedging the app.
@@ -173,8 +184,6 @@ public class CopyService extends IntentService {
                         .setAutoCancel(true);
                 mNotificationManager.notify(mJobId, 0, errorBuilder.build());
             }
-
-            // TODO: Display a toast if the copy was cancelled.
         }
     }
 
@@ -377,7 +386,8 @@ public class CopyService extends IntentService {
      * @param dstDirInfo The destination directory.
      * @throws RemoteException
      */
-    private void copy(DocumentInfo srcInfo, DocumentInfo dstDirInfo) throws RemoteException {
+    private void copy(DocumentInfo srcInfo, DocumentInfo dstDirInfo, int mode)
+            throws RemoteException {
         final Uri dstUri = DocumentsContract.createDocument(mDstClient, dstDirInfo.derivedUri,
                 srcInfo.mimeType, srcInfo.displayName);
         if (dstUri == null) {
@@ -388,9 +398,9 @@ public class CopyService extends IntentService {
         }
 
         if (Document.MIME_TYPE_DIR.equals(srcInfo.mimeType)) {
-            copyDirectoryHelper(srcInfo.derivedUri, dstUri);
+            copyDirectoryHelper(srcInfo.derivedUri, dstUri, mode);
         } else {
-            copyFileHelper(srcInfo.derivedUri, dstUri);
+            copyFileHelper(srcInfo.derivedUri, dstUri, mode);
         }
     }
 
@@ -403,7 +413,8 @@ public class CopyService extends IntentService {
      * @param dstDirUri URI of the directory to copy to. Must be created beforehand.
      * @throws RemoteException
      */
-    private void copyDirectoryHelper(Uri srcDirUri, Uri dstDirUri) throws RemoteException {
+    private void copyDirectoryHelper(Uri srcDirUri, Uri dstDirUri, int mode)
+            throws RemoteException {
         // Recurse into directories. Copy children into the new subdirectory.
         final String queryColumns[] = new String[] {
                 Document.COLUMN_DISPLAY_NAME,
@@ -424,9 +435,20 @@ public class CopyService extends IntentService {
                 final Uri childUri = DocumentsContract.buildDocumentUri(srcDirUri.getAuthority(),
                         getCursorString(cursor, Document.COLUMN_DOCUMENT_ID));
                 if (Document.MIME_TYPE_DIR.equals(childMimeType)) {
-                    copyDirectoryHelper(childUri, dstUri);
+                    copyDirectoryHelper(childUri, dstUri, mode);
                 } else {
-                    copyFileHelper(childUri, dstUri);
+                    copyFileHelper(childUri, dstUri, mode);
+                }
+            }
+            if (mode == TRANSFER_MODE_MOVE) {
+                try {
+                    DocumentsContract.deleteDocument(mSrcClient, srcDirUri);
+                } catch (RemoteException e) {
+                    // RemoteExceptions usually signal that the connection is dead, so there's no
+                    // point attempting to continue. Propagate the exception up so the copy job is
+                    // cancelled.
+                    Log.w(TAG, "Failed to clean up after move: " + srcDirUri, e);
+                    throw e;
                 }
             }
         } finally {
@@ -441,7 +463,8 @@ public class CopyService extends IntentService {
      * @param dstUri URI of the *file* to copy to. Must be created beforehand.
      * @throws RemoteException
      */
-    private void copyFileHelper(Uri srcUri, Uri dstUri) throws RemoteException {
+    private void copyFileHelper(Uri srcUri, Uri dstUri, int mode)
+            throws RemoteException {
         // Copy an individual file.
         CancellationSignal canceller = new CancellationSignal();
         ParcelFileDescriptor srcFile = null;
@@ -484,7 +507,7 @@ public class CopyService extends IntentService {
                 mFailedFiles.add(DocumentInfo.fromUri(getContentResolver(), srcUri));
             } catch (FileNotFoundException ignore) {
                 Log.w(TAG, "Source file gone: " + srcUri, copyError);
-              // The source file is gone.
+                // The source file is gone.
             }
         }
 
@@ -494,9 +517,17 @@ public class CopyService extends IntentService {
             try {
                 DocumentsContract.deleteDocument(mDstClient, dstUri);
             } catch (RemoteException e) {
-                Log.w(TAG, "Failed to clean up: " + srcUri, e);
+                Log.w(TAG, "Failed to clean up after copy error: " + dstUri, e);
                 // RemoteExceptions usually signal that the connection is dead, so there's no point
                 // attempting to continue. Propagate the exception up so the copy job is cancelled.
+                throw e;
+            }
+        } else if (mode == TRANSFER_MODE_MOVE) {
+            // Clean up src files after a successful move.
+            try {
+                DocumentsContract.deleteDocument(mSrcClient, srcUri);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to clean up after move: " + srcUri, e);
                 throw e;
             }
         }

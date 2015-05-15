@@ -16,23 +16,18 @@
 
 package com.android.documentsui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 
-import com.android.documentsui.CopyService;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 /**
@@ -43,10 +38,11 @@ public class FailureDialogFragment extends DialogFragment
     private static final String TAG = "FailureDialogFragment";
 
     private int mFailure;
+    private int mTransferMode;
     private ArrayList<DocumentInfo> mFailedSrcList;
 
     public static void show(FragmentManager fm, int failure,
-            ArrayList<DocumentInfo> failedSrcList, DocumentStack dstStack) {
+            ArrayList<DocumentInfo> failedSrcList, DocumentStack dstStack, int transferMode) {
         // TODO: Add support for other failures than copy.
         if (failure != CopyService.FAILURE_COPY) {
             return;
@@ -54,6 +50,7 @@ public class FailureDialogFragment extends DialogFragment
 
         final Bundle args = new Bundle();
         args.putInt(CopyService.EXTRA_FAILURE, failure);
+        args.putInt(CopyService.EXTRA_TRANSFER_MODE, transferMode);
         args.putParcelableArrayList(CopyService.EXTRA_SRC_LIST, failedSrcList);
 
         final FragmentTransaction ft = fm.beginTransaction();
@@ -66,11 +63,12 @@ public class FailureDialogFragment extends DialogFragment
 
     @Override
     public void onClick(DialogInterface dialog, int whichButton) {
-      if (whichButton == DialogInterface.BUTTON_POSITIVE) {
-          CopyService.start(getActivity(), mFailedSrcList,
-                  (DocumentStack) getActivity().getIntent().getParcelableExtra(
-                          CopyService.EXTRA_STACK));
-      }
+        if (whichButton == DialogInterface.BUTTON_POSITIVE) {
+            CopyService.start(getActivity(), mFailedSrcList,
+                    (DocumentStack) getActivity().getIntent().getParcelableExtra(
+                            CopyService.EXTRA_STACK),
+                            mTransferMode);
+        }
     }
 
     @Override
@@ -78,6 +76,7 @@ public class FailureDialogFragment extends DialogFragment
         super.onCreate(inState);
 
         mFailure = getArguments().getInt(CopyService.EXTRA_FAILURE);
+        mTransferMode = getArguments().getInt(CopyService.EXTRA_TRANSFER_MODE);
         mFailedSrcList = getArguments().getParcelableArrayList(CopyService.EXTRA_SRC_LIST);
 
         final StringBuilder list = new StringBuilder("<p>");
@@ -89,9 +88,9 @@ public class FailureDialogFragment extends DialogFragment
                 list.toString());
 
         return new AlertDialog.Builder(getActivity())
-            .setMessage(Html.fromHtml(message))
-            .setPositiveButton(R.string.retry, this)
-            .setNegativeButton(android.R.string.cancel, this)
-            .create();
+                .setMessage(Html.fromHtml(message))
+                .setPositiveButton(R.string.retry, this)
+                .setNegativeButton(android.R.string.cancel, this)
+                .create();
     }
 }
