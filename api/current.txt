@@ -27921,8 +27921,6 @@ package android.renderscript {
 
   public static final class ScriptGroup.Binding {
     ctor public ScriptGroup.Binding(android.renderscript.Script.FieldID, java.lang.Object);
-    method public android.renderscript.Script.FieldID getField();
-    method public java.lang.Object getValue();
   }
 
   public static final deprecated class ScriptGroup.Builder {
