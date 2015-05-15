@@ -71,6 +71,53 @@ page.tags="analytics, user behavior"
 <img src="{@docRoot}distribute/analyze/images/demographics.png">
 </div>
 
+<h2 id="change">All Things Change with Time, and So Do Your Users</h2>
+
+<p>
+  Getting users to install and open your app the first time is a big accomplishment;
+  however, it’s only the first step of what is hopefully a long and prosperous
+  relationship. The best apps aren’t just the ones with the most downloads, they are
+  the ones that have users coming back day after day, month after month, and year
+  after year.
+</p>
+
+<p>
+  Google Analytics takes a user-centric approach to reporting to help you explore what
+  keeps users coming back. <strong>Cohort Reporting</strong> allows you to see which users
+  come back over time and when usage tends to fall off. You can easily take this same
+  information and overlay it on any other report.
+</p>
+
+<div>
+<img src="{@docRoot}distribute/analyze/images/cohort_reporting.png">
+</div>
+
+<h2 id="measure-value">Measure Value over Time</h2>
+
+<p>
+  Analyzing retention is a great way to ensure users stick with your app and come back day after
+  day. With <strong>Lifetime Value</strong> reporting, you’ll get a full picture of these users’
+  value over time. To get the most out of this report, it’s important to start with a clear
+  definition of what a user’s value means to you based on your business objectives.
+</p>
+
+<p>
+  Once you’ve defined the value, you can access the report to measure certain variables such as
+  revenue per user and number of screen views per user over a period of 90 days. For example, if
+  the goal of your app is to get users to purchase virtual or material goods, you’ll want to use
+  this report to get a clear view of when they make a purchase and how much they are spending in
+  your app over time.
+</p>
+
+<p>
+  Lifetime Value is a key metric to use to measure the effectiveness of your acquisition
+  campaigns. If your cost to acquire a new user is higher than the average value over time,
+  you might want to optimize your campaigns to meet the lifetime revenue they generate. Lifetime
+  Value is particularly valuable if you offer in-app purchases, but it can be applied to
+  discovering many other useful insights, such as number of times they open your app, total
+  number of screens and goal completions.
+</p>
+
 <h2 id="cohort">Segment Your Data</h2>
 
 <p>

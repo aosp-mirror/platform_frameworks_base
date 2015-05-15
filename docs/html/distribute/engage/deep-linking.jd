@@ -1,98 +1,76 @@
-page.title=Deep Link to Bring Users Back
-page.metaDescription=Use deep links to bring your users into your apps from social posts, search, or ads.
-page.tags="app indexing, google+ signin"
+page.title=Drive Usage with Search
+page.metaDescription=Use search to bring your existing users back into your app.
 page.image=images/cards/google-search_2x.png
-
+page.tags=engagement, appindexing, search
 @jd:body
 
 <p>
-  Use deep links to bring your users into your apps from social posts,
-  search, or ads.
-</p>
-
-<div class="headerLine">
-<h2>Deep Linking from Google+ Posts</h2>
-</div>
-
-<p>
-  <a href="https://developers.google.com/+/mobile/android/share/deep-link">Deep
-  linking</a> allows the Google+ apps on mobile devices to direct clicks on a
-  shared post that contains deep-link information to a resource within your
-  apps.
-</p>
-
-<p style="margin-bottom:2em;">
-  If the user doesn’t have your app installed, they’re prompted to install it
-  before accessing the resource.
-</p>
-
-
-<div style="inline-block">
-
-<div class="col-5">
-    <img src="{@docRoot}images/gp-engage-5.jpg">
-    <p class="figure-caption">
-      G+ Post with Deep Link to Buy
-    </p>
-</div>
-
-<div class="col-5">
-    <img src="{@docRoot}images/gp-engage-6.jpg">
-    <p class="figure-caption">
-      Purchase page within app
-    </p>
-</div>
-
-</div>
-
-<h2 style="clear:both">Deep Linking from Google Search &mdash; App Indexing</h2>
-
-<div style="float:right;">
-  <img src="/images/gp-listing-4.jpg" style="padding-top:1em;padding-left:2em;">
-</div>
-
-<p>
-  Another way to bring users back to your apps is to apply for app indexing.
+  Users who have your app installed might overlook it as a way to get the answers
+  they need. With App Indexing, deep links to your Android app appear in Google Search
+  results so users can get to your native mobile experience quickly, landing exactly
+  on the right content within the app. 
 </p>
 
 <p>
-  When a user searches for content available within your app, Google can show
-  an "Open in App" button in in mobile search results. For instance, if a user
-  searches for a restaurant and you’ve got that establishment in your dining
-  app, a link can be shown to open the page within your app. Learn more about
-  <a href="https://developers.google.com/app-indexing/">linking to in-app
-  content</a>.
-</p>
+  Google Search for developers can also help you re-engage your users in other ways
+  &mdash; by letting them interact with your app from a voice action, get deep into
+  your app from a search suggestion, or go back to your email reminders in Google Now. </p>
 
 
+<p>Get started by <a href="https://developers.google.com/app-indexing/">indexing your
+app</a> and then take advantage of <a
+href="https://developers.google.com/voice-actions/">Voice actions</a>, the
+<a href="https://developers.google.com/app-indexing/webmasters/appindexingapi">App
+Indexing API</a>, and <a href="https://developers.google.com/schemas/now/cards">Google
+Now cards</a>.</p>
 
-<h2 style="clear:both" style="padding-top:2em">Deep Linking from Google Ads</h2>
+
+<h2 id="help_users_find_your_information">App Indexing</h2>
+
+<p>Re-engage with your users with deep-links displayed in search results, links
+that take users directly to content within your app.</p>
 
 
-<div class="col-5" style="float:right">
-  <img src="{@docRoot}images/gp-ads-linking2.jpg" >
+<div style="margin:1em">
+<img src="{@docRoot}images/distribute/app-indexing-deep-links.png">
+</div>
+<h2 id="empower_users_in_your_app">Voice actions</h2>
+
+<p>Brings your users into your app with voice actions such as “Ok
+Google, play a song” or “Ok Google, search for
+hotels in Maui on TripAdvisor”.</p>
+
+<div style="margin-top:1em">
+<img src="{@docRoot}images/distribute/voice-actions-engagement.png">
 </div>
 
-<p>
-  Ads can remind users about the apps they already have.
-</p>
 
-<p>
-  As with deep links from Google's organic search results, AdWords deep links
-  send users directly to the relevant pages in apps they already have on their
-  mobile device. A mobile search for "flights to London," for instance, could
-  take a user straight to the London page in a travel app. <a href=
-  "http://www.thinkwithgoogle.com/products/ads-apps.html"
-  class="external-link">Learn more</a>.
-</p>
+<h2 id="assist_your_users">Google Now</h2>
 
-<div class="headerLine clearfloat">
-  <h2 id="related-resources">
-    Related Resources
-  </h2>
+<div style="margin-top:1em">
+<img src="{@docRoot}images/distribute/google-now-engagement.png">
 </div>
 
-<div class="resource-widget resource-flow-layout col-13" data-query=
-"collection:distribute/engage/deeplinks" data-sortorder="-timestamp"
-data-cardsizes="9x3" data-maxresults="6">
-</div>
+<p>If you’re building travel, entertainment, or restaurant apps, Google Now cards
+can re-engage your users via structured data markup delivered in email notifications.</p>
+
+
+<h2 id="tips">Tips</h2>
+
+<ul>
+  <li>For users who have viewed pages in your app, and later searches for similar content,
+  you can use the App Indexing API to have deep links appear in search suggestions.</li>
+  <li>App Indexing is flexible—you can direct search users to your app or website on a
+  page by page basis. Moving from search results to apps is seamless, without any pop-ups
+  or extra taps to slow users down.</li>
+</ul>
+
+<h2 style="clear:both" id="related-resources">Related Resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/engage/appindexing"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+
+

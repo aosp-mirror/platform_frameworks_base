@@ -1,164 +1,185 @@
+fullpage=true
 page.title=Google Services
+section.landing=true
+meta.tags="beautifulapps, design, ux, patterns, holo, appquality, landing"
 header.hide=1
+footer.hide=1
 @jd:body
 
-<style>
-div.landing-cell,
-div.cell-icon {
-  height:150px;
-}
-div.cell-icon {
-  float:left;
-  margin-right:20px;
-}
-div.cell-icon img {
-  margin:0;
-}
-</style>
 
-<div class="landing-banner cols">
-        
-<div class="col-6" style="min-height:0">
-  <img src="{@docRoot}images/google/google-services.png" alt="" width="340" height="193" />
-</div>
-<div class="col-6">
-
-  <h1 itemprop="name" style="margin-bottom:0;">Google Services</h1>
-  <p itemprop="description">Google offers a variety of services that help you
-build new revenue streams, manage app distribution,
-track app usage, and enhance your app with features such as maps, sign-in, and
-cloud messaging.</p>
-  <p>Although these Google services are not included in the Android platform, they are
-  supported by most Android-powered devices. When using these services, you can
-  distribute your app on Google Play to all devices running Android 2.3
-  or higher, and some services support even more devices.</p>
-</div>
-</div>
-<div>&nbsp;</div>
-
-
-
-
-
-<div style="margin-top:10px">
-<div class="col-6 normal-links" style="margin-left:0">
-
-<div class="landing-cell">
-  <div class="cell-icon">
-  <img src="{@docRoot}images/google/maps-pin.png" width="40" >
+<section class="dac-expand dac-hero dac-light">
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-1of2 col-push-1of2 dac-hero-figure">
+        <img class="dac-hero-image" src="/design/media/hero-material-design.png">
+      </div>
+      <div class="col-1of2 col-pull-1of2">
+        <h1 class="dac-hero-title">Build better apps with Google</h1>
+        <p class="dac-hero-description">
+        Add powerful capabilities to your apps, quickly, at low cost. Simplify development,
+grow your user base, and monetize more effectively with Google Play services. 
+        </p>
+        <a class="dac-hero-cta" href="https://www.google.com/design/spec/material-design/introduction.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Get Started with Google Play services
+        </a><br>
+        <a class="dac-hero-cta" href="https://www.google.com/design/spec/resources/color-palettes.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          API Reference
+        </a><br>
+      </div>
+    </div>
+    <div class="dac-section dac-small">
+      <!--<div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:google/landing/google"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>-->
+    </div>
   </div>
-    <h4><a href="{@docRoot}google/play-services/maps.html"
-    >Google Maps</a></h4>
-    <p>Include the power of Google Maps in your app
+</section>
+<div class="wrap dac-offset-parent">
+  <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
+    <i class="dac-sprite dac-arrow-down-gray"></i>
+  </a>
+</div>
+<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+  <h2 class="norule">Latest</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="type:blog+tag:googleservices+tag:featured+tag:develop"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+</div></section>
+
+
+
+<section class="dac-section dac-light"><div class="wrap">
+  <h1 class="dac-section-title">Google APIs and services</h1>
+  <div class="dac-section-subtitle">
+    Design around Android&apos;s capabilities and conventions to give users the best experience.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:google/landing/services"
+       data-cardSizes="6x6"
+       data-maxResults="6"></div>
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://developers.google.com/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      More Google services for Android
+    </a></li>
+  </ul>
+</div></section>
+
+
+<section class="dac-section dac-invert dac-darken-bg" style="background-image: url(/images/distribute/google-play-bg.jpg)"><div class="wrap">
+  <h1 class="dac-section-title">Google Play developer tools</h1>
+  <div class="dac-section-subtitle">
+    Scale your operations. Essential downloads, stencils, and tools to help you create your design.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:google/landing/googleplay"
+       data-cardSizes="6x6"
+       data-maxResults="6"></div>
+
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="/google/play/filters.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Device filtering
+    </a></li>
+    <li class="dac-section-link"><a href="/google/play/filters.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Multiple APK support
+    </a></li>
+    <li class="dac-section-link"><a href="/google/play/expansion-files.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      APK expansion files
+    </a></li>
+    <li class="dac-section-link"><a href="/google/play/licensing/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Licensing library
+    </a></li>
+  </ul>
+</div></section>
+
+<!--
+
+<section class="dac-section dac-light"><div class="wrap">
+  <h1 class="dac-section-title">More</h1>
+  <div class="dac-section-subtitle">
+    Design around Android's capabilities and conventions to give users the best experience.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:google/landing/more"
+       data-cardSizes="6x6"
+       data-maxResults="6"></div>
+</div></section>
+
+
+
+
+Google Play services
+video video
+
+
+Google Play Publishing Tools
+
+
+
+Distribute your app on Google Play to all devices running Android 2.3
+  or higher, and some services support even more devices.</p>
+
+
+Google Maps
+
+Include the power of Google Maps in your app
     with an embeddable map view. You can customize the map with
     markers and overlays, control the user's perspective, draw lines
-    and shapes, and much more.</p>
-</div>
+    and shapes, and much more.
 
-<div class="landing-cell">
-  <div class="cell-icon">
-  <img src="{@docRoot}images/google/plus-logo.png" width="40" >
-  </div>
-    <h4><a href="{@docRoot}google/play-services/plus.html"
-    >Google+</a></h4>
-    <p>Allow users to sign in with their Google account,
+Google+</a></h4>
+
+Allow users to sign in with their Google account,
     customize the user experience with Google+ info,
     pull people into your app with interactive posts,
     and add +1 buttons so users can recommend your content.</p>
-</div>
 
-<div class="landing-cell">
-  <div class="cell-icon">
-  <img src="{@docRoot}images/google/cloud-platform.png" width="40" >
-  </div>
-    <h4><a class="external-link" href="https://cloud.google.com/solutions/mobile"
-    >Google Cloud Platform</a></h4>
-    <p>Build and host the backend for your Android app at Google-scale. With an infrastructure
+
+Google Cloud Platform
+
+Build and host the backend for your Android app at Google-scale. With an infrastructure
     that is managed automatically, you can focus on your app. Then, scale to support
-    millions of users.</p>
-</div>
-
-<div class="landing-cell">
-  <div class="cell-icon">
-  <img src="{@docRoot}images/google/gcm-cloud.png" width="40" >
-  </div>
-    <h4><a href="{@docRoot}google/gcm/index.html"
-    >Google Cloud Messaging</a></h4>
-    <p>Immediately notify your users about timely events by delivering
-    lightweight messages from your web server. There are no quotas or charges
-    to use Google Cloud Messaging.</p>
-</div>
-
-<div class="landing-cell">
-  <div class="cell-icon">
-  <img src="{@docRoot}images/google/gcs-small.png" width="40" >
-  </div>
-    <h4><a href="{@docRoot}google/gcs/index.html"
-    >Google Cloud Save</a></h4>
-    <p>Enable per-user data storage and sync in your apps with no backend programming
-    required.</p>
-</div>
-
-</div><!-- col-6 -->
+    millions of users.
 
 
 
 
-<div class="col-6" style="margin-right:0">
 
-<div class="landing-cell">
-  <div class="cell-icon">
-    <img src="{@docRoot}images/google/iab-99c.png" width="40" />
-  </div>
-    <h4><a href="{@docRoot}google/play/billing/index.html"
-    >Google Play In-App Billing</a></h4>
-    <p>Build an app with a steady revenue stream that keeps users engaged
+More
+
+Google Play In-App Billing
+
+Build an app with a steady revenue stream that keeps users engaged
     by offering new content or virtual goods directly in your app. All transactions are handled
     by Google Play Store for a simple user experience.
-    </p>
-</div>
 
-<div class="landing-cell">
-  <div class="cell-icon">
-    <img src="{@docRoot}images/google/wallet.png" width="40" />
-  </div>
-    <h4><a href="{@docRoot}google/play-services/wallet.html"
-    >Google Wallet Instant Buy</a></h4>
-    <p>Provide fast and easy checkout in your app when selling physical goods and services.
+
+Android Pay
+
+Provide fast and easy checkout in your app when selling physical goods and services.
     Increase conversions by streamlining your purchase flow and reducing the amount of
     information your customers need to enter.
-    </p>
-</div>
 
-<div class="landing-cell">
-  <div class="cell-icon">
-<img src="{@docRoot}images/google/analytics.png" width="40" />
-  </div>
-    <h4><a class="external-link" 
-href="https://developers.google.com/analytics/devguides/collection/android/v4/"
-  >Google Analytics</a></h4>
+Google Analytics
 
-<p>Measure your success and gain insights into how users engage with your app content
+Measure your success and gain insights into how users engage with your app content
 by integrating Google Analytics. You can track in-app purchases, the number of active users,
 interaction patterns, and much more.
-</p>
-</div>
 
-<div class="landing-cell">
-  <div class="cell-icon">
-    <img src="{@docRoot}images/google/google-mobile-ads.png" width="40" />
-  </div>
-    <h4><a href="{@docRoot}google/play-services/ads.html"
-    >Google Mobile Ads</a></h4>
-    <p>Display ads from Google Mobile Ads offer you an alternative revenue opportunity that leverages
+
+Google Mobile Ads
+
+Display ads from Google Mobile Ads offer you an alternative revenue opportunity that leverages
     multiple ad networks with targeted ads and several display formats.
-    </p>
-</div>
-  
-</div><!-- col-6 -->
-
-</div><!-- margin wrapper -->
 
 
 
-
+-->

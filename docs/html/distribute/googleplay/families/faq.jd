@@ -78,14 +78,44 @@ page.metaDescription=Questions and answers about Designed for Families
   </dd>
 
   <dt>
+    If I distribute my apps globally, do I need to provide a translated version
+    of my privacy policy for each separate language APK?
+  </dt>
+  <dd>
+    No, you do not need to translate your privacy policy. However, if you
+    distribute your apps in a few select countries, it is advised that you do
+    translate your privacy policy. 
+  </dd>
+
+  <dt>
+    How do I decide what age group to select?
+  </dt>
+
+  <dd>
+    Age groups are: Ages 5 & Under, Ages 6-8, and Ages 9-12. If you select one of these
+    age groups, your content must be appropriate for children in the age ranges. You may
+    select the General Audience category only select if your app targets both children
+    under 13 and adults.
+  </dd>
+
+  <dt>
+    What will be different about my app if I select the General Audience category?
+  </dt>
+
+  <dd>
+    There is not a dedicated section for General Audience apps within the family sections.
+    In addition,  you can use Google+ Sign-in or Google Play Game Services as an optional
+    feature, but child users must be able to access the app or game in its entirety
+    without signing into Google+ or Google Play Games Service.
+  </dd>
+
+  <dt>
     How many age groups can I select?
   </dt>
 
   <dd>
-    You can select up to two adjacent age groups. Age groups are: Ages 5 &
-    Under, Ages 6-8, and Ages 9-12. However, if your app targets audiences
-    comprised of children and older audiences, you must select the <em>General
-    Audience</em> category.
+    You can select up to two adjacent age groups only if your app is appropriate for
+    multiple age groups.
   </dd>
 
   <dt>
@@ -238,12 +268,12 @@ page.metaDescription=Questions and answers about Designed for Families
 
 <dl>
   <dt>
-    Can you give me more details on the advertising policies for Designed for
+    Are ads allowed? Can you give me more details on the advertising policies for Designed for
     Families?
   </dt>
 
   <dd>
-    Read the <a href=
+    Yes, ads are allowed as long as the adhere to the <a href=
     "https://support.google.com/googleplay/android-developer/answer/6184502#ads">
     ads policy for Designed for Families</a>.
   </dd>
@@ -255,6 +285,23 @@ page.metaDescription=Questions and answers about Designed for Families
   <dd>
     Interstitial ads may be appropriate for some apps. However, a user must be
     able to navigate to the main activity before any ads are served.
+  </dd>
+
+  <dt>
+    What about full page ads?
+  </dt>
+
+  <dd>
+    You may use full page ads as long as the ad can be dismissed without the user having to
+    interact with it in other ways.
+
+  <dt>
+    Am I allowed to use house/first party ads and product placements within my app?
+  </dt>
+
+  <dd>
+    House ads are allowed, but they must comply with <a
+    href="https://support.google.com/googleplay/android-developer/answer/6184502#ads">ads policies</a>. 
   </dd>
 
   <dt>
@@ -328,6 +375,17 @@ page.metaDescription=Questions and answers about Designed for Families
     a different category in the Play store. Apps that have not selected another
     category will be assigned to the Casual Games category.
   </dd>
+
+  <dt>
+    How can users find character pages?
+  </dt>
+
+  <dd>
+    Character pages are found through the “Popular Characters” tab within each of
+    the verticals. They can also be accessed from character-specific badges on details
+    pages of character content.
+  </dd>
+
 </dl>
 
 <div class="paging-links" style="padding-top:.75em;">
