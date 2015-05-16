@@ -16,10 +16,12 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import android.annotation.IntDef;
 
 /**
  * Structure for common playback params.
@@ -52,7 +54,7 @@ import android.annotation.IntDef;
  * similar to {@link AudioTrack#setPlaybackRate(int)}.</li>
  * </ul>
  */
-public final class PlaybackParams {
+public final class PlaybackParams implements Parcelable {
     /** @hide */
     @IntDef(
         value = {
@@ -93,6 +95,20 @@ public final class PlaybackParams {
     private int mAudioStretchMode = AUDIO_STRETCH_MODE_DEFAULT;
     private float mPitch = 1.0f;
     private float mSpeed = 1.0f;
+
+    public PlaybackParams() {
+    }
+
+    private PlaybackParams(Parcel in) {
+        mSet = in.readInt();
+        mAudioFallbackMode = in.readInt();
+        mAudioStretchMode = in.readInt();
+        mPitch = in.readFloat();
+        if (mPitch < 0.f) {
+            mPitch = 0.f;
+        }
+        mSpeed = in.readFloat();
+    }
 
     /**
      * Allows defaults to be returned for properties not set.
@@ -198,5 +214,33 @@ public final class PlaybackParams {
             throw new IllegalStateException("speed not set");
         }
         return mSpeed;
+    }
+
+    public static final Parcelable.Creator<PlaybackParams> CREATOR =
+            new Parcelable.Creator<PlaybackParams>() {
+                @Override
+                public PlaybackParams createFromParcel(Parcel in) {
+                    return new PlaybackParams(in);
+                }
+
+                @Override
+                public PlaybackParams[] newArray(int size) {
+                    return new PlaybackParams[size];
+                }
+            };
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mSet);
+        dest.writeInt(mAudioFallbackMode);
+        dest.writeInt(mAudioStretchMode);
+        dest.writeFloat(mPitch);
+        dest.writeFloat(mSpeed);
     }
 }
