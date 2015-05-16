@@ -189,16 +189,16 @@ void versionStylesForCompat(const std::shared_ptr<ResourceTable>& table) {
 }
 
 struct CompileItem {
-    Source source;
     ResourceName name;
     ConfigDescription config;
+    Source source;
     std::string extension;
 };
 
 struct LinkItem {
-    Source source;
     ResourceName name;
     ConfigDescription config;
+    Source source;
     std::string originalPath;
     ZipFile* apk;
     std::u16string originalPackage;
@@ -236,7 +236,8 @@ std::string buildFileReference(const LinkItem& item) {
     return buildFileReference(item.name, item.config, getExtension<char>(item.originalPath));
 }
 
-bool addFileReference(const std::shared_ptr<ResourceTable>& table, const CompileItem& item) {
+template <typename T>
+bool addFileReference(const std::shared_ptr<ResourceTable>& table, const T& item) {
     StringPool& pool = table->getValueStringPool();
     StringPool::Ref ref = pool.makeRef(util::utf8ToUtf16(buildFileReference(item)),
                                        StringPool::Context{ 0, item.config });
@@ -334,9 +335,40 @@ bool compileXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>
     return true;
 }
 
-bool linkXml(const AaptOptions& options, const std::shared_ptr<IResolver>& resolver,
-             const LinkItem& item, const void* data, size_t dataLen, ZipFile* outApk,
-             std::queue<LinkItem>* outQueue) {
+/**
+ * Determines if a layout should be auto generated based on SDK level. We do not
+ * generate a layout if there is already a layout defined whose SDK version is greater than
+ * the one we want to generate.
+ */
+bool shouldGenerateVersionedResource(const std::shared_ptr<const ResourceTable>& table,
+                                     const ResourceName& name, const ConfigDescription& config,
+                                     int sdkVersionToGenerate) {
+    assert(sdkVersionToGenerate > config.sdkVersion);
+    const ResourceTableType* type;
+    const ResourceEntry* entry;
+    std::tie(type, entry) = table->findResource(name);
+    assert(type && entry);
+
+    auto iter = std::lower_bound(entry->values.begin(), entry->values.end(), config,
+            [](const ResourceConfigValue& lhs, const ConfigDescription& config) -> bool {
+        return lhs.config < config;
+    });
+
+    assert(iter != entry->values.end());
+    ++iter;
+
+    if (iter == entry->values.end()) {
+        return true;
+    }
+
+    ConfigDescription newConfig = config;
+    newConfig.sdkVersion = sdkVersionToGenerate;
+    return newConfig < iter->config;
+}
+
+bool linkXml(const AaptOptions& options, const std::shared_ptr<ResourceTable>& table,
+             const std::shared_ptr<IResolver>& resolver, const LinkItem& item,
+             const void* data, size_t dataLen, ZipFile* outApk, std::queue<LinkItem>* outQueue) {
     std::shared_ptr<android::ResXMLTree> tree = std::make_shared<android::ResXMLTree>();
     if (tree->setTo(data, dataLen, false) != android::NO_ERROR) {
         return false;
@@ -376,9 +408,21 @@ bool linkXml(const AaptOptions& options, const std::shared_ptr<IResolver>& resol
     if (minStrippedSdk.value() > 0) {
         // Something was stripped, so let's generate a new file
         // with the version of the smallest SDK version stripped.
-        LinkItem newWork = item;
-        newWork.config.sdkVersion = minStrippedSdk.value();
-        outQueue->push(newWork);
+        // We can only generate a versioned layout if there doesn't exist a layout
+        // with sdk version greater than the current one but less than the one we
+        // want to generate.
+        if (shouldGenerateVersionedResource(table, item.name, item.config,
+                    minStrippedSdk.value())) {
+            LinkItem newWork = item;
+            newWork.config.sdkVersion = minStrippedSdk.value();
+            outQueue->push(newWork);
+
+            if (!addFileReference(table, newWork)) {
+                Logger::error(options.output) << "failed to add auto-versioned resource '"
+                                              << newWork.name << "'." << std::endl;
+                return false;
+            }
+        }
     }
 
     if (outApk->add(outBuffer, buildFileReference(item).data(), ZipEntry::kCompressDeflated,
@@ -604,7 +648,7 @@ static void addApkFilesToLinkQueue(const std::u16string& package, const Source& 
                     newSource.path += "/";
                     newSource.path += pathUtf8;
                     outLinkQueue->push(LinkItem{
-                            newSource, name, value.config, pathUtf8, apk.get(),
+                            name, value.config, newSource, pathUtf8, apk.get(),
                             table->getPackage() });
                     // Now rewrite the file path.
                     if (mangle) {
@@ -743,8 +787,8 @@ bool link(const AaptOptions& options, const std::shared_ptr<ResourceTable>& outT
             void* uncompressedData = item.apk->uncompress(entry);
             assert(uncompressedData);
 
-            if (!linkXml(options, resolver, item, uncompressedData, entry->getUncompressedLen(),
-                    &outApk, &linkQueue)) {
+            if (!linkXml(options, outTable, resolver, item, uncompressedData,
+                        entry->getUncompressedLen(), &outApk, &linkQueue)) {
                 Logger::error(options.output) << "failed to link '" << item.originalPath << "'."
                                               << std::endl;
                 return false;
@@ -862,9 +906,9 @@ bool compile(const AaptOptions& options, const std::shared_ptr<ResourceTable>& t
             }
 
             compileQueue.push(CompileItem{
-                    source,
                     ResourceName{ table->getPackage(), *type, pathData.name },
                     pathData.config,
+                    source,
                     pathData.extension
             });
         }
