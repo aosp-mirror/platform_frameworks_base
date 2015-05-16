@@ -94,8 +94,7 @@ SkScalar calculateStretch(SkScalar boundsLimit, SkScalar startingPoint,
     SkScalar spaceRemaining = boundsLimit - startingPoint;
     SkScalar stretchySpaceRemaining =
                 spaceRemaining - SkIntToScalar(numFixedPixelsRemaining);
-    return SkScalarMulDiv(srcSpace, stretchySpaceRemaining,
-                          numStrechyPixelsRemaining);
+    return srcSpace * stretchySpaceRemaining / numStrechyPixelsRemaining;
 }
 
 void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
