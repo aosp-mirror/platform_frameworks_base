@@ -1023,7 +1023,7 @@
     <string name="volume_stream_vibrate_dnd" translatable="false">%s vibrate — Priority only</string>
 
     <!-- Name of special SystemUI debug settings -->
-    <string name="system_ui_tuner">SystemUI Tuner</string>
+    <string name="system_ui_tuner">System UI tuner</string>
 
     <!-- Name of quick settings -->
     <string name="quick_settings">Quick Settings</string>
@@ -1033,4 +1033,9 @@
 
     <!-- Name of a quick settings tile controlled by broadcast -->
     <string name="broadcast_tile">Broadcast Tile</string>
+
+    <!-- For preview release. DO NOT TRANSLATE -->
+    <string name="regrettable_lack_of_easter_egg">
+        ¯\\_(ツ)_/¯
+    </string>
 </resources>
