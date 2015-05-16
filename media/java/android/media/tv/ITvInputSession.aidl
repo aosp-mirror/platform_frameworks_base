@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -50,6 +51,6 @@ oneway interface ITvInputSession {
     void timeShiftPause();
     void timeShiftResume();
     void timeShiftSeekTo(long timeMs);
-    void timeShiftSetPlaybackRate(float rate, int audioMode);
+    void timeShiftSetPlaybackParams(in PlaybackParams params);
     void timeShiftEnablePositionTracking(boolean enable);
 }
