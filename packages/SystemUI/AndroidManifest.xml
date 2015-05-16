@@ -184,16 +184,17 @@
 
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
-                  android:icon="@*android:drawable/stat_sys_adb"
+                  android:icon="@drawable/tuner"
                   android:theme="@android:style/Theme.Material.Settings"
                   android:label="@string/system_ui_tuner"
+                  android:process=":tuner"
                   android:exported="true">
             <intent-filter>
                 <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.category"
-                    android:value="com.android.settings.category.device" />
+                    android:value="com.android.settings.category.system" />
         </activity>
 
         <!-- Alternate Recents -->
@@ -312,6 +313,19 @@
                   android:exported="true"
                   android:label="@string/lland"
                   android:hardwareAccelerated="true"
+                  android:launchMode="singleInstance"
+                  android:screenOrientation="locked"
+                  android:process=":sweetsweetdesserts"
+                  android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".egg.ShruggyActivity"
+                  android:theme="@android:style/Theme.NoDisplay"
+                  android:exported="true"
                   android:launchMode="singleInstance"
                   android:screenOrientation="locked"
                   android:process=":sweetsweetdesserts"
