@@ -75,7 +75,6 @@ public class IpReachabilityMonitor {
     private boolean mRunning;
     final private Thread mObserverThread;
 
-    // TODO: consider passing in a NetworkInterface object from the caller.
     public IpReachabilityMonitor(String ifName, Callback callback) throws IllegalArgumentException {
         mInterfaceName = ifName;
         int ifIndex = -1;
@@ -154,6 +153,12 @@ public class IpReachabilityMonitor {
         }
     }
 
+    private boolean stillRunning() {
+        synchronized (mLock) {
+            return mRunning;
+        }
+    }
+
     public void updateLinkProperties(LinkProperties lp) {
         if (!mInterfaceName.equals(lp.getInterfaceName())) {
             // TODO: figure out how to cope with interface changes.
@@ -204,6 +209,47 @@ public class IpReachabilityMonitor {
         }
     }
 
+    public void probeAll() {
+        Set<InetAddress> ipProbeList = new HashSet<InetAddress>();
+        synchronized (mLock) {
+            ipProbeList.addAll(mIpWatchList);
+        }
+        for (InetAddress target : ipProbeList) {
+            if (!stillRunning()) { break; }
+            probeIp(target);
+        }
+    }
+
+    private void probeIp(InetAddress ip) {
+        // This currently does not cause neighbor probing if the target |ip|
+        // has been confirmed reachable within the past "delay_probe_time"
+        // seconds, i.e. within the past 5 seconds.
+        //
+        // TODO: replace with a transition directly to NUD_PROBE state once
+        // kernels are updated to do so correctly.
+        if (DBG) { Log.d(TAG, "Probing ip=" + ip.getHostAddress()); }
+
+        final byte[] msg = RtNetlinkNeighborMessage.newNewNeighborMessage(
+                1, ip, StructNdMsg.NUD_DELAY, mInterfaceIndex, null);
+        NetlinkSocket nlSocket = null;
+
+        try {
+            nlSocket = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
+            nlSocket.connectToKernel();
+            nlSocket.sendMessage(msg, 0, msg.length, 300);
+            final NetlinkMessage response = NetlinkMessage.parse(nlSocket.recvMessage(300));
+            if (response != null && response instanceof NetlinkErrorMessage) {
+                Log.e(TAG, "Error probing ip=" + response.toString());
+            }
+        } catch (ErrnoException | InterruptedIOException | SocketException e) {
+            Log.d(TAG, "Error probing ip=" + ip.getHostAddress(), e);
+        }
+
+        if (nlSocket != null) {
+            nlSocket.close();
+        }
+    }
+
 
     private final class NetlinkSocketObserver implements Runnable {
         private static final String TAG = "NetlinkSocketObserver";
@@ -240,12 +286,6 @@ public class IpReachabilityMonitor {
 
             synchronized (mLock) { mRunning = false; }
             if (VDBG) { Log.d(TAG, "Finishing observing thread."); }
-        }
-
-        private boolean stillRunning() {
-            synchronized (mLock) {
-                return mRunning;
-            }
         }
 
         private void clearNetlinkSocket() {

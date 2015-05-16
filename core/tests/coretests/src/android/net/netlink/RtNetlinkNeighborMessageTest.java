@@ -26,9 +26,11 @@ import android.util.Log;
 import libcore.util.HexEncoding;
 
 import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import junit.framework.TestCase;
 
 
@@ -133,7 +135,7 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
     public static final byte[] RTM_GETNEIGH_RESPONSE =
             HexEncoding.decode(RTM_GETNEIGH_RESPONSE_HEX.replaceAll(" ", "").toCharArray(), false);
 
-    public void testParseRtNetlinkNeighborRtmDelNeigh() {
+    public void testParseRtmDelNeigh() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(RTM_DELNEIGH);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);  // For testing.
         final NetlinkMessage msg = NetlinkMessage.parse(byteBuffer);
@@ -159,7 +161,7 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
         assertEquals(InetAddress.parseNumericAddress("192.168.159.254"), destination);
     }
 
-    public void testParseRtNetlinkNeighborRtmNewNeigh() {
+    public void testParseRtmNewNeigh() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(RTM_NEWNEIGH);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);  // For testing.
         final NetlinkMessage msg = NetlinkMessage.parse(byteBuffer);
@@ -185,7 +187,7 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
         assertEquals(InetAddress.parseNumericAddress("fe80::86c9:b2ff:fe6a:ed4b"), destination);
     }
 
-    public void testParseRtNetlinkNeighborRtmGetNeighResponse() {
+    public void testParseRtmGetNeighResponse() {
         final ByteBuffer byteBuffer = ByteBuffer.wrap(RTM_GETNEIGH_RESPONSE);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);  // For testing.
 
@@ -207,5 +209,49 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
         }
         // TODO: add more detailed spot checks.
         assertEquals(14, messageCount);
+    }
+
+    public void testCreateRtmNewNeighMessage() {
+        final int seqNo = 2635;
+        final int ifIndex = 14;
+        final byte[] llAddr =
+                new byte[] { (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6 };
+
+        // Hexadecimal representation of our created packet.
+        final String expectedNewNeighHex =
+                // struct nlmsghdr
+                "30000000" +     // length = 48
+                "1c00" +         // type = 28 (RTM_NEWNEIGH)
+                "0101" +         // flags (NLM_F_REQUEST | NLM_F_REPLACE)
+                "4b0a0000" +     // seqno
+                "00000000" +     // pid (0 == kernel)
+                // struct ndmsg
+                "02" +           // family
+                "00" +           // pad1
+                "0000" +         // pad2
+                "0e000000" +     // interface index (14)
+                "0800" +         // NUD state (0x08 == NUD_DELAY)
+                "00" +           // flags
+                "00" +           // type
+                // struct nlattr: NDA_DST
+                "0800" +         // length = 8
+                "0100" +         // type (1 == NDA_DST, for neighbor messages)
+                "7f000001" +     // IPv4 address (== 127.0.0.1)
+                // struct nlattr: NDA_LLADDR
+                "0a00" +         // length = 10
+                "0200" +         // type (2 == NDA_LLADDR, for neighbor messages)
+                "010203040506" + // MAC Address (== 01:02:03:04:05:06)
+                "0000";          // padding, for 4 byte alignment
+        final byte[] expectedNewNeigh =
+                HexEncoding.decode(expectedNewNeighHex.toCharArray(), false);
+
+        final byte[] bytes = RtNetlinkNeighborMessage.newNewNeighborMessage(
+            seqNo, Inet4Address.LOOPBACK, StructNdMsg.NUD_DELAY, ifIndex, llAddr);
+        if (!Arrays.equals(expectedNewNeigh, bytes)) {
+            assertEquals(expectedNewNeigh.length, bytes.length);
+            for (int i = 0; i < Math.min(expectedNewNeigh.length, bytes.length); i++) {
+                assertEquals(expectedNewNeigh[i], bytes[i]);
+            }
+        }
     }
 }

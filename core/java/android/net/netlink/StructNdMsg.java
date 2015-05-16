@@ -123,9 +123,7 @@ public class StructNdMsg {
         ndm_family = (byte) OsConstants.AF_UNSPEC;
     }
 
-    public boolean pack(ByteBuffer byteBuffer) {
-        if (!hasAvailableSpace(byteBuffer)) { return false; }
-
+    public void pack(ByteBuffer byteBuffer) {
         // The ByteOrder must have already been set by the caller.  In most
         // cases ByteOrder.nativeOrder() is correct, with the exception
         // of usage within unittests.
@@ -136,7 +134,6 @@ public class StructNdMsg {
         byteBuffer.putShort(ndm_state);
         byteBuffer.put(ndm_flags);
         byteBuffer.put(ndm_type);
-        return true;
     }
 
     public boolean nudConnected() {
