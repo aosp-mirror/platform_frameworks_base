@@ -229,7 +229,7 @@ bool SoundPool::unload(int sampleID)
 {
     ALOGV("unload: sampleID=%d", sampleID);
     Mutex::Autolock lock(&mLock);
-    return mSamples.removeItem(sampleID);
+    return mSamples.removeItem(sampleID) >= 0; // removeItem() returns index or BAD_VALUE
 }
 
 int SoundPool::play(int sampleID, float leftVolume, float rightVolume,
