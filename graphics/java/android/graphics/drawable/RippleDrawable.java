@@ -31,7 +31,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
@@ -292,6 +291,14 @@ public class RippleDrawable extends LayerDrawable {
         if (!mOverrideBounds) {
             mHotspotBounds.set(bounds);
             onHotspotBoundsChanged();
+        }
+
+        if (mBackground != null) {
+            mBackground.onBoundsChange();
+        }
+
+        if (mRipple != null) {
+            mRipple.onBoundsChange();
         }
 
         invalidateSelf();
