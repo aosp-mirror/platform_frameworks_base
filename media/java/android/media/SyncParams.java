@@ -51,9 +51,9 @@ import android.annotation.IntDef;
  * </ul>
  * <p> <strong>tolerance:</strong> specifies the amount of allowed playback rate
  * change to keep media in sync with the sync source. The handling of this depends
- * on the sync source.
+ * on the sync source, but must not be negative, and must be less than one.
  * <p> <strong>frameRate:</strong> initial hint for video frame rate. Used when
- * sync source is vsync.
+ * sync source is vsync. Negative values can be used to clear a previous hint.
  */
 public final class SyncParams {
     /** @hide */
@@ -163,7 +163,7 @@ public final class SyncParams {
     private int mSet = 0;
 
     // params
-    private int mAudioAdjustMode = AUDIO_ADJUST_MODE_STRETCH;
+    private int mAudioAdjustMode = AUDIO_ADJUST_MODE_DEFAULT;
     private int mSyncSource = SYNC_SOURCE_DEFAULT;
     private float mTolerance = 0.f;
     private float mFrameRate = 0.f;
@@ -227,13 +227,17 @@ public final class SyncParams {
     }
 
     /**
-     * Sets the tolerance. The default tolerance is 0.
+     * Sets the tolerance. The default tolerance is platform specific, but is never more than 1/24.
      * @param tolerance A non-negative number representing
      *     the maximum deviation of the playback rate from the playback rate
      *     set. ({@code abs(actual_rate - set_rate) / set_rate})
      * @return this <code>SyncParams</code> instance.
+     * @throws InvalidArgumentException if the tolerance is negative, or not less than one
      */
     public SyncParams setTolerance(float tolerance) {
+        if (tolerance < 0.f || tolerance >= 1.f) {
+            throw new IllegalArgumentException("tolerance must be less than one and non-negative");
+        }
         mTolerance = tolerance;
         mSet |= SET_TOLERANCE;
         return this;
@@ -256,7 +260,8 @@ public final class SyncParams {
     /**
      * Sets the video frame rate hint to be used. By default the frame rate is unspecified.
      * @param frameRate A non-negative number used as an initial hint on
-     *     the video frame rate to be used when using vsync as the sync source.
+     *     the video frame rate to be used when using vsync as the sync source. A negative
+     *     number is used to clear a previous hint.
      * @return this <code>SyncParams</code> instance.
      */
     public SyncParams setFrameRate(float frameRate) {
@@ -269,7 +274,8 @@ public final class SyncParams {
      * Retrieves the video frame rate hint.
      * @return frame rate factor. A non-negative number representing
      *     the maximum deviation of the playback rate from the playback rate
-     *     set. ({@code abs(actual_rate - set_rate) / set_rate})
+     *     set. ({@code abs(actual_rate - set_rate) / set_rate}), or a negative
+     *     number representing the desire to clear a previous hint using these params.
      * @throws IllegalStateException if frame rate is not set.
      */
     public float getFrameRate() {
