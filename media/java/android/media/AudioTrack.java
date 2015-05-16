@@ -242,7 +242,7 @@ public class AudioTrack
     /**
      * The audio channel mask used for calling native AudioTrack
      */
-    private int mChannels = AudioFormat.CHANNEL_OUT_MONO;
+    private int mChannelMask = AudioFormat.CHANNEL_OUT_MONO;
 
     /**
      * The type of the audio stream to play. See
@@ -485,7 +485,7 @@ public class AudioTrack
         session[0] = sessionId;
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
-                mSampleRate, mChannels, mChannelIndexMask, mAudioFormat,
+                mSampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode, session);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
@@ -699,7 +699,7 @@ public class AudioTrack
     // This is where constructor IllegalArgumentException-s are thrown
     // postconditions:
     //    mChannelCount is valid
-    //    mChannels is valid
+    //    mChannelMask is valid
     //    mAudioFormat is valid
     //    mSampleRate is valid
     //    mDataLoadMode is valid
@@ -722,12 +722,12 @@ public class AudioTrack
         case AudioFormat.CHANNEL_OUT_MONO:
         case AudioFormat.CHANNEL_CONFIGURATION_MONO:
             mChannelCount = 1;
-            mChannels = AudioFormat.CHANNEL_OUT_MONO;
+            mChannelMask = AudioFormat.CHANNEL_OUT_MONO;
             break;
         case AudioFormat.CHANNEL_OUT_STEREO:
         case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
             mChannelCount = 2;
-            mChannels = AudioFormat.CHANNEL_OUT_STEREO;
+            mChannelMask = AudioFormat.CHANNEL_OUT_STEREO;
             break;
         default:
             if (channelConfig == AudioFormat.CHANNEL_INVALID && channelIndexMask != 0) {
@@ -738,7 +738,7 @@ public class AudioTrack
                 // input channel configuration features unsupported channels
                 throw new IllegalArgumentException("Unsupported channel configuration.");
             }
-            mChannels = channelConfig;
+            mChannelMask = channelConfig;
             mChannelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
         }
         // check the channel index configuration (if present)
