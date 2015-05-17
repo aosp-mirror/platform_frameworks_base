@@ -678,6 +678,7 @@
 
     <!-- Allows an app to use fingerprint hardware. -->
     <permission android:name="android.permission.USE_FINGERPRINT"
+        android:permissionGroup="android.permission-group.SENSORS"
         android:label="@string/permlab_useFingerprint"
         android:description="@string/permdesc_useFingerprint"
         android:protectionLevel="dangerous" />
