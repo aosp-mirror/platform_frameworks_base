@@ -1535,6 +1535,22 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGE_APP_PERMISSIONS";
 
     /**
+     * Activity action: Launch UI to manage permissions.
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_PERMISSIONS =
+            "android.intent.action.MANAGE_PERMISSIONS";
+
+    /**
      * Intent extra: An app package name.
      * <p>
      * Type: String
