@@ -156,9 +156,34 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * value indicating that a layout dir has been set to RTL. */
     public static final int SCREENLAYOUT_LAYOUTDIR_RTL = 0x02 << SCREENLAYOUT_LAYOUTDIR_SHIFT;
 
+    /** Constant for {@link #screenLayout}: bits that encode roundness of the screen. */
+    public static final int SCREENLAYOUT_ROUND_MASK = 0x300;
+    /** @hide Constant for {@link #screenLayout}: bit shift to get to screen roundness bits */
+    public static final int SCREENLAYOUT_ROUND_SHIFT = 8;
+    /**
+     * Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_ROUND_MASK} value indicating
+     * that it is unknown whether or not the screen has a round shape.
+     */
+    public static final int SCREENLAYOUT_ROUND_UNDEFINED = 0x00;
+    /**
+     * Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_ROUND_MASK} value indicating
+     * that the screen does not have a rounded shape.
+     */
+    public static final int SCREENLAYOUT_ROUND_NO = 0x1 << SCREENLAYOUT_ROUND_SHIFT;
+    /**
+     * Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_ROUND_MASK} value indicating
+     * that the screen has a rounded shape. Corners may not be visible to the user;
+     * developers should pay special attention to the {@link android.view.WindowInsets} delivered
+     * to views for more information about ensuring content is not obscured.
+     *
+     * <p>Corresponds to the <code>-round</code> resource qualifier.</p>
+     */
+    public static final int SCREENLAYOUT_ROUND_YES = 0x2 << SCREENLAYOUT_ROUND_SHIFT;
+
     /** Constant for {@link #screenLayout}: a value indicating that screenLayout is undefined */
     public static final int SCREENLAYOUT_UNDEFINED = SCREENLAYOUT_SIZE_UNDEFINED |
-            SCREENLAYOUT_LONG_UNDEFINED | SCREENLAYOUT_LAYOUTDIR_UNDEFINED;
+            SCREENLAYOUT_LONG_UNDEFINED | SCREENLAYOUT_LAYOUTDIR_UNDEFINED |
+            SCREENLAYOUT_ROUND_UNDEFINED;
 
     /**
      * Special flag we generate to indicate that the screen layout requires
@@ -174,18 +199,22 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * <p>The {@link #SCREENLAYOUT_SIZE_MASK} bits define the overall size
      * of the screen.  They may be one of
      * {@link #SCREENLAYOUT_SIZE_SMALL}, {@link #SCREENLAYOUT_SIZE_NORMAL},
-     * {@link #SCREENLAYOUT_SIZE_LARGE}, or {@link #SCREENLAYOUT_SIZE_XLARGE}.
+     * {@link #SCREENLAYOUT_SIZE_LARGE}, or {@link #SCREENLAYOUT_SIZE_XLARGE}.</p>
      * 
      * <p>The {@link #SCREENLAYOUT_LONG_MASK} defines whether the screen
      * is wider/taller than normal.  They may be one of
-     * {@link #SCREENLAYOUT_LONG_NO} or {@link #SCREENLAYOUT_LONG_YES}.
+     * {@link #SCREENLAYOUT_LONG_NO} or {@link #SCREENLAYOUT_LONG_YES}.</p>
      * 
      * <p>The {@link #SCREENLAYOUT_LAYOUTDIR_MASK} defines whether the screen layout
      * is either LTR or RTL.  They may be one of
-     * {@link #SCREENLAYOUT_LAYOUTDIR_LTR} or {@link #SCREENLAYOUT_LAYOUTDIR_RTL}.
+     * {@link #SCREENLAYOUT_LAYOUTDIR_LTR} or {@link #SCREENLAYOUT_LAYOUTDIR_RTL}.</p>
+     *
+     * <p>The {@link #SCREENLAYOUT_ROUND_MASK} defines whether the screen has a rounded
+     * shape. They may be one of {@link #SCREENLAYOUT_ROUND_NO} or {@link #SCREENLAYOUT_ROUND_YES}.
+     * </p>
      *
      * <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
-     * Multiple Screens</a> for more information.
+     * Multiple Screens</a> for more information.</p>
      */
     public int screenLayout;
 
@@ -1328,6 +1357,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
+     * Return whether the screen has a round shape. Apps may choose to change styling based
+     * on this property, such as the alignment or layout of text or informational icons.
+     *
+     * @return true if the screen is rounded, false otherwise
+     */
+    public boolean isScreenRound() {
+        return (screenLayout & SCREENLAYOUT_ROUND_MASK) == SCREENLAYOUT_ROUND_YES;
+    }
+
+    /**
      *
      * @hide
      */
@@ -1420,6 +1459,17 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
             case Configuration.SCREENLAYOUT_LONG_NO:
                 parts.add("notlong");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.screenLayout & Configuration.SCREENLAYOUT_ROUND_MASK) {
+            case Configuration.SCREENLAYOUT_ROUND_YES:
+                parts.add("round");
+                break;
+            case Configuration.SCREENLAYOUT_ROUND_NO:
+                parts.add("notround");
                 break;
             default:
                 break;
@@ -1638,6 +1688,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((base.screenLayout & SCREENLAYOUT_LONG_MASK) !=
                 (change.screenLayout & SCREENLAYOUT_LONG_MASK)) {
             delta.screenLayout |= change.screenLayout & SCREENLAYOUT_LONG_MASK;
+        }
+
+        if ((base.screenLayout & SCREENLAYOUT_ROUND_MASK) !=
+                (change.screenLayout & SCREENLAYOUT_ROUND_MASK)) {
+            delta.screenLayout |= change.screenLayout & SCREENLAYOUT_ROUND_MASK;
         }
 
         if ((base.uiMode & UI_MODE_TYPE_MASK) != (change.uiMode & UI_MODE_TYPE_MASK)) {
