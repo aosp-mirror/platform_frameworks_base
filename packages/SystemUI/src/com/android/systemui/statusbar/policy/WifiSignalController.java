@@ -29,8 +29,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
-import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
 import java.util.List;
 import java.util.Objects;
@@ -43,10 +42,9 @@ public class WifiSignalController extends
     private final boolean mHasMobileData;
 
     public WifiSignalController(Context context, boolean hasMobileData,
-            List<NetworkSignalChangedCallback> signalCallbacks,
-            List<SignalCluster> signalClusters, NetworkControllerImpl networkController) {
+            CallbackHandler callbackHandler, NetworkControllerImpl networkController) {
         super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
-                signalCallbacks, signalClusters, networkController);
+                callbackHandler, networkController);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mHasMobileData = hasMobileData;
         Handler handler = new WifiHandler();
@@ -82,19 +80,13 @@ public class WifiSignalController extends
         String wifiDesc = wifiVisible ? mCurrentState.ssid : null;
         boolean ssidPresent = wifiVisible && mCurrentState.ssid != null;
         String contentDescription = getStringIfExists(getContentDescription());
-        int length = mSignalsChangedCallbacks.size();
-        for (int i = 0; i < length; i++) {
-            mSignalsChangedCallbacks.get(i).onWifiSignalChanged(mCurrentState.enabled,
-                    mCurrentState.connected, getQsCurrentIconId(),
-                    ssidPresent && mCurrentState.activityIn,
-                    ssidPresent && mCurrentState.activityOut, contentDescription, wifiDesc);
-        }
 
-        int signalClustersLength = mSignalClusters.size();
-        for (int i = 0; i < signalClustersLength; i++) {
-            mSignalClusters.get(i).setWifiIndicators(wifiVisible, getCurrentIconId(),
-                    contentDescription);
-        }
+        IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
+        IconState qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconId(),
+                contentDescription);
+        mCallbackHandler.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
+                ssidPresent && mCurrentState.activityIn, ssidPresent && mCurrentState.activityOut,
+                wifiDesc);
     }
 
     /**

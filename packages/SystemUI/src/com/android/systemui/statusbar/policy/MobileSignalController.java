@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkCapabilities;
+import android.os.Looper;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -31,12 +32,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
 
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.Objects;
 
 
@@ -66,17 +65,17 @@ public class MobileSignalController extends SignalController<
     // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
     // need listener lists anymore.
     public MobileSignalController(Context context, Config config, boolean hasMobileData,
-            TelephonyManager phone, List<NetworkSignalChangedCallback> signalCallbacks,
-            List<SignalCluster> signalClusters, NetworkControllerImpl networkController,
-            SubscriptionInfo info) {
+            TelephonyManager phone, CallbackHandler callbackHandler,
+            NetworkControllerImpl networkController, SubscriptionInfo info, Looper receiverLooper) {
         super("MobileSignalController(" + info.getSubscriptionId() + ")", context,
-                NetworkCapabilities.TRANSPORT_CELLULAR, signalCallbacks, signalClusters,
+                NetworkCapabilities.TRANSPORT_CELLULAR, callbackHandler,
                 networkController);
         mNetworkToIconLookup = new SparseArray<>();
         mConfig = config;
         mPhone = phone;
         mSubscriptionInfo = info;
-        mPhoneStateListener = new MobilePhoneStateListener(info.getSubscriptionId());
+        mPhoneStateListener = new MobilePhoneStateListener(info.getSubscriptionId(),
+                receiverLooper);
         mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator);
         mNetworkNameDefault = getStringIfExists(
                 com.android.internal.R.string.lockscreen_carrier_default);
@@ -199,41 +198,29 @@ public class MobileSignalController extends SignalController<
         boolean showDataIcon = mCurrentState.dataConnected && mCurrentState.inetForNetwork != 0
                 || mCurrentState.iconGroup == TelephonyIcons.ROAMING;
 
+        IconState statusIcon = new IconState(mCurrentState.enabled && !mCurrentState.airplaneMode,
+                getCurrentIconId(), contentDescription);
+
+        int qsTypeIcon = 0;
+        IconState qsIcon = null;
+        String description = null;
         // Only send data sim callbacks to QS.
         if (mCurrentState.dataSim) {
-            int qsTypeIcon = showDataIcon ? icons.mQsDataType[mCurrentState.inetForNetwork] : 0;
-            int length = mSignalsChangedCallbacks.size();
-            for (int i = 0; i < length; i++) {
-                mSignalsChangedCallbacks.get(i).onMobileDataSignalChanged(mCurrentState.enabled
-                        && !mCurrentState.isEmergency,
-                        getQsCurrentIconId(), contentDescription,
-                        qsTypeIcon,
-                        mCurrentState.dataConnected
-                            && !mCurrentState.carrierNetworkChangeMode
-                            && mCurrentState.activityIn,
-                        mCurrentState.dataConnected
-                            && !mCurrentState.carrierNetworkChangeMode
-                            && mCurrentState.activityOut,
-                        dataContentDescription,
-                        mCurrentState.isEmergency ? null : mCurrentState.networkName,
-                        // Only wide if actually showing something.
-                        icons.mIsWide && qsTypeIcon != 0);
-            }
+            qsTypeIcon = showDataIcon ? icons.mQsDataType[mCurrentState.inetForNetwork] : 0;
+            qsIcon = new IconState(mCurrentState.enabled
+                    && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
+            description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
         }
+        boolean activityIn = mCurrentState.dataConnected
+                        && !mCurrentState.carrierNetworkChangeMode
+                        && mCurrentState.activityIn;
+        boolean activityOut = mCurrentState.dataConnected
+                        && !mCurrentState.carrierNetworkChangeMode
+                        && mCurrentState.activityOut;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
-        int signalClustersLength = mSignalClusters.size();
-        for (int i = 0; i < signalClustersLength; i++) {
-            mSignalClusters.get(i).setMobileDataIndicators(
-                    mCurrentState.enabled && !mCurrentState.airplaneMode,
-                    getCurrentIconId(),
-                    getCurrentDarkIconId(),
-                    typeIcon,
-                    contentDescription,
-                    dataContentDescription,
-                    // Only wide if actually showing something.
-                    icons.mIsWide && typeIcon != 0,
-                    mSubscriptionInfo.getSubscriptionId());
-        }
+        mCallbackHandler.setMobileDataIndicators(statusIcon, qsIcon, getCurrentDarkIconId(),
+                typeIcon, qsTypeIcon, activityIn, activityOut, dataContentDescription, description,
+                icons.mIsWide, mSubscriptionInfo.getSubscriptionId());
     }
 
     private int getCurrentDarkIconId() {
@@ -425,8 +412,8 @@ public class MobileSignalController extends SignalController<
     }
 
     class MobilePhoneStateListener extends PhoneStateListener {
-        public MobilePhoneStateListener(int subId) {
-            super(subId);
+        public MobilePhoneStateListener(int subId, Looper looper) {
+            super(subId, looper);
         }
 
         @Override
