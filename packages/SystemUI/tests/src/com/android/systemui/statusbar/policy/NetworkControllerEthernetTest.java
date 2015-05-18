@@ -2,6 +2,8 @@ package com.android.systemui.statusbar.policy;
 
 import android.net.NetworkCapabilities;
 
+import com.android.systemui.statusbar.policy.NetworkControllerImpl.IconState;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -28,13 +30,12 @@ public class NetworkControllerEthernetTest extends NetworkControllerBaseTest {
     }
 
     protected void verifyLastEthernetIcon(boolean visible, int icon) {
-        ArgumentCaptor<Boolean> visibleArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Integer> iconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
 
-        Mockito.verify(mSignalCluster, Mockito.atLeastOnce()).setEthernetIndicators(
-                visibleArg.capture(), iconArg.capture(),
-                ArgumentCaptor.forClass(String.class).capture());
-        assertEquals("Ethernet visible, in status bar", visible, (boolean) visibleArg.getValue());
-        assertEquals("Ethernet icon, in status bar", icon, (int) iconArg.getValue());
+        Mockito.verify(mCallbackHandler, Mockito.atLeastOnce()).setEthernetIndicators(
+                iconArg.capture());
+        IconState iconState = iconArg.getValue();
+        assertEquals("Ethernet visible, in status bar", visible, iconState.visible);
+        assertEquals("Ethernet icon, in status bar", icon, iconState.icon);
     }
 }
