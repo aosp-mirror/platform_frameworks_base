@@ -21,11 +21,7 @@ import android.content.Context;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
-
 import java.io.PrintWriter;
-import java.util.List;
 
 
 /**
@@ -49,24 +45,22 @@ public abstract class SignalController<T extends SignalController.State,
     // The owner of the SignalController (i.e. NetworkController will maintain the following
     // lists and call notifyListeners whenever the list has changed to ensure everyone
     // is aware of current state.
-    protected final List<NetworkSignalChangedCallback> mSignalsChangedCallbacks;
-    protected final List<SignalCluster> mSignalClusters;
     protected final NetworkControllerImpl mNetworkController;
+
+    protected final CallbackHandler mCallbackHandler;
 
     // Save the previous HISTORY_SIZE states for logging.
     private final State[] mHistory;
     // Where to copy the next state into.
     private int mHistoryIndex;
 
-    public SignalController(String tag, Context context, int type,
-            List<NetworkSignalChangedCallback> signalCallbacks,
-            List<SignalCluster> signalClusters, NetworkControllerImpl networkController) {
+    public SignalController(String tag, Context context, int type, CallbackHandler callbackHandler,
+            NetworkControllerImpl networkController) {
         mTag = TAG + "." + tag;
         mNetworkController = networkController;
         mTransportType = type;
         mContext = context;
-        mSignalsChangedCallbacks = signalCallbacks;
-        mSignalClusters = signalClusters;
+        mCallbackHandler = callbackHandler;
         mCurrentState = cleanState();
         mLastState = cleanState();
         if (RECORD_HISTORY) {

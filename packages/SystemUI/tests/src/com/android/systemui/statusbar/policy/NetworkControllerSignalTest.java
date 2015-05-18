@@ -19,12 +19,12 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.os.Looper;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 
-import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
@@ -41,8 +41,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
-                mConfig, mock(AccessPointControllerImpl.class),
-                mock(MobileDataControllerImpl.class));
+                mConfig, Looper.getMainLooper(), mCallbackHandler,
+                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class));
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, 0, 0);
@@ -61,8 +61,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
-                mConfig, mock(AccessPointControllerImpl.class),
-                mock(MobileDataControllerImpl.class));
+                mConfig, Looper.getMainLooper(), mCallbackHandler,
+                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class));
         setupNetworkController();
 
         // No Subscriptions.

@@ -18,22 +18,16 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.net.NetworkCapabilities;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
-
-import java.util.List;
-import java.util.Objects;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
 
 public class EthernetSignalController extends
         SignalController<SignalController.State, SignalController.IconGroup> {
 
     public EthernetSignalController(Context context,
-            List<NetworkSignalChangedCallback> signalCallbacks,
-            List<SignalCluster> signalClusters, NetworkControllerImpl networkController) {
+            CallbackHandler callbackHandler, NetworkControllerImpl networkController) {
         super("EthernetSignalController", context, NetworkCapabilities.TRANSPORT_ETHERNET,
-                signalCallbacks, signalClusters, networkController);
+                callbackHandler, networkController);
         mCurrentState.iconGroup = mLastState.iconGroup = new IconGroup(
                 "Ethernet Icons",
                 EthernetIcons.ETHERNET_ICONS,
@@ -49,11 +43,8 @@ public class EthernetSignalController extends
         String contentDescription = getStringIfExists(getContentDescription());
 
         // TODO: wire up data transfer using WifiSignalPoller.
-        int signalClustersLength = mSignalClusters.size();
-        for (int i = 0; i < signalClustersLength; i++) {
-            mSignalClusters.get(i).setEthernetIndicators(ethernetVisible, getCurrentIconId(),
-                    contentDescription);
-        }
+        mCallbackHandler.setEthernetIndicators(new IconState(ethernetVisible, getCurrentIconId(),
+                contentDescription));
     }
 
     @Override
