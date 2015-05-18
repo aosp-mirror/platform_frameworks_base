@@ -25013,22 +25013,21 @@ package android.os {
 
   public final class MessageQueue {
     method public void addIdleHandler(android.os.MessageQueue.IdleHandler);
+    method public void addOnFileDescriptorEventListener(java.io.FileDescriptor, int, android.os.MessageQueue.OnFileDescriptorEventListener);
     method public boolean isIdle();
-    method public void registerFileDescriptorCallback(java.io.FileDescriptor, int, android.os.MessageQueue.FileDescriptorCallback);
     method public void removeIdleHandler(android.os.MessageQueue.IdleHandler);
-    method public void unregisterFileDescriptorCallback(java.io.FileDescriptor);
-  }
-
-  public static abstract class MessageQueue.FileDescriptorCallback {
-    ctor public MessageQueue.FileDescriptorCallback();
-    method public int onFileDescriptorEvents(java.io.FileDescriptor, int);
-    field public static final int EVENT_ERROR = 4; // 0x4
-    field public static final int EVENT_INPUT = 1; // 0x1
-    field public static final int EVENT_OUTPUT = 2; // 0x2
+    method public void removeOnFileDescriptorEventListener(java.io.FileDescriptor);
   }
 
   public static abstract interface MessageQueue.IdleHandler {
     method public abstract boolean queueIdle();
+  }
+
+  public static abstract interface MessageQueue.OnFileDescriptorEventListener {
+    method public abstract int onFileDescriptorEvents(java.io.FileDescriptor, int);
+    field public static final int EVENT_ERROR = 4; // 0x4
+    field public static final int EVENT_INPUT = 1; // 0x1
+    field public static final int EVENT_OUTPUT = 2; // 0x2
   }
 
   public final class Messenger implements android.os.Parcelable {

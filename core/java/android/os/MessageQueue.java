@@ -160,67 +160,67 @@ public final class MessageQueue {
     }
 
     /**
-     * Registers a file descriptor callback to receive notification when file descriptor
+     * Adds a file descriptor listener to receive notification when file descriptor
      * related events occur.
      * <p>
      * If the file descriptor has already been registered, the specified events
-     * and callback will replace any that were previously associated with it.
-     * It is not possible to set more than one callback per file descriptor.
+     * and listener will replace any that were previously associated with it.
+     * It is not possible to set more than one listener per file descriptor.
      * </p><p>
-     * It is important to always unregister the callback when the file descriptor
+     * It is important to always unregister the listener when the file descriptor
      * is no longer of use.
      * </p>
      *
-     * @param fd The file descriptor for which a callback will be registered.
+     * @param fd The file descriptor for which a listener will be registered.
      * @param events The set of events to receive: a combination of the
-     * {@link FileDescriptorCallback#EVENT_INPUT},
-     * {@link FileDescriptorCallback#EVENT_OUTPUT}, and
-     * {@link FileDescriptorCallback#EVENT_ERROR} event masks.  If the requested
-     * set of events is zero, then the callback is unregistered.
-     * @param callback The callback to invoke when file descriptor events occur.
+     * {@link OnFileDescriptorEventListener#EVENT_INPUT},
+     * {@link OnFileDescriptorEventListener#EVENT_OUTPUT}, and
+     * {@link OnFileDescriptorEventListener#EVENT_ERROR} event masks.  If the requested
+     * set of events is zero, then the listener is unregistered.
+     * @param listener The listener to invoke when file descriptor events occur.
      *
-     * @see FileDescriptorCallback
-     * @see #unregisterFileDescriptorCallback
+     * @see OnFileDescriptorEventListener
+     * @see #removeOnFileDescriptorEventListener
      */
-    public void registerFileDescriptorCallback(@NonNull FileDescriptor fd,
-            @FileDescriptorCallback.Events int events,
-            @NonNull FileDescriptorCallback callback) {
+    public void addOnFileDescriptorEventListener(@NonNull FileDescriptor fd,
+            @OnFileDescriptorEventListener.Events int events,
+            @NonNull OnFileDescriptorEventListener listener) {
         if (fd == null) {
             throw new IllegalArgumentException("fd must not be null");
         }
-        if (callback == null) {
-            throw new IllegalArgumentException("callback must not be null");
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
         }
 
         synchronized (this) {
-            setFileDescriptorCallbackLocked(fd, events, callback);
+            updateOnFileDescriptorEventListenerLocked(fd, events, listener);
         }
     }
 
     /**
-     * Unregisters a file descriptor callback.
+     * Removes a file descriptor listener.
      * <p>
-     * This method does nothing if no callback has been registered for the
+     * This method does nothing if no listener has been registered for the
      * specified file descriptor.
      * </p>
      *
-     * @param fd The file descriptor whose callback will be unregistered.
+     * @param fd The file descriptor whose listener will be unregistered.
      *
-     * @see FileDescriptorCallback
-     * @see #registerFileDescriptorCallback
+     * @see OnFileDescriptorEventListener
+     * @see #addOnFileDescriptorEventListener
      */
-    public void unregisterFileDescriptorCallback(@NonNull FileDescriptor fd) {
+    public void removeOnFileDescriptorEventListener(@NonNull FileDescriptor fd) {
         if (fd == null) {
             throw new IllegalArgumentException("fd must not be null");
         }
 
         synchronized (this) {
-            setFileDescriptorCallbackLocked(fd, 0, null);
+            updateOnFileDescriptorEventListenerLocked(fd, 0, null);
         }
     }
 
-    private void setFileDescriptorCallbackLocked(FileDescriptor fd, int events,
-            FileDescriptorCallback callback) {
+    private void updateOnFileDescriptorEventListenerLocked(FileDescriptor fd, int events,
+            OnFileDescriptorEventListener listener) {
         final int fdNum = fd.getInt$();
 
         int index = -1;
@@ -236,15 +236,15 @@ public final class MessageQueue {
         }
 
         if (events != 0) {
-            events |= FileDescriptorCallback.EVENT_ERROR;
+            events |= OnFileDescriptorEventListener.EVENT_ERROR;
             if (record == null) {
                 if (mFileDescriptorRecords == null) {
                     mFileDescriptorRecords = new SparseArray<FileDescriptorRecord>();
                 }
-                record = new FileDescriptorRecord(fd, events, callback);
+                record = new FileDescriptorRecord(fd, events, listener);
                 mFileDescriptorRecords.put(fdNum, record);
             } else {
-                record.mCallback = callback;
+                record.mListener = listener;
                 record.mEvents = events;
                 record.mSeq += 1;
             }
@@ -260,12 +260,12 @@ public final class MessageQueue {
         // Get the file descriptor record and any state that might change.
         final FileDescriptorRecord record;
         final int oldWatchedEvents;
-        final FileDescriptorCallback callback;
+        final OnFileDescriptorEventListener listener;
         final int seq;
         synchronized (this) {
             record = mFileDescriptorRecords.get(fd);
             if (record == null) {
-                return 0; // spurious, no callback registered
+                return 0; // spurious, no listener registered
             }
 
             oldWatchedEvents = record.mEvents;
@@ -274,19 +274,19 @@ public final class MessageQueue {
                 return oldWatchedEvents; // spurious, watched events changed
             }
 
-            callback = record.mCallback;
+            listener = record.mListener;
             seq = record.mSeq;
         }
 
-        // Invoke the callback outside of the lock.
-        int newWatchedEvents = callback.onFileDescriptorEvents(
+        // Invoke the listener outside of the lock.
+        int newWatchedEvents = listener.onFileDescriptorEvents(
                 record.mDescriptor, events);
         if (newWatchedEvents != 0) {
-            newWatchedEvents |= FileDescriptorCallback.EVENT_ERROR;
+            newWatchedEvents |= OnFileDescriptorEventListener.EVENT_ERROR;
         }
 
-        // Update the file descriptor record if the callback changed the set of
-        // events to watch and the callback itself hasn't been updated since.
+        // Update the file descriptor record if the listener changed the set of
+        // events to watch and the listener itself hasn't been updated since.
         if (newWatchedEvents != oldWatchedEvents) {
             synchronized (this) {
                 int index = mFileDescriptorRecords.indexOfKey(fd);
@@ -786,23 +786,23 @@ public final class MessageQueue {
     }
 
     /**
-     * A callback which is invoked when file descriptor related events occur.
+     * A listener which is invoked when file descriptor related events occur.
      */
-    public static abstract class FileDescriptorCallback {
+    public interface OnFileDescriptorEventListener {
         /**
          * File descriptor event: Indicates that the file descriptor is ready for input
          * operations, such as reading.
          * <p>
-         * The callback should read all available data from the file descriptor
-         * then return <code>true</code> to keep the callback active or <code>false</code>
-         * to remove the callback.
+         * The listener should read all available data from the file descriptor
+         * then return <code>true</code> to keep the listener active or <code>false</code>
+         * to remove the listener.
          * </p><p>
          * In the case of a socket, this event may be generated to indicate
-         * that there is at least one incoming connection that the callback
+         * that there is at least one incoming connection that the listener
          * should accept.
          * </p><p>
          * This event will only be generated if the {@link #EVENT_INPUT} event mask was
-         * specified when the callback was added.
+         * specified when the listener was added.
          * </p>
          */
         public static final int EVENT_INPUT = 1 << 0;
@@ -811,14 +811,14 @@ public final class MessageQueue {
          * File descriptor event: Indicates that the file descriptor is ready for output
          * operations, such as writing.
          * <p>
-         * The callback should write as much data as it needs.  If it could not
+         * The listener should write as much data as it needs.  If it could not
          * write everything at once, then it should return <code>true</code> to
-         * keep the callback active.  Otherwise, it should return <code>false</code>
-         * to remove the callback then re-register it later when it needs to write
+         * keep the listener active.  Otherwise, it should return <code>false</code>
+         * to remove the listener then re-register it later when it needs to write
          * something else.
          * </p><p>
          * This event will only be generated if the {@link #EVENT_OUTPUT} event mask was
-         * specified when the callback was added.
+         * specified when the listener was added.
          * </p>
          */
         public static final int EVENT_OUTPUT = 1 << 1;
@@ -831,7 +831,7 @@ public final class MessageQueue {
          * is when the remote peer of a socket or pipe closes its end of the connection.
          * </p><p>
          * This event may be generated at any time regardless of whether the
-         * {@link #EVENT_ERROR} event mask was specified when the callback was added.
+         * {@link #EVENT_ERROR} event mask was specified when the listener was added.
          * </p>
          */
         public static final int EVENT_ERROR = 1 << 2;
@@ -843,35 +843,30 @@ public final class MessageQueue {
 
         /**
          * Called when a file descriptor receives events.
-         * <p>
-         * The default implementation does nothing and returns 0 to unregister the callback.
-         * </p>
          *
          * @param fd The file descriptor.
          * @param events The set of events that occurred: a combination of the
          * {@link #EVENT_INPUT}, {@link #EVENT_OUTPUT}, and {@link #EVENT_ERROR} event masks.
-         * @return The new set of events to watch, or 0 to unregister the callback.
+         * @return The new set of events to watch, or 0 to unregister the listener.
          *
          * @see #EVENT_INPUT
          * @see #EVENT_OUTPUT
          * @see #EVENT_ERROR
          */
-        public @Events int onFileDescriptorEvents(@NonNull FileDescriptor fd, @Events int events) {
-            return 0;
-        }
+        @Events int onFileDescriptorEvents(@NonNull FileDescriptor fd, @Events int events);
     }
 
     private static final class FileDescriptorRecord {
         public final FileDescriptor mDescriptor;
         public int mEvents;
-        public FileDescriptorCallback mCallback;
+        public OnFileDescriptorEventListener mListener;
         public int mSeq;
 
         public FileDescriptorRecord(FileDescriptor descriptor,
-                int events, FileDescriptorCallback callback) {
+                int events, OnFileDescriptorEventListener listener) {
             mDescriptor = descriptor;
             mEvents = events;
-            mCallback = callback;
+            mListener = listener;
         }
     }
 }
