@@ -129,6 +129,14 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/app-indexing/"
     ]
   },
+  "google/landing/videos": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=FOn64iqlphk&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
+      "https://www.youtube.com/watch?v=F0Kh_RnSM0w&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
+      "https://www.youtube.com/watch?v=fvtMtfCuEpw&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf"
+    ]
+  },
   "google/landing/googleplay": {
     "title": "",
     "resources": [
@@ -517,7 +525,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/googleplay/cardboard": {
     "title": "Google Cast",
     "resources": [
-      "https://www.google.com/get/cardboard/",
+      "https://www.google.com/get/cardboard/get-cardboard/",
       "https://developers.google.com/cardboard/android/download",
       "http://www.google.com/design/spec-vr"
     ]
