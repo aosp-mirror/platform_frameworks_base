@@ -85,7 +85,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group":"",
     "keywords": ["carboard","vr"],
     "tags": [],
-    "image":"images/cards/card-cardboard_2x.jpg",
+    "image":"images/cards/card-cardboard_2x.png",
     "type":"Guide"
   },
     {
@@ -110,9 +110,6 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image":"images/cards/card-cardboard_2x.png",
     "type":"Design"
   },
-
-
-
   {
     "title":"Maps",
     "titleFriendly":"",
@@ -146,22 +143,6 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image":"images/gcm/gcm-logo.png",
     "type":"Guide"
   },
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   {
     "title":"ClassDojo Developer Story",
     "titleFriendly":"",
@@ -1243,27 +1224,13 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "url": "http://www.google.com/analytics/mobile/",
     "timestamp": 1383243492000,
     "image": "images/cards/analytics-mobile_2x.jpg",
-    "title": "Google Mobile App Analytics",
+    "title": "Mobile App Analytics",
     "summary": "Mobile App Analytics measures what matters most at all key stages: from first discovery and download to in-app purchases. ",
     "keywords": ["analytics,user behavior"],
-    "type": "guide",
+    "type": "Guide",
     "titleFriendly": ""
   },
-  {
-    "lang": "en",
-    "group": "",
-    "tags": [
-      "#engagement",
-    ],
-    "url": "https://developers.google.com/app-indexing/",
-    "timestamp": 1383243492000,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/search_64dp.png",
-    "title": "Sign Up for App Indexing",
-    "summary": "Surface your app content in Google seaerch. Deep link direct to your apps.",
-    "keywords": [],
-    "type": "guide",
-    "titleFriendly": ""
-  },
+
 
   {
     "lang": "en",
@@ -1278,21 +1245,6 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "summary": "Google Cloud Messaging allows your services to efficiently send data to applications on Android devices. See what's new, and learn how to use GCM to make your apps more efficient.",
     "keywords": ["gcm"],
     "type": "youtube",
-    "titleFriendly": ""
-  },
-  {
-    "lang": "en",
-    "group": "",
-    "tags": [
-      "#googleplus",
-    ],
-    "url": "https://developers.google.com/+/mobile/android/people",
-    "timestamp": 1383243492000,
-    "image": "images/google/gps-googleplus.png",
-    "title": "Google Sign In",
-    "summary": "After you let users sign in with Google, you can access their age range, language, public profile information, and people that they have circled.",
-    "keywords": ["googleplus"],
-    "type": "guide",
     "titleFriendly": ""
   },
   {
@@ -1373,12 +1325,12 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "https://developers.google.com/+/mobile/android/sign-in",
+    "url": "https://developers.google.com/+/mobile/android/",
     "timestamp": 1194884220000,
     "image": 'images/google/gps-googleplus.png',
-    "title": "Sign-in with Google",
-    "summary": "Get users into your app quickly and securely.",
-    "keywords": ["signin", "Google+"],
+    "title": "Google+ Platform",
+    "summary": "Find out about features such as interactive posts, Hangouts, accessing basic user details and their social graphs to make your app more personal.",
+    "keywords": ["Google+"],
     "type": "guide",
     "titleFriendly": ""
   },
@@ -1596,11 +1548,36 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": ["monetize", "ads"],
     "url": "http://support.google.com/googleplay/android-developer/topic/2985714",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/support-kms-prod/SNP_712EA2784949DDF085C46E3BE7B1DC618A09_4389397_en_v0",
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/play_64dp.png",
+    "image":"images/play_dev.jpg",
     "title": "Policy Center: Ads",
-    "summary": "Introduction to ads and system interference policies in Google Play",
+    "summary": "Introduction to ads and system interference policies in Google Play.",
     "keywords": ["ads"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/analytics/answer/2611404",
+    "timestamp": null,
+    "image": "images/cards/analytics-mobile_2x.jpg",
+    "title": "Create Audience lists in Google Analytics",
+    "summary": "Find out how to use your analytics data to discover high value users and create remarketing audiences to use in AdMob.",
+    "keywords": ["ads, analytics, monetize"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/admob/answer/3111064",
+    "timestamp": null,
+    "image": "distribute/images/advertising.jpg",
+    "title": "AdMob in-app conversion tracking",
+    "summary": "Use in-app conversion tracking to attribute revenue back to your IAP promotion campaigns and determine which ones earn you the most.",
+    "keywords": ["ads, analytics, conversions"],
     "type": "distribute",
     "titleFriendly": ""
   },
@@ -1676,7 +1653,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "url": "https://developers.google.com/analytics/devguides/collection/android/",
     "timestamp": null,
     "image": "images/cards/analytics-mobile_2x.jpg",
-    "title": "Mobile App Analytics",
+    "title": "Mobile App Analytics SDK",
     "summary": "Measure everything about your app. Get started with the Google Analytics SDK for Android.",
     "keywords": ["analytics, user behavior"],
     "type": "sdk",
@@ -2395,7 +2372,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://support.google.com/adwords/answer/6032059",
     "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/admob_64dp.png",
+    "image": "distribute/images/advertising.jpg",
     "title": "Setting up Mobile App Install Ads",
     "summary": "With Mobile app installs campaigns on the Search and Display Networks, and TrueView for mobile app promotion on YouTube, you can create custom app install ads that run exclusively on phones and tablets.",
     "keywords": ["marketing", "admob"],
@@ -2408,7 +2385,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://support.google.com/adwords/answer/6167164",
     "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/admob_64dp.png",
+    "image": "distribute/images/advertising.jpg",
     "title": "Best practices for Mobile App Engagement",
     "summary": "Learn how to market to your user base to drive re-engagement with your app. ",
     "keywords": ["marketing", "admob"],
@@ -2452,23 +2429,15 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "distribute",
     "titleFriendly": ""
   },
-
-
-
-
-
-
-
-
   {
     "lang": "en",
     "group": "",
     "tags": [],
     "url": "https://support.google.com/admob/topic/2784623",
     "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/admob_64dp.png",
+    "image": "distribute/images/advertising.jpg",
     "title": "Set up your AdMob account",
-    "summary": "Guide to setting up your account so that you get the most value.",
+    "summary": "Setting up your AdMob account in the right way will help you get the most value, check out the Setup and Basics guide.",
     "keywords": ["marketing", "admob"],
     "type": "distribute",
     "titleFriendly": ""
@@ -2479,7 +2448,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "http://analyticsacademy.withgoogle.com/mobile-app",
     "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/admob_64dp.png",
+    "image": "distribute/images/advertising.jpg",
     "title": "Analytics Academy for Mobile Apps",
     "summary": "Learn how to use Google Analytics to make your app more discoverable and profitable.",
     "keywords": ["marketing", "analytics"],
@@ -2492,11 +2461,11 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://developers.google.com/mobile-ads-sdk/download",
     "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/admob_64dp.png",
-    "title": "Google Mobile Ads SDK",
+    "image": "distribute/images/advertising.jpg",
+    "title": "Admob Ads",
     "summary": "Use the Mobile Ads SDK to start showing AdMob ads in your apps.",
     "keywords": ["marketing", "adwords"],
-    "type": "distribute",
+    "type": "Guide",
     "titleFriendly": ""
   },
   {
@@ -2505,7 +2474,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://support.google.com/admob/",
     "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/admob_64dp.png",
+    "image": "distribute/images/advertising.jpg",
     "title": "AdMob Help Center",
     "summary": "For setup assistance, general info, and fixes for specific problems check out the AdMob Help Center.",
     "keywords": ["admob"],
@@ -2518,56 +2487,97 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [],
     "url": "https://support.google.com/admob/answer/2753860",
     "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/admob_64dp.png",
+    "image": "distribute/images/advertising.jpg",
     "title": "AdMob Policy Guidelines",
     "summary": "Learn about best practices for displaying AdMob ads in your apps to maximize revenue.",
     "keywords": ["admob"],
     "type": "distribute",
     "titleFriendly": ""
   },
+
   {
     "lang": "en",
     "group": "",
-    "tags": ["appindexing", "search", "getusers"],
+    "tags": [],
     "url": "https://developers.google.com/app-indexing/",
     "timestamp": 1383243492000,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/search_64dp.png",
+    "image": "images/cards/google-search_2x.png",
     "title": "Set Up App Indexing",
-    "summary": "Learn more about how Google Search can help users discover your app, along with other ways you can integrate with Google Search.",
-    "keywords": ["search"],
+    "summary": "Surface your app content in Google seaerch. Deep link direct to your apps.",
+    "keywords": ["search", "appindexing", "engagement", "getusers"],
     "type": "guide",
     "titleFriendly": ""
   },
-    {
+  {
     "lang": "en",
     "group": "",
-    "tags": ["appindexing", "search", "getusers"],
+    "tags": [],
     "url": "https://developers.google.com/app-indexing/webmasters/details",
     "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/search_64dp.png",
-    "title": "Verify and Create Deep Links",
-    "summary": "Index your app today by adding deep links and verifying its official web site to ensure it starts appearing in Google Search results.",
-    "keywords": ["search"],
+    "image": "images/cards/google-search_2x.png",
+    "title": "Index your app",
+    "summary": "Index your app today by adding deep links and verifying its official web site to ensure it starts appearing in Google Search results. ",
+    "keywords": ["appindexing","search","getusers"],
     "type": "distribute",
     "titleFriendly": ""
   },
-    {
+  {
     "lang": "en",
     "group": "",
-    "tags": [
-      "appindexing",
-      "search",
-      "getusers",
-    ],
-    "url": "https://support.google.com/admob/answer/2753860",
-    "timestamp": null,
-    "image": "https://www.gstatic.com/images/icons/material/product/2x/search_64dp.png",
-    "title": "Drive use with Google Search",
-    "summary": "More about how app indexing and deep links can drive users directly to the content in your app. ",
-    "keywords": [],
-    "type": "distribute",
+    "tags": [],
+    "url": "https://developers.google.com/identity/sign-in/android/people",
+    "timestamp": 1383243492000,
+    "image": "images/cards/google-sign-in_2x.png",
+    "title": "Get user profile details",
+    "summary": "After users sign-in with Google, you can access their age range, language, and public profile information.",
+    "keywords": ["signin", "identity", "google"],
+    "type": "guide",
     "titleFriendly": ""
   },
+
+
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/identity/sign-in/android/",
+    "timestamp": "",
+    "image": "images/cards/google-sign-in_2x.png",
+    "title": "Google Sign-In",
+    "summary": "Discover how you can enhance user experiences on your website or in your app using information provided by their Google identity.",
+    "keywords": ["signin", "identity", "google"],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/+/features/play-installs",
+    "timestamp": 1383243492000,
+    "image": "images/cards/google-sign-in_2x.png",
+    "title": "Over-the-air installs",
+    "summary": "Follow this step-by-step guide to quickly add Google Sign-in and over-the-air app installs to your website.",
+    "keywords": ["signin", "google", "installs"],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/+/features/analytics",
+    "timestamp": 1383243492000,
+    "image": 'images/google/gps-googleplus.png',
+    "title": "Google+ Insights",
+    "summary": "Measure impressions of the over-the-air install prompt, resulting installs, and success rate by day, week, and month.",
+    "keywords": ["signin", "identity"],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+
+
+
  // TODO remove this?
   {
     "title":"Android Wear Materials",
@@ -2715,7 +2725,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
   {
     "title":"Opportunities & Programs",
     "titleFriendly":"",
-    "summary":"This is a card body place holder text. This is a card body place holder text. This is a card body place holder text.",
+    "summary":"Take advantage of the many ways you can distribute your app to consumers, students, and businesses through Google Play.",
     "url":"distribute/googleplay/index.html#opportunities",
     "group":"",
     "keywords": [],
@@ -2724,6 +2734,56 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang":"en",
     "type":"distribute"
   },
+  {
+    "title":"Android for Work",
+    "titleFriendly":"",
+    "summary":"Learn more about how Android for Work makes your favorite phones and tablets the perfect business tools.",
+    "url":"http://www.android.com/work/",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/cards/card-android-work_2x.png",
+    "lang":"en",
+    "type":"about"
+  },
+  {
+    "title":"Android for Work DevBytes",
+    "titleFriendly":"",
+    "summary":"Watch the videos in this playlist to understand more about Android for Work and get tips on developing enterprise apps.",
+    "url":"https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"http://i1.ytimg.com/vi/jQWB_-o1kz4/maxresdefault.jpg",
+    "lang":"en",
+    "type":"about"
+  },
+  {
+    "title":"Discover YouTube cards",
+    "titleFriendly":"",
+    "summary":"Find out more about YouTube cards, the options available, and how to use them to get the most from your YouTube content.",
+    "url":"https://support.google.com/youtube/answer/6140493",
+    "group":"",
+    "keywords": ["youtube", "video", "users", "installs"],
+    "tags": [],
+    "image":"images/cards/card-youtube_2x.png",
+    "lang":"en",
+    "type":"distribute"
+  },
+    {
+    "title":"What is YouTube account good standing?",
+    "titleFriendly":"",
+    "summary":"Learn what it means for an account to be in good standing from the YouTube Help Center.",
+    "url":"https://support.google.com/youtube/answer/2797387",
+    "group":"",
+    "keywords": ["youtube", "video", "users", "installs"],
+    "tags": [],
+    "image":"images/cards/card-youtube_2x.png",
+    "lang":"en",
+    "type":"distribute"
+  },
+
+
   {
     "lang": "ja",
     "title": "Gaming Everywhere",
