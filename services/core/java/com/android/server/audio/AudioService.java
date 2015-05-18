@@ -2862,8 +2862,11 @@ public class AudioService extends IAudioService.Stub {
                             }
                         }
                         if (toRemove != null) {
+                            int delay = checkSendBecomingNoisyIntent(
+                                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                                0);
                             for (int i = 0; i < toRemove.size(); i++) {
-                                makeA2dpDeviceUnavailableNow(toRemove.valueAt(i));
+                                makeA2dpDeviceUnavailableLater(toRemove.valueAt(i), delay);
                             }
                         }
                     }
@@ -4426,7 +4429,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     // must be called synchronized on mConnectedDevices
-    private void makeA2dpDeviceUnavailableLater(String address) {
+    private void makeA2dpDeviceUnavailableLater(String address, int delayMs) {
         // prevent any activity on the A2DP audio output to avoid unwanted
         // reconnection of the sink.
         AudioSystem.setParameters("A2dpSuspended=true");
@@ -4435,7 +4438,7 @@ public class AudioService extends IAudioService.Stub {
                 makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         // send the delayed message to make the device unavailable later
         Message msg = mAudioHandler.obtainMessage(MSG_BTA2DP_DOCK_TIMEOUT, address);
-        mAudioHandler.sendMessageDelayed(msg, BTA2DP_DOCK_TIMEOUT_MILLIS);
+        mAudioHandler.sendMessageDelayed(msg, delayMs);
 
     }
 
@@ -4492,7 +4495,7 @@ public class AudioService extends IAudioService.Stub {
                         // introduction of a delay for transient disconnections of docks when
                         // power is rapidly turned off/on, this message will be canceled if
                         // we reconnect the dock under a preset delay
-                        makeA2dpDeviceUnavailableLater(address);
+                        makeA2dpDeviceUnavailableLater(address, BTA2DP_DOCK_TIMEOUT_MILLIS);
                         // the next time isConnected is evaluated, it will be false for the dock
                     }
                 } else {
