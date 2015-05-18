@@ -27,6 +27,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -322,7 +326,7 @@ public abstract class NotificationListenerService extends Service {
         if (!isBound()) return;
         try {
             getNotificationInterface().cancelNotificationsFromListener(mWrapper,
-                    new String[] {key});
+                    new String[] { key });
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
@@ -636,6 +640,24 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
+    /** Convert new-style Icons to legacy representations for pre-M clients. */
+    private void createLegacyIconExtras(Notification n) {
+        Icon smallIcon = n.getSmallIcon();
+        Icon largeIcon = n.getLargeIcon();
+        if (smallIcon.getType() == Icon.TYPE_RESOURCE) {
+            n.extras.putInt(Notification.EXTRA_SMALL_ICON, smallIcon.getResId());
+            n.icon = smallIcon.getResId();
+        }
+        if (largeIcon != null) {
+            Drawable d = largeIcon.loadDrawable(getContext());
+            if (d != null && d instanceof BitmapDrawable) {
+                final Bitmap largeIconBits = ((BitmapDrawable) d).getBitmap();
+                n.extras.putParcelable(Notification.EXTRA_LARGE_ICON, largeIconBits);
+                n.largeIcon = largeIconBits;
+            }
+        }
+    }
+
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
         public void onNotificationPosted(IStatusBarNotificationHolder sbnHolder,
@@ -648,6 +670,9 @@ public abstract class NotificationListenerService extends Service {
                 return;
             }
             Notification.Builder.rebuild(getContext(), sbn.getNotification());
+
+            // convert icon metadata to legacy format for older clients
+            createLegacyIconExtras(sbn.getNotification());
 
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
             synchronized (mWrapper) {
