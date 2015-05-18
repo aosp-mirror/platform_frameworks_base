@@ -2277,4 +2277,5 @@
   <java-symbol type="drawable" name="ic_perm_device_info" />
   <java-symbol type="string" name="config_radio_access_family" />
   <java-symbol type="string" name="notification_inbox_ellipsis" />
+  <java-symbol type="bool" name="config_mainBuiltInDisplayIsRound" />
 </resources>

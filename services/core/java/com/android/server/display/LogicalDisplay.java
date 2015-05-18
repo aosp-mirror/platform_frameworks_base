@@ -217,6 +217,9 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_PRESENTATION) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_PRESENTATION;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_ROUND) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_ROUND;
+            }
             mBaseDisplayInfo.type = deviceInfo.type;
             mBaseDisplayInfo.address = deviceInfo.address;
             mBaseDisplayInfo.name = deviceInfo.name;
