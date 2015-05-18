@@ -2568,7 +2568,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         selectorRect.right += mSelectionRightPadding;
         selectorRect.bottom += mSelectionBottomPadding;
 
-        // Update the selector drawable.
+        // Update the child enabled state prior to updating the selector.
+        final boolean isChildViewEnabled = sel.isEnabled();
+        if (mIsChildViewEnabled != isChildViewEnabled) {
+            mIsChildViewEnabled = isChildViewEnabled;
+        }
+
+        // Update the selector drawable's state and position.
         final Drawable selector = mSelector;
         if (selector != null) {
             if (positionChanged) {
@@ -2586,14 +2592,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
             if (manageHotspot) {
                 selector.setHotspot(x, y);
-            }
-        }
-
-        final boolean isChildViewEnabled = mIsChildViewEnabled;
-        if (sel.isEnabled() != isChildViewEnabled) {
-            mIsChildViewEnabled = !isChildViewEnabled;
-            if (getSelectedItemPosition() != INVALID_POSITION) {
-                refreshDrawableState();
             }
         }
     }
