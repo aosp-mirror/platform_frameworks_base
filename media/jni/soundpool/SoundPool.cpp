@@ -753,6 +753,7 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
             status = newTrack->initCheck();
             if (status != NO_ERROR) {
                 ALOGE("Error creating AudioTrack");
+                // newTrack goes out of scope, so reference count drops to zero
                 goto exit;
             }
             // From now on, AudioTrack callbacks received with previous toggle value will be ignored.

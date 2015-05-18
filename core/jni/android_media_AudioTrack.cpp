@@ -405,6 +405,7 @@ native_init_failure:
     delete lpJniStorage;
     env->SetLongField(thiz, javaAudioTrackFields.jniData, 0);
 
+    // lpTrack goes out of scope, so reference count drops to zero
     return (jint) AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
 }
 
