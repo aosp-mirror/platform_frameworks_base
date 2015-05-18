@@ -29,6 +29,24 @@
     </div>
   </li>
   <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/ota-installs.html">
+          <span class="en">Offer Over-the-air Installs</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/house-ads.html">
+          <span class="en">Cross-Sell to Users with House Ads</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/youtube.html">
+          <span class="en">Drive installs from YouTube</span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/users/build-buzz.html">
           <span class="en">Build Buzz</span>
         </a>

@@ -60,7 +60,7 @@ excludeFromSuggestions=true
        data-maxResults="3"></div>
 </div></section>
 
-<section class="dac-section dac-section-light"><div class="wrap">
+<section class="dac-section dac-light"><div class="wrap">
   <h1 class="dac-section-title">Tools for building apps</h1>
   <div class="dac-section-subtitle">
     Insights into Android's tools and libraries to speed your development.
@@ -74,7 +74,7 @@ excludeFromSuggestions=true
   </ul>
 </div></section>
 
-<section class="dac-section dac-light"><div class="wrap">
+<section class="dac-section dac-section-light"><div class="wrap">
   <h1 class="dac-section-title">Android performance patterns</h1>
   <div class="dac-section-subtitle">
     Everything you need to know about improving your app’s performance.

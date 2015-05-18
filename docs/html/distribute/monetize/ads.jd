@@ -25,89 +25,88 @@ precious development resources to build your own solution.</p>
 </ul>
 
 <p><a href="http://www.google.com/ads/admob/#subid=us-en-et-dac">Sign-up for AdMob</a>
-today and start showing ads by integrating the <a
-href="https://developers.google.com/mobile-ads-sdk/download">Google Mobile Ads SDK</a>
+today and start using the <a
+href="https://developer.android.com/google/play-services/ads.html">Google Mobile Ads SDK</a>
 in your app with a few lines of code.</p>
 
-<h2 id="key_features">Key features</h2>
+<h2 id="maximize_your_ad_revenue">Maximize your ad revenue</h2>
 
-<div style="display:inline-block">
-<h3 id="maximize_your_ad_revenue">Maximize your ad revenue</h3>
-
-<div class="col-4">
-  <h4 id="maximize_earnings">Maximize earnings</h4>
-  <p>Earn more with our industry-leading ad service, which includes <a href=
-  "https://support.google.com/admob/answer/3063564">free mediation</a> to
-  automatically improve your earnings, and access to all of Google’s advertiser
-  demand from AdMob, AdWords, and the DoubleClick Ad Exchange.</p>
+<div class="wrap">
+  <div class="cols" style="margin-top:2em;">
+    <div class="col-4of12">
+      <h5 id="maximize_earnings">Maximize earnings</h5>
+      <p>Earn more with our industry-leading ad service, which includes <a href=
+      "https://support.google.com/admob/answer/3063564">free mediation</a> to
+      automatically improve your earnings, and access to all of Google’s advertiser
+      demand from AdMob, AdWords, and the DoubleClick Ad Exchange.</p>
+    </div>
+    <div class="col-4of12">
+      <h5 id="get_paid_fast">Get paid fast</h5>
+      <p>Get paid in local currencies quickly and reliably, with no wire fees charged by
+      AdMob.</p>
+    </div>
+    <div class="col-4of12">
+      <h5 id="easy_and_free">Easy and free</h5>
+      <p>The SDK can be installed quickly, and there are no standard fees for using the
+      platform.</p>
+    </div>
+  </div>
 </div>
 
-<div class="col-4">
-  <h4 id="get_paid_fast">Get paid fast</h4>
-  <p>Get paid in local currencies quickly and reliably, with no wire fees charged by
-  AdMob.</p>
+<h2 id="grow_your_business_with_a_trusted_partner">Grow your business with a trusted partner</h2>
+<div class="wrap">
+  <div class="cols" style="margin-top:2em;">
+    <div class="col-6of12">
+      <h5 id="powered_by_googles_ad_technology">Powered by Google’s ad technology</h5>
+      <p>For over a decade, Google has helped millions of developers grow their digital
+      businesses.</p>
+    </div>
+    <div class="col-6of12">
+      <h5 id="auto_updates_on_google_play">Auto updates on Google Play</h5>
+      <p>AdMob’s integration with Google Play services pushes automatic performance
+        improvements to Android apps without additional SDK changes.</p>
+    </div>
+  </div>
 </div>
 
-<div class="col-4">
-  <h4 id="easy_and_free">Easy and free</h4>
-  <p>The SDK can be installed quickly, and there are no standard fees for using the
-  platform.</p>
-</div>
-</div>
 
-<div style="display:inline-block">
-<h3 id="grow_your_business_with_a_trusted_partner">Grow your business with a trusted partner</h3>
-
-<div class="col-6">
-  <h4 id="powered_by_googles_ad_technology">Powered by Google’s ad technology</h4>
-  <p>For over a decade, Google has helped millions of developers grow their digital
-  businesses.</p>
-</div>
-
-<div class="col-6">
-<h4 id="auto_updates_on_google_play">Auto updates on Google Play</h4>
-<p>AdMob’s integration with Google Play services pushes automatic performance
-  improvements to Android apps without additional SDK changes.</p>
-</div>
-</div>
-
-<div style="display:inline-block">
-<h3 id="drive_more_in-app_purchases_and_downloads">Drive more in-app purchases and downloads</h3>
-
-<div class="col-6">
-<h4 id="sell_more_in-app_purchases">Sell more in-app purchases</h4>
+<h2 id="drive_more_in-app_purchases_and_downloads">Drive more in-app purchases and downloads</h2>
+<div class="wrap">
+  <div class="cols" style="margin-top:2em;">
+    <div class="col-6of12">
+<h5 id="sell_more_in-app_purchases">Sell more in-app purchases</h5>
 <p>Earn more revenue by intelligently promoting your in-app purchases to the users
 most likely to buy them.</p>
-</div>
-
-<div class="col-6">
-<h4 id="promote_your_apps_for_free">Promote your apps for free</h4>
+    </div>
+    <div class="col-6of12">
+<h5 id="promote_your_apps_for_free">Promote your apps for free</h5>
 <p>Cross-sell your other apps (or your friend’s apps) to your existing users,
 using free AdMob <a href="https://support.google.com/admob/answer/3210452">house ads</a>.</p>
-</div>
+    </div>
+  </div>
 </div>
 
-<div style="display:inline-block">
-<h3 id="drive_more_in-app_purchases_and_downloads">Drive more in-app purchases and downloads</h3>
-
-<div class="col-6">
-<h4 id="analytics_for_apps">Analytics for apps</h4>
+<h2 id="understand_users">Understand your users</h2>
+<div class="wrap">
+  <div class="cols" style="margin-top:2em;">
+    <div class="col-6of12">
+<h5 id="analytics_for_apps">Analytics for apps</h5>
 <p>Analyze your app’s performance from within AdMob with Google Analytics.
 Discover where people are downloading your app, and the features they use the
 most in real time.</p>
-</div>
-
-<div class="col-6">
-<h4 id="flow_visualization_reports">Flow visualization reports</h4>
+    </div>
+    <div class="col-6of12">
+<h5 id="flow_visualization_reports">Flow visualization reports</h5>
 <p>In Analytics, see how people are navigating through your app with graphical
 <a href="https://support.google.com/analytics/answer/2519986">flow reports</a>.
 View the path they take to making a purchase, and the point where they exit
 the app, plus much more.</p>
-</div>
+    </div>
+  </div>
 </div>
 
 
-<h2 id=tips>Tips</h2>
+<div style="<h2 id=tips>Tips</h2>
 
 <ul>
   <li> Place ads wisely, they shouldn't be too intrusive but still need to be clearly

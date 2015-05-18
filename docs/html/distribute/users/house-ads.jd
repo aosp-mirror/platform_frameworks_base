@@ -1,0 +1,61 @@
+page.title=Cross-Sell to Users with House Ads
+page.metaDescription=Tap into your existing user base to increase downloads and increase conversions.
+page.tags="google", "identity", "signin"
+page.image=distribute/images/advertising.jpg
+
+@jd:body
+
+<p>One of the fastest ways to accumulate downloads or increase conversions is to tap into your
+existing user base. These users know your products and are a receptive audience for your other
+apps and in-app products.</p>
+
+<h3>Promote your apps for free</h3>
+
+<p>AdMob's house ads let you cross-sell your other apps (or your friend’s apps) to your
+existing users, and it's a free service.</p>
+
+<h3>Sell more in-app purchases</h3>
+
+<p>Intelligently promote your in-app purchases to the users most likely to buy them, with
+AdMob’s free in-app purchase house ad format.</p>
+
+<p>Get started <a href="https://developers.google.com/identity/sign-in/">integrating
+Google sign-in into your apps and games</a>.</p>
+
+<div class="wrap">
+  <div class="cols" style="margin:1em auto;">
+    <div class="col-8of12">
+     <img src="{@docRoot}images/distribute/house-ads.png" style="padding-top:1em;">
+    </div>
+  </div>
+</div>
+
+<p><a href="http://www.google.com/ads/admob/#subid=us-en-et-dac">Sign-up for AdMob</a> today
+and start using the <a href="https://developer.android.com/google/play-services/ads.html">Google
+Mobile Ads SDK</a> included in Google Play services to show ads in your app with a few lines of
+code. Then create your <a href="https://support.google.com/admob/answer/3210442?hl=en">house
+ad campaigns</a>.</p>
+
+<h2>Tips</h2>
+
+<ul>
+  <li>AdMob automatically figures out which of your users are likely to spend to optimize which
+  users see the ads.</li>
+  <li>Place ads wisely, they shouldn't be too intrusive but still need to be clearly visible to
+  attract clickthroughs.</li>
+  <li>Remember that ads form part of your app and must match its age rating.</li>
+  <li>Use the impression goals feature of AdMob house ads to set limits on the number of ads
+  served. This is useful if you want to run ad campaigns in your app from other developers.</li>
+</ul>
+
+
+<h2 style="clear:both" id="related-resources">Related Resources</h2>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/users/houseads"
+  data-sortorder="-timestamp"
+  data-cardsizes="6x3"
+  data-maxresults="6">
+</div>
+
+

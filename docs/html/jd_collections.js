@@ -123,10 +123,10 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://developers.google.com/analytics/devguides/collection/android/",
       "https://developers.google.com/maps/documentation/android/",
-      "https://developers.google.com/+/mobile/android/sign-in",
-      "https://developers.google.com/places/android/",
+      "https://developers.google.com/identity/sign-in/android/",
+      "https://developers.google.com/mobile-ads-sdk/download",
       "https://developers.google.com/gcm/android/",
-      "https://developers.google.com/maps/documentation/android/"
+      "https://developers.google.com/app-indexing/"
     ]
   },
   "google/landing/googleplay": {
@@ -203,7 +203,7 @@ var RESOURCE_COLLECTIONS = {
       "http://youtu.be/vzvpcEffvaE"
     ]
   },
-  "launch/static": {
+/*  "launch/static": {
     "title": "",
     "resources": [
       "http://www.youtube.com/watch?v=1RIz-cmTQB4",
@@ -221,7 +221,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/users/know-your-user.html",
       "distribute/googleplay/developer-console.html"
     ]
-  },
+  }, */
   "launch/static/ja": {
     "title": "",
     "resources": [
@@ -272,8 +272,18 @@ var RESOURCE_COLLECTIONS = {
       "distribute/googleplay/auto.html",
       "distribute/googleplay/tv.html",
       "distribute/googleplay/wear.html",
+      "distribute/googleplay/cardboard.html",
+      "distribute/googleplay/cast.html",
       "distribute/googleplay/edu/about.html",
-      "distribute/googleplay/families/about.html"
+      "distribute/googleplay/families/about.html",
+      "distribute/googleplay/work/about.html"
+    ]
+  },
+  "distribute/googleplay/gpfw": {
+    "resources": [
+      "http://www.android.com/work/",
+      "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "training/enterprise/index.html"
     ]
   },
   "distribute/essentials": {
@@ -304,6 +314,9 @@ var RESOURCE_COLLECTIONS = {
       "distribute/users/expand-to-new-markets.html",
       "distribute/users/promote-with-ads.html",
       "distribute/users/appindexing.html",
+      "distribute/users/ota-installs.html",
+      "distribute/users/house-ads.html",
+      "distribute/users/youtube.html",
       "distribute/users/build-buzz.html",
       "distribute/users/build-community.html"
     ]
@@ -317,6 +330,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/deep-linking.html",
       "distribute/engage/ads.html",
       "distribute/engage/intents.html",
+      "distribute/engage/appindexing.html",
       "distribute/engage/analytics.html",
       "distribute/engage/game-services.html",
       "distribute/engage/app-updates.html",
@@ -630,7 +644,33 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://developers.google.com/app-indexing/",
       "https://developers.google.com/app-indexing/webmasters/details",
-      "distribute/engage/search.html"
+      "distribute/engage/appindexing.html"
+    ]
+  },
+  "distribute/users/otas": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/identity/sign-in/android/",
+      "https://developers.google.com/+/features/play-installs",
+      "https://developers.google.com/+/features/analytics"
+    ]
+  },
+  "distribute/users/houseads": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/admob/topic/2784623",
+      "https://developers.google.com/mobile-ads-sdk/download",
+      "http://support.google.com/googleplay/android-developer/topic/2985714",
+      "http://analyticsacademy.withgoogle.com/mobile-app",
+      "https://support.google.com/analytics/answer/2611404",
+      "https://support.google.com/admob/answer/3111064"
+    ]
+  },
+  "distribute/users/youtube": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/youtube/answer/6140493",
+      "https://support.google.com/youtube/answer/2797387"
     ]
   },
   "distribute/toolsreference/bestpractices/apps": {
@@ -910,10 +950,9 @@ var RESOURCE_COLLECTIONS = {
   "distribute/engage/gplus": {
     "title": "",
     "resources": [
-      "google/play-services/plus.html",
-      "google/play-services/games.html",
-      "https://developers.google.com/+/mobile/android/share/interactive-post",
-      "https://developers.google.com/+/mobile/android/share/deep-link"
+      "distribute/users/ota-installs.html",
+      "https://developers.google.com/identity/sign-in/android/people",
+      "https://developers.google.com/+/mobile/android/"
     ]
   },
   "distribute/engage/community": {

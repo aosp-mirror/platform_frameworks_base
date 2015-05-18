@@ -1,0 +1,111 @@
+page.title=Android, the world's most popular mobile platform
+excludeFromSuggestions=true
+walkthru=0
+header.hide=0
+
+@jd:body
+
+
+<p>Android powers hundreds of millions of mobile devices in more than 190
+countries around the world. It's the largest installed base of any mobile platform
+and growing fast&mdash;every day another million users power up their
+Android devices for the first time and start looking for apps, games,
+and other digital content. </p>
+
+
+<p>Android gives you a world-class platform for creating apps and games for
+Android users everywhere, as well as an open marketplace for distributing
+to them instantly.</p>
+
+<h3>Global partnerships and large installed base</h3>
+
+<p>Building on the contributions of the open-source Linux community and more
+than 300 hardware, software, and carrier partners, Android has rapidly become
+the fastest-growing mobile OS.</p>
+
+<blockquote>Every day more than a million new Android devices are activated worldwide.</blockquote>
+
+<p>Android’s openness has made it a favorite for consumers and developers alike,
+driving strong growth in app consumption. Android users download more than 
+billions of apps and games from Google Play each month. </p>
+
+<p>With its partners, Android is continuously pushing the boundaries of hardware and software
+forward to bring new capabilities to users and developers. For developers, 
+Android innovation lets you build powerful, differentiated applications
+that use the latest mobile technologies.</p>
+
+<h3>Rapid innovation</h3>
+
+<p>Android is continuously pushing the boundaries of hardware and software
+forward, to bring new capabilities to users and developers. For developers, the
+rapid evolution of Android technology lets you stay in front with powerful,
+differentiated applications.</p>
+
+<p>Android gives you access to the latest technologies and innovations across a
+multitude of device form-factors, chipset architectures, and price points. From
+multicore processing and high-performance graphics to state-of-the-art sensors,
+vibrant touchscreens, and emerging mobile technologies.</p>
+
+<h3>Powerful development framework</h3>
+
+<blockquote>Easily optimize a single binary for phones, tablets, and other devices.</blockquote>
+
+<p>Android gives you everything you need to build best-in-class app experiences.
+It gives you a single application model that lets you deploy
+your apps broadly to hundreds of millions of users across a wide range of
+devices&mdash;from phones to tablets and beyond.</p>
+
+<p>Android also gives you tools for creating apps that look great and take
+advantage of the hardware capabilities available on each device. It
+automatically adapts your UI to look its best on each device, while giving you
+as much control as you want over your UI on different device
+types. </p> 
+
+<p>For example, you can create a single app binary that's optimized for
+both phone and tablet form factors. You declare your UI in lightweight sets of XML
+resources, one set for parts of the UI that are common to all form factors and
+other sets for optimzations specific to phones or tablets.
+At runtime, Android applies the correct resource sets based on its screen size,
+density, locale,
+and so on.</p>
+
+
+<p>To help you develop efficiently, the <a href="{@docRoot}tools/index.html">Android 
+    Developer Tools</a>
+offer a full Java IDE with advanced features for developing, debugging, and
+packaging Android apps. Using the IDE, you can develop on any available Android
+device or create virtual devices that emulate any hardware configuration.</p>
+
+<blockquote>1.5 billion downloads a month and growing. Get your apps in front
+of millions of users at Google's scale.</blockquote>
+
+<h3>Open marketplace for distributing your apps</h3>
+
+<p>Google Play is the premier marketplace for selling and distributing Android apps.
+When you publish an app on Google Play, you reach the huge installed base of
+Android.</p>
+
+<div style="float:left;margin-right:24px;margin-top:12px;">
+<img src="{@docRoot}images/gp-device.png">
+</div>
+
+<p>As an open marketplace, Google Play puts you in control of how you sell your
+products. You can publish whenever you want, as often as you want, and to the
+customers you want. You can distribute broadly to all markets and
+devices or focus on specific segments, devices, or ranges of hardware
+capabilities.</p>
+
+<p>You can monetize in the way that works best for your business&mdash;priced or
+free, with in-app products or subscriptions&mdash;for highest engagement and
+revenues. You also have complete control of the pricing for your apps
+and in-app products and can set or change prices in any supported currency at
+any time.<p>
+
+<p>Beyond growing your customer base, Google Play helps you build visibility and
+engagement across your apps and brand. As your apps rise in popularity, Google
+Play gives them higher placement in weekly "top" charts and rankings, and for
+the best apps promotional slots in curated collections.
+</p>
+
+<p>Preinstalled on hundreds of billions of Android devices around the world,
+Google Play can be a growth engine for your business.</p>
