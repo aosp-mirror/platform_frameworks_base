@@ -17,6 +17,7 @@
 package android.media;
 
 import android.graphics.Canvas;
+import android.media.MediaPlayer.TrackInfo;
 import android.os.Handler;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -609,8 +610,10 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
     }
 
     /** @hide whether this is a text track who fires events instead getting rendered */
-    public boolean isTimedText() {
-        return getRenderingWidget() == null;
+    public int getTrackType() {
+        return getRenderingWidget() == null
+                ? TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT
+                : TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE;
     }
 
 
