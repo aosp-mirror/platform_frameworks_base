@@ -558,6 +558,22 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Creates a new immutable bitmap backed by ashmem which can efficiently
+     * be passed between processes.
+     *
+     * @hide
+     */
+    public Bitmap createAshmemBitmap() {
+        checkRecycled("Can't copy a recycled bitmap");
+        Bitmap b = nativeCopyAshmem(mFinalizer.mNativeBitmap);
+        if (b != null) {
+            b.setPremultiplied(mRequestPremultiplied);
+            b.mDensity = mDensity;
+        }
+        return b;
+    }
+
+    /**
      * Creates a new bitmap, scaled from an existing bitmap, when possible. If the
      * specified width and height are the same as the current width and height of
      * the source bitmap, the source bitmap is returned and no new bitmap is
@@ -1636,6 +1652,7 @@ public final class Bitmap implements Parcelable {
                                               int nativeConfig, boolean mutable);
     private static native Bitmap nativeCopy(long nativeSrcBitmap, int nativeConfig,
                                             boolean isMutable);
+    private static native Bitmap nativeCopyAshmem(long nativeSrcBitmap);
     private static native void nativeDestructor(long nativeBitmap);
     private static native boolean nativeRecycle(long nativeBitmap);
     private static native void nativeReconfigure(long nativeBitmap, int width, int height,
