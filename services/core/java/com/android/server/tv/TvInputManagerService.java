@@ -39,6 +39,7 @@ import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.media.PlaybackParams;
 import android.media.tv.DvbDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
@@ -87,8 +88,6 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.IllegalArgumentException;
-import java.lang.Integer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1422,19 +1421,19 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void timeShiftSetPlaybackRate(IBinder sessionToken, float rate, int audioMode,
+        public void timeShiftSetPlaybackParams(IBinder sessionToken, PlaybackParams params,
                 int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "timeShiftSetPlaybackRate");
+                    userId, "timeShiftSetPlaybackParams");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     try {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
-                                .timeShiftSetPlaybackRate(rate, audioMode);
+                                .timeShiftSetPlaybackParams(params);
                     } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in timeShiftSetPlaybackRate", e);
+                        Slog.e(TAG, "error in timeShiftSetPlaybackParams", e);
                     }
                 }
             } finally {
