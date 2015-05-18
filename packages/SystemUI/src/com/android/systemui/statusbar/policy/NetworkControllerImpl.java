@@ -36,6 +36,7 @@ import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.PhoneConstants;
@@ -99,14 +100,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private boolean mHasNoSims;
     private Locale mLocale = null;
     // This list holds our ordering.
-    private List<SubscriptionInfo> mCurrentSubscriptions
-            = new ArrayList<SubscriptionInfo>();
+    private List<SubscriptionInfo> mCurrentSubscriptions = new ArrayList<>();
 
     // All the callbacks.
-    private ArrayList<EmergencyListener> mEmergencyListeners = new ArrayList<EmergencyListener>();
-    private ArrayList<SignalCluster> mSignalClusters = new ArrayList<SignalCluster>();
-    private ArrayList<NetworkSignalChangedCallback> mSignalsChangedCallbacks =
-            new ArrayList<NetworkSignalChangedCallback>();
+    private ArrayList<EmergencyListener> mEmergencyListeners = new ArrayList<>();
+    private ArrayList<SignalCluster> mSignalClusters = new ArrayList<>();
+    private ArrayList<NetworkSignalChangedCallback> mSignalsChangedCallbacks = new ArrayList<>();
     @VisibleForTesting
     boolean mListening;
 
@@ -664,18 +663,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
             String sims = args.getString("sims");
             if (sims != null) {
-                int num = Integer.parseInt(sims);
-                List<SubscriptionInfo> subs = new ArrayList<SubscriptionInfo>();
+                int num = MathUtils.constrain(Integer.parseInt(sims), 1, 8);
+                List<SubscriptionInfo> subs = new ArrayList<>();
                 if (num != mMobileSignalControllers.size()) {
                     mMobileSignalControllers.clear();
                     int start = mSubscriptionManager.getActiveSubscriptionInfoCountMax();
                     for (int i = start /* get out of normal index range */; i < start + num; i++) {
-                        SubscriptionInfo info = new SubscriptionInfo(i, "", i, "", "", 0, 0, "", 0,
-                                null, 0, 0, "");
-                        subs.add(info);
-                        mMobileSignalControllers.put(i, new MobileSignalController(mContext,
-                                mConfig, mHasMobileDataFeature, mPhone, mSignalsChangedCallbacks,
-                                mSignalClusters, this, info));
+                        subs.add(addSignalController(i, i));
                     }
                 }
                 final int n = mSignalClusters.size();
@@ -697,6 +691,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 String datatype = args.getString("datatype");
                 String slotString = args.getString("slot");
                 int slot = TextUtils.isEmpty(slotString) ? 0 : Integer.parseInt(slotString);
+                slot = MathUtils.constrain(slot, 0, 8);
+                // Ensure we have enough sim slots
+                List<SubscriptionInfo> subs = new ArrayList<>();
+                while (mMobileSignalControllers.size() <= slot) {
+                    int nextSlot = mMobileSignalControllers.size();
+                    subs.add(addSignalController(nextSlot, nextSlot));
+                }
+                if (!subs.isEmpty()) {
+                    final int n = mSignalClusters.size();
+                    for (int i = 0; i < n; i++) {
+                        mSignalClusters.get(i).setSubs(subs);
+                    }
+                }
                 // Hack to index linearly for easy use.
                 MobileSignalController controller = mMobileSignalControllers
                         .values().toArray(new MobileSignalController[0])[slot];
@@ -731,6 +738,15 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
             }
         }
+    }
+
+    private SubscriptionInfo addSignalController(int id, int simSlotIndex) {
+        SubscriptionInfo info = new SubscriptionInfo(id, "", simSlotIndex, "", "", 0, 0, "", 0,
+                null, 0, 0, "");
+        mMobileSignalControllers.put(id, new MobileSignalController(mContext,
+                mConfig, mHasMobileDataFeature, mPhone, mSignalsChangedCallbacks,
+                mSignalClusters, this, info));
+        return info;
     }
 
     private final OnSubscriptionsChangedListener mSubscriptionListener =
