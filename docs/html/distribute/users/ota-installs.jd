@@ -14,7 +14,7 @@ they sign-in, without the need for them to visit the Play store. Using this appr
 some developers have seen app installation acceptance rates of 40%.</p>
 
 <p>Get started with <a href="https://developers.google.com/identity/sign-in/android/">
-Google sign-in for Android/a> and then enable <a
+Google sign-in for Android</a> and then enable <a
 href="https://developers.google.com/identity/sign-in/web/android-app-installs">over-the-air
 installs</a> for your web site.</p>
 
