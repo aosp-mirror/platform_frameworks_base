@@ -468,6 +468,8 @@ public abstract class NotificationListenerService extends Service {
             for (int i = 0; i < N; i++) {
                 Notification notification = list.get(i).getNotification();
                 Builder.rebuild(getContext(), notification);
+                // convert icon metadata to legacy format for older clients
+                createLegacyIconExtras(notification);
             }
             return list.toArray(new StatusBarNotification[N]);
         } catch (android.os.RemoteException ex) {
