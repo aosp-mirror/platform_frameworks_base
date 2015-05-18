@@ -779,9 +779,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (SignalClusterView) mKeyguardStatusBar.findViewById(R.id.signal_cluster);
         final SignalClusterView signalClusterQs =
                 (SignalClusterView) mHeader.findViewById(R.id.signal_cluster);
-        mNetworkController.addSignalCluster(signalCluster);
-        mNetworkController.addSignalCluster(signalClusterKeyguard);
-        mNetworkController.addSignalCluster(signalClusterQs);
+        mNetworkController.addSignalCallback(signalCluster);
+        mNetworkController.addSignalCallback(signalClusterKeyguard);
+        mNetworkController.addSignalCallback(signalClusterQs);
         signalCluster.setSecurityController(mSecurityController);
         signalCluster.setNetworkController(mNetworkController);
         signalClusterKeyguard.setSecurityController(mSecurityController);
@@ -3087,6 +3087,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
         mAssistManager.destroy();
+
+        final SignalClusterView signalCluster =
+                (SignalClusterView) mStatusBarView.findViewById(R.id.signal_cluster);
+        final SignalClusterView signalClusterKeyguard =
+                (SignalClusterView) mKeyguardStatusBar.findViewById(R.id.signal_cluster);
+        final SignalClusterView signalClusterQs =
+                (SignalClusterView) mHeader.findViewById(R.id.signal_cluster);
+        mNetworkController.addSignalCallback(signalCluster);
+        mNetworkController.addSignalCallback(signalClusterKeyguard);
+        mNetworkController.addSignalCallback(signalClusterQs);
     }
 
     private boolean mDemoModeAllowed;
