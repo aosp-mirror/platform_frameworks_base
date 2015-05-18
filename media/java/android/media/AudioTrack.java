@@ -98,6 +98,7 @@ public class AudioTrack
     /** Maximum value for sample rate */
     private static final int SAMPLE_RATE_HZ_MAX = 192000;
 
+    // FCC_8
     /** Maximum value for AudioTrack channel count */
     private static final int CHANNEL_COUNT_MAX = 8;
 
@@ -206,14 +207,16 @@ public class AudioTrack
     //--------------------
     /**
      * Indicates the state of the AudioTrack instance.
+     * One of STATE_UNINITIALIZED, STATE_INITIALIZED, or STATE_NO_STATIC_DATA.
      */
     private int mState = STATE_UNINITIALIZED;
     /**
      * Indicates the play state of the AudioTrack instance.
+     * One of PLAYSTATE_STOPPED, PLAYSTATE_PAUSED, or PLAYSTATE_PLAYING.
      */
     private int mPlayState = PLAYSTATE_STOPPED;
     /**
-     * Lock to make sure mPlayState updates are reflecting the actual state of the object.
+     * Lock to ensure mPlayState updates reflect the actual state of the object.
      */
     private final Object mPlayStateLock = new Object();
     /**
@@ -234,9 +237,9 @@ public class AudioTrack
     /**
      * The audio data source sampling rate in Hz.
      */
-    private int mSampleRate; // initialized by all constructors
+    private int mSampleRate; // initialized by all constructors via audioParamCheck()
     /**
-     * The number of audio output channels (1 is mono, 2 is stereo).
+     * The number of audio output channels (1 is mono, 2 is stereo, etc.).
      */
     private int mChannelCount = 1;
     /**
@@ -255,7 +258,7 @@ public class AudioTrack
 
     private final AudioAttributes mAttributes;
     /**
-     * The way audio is consumed by the audio sink, streaming or static.
+     * The way audio is consumed by the audio sink, one of MODE_STATIC or MODE_STREAM.
      */
     private int mDataLoadMode = MODE_STREAM;
     /**
@@ -265,7 +268,7 @@ public class AudioTrack
      */
     private int mChannelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
     /**
-     * The current audio channel index configuration (if specified).
+     * The channel index mask if specified, otherwise 0.
      */
     private int mChannelIndexMask = 0;
     /**
@@ -274,7 +277,7 @@ public class AudioTrack
      * @see AudioFormat#ENCODING_PCM_16BIT
      * @see AudioFormat#ENCODING_PCM_FLOAT
      */
-    private int mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
+    private int mAudioFormat;   // initialized by all constructors via audioParamCheck()
     /**
      * Audio session ID
      */
@@ -475,7 +478,7 @@ public class AudioTrack
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
         mAppOps = IAppOpsService.Stub.asInterface(b);
 
-        mAttributes = (new AudioAttributes.Builder(attributes).build());
+        mAttributes = new AudioAttributes.Builder(attributes).build();
 
         if (sessionId < 0) {
             throw new IllegalArgumentException("Invalid audio session ID: "+sessionId);
@@ -683,7 +686,8 @@ public class AudioTrack
         }
     }
 
-    // mask of all the channels supported by this implementation
+    // mask of all the positional channels supported, however the allowed combinations
+    // are further restricted by the matching left/right rule and CHANNEL_COUNT_MAX
     private static final int SUPPORTED_OUT_CHANNELS =
             AudioFormat.CHANNEL_OUT_FRONT_LEFT |
             AudioFormat.CHANNEL_OUT_FRONT_RIGHT |
@@ -834,8 +838,7 @@ public class AudioTrack
         //     To update when supporting compressed formats
         int frameSizeInBytes;
         if (AudioFormat.isEncodingLinearPcm(mAudioFormat)) {
-            frameSizeInBytes = mChannelCount
-                    * (AudioFormat.getBytesPerSample(mAudioFormat));
+            frameSizeInBytes = mChannelCount * AudioFormat.getBytesPerSample(mAudioFormat);
         } else {
             frameSizeInBytes = 1;
         }
@@ -941,7 +944,7 @@ public class AudioTrack
      * <p> For example, refer to {@link AudioFormat#CHANNEL_OUT_MONO},
      * {@link AudioFormat#CHANNEL_OUT_STEREO}, {@link AudioFormat#CHANNEL_OUT_5POINT1}.
      * This method may return {@link AudioFormat#CHANNEL_INVALID} if
-     * a channel index mask is used. Consider
+     * a channel index mask was used. Consider
      * {@link #getFormat()} instead, to obtain an {@link AudioFormat},
      * which contains both the channel position mask and the channel index mask.
      */
@@ -978,9 +981,9 @@ public class AudioTrack
      * Returns the state of the AudioTrack instance. This is useful after the
      * AudioTrack instance has been created to check if it was initialized
      * properly. This ensures that the appropriate resources have been acquired.
+     * @see #STATE_UNINITIALIZED
      * @see #STATE_INITIALIZED
      * @see #STATE_NO_STATIC_DATA
-     * @see #STATE_UNINITIALIZED
      */
     public int getState() {
         return mState;
