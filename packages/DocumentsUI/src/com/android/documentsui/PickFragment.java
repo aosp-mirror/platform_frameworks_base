@@ -16,7 +16,6 @@
 
 package com.android.documentsui;
 
-import android.R.string;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -67,7 +66,7 @@ public class PickFragment extends Fragment {
         mCancel = (Button) mContainer.findViewById(android.R.id.button2);
         mCancel.setOnClickListener(mCancelListener);
 
-        setPickTarget(0, null, null);
+        setPickTarget(0, 0, null, null);
 
         return mContainer;
     }
@@ -93,6 +92,7 @@ public class PickFragment extends Fragment {
      * @param action Which action defined in BaseActivity.State is the picker shown for.
      */
     public void setPickTarget(int action,
+                              int transferMode,
                               DocumentInfo pickTarget,
                               CharSequence displayName) {
         if (mContainer != null) {
@@ -105,7 +105,11 @@ public class PickFragment extends Fragment {
                         mCancel.setVisibility(View.GONE);
                         break;
                     case BaseActivity.State.ACTION_OPEN_COPY_DESTINATION:
-                        mPick.setText(getString(R.string.button_copy).toUpperCase(locale));
+                        final String buttonText = getString(
+                                transferMode == CopyService.TRANSFER_MODE_MOVE ?
+                                        R.string.button_move :
+                                        R.string.button_copy);
+                        mPick.setText(buttonText);
                         mCancel.setVisibility(View.VISIBLE);
                         break;
                     default:

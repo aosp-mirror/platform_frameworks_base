@@ -27,9 +27,6 @@ import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.DirectoryFragment.ANIM_UP;
 
-import java.util.Arrays;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -68,6 +65,9 @@ import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class DocumentsActivity extends BaseActivity {
     private static final int CODE_FORWARD = 42;
@@ -564,7 +564,7 @@ public class DocumentsActivity extends BaseActivity {
             if (pick != null) {
                 final CharSequence displayName = (mState.stack.size() <= 1) ? root.title
                         : cwd.displayName;
-                pick.setPickTarget(mState.action, cwd, displayName);
+                pick.setPickTarget(mState.action, mState.transferMode, cwd, displayName);
             }
         }
     }

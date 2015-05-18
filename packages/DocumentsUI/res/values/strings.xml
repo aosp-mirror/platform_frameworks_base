@@ -67,8 +67,10 @@
     <!-- Menu item that hides the sizes of displayed files [CHAR LIMIT=24] -->
     <string name="menu_file_size_hide">Hide file size</string>
 
-    <!-- Button label that copies files to the current directory [CHAR LIMIT=48] -->
+    <!-- Button label that copies files to the current directory [CHAR LIMIT=24] -->
     <string name="button_copy">Copy</string>
+    <!-- Button label that moves files to the current directory [CHAR LIMIT=24] -->
+    <string name="button_move">Move</string>
 
     <!-- Action mode title summarizing the number of documents selected [CHAR LIMIT=32] -->
     <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
