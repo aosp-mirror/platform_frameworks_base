@@ -144,6 +144,23 @@ private:
     android::Bitmap* mStorage = nullptr;
 };
 
+class AshmemPixelAllocator : public SkBitmap::Allocator {
+public:
+    AshmemPixelAllocator(JNIEnv* env);
+    ~AshmemPixelAllocator();
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
+    android::Bitmap* getStorageObjAndReset() {
+        android::Bitmap* result = mStorage;
+        mStorage = NULL;
+        return result;
+    };
+
+private:
+    JavaVM* mJavaVM;
+    android::Bitmap* mStorage = nullptr;
+};
+
+
 enum JNIAccess {
     kRO_JNIAccess,
     kRW_JNIAccess
