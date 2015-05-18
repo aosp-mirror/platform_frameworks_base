@@ -660,6 +660,7 @@ public class NotificationManagerService extends SystemService {
                 String[] newlyVisibleKeys, String[] noLongerVisibleKeys) {
             // Using ';' as separator since eventlogs uses ',' to separate
             // args.
+            // TODO remove this: b/21248682
             EventLogTags.writeNotificationVisibilityChanged(
                     TextUtils.join(";", newlyVisibleKeys),
                     TextUtils.join(";", noLongerVisibleKeys));
@@ -667,7 +668,7 @@ public class NotificationManagerService extends SystemService {
                 for (String key : newlyVisibleKeys) {
                     NotificationRecord r = mNotificationsByKey.get(key);
                     if (r == null) continue;
-                    r.stats.onVisibilityChanged(true);
+                    r.setVisibility(true);
                 }
                 // Note that we might receive this event after notifications
                 // have already left the system, e.g. after dismissing from the
@@ -676,7 +677,7 @@ public class NotificationManagerService extends SystemService {
                 for (String key : noLongerVisibleKeys) {
                     NotificationRecord r = mNotificationsByKey.get(key);
                     if (r == null) continue;
-                    r.stats.onVisibilityChanged(false);
+                    r.setVisibility(false);
                 }
             }
         }
@@ -2784,8 +2785,11 @@ public class NotificationManagerService extends SystemService {
         // Save it for users of getHistoricalNotifications()
         mArchive.record(r.sbn);
 
-        int lifespan = (int) (System.currentTimeMillis() - r.getCreationTimeMs());
-        EventLogTags.writeNotificationCanceled(canceledKey, reason, lifespan);
+        final long now = System.currentTimeMillis();
+        final int lifespan = (int) (now - r.getCreationTimeMs());
+        final long visibleSinceMs = r.getVisibleSinceMs();
+        final int exposure = visibleSinceMs == 0L ? 0 : (int) (now - visibleSinceMs);
+        EventLogTags.writeNotificationCanceled(canceledKey, reason, lifespan, exposure);
     }
 
     /**

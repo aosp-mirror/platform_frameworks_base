@@ -26,6 +26,7 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -68,6 +69,12 @@ public final class NotificationRecord {
     // The first post time, stable across updates.
     private long mCreationTimeMs;
 
+    // The most recent visibility event.
+    private long mVisibleSinceMs;
+
+    // The most recent update time, or the creation time if no updates.
+    private long mUpdateTimeMs;
+
     // Is this record an update of an old record?
     public boolean isUpdate;
     private int mPackagePriority;
@@ -84,6 +91,7 @@ public final class NotificationRecord {
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
         mCreationTimeMs = sbn.getPostTime();
+        mUpdateTimeMs = mCreationTimeMs;
     }
 
     // copy any notes that the ranking system may have made before the update
@@ -95,6 +103,7 @@ public final class NotificationRecord {
         mIntercept = previous.mIntercept;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
+        mVisibleSinceMs = previous.mVisibleSinceMs;
         // Don't copy mGlobalSortKey, recompute it.
     }
 
@@ -181,6 +190,8 @@ public final class NotificationRecord {
         pw.println(prefix + "  mGlobalSortKey=" + mGlobalSortKey);
         pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
         pw.println(prefix + "  mCreationTimeMs=" + mCreationTimeMs);
+        pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
+        pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
     }
 
 
@@ -277,10 +288,36 @@ public final class NotificationRecord {
     }
 
     /**
+     * Returns the timestamp of the most recent updates, or the post time if none.
+     */
+    public long getUpdateTimeMs() {
+        return mUpdateTimeMs;
+    }
+
+    /**
      * Returns the timestamp of the first post, ignoring updates.
      */
     public long getCreationTimeMs() {
         return mCreationTimeMs;
+    }
+
+    /**
+     * Returns the timestamp of the most recent visibility event, or 0L if hidden.
+     */
+    public long getVisibleSinceMs() {
+        return mVisibleSinceMs;
+    }
+
+    /**
+     * Set the visibility of the notification.
+     */
+    public void setVisibility(boolean visible) {
+        final long now = System.currentTimeMillis();
+        mVisibleSinceMs = visible ? now : 0L;
+        stats.onVisibilityChanged(visible);
+        EventLogTags.writeNotificationVisibility(getKey(), visible ? 1 : 0,
+                (int) (now - mCreationTimeMs),
+                (int) (now - mUpdateTimeMs));
     }
 
     /**
