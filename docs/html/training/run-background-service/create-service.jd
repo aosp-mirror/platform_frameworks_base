@@ -55,8 +55,8 @@ trainingnavtop=true
     </li>
 </ul>
 <p>
-    However, in most cases an {@link android.app.IntentService} is the preferred way to simple
-    background operations.
+    However, in most cases an {@link android.app.IntentService} is the preferred way to perform
+    simple background operations.
 </p>
 <p>
     This lesson shows you how to create your own subclass of {@link android.app.IntentService}.
