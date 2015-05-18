@@ -1,5 +1,4 @@
 fullpage=true
-page.viewport_width=970
 excludeFromSuggestions=true
 page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
 page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" />
@@ -31,13 +30,12 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   </div><!-- end .wrap -->
 </div><!-- end .actions-bar -->
 
-<div class="dac-hero-carousel" data-carousel-query="collection:distribute/landing/carousel">
-</div>
+
 
 <section class="dac-section dac-section-light" id="build-apps"><div class="wrap">
   <h1 class="dac-section-title">Build Beautiful Apps</h1>
   <div class="dac-section-subtitle">
-    See what’s new or find the resources to get you started with designing and developing for Android.
+    Resources to get you started with designing and developing for Android.
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:index/primary"
@@ -45,11 +43,14 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
        data-maxResults="3"></div>
 </div></section>
 
+<div class="dac-hero-carousel" data-carousel-query="collection:distribute/landing/carousel">
+</div>
+
 <section class="dac-section dac-gray"><div class="wrap">
   <div class="cols"><div class="col-10of12 col-push-1of12">
     <h1 class="dac-section-title">Build for a Multi-Screen World</h1>
     <div class="dac-section-subtitle">
-      Android runs on hundreds of millions of handheld devices around the world,
+      Android runs on billions of handheld devices around the world,
       and it now supports these exciting, new form-factors.
     </div>
   </div></div>

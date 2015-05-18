@@ -11,9 +11,7 @@ nonavpage=true
   help you gain traction in the marketplace.</span>
 </p>
 
-<div class="dynamic-grid">
-
-  <h3>Overview</h3>
+  <h2>Overview</h2>
 
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/gp/gplanding"
@@ -22,25 +20,20 @@ nonavpage=true
     data-maxResults="3">
   </div>
 
-  <h3>Distribute Your Apps</h3>
+  <h2>Distribute Your Apps</h2>
 
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/gp/gpfelanding"
     data-cardSizes="6x6"
-    data-maxResults="5">
+    data-maxResults="10">
   </div>
 
-  <h3>Related resources</h3>
+<!--  <h2>Related resources</h2>
 
   <div class="resource-widget resource-flow-layout col-16"
-    data-query="type:youtube+tag:growth"
-    data-cardSizes="6x3"
-    data-maxResults="3">
-  </div>
-  <div class="resource-widget resource-flow-layout col-16"
-    data-query="type:blog+tag:googleplay"
-    data-cardSizes="6x3"
-    data-maxResults="3">
-  </div>
+    data-query="tag:growth"
+    data-cardSizes="6x2"
+    data-maxResults="3"
+    data-sortOrder="random">
+  </div> -->
 
-</div>

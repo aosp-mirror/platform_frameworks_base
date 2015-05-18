@@ -1,7 +1,7 @@
 fullpage=true
 page.title=Google Services
 section.landing=true
-meta.tags="beautifulapps, design, ux, patterns, holo, appquality, landing"
+meta.tags="google, play, services, maps, location, gcm, messaging, places"
 header.hide=1
 footer.hide=1
 @jd:body
@@ -16,14 +16,14 @@ footer.hide=1
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Build better apps with Google</h1>
         <p class="dac-hero-description">
-        Add powerful capabilities to your apps, quickly, at low cost. Simplify development,
-grow your user base, and monetize more effectively with Google Play services. 
+        Add powerful capabilities, quickly, at low cost. Simplify development,
+        grow your user base, and monetize more effectively with Google Play services. 
         </p>
-        <a class="dac-hero-cta" href="https://www.google.com/design/spec/material-design/introduction.html">
+        <a class="dac-hero-cta" href="https://developers.google.com/android/guides/">
           <span class="dac-sprite dac-auto-chevron"></span>
           Get Started with Google Play services
         </a><br>
-        <a class="dac-hero-cta" href="https://www.google.com/design/spec/resources/color-palettes.html">
+        <a class="dac-hero-cta" href="https://developers.google.com/android/reference/">
           <span class="dac-sprite dac-auto-chevron"></span>
           API Reference
         </a><br>
@@ -42,20 +42,20 @@ grow your user base, and monetize more effectively with Google Play services.
     <i class="dac-sprite dac-arrow-down-gray"></i>
   </a>
 </div>
+
 <section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="type:blog+tag:googleservices+tag:featured+tag:develop"
        data-cardSizes="6x6"
        data-maxResults="3"></div>
-</div></section>
-
-
+  </div>
+</section>
 
 <section class="dac-section dac-light"><div class="wrap">
   <h1 class="dac-section-title">Google APIs and services</h1>
   <div class="dac-section-subtitle">
-    Design around Android&apos;s capabilities and conventions to give users the best experience.
+    Google gives you a rich set of APIs to build with and delivers consistent services across billions of Android devices worldwide. 
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:google/landing/services"
@@ -67,17 +67,18 @@ grow your user base, and monetize more effectively with Google Play services.
       More Google services for Android
     </a></li>
   </ul>
-</div></section>
+  </div>
+</section>
 
 
 <section class="dac-section dac-invert dac-darken-bg" style="background-image: url(/images/distribute/google-play-bg.jpg)"><div class="wrap">
   <h1 class="dac-section-title">Google Play developer tools</h1>
   <div class="dac-section-subtitle">
-    Scale your operations. Essential downloads, stencils, and tools to help you create your design.
+    Scale your publishing operations, manage your catalog more easily, and build your revenue stream with in-app products and subscriptions using Google Play's developer tools. 
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:google/landing/googleplay"
-       data-cardSizes="6x6"
+       data-cardSizes="6x3"
        data-maxResults="6"></div>
 
   <ul class="dac-section-links">

@@ -1,4 +1,4 @@
-page.title=Drive Usage with Search
+page.title=Increase Usage with Search
 page.metaDescription=Use search to bring your existing users back into your app.
 page.image=images/cards/google-search_2x.png
 page.tags=engagement, appindexing, search
@@ -47,13 +47,12 @@ hotels in Maui on TripAdvisor”.</p>
 
 <h2 id="assist_your_users">Google Now</h2>
 
-<div style="margin-top:1em">
-<img src="{@docRoot}images/distribute/google-now-engagement.png">
-</div>
-
 <p>If you’re building travel, entertainment, or restaurant apps, Google Now cards
 can re-engage your users via structured data markup delivered in email notifications.</p>
 
+<div style="margin-top:1em">
+<img src="{@docRoot}images/distribute/google-now-engagement.png">
+</div>
 
 <h2 id="tips">Tips</h2>
 
@@ -70,7 +69,7 @@ can re-engage your users via structured data markup delivered in email notificat
 <div class="resource-widget resource-flow-layout col-13"
   data-query="collection:distribute/engage/appindexing"
   data-sortOrder="-timestamp"
-  data-cardSizes="9x3"
-  data-maxResults="6"></div>
+  data-cardSizes="6x2"
+  data-maxResults="3"></div>
 
 

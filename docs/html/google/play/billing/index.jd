@@ -1,5 +1,5 @@
-page.title=Google Play In-app Billing
-page.metaDescription=In-app Billing lets you sell digital content as one-time purchases or subscriptions.
+page.title=In-app Billing
+page.metaDescription=Sell digital content as one-time purchases inside your app.
 page.image=/images/play_dev.jpg
 meta.tags="monetizing, inappbilling, subscriptions"
 page.tags="billing, inapp, iap"
@@ -24,7 +24,9 @@ and features, and more. You can use In-app Billing to sell products as</p>
     period.</li>
   <li><strong>IAB Sandbox</strong>&mdash;The In-app Billing Sandbox now supports
     testing subscription purchases.</li>
-  <li><strong>IAB v2 shutdown</strong>&mdash;In-app Billing v2 API is deprecated and will be shut down in January 2015. If your app is still using In-app Billing v2, please migrate to the v3 API as soon as possible.</li>
+  <li><strong>IAB v2 shutdown</strong>&mdash;In-app Billing v2 API is deprecated
+    and will be shut down in January 2015. If your app is still using In-app Billing
+    v2, please migrate to the v3 API as soon as possible.</li>
   <li><strong>Seasonal subscriptions</strong>&mdash;You can now set up a
     recurring <a href="billing_subscriptions.html#user-billing">seasonal
     subscription</a> that starts and ends on the same date each year (for
