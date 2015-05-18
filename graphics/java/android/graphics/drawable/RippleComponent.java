@@ -57,19 +57,30 @@ abstract class RippleComponent {
         mBounds = bounds;
     }
 
+    public void onBoundsChange() {
+        if (!mHasMaxRadius) {
+            mTargetRadius = getTargetRadius(mBounds);
+            onTargetRadiusChanged(mTargetRadius);
+        }
+    }
+
     public final void setup(float maxRadius, float density) {
         if (maxRadius >= 0) {
             mHasMaxRadius = true;
             mTargetRadius = maxRadius;
         } else {
-            final float halfWidth = mBounds.width() / 2.0f;
-            final float halfHeight = mBounds.height() / 2.0f;
-            mTargetRadius = (float) Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
+            mTargetRadius = getTargetRadius(mBounds);
         }
 
         mDensity = density;
 
         onTargetRadiusChanged(mTargetRadius);
+    }
+
+    private static float getTargetRadius(Rect bounds) {
+        final float halfWidth = bounds.width() / 2.0f;
+        final float halfHeight = bounds.height() / 2.0f;
+        return (float) Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
     }
 
     /**
