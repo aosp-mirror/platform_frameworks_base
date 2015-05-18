@@ -4127,4 +4127,8 @@
     <!-- Content description for the button that closes the floating toolbar overflow. [CHAR LIMIT=NONE] -->
     <string name="floating_toolbar_close_overflow_description">Close overflow</string>
 
+    <!-- Ellipsis character to appear in notification templates, e.g.
+         notification_template_material_inbox.xml.
+         DO NOT TRANSLATE -->
+    <string name="notification_inbox_ellipsis">\u2026</string>
 </resources>
