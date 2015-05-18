@@ -4454,47 +4454,60 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private static SparseArray<String> getAttributeMap() {
         if (mAttributeMap == null) {
-            mAttributeMap = new SparseArray<String>();
+            mAttributeMap = new SparseArray<>();
         }
         return mAttributeMap;
     }
 
-    private void saveAttributeData(AttributeSet attrs, TypedArray a) {
-        int length = ((attrs == null ? 0 : attrs.getAttributeCount()) + a.getIndexCount()) * 2;
-        mAttributes = new String[length];
+    private void saveAttributeData(@Nullable AttributeSet attrs, @NonNull TypedArray t) {
+        final int attrsCount = attrs == null ? 0 : attrs.getAttributeCount();
+        final int indexCount = t.getIndexCount();
+        final String[] attributes = new String[(attrsCount + indexCount) * 2];
 
         int i = 0;
-        if (attrs != null) {
-            for (i = 0; i < attrs.getAttributeCount(); i += 2) {
-                mAttributes[i] = attrs.getAttributeName(i);
-                mAttributes[i + 1] = attrs.getAttributeValue(i);
-            }
 
+        // Store raw XML attributes.
+        for (int j = 0; j < attrsCount; ++j) {
+            attributes[i] = attrs.getAttributeName(j);
+            attributes[i + 1] = attrs.getAttributeValue(j);
+            i += 2;
         }
 
-        SparseArray<String> attributeMap = getAttributeMap();
-        for (int j = 0; j < a.length(); ++j) {
-            if (a.hasValue(j)) {
+        // Store resolved styleable attributes.
+        final Resources res = t.getResources();
+        final SparseArray<String> attributeMap = getAttributeMap();
+        for (int j = 0; j < indexCount; ++j) {
+            final int index = t.getIndex(j);
+            if (!t.hasValueOrEmpty(index)) {
+                // Value is undefined. Skip it.
+                continue;
+            }
+
+            final int resourceId = t.getResourceId(index, 0);
+            if (resourceId == 0) {
+                // Value is not a reference. Skip it.
+                continue;
+            }
+
+            String resourceName = attributeMap.get(resourceId);
+            if (resourceName == null) {
                 try {
-                    int resourceId = a.getResourceId(j, 0);
-                    if (resourceId == 0) {
-                        continue;
-                    }
-
-                    String resourceName = attributeMap.get(resourceId);
-                    if (resourceName == null) {
-                        resourceName = a.getResources().getResourceName(resourceId);
-                        attributeMap.put(resourceId, resourceName);
-                    }
-
-                    mAttributes[i] = resourceName;
-                    mAttributes[i + 1] = a.getText(j).toString();
-                    i += 2;
+                    resourceName = res.getResourceName(resourceId);
                 } catch (Resources.NotFoundException e) {
-                    // if we can't get the resource name, we just ignore it
+                    resourceName = "0x" + Integer.toHexString(resourceId);
                 }
+                attributeMap.put(resourceId, resourceName);
             }
+
+            attributes[i] = resourceName;
+            attributes[i + 1] = t.getString(index, false);
+            i += 2;
         }
+
+        // Trim to fit contents.
+        final String[] trimmed = new String[i];
+        System.arraycopy(attributes, 0, trimmed, 0, i);
+        mAttributes = trimmed;
     }
 
     public String toString() {
