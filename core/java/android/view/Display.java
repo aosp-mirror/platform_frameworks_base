@@ -172,6 +172,17 @@ public final class Display {
     public static final int FLAG_PRESENTATION = 1 << 3;
 
     /**
+     * Display flag: Indicates that the display has a round shape.
+     * <p>
+     * This flag identifies displays that are circular, elliptical or otherwise
+     * do not permit the user to see all the way to the logical corners of the display.
+     * </p>
+     *
+     * @see #getFlags
+     */
+    public static final int FLAG_ROUND = 1 << 4;
+
+    /**
      * Display flag: Indicates that the contents of the display should not be scaled
      * to fit the physical screen dimensions.  Used for development only to emulate
      * devices with smaller physicals screens while preserving density.

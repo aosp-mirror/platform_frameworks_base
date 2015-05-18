@@ -7341,6 +7341,11 @@ public class WindowManagerService extends IWindowManager.Stub
         computeSizeRangesAndScreenLayout(displayInfo, rotated, dw, dh, mDisplayMetrics.density,
                 config);
 
+        config.screenLayout = (config.screenLayout & ~Configuration.SCREENLAYOUT_ROUND_MASK)
+                | ((displayInfo.flags & Display.FLAG_ROUND) != 0
+                        ? Configuration.SCREENLAYOUT_ROUND_YES
+                        : Configuration.SCREENLAYOUT_ROUND_NO);
+
         config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
         config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
         config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated,

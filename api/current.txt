@@ -9630,6 +9630,7 @@ package android.content.res {
     method public boolean equals(android.content.res.Configuration);
     method public int getLayoutDirection();
     method public boolean isLayoutSizeAtLeast(int);
+    method public boolean isScreenRound();
     method public static boolean needNewResources(int, int);
     method public void readFromParcel(android.os.Parcel);
     method public void setLayoutDirection(java.util.Locale);
@@ -9672,6 +9673,10 @@ package android.content.res {
     field public static final int SCREENLAYOUT_LONG_NO = 16; // 0x10
     field public static final int SCREENLAYOUT_LONG_UNDEFINED = 0; // 0x0
     field public static final int SCREENLAYOUT_LONG_YES = 32; // 0x20
+    field public static final int SCREENLAYOUT_ROUND_MASK = 768; // 0x300
+    field public static final int SCREENLAYOUT_ROUND_NO = 256; // 0x100
+    field public static final int SCREENLAYOUT_ROUND_UNDEFINED = 0; // 0x0
+    field public static final int SCREENLAYOUT_ROUND_YES = 512; // 0x200
     field public static final int SCREENLAYOUT_SIZE_LARGE = 3; // 0x3
     field public static final int SCREENLAYOUT_SIZE_MASK = 15; // 0xf
     field public static final int SCREENLAYOUT_SIZE_NORMAL = 2; // 0x2
@@ -34536,6 +34541,7 @@ package android.view {
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
     field public static final int FLAG_PRESENTATION = 8; // 0x8
     field public static final int FLAG_PRIVATE = 4; // 0x4
+    field public static final int FLAG_ROUND = 16; // 0x10
     field public static final int FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1; // 0x1
     field public static final int STATE_DOZE = 3; // 0x3
