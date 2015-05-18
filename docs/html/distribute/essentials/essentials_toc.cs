@@ -34,18 +34,7 @@
         </a>
     </div>
   </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/best-practices/apps.html">
-          <span class="en">App Best Practices</span>
-        </a>
-    </div>
-  </li>
-  <li class="nav-section">
-    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/best-practices/games.html">
-          <span class="en">Game Best Practices</span>
-        </a>
-    </div>
-  </li>
+</ul>
 
 
 <script type="text/javascript">

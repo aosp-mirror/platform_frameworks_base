@@ -1,7 +1,7 @@
 page.title=In-app Subscriptions
 parent.title=In-app Billing
 parent.link=index.html
-page.metaDescription=Subscriptions let you sell content or features in your app with automated, recurring billing.
+page.metaDescription=Create a steady revenue stream by selling subscriptions to your content.
 page.image=/images/play_dev.jpg
 page.tags="subscriptions, billing, inapp, iap"
 meta.tags="monetization, inappbilling, subscriptions"

@@ -9,49 +9,39 @@ nonavpage=true
   users, and monetize your investment.
 </p>
 
-<div class="dynamic-grid">
-
-  <h3>Publishing and Launch</h3>
+  <h2>Publishing and Launch</h2>
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/tools/checklists"
     data-cardSizes="9x6"
     data-maxResults="2">
   </div>
 
-<h3>Marketing Tools</h3>
+  <h2>Marketing Tools</h2>
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/tools/promote"
     data-cardSizes="6x6"
     data-maxResults="3">
   </div>
 
-  <h3>Developer Support</h3>
+  <h2>Developer Support</h2>
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/tools/support"
     data-cardSizes="6x6"
     data-maxResults="3">
   </div>
 
-  <h3>Developer News</h3>
+  <h2>Developer News</h2>
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/tools/news"
     data-cardSizes="9x6"
     data-maxResults="2">
   </div>
 
-  <h3>More</h3>
+  <h2>More</h2>
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/tools/more"
     data-cardSizes="6x6"
     data-maxResults="3">
   </div>
 
-<!--  <h3>Related Resources</h3>
-  <div class="resource-widget resource-stack-layout col-16"
-    data-query="tag:developersupport"
-    data-sortOrder="-timestamp"
-    data-numStacks="3"
-    data-maxResults="6">
-  </div> -->
 
-</div>

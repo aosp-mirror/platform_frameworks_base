@@ -11,8 +11,6 @@ nonavpage=true
   techniques to keep your users coming back.
 </p>
 
-<div class="dynamic-grid">
-
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/engagelanding"
     data-cardSizes="6x6"
@@ -20,22 +18,14 @@ nonavpage=true
   </div>
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/engagelanding"
-    data-cardSizes="6x2"
+    data-cardSizes="6x3"
     data-maxResults="20">
   </div>
 
-  <h3>Related Resources</h3>
+<!--  <h2>Related Resources</h2>
   <div class="resource-widget resource-flow-layout col-16"
-    data-query="type:youtube+tag:engagement"
-    data-sortOrder="-timestamp"
-    data-cardSizes="6x3"
+    data-query="tag:engagement"
+    data-sortOrder="random"
+    data-cardSizes="6x2"
     data-maxResults="3">
-  </div>
-  <div class="resource-widget resource-flow-layout col-16"
-    data-query="type:blog+tag:engagement"
-    data-sortdOrder="-timestamp"
-    data-cardSizes="6x3"
-    data-maxResults="3">
-  </div>
-
-</div>
+  </div> -->
