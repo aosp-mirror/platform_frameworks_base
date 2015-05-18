@@ -1,0 +1,338 @@
+page.title=Behavior Changes
+page.keywords=preview,sdk,compatibility
+sdk.platform.apiLevel=23
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol id="toc44" class="hide-nested">
+    <li><a href="#behavior-runtime-permissions">Runtime Permissions</a></li>
+    <li><a href="#behavior-notifications">Notifications</a></li>
+    <li><a href="#behavior-openssl">OpenSSL</a></li>
+    <li><a href="#behavior-project-volta">Project Volta</a>
+        <ol>
+            <li><a href="#behavior-doze">Doze Mode</a></li>
+            <li><a href="#behavior-app-standby">App Standby Mode</a></li>
+        </ol>
+    </li>
+    <li><a href="#behavior-adoptable-storage">Adoptable Storage Devices</a></li>
+    <li><a href="#behavior-apache-http-client">Apache HTTP Client Removal</a></li>
+    <li><a href="#behavior-audiomanager-Changes">AudioManager Changes</a></li>
+    <li><a href="#behavior-test-selection">Text Selection</a></li>
+    <li><a href="#behavior-keystore">Android Keystore Changes</a></li>
+    <li><a href="#behavior-themeable-colorstatelists">Themeable ColorStateLists</a></li>
+    <li><a href="#night-mode">Night Mode</a></li>
+    <li><a href="#behavior-art-runtime">ART Runtime</a></li>
+    <li><a href="#behavior-afw">Android for Work Changes</a></li>
+</ol>
+
+<h2>API Differences</h2>
+<ol>
+<li><a href="">API level 22 to M &raquo;</a> </li>
+</ol>
+
+
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}preview/api-overview.html">M Developer Preview API Overview</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>API Level: M</p>
+<p>Along with new features and capabilities, M includes a variety of
+system changes and API behavior changes. This document highlights
+some of the key changes that you should be understand and account for in your apps.</p>
+
+<p>If you have previously published an app for Android, be aware that your app
+  might be affected by these changes in M.</p>
+
+<h2 id="behavior-runtime-permissions">Runtime Permissions</h1>
+<p>This release introduces a new runtime permissions model, where users can now directly manage
+their app permissions at runtime. This model gives users improved visibility and control over
+permissions, while streamlining the installation and auto-update processes for app developers.
+Users can set permissions on or off for all apps running on Android M. However, apps that don’t
+target M cannot request permissions at runtime.</p>
+
+<p>On your apps that target M, make sure to check and request for permissions at
+runtime. To determine if your app has been granted a permission, call the
+new {@code Context.checkSelfPermission()} method. To request for a permission, call the new
+{@code Activity.requestPermission()} method.</p>
+
+<p>For more information on supporting the new permissions model in your app, see the
+<a href="{@docRoot}preview/features/runtime-permissions.html">
+Android M Runtime Permissions guide</a>.</p>
+
+<h2 id="behavior-openssl">OpenSSL</h2>
+<p>Android is moving away from OpenSSL to the
+<a href="https://boringssl.googlesource.com/boringssl/" class="external-link">BoringSSL</a>
+library. If you’re using the Android NDK in your app, don't link against cryptographic libraries
+that are not a part of the NDK API, such as {@code libcrypto.so} and {@code libssl.so}. These
+libraries are not public APIs, and may change or break without notice across releases and devices.
+In addition, you may expose yourself to security vulnerabilities. Instead, modify your
+native code to call the Java cryptography APIs via JNI or to statically link against a
+cryptography library of your choice.</p>
+
+<h2 id="behavior-project-volta">Project Volta</h2>
+<p>This release introduces new power-saving optimizations for idle devices and apps.</p>
+
+<h3 id="behavior-doze">Doze mode</h3>
+<p>If a device is unplugged and not used for up to an hour, it goes into <em>doze</em> mode where
+it attempts to keep the system in a sleep state. In this mode, devices may briefly resume normal
+operations for up to 5 minutes every few hours so that app syncing can occur and the system can
+perform any pending operations.</p>
+
+<p>The following restrictions apply to your apps while in device doze mode:</p>
+<ul>
+<li>Network access is disabled</li>
+<li>Alarms scheduled with the {@link android.app.AlarmManager} class are disabled, except for
+alarms that you've set with the
+{@link android.app.AlarmManager#setAlarmClock(android.app.AlarmManager.AlarmClockInfo,android.app.PendingIntent) setAlarmClock()}
+method</li>
+<li>WiFi scans are not performed</li>
+<li>Syncs and jobs for your sync adapters and {@link android.app.job.JobScheduler} are not
+permitted to run</li>
+</ul>
+</p>
+<p>When the system comes out of doze mode, it executes jobs and syncs that are pending.</p>
+
+<h3 id="behavior-app-standby">App standby mode</h3>
+<p>In M, the system may determine that apps are idle when they are not in active use by the user.
+Your app goes into <em>app standby</em> mode after two days unless the system detects any of these
+signals:</p>
+
+<ul>
+<li>The app has a process currently in the foreground (either as an activity or foreground service,
+or in use by another activity or foreground service)</li>
+<li>The app generates a notification that the user can see</li>
+<li>The user explicitly asks for the app to remain running</li>
+</ul>
+
+<p>If the system is running on battery power, apps that are in standby mode will have their
+network access disabled and their syncs and jobs suspended. When the system is plugged into a power
+supply, it brings an app out of standby mode and executes any jobs and syncs that are pending.</p>
+
+<p>Apps that use <a href="{@docRoot}google/gcm/index.html">Google Cloud Messaging</a> will
+continue to receive messages even if they are idle. When the system is plugged into a power
+supply, apps resume normal operations and can run any pending syncs and jobs.</p>
+
+<p>You can test this feature by connecting a device running M to your development machine and
+calling the following commands:
+</p>
+<pre>
+$ adb shell am broadcast -a android.os.action.DISCHARGING
+$ adb shell am set-idle &lt;packageName&gt; true
+$ adb shell am set-idle &lt;packageName&gt; false
+$ adb shell am get-idle &lt;packageName&gt;
+</pre>
+
+<h2 id="behavior-adoptable-storage">Adoptable Storage Devices</h2>
+<p>
+In M, users can adopt external storage devices such as SD cards. Adopting an external storage
+device encrypts and formats the device to behave like internal storage. This feature allows users
+to move both apps and private data of those apps between storage devices. When moving apps, the
+system respects the <a href="{@docRoot}guide/topics/manifest/manifest-element.html#install">
+{@code android:installLocation}</a> preference in the manifest.</p>
+
+<p>If your app accesses the following APIs or fields, be aware that the file paths they return
+will dynamically change when the app is moved between internal and external storage devices.
+When building file paths, it is strongly recommended that you always call these APIs dynamically.
+Don’t use hardcoded file paths or persist fully-qualified file paths that were built previously.</p>
+
+<ul>
+<li>{@link android.content.Context} methods:
+    <ul>
+        <li>{@link android.content.Context#getFilesDir() getFilesDir()}</li>
+        <li>{@link android.content.Context#getCacheDir() getCacheDir()}</li>
+        <li>{@link android.content.Context#getCodeCacheDir() getCodeCacheDir()}</li>
+        <li>{@link android.content.Context#getDatabasePath(java.lang.String) getDatabasePath()}</li>
+        <li>{@link android.content.Context#getDir(java.lang.String,int) getDir()}</li>
+        <li>{@link android.content.Context#getNoBackupFilesDir() getNoBackupFilesDir()}</li>
+        <li>{@link android.content.Context#getFileStreamPath(java.lang.String) getFileStreamPath()}</li>
+        <li>{@link android.content.Context#getPackageCodePath() getPackageCodePath()}</li>
+        <li>{@link android.content.Context#getPackageResourcePath() getPackageResourcePath()}</li>
+    </ul>
+</li>
+<li>{@link android.content.pm.ApplicationInfo} fields:
+    <ul>
+        <li>{@link android.content.pm.ApplicationInfo#dataDir dataDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#sourceDir sourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#nativeLibraryDir nativeLibraryDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#publicSourceDir publicSourceDir}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitSourceDirs splitSourceDirs}</li>
+        <li>{@link android.content.pm.ApplicationInfo#splitPublicSourceDirs splitPublicSourceDirs}</li>
+    </ul>
+</li>
+</ul>
+
+<p>To debug this feature in the developer preview, you can enable adoption of a USB drive that is
+connected to an Android device through a USB On-The-Go (OTG) cable, by running these
+commands:</p>
+
+<pre>
+$ adb root
+$ sleep 2
+$ adb shell setprop persist.fw.force_adoptable 1
+$ adb reboot
+</pre>
+
+<h2 id="behavior-apache-http-client">Apache HTTP Client Removal</h2>
+<p>This release removes support for the Apache HTTP client. If your app is using this client and
+targets Android 2.3 (API level 9) or higher, use the {@link java.net.HttpURLConnection} class
+instead. This API is more efficient because it reduces network use through transparent compression
+and response caching, and minimizes power consumption. To continue using the Apache HTTP APIs, you
+must first declare the following compile-time dependency in your {@code build.gradle} file:
+</p>
+<pre>
+android {
+    compileSdkVersion M
+    useLibrary 'org.apache.http.legacy'
+}
+</pre>
+
+<h2 id="behavior-audiomanager-Changes">AudioManager Changes</h2>
+<p>Setting the volume directly or muting specific streams via the {@link android.media.AudioManager}
+class is no longer supported. The {@link android.media.AudioManager#setStreamSolo(int,boolean)
+setStreamSolo()} method is deprecated, and you should call the
+{@code AudioManager.requestAudioFocus()} method instead. Similarly, the
+{@link android.media.AudioManager#setStreamMute(int,boolean) setStreamMute()} method is
+deprecated; instead, call the {@code AudioManager.adjustStreamVolume()} method
+and pass in the direction value {@code ADJUST_MUTE} or {@code ADJUST_UNMUTE}.</p>
+
+<h2 id="behavior-test-selection">Text Selection</h2>
+
+<img src="{@docRoot}preview/images/text-selection.gif"
+style="float:right; margin:0 0 20px 30px" width="270" height="480" />
+
+<p>When users selects text in your app, you can now display text selection actions such as
+<em>Cut</em>, <em>Copy</em>, and <em>Paste</em> in a
+<a href="http://www.google.com/design/spec/patterns/selection.html#selection-text-selection"
+class="external-link">floating toolbar</a>. The user interaction implementation is similar to that
+for the contextual action bar, as described in
+<a href="{@docRoot}guide/topics/ui/menus.html#CABforViews">
+Enabling the contextual action mode for individual views</a>.</p>
+
+<p>To implement a floating toolbar for text selection, make the following changes in your existing
+apps:</p>
+<ol>
+<li>In your {@link android.view.View} or {@link android.app.Activity} object, change your
+{@link android.view.ActionMode} calls from
+{@code startActionMode(Callback)} to {@code startActionMode(Callback, ActionMode.TYPE_FLOATING)}.</li>
+<li>Take your existing implementation of ActionMode.Callback and make it extend
+{@code ActionMode.Callback2} instead.</li>
+<li>Override the {@code Callback2.onGetContentRect()} method to provide the coordinates of the
+content {@link android.graphics.Rect} object (such as a text selection rectangle) in the view.</li>
+<li>If the rectangle positioning is no longer valid, and this is the only element to be invalidated,
+call the {@code ActionMode.invalidateContentRect()} method.</li>
+</ol>
+
+<p>If you are using <a href="{@docRoot}tools/support-library/index.html">
+Android Support Library</a> revision 22.2, be aware that floating toolbars are not
+backward-compatible and appcompat takes control over {@link android.view.ActionMode} objects by
+default. This prevents floating toolbars from being displayed in M. To enable
+{@link android.view.ActionMode} support in an
+{@link android.support.v7.app.AppCompatActivity}, call
+{@code android.support.v7.app.AppCompatActivity.getDelegate()}, then call
+{@code android.support.v7.app.AppCompatDelegate.setHandleNativeActionModesEnabled()} on the returned
+{@link android.support.v7.app.AppCompatDelegate} object and set the input
+parameter to {@code false}. This call returns control of {@link android.view.ActionMode} objects to
+the framework. In devices running M, that allows the framework to support
+{@link android.support.v7.app.ActionBar} or floating toolbar modes, while on pre-M devices, only the
+{@link android.support.v7.app.ActionBar} modes are supported.</p>
+
+<h2 id="behavior-keystore">Android Keystore Changes</h2>
+<p>Starting this release, the
+<a href="{@docRoot}training/articles/keystore.html">Android Keystore provider</a> no longer supports
+DSA. ECDSA is still supported.</p>
+
+<p>Keys which do not require encryption at rest will no longer be deleted when secure lock screen
+is disabled or reset (for example, by the user or a Device Administrator). Keys which require
+encryption at rest will be deleted during these events.</p>
+
+<h2 id="behavior-themeable-colorstatelists">Themeable ColorStateLists</h2>
+<p>Theme attributes are now supported in
+{@link android.content.res.ColorStateList} for devices running M. The
+{@link android.content.res.Resources#getColorStateList(int) getColorStateList()} and
+{@link android.content.res.Resources#getColor(int) getColor()} methods have been deprecated. If
+you are calling these APIs, call the new {@code Context.getColorStateList()} or
+{@code Context.getColor()} methods instead. These methods are also available in the
+v4 appcompat library via {@link android.support.v4.content.ContextCompat}.</p>
+
+<h2 id="night-mode">Night Mode (User-configurable Dark Theme)</h2>
+<p>
+Support for the {@code -night} resource qualifier has been updated in M. Previously, night mode was
+only available when a device was docked and in car mode. Starting in M, night mode is available on
+all devices and is user-configurable via <em>Settings > Display > Theme</em>. You can adjust this
+setting globally using {@link android.app.UiModeManager#setNightMode(int) setNightMode()}. The
+Dark theme corresponds to {@link android.app.UiModeManager#MODE_NIGHT_YES}. When the device is in
+night mode, the resource framework will prefer resources that have the -night qualifier. To
+take advantage of user-configurable Dark mode in your app, extend from the
+{@code Theme.Material.DayNight} set of themes rather than {@code Theme.Material} or
+{@code Theme.Material.Light}.
+</p>
+
+<h2 id="behavior-art-runtime">ART Runtime</h2>
+<p>The ART runtime now properly implements access rules for the
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} method. This
+change fixes a problem where Dalvik was checking access rules incorrectly in previous versions.
+If your app uses the
+{@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} method and you
+want to override access checks, call the
+{@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()} method with the input
+parameter set to {@code true}. If your app uses the
+<a href="{@docRoot}tools/support-library/features.html#v7">v7 appcompat library</a> or the
+<a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">v7 recyclerview library</a>,
+you must update your app to use to the latest versions of these libraries. Otherwise, make sure that
+any custom classes referenced from XML are updated so that their class constructors are accessible.</p>
+
+<p>The M release updates the behavior of the dynamic linker. The dynamic linker now understands the
+difference between a library’s {@code soname} and its path
+(<a href="https://code.google.com/p/android/issues/detail?id=6670" class="external-link">
+public bug 6670</a>), and search by {@code soname} is now
+implemented. Apps which previously worked that have bad {@code DT_NEEDED} entries
+(usually absolute paths on the build machine’s file system) may fail when loaded on M.</p>
+
+<p>The {@code dlopen(3) RTLD_LOCAL} flag is now correctly implemented in M. Note that
+{@code RTLD_LOCAL} is the default, so calls to {@code dlopen(3)} that didn’t explicitly use
+{@code RTLD_LOCAL} will be affected (unless your app explicitly used {@code RTLD_GLOBAL}). With
+{@code RTLD_LOCAL}, symbols will not be made available to libraries loaded by later calls to
+{@code dlopen(3)} (as opposed to being referenced by {@code DT_NEEDED} entries).</p>
+</p>
+
+<h2 id="behavior-afw">Android for Work Changes</h2>
+<p>This release includes the following behavior changes for Android for Work:</p>
+<ul>
+<li><strong>Work contacts in personal contexts.</strong> Google Messenger and the Google Dialer
+Call Log now display work contacts when the user views past messages or calls. Furthermore, both
+work and personal contacts are now available to devices over Bluetooth, but you can hide work
+profile contacts through a device policy by calling the new
+{@code DevicePolicyManager.setBluetoothContactSharingDisabled()} method. Initiating a call or
+creating a new message will only show personal contacts, as consistent with the experience in
+Android 5.0.
+</li>
+<li><strong>WiFi configuration removal:</strong> WiFi configurations added by a Profile Owner
+(for example, through calls to the
+{@link android.net.wifi.WifiManager#addNetwork(android.net.wifi.WifiConfiguration)
+addNetwork()} method) are now removed if that work profile is deleted.</li>
+<li><strong>WiFi configuration lockdown:</strong> Any WiFi configuration created by an active Device
+Owner can no longer be modified or deleted by the user. The user can still create and
+modify their own WiFi configurations, so long as the {@link android.os.UserManager} constant
+{@link android.os.UserManager#DISALLOW_CONFIG_WIFI} has not been set for that user.</li>
+<li><strong>VPN in Settings:</strong> VPN apps are now visible in <em>Settings > More > VPN</em>.
+Additionally, the notifications that accompany VPN usage are now specific to whether that VPN is
+configured for a managed profile or the entire device.</li>
+<li><strong>Work status notification:</strong> A status bar briefcase icon now appears whenever
+an app from the managed profile has an activity in the foreground. Furthermore, if the device is
+unlocked directly to the activity of an app in the managed profile, a toast is displayed notifying
+the user that they are within the work profile.
+</li>
+<li><strong>Download Work Policy Controller via Google account addition:</strong> When a Google
+account that requires management via a Work Policy Controller (WPC) app is added to a device
+outside of a managed context, the add account flow now prompts the user to install the
+appropriate WPC. This behavior also applies to accounts added via
+<em>Settings > Accounts</em> in the initial device setup wizard.</li>
+</ul>
