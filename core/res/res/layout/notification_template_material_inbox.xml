@@ -132,7 +132,7 @@
             android:ellipsize="end"
             android:visibility="gone"
             android:layout_weight="1"
-            android:text="@android:string/ellipsis"
+            android:text="@android:string/notification_inbox_ellipsis"
             />
         <FrameLayout
             android:id="@+id/inbox_end_pad"
