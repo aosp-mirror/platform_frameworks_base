@@ -41,6 +41,9 @@ public class NavigationBar extends CustomBar {
     private static final int WIDTH_DEFAULT = 36;
     private static final int WIDTH_SW360 = 40;
     private static final int WIDTH_SW600 = 48;
+    private static final String LAYOUT_XML = "/bars/navigation_bar.xml";
+    private static final String LAYOUT_600DP_XML = "/bars/navigation_bar600dp.xml";
+
 
     /**
      * Constructor to be used when creating the {@link NavigationBar} as a regular control.
@@ -59,8 +62,8 @@ public class NavigationBar extends CustomBar {
 
     public NavigationBar(BridgeContext context, Density density, int orientation, boolean isRtl,
             boolean rtlEnabled, int simulatedPlatformVersion) throws XmlPullParserException {
-        super(context, orientation, "/bars/navigation_bar.xml", "navigation_bar.xml",
-                simulatedPlatformVersion);
+        super(context, orientation, getShortestWidth(context)>= 600 ? LAYOUT_600DP_XML : LAYOUT_XML,
+                "navigation_bar.xml", simulatedPlatformVersion);
 
         int color = getThemeAttrColor(ATTR_COLOR, true);
         setBackgroundColor(color == 0 ? 0xFF000000 : color);
@@ -87,13 +90,19 @@ public class NavigationBar extends CustomBar {
     }
 
     private void setupNavBar(BridgeContext context, int orientation) {
+        float sw = getShortestWidth(context);
         View leftPadding = getChildAt(0);
         View rightPadding = getChildAt(6);
-        setSize(context, leftPadding, orientation, getSidePadding(context));
-        setSize(context, rightPadding, orientation, getSidePadding(context));
+        setSize(context, leftPadding, orientation, getSidePadding(sw));
+        setSize(context, rightPadding, orientation, getSidePadding(sw));
+        int navButtonWidth = getWidth(sw);
         for (int i = 1; i < 6; i += 2) {
             View navButton = getChildAt(i);
-            setSize(context, navButton, orientation, getWidth(context));
+            setSize(context, navButton, orientation, navButtonWidth);
+        }
+        if (sw >= 600) {
+            setSize(context, getChildAt(2), orientation, 128);
+            setSize(context, getChildAt(4), orientation, 128);
         }
     }
 
@@ -108,11 +117,7 @@ public class NavigationBar extends CustomBar {
         view.setLayoutParams(layoutParams);
     }
 
-    private static int getSidePadding(BridgeContext context) {
-        DisplayMetrics metrics = context.getMetrics();
-        float sw = metrics.widthPixels > metrics.heightPixels
-                ? metrics.heightPixels : metrics.widthPixels;
-        sw /= metrics.density;
+    private static int getSidePadding(float sw) {
         if (sw >= 400) {
             return PADDING_WIDTH_SW400;
         }
@@ -122,11 +127,7 @@ public class NavigationBar extends CustomBar {
         return PADDING_WIDTH_DEFAULT;
     }
 
-    private static int getWidth(BridgeContext context) {
-        DisplayMetrics metrics = context.getMetrics();
-        float sw = metrics.widthPixels > metrics.heightPixels
-                ? metrics.heightPixels : metrics.widthPixels;
-        sw /= metrics.density;
+    private static int getWidth(float sw) {
         if (sw >= 600) {
             return WIDTH_SW600;
         }
@@ -134,6 +135,14 @@ public class NavigationBar extends CustomBar {
             return WIDTH_SW360;
         }
         return WIDTH_DEFAULT;
+    }
+
+    private static float getShortestWidth(BridgeContext context) {
+        DisplayMetrics metrics = context.getMetrics();
+        float sw = metrics.widthPixels < metrics.heightPixels ?
+                metrics.widthPixels : metrics.heightPixels;
+        sw /= metrics.density;
+        return sw;
     }
 
     @Override
