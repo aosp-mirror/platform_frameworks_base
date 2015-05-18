@@ -1,11 +1,10 @@
-page.title=Getting Started with SafetyNet
-parent.title=SafetyNet for Android
-parent.link=index.html
+page.title=Checking Device Compatibility with SafetyNet
+
 @jd:body
 
 
-<div id="qv-wrapper">
-<div id="qv">
+<div id="tb-wrapper">
+<div id="tb">
 
   <h2>In this document</h2>
   <ol>
@@ -68,7 +67,9 @@ party rights. You will not violate any other terms of service with Google (or it
 You acknowledge and understand that the SafetyNet API works by collecting hardware and software
 information, such as device and application data and the results of integrity checks, and sending
 that data to Google for analysis. Pursuant to Section 3(d) of the
-<a href= "https://developers.google.com/terms/">Google APIs Terms of Service</a>, you agree that if you use the APIs that it is your responsibility to provide any necessary notices or consents for the collection and sharing of this data with Google.
+<a href= "https://developers.google.com/terms/">Google APIs Terms of Service</a>, you agree that if
+you use the APIs that it is your responsibility to provide any necessary notices or consents for the
+collection and sharing of this data with Google.
 </div>
 
 <h2 id="connect-play">
@@ -256,9 +257,9 @@ certificate used to sign requesting app"],
   <a href=
   "{@docRoot}reference/com/google/android/gms/safetynet/SafetyNetApi.AttestationResult.html#getJwsResult()">
 {@code getJwsResult()}</a> method is null or contains an {@code error:} field, then communication
-  with the service failed and should be retried. You should use an <a href=
-  "{@docRoot}google/gcm/gcm.html#retry">exponential backoff</a> technique for
-  retries, to avoid flooding the service with additional requests.
+  with the service failed and should be retried. You should use an <a class="external-link" href=
+  "https://developers.google.com/api-client-library/java/google-http-java-client/backoff">
+  exponential backoff</a> technique for retries, to avoid flooding the service with additional requests.
 </p>
 
 <h3 id="verify-compat-check">
@@ -362,7 +363,7 @@ https&#58;&#47;&#47;www.googleapis.com/androidcheck/v1/attestations/verify?key=&
   </li>
 </ol>
 
-<p>
+<p class="note">
   <strong>Important:</strong> This use of the Android Device Verification API only validates that the
   provided JWS message was received from the SafetyNet service. It <em>does not</em> verify that the
   payload data matches your original compatibility check request.
