@@ -9973,6 +9973,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             winAnimator.setAnimation(a);
                             winAnimator.mAnimDw = w.mLastFrame.left - left;
                             winAnimator.mAnimDh = w.mLastFrame.top - top;
+                            winAnimator.mAnimateMove = true;
                         }
 
                         //TODO (multidisplay): Accessibility supported only for the default display.
