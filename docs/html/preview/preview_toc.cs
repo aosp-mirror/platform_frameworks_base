@@ -16,9 +16,33 @@
   </li>
 
   <li class="nav-section">
+    <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/api-changes.html">
+      Behavior Changes</a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty">
+    <a href="<?cs var:toroot ?>preview/features/runtime-permissions.html">
+      Runtime Permissions</a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty">
+    <a href="<?cs var:toroot ?>preview/backup/index.html">
+      Automatic Backups</a></div>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header empty">
+    <a href="<?cs var:toroot ?>preview/data-binding/guide.html">
+      Data Binding</a></div>
+  </li>
+
+  <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/samples.html">
       Samples</a></div>
   </li>
+
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>preview/reference.html">
       Reference</a></div>
