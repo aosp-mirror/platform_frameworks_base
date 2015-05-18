@@ -24,23 +24,21 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.util.Collection;

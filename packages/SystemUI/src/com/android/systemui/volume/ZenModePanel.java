@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -175,7 +176,14 @@ public class ZenModePanel extends LinearLayout {
         });
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
+    }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mZenButtons != null) {
+            mZenButtons.updateLocale();
+        }
     }
 
     private void confirmZenIntroduction() {
