@@ -2773,7 +2773,7 @@ public class WifiManager {
      * Set setting for allowing Scans when infrastructure is associated
      * @hide
      */
-    public void setAllowScansWhileAssociated(boolean enabled) {
+    public void setAllowScansWhileAssociated(int enabled) {
         try {
             mService.setAllowScansWhileAssociated(enabled);
         } catch (RemoteException e) {
@@ -2785,12 +2785,12 @@ public class WifiManager {
      * Get setting for allowing Scans when infrastructure is associated
      * @hide
      */
-    public boolean getAllowScansWhileAssociated() {
+    public int getAllowScansWhileAssociated() {
         try {
             return mService.getAllowScansWhileAssociated();
         } catch (RemoteException e) {
         }
-        return false;
+        return 0;
     }
 
     /**
@@ -2816,5 +2816,53 @@ public class WifiManager {
         } catch (RemoteException e) {
             return null;
         }
+    }
+
+    /**
+     * Set setting for enabling autojoin Offload thru Wifi HAL layer
+     * @hide
+     */
+    public void setHalBasedAutojoinOffload(int enabled) {
+        try {
+            mService.setHalBasedAutojoinOffload(enabled);
+        } catch (RemoteException e) {
+
+        }
+    }
+
+    /**
+     * Get setting for enabling autojoin Offload thru Wifi HAL layer
+     * @hide
+     */
+    public int getHalBasedAutojoinOffload() {
+        try {
+            return mService.getHalBasedAutojoinOffload();
+        } catch (RemoteException e) {
+        }
+        return 0;
+    }
+
+    /**
+     * Set setting for enabling network switching while wifi is associated
+     * @hide
+     */
+    public void setAllowNetworkSwitchingWhileAssociated(int enabled) {
+        try {
+            mService.setAllowNetworkSwitchingWhileAssociated(enabled);
+        } catch (RemoteException e) {
+
+        }
+    }
+
+    /**
+     * Get setting for enabling network switching while wifi is associated
+     * @hide
+     */
+    public int getAllowNetworkSwitchingWhileAssociated() {
+        try {
+            return mService.getAllowNetworkSwitchingWhileAssociated();
+        } catch (RemoteException e) {
+        }
+        return 0;
     }
 }
