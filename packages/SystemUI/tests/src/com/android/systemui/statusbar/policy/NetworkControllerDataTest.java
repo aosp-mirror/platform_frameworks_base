@@ -1,9 +1,9 @@
 package com.android.systemui.statusbar.policy;
 
-import org.mockito.Mockito;
-
 import android.os.Looper;
 import android.telephony.TelephonyManager;
+
+import org.mockito.Mockito;
 
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
@@ -11,7 +11,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setupDefaultSignal();
 
         verifyDataIndicators(TelephonyIcons.DATA_3G[1][0 /* No direction */],
-                TelephonyIcons.QS_DATA_3G[1]);
+                TelephonyIcons.QS_DATA_3G);
     }
 
     public void testRoamingDataIcon() {
@@ -23,7 +23,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.ROAMING_ICON);
         verifyLastQsMobileDataIndicators(true,
                 TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL],
-                TelephonyIcons.QS_DATA_R[1], false, false);
+                TelephonyIcons.QS_DATA_R, false, false);
     }
 
     public void test2gDataIcon() {
@@ -32,7 +32,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyManager.NETWORK_TYPE_GSM);
 
         verifyDataIndicators(TelephonyIcons.DATA_G[1][0 /* No direction */],
-                TelephonyIcons.QS_DATA_G[1]);
+                TelephonyIcons.QS_DATA_G);
     }
 
     public void testCdmaDataIcon() {
@@ -41,7 +41,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyManager.NETWORK_TYPE_CDMA);
 
         verifyDataIndicators(TelephonyIcons.DATA_1X[1][0 /* No direction */],
-                TelephonyIcons.QS_DATA_1X[1]);
+                TelephonyIcons.QS_DATA_1X);
     }
 
     public void testEdgeDataIcon() {
@@ -50,7 +50,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyManager.NETWORK_TYPE_EDGE);
 
         verifyDataIndicators(TelephonyIcons.DATA_E[1][0 /* No direction */],
-                TelephonyIcons.QS_DATA_E[1]);
+                TelephonyIcons.QS_DATA_E);
     }
 
     public void testLteDataIcon() {
@@ -59,7 +59,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyManager.NETWORK_TYPE_LTE);
 
         verifyDataIndicators(TelephonyIcons.DATA_LTE[1][0 /* No direction */],
-                TelephonyIcons.QS_DATA_LTE[1]);
+                TelephonyIcons.QS_DATA_LTE);
     }
 
     public void testHspaDataIcon() {
@@ -68,7 +68,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyManager.NETWORK_TYPE_HSPA);
 
         verifyDataIndicators(TelephonyIcons.DATA_H[1][0 /* No direction */],
-                TelephonyIcons.QS_DATA_H[1]);
+                TelephonyIcons.QS_DATA_H);
     }
 
     public void test4gDataIcon() {
@@ -85,7 +85,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyManager.NETWORK_TYPE_LTE);
 
         verifyDataIndicators(TelephonyIcons.DATA_4G[1][0 /* No direction */],
-                TelephonyIcons.QS_DATA_4G[1]);
+                TelephonyIcons.QS_DATA_4G);
     }
 
     public void test4gDataIconConfigChange() {
@@ -101,7 +101,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mNetworkController.handleConfigurationChanged();
 
         verifyDataIndicators(TelephonyIcons.DATA_4G[1][0 /* No direction */],
-                TelephonyIcons.QS_DATA_4G[1]);
+                TelephonyIcons.QS_DATA_4G);
     }
 
     public void testDataActivity() {
