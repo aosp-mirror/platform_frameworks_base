@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.content.res.Resources;
+import android.os.Build;
 import com.android.server.LocalServices;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
@@ -49,6 +50,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private static final boolean DEBUG = false;
 
     private static final String UNIQUE_ID_PREFIX = "local:";
+
+    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
     private static final int[] BUILT_IN_DISPLAY_IDS_TO_SCAN = new int[] {
             SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN,
@@ -273,8 +276,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             com.android.internal.R.string.display_manager_built_in_display_name);
                     mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
                             | DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
-                    if (res.getBoolean(
-                            com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)) {
+                    if (res.getBoolean(com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)
+                            || (Build.HARDWARE.contains("goldfish")
+                            && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
                     mInfo.type = Display.TYPE_BUILT_IN;
