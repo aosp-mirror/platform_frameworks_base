@@ -16199,9 +16199,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
                         mCompatModePackages.handlePackageAddedLocked(ssp, replacing);
 
-                        if (replacing) {
-                            removeTasksByRemovedPackageComponentsLocked(ssp, userId);
-                        }
                         try {
                             ApplicationInfo ai = AppGlobals.getPackageManager().
                                     getApplicationInfo(ssp, 0, 0);
