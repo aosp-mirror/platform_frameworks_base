@@ -939,4 +939,6 @@ public class StorageManager {
     public static final String OWNER_INFO_KEY = "OwnerInfo";
     /** @hide */
     public static final String PATTERN_VISIBLE_KEY = "PatternVisible";
+    /** @hide */
+    public static final String PASSWORD_VISIBLE_KEY = "PasswordVisible";
 }
