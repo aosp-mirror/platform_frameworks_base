@@ -43,7 +43,7 @@ parent.link=index.html
   <p>Whether you're building with the debug or release build type, you need to run
   and build your module. This will create the .apk file that you can install on an emulator or device.
   When you build using the debug build type, the .apk file is automatically signed by the SDK tools
-  with a debug key based on the <code>debuggable true</code> setting in the module's gradle.build file,
+  with a debug key based on the <code>debuggable true</code> setting in the module's build.gradle file,
   so it's instantly ready for installation onto an emulator or attached
   development device. You cannot distribute an application that is signed with a debug key.
   When you build using the release build type, the .apk file is <em>unsigned</em>, so you
@@ -174,7 +174,7 @@ $ ./gradlew assembleRelease
   the build will prompt you for your keystore and alias password when you build using the release
   build type and produce your final application package, which will be ready for distribution.</p>
 
-  <p>To specify your keystore and alias, open the module gradle.build file (found in
+  <p>To specify your keystore and alias, open the module build.gradle file (found in
   the root of the module directory) and add entries for {@code storeFile}, {@code storePassword},
   {@code keyAlias} and {@code keyPassword}.
   For example:</p>
@@ -188,7 +188,7 @@ keyAlias "MyReleaseKey"
   <ol>
     <li>Open a command-line and navigate to the root of your module directory.</li>
 
-    <li>Edit the gradle.build file to build your project in release mode:
+    <li>Edit the build.gradle file to build your project in release mode:
       <p><pre>
 ...
 android {
@@ -222,7 +222,7 @@ android {
 
   <p>This creates your Android application .apk file inside the module <code>build/</code>
   directory, named <code><em>&lt;your_module_name&gt;</em>-release.apk</code>. This .apk file has
-  been signed with the private key specified in gradle.build file and aligned with {@code
+  been signed with the private key specified in build.gradle file and aligned with {@code
   zipalign}. It's ready for installation and distribution.</p>
 
   <h3 id="OnceBuilt">Once built and signed in release mode</h3>
