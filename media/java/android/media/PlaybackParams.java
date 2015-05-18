@@ -158,8 +158,12 @@ public final class PlaybackParams {
      * Sets the pitch factor.
      * @param pitch
      * @return this <code>PlaybackParams</code> instance.
+     * @throws InvalidArgumentException if the pitch is negative
      */
     public PlaybackParams setPitch(float pitch) {
+        if (pitch < 0.f) {
+            throw new IllegalArgumentException("pitch must not be negative");
+        }
         mPitch = pitch;
         mSet |= SET_PITCH;
         return this;
