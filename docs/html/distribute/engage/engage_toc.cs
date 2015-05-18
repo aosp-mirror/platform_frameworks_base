@@ -20,7 +20,7 @@
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/easy-signin.html">
-        <span class="en">Make Signing In Easy</span></a>
+        <span class="en">Add Google Sign-in</span></a>
     </div>
   </li>
   <li class="nav-section">
@@ -41,7 +41,6 @@
         <span class="en">Use the Power of Intents</span></a>
     </div>
   </li>
-
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs
         var:toroot?>distribute/engage/analytics.html">

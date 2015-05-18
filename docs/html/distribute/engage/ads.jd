@@ -15,20 +15,25 @@ they didn't know your app could handle.</p>
   app engagement campaigns</a>.
 </p>
 
-<div>
- <div class="figure-left" style="width:46%;">
+
+
+<div class="wrap">
+  <div class="cols" style="margin-top:2em;">
+    <div class="col-1of2">
    <h3>From search</h3>
    <img src="/images/distribute/promote_ads.png">
     <p class="figure-caption">Add deep links to your app, then bring users straight
     to relevant app content when they’re searching.</p>
-  </div>
-  <div class="figure-right" style="width:46%;">
+    </div>
+    <div class="col-1of2">
     <h3>From apps</h3>
     <img src="/images/distribute/promote_ads_inapp.png">
     <p class="figure-caption">Use remarketing and deep links to bring users to just the right
     place in your app to re-engage and convert, from other apps and games they love.</p>
+    </div>
   </div>
 </div>
+
 
 <h3 id="tips">Tips</h2>
 

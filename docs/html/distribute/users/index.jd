@@ -10,21 +10,23 @@ nonavpage=true
   developers. These best practices are critical to your app or game’s success.
 </p>
 
-<div class="dynamic-grid">
-
 <div class="resource-widget resource-flow-layout landing col-16"
   data-query="collection:distribute/users"
   data-cardSizes="6x6"
   data-maxResults="6">
 </div>
+<div class="resource-widget resource-flow-layout landing col-16"
+  data-query="collection:distribute/users"
+  data-cardSizes="9x3"
+  data-maxResults="16">
+</div>
 
-<h3>Related resources</h3>
+<!-- <h2>Related resources</h2>
 
   <div class="resource-widget resource-flow-layout col-16"
-    data-query="type:youtube+tag:users,tag:global,type:blog+tag:users"
-    data-sortOrder="-timestamp"
-    data-cardSizes="6x3"
-    data-maxResults="6">
-  </div>
-  
-</div>
+    data-query="tag:users"
+    data-sortOrder="random"
+    data-cardSizes="6x2"
+    data-maxResults="3">
+  </div> -->
+
