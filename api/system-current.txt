@@ -17705,18 +17705,21 @@ package android.media {
     ctor public NotProvisionedException(java.lang.String);
   }
 
-  public final class PlaybackParams {
+  public final class PlaybackParams implements android.os.Parcelable {
     ctor public PlaybackParams();
     method public android.media.PlaybackParams allowDefaults();
+    method public int describeContents();
     method public int getAudioFallbackMode();
     method public float getPitch();
     method public float getSpeed();
     method public android.media.PlaybackParams setAudioFallbackMode(int);
     method public android.media.PlaybackParams setPitch(float);
     method public android.media.PlaybackParams setSpeed(float);
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final int AUDIO_FALLBACK_MODE_DEFAULT = 0; // 0x0
     field public static final int AUDIO_FALLBACK_MODE_FAIL = 2; // 0x2
     field public static final int AUDIO_FALLBACK_MODE_MUTE = 1; // 0x1
+    field public static final android.os.Parcelable.Creator<android.media.PlaybackParams> CREATOR;
   }
 
   public final class Rating implements android.os.Parcelable {
