@@ -206,15 +206,20 @@ static jstring Region_toString(JNIEnv* env, jobject clazz, jlong regionHandle) {
 
 static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
 {
-    if (parcel == NULL) {
-        return NULL;
+    if (parcel == nullptr) {
+        return 0;
     }
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
     SkRegion* region = new SkRegion;
     size_t size = p->readInt32();
-    region->readFromMemory(p->readInplace(size), size);
+    size_t actualSize = region->readFromMemory(p->readInplace(size), size);
+
+    if (size != actualSize) {
+        delete region;
+        return 0;
+    }
 
     return reinterpret_cast<jlong>(region);
 }
