@@ -34,8 +34,8 @@ import android.util.Log;
 
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.IconState;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -145,10 +145,10 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setLevel(DEFAULT_LEVEL);
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_UMTS);
-        setConnectivity(100, ConnectivityManager.TYPE_MOBILE, true);
+        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
     }
 
-    public void setConnectivity(int inetCondition, int networkType, boolean isConnected) {
+    public void setConnectivity(int networkType, boolean inetCondition, boolean isConnected) {
         Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
         // TODO: Separate out into several NetworkCapabilities.
         if (isConnected) {
@@ -156,7 +156,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         } else {
             mNetCapabilities.removeTransportType(networkType);
         }
-        if (inetCondition != 0) {
+        if (inetCondition) {
             mNetCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
         } else {
             mNetCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);

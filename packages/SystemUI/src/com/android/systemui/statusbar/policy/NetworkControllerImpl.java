@@ -538,17 +538,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private void pushConnectivityToSignals() {
         // We want to update all the icons, all at once, for any condition change
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
-            mobileSignalController.setInetCondition(
-                    mInetCondition ? 1 : 0,
-                    mValidatedTransports.get(mobileSignalController.getTransportType()) ? 1 : 0);
+            mobileSignalController.updateConnectivity(mConnectedTransports, mValidatedTransports);
         }
-        mWifiSignalController.setInetCondition(
-                mValidatedTransports.get(mWifiSignalController.getTransportType()) ? 1 : 0);
-
-        mEthernetSignalController.setConnected(
-                mConnectedTransports.get(mEthernetSignalController.getTransportType()));
-        mEthernetSignalController.setInetCondition(
-                mValidatedTransports.get(mEthernetSignalController.getTransportType()) ? 1 : 0);
+        mWifiSignalController.updateConnectivity(mConnectedTransports, mValidatedTransports);
+        mEthernetSignalController.updateConnectivity(mConnectedTransports, mValidatedTransports);
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -581,7 +574,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private boolean mDemoMode;
-    private int mDemoInetCondition;
+    private boolean mDemoInetCondition;
     private WifiSignalController.WifiState mDemoWifiState;
 
     @Override
@@ -590,7 +583,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             if (DEBUG) Log.d(TAG, "Entering demo mode");
             unregisterListeners();
             mDemoMode = true;
-            mDemoInetCondition = mInetCondition ? 1 : 0;
+            mDemoInetCondition = mInetCondition;
             mDemoWifiState = mWifiSignalController.getState();
         } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
             if (DEBUG) Log.d(TAG, "Exiting demo mode");
@@ -614,10 +607,18 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
             String fully = args.getString("fully");
             if (fully != null) {
-                mDemoInetCondition = Boolean.parseBoolean(fully) ? 1 : 0;
-                mWifiSignalController.setInetCondition(mDemoInetCondition);
+                mDemoInetCondition = Boolean.parseBoolean(fully);
+                BitSet connected = new BitSet();
+
+                if (mDemoInetCondition) {
+                    connected.set(mWifiSignalController.mTransportType);
+                }
+                mWifiSignalController.updateConnectivity(connected, connected);
                 for (MobileSignalController controller : mMobileSignalControllers.values()) {
-                    controller.setInetCondition(mDemoInetCondition, mDemoInetCondition);
+                    if (mDemoInetCondition) {
+                        connected.set(controller.mTransportType);
+                    }
+                    controller.updateConnectivity(connected, connected);
                 }
             }
             String wifi = args.getString("wifi");
