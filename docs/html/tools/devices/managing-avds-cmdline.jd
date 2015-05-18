@@ -84,8 +84,8 @@ id: 5 or "android-9"
 
 <h2 id="AVDCmdLine">Creating AVDs</h2>
 
-<p>In addition to creating AVDs with the 
-<a href="{@docRoot}tools/devices/managing-avds-cmdline.html">AVD Manager user interface</a>,
+<p>In addition to creating AVDs with the
+<a href="{@docRoot}tools/help/avd-manager.html">AVD Manager user interface</a>,
 you can also create them by passing in command line arguments to the <code>android</code> tool.
 </p>
 
