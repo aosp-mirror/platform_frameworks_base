@@ -20,6 +20,7 @@ import java.util.Locale;
 import java.util.Vector;
 
 import android.content.Context;
+import android.media.MediaPlayer.TrackInfo;
 import android.media.SubtitleTrack.RenderingWidget;
 import android.os.Handler;
 import android.os.Looper;
@@ -275,7 +276,8 @@ public class SubtitleController {
                      mSelectedTrack.getFormat().getInteger(
                             MediaFormat.KEY_IS_FORCED_SUBTITLE, 0) != 0)) {
                     show();
-                } else if (mSelectedTrack != null && !mSelectedTrack.isTimedText()) {
+                } else if (mSelectedTrack != null
+                        && mSelectedTrack.getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
                     hide();
                 }
                 mVisibilityIsExplicit = false;
