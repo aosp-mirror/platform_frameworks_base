@@ -1,12 +1,12 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Intent;
-import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -27,9 +27,9 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
             setWifiLevel(testLevel);
 
-            setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
+            setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
             verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[1][testLevel]);
-            setConnectivity(0, ConnectivityManager.TYPE_WIFI, true);
+            setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, false, true);
             verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[0][testLevel]);
         }
     }
@@ -47,10 +47,10 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
             setWifiLevel(testLevel);
 
-            setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
+            setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
             verifyLastQsWifiIcon(true, true, WifiIcons.QS_WIFI_SIGNAL_STRENGTH[1][testLevel],
                     testSsid);
-            setConnectivity(0, ConnectivityManager.TYPE_WIFI, true);
+            setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, false, true);
             verifyLastQsWifiIcon(true, true, WifiIcons.QS_WIFI_SIGNAL_STRENGTH[0][testLevel],
                     testSsid);
         }
@@ -63,7 +63,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         setWifiEnabled(true);
         setWifiState(true, testSsid);
         setWifiLevel(testLevel);
-        setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
+        setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
         verifyLastQsWifiIcon(true, true,
                 WifiIcons.QS_WIFI_SIGNAL_STRENGTH[1][testLevel], testSsid);
 
@@ -84,13 +84,13 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         setWifiEnabled(true);
         setWifiState(true, testSsid);
         setWifiLevel(testLevel);
-        setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
+        setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
         verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[1][testLevel]);
 
         setupDefaultSignal();
         setGsmRoaming(true);
         // Still be on wifi though.
-        setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
+        setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
         verifyLastMobileDataIndicators(true,
                 TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[1][DEFAULT_LEVEL],
                 TelephonyIcons.ROAMING_ICON);
