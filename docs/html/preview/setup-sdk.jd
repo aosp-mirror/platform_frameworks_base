@@ -192,16 +192,18 @@ App</a> training lesson first.</a></p>
 
 <h2 id="setupHardware">Set Up Hardware and AVDs</h2>
 
-<p>The Android M Developer Preview provides you with 32-bit system images
+<p>The Android M Developer Preview provides you with system images
 to flash the following devices:
 </p>
 
 <ul>
   <li>Nexus 5</li>
-  <li>Nexus 7 Wi-Fi (version 2, released in 2013)</li>
+  <li>Nexus 6</li>
+  <li>Nexus 9</li>
+  <li>Nexus Player</li>
 </ul>
 
-<p>In addition, you also get the emulator system images, which includes
+<p>In addition, the Preview SDK provides emulator system images, which include
 experimental 64-bit system images along with standard 32-bit system images.
 </p>
 
@@ -213,37 +215,54 @@ folder.</p>
 
 <h3 id="installImage">Install the M Preview System Image</h3>
 
-<p class="warning"><b>Warning:</b> This is a preview version of the Android
-system image, and is subject to change. Your use of this system image is
+<p class="warning"><b>Warning:</b> The following Android system images are
+previews and are subject to change. Your use of these system images is
 governed by the Android SDK Preview License Agreement. The Android preview
-system image is not a stable release, and may contain errors and defects that
+system images are not stable releases, and may contain errors and defects that
 can result in damage to your computer systems, devices, and data. The preview
-Android system image is not subject to the same testing as the factory OS and
+Android system images are not subject to the same testing as the factory OS and
 can cause your phone and installed services and applications to stop working.
 </p>
 
 
 <ol>
   <li>Download and uncompress the Android Developer Preview package.
-    <table style="width:860px">
+    <table>
       <tr>
         <th scope="col">Device</th>
-        <th scope="col">Download</th>
-        <th scope="col">Checksum</th>
+        <th scope="col">Download / Checksums</th>
       </tr>
       <tr id="hammerhead">
         <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
         <td><a href="#top" onclick="onDownload(this)"
-          >hammerhead-lpv79-preview-ac1d8a8e.tgz</a></td>
-        <td>MD5: <code>5a6ae77217978cb7b958a240c2e80b57</code>
-        <br>SHA-1: <code>ac1d8a8e4f4a1dca5864dc733caa940bffc28616</code></td>
+          >hammerhead-mpv79-preview-ac1d8a8e.tgz</a><br>
+          MD5: 5a6ae77217978cb7b958a240c2e80b57<br>
+          SHA-1: ac1d8a8e4f4a1dca5864dc733caa940bffc28616
+        </td>
       </tr>
-      <tr id="razor">
-        <td>Nexus 7 (Wifi) <br>"razor"</td>
+      <tr id="shamu">
+        <td>Nexus 6 <br>"shamu"</td>
         <td><a href="#top" onclick="onDownload(this)"
-          >razor-lpv79-preview-d0ddf8ce.tgz</a></td>
-        <td>MD5: <code>b293a5d3a4e07beabebcc0be85ad68a2</code>
-        <br><nobr>SHA-1: <code>d0ddf8ce733ba2a34279cdff8827fd604762c2342d</nobr></td>
+          >shamu-mpv79-preview-ac1d8a8e.tgz</a><br>
+          MD5: 5a6ae77217978cb7b958a240c2e80b57<br>
+          SHA-1: ac1d8a8e4f4a1dca5864dc733caa940bffc28616
+        </td>
+      </tr>
+      <tr id="volantis">
+        <td>Nexus 9 <br>"volantis"</td>
+        <td><a href="#top" onclick="onDownload(this)"
+          >volantis-mpv79-preview-ac1d8a8e.tgz</a><br>
+          MD5: 5a6ae77217978cb7b958a240c2e80b57<br>
+          SHA-1: ac1d8a8e4f4a1dca5864dc733caa940bffc28616
+        </td>
+      </tr>
+      <tr id="fugu">
+        <td>Nexus Player <br>"fugu"</td>
+        <td><a href="#top" onclick="onDownload(this)"
+          >fugu-mpv79-preview-d0ddf8ce.tgz</a><br>
+          MD5: b293a5d3a4e07beabebcc0be85ad68a2<br>
+          SHA-1: d0ddf8ce733ba2a34279cdff8827fd604762c2342d
+        </td>
       </tr>
     </table>
   </li>
@@ -278,11 +297,10 @@ image to your device.</p>
       <a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD
       Manager</a>. Use the following settings:
     <ul>
-      <li><b>Device:</b> Either Nexus 5 or Nexus 7</li>
-      <li><b>Target:</b> <!-- Confirm exact text when we have final distro -->
+      <li><b>Device:</b> Nexus 5, Nexus 6, Nexus 9, or Nexus Player</li>
+      <li><b>Target:</b>
        Android M (Preview) - API Level M</li>
     </ul>
-    <!-- Confirm this works when you can download image through SDK manager! -->
   </li>
 </ol>
 
