@@ -1,5 +1,8 @@
 #define LOG_TAG "GraphicsJNI"
 
+#include <unistd.h>
+#include <sys/mman.h>
+
 #include "jni.h"
 #include "JNIHelp.h"
 #include "GraphicsJNI.h"
@@ -10,6 +13,7 @@
 #include "SkMath.h"
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
+#include <cutils/ashmem.h>
 
 #include <Caches.h>
 #include <TextureCache.h>
@@ -570,6 +574,82 @@ bool GraphicsJNI::allocatePixels(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ct
     bitmap->lockPixels();
 
     return true;
+}
+
+android::Bitmap* GraphicsJNI::allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+                                                     SkColorTable* ctable) {
+    int fd;
+
+    const SkImageInfo& info = bitmap->info();
+    if (info.fColorType == kUnknown_SkColorType) {
+        doThrowIAE(env, "unknown bitmap configuration");
+        return nullptr;
+    }
+
+    size_t size;
+    if (!computeAllocationSize(*bitmap, &size)) {
+        return nullptr;
+    }
+
+    // we must respect the rowBytes value already set on the bitmap instead of
+    // attempting to compute our own.
+    const size_t rowBytes = bitmap->rowBytes();
+
+    // Create new ashmem region with read/write priv
+    fd = ashmem_create_region("bitmap", size);
+    if (fd < 0) {
+        return nullptr;
+    }
+
+    void* addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (addr == MAP_FAILED) {
+        close(fd);
+        return nullptr;
+    }
+
+    if (ashmem_set_prot_region(fd, PROT_READ) < 0) {
+        munmap(addr, size);
+        close(fd);
+        return nullptr;
+    }
+
+    android::Bitmap* wrapper = new android::Bitmap(addr, fd, info, rowBytes, ctable);
+    wrapper->getSkBitmap(bitmap);
+    // since we're already allocated, we lockPixels right away
+    // HeapAllocator behaves this way too
+    bitmap->lockPixels();
+
+    return wrapper;
+}
+
+android::Bitmap* GraphicsJNI::mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+                                                SkColorTable* ctable, int fd, bool readOnly) {
+    int flags;
+
+    const SkImageInfo& info = bitmap->info();
+    if (info.fColorType == kUnknown_SkColorType) {
+        doThrowIAE(env, "unknown bitmap configuration");
+        return nullptr;
+    }
+
+    // Create new ashmem region with read/write priv
+    flags = readOnly ? (PROT_READ) : (PROT_READ | PROT_WRITE);
+    void* addr = mmap(NULL, ashmem_get_size_region(fd), flags, MAP_SHARED, fd, 0);
+    if (addr == MAP_FAILED) {
+        return nullptr;
+    }
+
+    // we must respect the rowBytes value already set on the bitmap instead of
+    // attempting to compute our own.
+    const size_t rowBytes = bitmap->rowBytes();
+
+    android::Bitmap* wrapper = new android::Bitmap(addr, fd, info, rowBytes, ctable);
+    wrapper->getSkBitmap(bitmap);
+    // since we're already allocated, we lockPixels right away
+    // HeapAllocator behaves this way too
+    bitmap->lockPixels();
+
+    return wrapper;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
