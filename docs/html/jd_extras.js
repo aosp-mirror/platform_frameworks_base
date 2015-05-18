@@ -81,7 +81,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title":"Get Cardboard",
     "titleFriendly":"",
     "summary":"Get your own Cardboard, today. Buy one from a manufacturer or build your own, and start developing.",
-    "url":"https://www.google.com/get/cardboard/",
+    "url":"https://www.google.com/get/cardboard/get-cardboard/",
     "group":"",
     "keywords": ["carboard","vr"],
     "tags": [],
@@ -293,6 +293,30 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "tags": [
     ],
     "image":"http://i1.ytimg.com/vi/FOn64iqlphk/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Google Play Services 6.5",
+    "titleFriendly":"",
+    "summary":"Google Play services 6.5 includes new features in Google Maps, Google Drive and Google Wallet as well as the recently launched Google Fit API. ",
+    "url":"https://www.youtube.com/watch?v=fvtMtfCuEpw&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
+    "group":"",
+    "keywords": ["google play services"],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/fvtMtfCuEpw/maxresdefault.jpg",
+    "type":"video"
+  },
+    {
+    "title":"Google Play Services 7.0",
+    "titleFriendly":"",
+    "summary":"Google Play services 7.0 is here! we've added the Places API, made enhancements to Location and Google Fit, and you can also remote control your Android TV through the new Nearby Connections API.",
+    "url":"https://www.youtube.com/watch?v=F0Kh_RnSM0w&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
+    "group":"",
+    "keywords": ["google play services"],
+    "tags": [
+    ],
+    "image":"http://i1.ytimg.com/vi/F0Kh_RnSM0w/maxresdefault.jpg",
     "type":"video"
   },
   {

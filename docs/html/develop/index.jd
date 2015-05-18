@@ -13,7 +13,8 @@ excludeFromSuggestions=true
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="{@docRoot}images/develop/studio-open.png">
+        <img class="dac-hero-image" src="{@docRoot}images/develop/hero_image_studio5_2x.png"
+          srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x" />
       </div>
       <div class="col-1of2 col-pull-1of2">
         <h1 class="dac-hero-title">Get Started with Android Studio</h1>
