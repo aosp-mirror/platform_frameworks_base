@@ -615,6 +615,10 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
 
     const char* locale8 = locale != NULL ? env->GetStringUTFChars(locale, NULL) : NULL;
 
+    // Constants duplicated from Java class android.content.res.Configuration.
+    static const jint kScreenLayoutRoundMask = 0x300;
+    static const jint kScreenLayoutRoundShift = 8;
+
     config.mcc = (uint16_t)mcc;
     config.mnc = (uint16_t)mnc;
     config.orientation = (uint8_t)orientation;
@@ -632,6 +636,13 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
     config.uiMode = (uint8_t)uiMode;
     config.sdkVersion = (uint16_t)sdkVersion;
     config.minorVersion = 0;
+
+    // In Java, we use a 32bit integer for screenLayout, while we only use an 8bit integer
+    // in C++. We must extract the round qualifier out of the Java screenLayout and put it
+    // into screenLayout2.
+    config.screenLayout2 =
+            (uint8_t)((screenLayout & kScreenLayoutRoundMask) >> kScreenLayoutRoundShift);
+
     am->setConfiguration(config, locale8);
 
     if (locale != NULL) env->ReleaseStringUTFChars(locale, locale8);

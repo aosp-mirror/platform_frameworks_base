@@ -38,6 +38,7 @@ enum {
     SDK_KITKAT_WATCH = 20,
     SDK_LOLLIPOP = 21,
     SDK_LOLLIPOP_MR1 = 22,
+    SDK_MNC = 23,
 };
 
 #endif // H_AAPT_SDK_CONSTANTS
