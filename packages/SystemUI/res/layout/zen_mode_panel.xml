@@ -61,6 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:layout_marginStart="24dp"
+            android:textDirection="locale"
             android:lineSpacingMultiplier="1.20029"
             android:layout_toStartOf="@id/zen_introduction_confirm"
             android:textAppearance="@style/TextAppearance.QS.Introduction" />
