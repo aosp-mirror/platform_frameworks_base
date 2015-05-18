@@ -626,16 +626,16 @@ public class FingerprintService extends SystemService {
     public void onStart() {
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
         mHalDeviceId = nativeOpenHal();
-        if (mHalDeviceId != 0) {
-            updateActiveGroup(ActivityManager.getCurrentUser());
-        }
+        updateActiveGroup(ActivityManager.getCurrentUser());
         if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
         listenForUserSwitches();
     }
 
     private void updateActiveGroup(int userId) {
-        File path = Environment.getUserSystemDirectory(userId);
-        nativeSetActiveGroup(userId, path.getAbsolutePath().getBytes());
+        if (mHalDeviceId != 0) {
+            File path = Environment.getUserSystemDirectory(userId);
+            nativeSetActiveGroup(userId, path.getAbsolutePath().getBytes());
+        }
     }
 
     private void listenForUserSwitches() {
