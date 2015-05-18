@@ -111,6 +111,7 @@ public class AndroidKeyStoreProvider extends Provider {
      *
      * @throws IllegalArgumentException if the provided primitive is not supported or is not backed
      *         by AndroidKeyStore provider.
+     * @throws IllegalStateException if the provided primitive is not initialized.
      */
     public static long getKeyStoreOperationHandle(Object cryptoPrimitive) {
         if (cryptoPrimitive == null) {
@@ -118,15 +119,17 @@ public class AndroidKeyStoreProvider extends Provider {
         }
         Object spi;
         if (cryptoPrimitive instanceof Mac) {
-            spi = ((Mac) cryptoPrimitive).getSpi();
+            spi = ((Mac) cryptoPrimitive).getCurrentSpi();
         } else if (cryptoPrimitive instanceof Cipher) {
-            spi = ((Cipher) cryptoPrimitive).getSpi();
+            spi = ((Cipher) cryptoPrimitive).getCurrentSpi();
         } else {
             throw new IllegalArgumentException("Unsupported crypto primitive: " + cryptoPrimitive);
         }
-        if (!(spi instanceof KeyStoreCryptoOperation)) {
+        if (spi == null) {
+            throw new IllegalStateException("Crypto primitive not initialized");
+        } else if (!(spi instanceof KeyStoreCryptoOperation)) {
             throw new IllegalArgumentException(
-                    "Crypto primitive not backed by AndroidKeyStore: " + cryptoPrimitive
+                    "Crypto primitive not backed by AndroidKeyStore provider: " + cryptoPrimitive
                     + ", spi: " + spi);
         }
         return ((KeyStoreCryptoOperation) spi).getOperationHandle();
