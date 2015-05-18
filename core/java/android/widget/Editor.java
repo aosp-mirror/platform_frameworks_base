@@ -3687,7 +3687,8 @@ public class Editor {
                     }
                     mTouchToWindowOffsetY = newVerticalOffset + mLastParentY;
 
-                    final float newPosX = rawX - mTouchToWindowOffsetX + mHotspotX;
+                    final float newPosX =
+                            rawX - mTouchToWindowOffsetX + mHotspotX + getHorizontalOffset();
                     final float newPosY = rawY - mTouchToWindowOffsetY + mTouchOffsetY;
 
                     updatePosition(newPosX, newPosY);
