@@ -40,7 +40,10 @@ import com.android.server.LocalServices;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Top level factory, used creating all the main WebView implementation classes.
@@ -323,15 +326,30 @@ public final class WebViewFactory {
                 long newVmSize = 0L;
 
                 for (String path : nativeLibs) {
+                    if (path == null || TextUtils.isEmpty(path)) continue;
                     if (DEBUG) Log.d(LOGTAG, "Checking file size of " + path);
-                    if (path == null) continue;
                     File f = new File(path);
                     if (f.exists()) {
-                        long length = f.length();
-                        if (length > newVmSize) {
-                            newVmSize = length;
+                        newVmSize = Math.max(newVmSize, f.length());
+                        continue;
+                    }
+                    if (path.contains("!")) {
+                        String[] split = TextUtils.split(path, "!");
+                        if (split.length == 2) {
+                            try {
+                                ZipFile z = new ZipFile(split[0]);
+                                ZipEntry e = z.getEntry(split[1]);
+                                if (e != null && e.getMethod() == ZipEntry.STORED) {
+                                    newVmSize = Math.max(newVmSize, e.getSize());
+                                    continue;
+                                }
+                            }
+                            catch (IOException e) {
+                                Log.e(LOGTAG, "error reading APK file " + split[0] + ", ", e);
+                            }
                         }
                     }
+                    Log.e(LOGTAG, "error sizing load for " + path);
                 }
 
                 if (DEBUG) {
@@ -352,6 +370,27 @@ public final class WebViewFactory {
             Log.e(LOGTAG, "error preparing webview native library", t);
         }
         prepareWebViewInSystemServer(nativeLibs);
+    }
+
+    // throws MissingWebViewPackageException
+    private static String getLoadFromApkPath(String apkPath,
+                                             String[] abiList,
+                                             String nativeLibFileName) {
+        // Search the APK for a native library conforming to a listed ABI.
+        try {
+            ZipFile z = new ZipFile(apkPath);
+            for (String abi : abiList) {
+                final String entry = "lib/" + abi + "/" + nativeLibFileName;
+                ZipEntry e = z.getEntry(entry);
+                if (e != null && e.getMethod() == ZipEntry.STORED) {
+                    // Return a path formatted for dlopen() load from APK.
+                    return apkPath + "!" + entry;
+                }
+            }
+        } catch (IOException e) {
+            throw new MissingWebViewPackageException(e);
+        }
+        return "";
     }
 
     // throws MissingWebViewPackageException
@@ -382,8 +421,29 @@ public final class WebViewFactory {
             path32 = ai.nativeLibraryDir;
             path64 = "";
         }
-        if (!TextUtils.isEmpty(path32)) path32 += "/" + NATIVE_LIB_FILE_NAME;
-        if (!TextUtils.isEmpty(path64)) path64 += "/" + NATIVE_LIB_FILE_NAME;
+
+        // Form the full paths to the extracted native libraries.
+        // If libraries were not extracted, try load from APK paths instead.
+        if (!TextUtils.isEmpty(path32)) {
+            path32 += "/" + NATIVE_LIB_FILE_NAME;
+            File f = new File(path32);
+            if (!f.exists()) {
+                path32 = getLoadFromApkPath(ai.sourceDir,
+                                            Build.SUPPORTED_32_BIT_ABIS,
+                                            NATIVE_LIB_FILE_NAME);
+            }
+        }
+        if (!TextUtils.isEmpty(path64)) {
+            path64 += "/" + NATIVE_LIB_FILE_NAME;
+            File f = new File(path64);
+            if (!f.exists()) {
+                path64 = getLoadFromApkPath(ai.sourceDir,
+                                            Build.SUPPORTED_64_BIT_ABIS,
+                                            NATIVE_LIB_FILE_NAME);
+            }
+        }
+
+        if (DEBUG) Log.v(LOGTAG, "Native 32-bit lib: " + path32 + ", 64-bit lib: " + path64);
         return new String[] { path32, path64 };
     }
 
