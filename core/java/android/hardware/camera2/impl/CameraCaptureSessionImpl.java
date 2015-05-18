@@ -371,7 +371,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             mDeviceImpl.stopRepeating();
         } catch (IllegalStateException e) {
             // OK: Camera device may already be closed, nothing else to do
-            Log.w(TAG, mIdString + "The camera device was already closed: ", e);
 
             // TODO: Fire onClosed anytime we get the device onClosed or the ISE?
             // or just suppress the ISE only and rely onClosed.
