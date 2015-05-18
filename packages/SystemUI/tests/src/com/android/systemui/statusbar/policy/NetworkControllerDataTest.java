@@ -2,6 +2,7 @@ package com.android.systemui.statusbar.policy;
 
 import org.mockito.Mockito;
 
+import android.os.Looper;
 import android.telephony.TelephonyManager;
 
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
@@ -74,7 +75,8 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         // Switch to showing 4g icon and re-initialize the NetworkController.
         mConfig.show4gForLte = true;
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
-                mConfig, Mockito.mock(AccessPointControllerImpl.class),
+                mConfig, Looper.getMainLooper(), mCallbackHandler,
+                Mockito.mock(AccessPointControllerImpl.class),
                 Mockito.mock(MobileDataControllerImpl.class));
         setupNetworkController();
 

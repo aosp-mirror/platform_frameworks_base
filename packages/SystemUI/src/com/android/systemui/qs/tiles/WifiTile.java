@@ -16,8 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import java.util.List;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -36,7 +34,11 @@ import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
-import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
+import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.statusbar.policy.SignalCallbackAdapter;
+
+import java.util.List;
 
 /** Quick settings tile: Wifi **/
 public class WifiTile extends QSTile<QSTile.SignalState> {
@@ -67,9 +69,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mController.addNetworkSignalChangedCallback(mCallback);
+            mController.addSignalCallback(mSignalCallback);
         } else {
-            mController.removeNetworkSignalChangedCallback(mCallback);
+            mController.removeSignalCallback(mSignalCallback);
         }
     }
 
@@ -211,45 +213,20 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         }
     }
 
-    private final NetworkSignalChangedCallback mCallback = new NetworkSignalChangedCallback() {
+    private final SignalCallback mSignalCallback = new SignalCallbackAdapter() {
         @Override
-        public void onWifiSignalChanged(boolean enabled, boolean connected, int wifiSignalIconId,
-                boolean activityIn, boolean activityOut,
-                String wifiSignalContentDescriptionId, String description) {
+        public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
+                boolean activityIn, boolean activityOut, String description) {
             if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + enabled);
             final CallbackInfo info = new CallbackInfo();
             info.enabled = enabled;
-            info.connected = connected;
-            info.wifiSignalIconId = wifiSignalIconId;
+            info.connected = qsIcon.visible;
+            info.wifiSignalIconId = qsIcon.icon;
             info.enabledDesc = description;
             info.activityIn = activityIn;
             info.activityOut = activityOut;
-            info.wifiSignalContentDescription = wifiSignalContentDescriptionId;
+            info.wifiSignalContentDescription = qsIcon.contentDescription;
             refreshState(info);
-        }
-
-        @Override
-        public void onMobileDataSignalChanged(boolean enabled,
-                int mobileSignalIconId,
-                String mobileSignalContentDescriptionId, int dataTypeIconId,
-                boolean activityIn, boolean activityOut,
-                String dataTypeContentDescriptionId, String description,
-                boolean isDataTypeIconWide) {
-            // noop
-        }
-
-        public void onNoSimVisibleChanged(boolean noSims) {
-            // noop
-        }
-
-        @Override
-        public void onAirplaneModeChanged(boolean enabled) {
-            // noop
-        }
-
-        @Override
-        public void onMobileDataEnabled(boolean enabled) {
-            // noop
         }
     };
 
