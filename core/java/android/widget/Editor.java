@@ -3426,9 +3426,13 @@ public class Editor {
         protected void updateDrawable() {
             final int offset = getCurrentCursorOffset();
             final boolean isRtlCharAtOffset = mTextView.getLayout().isRtlCharAt(offset);
+            final Drawable oldDrawable = mDrawable;
             mDrawable = isRtlCharAtOffset ? mDrawableRtl : mDrawableLtr;
             mHotspotX = getHotspotX(mDrawable, isRtlCharAtOffset);
             mHorizontalGravity = getHorizontalGravity(isRtlCharAtOffset);
+            if (oldDrawable != mDrawable) {
+                postInvalidate();
+            }
         }
 
         protected abstract int getHotspotX(Drawable drawable, boolean isRtlRun);
