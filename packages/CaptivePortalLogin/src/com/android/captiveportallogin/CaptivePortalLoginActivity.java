@@ -146,6 +146,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private void done(Result result) {
         if (mNetworkCallback != null) {
             mCm.unregisterNetworkCallback(mNetworkCallback);
+            mNetworkCallback = null;
         }
         switch (result) {
             case DISMISSED:
@@ -189,6 +190,16 @@ public class CaptivePortalLoginActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (mNetworkCallback != null) {
+            mCm.unregisterNetworkCallback(mNetworkCallback);
+            mNetworkCallback = null;
+        }
     }
 
     private void testForCaptivePortal() {
