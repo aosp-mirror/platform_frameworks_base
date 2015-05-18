@@ -6164,17 +6164,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    @Override
-    public void systemBackupRestored() {
-        synchronized (this) {
-            if (mSystemReady) {
-                mTaskPersister.restoreTasksFromOtherDeviceLocked();
-            } else {
-                Slog.w(TAG, "System backup restored before system is ready");
-            }
-        }
-    }
-
     final void ensureBootCompleted() {
         boolean booting;
         boolean enableScreen;
@@ -11327,7 +11316,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             mRecentTasks.clear();
             mRecentTasks.addAll(mTaskPersister.restoreTasksLocked());
-            mTaskPersister.restoreTasksFromOtherDeviceLocked();
             mRecentTasks.cleanupLocked(UserHandle.USER_ALL);
             mTaskPersister.startPersisting();
 
@@ -16191,18 +16179,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         removeUriPermissionsForPackageLocked(ssp, userId, true);
 
                                         removeTasksByPackageNameLocked(ssp, userId);
-                                        if (userId == UserHandle.USER_OWNER) {
-                                            mTaskPersister.removeFromPackageCache(ssp);
-                                        }
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
                                 } else {
                                     cleanupDisabledPackageComponentsLocked(ssp, userId,
                                             intent.getStringArrayExtra(
                                                     Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST));
-                                    if (userId == UserHandle.USER_OWNER) {
-                                        mTaskPersister.addOtherDeviceTasksToRecentsLocked(ssp);
-                                    }
                                 }
                             }
                             break;
@@ -16217,8 +16199,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
                         mCompatModePackages.handlePackageAddedLocked(ssp, replacing);
 
-                        if (userId == UserHandle.USER_OWNER) {
-                            mTaskPersister.addOtherDeviceTasksToRecentsLocked(ssp);
+                        if (replacing) {
+                            removeTasksByRemovedPackageComponentsLocked(ssp, userId);
                         }
                         try {
                             ApplicationInfo ai = AppGlobals.getPackageManager().
