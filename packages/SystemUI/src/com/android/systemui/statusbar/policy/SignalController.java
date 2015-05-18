@@ -22,6 +22,7 @@ import android.text.format.DateFormat;
 import android.util.Log;
 
 import java.io.PrintWriter;
+import java.util.BitSet;
 
 
 /**
@@ -75,12 +76,8 @@ public abstract class SignalController<T extends SignalController.State,
         return mCurrentState;
     }
 
-    public int getTransportType() {
-        return mTransportType;
-    }
-
-    public void setInetCondition(int inetCondition) {
-        mCurrentState.inetCondition = inetCondition;
+    public void updateConnectivity(BitSet connectedTransports, BitSet validatedTransports) {
+        mCurrentState.inetCondition = validatedTransports.get(mTransportType) ? 1 : 0;
         notifyListenersIfNecessary();
     }
 

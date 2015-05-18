@@ -20,6 +20,8 @@ import android.net.NetworkCapabilities;
 
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
+import java.util.BitSet;
+
 
 public class EthernetSignalController extends
         SignalController<SignalController.State, SignalController.IconGroup> {
@@ -38,6 +40,12 @@ public class EthernetSignalController extends
     }
 
     @Override
+    public void updateConnectivity(BitSet connectedTransports, BitSet validatedTransports) {
+        mCurrentState.connected = connectedTransports.get(mTransportType);
+        super.updateConnectivity(connectedTransports, validatedTransports);
+    }
+
+    @Override
     public void notifyListeners() {
         boolean ethernetVisible = mCurrentState.connected;
         String contentDescription = getStringIfExists(getContentDescription());
@@ -50,10 +58,5 @@ public class EthernetSignalController extends
     @Override
     public SignalController.State cleanState() {
         return new SignalController.State();
-    }
-
-    public void setConnected(boolean connected) {
-        mCurrentState.connected = connected;
-        notifyListenersIfNecessary();
     }
 }

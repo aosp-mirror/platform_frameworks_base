@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.os.Looper;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -79,13 +80,12 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
             setLevel(testStrength);
 
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][testStrength],
-                    DEFAULT_ICON);
+                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][testStrength], DEFAULT_ICON);
 
             // Verify low inet number indexing.
-            setConnectivity(0, ConnectivityManager.TYPE_MOBILE, true);
+            setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, true);
             verifyLastMobileDataIndicators(true,
-                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[0][testStrength], 0);
+                    TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[0][testStrength], DEFAULT_ICON);
         }
     }
 
@@ -154,18 +154,12 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         }
     }
 
-    public void testNoRoamingWithoutSignal() {
+    public void testNoBangWithWifi() {
         setupDefaultSignal();
-        setCdma();
-        setCdmaRoaming(true);
-        setVoiceRegState(ServiceState.STATE_OUT_OF_SERVICE);
-        setDataRegState(ServiceState.STATE_OUT_OF_SERVICE);
+        setConnectivity(mMobileSignalController.mTransportType, false, false);
+        setConnectivity(NetworkCapabilities.TRANSPORT_WIFI, true, true);
 
-        // This exposes the bug in b/18034542, and should be switched to the commented out
-        // verification below (and pass), once the bug is fixed.
-        verifyLastMobileDataIndicators(true, R.drawable.stat_sys_signal_null,
-                TelephonyIcons.ROAMING_ICON);
-        //verifyLastMobileDataIndicators(true, R.drawable.stat_sys_signal_null, 0 /* No Icon */);
+        verifyLastMobileDataIndicators(true, TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][2], 0);
     }
 
     // Some tests of actual NetworkController code, just internals not display stuff
