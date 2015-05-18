@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1747,23 +1748,17 @@ public final class TvInputManager {
         }
 
         /**
-         * Sets playback rate and audio mode.
+         * Sets playback rate using {@link android.media.PlaybackParams}.
          *
-         * @param rate The ratio between desired playback rate and normal one.
-         * @param audioMode Audio playback mode. Must be one of the supported audio modes:
-         * <ul>
-         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_DEFAULT}
-         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_STRETCH}
-         * <li> {@link android.media.MediaPlayer#PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
-         * </ul>
+         * @param params The playback params.
          */
-        void timeShiftSetPlaybackRate(float rate, int audioMode) {
+        void timeShiftSetPlaybackParams(PlaybackParams params) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.timeShiftSetPlaybackRate(mToken, rate, audioMode, mUserId);
+                mService.timeShiftSetPlaybackParams(mToken, params, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
