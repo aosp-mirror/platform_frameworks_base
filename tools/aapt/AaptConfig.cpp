@@ -123,6 +123,14 @@ bool parse(const String8& str, ConfigDescription* out) {
         part = parts[index].string();
     }
 
+    if (parseScreenRound(part, &config)) {
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index].string();
+    }
+
     if (parseOrientation(part, &config)) {
         index++;
         if (index == N) {
@@ -241,7 +249,9 @@ void applyVersionForCompatibility(ConfigDescription* config) {
     }
 
     uint16_t minSdk = 0;
-    if (config->density == ResTable_config::DENSITY_ANY) {
+    if (config->screenLayout2 & ResTable_config::MASK_SCREENROUND) {
+        minSdk = SDK_MNC;
+    } else if (config->density == ResTable_config::DENSITY_ANY) {
         minSdk = SDK_LOLLIPOP;
     } else if (config->smallestScreenWidthDp != ResTable_config::SCREENWIDTH_ANY
             || config->screenWidthDp != ResTable_config::SCREENWIDTH_ANY
@@ -395,7 +405,26 @@ bool parseScreenLayoutLong(const char* name, ResTable_config* out) {
                 | ResTable_config::SCREENLONG_NO;
         return true;
     }
+    return false;
+}
 
+bool parseScreenRound(const char* name, ResTable_config* out) {
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->screenLayout2 =
+                (out->screenLayout2&~ResTable_config::MASK_SCREENROUND)
+                | ResTable_config::SCREENROUND_ANY;
+        return true;
+    } else if (strcmp(name, "round") == 0) {
+        if (out) out->screenLayout2 =
+                (out->screenLayout2&~ResTable_config::MASK_SCREENROUND)
+                | ResTable_config::SCREENROUND_YES;
+        return true;
+    } else if (strcmp(name, "notround") == 0) {
+        if (out) out->screenLayout2 =
+                (out->screenLayout2&~ResTable_config::MASK_SCREENROUND)
+                | ResTable_config::SCREENROUND_NO;
+        return true;
+    }
     return false;
 }
 
