@@ -443,8 +443,6 @@
   <java-symbol type="string" name="app_running_notification_text" />
   <java-symbol type="string" name="delete" />
   <java-symbol type="string" name="deleteText" />
-  <java-symbol type="string" name="ellipsis_two_dots" />
-  <java-symbol type="string" name="ellipsis" />
   <java-symbol type="string" name="grant_permissions_header_text" />
   <java-symbol type="string" name="list_delimeter" />
   <java-symbol type="string" name="menu_delete_shortcut_label" />
@@ -2278,4 +2276,5 @@
   <java-symbol type="bool" name="config_supportDoubleTapWake" />
   <java-symbol type="drawable" name="ic_perm_device_info" />
   <java-symbol type="string" name="config_radio_access_family" />
+  <java-symbol type="string" name="notification_inbox_ellipsis" />
 </resources>
