@@ -100,4 +100,82 @@ TEST(ConfigTest, shouldSelectBestDensityWhenNoneSpecified) {
     ASSERT_EQ(expectedBest, selectBest(deviceConfig, configs));
 }
 
+TEST(ConfigTest, shouldMatchRoundQualifier) {
+    ResTable_config deviceConfig;
+    memset(&deviceConfig, 0, sizeof(deviceConfig));
+
+    ResTable_config roundConfig;
+    memset(&roundConfig, 0, sizeof(roundConfig));
+    roundConfig.screenLayout2 = ResTable_config::SCREENROUND_YES;
+
+    EXPECT_FALSE(roundConfig.match(deviceConfig));
+
+    deviceConfig.screenLayout2 = ResTable_config::SCREENROUND_YES;
+
+    EXPECT_TRUE(roundConfig.match(deviceConfig));
+
+    deviceConfig.screenLayout2 = ResTable_config::SCREENROUND_NO;
+
+    EXPECT_FALSE(roundConfig.match(deviceConfig));
+
+    ResTable_config notRoundConfig;
+    memset(&notRoundConfig, 0, sizeof(notRoundConfig));
+    notRoundConfig.screenLayout2 = ResTable_config::SCREENROUND_NO;
+
+    EXPECT_TRUE(notRoundConfig.match(deviceConfig));
+}
+
+TEST(ConfigTest, RoundQualifierShouldHaveStableSortOrder) {
+    ResTable_config defaultConfig;
+    memset(&defaultConfig, 0, sizeof(defaultConfig));
+
+    ResTable_config longConfig = defaultConfig;
+    longConfig.screenLayout = ResTable_config::SCREENLONG_YES;
+
+    ResTable_config longRoundConfig = longConfig;
+    longRoundConfig.screenLayout2 = ResTable_config::SCREENROUND_YES;
+
+    ResTable_config longRoundPortConfig = longConfig;
+    longRoundPortConfig.orientation = ResTable_config::ORIENTATION_PORT;
+
+    EXPECT_TRUE(longConfig.compare(longRoundConfig) < 0);
+    EXPECT_TRUE(longConfig.compareLogical(longRoundConfig) < 0);
+    EXPECT_TRUE(longRoundConfig.compare(longConfig) > 0);
+    EXPECT_TRUE(longRoundConfig.compareLogical(longConfig) > 0);
+
+    EXPECT_TRUE(longRoundConfig.compare(longRoundPortConfig) < 0);
+    EXPECT_TRUE(longRoundConfig.compareLogical(longRoundPortConfig) < 0);
+    EXPECT_TRUE(longRoundPortConfig.compare(longRoundConfig) > 0);
+    EXPECT_TRUE(longRoundPortConfig.compareLogical(longRoundConfig) > 0);
+}
+
+TEST(ConfigTest, ScreenShapeHasCorrectDiff) {
+    ResTable_config defaultConfig;
+    memset(&defaultConfig, 0, sizeof(defaultConfig));
+
+    ResTable_config roundConfig = defaultConfig;
+    roundConfig.screenLayout2 = ResTable_config::SCREENROUND_YES;
+
+    EXPECT_EQ(defaultConfig.diff(roundConfig), ResTable_config::CONFIG_SCREEN_ROUND);
+}
+
+TEST(ConfigTest, RoundIsMoreSpecific) {
+    ResTable_config deviceConfig;
+    memset(&deviceConfig, 0, sizeof(deviceConfig));
+    deviceConfig.screenLayout2 = ResTable_config::SCREENROUND_YES;
+    deviceConfig.screenLayout = ResTable_config::SCREENLONG_YES;
+
+    ResTable_config targetConfigA;
+    memset(&targetConfigA, 0, sizeof(targetConfigA));
+
+    ResTable_config targetConfigB = targetConfigA;
+    targetConfigB.screenLayout = ResTable_config::SCREENLONG_YES;
+
+    ResTable_config targetConfigC = targetConfigB;
+    targetConfigC.screenLayout2 = ResTable_config::SCREENROUND_YES;
+
+    EXPECT_TRUE(targetConfigB.isBetterThan(targetConfigA, &deviceConfig));
+    EXPECT_TRUE(targetConfigC.isBetterThan(targetConfigB, &deviceConfig));
+}
+
 }  // namespace android.
