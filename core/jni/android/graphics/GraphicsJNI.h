@@ -95,6 +95,12 @@ public:
     static android::Bitmap* allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
             SkColorTable* ctable);
 
+    static android::Bitmap* allocateAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+            SkColorTable* ctable);
+
+    static android::Bitmap* mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
+            SkColorTable* ctable, int fd, bool readOnly);
+
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
      * of that bitmap.  The memory is then attached to the bitmap via an
