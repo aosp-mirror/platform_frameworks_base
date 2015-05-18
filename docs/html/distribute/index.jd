@@ -22,7 +22,7 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
       data-query="type:youtube+tag:googleplay+tag:developerstory+tag:featured, type:blog+tag:googleplay+tag:distribute+tag:featured"
       data-sortOrder="-timestamp"
       data-cardSizes="6x6"
-      data-maxResults="6"></div>
+      data-maxResults="3"></div>
 </div></section>
 
 <section class="dac-section dac-invert dac-darken-bg" style="background-image: url(/images/distribute/google-play-bg.jpg)"><div class="wrap">
@@ -64,7 +64,11 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
     </a></li>
     <li class="dac-section-link"><a href="/distribute/monetize/index.html">
       <span class="dac-sprite dac-auto-chevron"></span>
-      Monetize
+      Earn
+    </a></li>
+    <li class="dac-section-link"><a href="/distribute/analyze/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Analyze
     </a></li>
   </ul>
 </div></section>
@@ -77,10 +81,10 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:distribute/landing/more"
        data-cardSizes="6x6"></div>
-  <ul class="dac-section-links">
+<!--  <ul class="dac-section-links">
     <li class="dac-section-link"><a href="https://developers.google.com/">
       <span class="dac-sprite dac-auto-chevron"></span>
       More Google services for Android
     </a></li>
-  </ul>
+  </ul> -->
 </div></section>

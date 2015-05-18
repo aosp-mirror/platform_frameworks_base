@@ -84,6 +84,12 @@
         </a></li>
     </ul>
   </li>
+  <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/work/about.html">
+          <span class="en"><span style="white-space:nowrap">Google Play for Work</span></span>
+        </a>
+    </div>
+  </li>
 </ul>
 <script type="text/javascript">
 <!--
