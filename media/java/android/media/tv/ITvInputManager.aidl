@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.media.tv.DvbDeviceInfo;
 import android.media.tv.ITvInputClient;
 import android.media.tv.ITvInputHardware;
@@ -79,7 +80,7 @@ interface ITvInputManager {
     void timeShiftPause(in IBinder sessionToken, int userId);
     void timeShiftResume(in IBinder sessionToken, int userId);
     void timeShiftSeekTo(in IBinder sessionToken, long timeMs, int userId);
-    void timeShiftSetPlaybackRate(in IBinder sessionToken, float rate, int audioMode, int userId);
+    void timeShiftSetPlaybackParams(in IBinder sessionToken, in PlaybackParams params, int userId);
     void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
 
     // For TV input hardware binding

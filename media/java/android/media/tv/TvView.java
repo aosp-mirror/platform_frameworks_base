@@ -28,7 +28,6 @@ import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
-import android.media.tv.TvView.TimeShiftPositionCallback;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -470,13 +469,13 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets playback rate using {@link android.media#PlaybackParams}.
+     * Sets playback rate using {@link android.media.PlaybackParams}.
      *
      * @param params The playback params.
      */
     public void timeShiftSetPlaybackParams(@NonNull PlaybackParams params) {
         if (mSession != null) {
-            mSession.timeShiftSetPlaybackRate(params.getSpeed(), params.getAudioFallbackMode());
+            mSession.timeShiftSetPlaybackParams(params);
         }
     }
 
