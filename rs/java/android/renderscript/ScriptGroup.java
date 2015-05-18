@@ -131,28 +131,16 @@ public final class ScriptGroup extends BaseObj {
 
             int i;
             for (i = 0; i < args.length; i++) {
-                Object obj = args[i];
                 fieldIDs[i] = 0;
-                if (obj instanceof Input) {
-                    Input unbound = (Input)obj;
-                    unbound.addReference(this, i);
-                } else {
-                    retrieveValueAndDependenceInfo(rs, i, args[i], values, sizes,
-                                                   depClosures, depFieldIDs);
-                }
+                retrieveValueAndDependenceInfo(rs, i, null, args[i],
+                                               values, sizes, depClosures, depFieldIDs);
             }
-
             for (Map.Entry<Script.FieldID, Object> entry : globals.entrySet()) {
                 Object obj = entry.getValue();
                 Script.FieldID fieldID = entry.getKey();
                 fieldIDs[i] = fieldID.getID(rs);
-                if (obj instanceof Input) {
-                    Input unbound = (Input)obj;
-                    unbound.addReference(this, fieldID);
-                } else {
-                    retrieveValueAndDependenceInfo(rs, i, obj, values,
-                                                   sizes, depClosures, depFieldIDs);
-                }
+                retrieveValueAndDependenceInfo(rs, i, fieldID, obj,
+                                               values, sizes, depClosures, depFieldIDs);
                 i++;
             }
 
@@ -184,13 +172,8 @@ public final class ScriptGroup extends BaseObj {
                 Object obj = entry.getValue();
                 Script.FieldID fieldID = entry.getKey();
                 fieldIDs[i] = fieldID.getID(rs);
-                if (obj instanceof Input) {
-                    Input unbound = (Input)obj;
-                    unbound.addReference(this, fieldID);
-                } else {
-                    retrieveValueAndDependenceInfo(rs, i, obj, values,
-                                                   sizes, depClosures, depFieldIDs);
-                }
+                retrieveValueAndDependenceInfo(rs, i, fieldID, obj, values,
+                                               sizes, depClosures, depFieldIDs);
                 i++;
             }
 
@@ -200,9 +183,8 @@ public final class ScriptGroup extends BaseObj {
             setID(id);
         }
 
-        private static
-                void retrieveValueAndDependenceInfo(RenderScript rs,
-                                                    int index, Object obj,
+        private void retrieveValueAndDependenceInfo(RenderScript rs,
+                                                    int index, Script.FieldID fid, Object obj,
                                                     long[] values, int[] sizes,
                                                     long[] depClosures,
                                                     long[] depFieldIDs) {
@@ -213,20 +195,25 @@ public final class ScriptGroup extends BaseObj {
                 depClosures[index] = f.getClosure().getID(rs);
                 Script.FieldID fieldID = f.getFieldID();
                 depFieldIDs[index] = fieldID != null ? fieldID.getID(rs) : 0;
-                if (obj == null) {
-                    // Value is originally created by the owner closure
-                    values[index] = 0;
-                    sizes[index] = 0;
-                    return;
-                }
             } else {
                 depClosures[index] = 0;
                 depFieldIDs[index] = 0;
             }
 
-            ValueAndSize vs = new ValueAndSize(rs, obj);
-            values[index] = vs.value;
-            sizes[index] = vs.size;
+            if (obj instanceof Input) {
+                Input unbound = (Input)obj;
+                if (index < mArgs.length) {
+                    unbound.addReference(this, index);
+                } else {
+                    unbound.addReference(this, fid);
+                }
+                values[index] = 0;
+                sizes[index] = 0;
+            } else {
+                ValueAndSize vs = new ValueAndSize(rs, obj);
+                values[index] = vs.value;
+                sizes[index] = vs.size;
+            }
         }
 
         /**
@@ -258,7 +245,11 @@ public final class ScriptGroup extends BaseObj {
                 // without an associated value (reference). So this is not working for
                 // cross-module (cross-script) linking in this case where a field not
                 // explicitly bound.
-                f = new Future(this, field, mBindings.get(field));
+                Object obj = mBindings.get(field);
+                if (obj instanceof Future) {
+                    obj = ((Future)obj).getValue();
+                }
+                f = new Future(this, field, obj);
                 mGlobalFuture.put(field, f);
             }
 
@@ -266,12 +257,18 @@ public final class ScriptGroup extends BaseObj {
         }
 
         void setArg(int index, Object obj) {
+            if (obj instanceof Future) {
+                obj = ((Future)obj).getValue();
+            }
             mArgs[index] = obj;
             ValueAndSize vs = new ValueAndSize(mRS, obj);
             mRS.nClosureSetArg(getID(mRS), index, vs.value, vs.size);
         }
 
         void setGlobal(Script.FieldID fieldID, Object obj) {
+            if (obj instanceof Future) {
+                obj = ((Future)obj).getValue();
+            }
             mBindings.put(fieldID, obj);
             ValueAndSize vs = new ValueAndSize(mRS, obj);
             mRS.nClosureSetGlobal(getID(mRS), fieldID.getID(mRS), vs.value, vs.size);
@@ -344,6 +341,7 @@ public final class ScriptGroup extends BaseObj {
         // -1 means unset. Legal values are 0 .. n-1, where n is the number of
         // arguments for the referencing closure.
         List<Pair<Closure, Integer>> mArgIndex;
+        Object mValue;
 
         Input() {
             mFieldID = new ArrayList<Pair<Closure, Script.FieldID>>();
@@ -359,6 +357,7 @@ public final class ScriptGroup extends BaseObj {
         }
 
         void set(Object value) {
+            mValue = value;
             for (Pair<Closure, Integer> p : mArgIndex) {
                 Closure closure = p.first;
                 int index = p.second.intValue();
@@ -370,6 +369,8 @@ public final class ScriptGroup extends BaseObj {
                 closure.setGlobal(fieldID, value);
             }
         }
+
+        Object get() { return mValue; }
     }
 
     private String mName;
@@ -434,7 +435,11 @@ public final class ScriptGroup extends BaseObj {
         Object[] outputObjs = new Object[mOutputs2.length];
         int i = 0;
         for (Future f : mOutputs2) {
-            outputObjs[i++] = f.getValue();
+            Object output = f.getValue();
+            if (output instanceof Input) {
+                output = ((Input)output).get();
+            }
+            outputObjs[i++] = output;
         }
         return outputObjs;
     }
@@ -592,7 +597,8 @@ public final class ScriptGroup extends BaseObj {
                 Node n = mNodes.get(ct);
                 if (n.mInputs.size() == 0) {
                     if (n.mOutputs.size() == 0 && mNodes.size() > 1) {
-                        throw new RSInvalidStateException("Groups cannot contain unconnected scripts");
+                        String msg = "Groups cannot contain unconnected scripts";
+                        throw new RSInvalidStateException(msg);
                     }
                     validateDAGRecurse(n, ct+1);
                 }
