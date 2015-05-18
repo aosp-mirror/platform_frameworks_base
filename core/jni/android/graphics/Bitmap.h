@@ -29,6 +29,7 @@ enum class PixelStorageType {
     Invalid,
     External,
     Java,
+    Ashmem,
 };
 
 class WrappedPixelRef;
@@ -50,6 +51,8 @@ public:
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     Bitmap(void* address, void* context, FreeFunc freeFunc,
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
+    Bitmap(void* address, int fd, const SkImageInfo& info, size_t rowBytes,
+            SkColorTable* ctable);
 
     const SkImageInfo& info() const;
 
@@ -76,6 +79,7 @@ public:
 
     bool hasHardwareMipMap();
     void setHasHardwareMipMap(bool hasMipMap);
+    int getAshmemFd() const;
 
 private:
     friend class WrappedPixelRef;
@@ -103,6 +107,11 @@ private:
             void* context;
             FreeFunc freeFunc;
         } external;
+        struct {
+            void* address;
+            int fd;
+            size_t size;
+        } ashmem;
         struct {
             JavaVM* jvm;
             jweak jweakRef;

@@ -1,5 +1,4 @@
 #define LOG_TAG "Bitmap"
-
 #include "Bitmap.h"
 
 #include "Paint.h"
@@ -23,6 +22,10 @@
 #include "core_jni_helpers.h"
 
 #include <jni.h>
+#include <memory>
+#include <string>
+#include <sys/mman.h>
+#include <cutils/ashmem.h>
 
 namespace android {
 
@@ -135,6 +138,17 @@ Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
     mPixelRef->unref();
 }
 
+Bitmap::Bitmap(void* address, int fd,
+            const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
+        : mPixelStorageType(PixelStorageType::Ashmem) {
+    mPixelStorage.ashmem.address = address;
+    mPixelStorage.ashmem.fd = fd;
+    mPixelStorage.ashmem.size = ashmem_get_size_region(fd);
+    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));
+    // Note: this will trigger a call to onStrongRefDestroyed(), but
+    // we want the pixel ref to have a ref count of 0 at this point
+    mPixelRef->unref();
+}
 Bitmap::~Bitmap() {
     doFreePixels();
 }
@@ -155,6 +169,10 @@ void Bitmap::doFreePixels() {
     case PixelStorageType::External:
         mPixelStorage.external.freeFunc(mPixelStorage.external.address,
                 mPixelStorage.external.context);
+        break;
+    case PixelStorageType::Ashmem:
+        munmap(mPixelStorage.ashmem.address, mPixelStorage.ashmem.size);
+        close(mPixelStorage.ashmem.fd);
         break;
     case PixelStorageType::Java:
         JNIEnv* env = jniEnv();
@@ -177,6 +195,15 @@ bool Bitmap::hasHardwareMipMap() {
 
 void Bitmap::setHasHardwareMipMap(bool hasMipMap) {
     mPixelRef->setHasHardwareMipMap(hasMipMap);
+}
+
+int Bitmap::getAshmemFd() const {
+    switch (mPixelStorageType) {
+    case PixelStorageType::Ashmem:
+        return mPixelStorage.ashmem.fd;
+    default:
+        return -1;
+    }
 }
 
 const SkImageInfo& Bitmap::info() const {
@@ -274,6 +301,7 @@ void Bitmap::pinPixelsLocked() {
         LOG_ALWAYS_FATAL("Cannot pin invalid pixels!");
         break;
     case PixelStorageType::External:
+    case PixelStorageType::Ashmem:
         // Nothing to do
         break;
     case PixelStorageType::Java: {
@@ -296,6 +324,7 @@ void Bitmap::unpinPixelsLocked() {
         LOG_ALWAYS_FATAL("Cannot unpin invalid pixels!");
         break;
     case PixelStorageType::External:
+    case PixelStorageType::Ashmem:
         // Don't need to do anything
         break;
     case PixelStorageType::Java: {
@@ -898,33 +927,75 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         }
     }
 
-    android::Bitmap* nativeBitmap = GraphicsJNI::allocateJavaPixelRef(env, bitmap.get(), ctable);
-    if (!nativeBitmap) {
+    int fd = p->readFileDescriptor();
+    int dupFd = dup(fd);
+    if (dupFd < 0) {
         SkSafeUnref(ctable);
+        doThrowRE(env, "Could not dup parcel fd.");
         return NULL;
     }
 
+    bool readOnlyMapping = !isMutable;
+    Bitmap* nativeBitmap = GraphicsJNI::mapAshmemPixelRef(env, bitmap.get(),
+        ctable, dupFd, readOnlyMapping);
     SkSafeUnref(ctable);
-
-    size_t size = bitmap->getSize();
-
-    android::Parcel::ReadableBlob blob;
-    android::status_t status = p->readBlob(size, &blob);
-    if (status) {
-        nativeBitmap->detachFromJava();
-        doThrowRE(env, "Could not read bitmap from parcel blob.");
+    if (!nativeBitmap) {
+        close(dupFd);
+        doThrowRE(env, "Could not allocate ashmem pixel ref.");
         return NULL;
     }
-
-    bitmap->lockPixels();
-    memcpy(bitmap->getPixels(), blob.data(), size);
-    bitmap->unlockPixels();
-
-    blob.release();
+    bitmap->pixelRef()->setImmutable();
 
     return GraphicsJNI::createBitmap(env, nativeBitmap,
             getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);
 }
+
+class Ashmem {
+public:
+    Ashmem(size_t sz, bool removeWritePerm) : mSize(sz) {
+        int fd = -1;
+        void *addr = nullptr;
+
+        // Create new ashmem region with read/write priv
+        fd = ashmem_create_region("bitmap", sz);
+        if (fd < 0) {
+            goto error;
+        }
+        addr = mmap(nullptr, sz, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (addr == MAP_FAILED) {
+            goto error;
+        }
+        // If requested, remove the ability to make additional writeable to
+        // this memory.
+        if (removeWritePerm) {
+            if (ashmem_set_prot_region(fd, PROT_READ) < 0) {
+                goto error;
+            }
+        }
+        mFd = fd;
+        mPtr = addr;
+        return;
+error:
+        if (fd >= 0) {
+            close(fd);
+        }
+        if (addr) {
+            munmap(addr, sz);
+        }
+    }
+    ~Ashmem() {
+        if (mPtr) {
+            close(mFd);
+            munmap(mPtr, mSize);
+        }
+    }
+    void *getPtr() const { return mPtr; }
+    int getFd() const { return mFd; }
+private:
+    int mFd = -1;
+    int mSize;
+    void* mPtr = nullptr;
+};
 
 static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
                                      jlong bitmapHandle,
@@ -937,7 +1008,9 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
     SkBitmap bitmap;
-    reinterpret_cast<Bitmap*>(bitmapHandle)->getSkBitmap(&bitmap);
+
+    android::Bitmap* androidBitmap = reinterpret_cast<Bitmap*>(bitmapHandle);
+    androidBitmap->getSkBitmap(&bitmap);
 
     p->writeInt32(isMutable);
     p->writeInt32(bitmap.colorType());
@@ -959,25 +1032,26 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
         }
     }
 
-    size_t size = bitmap.getSize();
-
-    android::Parcel::WritableBlob blob;
-    android::status_t status = p->writeBlob(size, &blob);
-    if (status) {
-        doThrowRE(env, "Could not write bitmap to parcel blob.");
-        return JNI_FALSE;
-    }
-
-    bitmap.lockPixels();
-    const void* pSrc =  bitmap.getPixels();
-    if (pSrc == NULL) {
-        memset(blob.data(), 0, size);
+    bool ashmemSrc = androidBitmap->getAshmemFd() >= 0;
+    if (ashmemSrc && !isMutable) {
+        p->writeDupFileDescriptor(androidBitmap->getAshmemFd());
     } else {
-        memcpy(blob.data(), pSrc, size);
-    }
-    bitmap.unlockPixels();
+        Ashmem dstAshmem(bitmap.getSize(), !isMutable);
+        if (!dstAshmem.getPtr()) {
+            doThrowRE(env, "Could not allocate ashmem for new bitmap.");
+            return JNI_FALSE;
+        }
 
-    blob.release();
+        bitmap.lockPixels();
+        const void* pSrc = bitmap.getPixels();
+        if (pSrc == NULL) {
+            memset(dstAshmem.getPtr(), 0, bitmap.getSize());
+        } else {
+            memcpy(dstAshmem.getPtr(), pSrc, bitmap.getSize());
+        }
+        bitmap.unlockPixels();
+        p->writeDupFileDescriptor(dstAshmem.getFd());
+    }
     return JNI_TRUE;
 }
 
