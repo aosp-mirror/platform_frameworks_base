@@ -674,6 +674,25 @@ bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+AshmemPixelAllocator::AshmemPixelAllocator(JNIEnv *env) {
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&mJavaVM) != JNI_OK,
+            "env->GetJavaVM failed");
+}
+
+AshmemPixelAllocator::~AshmemPixelAllocator() {
+    if (mStorage) {
+        mStorage->detachFromJava();
+    }
+}
+
+bool AshmemPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+    JNIEnv* env = vm2env(mJavaVM);
+    mStorage = GraphicsJNI::allocateAshmemPixelRef(env, bitmap, ctable);
+    return mStorage != nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 static jclass make_globalref(JNIEnv* env, const char classname[])
 {
     jclass c = env->FindClass(classname);
