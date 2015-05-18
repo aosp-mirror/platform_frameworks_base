@@ -62,7 +62,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_TIME_SHIFT_PAUSE = 14;
     private static final int DO_TIME_SHIFT_RESUME = 15;
     private static final int DO_TIME_SHIFT_SEEK_TO = 16;
-    private static final int DO_TIME_SHIFT_SET_PLAYBACK_RATE = 17;
+    private static final int DO_TIME_SHIFT_SET_PLAYBACK_PARAMS = 17;
     private static final int DO_TIME_SHIFT_ENABLE_POSITION_TRACKING = 18;
 
     private final HandlerCaller mCaller;
@@ -172,7 +172,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.timeShiftSeekTo((Long) msg.obj);
                 break;
             }
-            case DO_TIME_SHIFT_SET_PLAYBACK_RATE: {
+            case DO_TIME_SHIFT_SET_PLAYBACK_PARAMS: {
                 PlaybackParams params = new PlaybackParams()
                         .setSpeed((Float) msg.obj)
                         .setAudioFallbackMode(msg.arg1);
@@ -293,9 +293,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void timeShiftSetPlaybackRate(float rate, int audioMode) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIO(DO_TIME_SHIFT_SET_PLAYBACK_RATE,
-                audioMode, Float.valueOf(rate)));
+    public void timeShiftSetPlaybackParams(PlaybackParams params) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_SET_PLAYBACK_PARAMS,
+                params));
     }
 
     @Override
