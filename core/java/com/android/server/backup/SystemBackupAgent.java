@@ -16,14 +16,12 @@
 
 package com.android.server.backup;
 
-import android.app.ActivityManagerNative;
 import android.app.IWallpaperManager;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
-import android.app.backup.RecentsBackupHelper;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.Context;
 import android.os.Environment;
@@ -45,7 +43,6 @@ public class SystemBackupAgent extends BackupAgentHelper {
     // Names of the helper tags within the dataset.  Changing one of these names will
     // break the ability to restore from datasets that predate the change.
     private static final String WALLPAPER_HELPER = "wallpaper";
-    private static final String RECENTS_HELPER = "recents";
     private static final String SYNC_SETTINGS_HELPER = "account_sync_settings";
     private static final String PREFERRED_HELPER = "preferred_activities";
     private static final String NOTIFICATION_HELPER = "notifications";
@@ -92,7 +89,6 @@ public class SystemBackupAgent extends BackupAgentHelper {
             }
         }
         addHelper(WALLPAPER_HELPER, new WallpaperBackupHelper(this, files, keys));
-        addHelper(RECENTS_HELPER, new RecentsBackupHelper(this));
         addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
@@ -127,7 +123,6 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper("system_files", new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE },
                 new String[] { WALLPAPER_IMAGE_KEY} ));
-        addHelper(RECENTS_HELPER, new RecentsBackupHelper(this));
         addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
         addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
         addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
@@ -198,15 +193,6 @@ public class SystemBackupAgent extends BackupAgentHelper {
                 (new File(WALLPAPER_IMAGE)).delete();
                 (new File(WALLPAPER_INFO)).delete();
             }
-        }
-    }
-
-    @Override
-    public void onRestoreFinished() {
-        try {
-            ActivityManagerNative.getDefault().systemBackupRestored();
-        } catch (RemoteException e) {
-            // Not possible since this code is running in the system process.
         }
     }
 }
