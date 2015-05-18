@@ -2151,4 +2151,10 @@
          format is UMTS|LTE|... -->
     <string translatable="false" name="config_radio_access_family"></string>
 
+    <!-- Whether the main built-in display is round. This will affect
+         Configuration.screenLayout's SCREENLAYOUT_ROUND_MASK flags for Configurations on the
+         main built-in display. Change this in device-specific overlays.
+         Defaults to the older, deprecated config_windowIsRound already used in
+         some existing device-specific resource overlays. -->
+    <bool name="config_mainBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
 </resources>
