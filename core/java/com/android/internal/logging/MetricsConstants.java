@@ -208,7 +208,6 @@ public interface MetricsConstants {
     public static final int APPLICATIONS_USAGE_ACCESS_DETAIL = 183;
     public static final int APPLICATIONS_HIGH_POWER_APPS = 184;
     public static final int FUELGAUGE_HIGH_POWER_DETAILS = 185;
-    public static final int APPLICATIONS_MANAGE_ASSIST = 186;
 
     //aliases
     public static final int DEVICEINFO_STORAGE = DEVICEINFO_MEMORY;
