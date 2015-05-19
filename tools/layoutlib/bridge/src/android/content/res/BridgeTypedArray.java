@@ -444,7 +444,7 @@ public final class BridgeTypedArray extends TypedArray {
     @Override
     public int getDimensionPixelSize(int index, int defValue) {
         try {
-            return getDimension(index);
+            return getDimension(index, null);
         } catch (RuntimeException e) {
             String s = getString(index);
 
@@ -474,12 +474,12 @@ public final class BridgeTypedArray extends TypedArray {
     @Override
     public int getLayoutDimension(int index, String name) {
         try {
-            // this will throw an exception
-            return getDimension(index);
+            // this will throw an exception if not found.
+            return getDimension(index, name);
         } catch (RuntimeException e) {
 
             if (LayoutInflater_Delegate.sIsInInclude) {
-                throw new RuntimeException();
+                throw new RuntimeException("Layout Dimension '" + name + "' not found.");
             }
 
             Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
@@ -494,9 +494,13 @@ public final class BridgeTypedArray extends TypedArray {
         return getDimensionPixelSize(index, defValue);
     }
 
-    private int getDimension(int index) {
+    /** @param name attribute name, used for error reporting. */
+    private int getDimension(int index, @Nullable String name) {
         String s = getString(index);
         if (s == null) {
+            if (name != null) {
+                throw new RuntimeException("Attribute '" + name + "' not found");
+            }
             throw new RuntimeException();
         }
         // Check if the value is a magic constant that doesn't require a unit.
