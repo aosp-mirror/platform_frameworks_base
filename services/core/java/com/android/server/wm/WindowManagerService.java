@@ -252,11 +252,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int LAYER_OFFSET_DIM = 1;
 
     /**
-     * Blur surface layer is immediately below dim layer.
-     */
-    static final int LAYER_OFFSET_BLUR = 2;
-
-    /**
      * FocusedStackFrame layer is immediately above focused window.
      */
     static final int LAYER_OFFSET_FOCUSED_STACK = 1;
@@ -266,27 +261,12 @@ public class WindowManagerService extends IWindowManager.Stub
      * the thumbnail (or in other words as far as possible above the window
      * below it).
      */
-    static final int LAYER_OFFSET_THUMBNAIL = WINDOW_LAYER_MULTIPLIER-1;
-
-    /**
-     * Layer at which to put the rotation freeze snapshot.
-     */
-    static final int FREEZE_LAYER = (TYPE_LAYER_MULTIPLIER * 200) + 1;
-
-    /**
-     * Layer at which to put the mask for emulated screen sizes.
-     */
-    static final int MASK_LAYER = TYPE_LAYER_MULTIPLIER * 200;
+    static final int LAYER_OFFSET_THUMBNAIL = WINDOW_LAYER_MULTIPLIER - 1;
 
     /** The maximum length we will accept for a loaded animation duration:
      * this is 10 seconds.
      */
-    static final int MAX_ANIMATION_DURATION = 10*1000;
-
-    /** Amount of time (in milliseconds) to animate the fade-in-out transition for
-     * compatible windows.
-     */
-    static final int DEFAULT_FADE_IN_OUT_DURATION = 400;
+    static final int MAX_ANIMATION_DURATION = 10 * 1000;
 
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
@@ -381,48 +361,43 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * All currently active sessions with clients.
      */
-    final ArraySet<Session> mSessions = new ArraySet<Session>();
+    final ArraySet<Session> mSessions = new ArraySet<>();
 
     /**
      * Mapping from an IWindow IBinder to the server's Window object.
      * This is also used as the lock for all of our state.
      * NOTE: Never call into methods that lock ActivityManagerService while holding this object.
      */
-    final HashMap<IBinder, WindowState> mWindowMap = new HashMap<IBinder, WindowState>();
+    final HashMap<IBinder, WindowState> mWindowMap = new HashMap<>();
 
     /**
      * Mapping from a token IBinder to a WindowToken object.
      */
-    final HashMap<IBinder, WindowToken> mTokenMap = new HashMap<IBinder, WindowToken>();
+    final HashMap<IBinder, WindowToken> mTokenMap = new HashMap<>();
 
     /**
      * List of window tokens that have finished starting their application,
      * and now need to have the policy remove their windows.
      */
-    final ArrayList<AppWindowToken> mFinishedStarting = new ArrayList<AppWindowToken>();
+    final ArrayList<AppWindowToken> mFinishedStarting = new ArrayList<>();
 
     /**
      * Fake windows added to the window manager.  Note: ordered from top to
      * bottom, opposite of mWindows.
      */
-    final ArrayList<FakeWindowImpl> mFakeWindows = new ArrayList<FakeWindowImpl>();
+    final ArrayList<FakeWindowImpl> mFakeWindows = new ArrayList<>();
 
     /**
      * Windows that are being resized.  Used so we can tell the client about
      * the resize after closing the transaction in which we resized the
      * underlying surface.
      */
-    final ArrayList<WindowState> mResizingWindows = new ArrayList<WindowState>();
+    final ArrayList<WindowState> mResizingWindows = new ArrayList<>();
 
     /**
      * Windows whose animations have ended and now must be removed.
      */
-    final ArrayList<WindowState> mPendingRemove = new ArrayList<WindowState>();
-
-    /**
-     * Stacks whose animations have ended and whose tasks, apps, selves may now be removed.
-     */
-    final ArraySet<TaskStack> mPendingStacksRemove = new ArraySet<TaskStack>();
+    final ArrayList<WindowState> mPendingRemove = new ArrayList<>();
 
     /**
      * Used when processing mPendingRemove to avoid working on the original array.
@@ -432,13 +407,13 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Windows whose surface should be destroyed.
      */
-    final ArrayList<WindowState> mDestroySurface = new ArrayList<WindowState>();
+    final ArrayList<WindowState> mDestroySurface = new ArrayList<>();
 
     /**
      * Windows that have lost input focus and are waiting for the new
      * focus window to be displayed before they are told about this.
      */
-    ArrayList<WindowState> mLosingFocus = new ArrayList<WindowState>();
+    ArrayList<WindowState> mLosingFocus = new ArrayList<>();
 
     /**
      * This is set when we have run out of memory, and will either be an empty
@@ -449,7 +424,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Windows that clients are waiting to have drawn.
      */
-    ArrayList<WindowState> mWaitingForDrawn = new ArrayList<WindowState>();
+    ArrayList<WindowState> mWaitingForDrawn = new ArrayList<>();
     /**
      * And the callback to make when they've all been drawn.
      */
@@ -466,7 +441,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * This array is essentially a cache for all userId for
      * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled}
      */
-    SparseArray<Boolean> mScreenCaptureDisabled = new SparseArray<Boolean>();
+    SparseArray<Boolean> mScreenCaptureDisabled = new SparseArray<>();
 
     IInputMethodManager mInputMethodManager;
 
@@ -840,8 +815,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mInTouchMode;
 
     private ViewServer mViewServer;
-    private final ArrayList<WindowChangeListener> mWindowChangeListeners =
-        new ArrayList<WindowChangeListener>();
+    private final ArrayList<WindowChangeListener> mWindowChangeListeners = new ArrayList<>();
     private boolean mWindowsChanged = false;
 
     public interface WindowChangeListener {
@@ -858,6 +832,10 @@ public class WindowManagerService extends IWindowManager.Stub
     // is in a special boot mode, such as being encrypted or waiting for a decryption password.
     // For example, when this flag is true, there will be no wallpaper service.
     final boolean mOnlyCore;
+
+    // List of clients without a transtiton animation that we notify once we are done transitioning
+    // since they won't be notified through the app window animator.
+    private final List<IBinder> mNoAnimationNotifyOnTransitionFinished = new ArrayList<>();
 
     /** Listener to notify activity manager about app transitions. */
     private final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
@@ -9225,6 +9203,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 transit = AppTransition.TRANSIT_UNSET;
             }
             mSkipAppTransitionAnimation = false;
+            mNoAnimationNotifyOnTransitionFinished.clear();
 
             mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
 
@@ -9394,7 +9373,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     appAnimator.animation = null;
                 }
                 wtoken.inPendingTransaction = false;
-                setTokenVisibilityLocked(wtoken, animLp, true, transit, false, voiceInteraction);
+                if (!setTokenVisibilityLocked(
+                        wtoken, animLp, true, transit, false, voiceInteraction)){
+                    // This token isn't going to be animating. Add it to the list of tokens to
+                    // be notified of app transition complete since the notification will not be
+                    // sent be the app window animator.
+                    mNoAnimationNotifyOnTransitionFinished.add(wtoken.token);
+                }
                 wtoken.updateReportedVisibilityLocked();
                 wtoken.waitingToShow = false;
 
@@ -9560,6 +9545,12 @@ public class WindowManagerService extends IWindowManager.Stub
         int changes = 0;
 
         mAppTransition.setIdle();
+
+        for (int i = mNoAnimationNotifyOnTransitionFinished.size() - 1; i >= 0; i--) {
+            final IBinder token = mNoAnimationNotifyOnTransitionFinished.get(i);
+            mAppTransition.notifyAppTransitionFinishedLocked(token);
+        }
+        mNoAnimationNotifyOnTransitionFinished.clear();
 
         if (mDeferredHideWallpaper != null) {
             hideWallpapersLocked(mDeferredHideWallpaper);

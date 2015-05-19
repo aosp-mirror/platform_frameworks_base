@@ -325,8 +325,7 @@ public class AppTransition implements Dump {
         mListeners.add(listener);
     }
 
-    public void notifyAppTransitionFinishedLocked(AppWindowAnimator animator) {
-        IBinder token = animator != null ? animator.mAppToken.token : null;
+    public void notifyAppTransitionFinishedLocked(IBinder token) {
         for (int i = 0; i < mListeners.size(); i++) {
             mListeners.get(i).onAppTransitionFinishedLocked(token);
         }
