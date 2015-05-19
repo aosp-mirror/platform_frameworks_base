@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.XmlRes;
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -1465,15 +1466,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PROCESS_TEXT_REQUEST_CODE) {
-            CharSequence result = data != null
-                    ? data.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)
-                    : "";
-            if (isTextEditable()) {
-                replaceSelectionWithText(result);
-            } else {
-                if (result.length() > 0) {
-                    Toast.makeText(getContext(), String.valueOf(result), Toast.LENGTH_LONG).show();
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                CharSequence result = data.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT);
+                if (result != null) {
+                    if (isTextEditable()) {
+                        replaceSelectionWithText(result);
+                    } else {
+                        if (result.length() > 0) {
+                            Toast.makeText(getContext(), String.valueOf(result), Toast.LENGTH_LONG)
+                                .show();
+                        }
+                    }
                 }
+            }
+            if (mEditor.hasSelectionController()) {
+                mEditor.startSelectionActionModeWithSelection();
             }
         }
     }
@@ -9279,7 +9286,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     void replaceSelectionWithText(CharSequence text) {
         ((Editable) mText).replace(getSelectionStart(), getSelectionEnd(), text);
-        mEditor.startSelectionActionModeWithSelection();
     }
 
     /**
