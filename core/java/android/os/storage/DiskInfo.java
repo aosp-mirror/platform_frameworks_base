@@ -50,6 +50,8 @@ public class DiskInfo implements Parcelable {
     public final int flags;
     public long size;
     public String label;
+    /** Hacky; don't rely on this count */
+    public int volumeCount;
 
     public DiskInfo(String id, int flags) {
         this.id = Preconditions.checkNotNull(id);
@@ -61,6 +63,7 @@ public class DiskInfo implements Parcelable {
         flags = parcel.readInt();
         size = parcel.readLong();
         label = parcel.readString();
+        volumeCount = parcel.readInt();
     }
 
     public @NonNull String getId() {
@@ -181,5 +184,6 @@ public class DiskInfo implements Parcelable {
         parcel.writeInt(this.flags);
         parcel.writeLong(size);
         parcel.writeString(label);
+        parcel.writeInt(volumeCount);
     }
 }

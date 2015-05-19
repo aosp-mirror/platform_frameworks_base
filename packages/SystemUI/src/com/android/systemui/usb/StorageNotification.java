@@ -148,6 +148,11 @@ public class StorageNotification extends SystemUI {
                 android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
 
         // Kick current state into place
+        final List<DiskInfo> disks = mStorageManager.getDisks();
+        for (DiskInfo disk : disks) {
+            onDiskScannedInternal(disk, disk.volumeCount);
+        }
+
         final List<VolumeInfo> vols = mStorageManager.getVolumes();
         for (VolumeInfo vol : vols) {
             onVolumeStateChangedInternal(vol);
@@ -194,7 +199,7 @@ public class StorageNotification extends SystemUI {
     }
 
     private void onDiskScannedInternal(DiskInfo disk, int volumeCount) {
-        if (volumeCount == 0) {
+        if (volumeCount == 0 && disk.size > 0) {
             // No supported volumes found, give user option to format
             final CharSequence title = mContext.getString(
                     R.string.ext_media_unmountable_notification_title, disk.getDescription());
