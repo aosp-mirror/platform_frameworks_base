@@ -7162,6 +7162,7 @@ package android.bluetooth.le {
   public static final class ScanSettings.Builder {
     ctor public ScanSettings.Builder();
     method public android.bluetooth.le.ScanSettings build();
+    method public android.bluetooth.le.ScanSettings.Builder setCallbackType(int);
     method public android.bluetooth.le.ScanSettings.Builder setMatchMode(int);
     method public android.bluetooth.le.ScanSettings.Builder setNumOfMatches(int);
     method public android.bluetooth.le.ScanSettings.Builder setReportDelay(long);
