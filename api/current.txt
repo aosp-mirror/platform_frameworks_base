@@ -30323,6 +30323,7 @@ package android.telecom {
     method public android.net.Uri getSubscriptionAddress();
     method public java.util.List<java.lang.String> getSupportedUriSchemes();
     method public boolean hasCapabilities(int);
+    method public boolean isEnabled();
     method public boolean supportsUriScheme(java.lang.String);
     method public android.telecom.PhoneAccount.Builder toBuilder();
     method public void writeToParcel(android.os.Parcel, int);

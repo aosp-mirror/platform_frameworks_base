@@ -53,7 +53,8 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getCallCapablePhoneAccounts
      */
-    List<PhoneAccountHandle> getCallCapablePhoneAccounts(String callingPackage);
+    List<PhoneAccountHandle> getCallCapablePhoneAccounts(
+            boolean includeDisabledAccounts, String callingPackage);
 
     /**
      * @see TelecomManager#getPhoneAccountsSupportingScheme
@@ -226,4 +227,9 @@ interface ITelecomService {
      * @see TelecomServiceImpl#placeCall
      */
     void placeCall(in Uri handle, in Bundle extras, String callingPackage);
+
+    /**
+     * @see TelecomServiceImpl#enablePhoneAccount
+     */
+    void enablePhoneAccount(in PhoneAccountHandle accountHandle, boolean isEnabled);
 }
