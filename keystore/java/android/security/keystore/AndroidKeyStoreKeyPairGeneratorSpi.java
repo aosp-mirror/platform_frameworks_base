@@ -52,19 +52,19 @@ import java.util.Locale;
  * <p>
  * This class can not be directly instantiated and must instead be used via the
  * {@link KeyPairGenerator#getInstance(String)
- * KeyPairGenerator.getInstance("AndroidKeyPairGenerator")} API.
+ * KeyPairGenerator.getInstance("AndroidKeyStore")} API.
  *
- * {@hide}
+ * @hide
  */
-public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
+public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
 
-    public static class RSA extends AndroidKeyPairGeneratorSpi {
+    public static class RSA extends AndroidKeyStoreKeyPairGeneratorSpi {
         public RSA() {
             super(KeyProperties.KEY_ALGORITHM_RSA);
         }
     }
 
-    public static class EC extends AndroidKeyPairGeneratorSpi {
+    public static class EC extends AndroidKeyStoreKeyPairGeneratorSpi {
         public EC() {
             super(KeyProperties.KEY_ALGORITHM_EC);
         }
@@ -94,7 +94,7 @@ public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
     private int mKeyType;
     private int mKeySize;
 
-    protected AndroidKeyPairGeneratorSpi(@KeyProperties.KeyAlgorithmEnum String algorithm) {
+    protected AndroidKeyStoreKeyPairGeneratorSpi(@KeyProperties.KeyAlgorithmEnum String algorithm) {
         mAlgorithm = algorithm;
     }
 
@@ -283,7 +283,8 @@ public abstract class AndroidKeyPairGeneratorSpi extends KeyPairGeneratorSpi {
 
     @Override
     public void initialize(int keysize, SecureRandom random) {
-        throw new IllegalArgumentException("cannot specify keysize with AndroidKeyPairGenerator");
+        throw new IllegalArgumentException(
+                "cannot specify keysize with AndroidKeyStore KeyPairGenerator");
     }
 
     @Override
