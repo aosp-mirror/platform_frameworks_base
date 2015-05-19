@@ -357,7 +357,7 @@ public final class FloatingToolbar {
             mShowAnimation = createGrowFadeInFromBottom(mContentContainer);
             mDismissAnimation = createShrinkFadeOutFromBottomAnimation(
                     mContentContainer,
-                    0,
+                    150,  // startDelay
                     new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -367,7 +367,7 @@ public final class FloatingToolbar {
                     });
             mHideAnimation = createShrinkFadeOutFromBottomAnimation(
                     mContentContainer,
-                    150,
+                    0,  // startDelay
                     new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
