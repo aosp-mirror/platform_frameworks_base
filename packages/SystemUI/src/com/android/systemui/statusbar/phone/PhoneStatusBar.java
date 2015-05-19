@@ -1967,6 +1967,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return !mUnlockMethodCache.isCurrentlyInsecure();
     }
 
+    public void setPanelExpanded(boolean isExpanded) {
+        mStatusBarWindowManager.setPanelExpanded(isExpanded);
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
@@ -2027,7 +2031,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Expand the window to encompass the full screen in anticipation of the drag.
         // This is only possible to do atomically because the status bar is at the top of the screen!
-        mStatusBarWindowManager.setStatusBarExpanded(true);
+        mStatusBarWindowManager.setPanelVisible(true);
         mStatusBarView.setFocusable(false);
 
         visibilityChanged(true);
@@ -2156,7 +2160,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         visibilityChanged(false);
 
         // Shrink the window to the size of the status bar only
-        mStatusBarWindowManager.setStatusBarExpanded(false);
+        mStatusBarWindowManager.setPanelVisible(false);
         mStatusBarWindowManager.setForceStatusBarVisible(false);
         mStatusBarView.setFocusable(true);
 
