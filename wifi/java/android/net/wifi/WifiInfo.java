@@ -42,6 +42,14 @@ public class WifiInfo implements Parcelable {
     private static final EnumMap<SupplicantState, DetailedState> stateMap =
             new EnumMap<SupplicantState, DetailedState>(SupplicantState.class);
 
+    /**
+     * Default MAC address reported to a client that does not have the
+     * android.permission.LOCAL_MAC_ADDRESS permission.
+     *
+     * @hide
+     */
+    public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
+
     static {
         stateMap.put(SupplicantState.DISCONNECTED, DetailedState.DISCONNECTED);
         stateMap.put(SupplicantState.INTERFACE_DISABLED, DetailedState.DISCONNECTED);
@@ -91,7 +99,7 @@ public class WifiInfo implements Parcelable {
     private int mFrequency;
 
     private InetAddress mIpAddress;
-    private String mMacAddress;
+    private String mMacAddress = DEFAULT_MAC_ADDRESS;
 
     /**
      * @hide
