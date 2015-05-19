@@ -168,8 +168,6 @@ public abstract class WallpaperService extends Service {
         final Rect mFinalStableInsets = new Rect();
         final Configuration mConfiguration = new Configuration();
 
-        private boolean mWindowIsRound;
-
         final WindowManager.LayoutParams mLayout
                 = new WindowManager.LayoutParams();
         IWindowSession mSession;
@@ -640,7 +638,6 @@ public abstract class WallpaperService extends Service {
                         // Retrieve watch round info
                         TypedArray windowStyle = obtainStyledAttributes(
                                 com.android.internal.R.styleable.Window);
-                        mWindowIsRound = ScreenShapeHelper.getWindowIsRound(getResources());
                         windowStyle.recycle();
 
                         // Add window
@@ -776,7 +773,8 @@ public abstract class WallpaperService extends Service {
                             mFinalStableInsets.set(mDispatchedStableInsets);
                             mFinalSystemInsets.bottom = mIWallpaperEngine.mDisplayPadding.bottom;
                             WindowInsets insets = new WindowInsets(mFinalSystemInsets,
-                                    null, mFinalStableInsets, mWindowIsRound);
+                                    null, mFinalStableInsets,
+                                    getResources().getConfiguration().isScreenRound());
                             onApplyWindowInsets(insets);
                         }
 

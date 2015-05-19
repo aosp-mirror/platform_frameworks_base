@@ -122,7 +122,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final String PROPERTY_PROFILE_RENDERING = "viewroot.profile_rendering";
 
     // properties used by emulator to determine display shape
-    public static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
     public static final String PROPERTY_EMULATOR_WIN_OUTSET_BOTTOM_PX =
             "ro.emu.win_outset_bottom_px";
 
@@ -341,8 +340,6 @@ public final class ViewRootImpl implements ViewParent,
     /** Set to true once doDie() has been called. */
     private boolean mRemoved;
 
-    private final boolean mWindowIsRound;
-
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -397,7 +394,6 @@ public final class ViewRootImpl implements ViewParent,
         mChoreographer = Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         loadSystemProperties();
-        mWindowIsRound = ScreenShapeHelper.getWindowIsRound(context.getResources());
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1271,7 +1267,8 @@ public final class ViewRootImpl implements ViewParent,
                 stableInsets = mPendingStableInsets;
             }
             mLastWindowInsets = new WindowInsets(contentInsets,
-                    null /* windowDecorInsets */, stableInsets, mWindowIsRound);
+                    null /* windowDecorInsets */, stableInsets,
+                    mContext.getResources().getConfiguration().isScreenRound());
         }
         return mLastWindowInsets;
     }
