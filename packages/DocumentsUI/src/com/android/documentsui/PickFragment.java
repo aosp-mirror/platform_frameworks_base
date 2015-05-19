@@ -38,15 +38,19 @@ import java.util.Locale;
 public class PickFragment extends Fragment {
     public static final String TAG = "PickFragment";
 
+    private int mAction;
     private DocumentInfo mPickTarget;
-
     private View mContainer;
     private Button mPick;
     private Button mCancel;
 
     public static void show(FragmentManager fm) {
-        final PickFragment fragment = new PickFragment();
+        // Fragment can be restored by FragmentManager automatically.
+        if (get(fm) != null) {
+            return;
+        }
 
+        final PickFragment fragment = new PickFragment();
         final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.container_save, fragment, TAG);
         ft.commitAllowingStateLoss();
@@ -67,8 +71,7 @@ public class PickFragment extends Fragment {
         mCancel = (Button) mContainer.findViewById(android.R.id.button2);
         mCancel.setOnClickListener(mCancelListener);
 
-        setPickTarget(0, null, null);
-
+        updateView();
         return mContainer;
     }
 
@@ -92,32 +95,38 @@ public class PickFragment extends Fragment {
     /**
      * @param action Which action defined in BaseActivity.State is the picker shown for.
      */
-    public void setPickTarget(int action,
-                              DocumentInfo pickTarget,
-                              CharSequence displayName) {
-        if (mContainer != null) {
-            if (pickTarget != null) {
-                final Locale locale = getResources().getConfiguration().locale;
-                switch (action) {
-                    case BaseActivity.State.ACTION_OPEN_TREE:
-                        final String raw = getString(R.string.menu_select).toUpperCase(locale);
-                        mPick.setText(TextUtils.expandTemplate(raw, displayName));
-                        mCancel.setVisibility(View.GONE);
-                        break;
-                    case BaseActivity.State.ACTION_OPEN_COPY_DESTINATION:
-                        mPick.setText(getString(R.string.button_copy).toUpperCase(locale));
-                        mCancel.setVisibility(View.VISIBLE);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Illegal action for PickFragment.");
-                }
-            }
-            if (pickTarget != null && pickTarget.isCreateSupported()) {
-                mContainer.setVisibility(View.VISIBLE);
-            } else {
-                mContainer.setVisibility(View.GONE);
-            }
-        }
+    public void setPickTarget(int action, DocumentInfo pickTarget) {
+        mAction = action;
         mPickTarget = pickTarget;
+        if (mContainer != null) {
+            updateView();
+        }
+    }
+
+    /**
+     * Applies the state of fragment to the view components.
+     */
+    private void updateView() {
+        switch (mAction) {
+            case BaseActivity.State.ACTION_OPEN_TREE:
+                mPick.setText(R.string.button_select);
+                mCancel.setVisibility(View.GONE);
+                break;
+            case BaseActivity.State.ACTION_OPEN_COPY_DESTINATION:
+                mPick.setText(R.string.button_copy);
+                mCancel.setVisibility(View.VISIBLE);
+                break;
+            default:
+                mContainer.setVisibility(View.GONE);
+                return;
+        }
+
+        if (mPickTarget != null && (
+                mAction == BaseActivity.State.ACTION_OPEN_TREE ||
+                mPickTarget.isCreateSupported())) {
+            mContainer.setVisibility(View.VISIBLE);
+        } else {
+            mContainer.setVisibility(View.GONE);
+        }
     }
 }
