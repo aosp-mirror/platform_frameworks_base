@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
@@ -103,6 +104,7 @@ public abstract class CameraMetadata<TKey> {
      * @return List of the keys contained in this map.
      */
     @SuppressWarnings("unchecked")
+    @NonNull
     public List<TKey> getKeys() {
         Class<CameraMetadata<TKey>> thisClass = (Class<CameraMetadata<TKey>>) getClass();
         return Collections.unmodifiableList(

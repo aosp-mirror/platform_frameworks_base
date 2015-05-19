@@ -16,6 +16,8 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
@@ -117,6 +119,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *
          * @return String representation of the key name
          */
+        @NonNull
         public String getName() {
             return mKey.getName();
         }
@@ -239,6 +242,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @param key The result field to read.
      * @return The value of that key, or {@code null} if the field is not set.
      */
+    @Nullable
     public <T> T get(Key<T> key) {
         return mSettings.get(key);
     }
@@ -268,6 +272,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@inheritDoc}
      */
     @Override
+    @NonNull
     public List<Key<?>> getKeys() {
         // Force the javadoc for this function to show up on the CaptureRequest page
         return super.getKeys();
@@ -286,6 +291,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *     no tag has been set.
      * @see Builder#setTag
      */
+    @Nullable
     public Object getTag() {
         return mUserTag;
     }
@@ -476,7 +482,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *
          * @param outputTarget Surface to use as an output target for this request
          */
-        public void addTarget(Surface outputTarget) {
+        public void addTarget(@NonNull Surface outputTarget) {
             mRequest.mSurfaceSet.add(outputTarget);
         }
 
@@ -487,7 +493,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *
          * @param outputTarget Surface to use as an output target for this request
          */
-        public void removeTarget(Surface outputTarget) {
+        public void removeTarget(@NonNull Surface outputTarget) {
             mRequest.mSurfaceSet.remove(outputTarget);
         }
 
@@ -499,7 +505,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * @param value The value to set the field to, which must be of a matching
          * type to the key.
          */
-        public <T> void set(Key<T> key, T value) {
+        public <T> void set(@NonNull Key<T> key, T value) {
             mRequest.mSettings.set(key, value);
         }
 
@@ -512,6 +518,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * @param key The metadata field to read.
          * @return The value of that key, or {@code null} if the field is not set.
          */
+        @Nullable
         public <T> T get(Key<T> key) {
             return mRequest.mSettings.get(key);
         }
@@ -527,7 +534,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * @param tag an arbitrary Object to store with this request
          * @see CaptureRequest#getTag
          */
-        public void setTag(Object tag) {
+        public void setTag(@Nullable Object tag) {
             mRequest.mUserTag = tag;
         }
 
@@ -543,6 +550,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * @return A new capture request instance, ready for submission to the
          * camera device.
          */
+        @NonNull
         public CaptureRequest build() {
             return new CaptureRequest(mRequest);
         }
