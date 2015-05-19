@@ -427,6 +427,15 @@ public class ActivityTestMain extends Activity {
                 return true;
             }
         });
+        menu.add("Transaction fail").setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.putExtra("gulp", new int[1024*1024]);
+                startActivity(intent);
+                return true;
+            }
+        });
         return true;
     }
 
