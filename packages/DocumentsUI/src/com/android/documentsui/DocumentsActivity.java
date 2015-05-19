@@ -571,9 +571,7 @@ public class DocumentsActivity extends BaseActivity {
             mState.action == ACTION_OPEN_COPY_DESTINATION) {
             final PickFragment pick = PickFragment.get(fm);
             if (pick != null) {
-                final CharSequence displayName = (mState.stack.size() <= 1) ? root.title
-                        : cwd.displayName;
-                pick.setPickTarget(mState.action, cwd, displayName);
+                pick.setPickTarget(mState.action, cwd);
             }
         }
     }
