@@ -180,7 +180,7 @@ public class VolumeDialogController {
         pw.print("  mEnabled: "); pw.println(mEnabled);
         pw.print("  mDestroyed: "); pw.println(mDestroyed);
         pw.print("  mVolumePolicy: "); pw.println(mVolumePolicy);
-        pw.print("  mEnabled: "); pw.println(mEnabled);
+        pw.print("  mState: "); pw.println(mState.toString(4));
         pw.print("  mShowDndTile: "); pw.println(mShowDndTile);
         pw.print("  mHasVibrator: "); pw.println(mHasVibrator);
         pw.print("  mRemoteStreams: "); pw.println(mMediaSessionsCallbacksW.mRemoteStreams
@@ -960,23 +960,43 @@ public class VolumeDialogController {
 
         @Override
         public String toString() {
+            return toString(0);
+        }
+
+        public String toString(int indent) {
             final StringBuilder sb = new StringBuilder("{");
+            if (indent > 0) sep(sb, indent);
             for (int i = 0; i < states.size(); i++) {
-                if (i > 0) sb.append(',');
+                if (i > 0) {
+                    sep(sb, indent);
+                }
                 final int stream = states.keyAt(i);
                 final StreamState ss = states.valueAt(i);
                 sb.append(AudioSystem.streamToString(stream)).append(":").append(ss.level)
-                        .append("[").append(ss.levelMin).append("..").append(ss.levelMax);
+                        .append('[').append(ss.levelMin).append("..").append(ss.levelMax)
+                        .append(']');
                 if (ss.muted) sb.append(" [MUTED]");
             }
-            sb.append(",ringerModeExternal:").append(ringerModeExternal);
-            sb.append(",ringerModeInternal:").append(ringerModeInternal);
-            sb.append(",zenMode:").append(zenMode);
-            sb.append(",effectsSuppressor:").append(effectsSuppressor);
-            sb.append(",effectsSuppressorName:").append(effectsSuppressorName);
-            sb.append(",zenModeConfig:").append(zenModeConfig);
-            sb.append(",activeStream:").append(activeStream);
+            sep(sb, indent); sb.append("ringerModeExternal:").append(ringerModeExternal);
+            sep(sb, indent); sb.append("ringerModeInternal:").append(ringerModeInternal);
+            sep(sb, indent); sb.append("zenMode:").append(zenMode);
+            sep(sb, indent); sb.append("effectsSuppressor:").append(effectsSuppressor);
+            sep(sb, indent); sb.append("effectsSuppressorName:").append(effectsSuppressorName);
+            sep(sb, indent); sb.append("zenModeConfig:").append(zenModeConfig);
+            sep(sb, indent); sb.append("activeStream:").append(activeStream);
+            if (indent > 0) sep(sb, indent);
             return sb.append('}').toString();
+        }
+
+        private static void sep(StringBuilder sb, int indent) {
+            if (indent > 0) {
+                sb.append('\n');
+                for (int i = 0; i < indent; i++) {
+                    sb.append(' ');
+                }
+            } else {
+                sb.append(',');
+            }
         }
 
         public Condition getManualExitCondition() {
