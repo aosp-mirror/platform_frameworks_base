@@ -1462,7 +1462,7 @@ nAllocationElementRead(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
     rsAllocationElementRead((RsContext)con, (RsAllocation)alloc,
                             xoff, yoff, zoff,
                             lod, ptr, sizeBytes, compIdx);
-    _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
+    _env->ReleaseByteArrayElements(data, ptr, 0);
 }
 
 // Copies from the Allocation pointed to by _alloc into the Java object data.
