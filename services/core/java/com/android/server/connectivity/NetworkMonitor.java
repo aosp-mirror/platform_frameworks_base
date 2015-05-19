@@ -208,6 +208,8 @@ public class NetworkMonitor extends StateMachine {
 
     // Set if the user explicitly selected "Do not use this network" in captive portal sign-in app.
     private boolean mUserDoesNotWant = false;
+    // Avoids surfacing "Sign in to network" notification.
+    private boolean mDontDisplaySigninNotification = false;
 
     public boolean systemReady = false;
 
@@ -299,11 +301,13 @@ public class NetworkMonitor extends StateMachine {
                             sendMessage(CMD_FORCE_REEVALUATION, 0 /* no UID */, 0);
                             break;
                         case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS:
+                            mDontDisplaySigninNotification = true;
                             // TODO: Distinguish this from a network that actually validates.
                             // Displaying the "!" on the system UI icon may still be a good idea.
                             transitionTo(mValidatedState);
                             break;
                         case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_UNWANTED:
+                            mDontDisplaySigninNotification = true;
                             mUserDoesNotWant = true;
                             mConnectivityServiceHandler.sendMessage(obtainMessage(
                                     EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, 0,
@@ -498,7 +502,7 @@ public class NetworkMonitor extends StateMachine {
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
             // Don't annoy user with sign-in notifications.
-            if (mUserDoesNotWant) return;
+            if (mDontDisplaySigninNotification) return;
             // Create a CustomIntentReceiver that sends us a
             // CMD_LAUNCH_CAPTIVE_PORTAL_APP message when the user
             // touches the notification.
