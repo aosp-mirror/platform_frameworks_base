@@ -195,23 +195,19 @@ public class StandaloneActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean shown = super.onPrepareOptionsMenu(menu);
 
-        final RootInfo root = getCurrentRoot();
-        final DocumentInfo cwd = getCurrentDirectory();
-
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
-        createDir.setVisible(cwd != null
-                && cwd.isCreateSupported()
-                && !mSearchManager.isSearching()
-                && !root.isDownloads());
+        boolean canCreateDir = canCreateDirectory();
 
         createDir.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        createDir.setVisible(canCreateDir);
+
         fileSize.setVisible(true);
         advanced.setVisible(true);
-        settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
+        settings.setVisible((getCurrentRoot().flags & Root.FLAG_HAS_SETTINGS) != 0);
 
         return shown;
     }
@@ -301,13 +297,18 @@ public class StandaloneActivity extends BaseActivity {
                 dir = DirectoryFragment.get(getFragmentManager());
                 dir.copyToClipboard();
                 return true;
+            case KeyEvent.KEYCODE_N:
+                if (event.isShiftPressed() && canCreateDirectory()) {
+                    showCreateDirectoryDialog();
+                    return true;
+                }
             case KeyEvent.KEYCODE_V:
                 dir = DirectoryFragment.get(getFragmentManager());
                 dir.pasteFromClipboard();
                 return true;
-            default:
-                return super.onKeyUp(keyCode, event);
         }
+
+        return super.onKeyUp(keyCode, event);
     }
 
     @Override

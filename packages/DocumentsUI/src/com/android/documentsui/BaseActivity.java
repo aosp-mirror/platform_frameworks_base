@@ -180,7 +180,7 @@ abstract class BaseActivity extends Activity {
             onBackPressed();
             return true;
         } else if (id == R.id.menu_create_dir) {
-            CreateDirectoryFragment.show(getFragmentManager());
+            showCreateDirectoryDialog();
             return true;
         } else if (id == R.id.menu_search) {
             return false;
@@ -215,6 +215,23 @@ abstract class BaseActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    void showCreateDirectoryDialog() {
+        CreateDirectoryFragment.show(getFragmentManager());
+    }
+
+    /**
+     * Returns true if a directory can be created in the current location.
+     * @return
+     */
+    boolean canCreateDirectory() {
+        final RootInfo root = getCurrentRoot();
+        final DocumentInfo cwd = getCurrentDirectory();
+        return cwd != null
+                && cwd.isCreateSupported()
+                && !mSearchManager.isSearching()
+                && !root.isDownloads();
     }
 
     /**

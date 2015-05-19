@@ -33,9 +33,13 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.android.documentsui.model.DocumentInfo;
@@ -64,26 +68,47 @@ public class CreateDirectoryFragment extends DialogFragment {
         final LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
 
         final View view = dialogInflater.inflate(R.layout.dialog_create_dir, null, false);
-        final EditText text1 = (EditText) view.findViewById(android.R.id.text1);
+        final EditText editText = (EditText) view.findViewById(android.R.id.text1);
 
         builder.setTitle(R.string.menu_create_dir);
         builder.setView(view);
 
-        builder.setPositiveButton(android.R.string.ok, new OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                final String displayName = text1.getText().toString();
+        builder.setPositiveButton(
+                android.R.string.ok,
+                new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        createDirectory(editText.getText().toString());
+                    }
+                });
 
-                final BaseActivity activity = (BaseActivity) getActivity();
-                final DocumentInfo cwd = activity.getCurrentDirectory();
-
-                new CreateDirectoryTask(activity, cwd, displayName).executeOnExecutor(
-                        ProviderExecutor.forAuthority(cwd.authority));
-            }
-        });
         builder.setNegativeButton(android.R.string.cancel, null);
+        final AlertDialog dialog = builder.create();
 
-        return builder.create();
+        editText.setOnEditorActionListener(
+                new OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
+                        if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                                && event.hasNoModifiers()) {
+                            createDirectory(editText.getText().toString());
+                            dialog.dismiss();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
+
+        return dialog;
+    }
+
+    private void createDirectory(String name) {
+        final BaseActivity activity = (BaseActivity) getActivity();
+        final DocumentInfo cwd = activity.getCurrentDirectory();
+
+        new CreateDirectoryTask(activity, cwd, name).executeOnExecutor(
+                ProviderExecutor.forAuthority(cwd.authority));
     }
 
     private class CreateDirectoryTask extends AsyncTask<Void, Void, DocumentInfo> {
