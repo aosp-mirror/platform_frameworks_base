@@ -28,8 +28,6 @@ import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
-import static com.android.server.am.TaskPersister.DEBUG_PERSISTER;
-import static com.android.server.am.TaskPersister.DEBUG_RESTORER;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -71,7 +69,7 @@ final class TaskRecord {
     private static final String TAG_AFFINITYINTENT = "affinity_intent";
     static final String ATTR_REALACTIVITY = "real_activity";
     private static final String ATTR_ORIGACTIVITY = "orig_activity";
-    static final String TAG_ACTIVITY = "activity";
+    private static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_AFFINITY = "affinity";
     private static final String ATTR_ROOT_AFFINITY = "root_affinity";
     private static final String ATTR_ROOTHASRESET = "root_has_reset";
@@ -970,10 +968,6 @@ final class TaskRecord {
 
     static TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
             throws IOException, XmlPullParserException {
-        return restoreFromXml(in, stackSupervisor, INVALID_TASK_ID);
-    }
-    static TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor,
-            int inTaskId) throws IOException, XmlPullParserException {
         Intent intent = null;
         Intent affinityIntent = null;
         ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
@@ -993,7 +987,7 @@ final class TaskRecord {
         long lastActiveTime = -1;
         long lastTimeOnTop = 0;
         boolean neverRelinquishIdentity = true;
-        int taskId = inTaskId;
+        int taskId = INVALID_TASK_ID;
         final int outerDepth = in.getDepth();
         TaskDescription taskDescription = new TaskDescription();
         int taskAffiliation = INVALID_TASK_ID;
@@ -1008,8 +1002,8 @@ final class TaskRecord {
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
             final String attrValue = in.getAttributeValue(attrNdx);
-            if (DEBUG_PERSISTER || DEBUG_RESTORER) Slog.d(TaskPersister.TAG,
-                        "TaskRecord: attribute name=" + attrName + " value=" + attrValue);
+            if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: attribute name=" +
+                    attrName + " value=" + attrValue);
             if (ATTR_TASKID.equals(attrName)) {
                 if (taskId == INVALID_TASK_ID) taskId = Integer.valueOf(attrValue);
             } else if (ATTR_REALACTIVITY.equals(attrName)) {
@@ -1071,16 +1065,16 @@ final class TaskRecord {
                 (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
             if (event == XmlPullParser.START_TAG) {
                 final String name = in.getName();
-                if (DEBUG_PERSISTER || DEBUG_RESTORER)
-                        Slog.d(TaskPersister.TAG, "TaskRecord: START_TAG name=" + name);
+                if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: START_TAG name=" +
+                        name);
                 if (TAG_AFFINITYINTENT.equals(name)) {
                     affinityIntent = Intent.restoreFromXml(in);
                 } else if (TAG_INTENT.equals(name)) {
                     intent = Intent.restoreFromXml(in);
                 } else if (TAG_ACTIVITY.equals(name)) {
                     ActivityRecord activity = ActivityRecord.restoreFromXml(in, stackSupervisor);
-                    if (DEBUG_PERSISTER || DEBUG_RESTORER)
-                            Slog.d(TaskPersister.TAG, "TaskRecord: activity=" + activity);
+                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: activity=" +
+                            activity);
                     if (activity != null) {
                         activities.add(activity);
                     }

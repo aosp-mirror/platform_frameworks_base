@@ -2466,13 +2466,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case SYSTEM_BACKUP_RESTORED: {
-            data.enforceInterface(IActivityManager.descriptor);
-            systemBackupRestored();
-            reply.writeNoException();
-            return true;
-        }
-
         case NOTIFY_CLEARTEXT_NETWORK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final int uid = data.readInt();
@@ -5753,17 +5746,6 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         mRemote.transact(BOOT_ANIMATION_COMPLETE_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-
-    @Override
-    public void systemBackupRestored() throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(SYSTEM_BACKUP_RESTORED, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
