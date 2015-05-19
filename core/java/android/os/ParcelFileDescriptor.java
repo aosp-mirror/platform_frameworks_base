@@ -25,7 +25,7 @@ import static android.system.OsConstants.S_ISREG;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
-import android.os.MessageQueue.FileDescriptorCallback;
+import android.os.MessageQueue.OnFileDescriptorEventListener;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -236,19 +236,19 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         final FileDescriptor[] comm = createCommSocketPair();
         final ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd, comm[0]);
         final MessageQueue queue = handler.getLooper().getQueue();
-        queue.registerFileDescriptorCallback(comm[1],
-                FileDescriptorCallback.EVENT_INPUT, new FileDescriptorCallback() {
+        queue.addOnFileDescriptorEventListener(comm[1],
+                OnFileDescriptorEventListener.EVENT_INPUT, new OnFileDescriptorEventListener() {
             @Override
             public int onFileDescriptorEvents(FileDescriptor fd, int events) {
                 Status status = null;
-                if ((events & FileDescriptorCallback.EVENT_INPUT) != 0) {
+                if ((events & OnFileDescriptorEventListener.EVENT_INPUT) != 0) {
                     final byte[] buf = new byte[MAX_STATUS];
                     status = readCommStatus(fd, buf);
-                } else if ((events & FileDescriptorCallback.EVENT_ERROR) != 0) {
+                } else if ((events & OnFileDescriptorEventListener.EVENT_ERROR) != 0) {
                     status = new Status(Status.DEAD);
                 }
                 if (status != null) {
-                    queue.unregisterFileDescriptorCallback(fd);
+                    queue.removeOnFileDescriptorEventListener(fd);
                     IoUtils.closeQuietly(fd);
                     listener.onClose(status.asIOException());
                     return 0;
