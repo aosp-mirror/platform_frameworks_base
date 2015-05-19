@@ -151,6 +151,7 @@ public final class PhoneAccount implements Parcelable {
     private final CharSequence mShortDescription;
     private final List<String> mSupportedUriSchemes;
     private final Icon mIcon;
+    private boolean mIsEnabled;
 
     /**
      * Helper class for creating a {@link PhoneAccount}.
@@ -165,6 +166,7 @@ public final class PhoneAccount implements Parcelable {
         private CharSequence mShortDescription;
         private List<String> mSupportedUriSchemes = new ArrayList<String>();
         private Icon mIcon;
+        private boolean mIsEnabled = false;
 
         /**
          * Creates a builder with the specified {@link PhoneAccountHandle} and label.
@@ -190,6 +192,7 @@ public final class PhoneAccount implements Parcelable {
             mShortDescription = phoneAccount.getShortDescription();
             mSupportedUriSchemes.addAll(phoneAccount.getSupportedUriSchemes());
             mIcon = phoneAccount.getIcon();
+            mIsEnabled = phoneAccount.isEnabled();
         }
 
         /**
@@ -288,6 +291,18 @@ public final class PhoneAccount implements Parcelable {
         }
 
         /**
+         * Sets the enabled state of the phone account.
+         *
+         * @param isEnabled The enabled state.
+         * @return The builder.
+         * @hide
+         */
+        public Builder setIsEnabled(boolean isEnabled) {
+            mIsEnabled = isEnabled;
+            return this;
+        }
+
+        /**
          * Creates an instance of a {@link PhoneAccount} based on the current builder settings.
          *
          * @return The {@link PhoneAccount}.
@@ -307,7 +322,8 @@ public final class PhoneAccount implements Parcelable {
                     mHighlightColor,
                     mLabel,
                     mShortDescription,
-                    mSupportedUriSchemes);
+                    mSupportedUriSchemes,
+                    mIsEnabled);
         }
     }
 
@@ -320,7 +336,8 @@ public final class PhoneAccount implements Parcelable {
             int highlightColor,
             CharSequence label,
             CharSequence shortDescription,
-            List<String> supportedUriSchemes) {
+            List<String> supportedUriSchemes,
+            boolean isEnabled) {
         mAccountHandle = account;
         mAddress = address;
         mSubscriptionAddress = subscriptionAddress;
@@ -330,6 +347,7 @@ public final class PhoneAccount implements Parcelable {
         mLabel = label;
         mShortDescription = shortDescription;
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
+        mIsEnabled = isEnabled;
     }
 
     public static Builder builder(
@@ -437,6 +455,15 @@ public final class PhoneAccount implements Parcelable {
     }
 
     /**
+     * Indicates whether the user has enabled this phone account or not {@code PhoneAccounts}.
+     *
+     * @return The {@code true} if the account is enabled by the user, {@code false} otherwise.
+     */
+    public boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    /**
      * Determines if the {@link PhoneAccount} supports calls to/from addresses with a specified URI
      * scheme.
      *
@@ -464,6 +491,14 @@ public final class PhoneAccount implements Parcelable {
      */
     public int getHighlightColor() {
         return mHighlightColor;
+    }
+
+    /**
+     * Sets the enabled state of the phone account.
+     * @hide
+     */
+    public void setIsEnabled(boolean isEnabled) {
+        mIsEnabled = isEnabled;
     }
 
     //
@@ -500,12 +535,14 @@ public final class PhoneAccount implements Parcelable {
         out.writeCharSequence(mLabel);
         out.writeCharSequence(mShortDescription);
         out.writeStringList(mSupportedUriSchemes);
+
         if (mIcon == null) {
             out.writeInt(0);
         } else {
             out.writeInt(1);
             mIcon.writeToParcel(out, flags);
         }
+        out.writeByte((byte) (mIsEnabled ? 1 : 0));
     }
 
     public static final Creator<PhoneAccount> CREATOR
@@ -547,11 +584,14 @@ public final class PhoneAccount implements Parcelable {
         } else {
             mIcon = null;
         }
+        mIsEnabled = in.readByte() == 1;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder().append("[PhoneAccount: ")
+        StringBuilder sb = new StringBuilder().append("[[")
+                .append(mIsEnabled ? 'X' : ' ')
+                .append("] PhoneAccount: ")
                 .append(mAccountHandle)
                 .append(" Capabilities: ")
                 .append(mCapabilities)
