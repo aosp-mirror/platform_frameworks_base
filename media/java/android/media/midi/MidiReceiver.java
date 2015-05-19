@@ -87,7 +87,8 @@ abstract public class MidiReceiver {
     }
 
     /**
-     * Called to send MIDI data to the receiver
+     * Called to send MIDI data to the receiver without a timestamp.
+     * Data will be processed by receiver in the order sent.
      * Data will get split into multiple calls to {@link #onSend} if count exceeds
      * {@link #getMaxMessageSize}.
      *
@@ -97,11 +98,13 @@ abstract public class MidiReceiver {
      * @throws IOException
      */
     public void send(byte[] msg, int offset, int count) throws IOException {
-        send(msg, offset, count, System.nanoTime());
+        // TODO add public static final TIMESTAMP_NONE = 0L
+        send(msg, offset, count, 0L);
     }
 
     /**
-     * Called to send MIDI data to the receiver to be handled at a specified time in the future
+     * Called to send MIDI data to the receiver with a specified timestamp.
+     * Data will be processed by receiver in order first by timestamp, then in the order sent.
      * Data will get split into multiple calls to {@link #onSend} if count exceeds
      * {@link #getMaxMessageSize}.
      *
