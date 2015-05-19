@@ -51,11 +51,13 @@ public final class BluetoothEventManager {
     private final Collection<BluetoothCallback> mCallbacks =
             new ArrayList<BluetoothCallback>();
 
+    private android.os.Handler mReceiverHandler;
+
     interface Handler {
         void onReceive(Context context, Intent intent, BluetoothDevice device);
     }
 
-    void addHandler(String action, Handler handler) {
+    private void addHandler(String action, Handler handler) {
         mHandlerMap.put(action, handler);
         mAdapterIntentFilter.addAction(action);
     }
@@ -103,11 +105,18 @@ public final class BluetoothEventManager {
         // Dock event broadcasts
         addHandler(Intent.ACTION_DOCK_EVENT, new DockEventHandler());
 
-        mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter);
+        mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
     }
 
     void registerProfileIntentReceiver() {
-        mContext.registerReceiver(mBroadcastReceiver, mProfileIntentFilter);
+        mContext.registerReceiver(mBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
+    }
+
+    public void setReceiverHandler(android.os.Handler handler) {
+        mContext.unregisterReceiver(mBroadcastReceiver);
+        mReceiverHandler = handler;
+        mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
+        registerProfileIntentReceiver();
     }
 
     /** Register to start receiving callbacks for Bluetooth events. */
