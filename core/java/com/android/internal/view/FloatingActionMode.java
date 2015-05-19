@@ -40,6 +40,8 @@ public class FloatingActionMode extends ActionMode {
     private final Rect mContentRectOnWindow;
     private final Rect mPreviousContentRectOnWindow;
     private final int[] mViewPosition;
+    private final Rect mViewRect;
+    private final Rect mScreenRect;
     private final View mOriginatingView;
 
     private final Runnable mMovingOff = new Runnable() {
@@ -68,6 +70,8 @@ public class FloatingActionMode extends ActionMode {
         mContentRectOnWindow = new Rect();
         mPreviousContentRectOnWindow = new Rect();
         mViewPosition = new int[2];
+        mViewRect = new Rect();
+        mScreenRect = new Rect();
         mOriginatingView = Preconditions.checkNotNull(originatingView);
         mOriginatingView.getLocationInWindow(mViewPosition);
     }
@@ -117,6 +121,11 @@ public class FloatingActionMode extends ActionMode {
     public void updateViewLocationInWindow() {
         checkToolbarInitialized();
         mOriginatingView.getLocationInWindow(mViewPosition);
+        mViewRect.set(
+                mViewPosition[0],
+                mViewPosition[1],
+                mViewPosition[0] + mOriginatingView.getWidth(),
+                mViewPosition[1] + mOriginatingView.getHeight());
         repositionToolbar();
     }
 
@@ -135,6 +144,23 @@ public class FloatingActionMode extends ActionMode {
             mFloatingToolbar.updateLayout();
         }
         mPreviousContentRectOnWindow.set(mContentRectOnWindow);
+
+        if (isContentRectWithinBounds()) {
+            mFloatingToolbarVisibilityHelper.setOutOfBounds(false);
+        } else {
+            mFloatingToolbarVisibilityHelper.setOutOfBounds(true);
+        }
+    }
+
+    private boolean isContentRectWithinBounds() {
+       mScreenRect.set(
+           0,
+           0,
+           mContext.getResources().getDisplayMetrics().widthPixels,
+           mContext.getResources().getDisplayMetrics().heightPixels);
+
+       return Rect.intersects(mContentRectOnWindow, mScreenRect)
+           && Rect.intersects(mContentRectOnWindow, mViewRect);
     }
 
     private void notifyContentRectMoving() {
