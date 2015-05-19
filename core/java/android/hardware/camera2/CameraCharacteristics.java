@@ -16,6 +16,8 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
@@ -91,6 +93,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
          *
          * @return String representation of the key name
          */
+        @NonNull
         public String getName() {
             return mKey.getName();
         }
@@ -166,6 +169,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @param key The characteristics field to read.
      * @return The value of that key, or {@code null} if the field is not set.
      */
+    @Nullable
     public <T> T get(Key<T> key) {
         return mProperties.get(key);
     }
@@ -194,6 +198,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * {@inheritDoc}
      */
+    @NonNull
     @Override
     public List<Key<?>> getKeys() {
         // List of keys is immutable; cache the results after we calculate them
@@ -227,6 +232,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @return List of keys supported by this CameraDevice for CaptureRequests.
      */
     @SuppressWarnings({"unchecked"})
+    @NonNull
     public List<CaptureRequest.Key<?>> getAvailableCaptureRequestKeys() {
         if (mAvailableRequestKeys == null) {
             Object crKey = CaptureRequest.Key.class;
@@ -258,6 +264,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @return List of keys supported by this CameraDevice for CaptureResults.
      */
     @SuppressWarnings({"unchecked"})
+    @NonNull
     public List<CaptureResult.Key<?>> getAvailableCaptureResultKeys() {
         if (mAvailableResultKeys == null) {
             Object crKey = CaptureResult.Key.class;

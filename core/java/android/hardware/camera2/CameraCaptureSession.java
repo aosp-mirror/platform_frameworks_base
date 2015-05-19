@@ -16,6 +16,8 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.view.Surface;
 
@@ -73,6 +75,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     /**
      * Get the camera device that this session is created for.
      */
+    @NonNull
     public abstract CameraDevice getDevice();
 
     /**
@@ -133,7 +136,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @see StateCallback#onSurfacePrepared
      */
-    public abstract void prepare(Surface surface) throws CameraAccessException;
+    public abstract void prepare(@NonNull Surface surface) throws CameraAccessException;
 
     /**
      * <p>Submit a request for an image to be captured by the camera device.</p>
@@ -194,7 +197,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #abortCaptures
      * @see CameraDevice#createReprocessableCaptureSession
      */
-    public abstract int capture(CaptureRequest request, CaptureCallback listener, Handler handler)
+    public abstract int capture(@NonNull CaptureRequest request,
+            @Nullable CaptureCallback listener, @Nullable Handler handler)
             throws CameraAccessException;
 
     /**
@@ -252,8 +256,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #setRepeatingBurst
      * @see #abortCaptures
      */
-    public abstract int captureBurst(List<CaptureRequest> requests, CaptureCallback listener,
-            Handler handler) throws CameraAccessException;
+    public abstract int captureBurst(@NonNull List<CaptureRequest> requests,
+            @Nullable CaptureCallback listener, @Nullable Handler handler)
+            throws CameraAccessException;
 
     /**
      * Request endlessly repeating capture of images by this capture session.
@@ -318,8 +323,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #stopRepeating
      * @see #abortCaptures
      */
-    public abstract int setRepeatingRequest(CaptureRequest request, CaptureCallback listener,
-            Handler handler) throws CameraAccessException;
+    public abstract int setRepeatingRequest(@NonNull CaptureRequest request,
+            @Nullable CaptureCallback listener, @Nullable Handler handler)
+            throws CameraAccessException;
 
     /**
      * <p>Request endlessly repeating capture of a sequence of images by this
@@ -389,8 +395,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see #stopRepeating
      * @see #abortCaptures
      */
-    public abstract int setRepeatingBurst(List<CaptureRequest> requests, CaptureCallback listener,
-            Handler handler) throws CameraAccessException;
+    public abstract int setRepeatingBurst(@NonNull List<CaptureRequest> requests,
+            @Nullable CaptureCallback listener, @Nullable Handler handler)
+            throws CameraAccessException;
 
     /**
      * <p>Cancel any ongoing repeating capture set by either
@@ -478,6 +485,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see android.media.ImageWriter
      * @see android.media.ImageReader
      */
+    @Nullable
     public abstract Surface getInputSurface();
 
     /**
@@ -525,7 +533,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
-        public abstract void onConfigured(CameraCaptureSession session);
+        public abstract void onConfigured(@NonNull CameraCaptureSession session);
 
         /**
          * This method is called if the session cannot be configured as requested.
@@ -540,7 +548,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
-        public abstract void onConfigureFailed(CameraCaptureSession session);
+        public abstract void onConfigureFailed(@NonNull CameraCaptureSession session);
 
         /**
          * This method is called every time the session has no more capture requests to process.
@@ -555,7 +563,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          *
          */
-        public void onReady(CameraCaptureSession session) {
+        public void onReady(@NonNull CameraCaptureSession session) {
             // default empty implementation
         }
 
@@ -571,7 +579,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
-        public void onActive(CameraCaptureSession session) {
+        public void onActive(@NonNull CameraCaptureSession session) {
             // default empty implementation
         }
 
@@ -589,7 +597,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          */
-        public void onClosed(CameraCaptureSession session) {
+        public void onClosed(@NonNull CameraCaptureSession session) {
             // default empty implementation
         }
 
@@ -608,7 +616,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @param session the session returned by {@link CameraDevice#createCaptureSession}
          * @param surface the Surface that was used with the {@link #prepare} call.
          */
-        public void onSurfacePrepared(CameraCaptureSession session, Surface surface) {
+        public void onSurfacePrepared(@NonNull CameraCaptureSession session,
+                @NonNull Surface surface) {
             // default empty implementation
         }
     }
@@ -675,8 +684,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *
          * @see android.media.MediaActionSound
          */
-        public void onCaptureStarted(CameraCaptureSession session,
-                CaptureRequest request, long timestamp, long frameNumber) {
+        public void onCaptureStarted(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, long timestamp, long frameNumber) {
             // Temporary trampoline for API change transition
             onCaptureStarted(session, request, timestamp);
         }
@@ -756,8 +765,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see #setRepeatingRequest
          * @see #setRepeatingBurst
          */
-        public void onCaptureProgressed(CameraCaptureSession session,
-                CaptureRequest request, CaptureResult partialResult) {
+        public void onCaptureProgressed(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
             // default empty implementation
         }
 
@@ -785,8 +794,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see #setRepeatingRequest
          * @see #setRepeatingBurst
          */
-        public void onCaptureCompleted(CameraCaptureSession session,
-                CaptureRequest request, TotalCaptureResult result) {
+        public void onCaptureCompleted(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
             // default empty implementation
         }
 
@@ -814,8 +823,8 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see #setRepeatingRequest
          * @see #setRepeatingBurst
          */
-        public void onCaptureFailed(CameraCaptureSession session,
-                CaptureRequest request, CaptureFailure failure) {
+        public void onCaptureFailed(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
             // default empty implementation
         }
 
@@ -844,7 +853,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see CaptureFailure#getSequenceId()
          * @see #onCaptureSequenceAborted
          */
-        public void onCaptureSequenceCompleted(CameraCaptureSession session,
+        public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession session,
                 int sequenceId, long frameNumber) {
             // default empty implementation
         }
@@ -873,7 +882,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see CaptureFailure#getSequenceId()
          * @see #onCaptureSequenceCompleted
          */
-        public void onCaptureSequenceAborted(CameraCaptureSession session,
+        public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session,
                 int sequenceId) {
             // default empty implementation
         }
