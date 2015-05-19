@@ -26,6 +26,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -56,30 +58,20 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     private ArrayList<LocationSettingsChangeCallback> mSettingsChangeCallbacks =
             new ArrayList<LocationSettingsChangeCallback>();
+    private final H mHandler = new H();
 
-    public LocationControllerImpl(Context context) {
+    public LocationControllerImpl(Context context, Looper bgLooper) {
         mContext = context;
 
+        // Register to listen for changes in location settings.
         IntentFilter filter = new IntentFilter();
         filter.addAction(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
-        context.registerReceiverAsUser(this, UserHandle.ALL, filter, null, null);
+        filter.addAction(LocationManager.MODE_CHANGED_ACTION);
+        context.registerReceiverAsUser(this, UserHandle.ALL, filter, null, new Handler(bgLooper));
 
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mStatusBarManager
                 = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
-
-        // Register to listen for changes in location settings.
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
-        context.registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
-                    locationSettingsChanged();
-                }
-            }
-        }, UserHandle.ALL, intentFilter, null, new Handler());
 
         // Examine the current location state and initialize the status view.
         updateActiveLocationRequests();
@@ -91,7 +83,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
      */
     public void addSettingsChangedCallback(LocationSettingsChangeCallback cb) {
         mSettingsChangeCallbacks.add(cb);
-        locationSettingsChanged(cb);
+        mHandler.sendEmptyMessage(H.MSG_LOCATION_SETTINGS_CHANGED);
     }
 
     public void removeSettingsChangedCallback(LocationSettingsChangeCallback cb) {
@@ -181,8 +173,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     // Updates the status view based on the current state of location requests.
     private void refreshViews() {
         if (mAreActiveLocationRequests) {
-            mStatusBarManager.setIcon(LOCATION_STATUS_ICON_PLACEHOLDER, LOCATION_STATUS_ICON_ID, 0,
-                    mContext.getString(R.string.accessibility_location_active));
+            mStatusBarManager.setIcon(LOCATION_STATUS_ICON_PLACEHOLDER, LOCATION_STATUS_ICON_ID,
+                    0, mContext.getString(R.string.accessibility_location_active));
         } else {
             mStatusBarManager.removeIcon(LOCATION_STATUS_ICON_PLACEHOLDER);
         }
@@ -197,22 +189,33 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         }
     }
 
-    private void locationSettingsChanged() {
-        boolean isEnabled = isLocationEnabled();
-        for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
-            cb.onLocationSettingsChanged(isEnabled);
-        }
-    }
-
-    private void locationSettingsChanged(LocationSettingsChangeCallback cb) {
-        cb.onLocationSettingsChanged(isLocationEnabled());
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)) {
             updateActiveLocationRequests();
+        } else if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
+            mHandler.sendEmptyMessage(H.MSG_LOCATION_SETTINGS_CHANGED);
+        }
+    }
+
+    private final class H extends Handler {
+        private static final int MSG_LOCATION_SETTINGS_CHANGED = 1;
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_LOCATION_SETTINGS_CHANGED:
+                    locationSettingsChanged();
+                    break;
+            }
+        }
+
+        private void locationSettingsChanged() {
+            boolean isEnabled = isLocationEnabled();
+            for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
+                cb.onLocationSettingsChanged(isEnabled);
+            }
         }
     }
 }

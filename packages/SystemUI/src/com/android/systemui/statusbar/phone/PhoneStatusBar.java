@@ -745,7 +745,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mHandlerThread.start();
 
         // Other icons
-        mLocationController = new LocationControllerImpl(mContext); // will post a notification
+        mLocationController = new LocationControllerImpl(mContext,
+                mHandlerThread.getLooper()); // will post a notification
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addStateChangedCallback(new BatteryStateChangeCallback() {
             @Override
