@@ -911,6 +911,15 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public void deleteUserKey(int userHandle) {
+        try {
+            mMountService.deleteUserKey(userHandle);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /** {@hide} */
     public static File maybeTranslateEmulatedPathToInternal(File path) {
         final IMountService mountService = IMountService.Stub.asInterface(
                 ServiceManager.getService("mount"));

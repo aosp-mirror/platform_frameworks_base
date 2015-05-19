@@ -42,6 +42,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -1444,6 +1445,8 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void removeUserStateLocked(final int userHandle) {
+        mContext.getSystemService(StorageManager.class)
+            .deleteUserKey(userHandle);
         // Cleanup package manager settings
         mPm.cleanUpUserLILPw(this, userHandle);
 
