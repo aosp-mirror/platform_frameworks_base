@@ -1071,23 +1071,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private NetworkCapabilities getNetworkCapabilitiesAndValidation(NetworkAgentInfo nai) {
-        if (nai != null) {
-            synchronized (nai) {
-                if (nai.created) {
-                    NetworkCapabilities nc = new NetworkCapabilities(nai.networkCapabilities);
-                    if (nai.lastValidated) {
-                        nc.addCapability(NET_CAPABILITY_VALIDATED);
-                    } else {
-                        nc.removeCapability(NET_CAPABILITY_VALIDATED);
-                    }
-                    return nc;
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId) {
         // The basic principle is: if an app's traffic could possibly go over a
@@ -1109,7 +1092,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         HashMap<Network, NetworkCapabilities> result = new HashMap<Network, NetworkCapabilities>();
 
         NetworkAgentInfo nai = getDefaultNetwork();
-        NetworkCapabilities nc = getNetworkCapabilitiesAndValidation(getDefaultNetwork());
+        NetworkCapabilities nc = getNetworkCapabilitiesInternal(nai);
         if (nc != null) {
             result.put(nai.network, nc);
         }
@@ -1122,9 +1105,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (networks != null) {
                         for (Network network : networks) {
                             nai = getNetworkAgentInfoForNetwork(network);
-                            nc = getNetworkCapabilitiesAndValidation(nai);
+                            nc = getNetworkCapabilitiesInternal(nai);
                             if (nc != null) {
-                                result.put(nai.network, nc);
+                                result.put(network, nc);
                             }
                         }
                     }
@@ -1184,22 +1167,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return null;
     }
 
-    @Override
-    public NetworkCapabilities getNetworkCapabilities(Network network) {
-        enforceAccessPermission();
-        NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+    private NetworkCapabilities getNetworkCapabilitiesInternal(NetworkAgentInfo nai) {
         if (nai != null) {
             synchronized (nai) {
-                NetworkCapabilities nc = new NetworkCapabilities(nai.networkCapabilities);
-                if (nai.lastValidated) {
-                    nc.addCapability(NET_CAPABILITY_VALIDATED);
-                } else {
-                    nc.removeCapability(NET_CAPABILITY_VALIDATED);
+                if (nai.networkCapabilities != null) {
+                    return new NetworkCapabilities(nai.networkCapabilities);
                 }
-                return nc;
             }
         }
         return null;
+    }
+
+    @Override
+    public NetworkCapabilities getNetworkCapabilities(Network network) {
+        enforceAccessPermission();
+        return getNetworkCapabilitiesInternal(getNetworkAgentInfoForNetwork(network));
     }
 
     @Override
@@ -1966,11 +1948,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case NetworkMonitor.EVENT_NETWORK_TESTED: {
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
-                    if (isLiveNetworkAgent(nai, "EVENT_NETWORK_VALIDATED")) {
-                        boolean valid = (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
+                    if (isLiveNetworkAgent(nai, "EVENT_NETWORK_TESTED")) {
+                        final boolean valid =
+                                (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
+                        final boolean validationChanged = (valid != nai.lastValidated);
                         nai.lastValidated = valid;
                         if (valid) {
                             if (DBG) log("Validated " + nai.name());
+                            nai.networkCapabilities.addCapability(NET_CAPABILITY_VALIDATED);
                             if (!nai.everValidated) {
                                 nai.everValidated = true;
                                 rematchNetworkAndRequests(nai, NascentState.JUST_VALIDATED,
@@ -1978,6 +1963,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 // If score has changed, rebroadcast to NetworkFactories. b/17726566
                                 sendUpdatedScoreToFactories(nai);
                             }
+                        } else {
+                            nai.networkCapabilities.removeCapability(NET_CAPABILITY_VALIDATED);
                         }
                         updateInetCondition(nai);
                         // Let the NetworkAgent know the state of its network
@@ -1986,8 +1973,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
                                 0, null);
 
-                        // TODO: trigger a NetworkCapabilities update so that the dialog can know
-                        // that the network is now validated and close itself.
+                        if (validationChanged) {
+                            notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
+                        }
                     }
                     break;
                 }
@@ -3569,8 +3557,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void enforceNetworkRequestPermissions(NetworkCapabilities networkCapabilities) {
-        if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
-                == false) {
+        if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) == false) {
             enforceConnectivityInternalPermission();
         } else {
             enforceChangePermission();
@@ -3597,8 +3584,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void enforceMeteredApnPolicy(NetworkCapabilities networkCapabilities) {
         // if UID is restricted, don't allow them to bring up metered APNs
-        if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
-                == false) {
+        if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED) == false) {
             final int uidRules;
             final int uid = Binder.getCallingUid();
             synchronized(mRulesLock) {
@@ -3968,6 +3954,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!Objects.equals(networkAgent.networkCapabilities, networkCapabilities)) {
             synchronized (networkAgent) {
                 networkAgent.networkCapabilities = networkCapabilities;
+            }
+            if (networkAgent.lastValidated) {
+                networkAgent.networkCapabilities.addCapability(NET_CAPABILITY_VALIDATED);
+                // There's no need to remove the capability if we think the network is unvalidated,
+                // because NetworkAgents don't set the validated capability.
             }
             rematchAllNetworksAndRequests(networkAgent, networkAgent.getCurrentScore());
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_CAP_CHANGED);
