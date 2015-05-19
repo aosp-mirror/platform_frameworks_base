@@ -4133,6 +4133,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final int userId = UserHandle.getCallingUserId();
         ArrayList<ResolveInfo> result = new ArrayList<ResolveInfo>();
+        ArrayList<ResolveInfo> alwaysList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> undefinedList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> neverList = new ArrayList<ResolveInfo>();
         ArrayList<ResolveInfo> matchAllList = new ArrayList<ResolveInfo>();
@@ -4155,27 +4156,22 @@ public class PackageManagerService extends IPackageManager.Stub {
                     // Try to get the status from User settings first
                     int status = getDomainVerificationStatusLPr(ps, userId);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-                        result.add(info);
+                        alwaysList.add(info);
                     } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
                         neverList.add(info);
-                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED ||
+                            status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK) {
                         undefinedList.add(info);
                     }
                 }
             }
-            // Add all undefined Apps as we want them to appear in the Disambiguation dialog.
-            result.addAll(undefinedList);
-            // If there is nothing selected, add all candidates and remove the ones that the User
-            // has explicitely put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state and
-            // also remove Browser Apps ones.
-            // If there is still none after this pass, add all Browser Apps and
-            // let the User decide with the Disambiguation dialog if there are several ones.
-            if (result.size() == 0) {
-                result.addAll(candidates);
-            }
-            result.removeAll(neverList);
-            result.removeAll(matchAllList);
-            if (result.size() == 0) {
+            // First try to add the "always" if there is any
+            if (alwaysList.size() > 0) {
+                result.addAll(alwaysList);
+            } else {
+                // Add all undefined Apps as we want them to appear in the Disambiguation dialog.
+                result.addAll(undefinedList);
+                // Also add Browsers (all of them or only the default one)
                 if ((flags & MATCH_ALL) != 0) {
                     result.addAll(matchAllList);
                 } else {
@@ -4199,6 +4195,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } else {
                         result.addAll(matchAllList);
                     }
+                }
+
+                // If there is nothing selected, add all candidates and remove the ones that the User
+                // has explicitely put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state
+                if (result.size() == 0) {
+                    result.addAll(candidates);
+                    result.removeAll(neverList);
                 }
             }
         }
