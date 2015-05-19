@@ -36916,6 +36916,7 @@ package android.view {
     method public abstract void setText(java.lang.CharSequence);
     method public abstract void setText(java.lang.CharSequence, int, int);
     method public abstract void setTextPaint(android.text.TextPaint);
+    method public abstract void setTextStyle(int, int, int, int);
     method public abstract void setVisibility(int);
   }
 
