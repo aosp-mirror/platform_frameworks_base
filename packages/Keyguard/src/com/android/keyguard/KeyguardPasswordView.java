@@ -35,6 +35,8 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.internal.widget.TextViewInputDisabler;
+
 import java.util.List;
 /**
  * Displays an alphanumeric (latin-1) key entry for the user to enter
@@ -49,6 +51,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     InputMethodManager mImm;
     private TextView mPasswordEntry;
+    private TextViewInputDisabler mPasswordEntryDisabler;
+
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mFastOutLinearInInterpolator;
 
@@ -70,7 +74,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     protected void resetState() {
         mSecurityMessageDisplay.setMessage(R.string.kg_password_instructions, false);
-        mPasswordEntry.setEnabled(true);
+        setPasswordEntryEnabled(true);
     }
 
     @Override
@@ -123,6 +127,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 Context.INPUT_METHOD_SERVICE);
 
         mPasswordEntry = (TextView) findViewById(getPasswordTextViewId());
+        mPasswordEntryDisabler = new TextViewInputDisabler(mPasswordEntry);
         mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -185,7 +190,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     @Override
     protected void setPasswordEntryEnabled(boolean enabled) {
-        mPasswordEntry.setEnabled(enabled);
+        mPasswordEntryDisabler.setInputEnabled(enabled);
     }
 
     /**
