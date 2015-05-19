@@ -28894,7 +28894,6 @@ package android.service.voice {
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
     field public static final int START_SOURCE_ASSIST_GESTURE = 4; // 0x4
     field public static final int START_WITH_ASSIST = 1; // 0x1
-    field public static final int START_WITH_SCREENSHOT = 2; // 0x2
   }
 
   public abstract class VoiceInteractionSession implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback {
@@ -28920,7 +28919,6 @@ package android.service.voice {
     method public void onDestroy();
     method public boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
     method public void onHandleAssist(android.os.Bundle);
-    method public void onHandleScreenshot(android.graphics.Bitmap);
     method public void onHide();
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
