@@ -5417,6 +5417,14 @@ public final class Settings {
         public static final String EMERGENCY_ASSISTANCE_APPLICATION = "emergency_assistance_application";
 
         /**
+         * Specifies whether the current app context on scren (assist data) will be sent to the
+         * assist application (active voice interaction service).
+         *
+         * @hide
+         */
+        public static final String ASSIST_STRUCTURE_ENABLED = "assist_structure_enabled";
+
+        /**
          * Names of the packages that the current user has explicitly allowed to
          * see all of the user's notifications, separated by ':'.
          *
