@@ -78,7 +78,7 @@ static void draw(SgRenderable *obj) {
     if (rsIsObject(renderState->pr)) {
         rsgBindProgramRaster(renderState->pr);
     } else {
-        rs_program_raster pr;
+        rs_program_raster pr = {0};
         rsgBindProgramRaster(pr);
     }
 
