@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -63,7 +64,7 @@ public class ManageDialog extends AlertActivity implements
             mService = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
-            mConfig = mService.getVpnConfig();
+            mConfig = mService.getVpnConfig(UserHandle.myUserId());
 
             // mConfig can be null if we are a restricted user, in that case don't show this dialog
             if (mConfig == null) {
@@ -120,10 +121,11 @@ public class ManageDialog extends AlertActivity implements
             if (which == DialogInterface.BUTTON_POSITIVE) {
                 mConfig.configureIntent.send();
             } else if (which == DialogInterface.BUTTON_NEUTRAL) {
+                final int myUserId = UserHandle.myUserId();
                 if (mConfig.legacy) {
-                    mService.prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN);
+                    mService.prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN, myUserId);
                 } else {
-                    mService.prepareVpn(mConfig.user, VpnConfig.LEGACY_VPN);
+                    mService.prepareVpn(mConfig.user, VpnConfig.LEGACY_VPN, myUserId);
                 }
             }
         } catch (Exception e) {
