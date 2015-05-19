@@ -1449,7 +1449,7 @@ public class Allocation extends BaseObj {
         }
 
         final byte[] data = fp.getData();
-        int data_length = fp.getPos();
+        int data_length = data.length;
         int eSize = mType.mElement.mElements[component_number].getBytesSize();
         eSize *= mType.mElement.mArraySizes[component_number];
 
