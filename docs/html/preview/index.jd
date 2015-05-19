@@ -22,21 +22,9 @@ footer.hide=1
           Test your apps and give us feedback!
         </p>
 
-        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Preview Program Overview
-        </a><br>
-        <a class="dac-hero-cta" href="{@docRoot}preview/api-overview.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Review the API changes
-        </a><br>
         <a class="dac-hero-cta" href="{@docRoot}preview/setup-sdk.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Set up the Preview SDK
-        </a><br>
-        <a class="dac-hero-cta" href="https://code.google.com/p/android-developer-preview/">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Report issues
+          Get started
         </a><br>
 
       </div>
@@ -55,29 +43,11 @@ footer.hide=1
     <i class="dac-sprite dac-arrow-down-gray"></i>
   </a>
 </div>
+
 <section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="type:blog+tag:featured+tag:preview"
        data-cardSizes="6x6"
        data-maxResults="3"></div>
-</div></section>
-
-<section class="dac-section dac-light"><div class="wrap">
-  <h1 class="dac-section-title">Android Data Binding</h1>
-  <div class="dac-section-subtitle">
-    A new way to manage your app's UI. 
-  </div>
-
-  <ul class="dac-section-links">
-    <li class="dac-section-link"><a href="">
-      <span class="dac-sprite dac-auto-chevron"></span>
-      Overview and Usage
-    </a></li>
-    <li class="dac-section-link"><a href="/google/play/filters.html">
-      <span class="dac-sprite dac-auto-chevron"></span>
-      User Guide
-    </a></li>
-
-  </ul>
 </div></section>
