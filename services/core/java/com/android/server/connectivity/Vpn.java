@@ -298,13 +298,15 @@ public class Vpn {
     }
 
     /**
-     * Set whether the current package has the ability to launch VPNs without user intervention.
+     * Set whether a package has the ability to launch VPNs without user intervention.
      */
-    public void setPackageAuthorization(boolean authorized) {
+    public void setPackageAuthorization(String packageName, boolean authorized) {
         // Check if the caller is authorized.
         enforceControlPermission();
 
-        if (mPackage == null || VpnConfig.LEGACY_VPN.equals(mPackage)) {
+        int uid = getAppUid(packageName, mUserHandle);
+        if (uid == -1 || VpnConfig.LEGACY_VPN.equals(packageName)) {
+            // Authorization for nonexistent packages (or fake ones) can't be updated.
             return;
         }
 
@@ -312,10 +314,10 @@ public class Vpn {
         try {
             AppOpsManager appOps =
                     (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-            appOps.setMode(AppOpsManager.OP_ACTIVATE_VPN, mOwnerUID, mPackage,
+            appOps.setMode(AppOpsManager.OP_ACTIVATE_VPN, uid, packageName,
                     authorized ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
         } catch (Exception e) {
-            Log.wtf(TAG, "Failed to set app ops for package " + mPackage, e);
+            Log.wtf(TAG, "Failed to set app ops for package " + packageName + ", uid " + uid, e);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
