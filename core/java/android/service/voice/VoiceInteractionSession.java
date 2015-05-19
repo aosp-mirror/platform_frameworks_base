@@ -820,6 +820,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback,
     public void onHandleAssist(Bundle assistBundle) {
     }
 
+    /** @hide */
     public void onHandleScreenshot(Bitmap screenshot) {
     }
 

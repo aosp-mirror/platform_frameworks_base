@@ -177,6 +177,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
 
     public boolean showLocked(Bundle args, int flags,
             IVoiceInteractionSessionShowCallback showCallback) {
+        // For now we never allow screenshots.
+        flags &= ~VoiceInteractionService.START_WITH_SCREENSHOT;
         if (mBound) {
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
