@@ -156,7 +156,7 @@ public class VpnService extends Service {
      */
     public static Intent prepare(Context context) {
         try {
-            if (getService().prepareVpn(context.getPackageName(), null)) {
+            if (getService().prepareVpn(context.getPackageName(), null, UserHandle.myUserId())) {
                 return null;
             }
         } catch (RemoteException e) {
@@ -182,10 +182,11 @@ public class VpnService extends Service {
         String packageName = context.getPackageName();
         try {
             // Only prepare if we're not already prepared.
-            if (!cm.prepareVpn(packageName, null)) {
-                cm.prepareVpn(null, packageName);
+            int userId = UserHandle.myUserId();
+            if (!cm.prepareVpn(packageName, null, userId)) {
+                cm.prepareVpn(null, packageName, userId);
             }
-            cm.setVpnPackageAuthorization(true);
+            cm.setVpnPackageAuthorization(packageName, userId, true);
         } catch (RemoteException e) {
             // ignore
         }
