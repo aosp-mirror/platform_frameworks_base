@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -724,6 +725,26 @@ public final class AudioAttributes implements Parcelable {
                 return USAGE_UNKNOWN;
         }
     }
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC (or at least SYSTEM) API
+     * Returns the stream type matching the given attributes for volume control.
+     * Use this method to derive the stream type needed to configure the volume
+     * control slider in an {@link Activity} with {@link Activity#setVolumeControlStream(int)}.
+     * <BR>Do not use this method to set the stream type on an audio player object
+     * (e.g. {@link AudioTrack}, {@link MediaPlayer}), use <code>AudioAttributes</code> instead.
+     * @param aa non-null AudioAttributes.
+     * @return a valid stream type for <code>Activity</code> or stream volume control that matches
+     *     the attributes, or {@link AudioManager#USE_DEFAULT_STREAM_TYPE} if there isn't a direct
+     *     match. Note that <code>USE_DEFAULT_STREAM_TYPE</code> is not a valid value
+     *     for {@link AudioManager#setStreamVolume(int, int, int)}.
+     */
+    public static int getVolumeControlStream(@NonNull AudioAttributes aa) {
+        if (aa == null) {
+            throw new IllegalArgumentException("Invalid null audio attributes");
+        }
+        return toVolumeStreamType(true /*fromGetVolumeControlStream*/, aa);
+    }
 
     /**
      * @hide
@@ -732,13 +753,19 @@ public final class AudioAttributes implements Parcelable {
      * @param aa non-null AudioAttributes.
      * @return a valid stream type for volume control that matches the attributes.
      */
-    public static int toLegacyStreamType(AudioAttributes aa) {
+    public static int toLegacyStreamType(@NonNull AudioAttributes aa) {
+        return toVolumeStreamType(false /*fromGetVolumeControlStream*/, aa);
+    }
+
+    private static int toVolumeStreamType(boolean fromGetVolumeControlStream, AudioAttributes aa) {
         // flags to stream type mapping
         if ((aa.getFlags() & FLAG_AUDIBILITY_ENFORCED) == FLAG_AUDIBILITY_ENFORCED) {
-            return AudioSystem.STREAM_SYSTEM_ENFORCED;
+            return fromGetVolumeControlStream ?
+                    AudioSystem.STREAM_SYSTEM : AudioSystem.STREAM_SYSTEM_ENFORCED;
         }
         if ((aa.getFlags() & FLAG_SCO) == FLAG_SCO) {
-            return AudioSystem.STREAM_BLUETOOTH_SCO;
+            return fromGetVolumeControlStream ?
+                    AudioSystem.STREAM_VOICE_CALL : AudioSystem.STREAM_BLUETOOTH_SCO;
         }
 
         // usage to stream type mapping
@@ -753,7 +780,8 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_VOICE_COMMUNICATION:
                 return AudioSystem.STREAM_VOICE_CALL;
             case USAGE_VOICE_COMMUNICATION_SIGNALLING:
-                return AudioSystem.STREAM_DTMF;
+                return fromGetVolumeControlStream ?
+                        AudioSystem.STREAM_VOICE_CALL : AudioSystem.STREAM_DTMF;
             case USAGE_ALARM:
                 return AudioSystem.STREAM_ALARM;
             case USAGE_NOTIFICATION_RINGTONE:
@@ -765,8 +793,15 @@ public final class AudioAttributes implements Parcelable {
             case USAGE_NOTIFICATION_EVENT:
                 return AudioSystem.STREAM_NOTIFICATION;
             case USAGE_UNKNOWN:
+                return fromGetVolumeControlStream ?
+                        AudioManager.USE_DEFAULT_STREAM_TYPE : AudioSystem.STREAM_MUSIC;
             default:
-                return AudioSystem.STREAM_MUSIC;
+                if (fromGetVolumeControlStream) {
+                    throw new IllegalArgumentException("Unknown usage value " + aa.getUsage() +
+                            " in audio attributes");
+                } else {
+                    return AudioSystem.STREAM_MUSIC;
+                }
         }
     }
 
