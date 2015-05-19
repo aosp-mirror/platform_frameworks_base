@@ -503,7 +503,7 @@ public class AudioFormat {
          *    if both channel index mask and channel position mask
          *    are specified but do not have the same channel count.
          */
-        public @NonNull Builder setChannelMask(int channelMask) throws IllegalArgumentException {
+        public @NonNull Builder setChannelMask(int channelMask) {
             if (channelMask == 0) {
                 throw new IllegalArgumentException("Invalid zero channel mask");
             } else if (/* channelMask != 0 && */ mChannelIndexMask != 0 &&
@@ -555,8 +555,7 @@ public class AudioFormat {
          *    if both channel index mask and channel position mask
          *    are specified but do not have the same channel count.
          */
-        public @NonNull Builder setChannelIndexMask(int channelIndexMask)
-                throws IllegalArgumentException {
+        public @NonNull Builder setChannelIndexMask(int channelIndexMask) {
             if (channelIndexMask == 0) {
                 throw new IllegalArgumentException("Invalid zero channel index mask");
             } else if (/* channelIndexMask != 0 && */ mChannelMask != 0 &&

@@ -229,7 +229,7 @@ public class AudioTrack
     /**
      * Sizes of the native audio buffer.
      * These values are set during construction and can be stale.
-     * To obtain the current native audio buffer frame count use {@link #getNativeFrameCount()}.
+     * To obtain the current native audio buffer frame count use {@link #getBufferSizeInFrames()}.
      */
     private int mNativeBufferSizeInBytes = 0;
     private int mNativeBufferSizeInFrames = 0;
@@ -346,7 +346,7 @@ public class AudioTrack
      *   If <code>bufferSizeInBytes</code> is less than the
      *   minimum buffer size for the output sink, it is automatically increased to the minimum
      *   buffer size.
-     *   The method {@link #getNativeFrameCount()} returns the
+     *   The method {@link #getBufferSizeInFrames()} returns the
      *   actual size in frames of the native buffer created, which
      *   determines the frequency to write
      *   to the streaming <code>AudioTrack</code> to avoid underrun.
@@ -1009,7 +1009,7 @@ public class AudioTrack
     }
 
     /**
-     *  Returns the "native frame count" of the <code>AudioTrack</code> buffer.
+     *  Returns the frame count of the native <code>AudioTrack</code> buffer.
      *  <p> If the track's creation mode is {@link #MODE_STATIC},
      *  it is equal to the specified bufferSizeInBytes on construction, converted to frame units.
      *  A static track's native frame count will not change.
@@ -1019,12 +1019,26 @@ public class AudioTrack
      *  the target output sink, and
      *  if the track is subsequently routed to a different output sink, the native
      *  frame count may enlarge to accommodate.
-     *  See also {@link AudioManager#getProperty(String)} for key
+     *  <p> If the <code>AudioTrack</code> encoding indicates compressed data,
+     *  e.g. {@link AudioFormat#ENCODING_AC3}, then the frame count returned is
+     *  the size of the native <code>AudioTrack</code> buffer in bytes.
+     *  <p> See also {@link AudioManager#getProperty(String)} for key
      *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
-     *  @return current size in frames of the audio track buffer.
+     *  @return current size in frames of the <code>AudioTrack</code> buffer.
      *  @throws IllegalStateException
      */
-    public int getNativeFrameCount() throws IllegalStateException {
+    public int getBufferSizeInFrames() {
+        return native_get_native_frame_count();
+    }
+
+    /**
+     *  Returns the frame count of the native <code>AudioTrack</code> buffer.
+     *  @return current size in frames of the <code>AudioTrack</code> buffer.
+     *  @throws IllegalStateException
+     *  @deprecated Use the identical public method {@link #getBufferSizeInFrames()} instead.
+     */
+    @Deprecated
+    protected int getNativeFrameCount() {
         return native_get_native_frame_count();
     }
 
@@ -1305,6 +1319,9 @@ public class AudioTrack
      * The valid sample rate range is from 1 Hz to twice the value returned by
      * {@link #getNativeOutputSampleRate(int)}.
      * Use {@link #setPlaybackParams(PlaybackParams)} for speed control.
+     * <p> This method may also be used to repurpose an existing <code>AudioTrack</code>
+     * for playback of content of differing sample rate,
+     * but with identical encoding and channel mask.
      * @param sampleRateInHz the sample rate expressed in Hz
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
@@ -1474,7 +1491,7 @@ public class AudioTrack
      * <p>
      * If the mode is {@link #MODE_STREAM}, you can optionally prime the data path prior to
      * calling play(), by writing up to <code>bufferSizeInBytes</code> (from constructor).
-     * If you don’t call write() first, or if you call write() but with an insufficient amount of
+     * If you don't call write() first, or if you call write() but with an insufficient amount of
      * data, then the track will be in underrun state at play().  In this case,
      * playback will not actually start playing until the data path is filled to a
      * device-specific minimum level.  This requirement for the path to be filled
