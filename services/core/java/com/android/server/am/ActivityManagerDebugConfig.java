@@ -71,6 +71,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_TASKS = DEBUG_ALL || false;
     static final boolean DEBUG_THUMBNAILS = DEBUG_ALL || false;
     static final boolean DEBUG_TRANSITION = DEBUG_ALL || false;
+    static final boolean DEBUG_UID_OBSERVERS = DEBUG_ALL || false;
     static final boolean DEBUG_URI_PERMISSION = DEBUG_ALL || false;
     static final boolean DEBUG_USER_LEAVING = DEBUG_ALL || false;
     static final boolean DEBUG_VISIBILITY = DEBUG_ALL || false;
@@ -104,6 +105,8 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_TASKS = (APPEND_CATEGORY_NAME) ? "_Tasks" : "";
     static final String POSTFIX_THUMBNAILS = (APPEND_CATEGORY_NAME) ? "_Thumbnails" : "";
     static final String POSTFIX_TRANSITION = (APPEND_CATEGORY_NAME) ? "_Transition" : "";
+    static final String POSTFIX_UID_OBSERVERS = (APPEND_CATEGORY_NAME)
+            ? "_UidObservers" : "";
     static final String POSTFIX_URI_PERMISSION = (APPEND_CATEGORY_NAME) ? "_UriPermission" : "";
     static final String POSTFIX_USER_LEAVING = (APPEND_CATEGORY_NAME) ? "_UserLeaving" : "";
     static final String POSTFIX_VISIBILITY = (APPEND_CATEGORY_NAME) ? "_Visibility" : "";
