@@ -249,9 +249,7 @@ public final class ScanSettings implements Parcelable {
          *
          * @param callbackType The callback type flags for the scan.
          * @throws IllegalArgumentException If the {@code callbackType} is invalid.
-         * @hide
          */
-        @SystemApi
         public Builder setCallbackType(int callbackType) {
 
             if (!isValidCallbackType(callbackType)) {
