@@ -377,15 +377,23 @@ public class TelecomManager {
     }
 
     /**
-     * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
-     * calls with a specified URI scheme.
+     * Return the {@link PhoneAccount} which will be used to place outgoing calls to addresses with
+     * the specified {@code uriScheme}. This {@link PhoneAccount} will always be a member of the
+     * list which is returned from invoking {@link #getCallCapablePhoneAccounts()}. The specific
+     * account returned depends on the following priorities:
+     * <ul>
+     * <li> If the user-selected default {@link PhoneAccount} supports the specified scheme, it will
+     * be returned.
+     * </li>
+     * <li> If there exists only one {@link PhoneAccount} that supports the specified scheme, it
+     * will be returned.
+     * </li>
+     * </ul>
      * <p>
-     * Apps must be prepared for this method to return {@code null}, indicating that there currently
-     * exists no user-chosen default {@code PhoneAccount}.
-     * <p>
+     * If no {@link PhoneAccount} fits the criteria above, this method will return {@code null}.
+     *
      * @param uriScheme The URI scheme.
-     * @return The {@link PhoneAccountHandle} corresponding to the user-chosen default for outgoing
-     * phone calls for a specified URI scheme.
+     * @return The {@link PhoneAccountHandle} corresponding to the account to be used.
      */
     public PhoneAccountHandle getDefaultOutgoingPhoneAccount(String uriScheme) {
         try {
@@ -403,7 +411,7 @@ public class TelecomManager {
      * Return the {@link PhoneAccount} which is the user-chosen default for making outgoing phone
      * calls. This {@code PhoneAccount} will always be a member of the list which is returned from
      * calling {@link #getCallCapablePhoneAccounts()}
-     *
+     * <p>
      * Apps must be prepared for this method to return {@code null}, indicating that there currently
      * exists no user-chosen default {@code PhoneAccount}.
      *
@@ -422,7 +430,7 @@ public class TelecomManager {
     }
 
     /**
-     * Sets the default account for making outgoing phone calls.
+     * Sets the user-chosen default for making outgoing phone calls.
      * @hide
      */
     public void setUserSelectedOutgoingPhoneAccount(PhoneAccountHandle accountHandle) {
@@ -439,6 +447,7 @@ public class TelecomManager {
      * Returns the current SIM call manager. Apps must be prepared for this method to return
      * {@code null}, indicating that there currently exists no user-chosen default
      * {@code PhoneAccount}.
+     *
      * @return The phone account handle of the current sim call manager.
      */
     public PhoneAccountHandle getSimCallManager() {
@@ -454,6 +463,7 @@ public class TelecomManager {
 
     /**
      * Sets the SIM call manager to the specified phone account.
+     *
      * @param accountHandle The phone account handle of the account to set as the sim call manager.
      * @hide
      */
@@ -469,6 +479,7 @@ public class TelecomManager {
 
     /**
      * Returns the list of registered SIM call managers.
+     *
      * @return List of registered SIM call managers.
      * @hide
      */
@@ -494,16 +505,6 @@ public class TelecomManager {
     @SystemApi
     public PhoneAccountHandle getConnectionManager() {
         return getSimCallManager();
-    }
-
-    /**
-     * Returns the list of registered SIM call managers.
-     * @return List of registered SIM call managers.
-     * @hide
-     */
-    @SystemApi
-    public List<PhoneAccountHandle> getRegisteredConnectionManagers() {
-        return getSimCallManagers();
     }
 
     /**
@@ -534,20 +535,33 @@ public class TelecomManager {
 
 
     /**
-     * Return a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
-     * calls.
+     * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
+     * calls. The returned list includes only those accounts which have been explicitly enabled
+     * by the user.
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
-     *
      */
     public List<PhoneAccountHandle> getCallCapablePhoneAccounts() {
+        return getCallCapablePhoneAccounts(false);
+    }
+
+    /**
+     * Returns a list of {@link PhoneAccountHandle}s including those which have not been enabled
+     * by the user.
+     *
+     * @return A list of {@code PhoneAccountHandle} objects.
+     * @hide
+     */
+    public List<PhoneAccountHandle> getCallCapablePhoneAccounts(boolean includeDisabledAccounts) {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getCallCapablePhoneAccounts(mContext.getOpPackageName());
+                return getTelecomService().getCallCapablePhoneAccounts(
+                        includeDisabledAccounts, mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts", e);
+            Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts(" +
+                    includeDisabledAccounts + ")", e);
         }
         return new ArrayList<>();
     }
@@ -1159,6 +1173,25 @@ public class TelecomManager {
                         mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#placeCall", e);
+            }
+        }
+    }
+
+    /**
+     * Enables and disables specified phone account.
+     *
+     * @param handle Handle to the phone account.
+     * @param isEnabled Enable state of the phone account.
+     * @hide
+     */
+    @SystemApi
+    public void enablePhoneAccount(PhoneAccountHandle handle, boolean isEnabled) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                service.enablePhoneAccount(handle, isEnabled);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error enablePhoneAbbount", e);
             }
         }
     }

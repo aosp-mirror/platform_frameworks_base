@@ -32509,6 +32509,7 @@ package android.telecom {
     method public android.net.Uri getSubscriptionAddress();
     method public java.util.List<java.lang.String> getSupportedUriSchemes();
     method public boolean hasCapabilities(int);
+    method public boolean isEnabled();
     method public boolean supportsUriScheme(java.lang.String);
     method public android.telecom.PhoneAccount.Builder toBuilder();
     method public void writeToParcel(android.os.Parcel, int);
@@ -32650,6 +32651,7 @@ package android.telecom {
     method public void cancelMissedCallsNotification();
     method public deprecated void clearAccounts();
     method public void clearPhoneAccounts();
+    method public void enablePhoneAccount(android.telecom.PhoneAccountHandle, boolean);
     method public boolean endCall();
     method public android.net.Uri getAdnUriForPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getAllPhoneAccountHandles();
@@ -32665,7 +32667,6 @@ package android.telecom {
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
-    method public java.util.List<android.telecom.PhoneAccountHandle> getRegisteredConnectionManagers();
     method public android.telecom.PhoneAccountHandle getSimCallManager();
     method public java.lang.String getVoiceMailNumber(android.telecom.PhoneAccountHandle);
     method public boolean handleMmi(java.lang.String);
