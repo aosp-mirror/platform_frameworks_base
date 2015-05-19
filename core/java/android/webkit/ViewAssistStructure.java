@@ -137,6 +137,11 @@ public class ViewAssistStructure extends android.view.ViewAssistStructure {
     }
 
     @Override
+    public void setTextStyle(int size, int fgColor, int bgColor, int style) {
+        mV.setTextStyle(size, fgColor, bgColor, style);
+    }
+
+    @Override
     public  void setHint(CharSequence hint) {
         mV.setHint(hint);
     }
