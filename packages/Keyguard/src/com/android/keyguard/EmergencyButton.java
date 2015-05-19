@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -42,7 +43,7 @@ public class EmergencyButton extends Button {
             .setPackage("com.android.phone")
             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                     | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -127,6 +128,7 @@ public class EmergencyButton extends Button {
             KeyguardUpdateMonitor.getInstance(mContext).reportEmergencyCallAction(
                     true /* bypassHandler */);
             getContext().startActivityAsUser(INTENT_EMERGENCY_DIAL,
+                    ActivityOptions.makeCustomAnimation(getContext(), 0, 0).toBundle(),
                     new UserHandle(KeyguardUpdateMonitor.getCurrentUser()));
         }
     }
