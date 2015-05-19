@@ -973,6 +973,7 @@ class MountService extends IMountService.Stub
             }
         }
 
+        disk.volumeCount = volumeCount;
         mCallbacks.notifyDiskScanned(disk, volumeCount);
     }
 
