@@ -67,8 +67,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
     private final TaskSingleDrainer mIdleDrainer;
     /** Drain state transitions from BUSY -> IDLE */
     private final TaskSingleDrainer mAbortDrainer;
-    /** Drain the UNCONFIGURED state transition */
-    private final TaskSingleDrainer mUnconfigureDrainer;
 
     /** This session is closed; all further calls will throw ISE */
     private boolean mClosed = false;
@@ -121,8 +119,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                 /*name*/"idle");
         mAbortDrainer = new TaskSingleDrainer(mDeviceHandler, new AbortDrainListener(),
                 /*name*/"abort");
-        mUnconfigureDrainer = new TaskSingleDrainer(mDeviceHandler, new UnconfigureDrainListener(),
-                /*name*/"unconf");
 
         // CameraDevice should call configureOutputs and have it finish before constructing us
 
@@ -572,26 +568,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
             @Override
             public void onUnconfigured(CameraDevice camera) {
                 if (VERBOSE) Log.v(TAG, mIdString + "onUnconfigured");
-                synchronized (session) {
-                    // Ignore #onUnconfigured before #close is called.
-                    //
-                    // Normally, this is reached when this session is closed and no immediate other
-                    // activity happens for the camera, in which case the camera is configured to
-                    // null streams by this session and the UnconfigureDrainer task is started.
-                    // However, we can also end up here if
-                    //
-                    // 1) Session is closed
-                    // 2) New session is created before this session finishes closing, setting
-                    //    mSkipUnconfigure and therefore this session does not configure null or
-                    //    start the UnconfigureDrainer task.
-                    // 3) And then the new session fails to be created, so onUnconfigured fires
-                    //    _anyway_.
-                    // In this second case, need to not finish a task that was never started, so
-                    // guard with mSkipUnconfigure
-                    if (mClosed && mConfigureSuccess && !mSkipUnconfigure) {
-                        mUnconfigureDrainer.taskFinished();
-                    }
-                }
             }
 
             @Override
@@ -656,6 +632,19 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
              * then the drain immediately finishes.
              */
             if (VERBOSE) Log.v(TAG, mIdString + "onSequenceDrained");
+
+
+            // Fire session close as soon as all sequences are complete.
+            // We may still need to unconfigure the device, but a new session might be created
+            // past this point, and notifications would then stop to this instance.
+            mStateCallback.onClosed(CameraCaptureSessionImpl.this);
+
+            // Fast path: A new capture session has replaced this one; don't wait for abort/idle
+            // as we won't get state updates any more anyway.
+            if (mSkipUnconfigure) {
+                return;
+            }
+
             mAbortDrainer.beginDrain();
         }
     }
@@ -673,6 +662,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                  *
                  * If the camera is already "IDLE", then the drain immediately finishes.
                  */
+
+                // Fast path: A new capture session has replaced this one; don't wait for idle
+                // as we won't get state updates any more anyway.
+                if (mSkipUnconfigure) {
+                    return;
+                }
                 mIdleDrainer.beginDrain();
             }
         }
@@ -691,7 +686,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                  * The device is now IDLE, and has settled. It will not transition to
                  * ACTIVE or BUSY again by itself.
                  *
-                 * It's now safe to unconfigure the outputs and after it's done invoke #onClosed.
+                 * It's now safe to unconfigure the outputs.
                  *
                  * This operation is idempotent; a session will not be closed twice.
                  */
@@ -699,45 +694,31 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession {
                         Log.v(TAG, mIdString + "Session drain complete, skip unconfigure: " +
                                 mSkipUnconfigure);
 
-                    // Fast path: A new capture session has replaced this one; don't unconfigure.
+                    // Fast path: A new capture session has replaced this one; don't wait for idle
+                    // as we won't get state updates any more anyway.
                     if (mSkipUnconfigure) {
-                        mStateCallback.onClosed(CameraCaptureSessionImpl.this);
                         return;
                     }
 
-                    // Slow path: #close was called explicitly on this session; unconfigure first
-                    mUnconfigureDrainer.taskStarted();
-
+                    // Final slow path: unconfigure the camera, no session has replaced us and
+                    // everything is idle.
                     try {
                         // begin transition to unconfigured
                         mDeviceImpl.configureStreamsChecked(null, null);
                     } catch (CameraAccessException e) {
                         // OK: do not throw checked exceptions.
-                        Log.e(TAG, mIdString + "Exception while configuring outputs: ", e);
+                        Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);
 
                         // TODO: call onError instead of onClosed if this happens
                     } catch (IllegalStateException e) {
-                        // Camera is already closed, so go straight to the close callback
+                        // Camera is already closed, so nothing left to do
                         if (VERBOSE) Log.v(TAG, mIdString +
                                 "Camera was already closed or busy, skipping unconfigure");
-                        mUnconfigureDrainer.taskFinished();
                     }
 
-                    mUnconfigureDrainer.beginDrain();
                 }
             }
         }
     }
 
-    private class UnconfigureDrainListener implements TaskDrainer.DrainListener {
-        @Override
-
-        public void onDrained() {
-            if (VERBOSE) Log.v(TAG, mIdString + "onUnconfigureDrained");
-            synchronized (CameraCaptureSessionImpl.this) {
-                // The device has finished unconfiguring. It's now fully closed.
-                mStateCallback.onClosed(CameraCaptureSessionImpl.this);
-            }
-        }
-    }
 }
