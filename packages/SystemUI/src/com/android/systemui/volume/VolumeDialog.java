@@ -724,7 +724,7 @@ public class VolumeDialog {
                 }
                 row.slider.setProgress(newProgress);
             }
-            if (mAutomute) {
+            if (mAutomute && mShowing) {
                 if (vlevel == 0 && !row.ss.muted && row.stream == AudioManager.STREAM_MUSIC) {
                     mController.setStreamMute(row.stream, true);
                 }
