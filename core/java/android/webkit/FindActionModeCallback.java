@@ -154,9 +154,9 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
     }
 
     public void showSoftInput() {
-        mInput.startGettingWindowFocus(mEditText.getRootView());
-        mInput.focusIn(mEditText);
-        mInput.showSoftInput(mEditText, 0);
+        if (mEditText.requestFocus()) {
+            mInput.showSoftInput(mEditText, 0);
+        }
     }
 
     public void updateMatchCount(int matchIndex, int matchCount, boolean isEmptyFind) {
