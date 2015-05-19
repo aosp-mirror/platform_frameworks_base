@@ -146,6 +146,9 @@ class WindowStateAnimator {
 
     boolean mKeyguardGoingAwayAnimation;
 
+    /** The pixel format of the underlying SurfaceControl */
+    int mSurfaceFormat;
+
     /** This is set when there is no Surface */
     static final int NO_SURFACE = 0;
     /** This is set after the Surface has been created but before the window has been drawn. During
@@ -845,6 +848,7 @@ class WindowStateAnimator {
                     flags |= SurfaceControl.OPAQUE;
                 }
 
+                mSurfaceFormat = format;
                 if (DEBUG_SURFACE_TRACE) {
                     mSurfaceControl = new SurfaceTrace(
                             mSession.mSurfaceSession,
@@ -1608,6 +1612,28 @@ class WindowStateAnimator {
                         "<<< CLOSE TRANSACTION setWallpaperOffset");
             }
         }
+    }
+
+    /**
+     * Try to change the pixel format without recreating the surface. This
+     * will be common in the case of changing from PixelFormat.OPAQUE to
+     * PixelFormat.TRANSLUCENT in the hardware-accelerated case as both
+     * requested formats resolve to the same underlying SurfaceControl format
+     * @return True if format was succesfully changed, false otherwise
+     */
+    boolean tryChangeFormatInPlaceLocked() {
+        if (mSurfaceControl == null) {
+            return false;
+        }
+        final LayoutParams attrs = mWin.getAttrs();
+        final boolean isHwAccelerated = (attrs.flags &
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
+        final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
+        if (format == mSurfaceFormat) {
+            setOpaqueLocked(!PixelFormat.formatHasAlpha(attrs.format));
+            return true;
+        }
+        return false;
     }
 
     void setOpaqueLocked(boolean isOpaque) {
