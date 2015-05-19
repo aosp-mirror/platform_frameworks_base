@@ -117,6 +117,7 @@ public class NotificationPanelView extends PanelView implements
      * intercepted yet.
      */
     private boolean mIntercepting;
+    private boolean mPanelExpanded;
     private boolean mQsExpanded;
     private boolean mQsExpandedWhenExpandingStarted;
     private boolean mQsFullyExpanded;
@@ -1496,10 +1497,19 @@ public class NotificationPanelView extends PanelView implements
         updateHeader();
         updateUnlockIcon();
         updateNotificationTranslucency();
-        mHeadsUpManager.setIsExpanded(!isFullyCollapsed());
+        updatePanelExpanded();
         mNotificationStackScroller.setShadeExpanded(!isFullyCollapsed());
         if (DEBUG) {
             invalidate();
+        }
+    }
+
+    private void updatePanelExpanded() {
+        boolean isExpanded = !isFullyCollapsed();
+        if (mPanelExpanded != isExpanded) {
+            mHeadsUpManager.setIsExpanded(isExpanded);
+            mStatusBar.setPanelExpanded(isExpanded);
+            mPanelExpanded = isExpanded;
         }
     }
 

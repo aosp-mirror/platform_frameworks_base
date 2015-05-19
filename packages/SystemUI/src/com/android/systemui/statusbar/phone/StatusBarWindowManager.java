@@ -114,12 +114,12 @@ public class StatusBarWindowManager {
     }
 
     private void applyFocusableFlag(State state) {
+        boolean panelFocusable = state.statusBarFocusable && state.panelExpanded;
         if (state.isKeyguardShowingAndNotOccluded() && state.keyguardNeedsInput
-                && state.bouncerShowing
-                || BaseStatusBar.ENABLE_REMOTE_INPUT && state.statusBarExpanded) {
+                && state.bouncerShowing || BaseStatusBar.ENABLE_REMOTE_INPUT && panelFocusable) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        } else if (state.isKeyguardShowingAndNotOccluded() || state.statusBarFocusable) {
+        } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else {
@@ -130,7 +130,7 @@ public class StatusBarWindowManager {
 
     private void applyHeight(State state) {
         boolean expanded = !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
-                || state.statusBarExpanded || state.keyguardFadingAway || state.bouncerShowing
+                || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
                 || state.headsUpShowing);
         if (expanded) {
             mLpChanged.height = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -213,9 +213,9 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
-    public void setStatusBarExpanded(boolean expanded) {
-        mCurrentState.statusBarExpanded = expanded;
-        mCurrentState.statusBarFocusable = expanded;
+    public void setPanelVisible(boolean visible) {
+        mCurrentState.panelVisible = visible;
+        mCurrentState.statusBarFocusable = visible;
         apply(mCurrentState);
     }
 
@@ -267,11 +267,17 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setPanelExpanded(boolean isExpanded) {
+        mCurrentState.panelExpanded = isExpanded;
+        apply(mCurrentState);
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
         boolean keyguardNeedsInput;
-        boolean statusBarExpanded;
+        boolean panelVisible;
+        boolean panelExpanded;
         boolean statusBarFocusable;
         boolean bouncerShowing;
         boolean keyguardFadingAway;
