@@ -15,6 +15,12 @@
  */
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * A report of failed capture for a single image capture from the image sensor.
  *
@@ -43,6 +49,13 @@ public class CaptureFailure {
      */
     public static final int REASON_FLUSHED = 1;
 
+     /** @hide */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef(
+         {REASON_ERROR,
+          REASON_FLUSHED })
+     public @interface FailureReason {};
+
     private final CaptureRequest mRequest;
     private final int mReason;
     private final boolean mDropped;
@@ -52,8 +65,8 @@ public class CaptureFailure {
     /**
      * @hide
      */
-    public CaptureFailure(CaptureRequest request, int reason, boolean dropped, int sequenceId,
-            long frameNumber) {
+    public CaptureFailure(CaptureRequest request, int reason,
+            boolean dropped, int sequenceId, long frameNumber) {
         mRequest = request;
         mReason = reason;
         mDropped = dropped;
@@ -81,6 +94,7 @@ public class CaptureFailure {
      *
      * @return The request associated with this failed capture. Never {@code null}.
      */
+    @NonNull
     public CaptureRequest getRequest() {
         return mRequest;
     }
@@ -110,6 +124,7 @@ public class CaptureFailure {
      * @see #REASON_ERROR
      * @see #REASON_FLUSHED
      */
+    @FailureReason
     public int getReason() {
         return mReason;
     }

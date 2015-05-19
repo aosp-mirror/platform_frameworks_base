@@ -16,6 +16,9 @@
 
 package android.hardware.camera2;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
@@ -80,7 +83,8 @@ public final class DngCreator implements AutoCloseable {
      *          {@link android.hardware.camera2.CameraCharacteristics}.
      * @param metadata a metadata object to generate tags from.
      */
-    public DngCreator(CameraCharacteristics characteristics, CaptureResult metadata) {
+    public DngCreator(@NonNull CameraCharacteristics characteristics,
+            @NonNull CaptureResult metadata) {
         if (characteristics == null || metadata == null) {
             throw new IllegalArgumentException("Null argument to DngCreator constructor");
         }
@@ -126,6 +130,7 @@ public final class DngCreator implements AutoCloseable {
      *                    </ul>
      * @return this {@link #DngCreator} object.
      */
+    @NonNull
     public DngCreator setOrientation(int orientation) {
         if (orientation < ExifInterface.ORIENTATION_UNDEFINED ||
                 orientation > ExifInterface.ORIENTATION_ROTATE_270) {
@@ -150,7 +155,8 @@ public final class DngCreator implements AutoCloseable {
      * @throws java.lang.IllegalArgumentException if the given thumbnail image has a dimension
      *      larger than {@link #MAX_THUMBNAIL_DIMENSION}.
      */
-    public DngCreator setThumbnail(Bitmap pixels) {
+    @NonNull
+    public DngCreator setThumbnail(@NonNull Bitmap pixels) {
         if (pixels == null) {
             throw new IllegalArgumentException("Null argument to setThumbnail");
         }
@@ -185,7 +191,8 @@ public final class DngCreator implements AutoCloseable {
      * @throws java.lang.IllegalArgumentException if the given thumbnail image has a dimension
      *      larger than {@link #MAX_THUMBNAIL_DIMENSION}.
      */
-    public DngCreator setThumbnail(Image pixels) {
+    @NonNull
+    public DngCreator setThumbnail(@NonNull Image pixels) {
         if (pixels == null) {
             throw new IllegalArgumentException("Null argument to setThumbnail");
         }
@@ -226,7 +233,8 @@ public final class DngCreator implements AutoCloseable {
      * @throws java.lang.IllegalArgumentException if the given location object doesn't
      *          contain enough information to set location metadata.
      */
-    public DngCreator setLocation(Location location) {
+    @NonNull
+    public DngCreator setLocation(@NonNull Location location) {
         if (location == null) {
             throw new IllegalArgumentException("Null location passed to setLocation");
         }
@@ -258,7 +266,8 @@ public final class DngCreator implements AutoCloseable {
      * @param description the user description string.
      * @return this {@link #DngCreator} object.
      */
-    public DngCreator setDescription(String description) {
+    @NonNull
+    public DngCreator setDescription(@NonNull String description) {
         if (description == null) {
             throw new IllegalArgumentException("Null description passed to setDescription.");
         }
@@ -293,8 +302,8 @@ public final class DngCreator implements AutoCloseable {
      *          set to write a well-formatted DNG file.
      * @throws java.lang.IllegalArgumentException if the size passed in does not match the
      */
-    public void writeInputStream(OutputStream dngOutput, Size size, InputStream pixels, long offset)
-            throws IOException {
+    public void writeInputStream(@NonNull OutputStream dngOutput, @NonNull Size size,
+            @NonNull InputStream pixels, @IntRange(from=0) long offset) throws IOException {
         if (dngOutput == null) {
             throw new IllegalArgumentException("Null dngOutput passed to writeInputStream");
         } else if (size == null) {
@@ -345,7 +354,8 @@ public final class DngCreator implements AutoCloseable {
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
      */
-    public void writeByteBuffer(OutputStream dngOutput, Size size, ByteBuffer pixels, long offset)
+    public void writeByteBuffer(@NonNull OutputStream dngOutput, @NonNull Size size,
+            @NonNull ByteBuffer pixels, @IntRange(from=0) long offset)
             throws IOException {
         if (dngOutput == null) {
             throw new IllegalArgumentException("Null dngOutput passed to writeByteBuffer");
@@ -381,7 +391,8 @@ public final class DngCreator implements AutoCloseable {
      * @throws java.lang.IllegalStateException if not enough metadata information has been
      *          set to write a well-formatted DNG file.
      */
-    public void writeImage(OutputStream dngOutput, Image pixels) throws IOException {
+    public void writeImage(@NonNull OutputStream dngOutput, @NonNull Image pixels)
+            throws IOException {
         if (dngOutput == null) {
             throw new IllegalArgumentException("Null dngOutput to writeImage");
         } else if (pixels == null) {
