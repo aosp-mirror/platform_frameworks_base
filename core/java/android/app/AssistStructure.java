@@ -635,6 +635,15 @@ final public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setTextStyle(int size, int fgColor, int bgColor, int style) {
+            ViewNodeText t = getNodeText();
+            t.mTextColor = fgColor;
+            t.mTextBackgroundColor = bgColor;
+            t.mTextSize = size;
+            t.mTextStyle = style;
+        }
+
+        @Override
         public void setHint(CharSequence hint) {
             getNodeText().mHint = hint != null ? hint.toString() : null;
         }
