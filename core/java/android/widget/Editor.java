@@ -233,6 +233,24 @@ public class Editor {
 
     final CursorAnchorInfoNotifier mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier();
 
+    private final Runnable mHideFloatingToolbar = new Runnable() {
+        @Override
+        public void run() {
+            if (mSelectionActionMode != null) {
+                mSelectionActionMode.snooze(ActionMode.SNOOZE_TIME_DEFAULT);
+            }
+        }
+    };
+
+    private final Runnable mShowFloatingToolbar = new Runnable() {
+        @Override
+        public void run() {
+            if (mSelectionActionMode != null) {
+                mSelectionActionMode.snooze(0);  // snooze off.
+            }
+        }
+    };
+
     Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
@@ -357,6 +375,9 @@ public class Editor {
         if (mSelectionModeWithoutSelectionRunnable != null) {
             mTextView.removeCallbacks(mSelectionModeWithoutSelectionRunnable);
         }
+
+        mTextView.removeCallbacks(mHideFloatingToolbar);
+        mTextView.removeCallbacks(mShowFloatingToolbar);
 
         destroyDisplayListsData();
 
@@ -1169,6 +1190,8 @@ public class Editor {
     }
 
     void onTouchEvent(MotionEvent event) {
+        updateFloatingToolbarVisibility(event);
+
         if (hasSelectionController()) {
             getSelectionController().onTouchEvent(event);
         }
@@ -1186,6 +1209,37 @@ public class Editor {
             // causes focus to move to the view.
             mTouchFocusSelected = false;
             mIgnoreActionUpEvent = false;
+        }
+    }
+
+    private void updateFloatingToolbarVisibility(MotionEvent event) {
+        if (mSelectionActionMode != null) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_MOVE:
+                    hideFloatingToolbar();
+                    break;
+                case MotionEvent.ACTION_UP:  // fall through
+                case MotionEvent.ACTION_CANCEL:
+                    showFloatingToolbar();
+            }
+        }
+    }
+
+    private void hideFloatingToolbar() {
+        if (mSelectionActionMode != null) {
+            mTextView.removeCallbacks(mShowFloatingToolbar);
+            // Delay the "hide" a little bit just in case a "show" will happen almost immediately.
+            mTextView.postDelayed(mHideFloatingToolbar, 100);
+        }
+    }
+
+    private void showFloatingToolbar() {
+        if (mSelectionActionMode != null) {
+            mTextView.removeCallbacks(mHideFloatingToolbar);
+            // Delay "show" so it doesn't interfere with click confirmations
+            // or double-clicks that could "dismiss" the floating toolbar.
+            int delay = ViewConfiguration.getDoubleTapTimeout();
+            mTextView.postDelayed(mShowFloatingToolbar, delay);
         }
     }
 
@@ -3661,6 +3715,8 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
+            updateFloatingToolbarVisibility(ev);
+
             switch (ev.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
                     startTouchUpFilter(getCurrentCursorOffset());
