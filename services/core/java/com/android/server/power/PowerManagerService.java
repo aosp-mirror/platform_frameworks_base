@@ -16,6 +16,8 @@
 
 package com.android.server.power;
 
+import android.app.ActivityManager;
+import android.util.SparseIntArray;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
@@ -435,6 +437,8 @@ public final class PowerManagerService extends SystemService
 
     // Set of app ids that we will always respect the wake locks for.
     int[] mDeviceIdleWhitelist = new int[0];
+
+    private final SparseIntArray mUidState = new SparseIntArray();
 
     // True if theater mode is enabled
     private boolean mTheaterModeEnabled;
@@ -2316,6 +2320,24 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    void updateUidProcStateInternal(int uid, int procState) {
+        synchronized (mLock) {
+            mUidState.put(uid, procState);
+            if (mDeviceIdleMode) {
+                updateWakeLockDisabledStatesLocked();
+            }
+        }
+    }
+
+    void uidGoneInternal(int uid) {
+        synchronized (mLock) {
+            mUidState.delete(uid);
+            if (mDeviceIdleMode) {
+                updateWakeLockDisabledStatesLocked();
+            }
+        }
+    }
+
     private void updateWakeLockDisabledStatesLocked() {
         boolean changed = false;
         final int numWakeLocks = mWakeLocks.size();
@@ -2349,7 +2371,10 @@ public final class PowerManagerService extends SystemService
                 // If we are in idle mode, we will ignore all partial wake locks that are
                 // for application uids that are not whitelisted.
                 if (appid >= Process.FIRST_APPLICATION_UID &&
-                        Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0) {
+                        Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
+                        mUidState.get(wakeLock.mOwnerUid,
+                                ActivityManager.PROCESS_STATE_CACHED_EMPTY)
+                                > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
                     disabled = true;
                 }
             }
@@ -2648,6 +2673,13 @@ public final class PowerManagerService extends SystemService
             pw.println("Sleep timeout: " + sleepTimeout + " ms");
             pw.println("Screen off timeout: " + screenOffTimeout + " ms");
             pw.println("Screen dim duration: " + screenDimDuration + " ms");
+
+            pw.println();
+            pw.println("UID states:");
+            for (int i=0; i<mUidState.size(); i++) {
+                pw.print("  UID "); UserHandle.formatUid(pw, mUidState.keyAt(i));
+                pw.print(": "); pw.println(mUidState.valueAt(i));
+            }
 
             pw.println();
             pw.println("Wake Locks: size=" + mWakeLocks.size());
@@ -3450,6 +3482,16 @@ public final class PowerManagerService extends SystemService
         @Override
         public void setDeviceIdleWhitelist(int[] appids) {
             setDeviceIdleWhitelistInternal(appids);
+        }
+
+        @Override
+        public void updateUidProcState(int uid, int procState) {
+            updateUidProcStateInternal(uid, procState);
+        }
+
+        @Override
+        public void uidGone(int uid) {
+            uidGoneInternal(uid);
         }
     }
 }

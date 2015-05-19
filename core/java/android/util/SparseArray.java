@@ -134,6 +134,24 @@ public class SparseArray<E> implements Cloneable {
     }
 
     /**
+     * @hide
+     * Removes the mapping from the specified key, if there was any, returning the old value.
+     */
+    public E removeReturnOld(int key) {
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
+
+        if (i >= 0) {
+            if (mValues[i] != DELETED) {
+                final E old = (E) mValues[i];
+                mValues[i] = DELETED;
+                mGarbage = true;
+                return old;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Alias for {@link #delete(int)}.
      */
     public void remove(int key) {
