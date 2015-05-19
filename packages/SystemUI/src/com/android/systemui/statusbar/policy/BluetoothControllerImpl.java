@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.policy;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 import com.android.settingslib.bluetooth.BluetoothCallback;
@@ -42,9 +44,12 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private boolean mConnecting;
     private CachedBluetoothDevice mLastDevice;
 
+    private final H mHandler = new H();
+
     public BluetoothControllerImpl(Context context, Looper bgLooper) {
         mLocalBluetoothManager = LocalBluetoothManager.getInstance(context, null);
         if (mLocalBluetoothManager != null) {
+            mLocalBluetoothManager.getEventManager().setReceiverHandler(new Handler(bgLooper));
             mLocalBluetoothManager.getEventManager().registerCallback(this);
             onBluetoothStateChanged(
                     mLocalBluetoothManager.getBluetoothAdapter().getBluetoothState());
@@ -71,7 +76,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     public void addStateChangedCallback(Callback cb) {
         mCallbacks.add(cb);
-        fireStateChange(cb);
+        mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
     @Override
@@ -132,22 +137,6 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
                 : null;
     }
 
-    private void firePairedDevicesChanged() {
-        for (Callback cb : mCallbacks) {
-            cb.onBluetoothDevicesChanged();
-        }
-    }
-
-    private void fireStateChange() {
-        for (Callback cb : mCallbacks) {
-            fireStateChange(cb);
-        }
-    }
-
-    private void fireStateChange(Callback cb) {
-        cb.onBluetoothStateChange(mEnabled, mConnecting);
-    }
-
     private void updateConnected() {
         if (mLastDevice != null && mLastDevice.isConnected()) {
             // Our current device is still valid.
@@ -163,7 +152,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @Override
     public void onBluetoothStateChanged(int bluetoothState) {
         mEnabled = bluetoothState == BluetoothAdapter.STATE_ON;
-        fireStateChange();
+        mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
     @Override
@@ -175,25 +164,25 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     public void onDeviceAdded(CachedBluetoothDevice cachedDevice) {
         cachedDevice.registerCallback(this);
         updateConnected();
-        firePairedDevicesChanged();
+        mHandler.sendEmptyMessage(H.MSG_PAIRED_DEVICES_CHANGED);
     }
 
     @Override
     public void onDeviceDeleted(CachedBluetoothDevice cachedDevice) {
         updateConnected();
-        firePairedDevicesChanged();
+        mHandler.sendEmptyMessage(H.MSG_PAIRED_DEVICES_CHANGED);
     }
 
     @Override
     public void onDeviceBondStateChanged(CachedBluetoothDevice cachedDevice, int bondState) {
         updateConnected();
-        firePairedDevicesChanged();
+        mHandler.sendEmptyMessage(H.MSG_PAIRED_DEVICES_CHANGED);
     }
 
     @Override
     public void onDeviceAttributesChanged() {
         updateConnected();
-        firePairedDevicesChanged();
+        mHandler.sendEmptyMessage(H.MSG_PAIRED_DEVICES_CHANGED);
     }
 
     @Override
@@ -201,6 +190,39 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         mConnecting = state == BluetoothAdapter.STATE_CONNECTING;
         mLastDevice = cachedDevice;
         updateConnected();
-        fireStateChange();
+        mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+    }
+
+    private final class H extends Handler {
+        private static final int MSG_PAIRED_DEVICES_CHANGED = 1;
+        private static final int MSG_STATE_CHANGED = 2;
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_PAIRED_DEVICES_CHANGED:
+                    firePairedDevicesChanged();
+                    break;
+                case MSG_STATE_CHANGED:
+                    fireStateChange();
+                    break;
+            }
+        }
+
+        private void firePairedDevicesChanged() {
+            for (BluetoothController.Callback cb : mCallbacks) {
+                cb.onBluetoothDevicesChanged();
+            }
+        }
+
+        private void fireStateChange() {
+            for (BluetoothController.Callback cb : mCallbacks) {
+                fireStateChange(cb);
+            }
+        }
+
+        private void fireStateChange(BluetoothController.Callback cb) {
+            cb.onBluetoothStateChange(mEnabled, mConnecting);
+        }
     }
 }
