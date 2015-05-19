@@ -77,6 +77,7 @@ public class VoiceInteractionService extends Service {
     public static final int START_WITH_ASSIST = 1<<0;
 
     /**
+     * @hide
      * Flag for use with {@link #showSession}: request that the session be started with
      * a screen shot of the currently focused activity.
      */
