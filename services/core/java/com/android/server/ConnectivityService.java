@@ -2688,7 +2688,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 actionToken);
     }
 
-    public ProxyInfo getDefaultProxy() {
+    private ProxyInfo getDefaultProxy() {
         // this information is already available as a world read/writable jvm property
         // so this API change wouldn't have a benifit.  It also breaks the passing
         // of proxy info to all the JVMs.
@@ -2697,6 +2697,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
             ProxyInfo ret = mGlobalProxy;
             if ((ret == null) && !mDefaultProxyDisabled) ret = mDefaultProxy;
             return ret;
+        }
+    }
+
+    public ProxyInfo getProxyForNetwork(Network network) {
+        if (network == null) return getDefaultProxy();
+        final ProxyInfo globalProxy = getGlobalProxy();
+        if (globalProxy != null) return globalProxy;
+        if (!NetworkUtils.queryUserAccess(Binder.getCallingUid(), network.netId)) return null;
+        // Don't call getLinkProperties() as it requires ACCESS_NETWORK_STATE permission, which
+        // caller may not have.
+        final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+        if (nai == null) return null;
+        synchronized (nai) {
+            final ProxyInfo proxyInfo = nai.linkProperties.getHttpProxy();
+            if (proxyInfo == null) return null;
+            return new ProxyInfo(proxyInfo);
         }
     }
 

@@ -4585,7 +4585,7 @@ public final class ActivityThread {
             // crash if we can't get it.
             IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
             try {
-                final ProxyInfo proxyInfo = service.getDefaultProxy();
+                final ProxyInfo proxyInfo = service.getProxyForNetwork(null);
                 Proxy.setHttpProxySystemProperty(proxyInfo);
             } catch (RemoteException e) {}
         }
