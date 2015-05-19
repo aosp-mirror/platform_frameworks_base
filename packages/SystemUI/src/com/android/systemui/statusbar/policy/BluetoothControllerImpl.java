@@ -54,6 +54,9 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("BluetoothController state:");
         pw.print("  mLocalBluetoothManager="); pw.println(mLocalBluetoothManager);
+        if (mLocalBluetoothManager == null) {
+            return;
+        }
         pw.print("  mEnabled="); pw.println(mEnabled);
         pw.print("  mConnecting="); pw.println(mConnecting);
         pw.print("  mLastDevice="); pw.println(mLastDevice);
