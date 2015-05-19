@@ -81,6 +81,7 @@ import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.IProcessObserver;
+import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManagerInternal;
@@ -153,10 +154,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.AppOpsService;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
-import com.android.server.SystemConfig;
 import com.google.android.collect.Lists;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -294,9 +293,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     /** Set of currently active {@link Notification} tags. */
     private final ArraySet<String> mActiveNotifs = new ArraySet<String>();
 
-    /** Foreground at both UID and PID granularity. */
+    /** Foreground at UID granularity. */
     final SparseIntArray mUidState = new SparseIntArray();
-    final SparseArray<SparseIntArray> mUidPidState = new SparseArray<>();
 
     /** The current maximum process state that we are considering to be foreground. */
     private int mCurForegroundState = ActivityManager.PROCESS_STATE_TOP;
@@ -411,7 +409,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         updateScreenOn();
 
         try {
-            mActivityManager.registerProcessObserver(mProcessObserver);
+            mActivityManager.registerUidObserver(mUidObserver);
             mNetworkManager.registerObserver(mAlertObserver);
         } catch (RemoteException e) {
             // ignored; both services live in system_server
@@ -477,40 +475,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
 
     }
 
-    private IProcessObserver mProcessObserver = new IProcessObserver.Stub() {
-        @Override
-        public void onForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities) {
-        }
-
-        @Override
-        public void onProcessStateChanged(int pid, int uid, int procState) {
+    private IUidObserver mUidObserver = new IUidObserver.Stub() {
+        @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
             synchronized (mRulesLock) {
-                // because a uid can have multiple pids running inside, we need to
-                // remember all pid states and summarize foreground at uid level.
-
-                // record foreground for this specific pid
-                SparseIntArray pidState = mUidPidState.get(uid);
-                if (pidState == null) {
-                    pidState = new SparseIntArray(2);
-                    mUidPidState.put(uid, pidState);
-                }
-                pidState.put(pid, procState);
-                computeUidStateLocked(uid);
+                updateUidStateLocked(uid, procState);
             }
         }
 
-        @Override
-        public void onProcessDied(int pid, int uid) {
+        @Override public void onUidGone(int uid) throws RemoteException {
             synchronized (mRulesLock) {
-                // clear records and recompute, when they exist
-                final SparseIntArray pidState = mUidPidState.get(uid);
-                if (pidState != null) {
-                    pidState.delete(pid);
-                    if (pidState.size() <= 0) {
-                        mUidPidState.remove(uid);
-                    }
-                    computeUidStateLocked(uid);
-                }
+                removeUidStateLocked(uid);
             }
         }
     };
@@ -1919,14 +1893,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
                 fout.print(state);
                 fout.print(state <= mCurForegroundState ? " (fg)" : " (bg)");
 
-                fout.print(" pids=");
-                final int foregroundIndex = mUidPidState.indexOfKey(uid);
-                if (foregroundIndex < 0) {
-                    fout.print("UNKNOWN");
-                } else {
-                    dumpSparseIntArray(fout, mUidPidState.valueAt(foregroundIndex));
-                }
-
                 fout.print(" rules=");
                 final int rulesIndex = mUidRules.indexOfKey(uid);
                 if (rulesIndex < 0) {
@@ -1957,33 +1923,35 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
     }
 
     /**
-     * Process state of PID changed; recompute state at UID level. If
-     * changed, will trigger {@link #updateRulesForUidLocked(int)}.
+     * Process state of UID changed; if needed, will trigger
+     * {@link #updateRulesForUidLocked(int)}.
      */
-    void computeUidStateLocked(int uid) {
-        final SparseIntArray pidState = mUidPidState.get(uid);
-
-        // current pid is dropping foreground; examine other pids
-        int uidState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
-        if (pidState != null) {
-            final int size = pidState.size();
-            for (int i = 0; i < size; i++) {
-                final int state = pidState.valueAt(i);
-                if (state < uidState) {
-                    uidState = state;
-                }
-            }
-        }
-
+    void updateUidStateLocked(int uid, int uidState) {
         final int oldUidState = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
         if (oldUidState != uidState) {
             // state changed, push updated rules
             mUidState.put(uid, uidState);
-            final boolean oldForeground = oldUidState <= mCurForegroundState;
-            final boolean newForeground = uidState <= mCurForegroundState;
-            if (oldForeground != newForeground) {
-                updateRulesForUidLocked(uid);
+            updateRulesForUidStateChangeLocked(uid, oldUidState, uidState);
+        }
+    }
+
+    void removeUidStateLocked(int uid) {
+        final int index = mUidState.indexOfKey(uid);
+        if (index >= 0) {
+            final int oldUidState = mUidState.valueAt(index);
+            mUidState.removeAt(index);
+            if (oldUidState != ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
+                updateRulesForUidStateChangeLocked(uid, oldUidState,
+                        ActivityManager.PROCESS_STATE_CACHED_EMPTY);
             }
+        }
+    }
+
+    void updateRulesForUidStateChangeLocked(int uid, int oldUidState, int newUidState) {
+        final boolean oldForeground = oldUidState <= mCurForegroundState;
+        final boolean newForeground = newUidState <= mCurForegroundState;
+        if (oldForeground != newForeground) {
+            updateRulesForUidLocked(uid);
         }
     }
 
@@ -2379,16 +2347,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub
         for (int i = 0; i < size; i++) {
             target.put(source.keyAt(i), true);
         }
-    }
-
-    private static void dumpSparseIntArray(PrintWriter fout, SparseIntArray value) {
-        fout.print("[");
-        final int size = value.size();
-        for (int i = 0; i < size; i++) {
-            fout.print(value.keyAt(i) + "=" + value.valueAt(i));
-            if (i < size - 1) fout.print(",");
-        }
-        fout.print("]");
     }
 
     @Override
