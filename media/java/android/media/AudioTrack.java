@@ -192,13 +192,20 @@ public class AudioTrack
 
     /**
      * The write mode indicating the write operation will block until all data has been written,
-     * to be used in {@link #write(ByteBuffer, int, int)}
+     * to be used as the actual value of the writeMode parameter in
+     * {@link #write(byte[], int, int, int)}, {@link #write(short[], int, int, int)},
+     * {@link #write(float[], int, int, int)}, {@link #write(ByteBuffer, int, int)}, and
+     * {@link #write(ByteBuffer, int, int, long)}.
      */
     public final static int WRITE_BLOCKING = 0;
+
     /**
      * The write mode indicating the write operation will return immediately after
-     * queuing as much audio data for playback as possible without blocking, to be used in
-     * {@link #write(ByteBuffer, int, int)}.
+     * queuing as much audio data for playback as possible without blocking,
+     * to be used as the actual value of the writeMode parameter in
+     * {@link #write(ByteBuffer, int, int)}, {@link #write(short[], int, int, int)},
+     * {@link #write(float[], int, int, int)}, {@link #write(ByteBuffer, int, int)}, and
+     * {@link #write(ByteBuffer, int, int, long)}.
      */
     public final static int WRITE_NON_BLOCKING = 1;
 
@@ -1458,14 +1465,27 @@ public class AudioTrack
     //--------------------
     /**
      * Starts playing an AudioTrack.
+     * <p>
      * If track's creation mode is {@link #MODE_STATIC}, you must have called one of
-     * the {@link #write(byte[], int, int)}, {@link #write(short[], int, int)},
-     * or {@link #write(float[], int, int, int)} methods.
-     * If the mode is {@link #MODE_STREAM}, you can optionally prime the
-     * output buffer by writing up to bufferSizeInBytes (from constructor) before starting.
-     * This priming will avoid an immediate underrun, but is not required.
+     * the write methods ({@link #write(byte[], int, int)}, {@link #write(byte[], int, int, int)},
+     * {@link #write(short[], int, int)}, {@link #write(short[], int, int, int)},
+     * {@link #write(float[], int, int, int)}, or {@link #write(ByteBuffer, int, int)}) prior to
+     * play().
+     * <p>
+     * If the mode is {@link #MODE_STREAM}, you can optionally prime the data path prior to
+     * calling play(), by writing up to <code>bufferSizeInBytes</code> (from constructor).
+     * If you don’t call write() first, or if you call write() but with an insufficient amount of
+     * data, then the track will be in underrun state at play().  In this case,
+     * playback will not actually start playing until the data path is filled to a
+     * device-specific minimum level.  This requirement for the path to be filled
+     * to a minimum level is also true when resuming audio playback after calling stop().
+     * Similarly the buffer will need to be filled up again after
+     * the track underruns due to failure to call write() in a timely manner with sufficient data.
+     * For portability, an application should prime the data path to the maximum allowed
+     * by writing data until the write() method returns a short transfer count.
+     * This allows play() to start immediately, and reduces the chance of underrun.
      *
-     * @throws IllegalStateException
+     * @throws IllegalStateException if the track isn't properly initialized
      */
     public void play()
     throws IllegalStateException {
@@ -1570,21 +1590,30 @@ public class AudioTrack
      * or copies audio data for later playback (static buffer mode).
      * The format specified in the AudioTrack constructor should be
      * {@link AudioFormat#ENCODING_PCM_8BIT} to correspond to the data in the array.
-     * In streaming mode, will block until all data has been written to the audio sink.
+     * <p>
+     * In streaming mode, the write will normally block until all the data has been enqueued for
+     * playback, and will return a full transfer count.  However, if the track is stopped or paused
+     * on entry, or another thread interrupts the write by calling stop or pause, or an I/O error
+     * occurs during the write, then the write may return a short transfer count.
+     * <p>
      * In static buffer mode, copies the data to the buffer starting at offset 0.
-     * Note that the actual playback of this data might occur after this function
-     * returns. This function is thread safe with respect to {@link #stop} calls,
-     * in which case all of the specified data might not be written to the audio sink.
+     * Note that the actual playback of this data might occur after this function returns.
      *
      * @param audioData the array that holds the data to play.
      * @param offsetInBytes the offset expressed in bytes in audioData where the data to play
      *    starts.
      * @param sizeInBytes the number of bytes to read in audioData after the offset.
-     * @return the number of bytes that were written or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     * @return zero or the positive number of bytes that were written, or
+     *    {@link #ERROR_INVALID_OPERATION}
+     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes, or
      *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *    needs to be recreated.
+     *    The dead object error code is not returned if some data was successfully transferred.
+     *    In this case, the error is returned at the next write().
+     *
+     * This is equivalent to {@link #write(byte[], int, int, int)} with <code>writeMode</code>
+     * set to  {@link #WRITE_BLOCKING}.
      */
     public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes) {
         return write(audioData, offsetInBytes, sizeInBytes, WRITE_BLOCKING);
@@ -1595,11 +1624,17 @@ public class AudioTrack
      * or copies audio data for later playback (static buffer mode).
      * The format specified in the AudioTrack constructor should be
      * {@link AudioFormat#ENCODING_PCM_8BIT} to correspond to the data in the array.
-     * In streaming mode, will block until all data has been written to the audio sink.
-     * In static buffer mode, copies the data to the buffer starting at offset 0.
-     * Note that the actual playback of this data might occur after this function
-     * returns. This function is thread safe with respect to {@link #stop} calls,
-     * in which case all of the specified data might not be written to the audio sink.
+     * <p>
+     * In streaming mode, the blocking behavior depends on the write mode.  If the write mode is
+     * {@link #WRITE_BLOCKING}, the write will normally block until all the data has been enqueued
+     * for playback, and will return a full transfer count.  However, if the write mode is
+     * {@link #WRITE_NON_BLOCKING}, or the track is stopped or paused on entry, or another thread
+     * interrupts the write by calling stop or pause, or an I/O error
+     * occurs during the write, then the write may return a short transfer count.
+     * <p>
+     * In static buffer mode, copies the data to the buffer starting at offset 0,
+     * and the write mode is ignored.
+     * Note that the actual playback of this data might occur after this function returns.
      *
      * @param audioData the array that holds the data to play.
      * @param offsetInBytes the offset expressed in bytes in audioData where the data to play
@@ -1611,11 +1646,14 @@ public class AudioTrack
      *         to the audio sink.
      *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @return the number of bytes that were written or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     * @return zero or the positive number of bytes that were written, or
+     *    {@link #ERROR_INVALID_OPERATION}
+     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes, or
      *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *    needs to be recreated.
+     *    The dead object error code is not returned if some data was successfully transferred.
+     *    In this case, the error is returned at the next write().
      */
     public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
             @WriteMode int writeMode) {
@@ -1653,21 +1691,30 @@ public class AudioTrack
      * or copies audio data for later playback (static buffer mode).
      * The format specified in the AudioTrack constructor should be
      * {@link AudioFormat#ENCODING_PCM_16BIT} to correspond to the data in the array.
-     * In streaming mode, will block until all data has been written to the audio sink.
+     * <p>
+     * In streaming mode, the write will normally block until all the data has been enqueued for
+     * playback, and will return a full transfer count.  However, if the track is stopped or paused
+     * on entry, or another thread interrupts the write by calling stop or pause, or an I/O error
+     * occurs during the write, then the write may return a short transfer count.
+     * <p>
      * In static buffer mode, copies the data to the buffer starting at offset 0.
-     * Note that the actual playback of this data might occur after this function
-     * returns. This function is thread safe with respect to {@link #stop} calls,
-     * in which case all of the specified data might not be written to the audio sink.
+     * Note that the actual playback of this data might occur after this function returns.
      *
      * @param audioData the array that holds the data to play.
      * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
      *     starts.
      * @param sizeInShorts the number of shorts to read in audioData after the offset.
-     * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     * @return zero or the positive number of shorts that were written, or
+     *    {@link #ERROR_INVALID_OPERATION}
+     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes, or
      *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *    needs to be recreated.
+     *    The dead object error code is not returned if some data was successfully transferred.
+     *    In this case, the error is returned at the next write().
+     *
+     * This is equivalent to {@link #write(short[], int, int, int)} with <code>writeMode</code>
+     * set to  {@link #WRITE_BLOCKING}.
      */
     public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts) {
         return write(audioData, offsetInShorts, sizeInShorts, WRITE_BLOCKING);
@@ -1678,11 +1725,16 @@ public class AudioTrack
      * or copies audio data for later playback (static buffer mode).
      * The format specified in the AudioTrack constructor should be
      * {@link AudioFormat#ENCODING_PCM_16BIT} to correspond to the data in the array.
-     * In streaming mode, will block until all data has been written to the audio sink.
+     * <p>
+     * In streaming mode, the blocking behavior depends on the write mode.  If the write mode is
+     * {@link #WRITE_BLOCKING}, the write will normally block until all the data has been enqueued
+     * for playback, and will return a full transfer count.  However, if the write mode is
+     * {@link #WRITE_NON_BLOCKING}, or the track is stopped or paused on entry, or another thread
+     * interrupts the write by calling stop or pause, or an I/O error
+     * occurs during the write, then the write may return a short transfer count.
+     * <p>
      * In static buffer mode, copies the data to the buffer starting at offset 0.
-     * Note that the actual playback of this data might occur after this function
-     * returns. This function is thread safe with respect to {@link #stop} calls,
-     * in which case all of the specified data might not be written to the audio sink.
+     * Note that the actual playback of this data might occur after this function returns.
      *
      * @param audioData the array that holds the data to play.
      * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
@@ -1694,11 +1746,14 @@ public class AudioTrack
      *         to the audio sink.
      *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     * @return zero or the positive number of shorts that were written, or
+     *    {@link #ERROR_INVALID_OPERATION}
+     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes, or
      *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *    needs to be recreated.
+     *    The dead object error code is not returned if some data was successfully transferred.
+     *    In this case, the error is returned at the next write().
      */
     public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
             @WriteMode int writeMode) {
@@ -1736,14 +1791,18 @@ public class AudioTrack
      * or copies audio data for later playback (static buffer mode).
      * The format specified in the AudioTrack constructor should be
      * {@link AudioFormat#ENCODING_PCM_FLOAT} to correspond to the data in the array.
+     * <p>
+     * In streaming mode, the blocking behavior depends on the write mode.  If the write mode is
+     * {@link #WRITE_BLOCKING}, the write will normally block until all the data has been enqueued
+     * for playback, and will return a full transfer count.  However, if the write mode is
+     * {@link #WRITE_NON_BLOCKING}, or the track is stopped or paused on entry, or another thread
+     * interrupts the write by calling stop or pause, or an I/O error
+     * occurs during the write, then the write may return a short transfer count.
+     * <p>
      * In static buffer mode, copies the data to the buffer starting at offset 0,
      * and the write mode is ignored.
-     * In streaming mode, the blocking behavior will depend on the write mode.
-     * <p>
-     * Note that the actual playback of this data might occur after this function
-     * returns. This function is thread safe with respect to {@link #stop} calls,
-     * in which case all of the specified data might not be written to the audio sink.
-     * <p>
+     * Note that the actual playback of this data might occur after this function returns.
+     *
      * @param audioData the array that holds the data to play.
      *     The implementation does not clip for sample values within the nominal range
      *     [-1.0f, 1.0f], provided that all gains in the audio pipeline are
@@ -1763,11 +1822,14 @@ public class AudioTrack
      *         to the audio sink.
      *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @return the number of floats that were written, or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
+     * @return zero or the positive number of floats that were written, or
+     *    {@link #ERROR_INVALID_OPERATION}
+     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes, or
      *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *    needs to be recreated.
+     *    The dead object error code is not returned if some data was successfully transferred.
+     *    In this case, the error is returned at the next write().
      */
     public int write(@NonNull float[] audioData, int offsetInFloats, int sizeInFloats,
             @WriteMode int writeMode) {
@@ -1811,9 +1873,19 @@ public class AudioTrack
     /**
      * Writes the audio data to the audio sink for playback (streaming mode),
      * or copies audio data for later playback (static buffer mode).
-     * In static buffer mode, copies the data to the buffer starting at its 0 offset, and the write
-     * mode is ignored.
-     * In streaming mode, the blocking behavior will depend on the write mode.
+     * The audioData in ByteBuffer should match the format specified in the AudioTrack constructor.
+     * <p>
+     * In streaming mode, the blocking behavior depends on the write mode.  If the write mode is
+     * {@link #WRITE_BLOCKING}, the write will normally block until all the data has been enqueued
+     * for playback, and will return a full transfer count.  However, if the write mode is
+     * {@link #WRITE_NON_BLOCKING}, or the track is stopped or paused on entry, or another thread
+     * interrupts the write by calling stop or pause, or an I/O error
+     * occurs during the write, then the write may return a short transfer count.
+     * <p>
+     * In static buffer mode, copies the data to the buffer starting at offset 0,
+     * and the write mode is ignored.
+     * Note that the actual playback of this data might occur after this function returns.
+     *
      * @param audioData the buffer that holds the data to play, starting at the position reported
      *     by <code>audioData.position()</code>.
      *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
@@ -1827,10 +1899,12 @@ public class AudioTrack
      *         to the audio sink.
      *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @return 0 or a positive number of bytes that were written, or
+     * @return zero or the positive number of bytes that were written, or
      *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}, or
      *     {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *     needs to be recreated.
+     *     The dead object error code is not returned if some data was successfully transferred.
+     *     In this case, the error is returned at the next write().
      */
     public int write(@NonNull ByteBuffer audioData, int sizeInBytes,
             @WriteMode int writeMode) {
@@ -1877,8 +1951,8 @@ public class AudioTrack
     }
 
     /**
-     * Writes the audio data to the audio sink for playback (streaming mode) on a HW_AV_SYNC track.
-     * In streaming mode, the blocking behavior will depend on the write mode.
+     * Writes the audio data to the audio sink for playback in streaming mode on a HW_AV_SYNC track.
+     * The blocking behavior will depend on the write mode.
      * @param audioData the buffer that holds the data to play, starting at the position reported
      *     by <code>audioData.position()</code>.
      *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
@@ -1892,10 +1966,12 @@ public class AudioTrack
      *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
      * @param timestamp The timestamp of the first decodable audio frame in the provided audioData.
-     * @return 0 or a positive number of bytes that were written, or
+     * @return zero or a positive number of bytes that were written, or
      *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}, or
      *     {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
      *     needs to be recreated.
+     *     The dead object error code is not returned if some data was successfully transferred.
+     *     In this case, the error is returned at the next write().
      */
     public int write(ByteBuffer audioData, int sizeInBytes,
             @WriteMode int writeMode, long timestamp) {
