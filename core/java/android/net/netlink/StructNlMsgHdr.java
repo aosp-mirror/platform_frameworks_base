@@ -39,6 +39,12 @@ public class StructNlMsgHdr {
     public static final short NLM_F_ROOT    = 0x0100;
     public static final short NLM_F_MATCH   = 0x0200;
     public static final short NLM_F_DUMP    = NLM_F_ROOT|NLM_F_MATCH;
+    // Flags for a NEW request.
+    public static final short NLM_F_REPLACE   = 0x100;
+    public static final short NLM_F_EXCL      = 0x200;
+    public static final short NLM_F_CREATE    = 0x400;
+    public static final short NLM_F_APPEND    = 0x800;
+
 
     public static String stringForNlMsgFlags(short flags) {
         final StringBuilder sb = new StringBuilder();
@@ -106,9 +112,7 @@ public class StructNlMsgHdr {
         nlmsg_pid = 0;
     }
 
-    public boolean pack(ByteBuffer byteBuffer) {
-        if (!hasAvailableSpace(byteBuffer)) { return false; }
-
+    public void pack(ByteBuffer byteBuffer) {
         // The ByteOrder must have already been set by the caller.  In most
         // cases ByteOrder.nativeOrder() is correct, with the possible
         // exception of usage within unittests.
@@ -117,7 +121,6 @@ public class StructNlMsgHdr {
         byteBuffer.putShort(nlmsg_flags);
         byteBuffer.putInt(nlmsg_seq);
         byteBuffer.putInt(nlmsg_pid);
-        return true;
     }
 
     @Override

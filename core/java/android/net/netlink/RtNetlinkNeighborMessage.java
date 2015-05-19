@@ -21,9 +21,11 @@ import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlAttr;
 import android.net.netlink.StructNlMsgHdr;
 import android.net.netlink.NetlinkMessage;
+import android.system.OsConstants;
 import android.util.Log;
 
 import java.net.InetAddress;
+import java.net.Inet6Address;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -131,6 +133,34 @@ public class RtNetlinkNeighborMessage extends NetlinkMessage {
         return bytes;
     }
 
+    /**
+     * A convenience method to create an RTM_NEWNEIGH message, to modify
+     * the kernel's state information for a specific neighbor.
+     */
+    public static byte[] newNewNeighborMessage(
+            int seqNo, InetAddress ip, short nudState, int ifIndex, byte[] llAddr) {
+        final StructNlMsgHdr nlmsghdr = new StructNlMsgHdr();
+        nlmsghdr.nlmsg_type = NetlinkConstants.RTM_NEWNEIGH;
+        nlmsghdr.nlmsg_flags = StructNlMsgHdr.NLM_F_REQUEST | StructNlMsgHdr.NLM_F_REPLACE;
+        nlmsghdr.nlmsg_seq = seqNo;
+
+        final RtNetlinkNeighborMessage msg = new RtNetlinkNeighborMessage(nlmsghdr);
+        msg.mNdmsg = new StructNdMsg();
+        msg.mNdmsg.ndm_family =
+                (byte) ((ip instanceof Inet6Address) ? OsConstants.AF_INET6 : OsConstants.AF_INET);
+        msg.mNdmsg.ndm_ifindex = ifIndex;
+        msg.mNdmsg.ndm_state = nudState;
+        msg.mDestination = ip;
+        msg.mLinkLayerAddr = llAddr;  // might be null
+
+        final byte[] bytes = new byte[msg.getRequiredSpace()];
+        nlmsghdr.nlmsg_len = bytes.length;
+        final ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.nativeOrder());
+        msg.pack(byteBuffer);
+        return bytes;
+    }
+
     private StructNdMsg mNdmsg;
     private InetAddress mDestination;
     private byte[] mLinkLayerAddr;
@@ -164,6 +194,41 @@ public class RtNetlinkNeighborMessage extends NetlinkMessage {
 
     public StructNdaCacheInfo getCacheInfo() {
         return mCacheInfo;
+    }
+
+    public int getRequiredSpace() {
+        int spaceRequired = StructNlMsgHdr.STRUCT_SIZE + StructNdMsg.STRUCT_SIZE;
+        if (mDestination != null) {
+            spaceRequired += NetlinkConstants.alignedLengthOf(
+                    StructNlAttr.NLA_HEADERLEN + mDestination.getAddress().length);
+        }
+        if (mLinkLayerAddr != null) {
+            spaceRequired += NetlinkConstants.alignedLengthOf(
+                    StructNlAttr.NLA_HEADERLEN + mLinkLayerAddr.length);
+        }
+        // Currently we don't write messages with NDA_PROBES nor NDA_CACHEINFO
+        // attributes appended.  Fix later, if necessary.
+        return spaceRequired;
+    }
+
+    private static void packNlAttr(short nlType, byte[] nlValue, ByteBuffer byteBuffer) {
+        final StructNlAttr nlAttr = new StructNlAttr();
+        nlAttr.nla_type = nlType;
+        nlAttr.nla_value = nlValue;
+        nlAttr.nla_len = (short) (StructNlAttr.NLA_HEADERLEN + nlAttr.nla_value.length);
+        nlAttr.pack(byteBuffer);
+    }
+
+    public void pack(ByteBuffer byteBuffer) {
+        getHeader().pack(byteBuffer) ;
+        mNdmsg.pack(byteBuffer);
+
+        if (mDestination != null) {
+            packNlAttr(NDA_DST, mDestination.getAddress(), byteBuffer);
+        }
+        if (mLinkLayerAddr != null) {
+            packNlAttr(NDA_LLADDR, mLinkLayerAddr, byteBuffer);
+        }
     }
 
     @Override
