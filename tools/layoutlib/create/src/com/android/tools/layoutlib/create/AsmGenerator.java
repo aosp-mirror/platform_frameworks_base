@@ -72,6 +72,9 @@ public class AsmGenerator {
     /** FQCN Names of classes to refactor. All reference to old-FQCN will be updated to new-FQCN.
      * map old-FQCN => new-FQCN */
     private final HashMap<String, String> mRefactorClasses;
+    /** Methods to inject. FQCN of class in which method should be injected => runnable that does
+     * the injection. */
+    private final Map<String, ICreateInfo.InjectMethodRunnable> mInjectedMethodsMap;
 
     /**
      * Creates a new generator that can generate the output JAR with the stubbed classes.
@@ -165,6 +168,8 @@ public class AsmGenerator {
             }
             returnTypes.add(binaryToInternalClassName(className));
         }
+
+        mInjectedMethodsMap = createInfo.getInjectedMethodsMap();
     }
 
     /**
@@ -337,7 +342,7 @@ public class AsmGenerator {
         ClassVisitor cv = cw;
 
         if (mReplaceMethodCallsClasses.contains(className)) {
-            cv = new ReplaceMethodCallsAdapter(cv);
+            cv = new ReplaceMethodCallsAdapter(cv, className);
         }
 
         cv = new RefactorClassAdapter(cv, mRefactorClasses);
@@ -345,6 +350,10 @@ public class AsmGenerator {
             cv = new RenameClassAdapter(cv, className, newName);
         }
 
+        String binaryNewName = newName.replace('/', '.');
+        if (mInjectedMethodsMap.keySet().contains(binaryNewName)) {
+            cv = new InjectMethodsAdapter(cv, mInjectedMethodsMap.get(binaryNewName));
+        }
         cv = new TransformClassAdapter(mLog, mStubMethods, mDeleteReturns.get(className),
                 newName, cv, stubNativesOnly);
 
