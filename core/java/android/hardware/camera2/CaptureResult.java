@@ -16,6 +16,8 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.impl.PublicKey;
@@ -102,6 +104,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
          *
          * @return String representation of the key name
          */
+        @NonNull
         public String getName() {
             return mKey.getName();
         }
@@ -216,6 +219,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @param key The result field to read.
      * @return The value of that key, or {@code null} if the field is not set.
      */
+    @Nullable
     public <T> T get(Key<T> key) {
         T value = mResults.get(key);
         if (VERBOSE) Log.v(TAG, "#get for Key = " + key.getName() + ", returned value = " + value);
@@ -259,6 +263,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@inheritDoc}
      */
     @Override
+    @NonNull
     public List<Key<?>> getKeys() {
         // Force the javadoc for this function to show up on the CaptureResult page
         return super.getKeys();
@@ -285,6 +290,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @return The request associated with this result. Never {@code null}.
      */
+    @NonNull
     public CaptureRequest getRequest() {
         return mRequest;
     }
