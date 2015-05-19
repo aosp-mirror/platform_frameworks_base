@@ -94,12 +94,12 @@
 
     <!-- fallback fonts -->
     <family variant="elegant">
-        <font weight="400" style="normal">NotoNaskh-Regular.ttf</font>
-        <font weight="700" style="normal">NotoNaskh-Bold.ttf</font>
+        <font weight="400" style="normal">NotoNaskhArabic-Regular.ttf</font>
+        <font weight="700" style="normal">NotoNaskhArabic-Bold.ttf</font>
     </family>
     <family variant="compact">
-        <font weight="400" style="normal">NotoNaskhUI-Regular.ttf</font>
-        <font weight="700" style="normal">NotoNaskhUI-Bold.ttf</font>
+        <font weight="400" style="normal">NotoNaskhArabicUI-Regular.ttf</font>
+        <font weight="700" style="normal">NotoNaskhArabicUI-Bold.ttf</font>
     </family>
     <family>
         <font weight="400" style="normal">NotoSansEthiopic-Regular.ttf</font>
@@ -318,6 +318,9 @@
     </family>
     <family>
         <font weight="400" style="normal">NotoSansTaiViet-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansTibetan-Regular.ttf</font>
     </family>
     <family>
         <font weight="400" style="normal">NotoSansTifinagh-Regular.ttf</font>
