@@ -54,6 +54,8 @@ public abstract class NetworkAgent extends Handler {
     private final ArrayList<Message>mPreConnectedQueue = new ArrayList<Message>();
     private volatile long mLastBwRefreshTime = 0;
     private static final long BW_REFRESH_MIN_WIN_MS = 500;
+    private boolean mPollLceScheduled = false;
+    private AtomicBoolean mPollLcePending = new AtomicBoolean(false);
 
     private static final int BASE = Protocol.BASE_NETWORK_AGENT;
 
@@ -200,11 +202,23 @@ public abstract class NetworkAgent extends Handler {
                 break;
             }
             case CMD_REQUEST_BANDWIDTH_UPDATE: {
+                long currentTimeMs = System.currentTimeMillis();
                 if (VDBG) {
                     log("CMD_REQUEST_BANDWIDTH_UPDATE request received.");
                 }
-                if (System.currentTimeMillis() > (mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS)) {
-                    pollLceData();
+                if (currentTimeMs >= (mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS)) {
+                    mPollLceScheduled = false;
+                    if (mPollLcePending.getAndSet(true) == false) {
+                        pollLceData();
+                    }
+                } else {
+                    // deliver the request at a later time rather than discard it completely.
+                    if (!mPollLceScheduled) {
+                        long waitTime = mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS -
+                                currentTimeMs + 1;
+                        mPollLceScheduled = sendEmptyMessageDelayed(
+                                CMD_REQUEST_BANDWIDTH_UPDATE, waitTime);
+                    }
                 }
                 break;
             }
@@ -250,6 +264,7 @@ public abstract class NetworkAgent extends Handler {
      * Called by the bearer code when it has new NetworkCapabilities data.
      */
     public void sendNetworkCapabilities(NetworkCapabilities networkCapabilities) {
+        mPollLcePending.set(false);
         mLastBwRefreshTime = System.currentTimeMillis();
         queueOrSendMessage(EVENT_NETWORK_CAPABILITIES_CHANGED,
                 new NetworkCapabilities(networkCapabilities));
