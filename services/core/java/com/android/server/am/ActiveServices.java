@@ -509,7 +509,7 @@ public final class ActiveServices {
             // r.record is null if findServiceLocked() failed the caller permission check
             if (r.record == null) {
                 throw new SecurityException(
-                        "Permission Denial: Accessing service " + r.record.name
+                        "Permission Denial: Accessing service"
                         + " from pid=" + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid()
                         + " requires " + r.permission);
