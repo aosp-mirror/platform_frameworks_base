@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
 
@@ -96,6 +97,7 @@ public final class TotalCaptureResult extends CaptureResult {
      *
      * @return unmodifiable list of partial results
      */
+    @NonNull
     public List<CaptureResult> getPartialResults() {
         return Collections.unmodifiableList(mPartialResults);
     }

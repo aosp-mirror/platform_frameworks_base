@@ -16,6 +16,9 @@
 
 package android.hardware.camera2;
 
+import android.annotation.RequiresPermission;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
@@ -86,6 +89,7 @@ public final class CameraManager {
      *
      * @return The list of currently connected camera devices.
      */
+    @NonNull
     public String[] getCameraIdList() throws CameraAccessException {
         synchronized (mLock) {
             // ID list creation handles various known failures in device enumeration, so only
@@ -121,7 +125,8 @@ public final class CameraManager {
      * @throws IllegalArgumentException if the handler is {@code null} but the current thread has
      *             no looper.
      */
-    public void registerAvailabilityCallback(AvailabilityCallback callback, Handler handler) {
+    public void registerAvailabilityCallback(@NonNull AvailabilityCallback callback,
+            @Nullable Handler handler) {
         if (handler == null) {
             Looper looper = Looper.myLooper();
             if (looper == null) {
@@ -142,7 +147,7 @@ public final class CameraManager {
      *
      * @param callback The callback to remove from the notification list
      */
-    public void unregisterAvailabilityCallback(AvailabilityCallback callback) {
+    public void unregisterAvailabilityCallback(@NonNull AvailabilityCallback callback) {
         CameraManagerGlobal.get().unregisterAvailabilityCallback(callback);
     }
 
@@ -168,7 +173,7 @@ public final class CameraManager {
      * @throws IllegalArgumentException if the handler is {@code null} but the current thread has
      *             no looper.
      */
-    public void registerTorchCallback(TorchCallback callback, Handler handler) {
+    public void registerTorchCallback(@NonNull TorchCallback callback, @Nullable Handler handler) {
         if (handler == null) {
             Looper looper = Looper.myLooper();
             if (looper == null) {
@@ -188,7 +193,7 @@ public final class CameraManager {
      *
      * @param callback The callback to remove from the notification list
      */
-    public void unregisterTorchCallback(TorchCallback callback) {
+    public void unregisterTorchCallback(@NonNull TorchCallback callback) {
         CameraManagerGlobal.get().unregisterTorchCallback(callback);
     }
 
@@ -201,15 +206,13 @@ public final class CameraManager {
      *
      * @throws IllegalArgumentException if the cameraId does not match any
      *         known camera device.
-     * @throws CameraAccessException if the camera is disabled by device policy, or
-     *         the camera device has been disconnected.
-     * @throws SecurityException if the application does not have permission to
-     *         access the camera
+     * @throws CameraAccessException if the camera device has been disconnected.
      *
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
-    public CameraCharacteristics getCameraCharacteristics(String cameraId)
+    @NonNull
+    public CameraCharacteristics getCameraCharacteristics(@NonNull String cameraId)
             throws CameraAccessException {
         CameraCharacteristics characteristics = null;
 
@@ -431,8 +434,9 @@ public final class CameraManager {
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
-    public void openCamera(String cameraId, final CameraDevice.StateCallback callback,
-            Handler handler)
+    @RequiresPermission(android.Manifest.permission.CAMERA)
+    public void openCamera(@NonNull String cameraId,
+            @NonNull final CameraDevice.StateCallback callback, @Nullable Handler handler)
             throws CameraAccessException {
 
         if (cameraId == null) {
@@ -444,7 +448,7 @@ public final class CameraManager {
                 handler = new Handler();
             } else {
                 throw new IllegalArgumentException(
-                        "Looper doesn't exist in the calling thread");
+                        "Handler argument is null, but no looper exists in the calling thread");
             }
         }
 
@@ -490,7 +494,8 @@ public final class CameraManager {
      *             or previously available camera device, or the camera device doesn't have a
      *             flash unit.
      */
-    public void setTorchMode(String cameraId, boolean enabled) throws CameraAccessException {
+    public void setTorchMode(@NonNull String cameraId, boolean enabled)
+            throws CameraAccessException {
         CameraManagerGlobal.get().setTorchMode(cameraId, enabled);
     }
 
@@ -517,7 +522,7 @@ public final class CameraManager {
          *
          * @param cameraId The unique identifier of the new camera.
          */
-        public void onCameraAvailable(String cameraId) {
+        public void onCameraAvailable(@NonNull String cameraId) {
             // default empty implementation
         }
 
@@ -532,7 +537,7 @@ public final class CameraManager {
          *
          * @param cameraId The unique identifier of the disconnected camera.
          */
-        public void onCameraUnavailable(String cameraId) {
+        public void onCameraUnavailable(@NonNull String cameraId) {
             // default empty implementation
         }
     }
@@ -572,7 +577,7 @@ public final class CameraManager {
          * @param cameraId The unique identifier of the camera whose torch mode has become
          *                 unavailable.
          */
-        public void onTorchModeUnavailable(String cameraId) {
+        public void onTorchModeUnavailable(@NonNull String cameraId) {
             // default empty implementation
         }
 
@@ -589,7 +594,7 @@ public final class CameraManager {
          *                off. {@code false} when the torch mode has becomes off and available to
          *                be turned on.
          */
-        public void onTorchModeChanged(String cameraId, boolean enabled) {
+        public void onTorchModeChanged(@NonNull String cameraId, boolean enabled) {
             // default empty implementation
         }
     }

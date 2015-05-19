@@ -16,6 +16,9 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.IntDef;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -23,6 +26,8 @@ import android.os.Handler;
 import android.view.Surface;
 
 import java.util.List;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * <p>The CameraDevice class is a representation of a single camera connected to an
@@ -124,6 +129,17 @@ public abstract class CameraDevice implements AutoCloseable {
      */
     public static final int TEMPLATE_MANUAL = 6;
 
+     /** @hide */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef(
+         {TEMPLATE_PREVIEW,
+          TEMPLATE_STILL_CAPTURE,
+          TEMPLATE_RECORD,
+          TEMPLATE_VIDEO_SNAPSHOT,
+          TEMPLATE_ZERO_SHUTTER_LAG,
+          TEMPLATE_MANUAL })
+     public @interface RequestTemplate {};
+
     /**
      * Get the ID of this camera device.
      *
@@ -142,6 +158,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see CameraManager#getCameraCharacteristics
      * @see CameraManager#getCameraIdList
      */
+    @NonNull
     public abstract String getId();
 
     /**
@@ -391,8 +408,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getOutputSizes(int)
      * @see StreamConfigurationMap#getOutputSizes(Class)
      */
-    public abstract void createCaptureSession(List<Surface> outputs,
-            CameraCaptureSession.StateCallback callback, Handler handler)
+    public abstract void createCaptureSession(@NonNull List<Surface> outputs,
+            @NonNull CameraCaptureSession.StateCallback callback, @Nullable Handler handler)
             throws CameraAccessException;
 
     /**
@@ -560,8 +577,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see android.media.ImageWriter
      * @see android.media.ImageReader
      */
-    public abstract void createReprocessableCaptureSession(InputConfiguration inputConfig,
-            List<Surface> outputs, CameraCaptureSession.StateCallback callback, Handler handler)
+    public abstract void createReprocessableCaptureSession(@NonNull InputConfiguration inputConfig,
+            @NonNull List<Surface> outputs, @NonNull CameraCaptureSession.StateCallback callback,
+            @Nullable Handler handler)
             throws CameraAccessException;
 
     /**
@@ -591,7 +609,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see #TEMPLATE_VIDEO_SNAPSHOT
      * @see #TEMPLATE_MANUAL
      */
-    public abstract CaptureRequest.Builder createCaptureRequest(int templateType)
+    @NonNull
+    public abstract CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType)
             throws CameraAccessException;
 
     /**
@@ -620,8 +639,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see CameraDevice#createReprocessableCaptureSession
      * @see android.media.ImageWriter
      */
+    @NonNull
     public abstract CaptureRequest.Builder createReprocessCaptureRequest(
-            TotalCaptureResult inputResult) throws CameraAccessException;
+            @NonNull TotalCaptureResult inputResult) throws CameraAccessException;
 
     /**
      * Close the connection to this camera device as quickly as possible.
@@ -727,6 +747,16 @@ public abstract class CameraDevice implements AutoCloseable {
          */
         public static final int ERROR_CAMERA_SERVICE = 5;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(
+            {ERROR_CAMERA_IN_USE,
+             ERROR_MAX_CAMERAS_IN_USE,
+             ERROR_CAMERA_DISABLED,
+             ERROR_CAMERA_DEVICE,
+             ERROR_CAMERA_SERVICE })
+        public @interface ErrorCode {};
+
         /**
          * The method called when a camera device has finished opening.
          *
@@ -736,7 +766,7 @@ public abstract class CameraDevice implements AutoCloseable {
          *
          * @param camera the camera device that has become opened
          */
-        public abstract void onOpened(CameraDevice camera); // Must implement
+        public abstract void onOpened(@NonNull CameraDevice camera); // Must implement
 
         /**
          * The method called when a camera device has been closed with
@@ -749,7 +779,7 @@ public abstract class CameraDevice implements AutoCloseable {
          *
          * @param camera the camera device that has become closed
          */
-        public void onClosed(CameraDevice camera) {
+        public void onClosed(@NonNull CameraDevice camera) {
             // Default empty implementation
         }
 
@@ -781,7 +811,7 @@ public abstract class CameraDevice implements AutoCloseable {
          *
          * @param camera the device that has been disconnected
          */
-        public abstract void onDisconnected(CameraDevice camera); // Must implement
+        public abstract void onDisconnected(@NonNull CameraDevice camera); // Must implement
 
         /**
          * The method called when a camera device has encountered a serious error.
@@ -805,12 +835,14 @@ public abstract class CameraDevice implements AutoCloseable {
          * @param error The error code, one of the
          *     {@code StateCallback.ERROR_*} values.
          *
+         * @see #ERROR_CAMERA_IN_USE
+         * @see #ERROR_MAX_CAMERAS_IN_USE
+         * @see #ERROR_CAMERA_DISABLED
          * @see #ERROR_CAMERA_DEVICE
          * @see #ERROR_CAMERA_SERVICE
-         * @see #ERROR_CAMERA_DISABLED
-         * @see #ERROR_CAMERA_IN_USE
          */
-        public abstract void onError(CameraDevice camera, int error); // Must implement
+        public abstract void onError(@NonNull CameraDevice camera,
+                @ErrorCode int error); // Must implement
     }
 
     /**

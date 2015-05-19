@@ -607,6 +607,8 @@ public class CameraDeviceImpl extends CameraDevice {
     }
 
     public void prepare(Surface surface) throws CameraAccessException {
+        if (surface == null) throw new IllegalArgumentException("Surface is null");
+
         synchronized(mInterfaceLock) {
             int streamId = -1;
             for (int i = 0; i < mConfiguredOutputs.size(); i++) {
