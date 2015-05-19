@@ -35,6 +35,7 @@ interface IUserManager {
     Bitmap getUserIcon(int userHandle);
     List<UserInfo> getUsers(boolean excludeDying);
     List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
+    boolean canAddMoreManagedProfiles();
     UserInfo getProfileParent(int userHandle);
     UserInfo getUserInfo(int userHandle);
     boolean isRestricted();

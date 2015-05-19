@@ -537,6 +537,28 @@ public class UserManagerService extends IUserManager.Stub {
      * Check if we've hit the limit of how many users can be created.
      */
     private boolean isUserLimitReachedLocked() {
+        return getAliveUsersExcludingGuestsCountLocked() >= UserManager.getMaxSupportedUsers();
+    }
+
+    @Override
+    public boolean canAddMoreManagedProfiles() {
+        checkManageUsersPermission("check if more managed profiles can be added.");
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            return false;
+        }
+        synchronized(mPackagesLock) {
+            // Limit number of managed profiles that can be created
+            if (numberOfUsersOfTypeLocked(UserInfo.FLAG_MANAGED_PROFILE, true)
+                    >= MAX_MANAGED_PROFILES) {
+                return false;
+            }
+            int usersCount = getAliveUsersExcludingGuestsCountLocked();
+            // We allow creating a managed profile in the special case where there is only one user.
+            return usersCount == 1 || usersCount < UserManager.getMaxSupportedUsers();
+        }
+    }
+
+    private int getAliveUsersExcludingGuestsCountLocked() {
         int aliveUserCount = 0;
         final int totalUserCount = mUsers.size();
         // Skip over users being removed
@@ -547,7 +569,7 @@ public class UserManagerService extends IUserManager.Stub {
                 aliveUserCount++;
             }
         }
-        return aliveUserCount >= UserManager.getMaxSupportedUsers();
+        return aliveUserCount;
     }
 
     /**
@@ -1152,7 +1174,11 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
             return null;
         }
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            return null;
+        }
         final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
+        final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo = null;
         try {
@@ -1163,19 +1189,16 @@ public class UserManagerService extends IUserManager.Stub {
                         parent = getUserInfoLocked(parentId);
                         if (parent == null) return null;
                     }
-                    // If we're not adding a guest user and the limit has been reached,
-                    // cannot add a user.
-                    if (!isGuest && isUserLimitReachedLocked()) {
+                    if (isManagedProfile && !canAddMoreManagedProfiles()) {
+                        return null;
+                    }
+                    if (!isGuest && !isManagedProfile && isUserLimitReachedLocked()) {
+                        // If we're not adding a guest user or a managed profile and the limit has
+                        // been reached, cannot add a user.
                         return null;
                     }
                     // If we're adding a guest and there already exists one, bail.
                     if (isGuest && findCurrentGuestUserLocked() != null) {
-                        return null;
-                    }
-                    // Limit number of managed profiles that can be created
-                    if ((flags & UserInfo.FLAG_MANAGED_PROFILE) != 0
-                            && numberOfUsersOfTypeLocked(UserInfo.FLAG_MANAGED_PROFILE, true)
-                                >= MAX_MANAGED_PROFILES) {
                         return null;
                     }
                     int userId = getNextAvailableIdLocked();
