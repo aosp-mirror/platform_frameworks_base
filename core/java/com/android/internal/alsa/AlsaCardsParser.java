@@ -29,7 +29,7 @@ import java.util.ArrayList;
  */
 public class AlsaCardsParser {
     private static final String TAG = "AlsaCardsParser";
-    protected static final boolean DEBUG = true;
+    protected static final boolean DEBUG = false;
 
     private static final String kCardsFilePath = "/proc/asound/cards";
 
