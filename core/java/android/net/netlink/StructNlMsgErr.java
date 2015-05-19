@@ -57,9 +57,7 @@ public class StructNlMsgErr {
         msg = null;
     }
 
-    public boolean pack(ByteBuffer byteBuffer) {
-        if (!hasAvailableSpace(byteBuffer)) { return false; }
-
+    public void pack(ByteBuffer byteBuffer) {
         // The ByteOrder must have already been set by the caller.  In most
         // cases ByteOrder.nativeOrder() is correct, with the possible
         // exception of usage within unittests.
@@ -67,7 +65,6 @@ public class StructNlMsgErr {
         if (msg != null) {
             msg.pack(byteBuffer);
         }
-        return true;
     }
 
     @Override

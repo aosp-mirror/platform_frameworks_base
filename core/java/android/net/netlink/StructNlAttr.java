@@ -116,6 +116,14 @@ public class StructNlAttr {
         }
     }
 
+    public void pack(ByteBuffer byteBuffer) {
+        final int originalPosition = byteBuffer.position();
+        byteBuffer.putShort(nla_len);
+        byteBuffer.putShort(nla_type);
+        byteBuffer.put(nla_value);
+        byteBuffer.position(originalPosition + getAlignedLength());
+    }
+
     @Override
     public String toString() {
         return "StructNlAttr{ "
