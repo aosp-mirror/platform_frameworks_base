@@ -245,6 +245,11 @@ public class NavigationBarView extends LinearLayout {
         return intercept;
     }
 
+    public void abortCurrentGesture() {
+        mDelegateHelper.abortCurrentGesture();
+        getHomeButton().abortCurrentGesture();
+    }
+
     private H mHandler = new H();
 
     public View getCurrentView() {

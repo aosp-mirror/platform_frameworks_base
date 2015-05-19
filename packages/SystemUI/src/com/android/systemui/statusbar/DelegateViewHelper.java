@@ -105,6 +105,13 @@ public class DelegateViewHelper {
         return mPanelShowing;
     }
 
+    public void abortCurrentGesture() {
+        if (mStarted) {
+            mStarted = false;
+            mBar.setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, false);
+        }
+    }
+
     public void setSourceView(View view) {
         mSourceView = view;
         if (mSourceView != null) {
