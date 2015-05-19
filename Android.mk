@@ -84,6 +84,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/job/IJobScheduler.aidl \
 	core/java/android/app/job/IJobService.aidl \
 	core/java/android/app/ITransientNotification.aidl \
+	core/java/android/app/IUidObserver.aidl \
 	core/java/android/app/IUiAutomationConnection.aidl \
 	core/java/android/app/IUiModeManager.aidl \
 	core/java/android/app/IUserSwitchObserver.aidl \
