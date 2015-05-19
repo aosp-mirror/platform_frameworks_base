@@ -213,6 +213,11 @@ public class ViewConfiguration {
     private static final int OVERFLING_DISTANCE = 6;
 
     /**
+     * Default time to snooze an action mode for.
+     */
+    private static final int ACTION_MODE_SNOOZE_TIME_DEFAULT = 2000;
+
+    /**
      * Configuration values for overriding {@link #hasPermanentMenuKey()} behavior.
      * These constants must match the definition in res/values/config.xml.
      */
@@ -729,6 +734,13 @@ public class ViewConfiguration {
      */
     public static float getScrollFriction() {
         return SCROLL_FRICTION;
+    }
+
+    /**
+     * @return the default duration in milliseconds for {@link ActionMode#snooze(int)}.
+     */
+    public static int getDefaultActionModeSnoozeTime() {
+        return ACTION_MODE_SNOOZE_TIME_DEFAULT;
     }
 
     /**
