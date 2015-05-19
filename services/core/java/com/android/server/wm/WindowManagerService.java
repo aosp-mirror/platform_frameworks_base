@@ -3209,10 +3209,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 if ((attrChanges&WindowManager.LayoutParams.FORMAT_CHANGED) != 0) {
-                    // To change the format, we need to re-build the surface.
-                    winAnimator.destroySurfaceLocked();
-                    toBeDisplayed = true;
-                    surfaceChanged = true;
+                    // If the format can be changed in place yaay!
+                    // If not, fall back to a surface re-build
+                    if (!winAnimator.tryChangeFormatInPlaceLocked()) {
+                        winAnimator.destroySurfaceLocked();
+                        toBeDisplayed = true;
+                        surfaceChanged = true;
+                    }
                 }
                 try {
                     if (!win.mHasSurface) {
