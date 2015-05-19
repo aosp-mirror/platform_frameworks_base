@@ -33,16 +33,4 @@ public class ScreenShapeHelper {
         }
         return 0;
     }
-
-    /**
-     * Get whether a device has has a round screen.
-     */
-    public static boolean getWindowIsRound(Resources resources) {
-        if (IS_EMULATOR) {
-            return SystemProperties.getBoolean(ViewRootImpl.PROPERTY_EMULATOR_CIRCULAR, false);
-        } else {
-            return resources.getBoolean(
-                    com.android.internal.R.bool.config_windowIsRound);
-        }
-    }
 }

@@ -1220,9 +1220,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     };
 
     private boolean isRoundWindow() {
-        return mContext.getResources().getBoolean(com.android.internal.R.bool.config_windowIsRound)
-                || (Build.HARDWARE.contains("goldfish")
-                && SystemProperties.getBoolean(ViewRootImpl.PROPERTY_EMULATOR_CIRCULAR, false));
+        return mContext.getResources().getConfiguration().isScreenRound();
     }
 
     /** {@inheritDoc} */
