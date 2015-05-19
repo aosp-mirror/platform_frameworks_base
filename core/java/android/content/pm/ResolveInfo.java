@@ -45,7 +45,7 @@ public class ResolveInfo implements Parcelable {
      * {@link #providerInfo} will be non-null.
      */
     public ActivityInfo activityInfo;
-    
+
     /**
      * The service that corresponds to this resolution match, if this resolution
      * is for a service. Exactly one of {@link #activityInfo},
@@ -64,21 +64,21 @@ public class ResolveInfo implements Parcelable {
      * The IntentFilter that was matched for this ResolveInfo.
      */
     public IntentFilter filter;
-    
+
     /**
      * The declared priority of this match.  Comes from the "priority"
      * attribute or, if not set, defaults to 0.  Higher values are a higher
      * priority.
      */
     public int priority;
-    
+
     /**
      * Order of result according to the user's preference.  If the user
      * has not set a preference for this result, the value is 0; higher
      * values are a higher priority.
      */
     public int preferredOrder;
-    
+
     /**
      * The system's evaluation of how well the activity matches the
      * IntentFilter.  This is a match constant, a combination of
@@ -86,7 +86,7 @@ public class ResolveInfo implements Parcelable {
      * and {@link IntentFilter#MATCH_ADJUSTMENT_MASK IntentFiler.MATCH_ADJUSTMENT_MASK}.
      */
     public int match;
-    
+
     /**
      * Only set when returned by
      * {@link PackageManager#queryIntentActivityOptions}, this tells you
@@ -94,29 +94,30 @@ public class ResolveInfo implements Parcelable {
      * first in the list, < 0 means it came from the generic Intent query.
      */
     public int specificIndex = -1;
-    
+
     /**
      * This filter has specified the Intent.CATEGORY_DEFAULT, meaning it
      * would like to be considered a default action that the user can
      * perform on this data.
      */
     public boolean isDefault;
-    
+
     /**
      * A string resource identifier (in the package's resources) of this
      * match's label.  From the "label" attribute or, if not set, 0.
      */
     public int labelRes;
-    
+
     /**
      * The actual string retrieve from <var>labelRes</var> or null if none
      * was provided.
      */
     public CharSequence nonLocalizedLabel;
-    
+
     /**
      * A drawable resource identifier (in the package's resources) of this
-     * match's icon.  From the "icon" attribute or, if not set, 0.
+     * match's icon.  From the "icon" attribute or, if not set, 0. It is
+     * set only if the icon can be obtained by resource id alone.
      */
     public int icon;
 
@@ -134,9 +135,19 @@ public class ResolveInfo implements Parcelable {
     public int targetUserId;
 
     /**
+     * Set to true if the icon cannot be obtained by resource ids alone.
+     * It is set to true for ResolveInfos from the managed profile: They need to
+     * have their icon badged, so it cannot be obtained by resource ids alone.
      * @hide
      */
     public boolean noResourceId;
+
+    /**
+     * Same as {@link #icon} but it will always correspond to "icon" attribute
+     * regardless of {@link #noResourceId} value.
+     * @hide
+     */
+    public int iconResourceId;
 
     /**
      * @hide Target comes from system process?
@@ -159,10 +170,10 @@ public class ResolveInfo implements Parcelable {
      * Retrieve the current textual label associated with this resolution.  This
      * will call back on the given PackageManager to load the label from
      * the application.
-     * 
+     *
      * @param pm A PackageManager from which the label can be loaded; usually
      * the PackageManager from which you originally retrieved this item.
-     * 
+     *
      * @return Returns a CharSequence containing the resolutions's label.  If the
      * item does not have a label, its name is returned.
      */
@@ -191,33 +202,30 @@ public class ResolveInfo implements Parcelable {
         if (data != null) data = data.toString().trim();
         return data;
     }
-    
+
     /**
      * Retrieve the current graphical icon associated with this resolution.  This
      * will call back on the given PackageManager to load the icon from
      * the application.
-     * 
+     *
      * @param pm A PackageManager from which the icon can be loaded; usually
      * the PackageManager from which you originally retrieved this item.
-     * 
+     *
      * @return Returns a Drawable containing the resolution's icon.  If the
      * item does not have an icon, the default activity icon is returned.
      */
     public Drawable loadIcon(PackageManager pm) {
-        Drawable dr;
-        if (resolvePackageName != null && icon != 0) {
-            dr = pm.getDrawable(resolvePackageName, icon, null);
-            if (dr != null) {
-                return dr;
-            }
+        Drawable dr = null;
+        if (resolvePackageName != null && iconResourceId != 0) {
+            dr = pm.getDrawable(resolvePackageName, iconResourceId, null);
         }
         ComponentInfo ci = getComponentInfo();
-        ApplicationInfo ai = ci.applicationInfo;
-        if (icon != 0) {
-            dr = pm.getDrawable(ci.packageName, icon, ai);
-            if (dr != null) {
-                return dr;
-            }
+        if (dr == null && iconResourceId != 0) {
+            ApplicationInfo ai = ci.applicationInfo;
+            dr = pm.getDrawable(ci.packageName, iconResourceId, ai);
+        }
+        if (dr != null) {
+            return pm.getUserBadgedIcon(dr, new UserHandle(UserHandle.myUserId()));
         }
         return ci.loadIcon(pm);
     }
@@ -231,7 +239,7 @@ public class ResolveInfo implements Parcelable {
      * @return The icon associated with this match.
      */
     final int getIconResourceInternal() {
-        if (icon != 0) return icon;
+        if (iconResourceId != 0) return iconResourceId;
         final ComponentInfo ci = getComponentInfo();
         if (ci != null) {
             return ci.getIconResource();
@@ -298,6 +306,8 @@ public class ResolveInfo implements Parcelable {
         nonLocalizedLabel = orig.nonLocalizedLabel;
         icon = orig.icon;
         resolvePackageName = orig.resolvePackageName;
+        noResourceId = orig.noResourceId;
+        iconResourceId = orig.iconResourceId;
         system = orig.system;
         targetUserId = orig.targetUserId;
         handleAllWebDataURI = orig.handleAllWebDataURI;
@@ -362,6 +372,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(targetUserId);
         dest.writeInt(system ? 1 : 0);
         dest.writeInt(noResourceId ? 1 : 0);
+        dest.writeInt(iconResourceId);
         dest.writeInt(handleAllWebDataURI ? 1 : 0);
     }
 
@@ -408,9 +419,10 @@ public class ResolveInfo implements Parcelable {
         targetUserId = source.readInt();
         system = source.readInt() != 0;
         noResourceId = source.readInt() != 0;
+        iconResourceId = source.readInt();
         handleAllWebDataURI = source.readInt() != 0;
     }
-    
+
     public static class DisplayNameComparator
             implements Comparator<ResolveInfo> {
         public DisplayNameComparator(PackageManager pm) {
