@@ -143,7 +143,6 @@ static void createParticle(Particle_t *part, int idx, float scale) {
     float d = fabs(randomGauss()) * gGalaxyRadius * 0.5f + rsRand(64.0f);
     float id = d / gGalaxyRadius;
     float z = randomGauss() * 0.4f * (1.0f - id);
-    float p = -d * ELLIPSE_TWIST;
 
     if (d < gGalaxyRadius * 0.33f) {
         part->color.x = (uchar) (220 + id * 35);
@@ -305,7 +304,6 @@ static void drawMeshInPage(float xStart, float yStart, int wResolution, int hRes
     int left = 0, right = 0, top = 0, bottom = 0;
     rsgMeasureText(gSampleTextList100[0].item, &left, &right, &top, &bottom);
     float textHeight = (float)(top - bottom);
-    float textWidth = (float)(right - left);
 
     rs_matrix4x4 matrix;
     rsMatrixLoadScale(&matrix, size, size, 1.0);
