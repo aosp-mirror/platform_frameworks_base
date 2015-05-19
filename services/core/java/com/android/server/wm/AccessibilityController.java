@@ -432,8 +432,7 @@ final class AccessibilityController {
                 mDrawBorderInset = (int) mBorderWidth / 2;
                 mWindow = new ViewportWindow(mContext);
 
-                if (mContext.getResources().getBoolean(
-                            com.android.internal.R.bool.config_windowIsRound)) {
+                if (mContext.getResources().getConfiguration().isScreenRound()) {
                     mCircularPath = new Path();
                     mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
                     final int centerXY = mTempPoint.x / 2;
