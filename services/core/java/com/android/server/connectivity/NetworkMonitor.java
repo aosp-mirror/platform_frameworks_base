@@ -149,7 +149,6 @@ public class NetworkMonitor extends StateMachine {
     /**
      * Force evaluation even if it has succeeded in the past.
      * arg1 = UID responsible for requesting this reeval.  Will be billed for data.
-     * arg2 = Number of evaluation attempts to make. (If 0, make INITIAL_ATTEMPTS attempts.)
      */
     public static final int CMD_FORCE_REEVALUATION = BASE + 8;
 
@@ -183,20 +182,18 @@ public class NetworkMonitor extends StateMachine {
     private final int mLingerDelayMs;
     private int mLingerToken = 0;
 
-    // Negative values disable reevaluation.
-    private static final String REEVALUATE_DELAY_PROPERTY = "persist.netmon.reeval_delay";
-    // When connecting, attempt to validate 3 times, pausing 5s between them.
-    private static final int DEFAULT_REEVALUATE_DELAY_MS = 5000;
-    private static final int INITIAL_ATTEMPTS = 3;
-    // If a network is not validated, make one attempt every 10 mins to see if it starts working.
-    private static final int REEVALUATE_PAUSE_MS = 10*60*1000;
-    private static final int PERIODIC_ATTEMPTS = 1;
-    // When an application calls reportNetworkConnectivity, only make one attempt.
-    private static final int REEVALUATE_ATTEMPTS = 1;
-    private final int mReevaluateDelayMs;
+    // Start mReevaluateDelayMs at this value and double.
+    private static final int INITIAL_REEVALUATE_DELAY_MS = 1000;
+    private static final int MAX_REEVALUATE_DELAY_MS = 10*60*1000;
+    // Before network has been evaluated this many times, ignore repeated reevaluate requests.
+    private static final int IGNORE_REEVALUATE_ATTEMPTS = 5;
     private int mReevaluateToken = 0;
     private static final int INVALID_UID = -1;
     private int mUidResponsibleForReeval = INVALID_UID;
+    // When network has been evaluated this many times:
+    //   1. report NETWORK_TEST_RESULT_INVALID
+    //   2. stop blaming UID that requested re-evaluation for further attempts
+    private static final int INITIAL_EVALUATION_ATTEMPTS = 3;
 
     private final Context mContext;
     private final Handler mConnectivityServiceHandler;
@@ -212,18 +209,9 @@ public class NetworkMonitor extends StateMachine {
     // Set if the user explicitly selected "Do not use this network" in captive portal sign-in app.
     private boolean mUserDoesNotWant = false;
 
-    // How many times we should attempt validation. Only checked in EvaluatingState; must be set
-    // before entering EvaluatingState. Note that whatever code causes us to transition to
-    // EvaluatingState last decides how many attempts will be made, so if one codepath were to
-    // enter EvaluatingState with a specific number of attempts, and then another were to enter it
-    // with a different number of attempts, the second number would be used. This is not currently
-    // a problem because EvaluatingState is not reentrant.
-    private int mMaxAttempts;
-
     public boolean systemReady = false;
 
     private final State mDefaultState = new DefaultState();
-    private final State mOfflineState = new OfflineState();
     private final State mValidatedState = new ValidatedState();
     private final State mMaybeNotifyState = new MaybeNotifyState();
     private final State mEvaluatingState = new EvaluatingState();
@@ -247,7 +235,6 @@ public class NetworkMonitor extends StateMachine {
         mDefaultRequest = defaultRequest;
 
         addState(mDefaultState);
-        addState(mOfflineState, mDefaultState);
         addState(mValidatedState, mDefaultState);
         addState(mMaybeNotifyState, mDefaultState);
             addState(mEvaluatingState, mMaybeNotifyState);
@@ -260,8 +247,6 @@ public class NetworkMonitor extends StateMachine {
         if (mServer == null) mServer = DEFAULT_SERVER;
 
         mLingerDelayMs = SystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
-        mReevaluateDelayMs = SystemProperties.getInt(REEVALUATE_DELAY_PROPERTY,
-                DEFAULT_REEVALUATE_DELAY_MS);
 
         mIsCaptivePortalCheckEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
@@ -289,7 +274,6 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_NETWORK_CONNECTED:
                     if (DBG) log("Connected");
-                    mMaxAttempts = INITIAL_ATTEMPTS;
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
@@ -303,7 +287,6 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_FORCE_REEVALUATION:
                     if (DBG) log("Forcing reevaluation");
                     mUidResponsibleForReeval = message.arg1;
-                    mMaxAttempts = message.arg2 != 0 ? message.arg2 : REEVALUATE_ATTEMPTS;
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_CAPTIVE_PORTAL_APP_FINISHED:
@@ -313,8 +296,7 @@ public class NetworkMonitor extends StateMachine {
                     mCaptivePortalLoggedInResponseToken = String.valueOf(new Random().nextLong());
                     switch (message.arg1) {
                         case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_DISMISSED:
-                            sendMessage(CMD_FORCE_REEVALUATION, 0 /* no UID */,
-                                    0 /* INITIAL_ATTEMPTS */);
+                            sendMessage(CMD_FORCE_REEVALUATION, 0 /* no UID */, 0);
                             break;
                         case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS:
                             // TODO: Distinguish this from a network that actually validates.
@@ -323,50 +305,18 @@ public class NetworkMonitor extends StateMachine {
                             break;
                         case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_UNWANTED:
                             mUserDoesNotWant = true;
+                            mConnectivityServiceHandler.sendMessage(obtainMessage(
+                                    EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, 0,
+                                    mNetworkAgentInfo));
                             // TODO: Should teardown network.
-                            transitionTo(mOfflineState);
+                            mUidResponsibleForReeval = 0;
+                            transitionTo(mEvaluatingState);
                             break;
                     }
                     return HANDLED;
                 default:
                     return HANDLED;
             }
-        }
-    }
-
-    // Being in the OfflineState State indicates a Network is unwanted or failed validation.
-    private class OfflineState extends State {
-        @Override
-        public void enter() {
-            mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
-                    NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
-            if (!mUserDoesNotWant) {
-                sendMessageDelayed(CMD_FORCE_REEVALUATION, 0 /* no UID */,
-                        PERIODIC_ATTEMPTS, REEVALUATE_PAUSE_MS);
-            }
-        }
-
-        @Override
-        public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
-                        switch (message.what) {
-                case CMD_FORCE_REEVALUATION:
-                    // If the user has indicated they explicitly do not want to use this network,
-                    // don't allow a reevaluation as this will be pointless and could result in
-                    // the user being annoyed with repeated unwanted notifications.
-                    return mUserDoesNotWant ? HANDLED : NOT_HANDLED;
-                default:
-                    return NOT_HANDLED;
-            }
-        }
-
-        @Override
-        public void exit() {
-             // NOTE: This removes the delayed message posted by enter() but will inadvertently
-             // remove any other CMD_FORCE_REEVALUATION in the message queue.  At the moment this
-             // is harmless.  If in the future this becomes problematic a different message could
-             // be used.
-             removeMessages(CMD_FORCE_REEVALUATION);
         }
     }
 
@@ -426,18 +376,20 @@ public class NetworkMonitor extends StateMachine {
     }
 
     // Being in the EvaluatingState State indicates the Network is being evaluated for internet
-    // connectivity.
+    // connectivity, or that the user has indicated that this network is unwanted.
     private class EvaluatingState extends State {
-        private int mAttempt;
+        private int mReevaluateDelayMs;
+        private int mAttempts;
 
         @Override
         public void enter() {
-            mAttempt = 1;
             sendMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
             if (mUidResponsibleForReeval != INVALID_UID) {
                 TrafficStats.setThreadStatsUid(mUidResponsibleForReeval);
                 mUidResponsibleForReeval = INVALID_UID;
             }
+            mReevaluateDelayMs = INITIAL_REEVALUATE_DELAY_MS;
+            mAttempts = 0;
         }
 
         @Override
@@ -445,7 +397,7 @@ public class NetworkMonitor extends StateMachine {
             if (DBG) log(getName() + message.toString());
             switch (message.what) {
                 case CMD_REEVALUATE:
-                    if (message.arg1 != mReevaluateToken)
+                    if (message.arg1 != mReevaluateToken || mUserDoesNotWant)
                         return HANDLED;
                     // Don't bother validating networks that don't satisify the default request.
                     // This includes:
@@ -469,6 +421,7 @@ public class NetworkMonitor extends StateMachine {
                         transitionTo(mValidatedState);
                         return HANDLED;
                     }
+                    mAttempts++;
                     // Note: This call to isCaptivePortal() could take up to a minute. Resolving the
                     // server's IP addresses could hit the DNS timeout, and attempting connections
                     // to each of the server's several IP addresses (currently one IPv4 and one
@@ -480,16 +433,27 @@ public class NetworkMonitor extends StateMachine {
                         transitionTo(mValidatedState);
                     } else if (httpResponseCode >= 200 && httpResponseCode <= 399) {
                         transitionTo(mCaptivePortalState);
-                    } else if (++mAttempt > mMaxAttempts) {
-                        transitionTo(mOfflineState);
-                    } else if (mReevaluateDelayMs >= 0) {
+                    } else {
                         Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
                         sendMessageDelayed(msg, mReevaluateDelayMs);
+                        if (mAttempts >= INITIAL_EVALUATION_ATTEMPTS) {
+                            mConnectivityServiceHandler.sendMessage(obtainMessage(
+                                    EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, 0,
+                                    mNetworkAgentInfo));
+                            // Don't continue to blame UID forever.
+                            TrafficStats.clearThreadStatsUid();
+                        }
+                        mReevaluateDelayMs *= 2;
+                        if (mReevaluateDelayMs > MAX_REEVALUATE_DELAY_MS) {
+                            mReevaluateDelayMs = MAX_REEVALUATE_DELAY_MS;
+                        }
                     }
                     return HANDLED;
                 case CMD_FORCE_REEVALUATION:
-                    // Ignore duplicate requests.
-                    return HANDLED;
+                    // Before IGNORE_REEVALUATE_ATTEMPTS attempts are made,
+                    // ignore any re-evaluation requests. After, restart the
+                    // evaluation process via EvaluatingState#enter.
+                    return mAttempts < IGNORE_REEVALUATE_ATTEMPTS ? HANDLED : NOT_HANDLED;
                 default:
                     return NOT_HANDLED;
             }
@@ -533,6 +497,8 @@ public class NetworkMonitor extends StateMachine {
         public void enter() {
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
+            // Don't annoy user with sign-in notifications.
+            if (mUserDoesNotWant) return;
             // Create a CustomIntentReceiver that sends us a
             // CMD_LAUNCH_CAPTIVE_PORTAL_APP message when the user
             // touches the notification.
