@@ -90,12 +90,15 @@ abstract public class MidiReceiver {
      * Called to send MIDI data to the receiver without a timestamp.
      * Data will be processed by receiver in the order sent.
      * Data will get split into multiple calls to {@link #onSend} if count exceeds
-     * {@link #getMaxMessageSize}.
+     * {@link #getMaxMessageSize}.  Blocks until all the data is sent or an exception occurs.
+     * In the latter case, the amount of data sent prior to the exception is not provided to caller.
+     * The communication should be considered corrupt.  The sender should reestablish
+     * communication, reset all controllers and send all notes off.
      *
      * @param msg a byte array containing the MIDI data
      * @param offset the offset of the first byte of the data in the array to be sent
      * @param count the number of bytes of MIDI data in the array to be sent
-     * @throws IOException
+     * @throws IOException if the data could not be sent in entirety
      */
     public void send(byte[] msg, int offset, int count) throws IOException {
         // TODO add public static final TIMESTAMP_NONE = 0L
@@ -106,13 +109,16 @@ abstract public class MidiReceiver {
      * Called to send MIDI data to the receiver with a specified timestamp.
      * Data will be processed by receiver in order first by timestamp, then in the order sent.
      * Data will get split into multiple calls to {@link #onSend} if count exceeds
-     * {@link #getMaxMessageSize}.
+     * {@link #getMaxMessageSize}.  Blocks until all the data is sent or an exception occurs.
+     * In the latter case, the amount of data sent prior to the exception is not provided to caller.
+     * The communication should be considered corrupt.  The sender should reestablish
+     * communication, reset all controllers and send all notes off.
      *
      * @param msg a byte array containing the MIDI data
      * @param offset the offset of the first byte of the data in the array to be sent
      * @param count the number of bytes of MIDI data in the array to be sent
-     * @param timestamp the timestamp of the message (based on {@link java.lang.System#nanoTime}
-     * @throws IOException
+     * @param timestamp the timestamp of the message, based on {@link java.lang.System#nanoTime}
+     * @throws IOException if the data could not be sent in entirety
      */
     public void send(byte[] msg, int offset, int count, long timestamp)
             throws IOException {
