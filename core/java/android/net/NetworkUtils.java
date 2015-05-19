@@ -194,6 +194,12 @@ public class NetworkUtils {
     public native static boolean protectFromVpn(int socketfd);
 
     /**
+     * Determine if {@code uid} can access network designated by {@code netId}.
+     * @return {@code true} if {@code uid} can access network, {@code false} otherwise.
+     */
+    public native static boolean queryUserAccess(int uid, int netId);
+
+    /**
      * Convert a IPv4 address from an integer to an InetAddress.
      * @param hostAddress an int corresponding to the IPv4 address in network byte order
      */

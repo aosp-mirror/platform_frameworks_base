@@ -247,12 +247,7 @@ public class Network implements Parcelable {
             throw new IOException("No ConnectivityManager yet constructed, please construct one");
         }
         // TODO: Should this be optimized to avoid fetching the global proxy for every request?
-        ProxyInfo proxyInfo = cm.getGlobalProxy();
-        if (proxyInfo == null) {
-            // TODO: Should this be optimized to avoid fetching LinkProperties for every request?
-            final LinkProperties lp = cm.getLinkProperties(this);
-            if (lp != null) proxyInfo = lp.getHttpProxy();
-        }
+        final ProxyInfo proxyInfo = cm.getProxyForNetwork(this);
         java.net.Proxy proxy = null;
         if (proxyInfo != null) {
             proxy = proxyInfo.makeProxy();

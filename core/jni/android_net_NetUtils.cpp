@@ -291,6 +291,11 @@ static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint
     return (jboolean) !protectFromVpn(socket);
 }
 
+static jboolean android_net_utils_queryUserAccess(JNIEnv *env, jobject thiz, jint uid, jint netId)
+{
+    return (jboolean) !queryUserAccess(uid, netId);
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -311,6 +316,7 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
     { "bindSocketToNetwork", "(II)I", (void*) android_net_utils_bindSocketToNetwork },
     { "protectFromVpn", "(I)Z", (void*)android_net_utils_protectFromVpn },
+    { "queryUserAccess", "(II)Z", (void*)android_net_utils_queryUserAccess },
     { "attachDhcpFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDhcpFilter },
 };
 

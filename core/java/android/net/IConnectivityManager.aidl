@@ -104,7 +104,7 @@ interface IConnectivityManager
 
     void setGlobalProxy(in ProxyInfo p);
 
-    ProxyInfo getDefaultProxy();
+    ProxyInfo getProxyForNetwork(in Network nework);
 
     boolean prepareVpn(String oldPackage, String newPackage, int userId);
 
