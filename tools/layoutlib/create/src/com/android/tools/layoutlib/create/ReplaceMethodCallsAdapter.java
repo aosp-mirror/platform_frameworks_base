@@ -62,14 +62,13 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
         // Case 1: java.lang.System.arraycopy()
         METHOD_REPLACERS.add(new MethodReplacer() {
             @Override
-            public boolean isNeeded(String owner, String name, String desc) {
+            public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
                 return JAVA_LANG_SYSTEM.equals(owner) && "arraycopy".equals(name) &&
                         ARRAYCOPY_DESCRIPTORS.contains(desc);
             }
 
             @Override
             public void replace(MethodInformation mi) {
-                assert isNeeded(mi.owner, mi.name, mi.desc);
                 mi.desc = "(Ljava/lang/Object;ILjava/lang/Object;II)V";
             }
         });
@@ -81,14 +80,13 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
                     Type.getMethodDescriptor(STRING, Type.getType(Locale.class));
 
             @Override
-            public boolean isNeeded(String owner, String name, String desc) {
+            public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
                 return JAVA_LOCALE_CLASS.equals(owner) && "()Ljava/lang/String;".equals(desc) &&
                         ("toLanguageTag".equals(name) || "getScript".equals(name));
             }
 
             @Override
             public void replace(MethodInformation mi) {
-                assert isNeeded(mi.owner, mi.name, mi.desc);
                 mi.opcode = Opcodes.INVOKESTATIC;
                 mi.owner = ANDROID_LOCALE_CLASS;
                 mi.desc = LOCALE_TO_STRING;
@@ -103,7 +101,7 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
                     Type.getType(Locale.class), STRING);
 
             @Override
-            public boolean isNeeded(String owner, String name, String desc) {
+            public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
                 return JAVA_LOCALE_CLASS.equals(owner) &&
                         ("adjustLanguageCode".equals(name) && desc.equals(STRING_TO_STRING) ||
                         "forLanguageTag".equals(name) && desc.equals(STRING_TO_LOCALE));
@@ -111,7 +109,6 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
 
             @Override
             public void replace(MethodInformation mi) {
-                assert isNeeded(mi.owner, mi.name, mi.desc);
                 mi.owner = ANDROID_LOCALE_CLASS;
             }
         });
@@ -119,14 +116,13 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
         // Case 4: java.lang.System.log?()
         METHOD_REPLACERS.add(new MethodReplacer() {
             @Override
-            public boolean isNeeded(String owner, String name, String desc) {
+            public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
                 return JAVA_LANG_SYSTEM.equals(owner) && name.length() == 4
                         && name.startsWith("log");
             }
 
             @Override
             public void replace(MethodInformation mi) {
-                assert isNeeded(mi.owner, mi.name, mi.desc);
                 assert mi.desc.equals("(Ljava/lang/String;Ljava/lang/Throwable;)V")
                         || mi.desc.equals("(Ljava/lang/String;)V");
                 mi.name = "log";
@@ -142,7 +138,7 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
             private final String LINKED_HASH_MAP = Type.getInternalName(LinkedHashMap.class);
 
             @Override
-            public boolean isNeeded(String owner, String name, String desc) {
+            public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
                 return LINKED_HASH_MAP.equals(owner) &&
                         "eldest".equals(name) &&
                         VOID_TO_MAP_ENTRY.equals(desc);
@@ -150,26 +146,64 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
 
             @Override
             public void replace(MethodInformation mi) {
-                assert isNeeded(mi.owner, mi.name, mi.desc);
                 mi.opcode = Opcodes.INVOKESTATIC;
                 mi.owner = Type.getInternalName(LinkedHashMap_Delegate.class);
                 mi.desc = Type.getMethodDescriptor(
                         Type.getType(Map.Entry.class), Type.getType(LinkedHashMap.class));
             }
         });
+
+        // Case 6: android.content.Context.getClassLoader() in LayoutInflater
+        METHOD_REPLACERS.add(new MethodReplacer() {
+            // When LayoutInflater asks for a class loader, we must return the class loader that
+            // cannot return app's custom views/classes. This is so that in case of any failure
+            // or exception when instantiating the views, the IDE can replace it with a mock view
+            // and have proper error handling. However, if a custom view asks for the class
+            // loader, we must return a class loader that can find app's custom views as well.
+            // Thus, we rewrite the call to get class loader in LayoutInflater to
+            // getFrameworkClassLoader and inject a new method in Context. This leaves the normal
+            // method: Context.getClassLoader() free to be used by the apps.
+            private final String VOID_TO_CLASS_LOADER =
+                    Type.getMethodDescriptor(Type.getType(ClassLoader.class));
+
+            @Override
+            public boolean isNeeded(String owner, String name, String desc, String sourceClass) {
+                return owner.equals("android/content/Context") &&
+                        sourceClass.equals("android/view/LayoutInflater") &&
+                        name.equals("getClassLoader") &&
+                        desc.equals(VOID_TO_CLASS_LOADER);
+            }
+
+            @Override
+            public void replace(MethodInformation mi) {
+                mi.name = "getFrameworkClassLoader";
+            }
+        });
     }
 
-    public static boolean isReplacementNeeded(String owner, String name, String desc) {
+    /**
+     * If a method some.package.Class.Method(args) is called from some.other.Class,
+     * @param owner some/package/Class
+     * @param name Method
+     * @param desc (args)returnType
+     * @param sourceClass some/other/Class
+     * @return if the method invocation needs to be replaced by some other class.
+     */
+    public static boolean isReplacementNeeded(String owner, String name, String desc,
+            String sourceClass) {
         for (MethodReplacer replacer : METHOD_REPLACERS) {
-            if (replacer.isNeeded(owner, name, desc)) {
+            if (replacer.isNeeded(owner, name, desc, sourceClass)) {
                 return true;
             }
         }
         return false;
     }
 
-    public ReplaceMethodCallsAdapter(ClassVisitor cv) {
+    private final String mOriginalClassName;
+
+    public ReplaceMethodCallsAdapter(ClassVisitor cv, String originalClassName) {
         super(Opcodes.ASM4, cv);
+        mOriginalClassName = originalClassName;
     }
 
     @Override
@@ -187,7 +221,7 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc) {
             for (MethodReplacer replacer : METHOD_REPLACERS) {
-                if (replacer.isNeeded(owner, name, desc)) {
+                if (replacer.isNeeded(owner, name, desc, mOriginalClassName)) {
                     MethodInformation mi = new MethodInformation(opcode, owner, name, desc);
                     replacer.replace(mi);
                     opcode = mi.opcode;
@@ -216,13 +250,12 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
     }
 
     private interface MethodReplacer {
-        public boolean isNeeded(String owner, String name, String desc);
+        boolean isNeeded(String owner, String name, String desc, String sourceClass);
 
         /**
          * Updates the MethodInformation with the new values of the method attributes -
          * opcode, owner, name and desc.
-         *
          */
-        public void replace(MethodInformation mi);
+        void replace(MethodInformation mi);
     }
 }
