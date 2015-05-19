@@ -1645,6 +1645,15 @@ public class Editor {
      * @return true if the selection mode was actually started.
      */
     private boolean startSelectionActionModeWithoutSelection() {
+        if (extractedTextModeWillBeStarted()) {
+            // Cancel the single tap delayed runnable.
+            if (mSelectionModeWithoutSelectionRunnable != null) {
+                mTextView.removeCallbacks(mSelectionModeWithoutSelectionRunnable);
+            }
+
+            return false;
+        }
+
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
             // TODO: revisit invocations to minimize this case.
@@ -1686,6 +1695,15 @@ public class Editor {
     }
 
     private boolean startSelectionActionModeWithSelectionInternal() {
+        if (extractedTextModeWillBeStarted()) {
+            // Cancel the single tap delayed runnable.
+            if (mSelectionModeWithoutSelectionRunnable != null) {
+                mTextView.removeCallbacks(mSelectionModeWithoutSelectionRunnable);
+            }
+
+            return false;
+        }
+
         if (mSelectionActionMode != null) {
             // Selection action mode is already started
             mSelectionActionMode.invalidate();
