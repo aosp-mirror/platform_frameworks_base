@@ -408,11 +408,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
         if (repCbs != null) {
-            for (int i=0; i<repCbs.size(); i++) {
-                try {
-                    repCbs.get(i).mCallback.opChanged(code, packageName);
-                } catch (RemoteException e) {
+            // There are components watching for mode changes such as window manager
+            // and location manager which are in our process. The callbacks in these
+            // components may require permissions our remote caller does not have.
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                for (int i = 0; i < repCbs.size(); i++) {
+                    try {
+                        repCbs.get(i).mCallback.opChanged(code, packageName);
+                    } catch (RemoteException e) {
+                    }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
