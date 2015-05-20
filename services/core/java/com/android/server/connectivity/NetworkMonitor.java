@@ -190,10 +190,8 @@ public class NetworkMonitor extends StateMachine {
     private int mReevaluateToken = 0;
     private static final int INVALID_UID = -1;
     private int mUidResponsibleForReeval = INVALID_UID;
-    // When network has been evaluated this many times:
-    //   1. report NETWORK_TEST_RESULT_INVALID
-    //   2. stop blaming UID that requested re-evaluation for further attempts
-    private static final int INITIAL_EVALUATION_ATTEMPTS = 3;
+    // Stop blaming UID that requested re-evaluation after this many attempts.
+    private static final int BLAME_FOR_EVALUATION_ATTEMPTS = 5;
 
     private final Context mContext;
     private final Handler mConnectivityServiceHandler;
@@ -438,12 +436,12 @@ public class NetworkMonitor extends StateMachine {
                     } else if (httpResponseCode >= 200 && httpResponseCode <= 399) {
                         transitionTo(mCaptivePortalState);
                     } else {
-                        Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
+                        final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
                         sendMessageDelayed(msg, mReevaluateDelayMs);
-                        if (mAttempts >= INITIAL_EVALUATION_ATTEMPTS) {
-                            mConnectivityServiceHandler.sendMessage(obtainMessage(
-                                    EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, 0,
-                                    mNetworkAgentInfo));
+                        mConnectivityServiceHandler.sendMessage(obtainMessage(
+                                EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, 0,
+                                mNetworkAgentInfo));
+                        if (mAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
                             // Don't continue to blame UID forever.
                             TrafficStats.clearThreadStatsUid();
                         }
