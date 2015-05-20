@@ -1366,7 +1366,9 @@ public class Notification implements Parcelable
         int version = parcel.readInt();
 
         when = parcel.readLong();
-        mSmallIcon = Icon.CREATOR.createFromParcel(parcel);
+        if (parcel.readInt() != 0) {
+            mSmallIcon = Icon.CREATOR.createFromParcel(parcel);
+        }
         number = parcel.readInt();
         if (parcel.readInt() != 0) {
             contentIntent = PendingIntent.CREATOR.createFromParcel(parcel);
@@ -1590,7 +1592,12 @@ public class Notification implements Parcelable
         parcel.writeInt(1);
 
         parcel.writeLong(when);
-        mSmallIcon.writeToParcel(parcel, 0);
+        if (mSmallIcon != null) {
+            parcel.writeInt(1);
+            mSmallIcon.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
         parcel.writeInt(number);
         if (contentIntent != null) {
             parcel.writeInt(1);
@@ -3241,7 +3248,7 @@ public class Notification implements Parcelable
             Notification n = new Notification();
             n.when = mWhen;
             n.mSmallIcon = mSmallIcon;
-            if (mSmallIcon.getType() == Icon.TYPE_RESOURCE) {
+            if (mSmallIcon != null && mSmallIcon.getType() == Icon.TYPE_RESOURCE) {
                 n.icon = mSmallIcon.getResId();
             }
             n.iconLevel = mSmallIconLevel;
