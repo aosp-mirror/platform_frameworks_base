@@ -146,6 +146,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/database/IContentObserver.aidl \
 	core/java/android/hardware/ICameraService.aidl \
 	core/java/android/hardware/ICameraServiceListener.aidl \
+	core/java/android/hardware/ICameraServiceProxy.aidl \
 	core/java/android/hardware/ICamera.aidl \
 	core/java/android/hardware/ICameraClient.aidl \
 	core/java/android/hardware/IConsumerIrService.aidl \
