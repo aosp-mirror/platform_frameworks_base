@@ -1502,7 +1502,7 @@ public class AudioTrack
     }
 
     private boolean isRestricted() {
-        if ((mAttributes.getFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
+        if ((mAttributes.getAllFlags() & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0) {
             return false;
         }
         try {
