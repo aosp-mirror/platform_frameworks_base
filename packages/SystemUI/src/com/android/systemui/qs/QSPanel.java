@@ -215,9 +215,19 @@ public class QSPanel extends ViewGroup {
         mFooter.refreshState();
     }
 
-    public void showDetailAdapter(boolean show, DetailAdapter adapter) {
+    public void showDetailAdapter(boolean show, DetailAdapter adapter, int[] locationInWindow) {
+        int xInWindow = locationInWindow[0];
+        int yInWindow = locationInWindow[1];
+        mDetail.getLocationInWindow(locationInWindow);
+
         Record r = new Record();
         r.detailAdapter = adapter;
+        r.x = xInWindow - locationInWindow[0];
+        r.y = yInWindow - locationInWindow[1];
+
+        locationInWindow[0] = xInWindow;
+        locationInWindow[1] = yInWindow;
+
         showDetail(show, r);
     }
 
@@ -337,7 +347,13 @@ public class QSPanel extends ViewGroup {
         if (r instanceof TileRecord) {
             handleShowDetailTile((TileRecord) r, show);
         } else {
-            handleShowDetailImpl(r, show, getWidth() /* x */, 0/* y */);
+            int x = 0;
+            int y = 0;
+            if (r != null) {
+                x = r.x;
+                y = r.y;
+            }
+            handleShowDetailImpl(r, show, x, y);
         }
     }
 
@@ -558,6 +574,8 @@ public class QSPanel extends ViewGroup {
     private static class Record {
         View detailView;
         DetailAdapter detailAdapter;
+        int x;
+        int y;
     }
 
     protected static final class TileRecord extends Record {

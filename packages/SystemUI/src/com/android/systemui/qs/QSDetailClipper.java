@@ -42,14 +42,21 @@ public class QSDetailClipper {
         }
         final int w = mDetail.getWidth() - x;
         final int h = mDetail.getHeight() - y;
+        int innerR = 0;
+        if (x < 0 || w < 0 || y < 0 || h < 0) {
+            innerR = Math.abs(x);
+            innerR = Math.min(innerR, Math.abs(y));
+            innerR = Math.min(innerR, Math.abs(w));
+            innerR = Math.min(innerR, Math.abs(h));
+        }
         int r = (int) Math.ceil(Math.sqrt(x * x + y * y));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(w * w + y * y)));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(w * w + h * h)));
         r = (int) Math.max(r, Math.ceil(Math.sqrt(x * x + h * h)));
         if (in) {
-            mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, 0, r);
+            mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, innerR, r);
         } else {
-            mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, r, 0);
+            mAnimator = ViewAnimationUtils.createCircularReveal(mDetail, x, y, r, innerR);
         }
         mAnimator.setDuration((long)(mAnimator.getDuration() * 1.5));
         if (listener != null) {
