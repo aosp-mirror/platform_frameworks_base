@@ -435,9 +435,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
      */
     int trimForTaskLocked(TaskRecord task, boolean doTrim) {
         int recentsCount = size();
-        final Intent intent = task.intent;
-        final boolean document = intent != null && intent.isDocument();
-
+        final boolean document = task.intent != null && task.intent.isDocument();
         int maxRecents = task.maxRecents - 1;
         for (int i = 0; i < recentsCount; i++) {
             final TaskRecord tr = get(i);
@@ -448,12 +446,11 @@ class RecentTasks extends ArrayList<TaskRecord> {
                 if (i > MAX_RECENT_BITMAPS) {
                     tr.freeLastThumbnail();
                 }
-                final Intent trIntent = tr.intent;
-                if ((task.affinity == null || !task.affinity.equals(tr.affinity)) &&
-                        (intent == null || !intent.filterEquals(trIntent))) {
+                if (task.realActivity == null || tr.realActivity == null ||
+                        !task.realActivity.equals(tr.realActivity)) {
                     continue;
                 }
-                final boolean trIsDocument = trIntent != null && trIntent.isDocument();
+                final boolean trIsDocument = tr.intent != null && tr.intent.isDocument();
                 if (document && trIsDocument) {
                     // These are the same document activity (not necessarily the same doc).
                     if (maxRecents > 0) {
