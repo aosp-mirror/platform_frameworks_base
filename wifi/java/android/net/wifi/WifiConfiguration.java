@@ -1071,7 +1071,7 @@ public class WifiConfiguration implements Parcelable {
             if (diff <= 0) {
                 sbuf.append(" blackListed since <incorrect>");
             } else {
-                sbuf.append(" blackListed: ").append(Long.toString(diff/1000)).append( "sec");
+                sbuf.append(" blackListed: ").append(Long.toString(diff/1000)).append( "sec ");
             }
         }
         if (this.lastConnected != 0) {
@@ -1080,27 +1080,27 @@ public class WifiConfiguration implements Parcelable {
             if (diff <= 0) {
                 sbuf.append("lastConnected since <incorrect>");
             } else {
-                sbuf.append("lastConnected: ").append(Long.toString(diff/1000)).append( "sec");
+                sbuf.append("lastConnected: ").append(Long.toString(diff/1000)).append( "sec ");
             }
         }
         if (this.lastConnectionFailure != 0) {
             sbuf.append('\n');
             long diff = now_ms - this.lastConnectionFailure;
             if (diff <= 0) {
-                sbuf.append("lastConnectionFailure since <incorrect>");
+                sbuf.append("lastConnectionFailure since <incorrect> ");
             } else {
                 sbuf.append("lastConnectionFailure: ").append(Long.toString(diff/1000));
-                sbuf.append( "sec");
+                sbuf.append( "sec ");
             }
         }
         if (this.lastRoamingFailure != 0) {
             sbuf.append('\n');
             long diff = now_ms - this.lastRoamingFailure;
             if (diff <= 0) {
-                sbuf.append("lastRoamingFailure since <incorrect>");
+                sbuf.append("lastRoamingFailure since <incorrect> ");
             } else {
                 sbuf.append("lastRoamingFailure: ").append(Long.toString(diff/1000));
-                sbuf.append( "sec");
+                sbuf.append( "sec ");
             }
         }
         sbuf.append("roamingFailureBlackListTimeMilli: ").
