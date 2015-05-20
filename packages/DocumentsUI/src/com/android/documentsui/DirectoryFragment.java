@@ -93,6 +93,8 @@ import com.android.documentsui.model.RootInfo;
 
 import com.google.android.collect.Lists;
 
+import libcore.io.IoUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1264,15 +1266,17 @@ public class DirectoryFragment extends Fragment {
             Uri itemUri = item.getUri();
             if (itemUri != null && DocumentsContract.isDocumentUri(context, itemUri)) {
                 ContentProviderClient client = null;
+                Cursor cursor = null;
                 try {
                     client = DocumentsApplication.acquireUnstableProviderOrThrow(
                             resolver, itemUri.getAuthority());
-                    Cursor cursor = client.query(itemUri, null, null, null, null);
+                    cursor = client.query(itemUri, null, null, null, null);
                     cursor.moveToPosition(0);
                     srcDocs.add(DocumentInfo.fromCursor(cursor, itemUri.getAuthority()));
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 } finally {
+                    IoUtils.closeQuietly(cursor);
                     ContentProviderClient.releaseQuietly(client);
                 }
             }
