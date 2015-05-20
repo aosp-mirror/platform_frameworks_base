@@ -88,13 +88,13 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StringBuilderPrinter;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.IObbBackupService;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
-import com.android.server.pm.PackageManagerService;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -589,8 +589,12 @@ public class BackupManagerService {
 
     File mFullBackupScheduleFile;
     // If we're running a schedule-driven full backup, this is the task instance doing it
-    PerformFullTransportBackupTask mRunningFullBackupTask; // inside mQueueLock
-    ArrayList<FullBackupEntry> mFullBackupQueue;           // inside mQueueLock
+
+    @GuardedBy("mQueueLock")
+    PerformFullTransportBackupTask mRunningFullBackupTask;
+
+    @GuardedBy("mQueueLock")
+    ArrayList<FullBackupEntry> mFullBackupQueue;
 
     // Utility: build a new random integer token
     int generateToken() {
@@ -1229,8 +1233,10 @@ public class BackupManagerService {
             }
         }
 
-        // Resume the full-data backup queue
-        mFullBackupQueue = readFullBackupSchedule();
+        synchronized (mQueueLock) {
+            // Resume the full-data backup queue
+            mFullBackupQueue = readFullBackupSchedule();
+        }
 
         // Register for broadcasts about package install, etc., so we can
         // update the provider list.
@@ -1248,73 +1254,97 @@ public class BackupManagerService {
     }
 
     private ArrayList<FullBackupEntry> readFullBackupSchedule() {
+        boolean changed = false;
         ArrayList<FullBackupEntry> schedule = null;
-        synchronized (mQueueLock) {
-            if (mFullBackupScheduleFile.exists()) {
-                FileInputStream fstream = null;
-                BufferedInputStream bufStream = null;
-                DataInputStream in = null;
-                try {
-                    fstream = new FileInputStream(mFullBackupScheduleFile);
-                    bufStream = new BufferedInputStream(fstream);
-                    in = new DataInputStream(bufStream);
+        List<PackageInfo> apps =
+                PackageManagerBackupAgent.getStorableApplications(mPackageManager);
 
-                    int version = in.readInt();
-                    if (version != SCHEDULE_FILE_VERSION) {
-                        Slog.e(TAG, "Unknown backup schedule version " + version);
-                        return null;
-                    }
+        if (mFullBackupScheduleFile.exists()) {
+            FileInputStream fstream = null;
+            BufferedInputStream bufStream = null;
+            DataInputStream in = null;
+            try {
+                fstream = new FileInputStream(mFullBackupScheduleFile);
+                bufStream = new BufferedInputStream(fstream);
+                in = new DataInputStream(bufStream);
 
-                    int N = in.readInt();
-                    schedule = new ArrayList<FullBackupEntry>(N);
-                    for (int i = 0; i < N; i++) {
-                        String pkgName = in.readUTF();
-                        long lastBackup = in.readLong();
-                        try {
-                            PackageInfo pkg = mPackageManager.getPackageInfo(pkgName, 0);
-                            if (appGetsFullBackup(pkg)
-                                    && appIsEligibleForBackup(pkg.applicationInfo)) {
-                                schedule.add(new FullBackupEntry(pkgName, lastBackup));
-                            } else {
-                                if (DEBUG) {
-                                    Slog.i(TAG, "Package " + pkgName
-                                            + " no longer eligible for full backup");
-                                }
-                            }
-                        } catch (NameNotFoundException e) {
+                int version = in.readInt();
+                if (version != SCHEDULE_FILE_VERSION) {
+                    Slog.e(TAG, "Unknown backup schedule version " + version);
+                    return null;
+                }
+
+                final int N = in.readInt();
+                schedule = new ArrayList<FullBackupEntry>(N);
+
+                // HashSet instead of ArraySet specifically because we want the eventual
+                // lookups against O(hundreds) of entries to be as fast as possible, and
+                // we discard the set immediately after the scan so the extra memory
+                // overhead is transient.
+                HashSet<String> foundApps = new HashSet<String>(N);
+
+                for (int i = 0; i < N; i++) {
+                    String pkgName = in.readUTF();
+                    long lastBackup = in.readLong();
+                    foundApps.add(pkgName); // all apps that we've addressed already
+                    try {
+                        PackageInfo pkg = mPackageManager.getPackageInfo(pkgName, 0);
+                        if (appGetsFullBackup(pkg) && appIsEligibleForBackup(pkg.applicationInfo)) {
+                            schedule.add(new FullBackupEntry(pkgName, lastBackup));
+                        } else {
                             if (DEBUG) {
                                 Slog.i(TAG, "Package " + pkgName
-                                        + " not installed; dropping from full backup");
+                                        + " no longer eligible for full backup");
                             }
                         }
+                    } catch (NameNotFoundException e) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "Package " + pkgName
+                                    + " not installed; dropping from full backup");
+                        }
                     }
-                    Collections.sort(schedule);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Unable to read backup schedule", e);
-                    mFullBackupScheduleFile.delete();
-                    schedule = null;
-                } finally {
-                    IoUtils.closeQuietly(in);
-                    IoUtils.closeQuietly(bufStream);
-                    IoUtils.closeQuietly(fstream);
                 }
-            }
 
-            if (schedule == null) {
-                // no prior queue record, or unable to read it.  Set up the queue
-                // from scratch.
-                List<PackageInfo> apps =
-                        PackageManagerBackupAgent.getStorableApplications(mPackageManager);
-                final int N = apps.size();
-                schedule = new ArrayList<FullBackupEntry>(N);
-                for (int i = 0; i < N; i++) {
-                    PackageInfo info = apps.get(i);
-                    if (appGetsFullBackup(info) && appIsEligibleForBackup(info.applicationInfo)) {
-                        schedule.add(new FullBackupEntry(info.packageName, 0));
+                // New apps can arrive "out of band" via OTA and similar, so we also need to
+                // scan to make sure that we're tracking all full-backup candidates properly
+                for (PackageInfo app : apps) {
+                    if (appGetsFullBackup(app) && appIsEligibleForBackup(app.applicationInfo)) {
+                        if (!foundApps.contains(app.packageName)) {
+                            if (DEBUG) {
+                                Slog.i(TAG, "New full backup app " + app.packageName + " found");
+                            }
+                            schedule.add(new FullBackupEntry(app.packageName, 0));
+                            changed = true;
+                        }
                     }
                 }
-                writeFullBackupScheduleAsync();
+
+                Collections.sort(schedule);
+            } catch (Exception e) {
+                Slog.e(TAG, "Unable to read backup schedule", e);
+                mFullBackupScheduleFile.delete();
+                schedule = null;
+            } finally {
+                IoUtils.closeQuietly(in);
+                IoUtils.closeQuietly(bufStream);
+                IoUtils.closeQuietly(fstream);
             }
+        }
+
+        if (schedule == null) {
+            // no prior queue record, or unable to read it.  Set up the queue
+            // from scratch.
+            changed = true;
+            schedule = new ArrayList<FullBackupEntry>(apps.size());
+            for (PackageInfo info : apps) {
+                if (appGetsFullBackup(info) && appIsEligibleForBackup(info.applicationInfo)) {
+                    schedule.add(new FullBackupEntry(info.packageName, 0));
+                }
+            }
+        }
+
+        if (changed) {
+            writeFullBackupScheduleAsync();
         }
         return schedule;
     }
@@ -4313,13 +4343,16 @@ public class BackupManagerService {
 
             // This is also slow but easy for modest numbers of apps: work backwards
             // from the end of the queue until we find an item whose last backup
-            // time was before this one, then insert this new entry after it.
-            int which;
-            for (which = mFullBackupQueue.size() - 1; which >= 0; which--) {
-                final FullBackupEntry entry = mFullBackupQueue.get(which);
-                if (entry.lastBackup <= lastBackedUp) {
-                    mFullBackupQueue.add(which + 1, newEntry);
-                    break;
+            // time was before this one, then insert this new entry after it.  If we're
+            // adding something new we don't bother scanning, and just prepend.
+            int which = -1;
+            if (lastBackedUp > 0) {
+                for (which = mFullBackupQueue.size() - 1; which >= 0; which--) {
+                    final FullBackupEntry entry = mFullBackupQueue.get(which);
+                    if (entry.lastBackup <= lastBackedUp) {
+                        mFullBackupQueue.add(which + 1, newEntry);
+                        break;
+                    }
                 }
             }
             if (which < 0) {
