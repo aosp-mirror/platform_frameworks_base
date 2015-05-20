@@ -17,16 +17,24 @@
 package android.media;
 
 /**
- * OnAudioDeviceConnectionListener defines the interface for notification listeners in the
- * {@link AudioManager}
+ * AudioDeviceCallback defines the mechanism by which applications can receive notifications
+ * of audio device connection and disconnection events.
+ * @see AudioManager#registerAudioDeviceCallback.
  */
 public abstract class AudioDeviceCallback {
     /**
-     * Called by the {@link AudioManager} to indicate that an audio device has been
-     * connected or disconnected. A listener will probably call the
-     * {@link AudioManager#getDevices} method to retrieve the current list of audio
-     * devices.
+     * Called by the {@link AudioManager} to indicate that one or more audio devices have been
+     * connected.
+     * @param addedDevices  An array of {@link AudioDeviceInfo} objects corresponding to any
+     * newly added audio devices.
      */
     public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {}
+
+    /**
+     * Called by the {@link AudioManager} to indicate that one or more audio devices have been
+     * disconnected.
+     * @param removedDevices  An array of {@link AudioDeviceInfo} objects corresponding to any
+     * newly removed audio devices.
+     */
     public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {}
 }
