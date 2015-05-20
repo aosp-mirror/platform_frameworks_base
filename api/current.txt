@@ -25585,6 +25585,8 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.DataColumns {
+    field public static final java.lang.String CARRIER_PRESENCE = "carrier_presence";
+    field public static final int CARRIER_PRESENCE_VT_CAPABLE = 1; // 0x1
     field public static final java.lang.String DATA1 = "data1";
     field public static final java.lang.String DATA10 = "data10";
     field public static final java.lang.String DATA11 = "data11";
