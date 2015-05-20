@@ -3495,6 +3495,10 @@ public class Editor {
             mIdealVerticalOffset = 0.7f * handleHeight;
         }
 
+        public float getIdealVerticalOffset() {
+            return mIdealVerticalOffset;
+        }
+
         protected void updateDrawable() {
             final int offset = getCurrentCursorOffset();
             final boolean isRtlCharAtOffset = mTextView.getLayout().isRtlCharAt(offset);
@@ -4279,6 +4283,7 @@ public class Editor {
         private int mStartOffset = -1;
         // Indicates whether the user is selecting text and using the drag accelerator.
         private boolean mDragAcceleratorActive;
+        private boolean mHaventMovedEnoughToStartDrag;
 
         SelectionModifierCursorController() {
             resetTouchOffsets();
@@ -4343,19 +4348,20 @@ public class Editor {
         public void onTouchEvent(MotionEvent event) {
             // This is done even when the View does not have focus, so that long presses can start
             // selection and tap can move cursor from this tap position.
+            final float eventX = event.getX();
+            final float eventY = event.getY();
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    final float x = event.getX();
-                    final float y = event.getY();
 
                     // Remember finger down position, to be able to start selection from there.
-                    mMinTouchOffset = mMaxTouchOffset = mTextView.getOffsetForPosition(x, y);
+                    mMinTouchOffset = mMaxTouchOffset = mTextView.getOffsetForPosition(
+                            eventX, eventY);
 
                     // Double tap detection
                     if (mGestureStayedInTapRegion) {
                         if (mDoubleTap) {
-                            final float deltaX = x - mDownPositionX;
-                            final float deltaY = y - mDownPositionY;
+                            final float deltaX = eventX - mDownPositionX;
+                            final float deltaY = eventY - mDownPositionY;
                             final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
                             ViewConfiguration viewConfiguration = ViewConfiguration.get(
@@ -4363,16 +4369,17 @@ public class Editor {
                             int doubleTapSlop = viewConfiguration.getScaledDoubleTapSlop();
                             boolean stayedInArea = distanceSquared < doubleTapSlop * doubleTapSlop;
 
-                            if (stayedInArea && isPositionOnText(x, y)) {
+                            if (stayedInArea && isPositionOnText(eventX, eventY)) {
                                 startSelectionActionModeWithSelectionAndStartDrag();
                                 mDiscardNextActionUp = true;
                             }
                         }
                     }
 
-                    mDownPositionX = x;
-                    mDownPositionY = y;
+                    mDownPositionX = eventX;
+                    mDownPositionY = eventY;
                     mGestureStayedInTapRegion = true;
+                    mHaventMovedEnoughToStartDrag = true;
                     break;
 
                 case MotionEvent.ACTION_POINTER_DOWN:
@@ -4386,18 +4393,24 @@ public class Editor {
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    final ViewConfiguration viewConfiguration = ViewConfiguration.get(
+                    final ViewConfiguration viewConfig = ViewConfiguration.get(
                             mTextView.getContext());
+                    final int touchSlop = viewConfig.getScaledTouchSlop();
 
-                    if (mGestureStayedInTapRegion) {
-                        final float deltaX = event.getX() - mDownPositionX;
-                        final float deltaY = event.getY() - mDownPositionY;
+                    if (mGestureStayedInTapRegion || mHaventMovedEnoughToStartDrag) {
+                        final float deltaX = eventX - mDownPositionX;
+                        final float deltaY = eventY - mDownPositionY;
                         final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
 
-                        int doubleTapTouchSlop = viewConfiguration.getScaledDoubleTapTouchSlop();
-
-                        if (distanceSquared > doubleTapTouchSlop * doubleTapTouchSlop) {
-                            mGestureStayedInTapRegion = false;
+                        if (mGestureStayedInTapRegion) {
+                            int doubleTapTouchSlop = viewConfig.getScaledDoubleTapTouchSlop();
+                            mGestureStayedInTapRegion =
+                                    distanceSquared <= doubleTapTouchSlop * doubleTapTouchSlop;
+                        }
+                        if (mHaventMovedEnoughToStartDrag) {
+                            // We don't start dragging until the user has moved enough.
+                            mHaventMovedEnoughToStartDrag =
+                                    distanceSquared <= touchSlop * touchSlop;
                         }
                     }
 
@@ -4407,56 +4420,28 @@ public class Editor {
                     }
 
                     if (mStartOffset != -1) {
-                        final int rawOffset = mTextView.getOffsetForPosition(event.getX(),
-                                event.getY());
-                        int offset = rawOffset;
-
-                        // We don't start "dragging" until the user is past the initial word that
-                        // gets selected on long press.
-                        int firstWordStart = getWordStart(mStartOffset);
-                        int firstWordEnd = getWordEnd(mStartOffset);
-                        if (offset > firstWordEnd || offset < firstWordStart) {
-
-                            // Basically the goal in the below code is to have the highlight be
-                            // offset so that your finger isn't covering the end point.
-                            int fingerOffset = viewConfiguration.getScaledTouchSlop();
-                            float mx = event.getX();
-                            float my = event.getY();
-                            if (mx > fingerOffset) mx -= fingerOffset;
-                            if (my > fingerOffset) my -= fingerOffset;
-                            offset = mTextView.getOffsetForPosition(mx, my);
-
-                            // Perform the check for closeness at edge of view, if we're very close
-                            // don't adjust the offset to be in front of the finger - otherwise the
-                            // user can't select words at the edge.
-                            if (mTextView.getWidth() - fingerOffset > mx) {
-                                // We're going by word, so we need to make sure that the offset
-                                // that we get is within this, so we'll get the previous boundary.
-                                final WordIterator wordIterator = getWordIteratorWithText();
-
-                                final int precedingOffset = wordIterator.preceding(offset);
-                                if (mStartOffset < offset) {
-                                    // Expanding with bottom handle, in this case the selection end
-                                    // is before the finger.
-                                    offset = Math.max(precedingOffset - 1, 0);
-                                } else {
-                                    // Expand with the start handle, in this case the selection
-                                    // start is before the finger.
-                                    if (precedingOffset == WordIterator.DONE) {
-                                        offset = 0;
-                                    } else {
-                                        offset = wordIterator.preceding(precedingOffset);
-                                    }
-                                }
+                        if (!mHaventMovedEnoughToStartDrag) {
+                            // Offset the finger by the same vertical offset as the handles. This
+                            // improves visibility of the content being selected by shifting
+                            // the finger below the content.
+                            final float fingerOffset = (mStartHandle != null)
+                                    ? mStartHandle.getIdealVerticalOffset()
+                                    : touchSlop;
+                            int offset =
+                                    mTextView.getOffsetForPosition(eventX, eventY - fingerOffset);
+                            int startOffset;
+                            // Snap to word boundaries.
+                            if (mStartOffset < offset) {
+                                // Expanding with end handle.
+                                offset = getWordEnd(offset);
+                                startOffset = getWordStart(mStartOffset);
+                            } else {
+                                // Expanding with start handle.
+                                offset = getWordStart(offset);
+                                startOffset = getWordEnd(mStartOffset);
                             }
-                            if (offset == WordIterator.DONE)
-                                offset = rawOffset;
-
-                            // Need to adjust start offset based on direction of movement.
-                            int newStart = mStartOffset < offset ? getWordStart(mStartOffset)
-                                    : getWordEnd(mStartOffset);
-                            Selection.setSelection((Spannable) mTextView.getText(), newStart,
-                                    offset);
+                            Selection.setSelection((Spannable) mTextView.getText(),
+                                    startOffset, offset);
                         }
                     }
                     break;
