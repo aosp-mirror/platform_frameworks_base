@@ -25,7 +25,11 @@ import android.hardware.camera2.utils.BinderHolder;
 import android.hardware.ICameraServiceListener;
 import android.hardware.CameraInfo;
 
-/** @hide */
+/**
+ * Binder interface for the native camera service running in mediaserver.
+ *
+ * @hide
+ */
 interface ICameraService
 {
     /**
