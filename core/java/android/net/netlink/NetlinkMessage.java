@@ -60,7 +60,7 @@ public class NetlinkMessage {
         switch (nlmsghdr.nlmsg_type) {
             //case NetlinkConstants.NLMSG_NOOP:
             case NetlinkConstants.NLMSG_ERROR:
-                return (NetlinkMessage) NetlinkErrorMessage.parse(byteBuffer);
+                return (NetlinkMessage) NetlinkErrorMessage.parse(nlmsghdr, byteBuffer);
             case NetlinkConstants.NLMSG_DONE:
                 byteBuffer.position(byteBuffer.position() + payloadLength);
                 return new NetlinkMessage(nlmsghdr);

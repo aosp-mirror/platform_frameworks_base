@@ -222,7 +222,7 @@ public class RtNetlinkNeighborMessageTest extends TestCase {
                 // struct nlmsghdr
                 "30000000" +     // length = 48
                 "1c00" +         // type = 28 (RTM_NEWNEIGH)
-                "0101" +         // flags (NLM_F_REQUEST | NLM_F_REPLACE)
+                "0501" +         // flags (NLM_F_REQUEST | NLM_F_ACK | NLM_F_REPLACE)
                 "4b0a0000" +     // seqno
                 "00000000" +     // pid (0 == kernel)
                 // struct ndmsg

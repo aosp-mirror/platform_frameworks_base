@@ -16,6 +16,11 @@
 
 package android.net.netlink;
 
+import static android.net.netlink.StructNlMsgHdr.NLM_F_ACK;
+import static android.net.netlink.StructNlMsgHdr.NLM_F_DUMP;
+import static android.net.netlink.StructNlMsgHdr.NLM_F_REPLACE;
+import static android.net.netlink.StructNlMsgHdr.NLM_F_REQUEST;
+
 import android.net.netlink.StructNdaCacheInfo;
 import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlAttr;
@@ -123,7 +128,7 @@ public class RtNetlinkNeighborMessage extends NetlinkMessage {
         final StructNlMsgHdr nlmsghdr = new StructNlMsgHdr();
         nlmsghdr.nlmsg_len = length;
         nlmsghdr.nlmsg_type = NetlinkConstants.RTM_GETNEIGH;
-        nlmsghdr.nlmsg_flags = StructNlMsgHdr.NLM_F_REQUEST|StructNlMsgHdr.NLM_F_DUMP;
+        nlmsghdr.nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
         nlmsghdr.nlmsg_seq = seqNo;
         nlmsghdr.pack(byteBuffer);
 
@@ -141,7 +146,7 @@ public class RtNetlinkNeighborMessage extends NetlinkMessage {
             int seqNo, InetAddress ip, short nudState, int ifIndex, byte[] llAddr) {
         final StructNlMsgHdr nlmsghdr = new StructNlMsgHdr();
         nlmsghdr.nlmsg_type = NetlinkConstants.RTM_NEWNEIGH;
-        nlmsghdr.nlmsg_flags = StructNlMsgHdr.NLM_F_REQUEST | StructNlMsgHdr.NLM_F_REPLACE;
+        nlmsghdr.nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK | NLM_F_REPLACE;
         nlmsghdr.nlmsg_seq = seqNo;
 
         final RtNetlinkNeighborMessage msg = new RtNetlinkNeighborMessage(nlmsghdr);

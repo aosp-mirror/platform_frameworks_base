@@ -52,11 +52,6 @@ public class StructNlMsgErr {
     public int error;
     public StructNlMsgHdr msg;
 
-    public StructNlMsgErr() {
-        error = 0;
-        msg = null;
-    }
-
     public void pack(ByteBuffer byteBuffer) {
         // The ByteOrder must have already been set by the caller.  In most
         // cases ByteOrder.nativeOrder() is correct, with the possible
