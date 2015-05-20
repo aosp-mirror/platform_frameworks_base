@@ -6356,12 +6356,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // to scan the package again.
                 deriveNonSystemPackageAbi(pkg, scanFile, cpuAbiOverride, false /* extract libs */);
                 if (!TextUtils.equals(oldPrimaryCpuAbi, pkg.applicationInfo.primaryCpuAbi)) {
-                    throw new IllegalStateException("unexpected abi change for " + pkg.packageName + " ("
+                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                            "unexpected abi change for " + pkg.packageName + " ("
                             + oldPrimaryCpuAbi + "-> " + pkg.applicationInfo.primaryCpuAbi);
                 }
 
                 if (!TextUtils.equals(oldSecondaryCpuAbi, pkg.applicationInfo.secondaryCpuAbi)) {
-                    throw new IllegalStateException("unexpected abi change for " + pkg.packageName + " ("
+                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                            "unexpected abi change for " + pkg.packageName + " ("
                             + oldSecondaryCpuAbi + "-> " + pkg.applicationInfo.secondaryCpuAbi);
                 }
             }
@@ -11661,7 +11663,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         true /* extract libs */);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
-                res.setError(INSTALL_FAILED_INTERNAL_ERROR, "Error ");
+                res.setError(INSTALL_FAILED_INTERNAL_ERROR, "Error deriving application ABI");
                 return;
             }
 
