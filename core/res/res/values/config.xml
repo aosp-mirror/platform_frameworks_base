@@ -496,7 +496,10 @@
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
 
     <!-- Wifi HAL supported PNO -->
-    <bool translatable="false" name="config_wifi_hal_pno_enable">false</bool>
+    <bool translatable="false" name="config_wifi_hal_pno_enable">true</bool>
+
+    <!-- Wifi SSID white list (can't be enabled if config_wifi_hal_pno_enable is not) -->
+    <bool translatable="false" name="config_wifi_ssid_white_list_enable">true</bool>
 
     <!-- Idle Receive current for wifi radio. 0 by default-->
     <integer translatable="false" name="config_wifi_idle_receive_cur_ma">1</integer>
