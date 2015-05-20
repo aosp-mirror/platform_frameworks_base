@@ -199,6 +199,10 @@ abstract class BaseActivity extends Activity {
         } else if (id == R.id.menu_list) {
             setUserMode(State.MODE_LIST);
             return true;
+        } else if (id == R.id.menu_paste_from_clipboard) {
+            DirectoryFragment.get(getFragmentManager())
+                .pasteFromClipboard();
+          return true;
         } else if (id == R.id.menu_advanced) {
             setDisplayAdvancedDevices(!LocalPreferences.getDisplayAdvancedDevices(this));
             return true;

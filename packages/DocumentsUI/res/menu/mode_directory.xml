@@ -30,15 +30,22 @@
         android:title="@string/menu_delete"
         android:showAsAction="always" />
     <item
+        android:id="@+id/menu_copy_to_clipboard"
+        android:title="@string/menu_copy_to_clipboard"
+        android:showAsAction="never"
+        android:visible="false" />
+    <item
         android:id="@+id/menu_select_all"
         android:title="@string/menu_select_all"
         android:showAsAction="never" />
     <item
-        android:id="@+id/menu_copy"
+        android:id="@+id/menu_copy_to"
         android:title="@string/menu_copy"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:visible="false" />
     <item
-        android:id="@+id/menu_move"
+        android:id="@+id/menu_move_to"
         android:title="@string/menu_move"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:visible="false" />
 </menu>

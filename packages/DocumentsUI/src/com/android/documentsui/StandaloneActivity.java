@@ -66,6 +66,7 @@ public class StandaloneActivity extends BaseActivity {
     private State mState;
     private ItemSelectedListener mStackListener;
     private BaseAdapter mStackAdapter;
+    private DocumentClipper mClipper;
 
     public StandaloneActivity() {
         super(TAG);
@@ -102,6 +103,8 @@ public class StandaloneActivity extends BaseActivity {
         }
 
         setActionBar(mToolbar);
+
+        mClipper = new DocumentClipper(this);
 
         RootsFragment.show(getFragmentManager(), null);
         if (!mState.restored) {
@@ -195,9 +198,11 @@ public class StandaloneActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean shown = super.onPrepareOptionsMenu(menu);
 
+        menu.findItem(R.id.menu_file_size).setVisible(true);
+        menu.findItem(R.id.menu_advanced).setVisible(true);
+
+        final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
-        final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         boolean canCreateDir = canCreateDirectory();
@@ -205,11 +210,26 @@ public class StandaloneActivity extends BaseActivity {
         createDir.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         createDir.setVisible(canCreateDir);
 
-        fileSize.setVisible(true);
-        advanced.setVisible(true);
         settings.setVisible((getCurrentRoot().flags & Root.FLAG_HAS_SETTINGS) != 0);
 
+        pasteFromCb.setVisible(true);
+        pasteFromCb.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
+
         return shown;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int id = item.getItemId();
+        if (id == R.id.menu_paste_from_clipboard) {
+            DirectoryFragment dir = DirectoryFragment.get(getFragmentManager());
+            dir = DirectoryFragment.get(getFragmentManager());
+            dir.pasteFromClipboard();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -293,19 +313,16 @@ public class StandaloneActivity extends BaseActivity {
                 dir = DirectoryFragment.get(getFragmentManager());
                 dir.selectAllFiles();
                 return true;
-            case KeyEvent.KEYCODE_C:
-                dir = DirectoryFragment.get(getFragmentManager());
-                dir.copyToClipboard();
-                return true;
             case KeyEvent.KEYCODE_N:
                 if (event.isShiftPressed() && canCreateDirectory()) {
                     showCreateDirectoryDialog();
                     return true;
                 }
-            case KeyEvent.KEYCODE_V:
+            case KeyEvent.KEYCODE_C:
+                // TODO: Should be statically bound using alphabeticShortcut. See b/21330356.
                 dir = DirectoryFragment.get(getFragmentManager());
-                dir.pasteFromClipboard();
-                return true;
+                dir.copySelectedToClipboard();
+                // TODO: Cancel action mode in directory fragment.
         }
 
         return super.onKeyUp(keyCode, event);
