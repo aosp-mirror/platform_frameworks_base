@@ -124,9 +124,14 @@ public class Main {
         if (platformDir != null) {
             return platformDir;
         }
-        // Test if workingDir is  platform/frameworks/base/tools/layoutlib. That is, root should be
-        // workingDir/../../../../  (4 levels up)
+
+        // Test if workingDir is platform/frameworks/base/tools/layoutlib/bridge.
         File currentDir = workingDir;
+        if (currentDir.getName().equalsIgnoreCase("bridge")) {
+            currentDir = currentDir.getParentFile();
+        }
+        // Test if currentDir is  platform/frameworks/base/tools/layoutlib. That is, root should be
+        // workingDir/../../../../  (4 levels up)
         for (int i = 0; i < 4; i++) {
             if (currentDir != null) {
                 currentDir = currentDir.getParentFile();
