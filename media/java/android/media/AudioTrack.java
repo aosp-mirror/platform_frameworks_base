@@ -775,7 +775,7 @@ public class AudioTrack
             audioFormat = AudioFormat.ENCODING_PCM_16BIT;
         }
 
-        if (!AudioFormat.isValidEncoding(audioFormat)) {
+        if (!AudioFormat.isPublicEncoding(audioFormat)) {
             throw new IllegalArgumentException("Unsupported audio encoding.");
         }
         mAudioFormat = audioFormat;
@@ -1119,7 +1119,7 @@ public class AudioTrack
             }
         }
 
-        if (!AudioFormat.isValidEncoding(audioFormat)) {
+        if (!AudioFormat.isPublicEncoding(audioFormat)) {
             loge("getMinBufferSize(): Invalid audio format.");
             return ERROR_BAD_VALUE;
         }
