@@ -4069,6 +4069,21 @@ public final class ContactsContract {
         public static final String SYNC3 = "data_sync3";
         /** Generic column for use by sync adapters. */
         public static final String SYNC4 = "data_sync4";
+
+        /**
+         * Carrier presence information.
+         * <P>
+         * Type: INTEGER (A bitmask of CARRIER_PRESENCE_* fields)
+         * </P>
+         */
+        public static final String CARRIER_PRESENCE = "carrier_presence";
+
+        /**
+         * Bitmask flags for CARRIER_PRESENCE column. Each value represents
+         * a bit (or a set of bits) which may be set independently of each
+         * other.
+         */
+        public static final int CARRIER_PRESENCE_VT_CAPABLE = 0x01;
     }
 
     /**
@@ -8265,7 +8280,7 @@ public final class ContactsContract {
         /**
          * Constructs a QuickContacts intent based on an incoming intent for DevicePolicyManager
          * to strip off anything not necessary.
-         * 
+         *
          * @hide
          */
         public static Intent rebuildManagedQuickContactsIntent(String lookupKey, long contactId,
