@@ -381,10 +381,10 @@ public final class PermissionsState {
      *
      * @return The gids for all device users.
      */
-    public int[] computeGids() {
+    public int[] computeGids(int[] userIds) {
         int[] gids = mGlobalGids;
 
-        for (int userId : UserManagerService.getInstance().getUserIds()) {
+        for (int userId : userIds) {
             final int[] userGids = computeGids(userId);
             gids = appendInts(gids, userGids);
         }
