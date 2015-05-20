@@ -825,6 +825,23 @@ public class DevicePolicyManager {
      */
     public static final int PERMISSION_POLICY_AUTO_DENY = 2;
 
+    /**
+     * Runtime permission state: The user can manage the permission
+     * through the UI.
+     */
+    public static final int PERMISSION_GRANT_STATE_DEFAULT = 0;
+
+    /**
+     * Runtime permission state: The permission is granted to the app
+     * and the user cannot manage the permission through the UI.
+     */
+    public static final int PERMISSION_GRANT_STATE_GRANTED = 1;
+
+    /**
+     * Runtime permission state: The permission is denied to the app
+     * and the user cannot manage the permission through the UI.
+     */
+    public static final int PERMISSION_GRANT_STATE_DENIED = 2;
 
     /**
      * Return true if the given administrator component is currently
@@ -4401,21 +4418,31 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Grants or revokes a runtime permission to a specific application so that the user
-     * does not have to be prompted. This might affect all permissions in a group that the
-     * runtime permission belongs to. This method can only be called by a profile or device
-     * owner.
+     * Sets the grant state of a runtime permission for a specific application. The state
+     * can be {@link #PERMISSION_GRANT_STATE_DEFAULT default} in which a user can manage it
+     * through the UI, {@link #PERMISSION_GRANT_STATE_DENIED denied}, in which the permission
+     * is denied and the user cannot manage it through the UI, and {@link
+     * #PERMISSION_GRANT_STATE_GRANTED granted} in which the permission is granted and the
+     * user cannot manage it through the UI. This might affect all permissions in a
+     * group that the runtime permission belongs to. This method can only be called
+     * by a profile or device owner.
+     *
      * @param admin Which profile or device owner this request is associated with.
      * @param packageName The application to grant or revoke a permission to.
      * @param permission The permission to grant or revoke.
-     * @param granted Whether or not to grant the permission. If false, all permissions in the
-     * associated permission group will be denied.
-     * @return whether the permission was successfully granted or revoked
+     * @param grantState The permission grant state which is one of {@link
+     *         #PERMISSION_GRANT_STATE_DENIED}, {@link #PERMISSION_GRANT_STATE_DEFAULT},
+     *         {@link #PERMISSION_GRANT_STATE_GRANTED},
+     * @return whether the permission was successfully granted or revoked.
+     *
+     * @see #PERMISSION_GRANT_STATE_DENIED
+     * @see #PERMISSION_GRANT_STATE_DEFAULT
+     * @see #PERMISSION_GRANT_STATE_GRANTED
      */
-    public boolean setPermissionGranted(ComponentName admin, String packageName,
-            String permission, boolean granted) {
+    public boolean setPermissionGrantState(ComponentName admin, String packageName,
+            String permission, int grantState) {
         try {
-            return mService.setPermissionGranted(admin, packageName, permission, granted);
+            return mService.setPermissionGrantState(admin, packageName, permission, grantState);
         } catch (RemoteException re) {
             Log.w(TAG, "Failed talking with device policy service", re);
             return false;

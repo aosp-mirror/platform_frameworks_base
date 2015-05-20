@@ -6392,25 +6392,34 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setPermissionGranted(ComponentName admin, String packageName,
-            String permission, boolean granted) throws RemoteException {
+    public boolean setPermissionGrantState(ComponentName admin, String packageName,
+            String permission, int grantState) throws RemoteException {
         UserHandle user = Binder.getCallingUserHandle();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             long ident = Binder.clearCallingIdentity();
             try {
                 PackageManager packageManager = mContext.getPackageManager();
-                if (granted) {
-                    packageManager.grantRuntimePermission(packageName, permission, user);
-                    packageManager.updatePermissionFlags(permission, packageName,
-                            PackageManager.FLAG_PERMISSION_POLICY_FIXED,
-                            PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
-                } else {
-                    packageManager.revokeRuntimePermission(packageName,
-                            permission, user);
-                    packageManager.updatePermissionFlags(permission, packageName,
-                            PackageManager.FLAG_PERMISSION_POLICY_FIXED,
-                            PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
+                switch (grantState) {
+                    case DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED: {
+                        packageManager.grantRuntimePermission(packageName, permission, user);
+                        packageManager.updatePermissionFlags(permission, packageName,
+                                PackageManager.FLAG_PERMISSION_POLICY_FIXED,
+                                PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
+                    } break;
+
+                    case DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED: {
+                        packageManager.revokeRuntimePermission(packageName,
+                                permission, user);
+                        packageManager.updatePermissionFlags(permission, packageName,
+                                PackageManager.FLAG_PERMISSION_POLICY_FIXED,
+                                PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
+                    } break;
+
+                    case DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT: {
+                        packageManager.updatePermissionFlags(permission, packageName,
+                                PackageManager.FLAG_PERMISSION_POLICY_FIXED, 0, user);
+                    } break;
                 }
                 return true;
             } catch (SecurityException se) {
