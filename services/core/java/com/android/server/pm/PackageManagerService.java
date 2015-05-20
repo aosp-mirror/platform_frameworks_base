@@ -369,11 +369,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Permission grant: grant the permission as an install permission. */
     private static final int GRANT_INSTALL = 2;
 
+    /** Permission grant: grant the permission as an install permission for a legacy app. */
+    private static final int GRANT_INSTALL_LEGACY = 3;
+
     /** Permission grant: grant the permission as a runtime one. */
-    private static final int GRANT_RUNTIME = 3;
+    private static final int GRANT_RUNTIME = 4;
 
     /** Permission grant: grant as runtime a permission that was granted as an install time one. */
-    private static final int GRANT_UPGRADE = 4;
+    private static final int GRANT_UPGRADE = 5;
 
     final ServiceThread mHandlerThread;
 
@@ -7741,7 +7744,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 case PermissionInfo.PROTECTION_DANGEROUS: {
                     if (pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1) {
                         // For legacy apps dangerous permissions are install time ones.
-                        grant = GRANT_INSTALL;
+                        grant = GRANT_INSTALL_LEGACY;
                     } else if (ps.isSystem()) {
                         final int[] updatedUserIds = ps.getPermissionsUpdatedForUserIds();
                         if (origPermissions.hasInstallPermission(bp.name)) {
@@ -7801,6 +7804,28 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 switch (grant) {
                     case GRANT_INSTALL: {
+                        // Revoke this as runtime permission to handle the case of
+                        // a runtime permssion being downgraded to an install one.
+                        for (int userId : UserManagerService.getInstance().getUserIds()) {
+                            if (origPermissions.getRuntimePermissionState(
+                                    bp.name, userId) != null) {
+                                // Revoke the runtime permission and clear the flags.
+                                origPermissions.revokeRuntimePermission(bp, userId);
+                                origPermissions.updatePermissionFlags(bp, userId,
+                                      PackageManager.MASK_PERMISSION_FLAGS, 0);
+                                // If we revoked a permission permission, we have to write.
+                                changedRuntimePermissionUserIds = ArrayUtils.appendInt(
+                                        changedRuntimePermissionUserIds, userId);
+                            }
+                        }
+                        // Grant an install permission.
+                        if (permissionsState.grantInstallPermission(bp) !=
+                                PermissionsState.PERMISSION_OPERATION_FAILURE) {
+                            changedInstallPermission = true;
+                        }
+                    } break;
+
+                    case GRANT_INSTALL_LEGACY: {
                         // Grant an install permission.
                         if (permissionsState.grantInstallPermission(bp) !=
                                 PermissionsState.PERMISSION_OPERATION_FAILURE) {
