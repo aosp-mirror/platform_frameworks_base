@@ -205,6 +205,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         // Clear registered LE apps to force shut-off
                         synchronized (this) {
                             mBleAppCount = 0;
+                            mBleApps.clear();
                         }
                         if (st == BluetoothAdapter.STATE_BLE_ON) {
                             //if state is BLE_ON make sure you trigger disableBLE part
