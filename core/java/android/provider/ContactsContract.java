@@ -230,6 +230,8 @@ public final class ContactsContract {
      * }
      * </pre>
      * </p>
+     *
+     * @hide
      */
     public static final class Authorization {
         /**
@@ -7913,6 +7915,8 @@ public final class ContactsContract {
 
     /**
      * API for inquiring about the general status of the provider.
+     *
+     * @hide
      */
     public static final class ProviderStatus {
 
