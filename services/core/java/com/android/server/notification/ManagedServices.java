@@ -216,8 +216,8 @@ abstract public class ManagedServices {
         }
     }
 
-    public void onUserSwitched() {
-        if (DEBUG) Slog.d(TAG, "onUserSwitched");
+    public void onUserSwitched(int user) {
+        if (DEBUG) Slog.d(TAG, "onUserSwitched u=" + user);
         if (Arrays.equals(mLastSeenProfileIds, mUserProfiles.getCurrentProfileIds())) {
             if (DEBUG) Slog.d(TAG, "Current profile IDs didn't change, skipping rebindServices().");
             return;
